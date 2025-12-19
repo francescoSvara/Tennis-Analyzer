@@ -6,6 +6,12 @@
 // API Base URL - in produzione punta a Railway, in dev usa il proxy Vite
 export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
+// Debug: log delle env vars in console
+if (typeof window !== 'undefined') {
+  console.log('🔧 VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log('🔧 API_BASE_URL:', API_BASE_URL);
+}
+
 // Supabase URL (per riferimento, il backend usa le sue env vars)
 export const SUPABASE_URL = 'https://lhffxdsnpgteoeudeiwd.supabase.co';
 
