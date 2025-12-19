@@ -135,6 +135,16 @@ initLiveManager(io);
 
 app.use(bodyParser.json());
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Tennis Analyzer Backend',
+    version: '0.1.0',
+    status: 'running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 

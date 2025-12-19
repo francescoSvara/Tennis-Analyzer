@@ -3,7 +3,7 @@
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "cd backend && npm install"
+buildCommand = "cd backend && PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true PUPPETEER_SKIP_DOWNLOAD=true npm install"
 nixpacks = true
 nodeVersion = "20"
 
