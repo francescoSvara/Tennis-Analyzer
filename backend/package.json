@@ -1,0 +1,25 @@
+{
+  "name": "sofascore-scraper-backend",
+  "version": "0.1.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^2.8.8"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7",
+    "puppeteer": "^21.0.0",
+    "socket.io": "^4.7.2"
+  }
+}

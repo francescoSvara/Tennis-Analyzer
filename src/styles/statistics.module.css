@@ -1,0 +1,162 @@
+/* ============================================
+   STATISTICS - Soft Modern Theme
+   ============================================ */
+
+.statisticsContainer {
+  padding: 0;
+}
+
+/* Period Selector */
+.periodSelector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.periodBtn {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #8b95a5;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.periodBtn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+.periodBtn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Stats Group */
+.group {
+  margin-bottom: 24px;
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.groupTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #8b95a5;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Stats Table */
+.statsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.statsTable th,
+.statsTable td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.statsTable th {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.statsTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.statsTable tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Stat Values */
+.statName {
+  font-weight: 500;
+  color: #e4e6eb;
+  font-size: 14px;
+}
+
+.homeWinner {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399;
+  font-weight: 600;
+}
+
+.awayWinner {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.equalValue {
+  background: rgba(255, 255, 255, 0.03);
+  color: #8b95a5;
+}
+
+/* Loading, Error, Empty States */
+.loading,
+.error,
+.noData {
+  padding: 24px;
+  text-align: center;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.loading {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.error {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.noData {
+  background: rgba(255, 255, 255, 0.03);
+  color: #6b7280;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Live-mode empty state: highlight as an alert */
+.noDataLive {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .statsTable th,
+  .statsTable td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .periodBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

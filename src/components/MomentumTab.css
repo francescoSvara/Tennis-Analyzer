@@ -1,0 +1,775 @@
+/* ============================================
+   MOMENTUM TAB - Stili coerenti con pointbypoint.css
+   ============================================ */
+
+.momentum-tab {
+  padding: 0;
+}
+
+/* Empty State */
+.momentum-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.momentum-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.momentum-empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e4e6eb;
+  margin-bottom: 8px;
+}
+
+.momentum-empty-subtitle {
+  font-size: 14px;
+  color: #8b95a5;
+}
+
+/* Sezioni */
+.momentum-section {
+  margin-bottom: 24px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.momentum-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e4e6eb;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.momentum-section-icon {
+  font-size: 20px;
+}
+
+/* ============================================
+   ULTIMI 3 GAME
+   ============================================ */
+
+.momentum-last3-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.momentum-last3-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .momentum-last3-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.momentum-game-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.momentum-game-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Zone colors - coerenti con pointbypoint.css */
+.momentum-zone-strong_control {
+  background: rgba(76, 175, 80, 0.08);
+  border-color: #4caf50;
+}
+
+.momentum-zone-advantage {
+  background: rgba(139, 195, 74, 0.08);
+  border-color: #8bc34a;
+}
+
+.momentum-zone-balanced_positive {
+  background: rgba(158, 158, 158, 0.08);
+  border-color: #9e9e9e;
+}
+
+.momentum-zone-slight_pressure {
+  background: rgba(255, 152, 0, 0.08);
+  border-color: #ff9800;
+}
+
+.momentum-zone-strong_pressure {
+  background: rgba(244, 67, 54, 0.08);
+  border-color: #f44336;
+}
+
+.game-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.game-card-label {
+  font-size: 12px;
+  color: #8b95a5;
+  font-weight: 500;
+}
+
+.game-card-break {
+  background: #f44336;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.game-card-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.game-card-icon {
+  font-size: 24px;
+}
+
+.game-card-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #e4e6eb;
+}
+
+.game-card-message {
+  font-size: 13px;
+  color: #8b95a5;
+  line-height: 1.4;
+}
+
+/* Analisi Trend */
+.momentum-last3-analysis {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 10px;
+  padding: 20px;
+  color: white;
+}
+
+.trend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.trend-icon {
+  font-size: 32px;
+}
+
+.trend-text {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.trend-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.trend-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trend-stat-label {
+  font-size: 11px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.trend-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.trend-stat-value.positive {
+  color: #a5d6a7;
+}
+
+.trend-stat-value.negative {
+  color: #ef9a9a;
+}
+
+/* ============================================
+   GRAFICO MOMENTUM
+   ============================================ */
+
+.momentum-chart-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.momentum-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.legend-home .legend-color {
+  background: #4ade80;
+}
+
+.legend-away .legend-color {
+  background: #f87171;
+}
+
+.legend-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e4e6eb;
+}
+
+.legend-direction {
+  font-size: 11px;
+  color: #8b95a5;
+}
+
+.momentum-chart {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.momentum-svg-chart {
+  width: 100%;
+  height: auto;
+  min-height: 220px;
+}
+
+.momentum-chart-sets {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+}
+
+.set-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.set-badge {
+  background: #3b82f6;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.set-games {
+  font-size: 12px;
+  color: #8b95a5;
+}
+
+/* ============================================
+   STATISTICHE GRID
+   ============================================ */
+
+.momentum-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.momentum-stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.momentum-stat-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.momentum-stat-current {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.momentum-stat-current .stat-card-label,
+.momentum-stat-current .stat-card-sublabel {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.momentum-stat-current .stat-card-value {
+  color: white;
+}
+
+.momentum-stat-dominant {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.momentum-stat-pressure {
+  border-color: #f44336;
+  background: rgba(244, 67, 54, 0.05);
+}
+
+.stat-card-label {
+  font-size: 12px;
+  color: #8b95a5;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #e4e6eb;
+  margin-bottom: 4px;
+}
+
+.stat-card-value.text-positive {
+  color: #4caf50;
+}
+
+.stat-card-value.text-negative {
+  color: #f44336;
+}
+
+.stat-card-range {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.range-min {
+  color: #f44336;
+}
+
+.range-max {
+  color: #4caf50;
+}
+
+.range-arrow {
+  color: #9e9e9e;
+  font-size: 14px;
+}
+
+.stat-card-sublabel {
+  font-size: 11px;
+  color: #8a9bab;
+}
+
+/* ============================================
+   ANALISI PER SET
+   ============================================ */
+
+.momentum-sets-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.momentum-set-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.momentum-set-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.set-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #3b82f6;
+  color: white;
+}
+
+.set-card-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.set-card-games {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.set-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.set-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.set-stat-label {
+  font-size: 13px;
+  color: #8b95a5;
+}
+
+.set-stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e4e6eb;
+}
+
+.set-stat-value.positive {
+  color: #4caf50;
+}
+
+.set-stat-value.negative {
+  color: #f44336;
+}
+
+.set-mini-chart {
+  padding: 8px 16px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mini-set-chart {
+  width: 100%;
+  height: 40px;
+}
+
+/* ============================================
+   FILTRI E HEADER SEZIONE
+   ============================================ */
+
+.momentum-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.momentum-section-header .momentum-section-title {
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.momentum-filters {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 12px;
+  color: #8b95a5;
+  font-weight: 500;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.filter-btn {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #8b95a5;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+.filter-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.player-filter .filter-btn {
+  min-width: auto;
+  padding: 6px 14px;
+}
+
+.player-filter .filter-btn.home.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.player-filter .filter-btn.away.active {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+/* ============================================
+   TREND BANNER
+   ============================================ */
+
+.trend-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.trend-banner-icon {
+  font-size: 24px;
+}
+
+.trend-banner.trend-success {
+  background: linear-gradient(135deg, rgba(106, 186, 127, 0.15) 0%, rgba(76, 175, 80, 0.1) 100%);
+  color: #4ade80;
+  border: 1px solid rgba(106, 186, 127, 0.3);
+}
+
+.trend-banner.trend-danger {
+  background: linear-gradient(135deg, rgba(201, 118, 118, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
+  color: #f87171;
+  border: 1px solid rgba(201, 118, 118, 0.3);
+}
+
+.trend-banner.trend-neutral {
+  background: linear-gradient(135deg, rgba(158, 158, 158, 0.15) 0%, rgba(117, 117, 117, 0.1) 100%);
+  color: #9ca3af;
+  border: 1px solid rgba(158, 158, 158, 0.3);
+}
+
+/* ============================================
+   CARD COLORS - NEW
+   ============================================ */
+
+.momentum-game-card.card-success {
+  background: linear-gradient(135deg, rgba(106, 186, 127, 0.12) 0%, rgba(76, 175, 80, 0.08) 100%);
+  border-color: #6aba7f;
+}
+
+.momentum-game-card.card-success-light {
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.12) 0%, rgba(139, 195, 74, 0.06) 100%);
+  border-color: #8bc34a;
+}
+
+.momentum-game-card.card-neutral {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.momentum-game-card.card-warning {
+  background: linear-gradient(135deg, rgba(212, 168, 75, 0.12) 0%, rgba(255, 152, 0, 0.08) 100%);
+  border-color: #d4a84b;
+}
+
+.momentum-game-card.card-danger {
+  background: linear-gradient(135deg, rgba(201, 118, 118, 0.12) 0%, rgba(244, 67, 54, 0.08) 100%);
+  border-color: #c97676;
+}
+
+.game-card-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.game-card-indicator.success {
+  background: #6aba7f;
+  color: white;
+}
+
+.game-card-indicator.success-light {
+  background: #8bc34a;
+  color: white;
+}
+
+.game-card-indicator.neutral {
+  background: #9e9e9e;
+  color: white;
+}
+
+.game-card-indicator.warning {
+  background: #d4a84b;
+  color: white;
+}
+
+.game-card-indicator.danger {
+  background: #c97676;
+  color: white;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .momentum-section-header {
+    flex-direction: column;
+  }
+  
+  .momentum-filters {
+    width: 100%;
+  }
+  
+  .momentum-last3-cards {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .momentum-section {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .momentum-section-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+  
+  .momentum-chart-container {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .momentum-svg-chart {
+    min-height: 180px;
+  }
+  
+  .momentum-chart-legend {
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  
+  .legend-name {
+    font-size: 11px;
+  }
+  
+  .legend-direction {
+    font-size: 10px;
+  }
+  
+  .legend-color {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .momentum-chart-sets {
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+  
+  .set-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  
+  .set-games {
+    font-size: 10px;
+  }
+  
+  .momentum-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .trend-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .game-card-number {
+    font-size: 24px;
+  }
+  
+  .momentum-last3-cards {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

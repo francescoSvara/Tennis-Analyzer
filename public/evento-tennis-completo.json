@@ -1,0 +1,31 @@
+{
+  "pointByPoint": [
+    {
+      "set": 1,
+      "games": [
+        {
+          "game": 1,
+          "points": [
+            {
+              "homePoint": 1,
+              "awayPoint": 0,
+              "homePointType": "ace",
+              "awayPointType": null,
+              "pointDescription": "Ace di Home"
+            },
+            {
+              "homePoint": 1,
+              "awayPoint": 1,
+              "homePointType": null,
+              "awayPointType": "unforced",
+              "pointDescription": "Errore non forzato"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tennisPowerRankings": [{ "set": 1, "game": 1, "value": 42 }],
+  "home": { "name": "Giocatore Home" },
+  "away": { "name": "Giocatore Away" }
+}

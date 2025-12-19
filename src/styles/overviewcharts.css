@@ -1,0 +1,830 @@
+/* ========================================
+   OVERVIEW CHARTS STYLES - Dark Theme
+   ======================================== */
+
+/* Container comune per i grafici */
+.indicators-chart,
+.momentum-chart {
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+
+/* Header dei grafici */
+.chart-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chart-icon {
+  font-size: 24px;
+  background: rgba(59, 130, 246, 0.15);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e4e6eb;
+}
+
+/* No data state */
+.chart-no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #8b95a5;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================
+   INDICATORS CHART
+   ======================================== */
+
+/* Header giocatori */
+.players-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.player-home,
+.player-away {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #e4e6eb;
+}
+
+.player-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e4e6eb;
+}
+
+.player-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+} 
+
+/* Lista indicatori */
+.indicators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* Singola riga indicatore */
+.indicator-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.indicator-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 200px; /* fixed so thermometers align */
+  min-width: 160px;
+}
+
+.indicator-icon {
+  font-size: 16px;
+}
+
+.indicator-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e4e6eb;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.indicator-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.indicator-value {
+  font-size: 15px;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+  color: #e4e6eb;
+}
+
+.home-value {
+  color: #60a5fa;
+}
+
+.away-value {
+  color: #f87171;
+}
+
+/* OLD indicator bar removed: replaced by center-based thermometers */
+
+.indicator-thermometer-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.indicator-side-value {
+  width: 50px;
+  text-align: center;
+  font-weight: 700;
+  color: #e4e6eb;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.indicator-thermometer {
+  flex: 1;
+  min-width: 100px;
+}
+
+.indicator-track {
+  position: relative;
+  height: 28px;
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.15) 0%, rgba(30, 41, 59, 0.5) 50%, rgba(248, 113, 113, 0.15) 100%);
+  border-radius: 14px;
+  overflow: visible;
+  display: flex;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 100%;
+}
+
+.indicator-track .thermometer-fill {
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 28px;
+}
+
+.indicator-track .thermometer-fill.home-fill {
+  background: #3b82f6;
+  border-radius: 14px 0 0 14px;
+}
+
+.indicator-track .thermometer-fill.away-fill {
+  background: #ef4444;
+  border-radius: 0 14px 14px 0;
+}
+
+.indicator-track .thermometer-center-line {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.indicator-track .thermometer-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* Zone distribution */
+.zone-distribution {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zone-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b95a5;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.zone-bars {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  align-items: flex-end;
+  height: 80px;
+}
+
+.zone-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.zone-bar-wrapper {
+  width: 20px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.zone-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.5s ease;
+}
+
+.zone-icon {
+  font-size: 12px;
+}
+
+.zone-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8b95a5;
+}
+
+/* ========================================
+   MOMENTUM THERMOMETER (PILLOLA)
+   ======================================== */
+
+.momentum-thermometer {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.thermometer-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.thermometer-label {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.thermometer-label.home-label {
+  color: #60a5fa;
+}
+
+.thermometer-label.away-label {
+  color: #f87171;
+}
+
+.thermometer-track {
+  position: relative;
+  height: 28px;
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.15) 0%, rgba(30, 41, 59, 0.5) 50%, rgba(248, 113, 113, 0.15) 100%);
+  border-radius: 14px;
+  overflow: visible;
+  display: flex;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.thermometer-fill {
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.thermometer-fill.home-fill {
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+  border-radius: 14px 0 0 14px;
+}
+
+.thermometer-fill.away-fill {
+  background: linear-gradient(90deg, #f87171 0%, #ef4444 100%);
+  border-radius: 0 14px 14px 0;
+}
+
+.thermometer-center-line {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.thermometer-center-line::before {
+  content: '50%';
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.thermometer-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.indicator-needle {
+  width: 4px;
+  height: 36px;
+  background: linear-gradient(180deg, #e4e6eb 0%, #8b95a5 100%);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.indicator-value-badge {
+  position: absolute;
+  top: -28px;
+  background: #3b82f6;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.indicator-value-badge::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #3b82f6;
+}
+
+.thermometer-values {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.thermometer-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.thermometer-value.home-value {
+  align-items: flex-start;
+}
+
+.thermometer-value.away-value {
+  align-items: flex-end;
+}
+
+.thermometer-value .value-number {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.thermometer-value.home-value .value-number {
+  color: #60a5fa;
+}
+
+.thermometer-value.away-value .value-number {
+  color: #f87171;
+}
+
+.thermometer-value .value-percent {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ========================================
+   MINI TERMOMETRO (Ultimi 3 Game)
+   ======================================== */
+
+.mini-thermometer {
+  max-width: 70%;
+  margin: 0 auto 20px auto;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+}
+
+.thermometer-header-mini {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.mini-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.full-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b95a5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.full-thermometer {
+  margin-top: 0;
+}
+
+.full-thermometer .thermometer-header-mini {
+  margin-bottom: 4px;
+}
+
+.mini-track {
+  height: 16px !important;
+  border-radius: 8px !important;
+}
+
+.mini-indicator {
+  top: 50%;
+}
+
+.mini-needle {
+  width: 3px !important;
+  height: 24px !important;
+}
+
+.mini-badge {
+  top: -22px !important;
+  font-size: 10px !important;
+  padding: 3px 8px !important;
+  border-radius: 10px !important;
+}
+
+.mini-badge::after {
+  bottom: -4px !important;
+  border-left: 4px solid transparent !important;
+  border-right: 4px solid transparent !important;
+  border-top: 4px solid #3b82f6 !important;
+}
+
+.mini-center {
+  top: -2px !important;
+  bottom: -2px !important;
+}
+
+.mini-center::before {
+  display: none !important;
+}
+
+.mini-values {
+  margin-top: 8px !important;
+}
+
+.mini-values .value-number {
+  font-size: 14px !important;
+}
+
+/* ========================================
+   MOMENTUM CHART
+   ======================================== */
+
+/* Stats cards */
+.momentum-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* two columns by default (2x2 layout) */
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.momentum-stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.momentum-stat-card.home {
+  border-left: 4px solid #3b82f6;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.momentum-stat-card.home .stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #60a5fa;
+}
+
+.momentum-stat-card.away {
+  border-left: 4px solid #ef4444;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+.momentum-stat-card.away .stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #f87171;
+}
+
+.momentum-stat-card.current {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.momentum-stat-card.swings {
+  border-left: 3px solid #fbbf24;
+}
+
+.momentum-stat-card .stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b95a5;
+}
+
+.momentum-stat-card .stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e4e6eb;
+}
+
+.momentum-stat-card.home .stat-value {
+  color: #60a5fa;
+}
+
+.momentum-stat-card.away .stat-value {
+  color: #f87171;
+}
+
+.momentum-stat-card.swings .stat-value {
+  color: #fbbf24;
+}
+
+/* SVG Container */
+.momentum-svg-container {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.momentum-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: rgba(30, 41, 59, 0.98);
+  padding: 20px 20px 24px;
+  border-radius: 10px;
+  max-width: 540px;
+  width: 92%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e4e6eb;
+}
+
+.modal-header {
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #e4e6eb;
+}
+
+.modal-body {
+  color: #8b95a5;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-close {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #8b95a5;
+}
+
+.modal-close:hover {
+  color: #e4e6eb;
+}
+
+/* Set indicators */
+.momentum-set-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.set-indicator-badge {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.set-badge-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e4e6eb;
+}
+
+.set-badge-games {
+  font-size: 11px;
+  color: #8b95a5;
+}
+
+.set-badge-avg {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Legenda */
+.momentum-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #8b95a5;
+}
+
+.legend-color {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .indicators-chart,
+  .momentum-chart {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .chart-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .chart-icon {
+    font-size: 20px;
+    padding: 8px;
+  }
+  
+  .chart-title {
+    font-size: 16px;
+  }
+  
+  .momentum-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .momentum-stat-card {
+    padding: 12px;
+  }
+  
+  .momentum-stat-card .stat-value {
+    font-size: 18px;
+  }
+  
+  .indicator-bar {
+    height: 20px;
+  }
+  
+  .indicator-value {
+    font-size: 13px;
+    min-width: 28px;
+  }
+  
+  .momentum-legend {
+    gap: 12px;
+  }
+  
+  .zone-bars {
+    gap: 8px;
+  }
+  
+  .zone-bar-wrapper {
+    width: 18px;
+    height: 50px;
+  }
+  
+  .momentum-set-indicators {
+    gap: 8px;
+  }
+  
+  .set-indicator-badge {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .players-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .momentum-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .momentum-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .zone-bars {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* responsive adjustments for indicators thermometers */
+  .indicator-label { width: 110px; min-width: 90px; font-size: 12px; }
+  .indicator-side-value { width: 44px; font-size: 13px; }
+  .indicator-row { gap: 8px; }
+}

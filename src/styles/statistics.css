@@ -1,0 +1,53 @@
+#statistics-container {
+  padding: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.group {
+  margin-bottom: 24px;
+}
+.group h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #e4e6eb;
+}
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.stats-table th,
+.stats-table td {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px;
+  text-align: left;
+  color: #e4e6eb;
+}
+.home-winner {
+  background: rgba(76, 175, 80, 0.15);
+}
+.away-winner {
+  background: rgba(244, 67, 54, 0.15);
+}
+.equal-value {
+  background: rgba(255, 255, 255, 0.03);
+}
+.stat-name {
+  font-weight: 600;
+  color: #e4e6eb;
+}
+.statistics-loading,
+.statistics-error,
+.statistics-empty {
+  padding: 12px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  margin: 8px 0;
+  color: #e4e6eb;
+}
+
+/* Scoped small utilities */
+#statistics-container .stats-table tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02);
+}
+#statistics-container .stats-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}

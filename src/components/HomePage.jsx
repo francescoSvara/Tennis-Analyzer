@@ -1,0 +1,317 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import SportSidebar from './SportSidebar';
+import MatchGrid from './MatchGrid';
+import MonitoringDashboard from './MonitoringDashboard';
+
+// Modal per aggiungere un nuovo match (manteniamo per uso futuro)
+function AddMatchModal({ onClose, onSuccess }) {
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState(null); // 'scraping' | 'success' | 'duplicate'
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!url.trim()) return;
+
+    setLoading(true);
+    setError(null);
+    setStatus('scraping');
+
+    try {
+      const response = await fetch('/api/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim() })
+      });
+
+      const data = await response.json();
+
+      if (response.status === 409) {
+        setStatus('duplicate');
+        setError(`Match già presente: ${data.message}`);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore durante lo scraping');
+      }
+
+      // Estrai eventId dall'URL per il tracking
+      const eventIdMatch = url.match(/id[=:](\d+)/i) || url.match(/\/event\/(\d+)/);
+      if (eventIdMatch) {
+        const eventId = eventIdMatch[1];
+        // Avvia tracking automatico per partite live
+        try {
+          await fetch(`/api/track/${eventId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'inprogress' })
+          });
+          console.log(`📌 Match ${eventId} added to auto-tracking`);
+        } catch (trackErr) {
+          console.log('⚠️ Could not start tracking:', trackErr.message);
+        }
+      }
+
+      setStatus('success');
+      setTimeout(() => {
+        onSuccess && onSuccess(data);
+      }, 1000);
+
+    } catch (err) {
+      setError(err.message);
+      setStatus(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3 className="modal-title">➕ Aggiungi Match</h3>
+          <button className="modal-close" onClick={onClose}>&times;</button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="modal-body">
+            <label className="modal-label">URL SofaScore</label>
+            <input
+              type="url"
+              className="modal-input"
+              placeholder="https://www.sofascore.com/..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              disabled={loading}
+              autoFocus
+            />
+            <p className="modal-hint">
+              Incolla il link di un match da SofaScore per scaricarne i dati
+            </p>
+
+            {/* Status messages */}
+            {status === 'scraping' && (
+              <div className="modal-status scraping">
+                <span className="status-spinner"></span>
+                Scaricamento in corso...
+              </div>
+            )}
+            {status === 'success' && (
+              <div className="modal-status success">
+                ✅ Match aggiunto con successo!
+              </div>
+            )}
+            {status === 'duplicate' && (
+              <div className="modal-status warning">
+                ⚠️ {error}
+              </div>
+            )}
+            {error && status !== 'duplicate' && (
+              <div className="modal-status error">
+                ❌ {error}
+              </div>
+            )}
+          </div>
+
+          <div className="modal-footer">
+            <button type="button" className="modal-btn modal-btn-secondary" onClick={onClose}>
+              Annulla
+            </button>
+            <button 
+              type="submit" 
+              className="modal-btn modal-btn-primary"
+              disabled={loading || !url.trim()}
+            >
+              {loading ? 'Scaricamento...' : 'Scarica Match'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+function HomePage({ onMatchSelect }) {
+  const [selectedSport, setSelectedSport] = useState('tennis');
+  const [matches, setMatches] = useState([]);
+  const [suggestedMatches, setSuggestedMatches] = useState([]);
+  const [detectedMatches, setDetectedMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showMonitoring, setShowMonitoring] = useState(false);
+
+  // Funzione per caricare i match
+  const loadMatches = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Usa l'API /api/matches che legge dai file JSON (formattazione corretta)
+      // In futuro può essere sostituita con API database formattata
+      const matchesRes = await fetch(`/api/matches?sport=${selectedSport}`);
+      if (!matchesRes.ok) {
+        throw new Error(`Errore HTTP: ${matchesRes.status}`);
+      }
+      const matchesData = await matchesRes.json();
+      setMatches(matchesData.matches || []);
+      console.log(`📁 Loaded ${matchesData.matches?.length || 0} matches from files`);
+      
+      // Carica suggeriti e rilevati in parallelo
+      const [suggestedRes, detectedRes, trackedRes] = await Promise.all([
+        fetch(`/api/suggested-matches?sport=${selectedSport}`).catch(() => null),
+        fetch(`/api/detected-matches`).catch(() => null),
+        fetch(`/api/tracked`).catch(() => null)
+      ]);
+      
+      // Suggeriti sono opzionali, non fallire se non funziona
+      if (suggestedRes?.ok) {
+        const suggestedData = await suggestedRes.json();
+        setSuggestedMatches(suggestedData.matches || []);
+      }
+      
+      // Partite rilevate (dal torneo)
+      if (detectedRes?.ok) {
+        const detectedData = await detectedRes.json();
+        // Filtra per sport se necessario
+        const filtered = (detectedData.matches || []).filter(m => 
+          !selectedSport || m.sport === selectedSport
+        );
+        setDetectedMatches(filtered);
+      }
+      
+      // Log partite tracciate
+      if (trackedRes?.ok) {
+        const trackedData = await trackedRes.json();
+        if (trackedData.count > 0) {
+          console.log(`📌 ${trackedData.count} partite in monitoraggio automatico`);
+        }
+      }
+    } catch (err) {
+      console.error('Errore caricamento match:', err);
+      setError('Impossibile caricare i match. Verifica che il backend sia attivo su porta 3001.');
+      setMatches([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedSport]);
+
+  // Carica i match quando cambia lo sport
+  useEffect(() => {
+    loadMatches();
+  }, [loadMatches]);
+
+  const handleMatchClick = (match) => {
+    if (onMatchSelect) {
+      onMatchSelect(match);
+    }
+  };
+
+  // Handler per aggiungere match suggerito al DB
+  const handleAddSuggested = async (match) => {
+    try {
+      const sofaUrl = `https://www.sofascore.com/event/${match.eventId}`;
+      const response = await fetch('/api/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: sofaUrl })
+      });
+      
+      if (response.ok) {
+        // Ricarica lista dopo aggiunta
+        loadMatches();
+      }
+    } catch (err) {
+      console.error('Errore aggiunta match:', err);
+    }
+  };
+
+  const handleAddMatchSuccess = () => {
+    setShowAddModal(false);
+    loadMatches(); // Ricarica la lista
+  };
+
+  return (
+    <div className="home-page">
+      {/* Header */}
+      <header className="home-header">
+        <div className="home-header-left">
+          <h1 className="home-title">
+            <span className="home-icon">🏆</span>
+            Match Database
+          </h1>
+        </div>
+        <div className="home-header-right">
+          <button className="monitor-btn" onClick={() => setShowMonitoring(true)}>
+            <span className="icon">📊</span> Database Monitor
+          </button>
+        </div>
+      </header>
+
+      {/* Content Layout */}
+      <div className="home-content">
+        <SportSidebar 
+          selectedSport={selectedSport}
+          onSelectSport={setSelectedSport}
+        />
+        
+        <main className="home-main">
+          {/* Section Header */}
+          <div className="home-main-header">
+            <h2 className="section-title">
+              {selectedSport === 'tennis' && '🎾 Tennis Matches'}
+              {selectedSport === 'football' && '⚽ Football Matches'}
+              {selectedSport === 'basketball' && '🏀 Basketball Matches'}
+              {selectedSport === 'rugby-union' && '🏉 Rugby Matches'}
+            </h2>
+            <span className="match-count">
+              {loading ? '...' : `${matches.length} match`}
+              {detectedMatches.length > 0 && !loading && (
+                <span className="detected-count"> · {detectedMatches.length} rilevate</span>
+              )}
+            </span>
+          </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="error-banner">
+              <span className="error-icon">⚠️</span>
+              <span className="error-text">{error}</span>
+              <button className="retry-btn" onClick={loadMatches}>Riprova</button>
+            </div>
+          )}
+          
+          {/* Match Grid */}
+          <MatchGrid 
+            matches={matches}
+            suggestedMatches={suggestedMatches}
+            detectedMatches={detectedMatches}
+            loading={loading}
+            onMatchClick={handleMatchClick}
+            onAddSuggested={handleAddSuggested}
+          />
+        </main>
+      </div>
+
+      {/* Add Match Modal */}
+      {showAddModal && (
+        <AddMatchModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={handleAddMatchSuccess}
+        />
+      )}
+
+      {/* Monitoring Dashboard */}
+      <MonitoringDashboard 
+        isOpen={showMonitoring}
+        onClose={() => setShowMonitoring(false)}
+        onMatchesUpdated={loadMatches}
+        onMatchSelect={onMatchSelect}
+      />
+    </div>
+  );
+}
+
+export default HomePage;

@@ -1,0 +1,321 @@
+/* ============================================
+   MATCH HEADER - Dark Theme
+   ============================================ */
+
+.matchHeader {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 24px;
+  color: #e4e6eb;
+}
+
+.noData {
+  padding: 24px;
+  text-align: center;
+  color: #8b95a5;
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Tournament Info */
+.tournamentInfo {
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tournamentName {
+  font-weight: 600;
+  font-size: 15px;
+  color: #60a5fa;
+}
+
+.roundInfo {
+  color: #8b95a5;
+  font-size: 14px;
+}
+
+.groundType {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+/* Status Badge */
+.statusBadge {
+  text-align: center;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  width: fit-content;
+  margin: 0 auto 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.live {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.finished {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.upcoming {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.live {
+  animation: pulse 2s infinite;
+}
+
+/* Matchup Container */
+.matchup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Player Card */
+.player {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(15, 20, 25, 0.6);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.player.home {
+  text-align: left;
+}
+
+.player.away {
+  text-align: right;
+}
+
+.player.winner {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.player.winner .playerName {
+  color: #34d399;
+}
+
+/* Player Info */
+.playerInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player.away .playerInfo {
+  flex-direction: row-reverse;
+}
+
+.ranking {
+  font-size: 11px;
+  color: #8b95a5;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.playerName {
+  font-size: 26px;
+  font-weight: 700;
+  color: #e4e6eb;
+  flex: 1;
+}
+
+.countryFlag {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Score Section */
+.scoreSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player.away .scoreSection {
+  flex-direction: row-reverse;
+}
+
+.setsContainer {
+  display: flex;
+  gap: 6px;
+}
+
+.player.away .setsContainer {
+  flex-direction: row-reverse;
+}
+
+.setScore {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e4e6eb;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  min-width: 36px;
+  text-align: center;
+}
+
+.setScore sup {
+  font-size: 10px;
+  color: #60a5fa;
+  margin-left: 1px;
+}
+
+/* Current point (large and updating frequently) */
+.currentPoint {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #ffd700 0%, #ffb800 100%);
+  padding: 10px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(255, 184, 0, 0.4);
+  min-width: 48px;
+  text-align: center;
+  letter-spacing: -0.5px;
+  transition: transform 120ms ease;
+}
+
+/* Small animation to highlight point changes */
+.currentPoint.pulse {
+  transform: scale(1.06);
+}
+
+/* Game score in center - styled like final score */
+.gameScore {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: #6b7280;
+  font-size: 28px;
+}
+.gameNumber {
+  font-size: inherit;
+  background: none;
+  padding: 0 6px;
+  border-radius: 0;
+  color: inherit;
+}
+
+/* VS Separator */
+.vs {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  padding: 8px;
+}
+
+/* Final Score */
+.finalScore {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.finalScore span {
+  color: #6b7280;
+}
+
+.winnerScore {
+  color: #34d399 !important;
+}
+
+.scoreSeparator {
+  margin: 0 16px;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* Venue Info */
+.venueInfo {
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .matchHeader {
+    padding: 16px;
+  }
+  
+  .matchup {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .player {
+    width: 100%;
+  }
+  
+  .player.home,
+  .player.away {
+    text-align: center;
+  }
+  
+  .player.home .playerInfo,
+  .player.away .playerInfo {
+    justify-content: center;
+    flex-direction: row;
+  }
+  
+  .player.home .scoreSection,
+  .player.away .scoreSection {
+    justify-content: center;
+    flex-direction: row;
+  }
+  
+  .player.home .setsContainer,
+  .player.away .setsContainer {
+    flex-direction: row;
+  }
+  
+  .vs {
+    display: none;
+  }
+  
+  .playerName {
+    font-size: 17px;
+  }
+  
+  .setScore {
+    font-size: 16px;
+    padding: 4px 10px;
+  }
+}
