@@ -28,6 +28,12 @@ Apri **http://localhost:5173** nel browser.
 - Node.js 18+
 - Chrome (installato automaticamente da Puppeteer)
 
+### Environment Variables
+- Copia `.env.example` in `.env` (root) e `backend/.env` se necessario e riempi i valori reali.
+- **Backend**: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `PORT` (opzionale)
+- **Frontend**: `VITE_API_URL` (URL base del backend in produzione), `VITE_SUPABASE_ANON_KEY` (opzionale)
+- **Sicurezza**: Non commettere file `.env` reali — sono già ignorati da `.gitignore`.
+
 ---
 
 ## 🏗️ ARCHITETTURA DEL SISTEMA
@@ -472,5 +478,6 @@ Progetto privato - Tutti i diritti riservati.
 ---
 
 *Documentazione generata il 19 Dicembre 2025*
-#   T e n n i s - A n a l y z e r  
+#   T e n n i s - A n a l y z e r 
+ 
  
