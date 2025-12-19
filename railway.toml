@@ -1,0 +1,9 @@
+# Railway Configuration
+# This tells Railway to build and run from the backend directory
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd backend && npm install"
+
+[deploy]
+startCommand = "cd backend && npm start"
