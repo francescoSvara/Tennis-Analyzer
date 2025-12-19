@@ -212,10 +212,19 @@ async function runScraper(url) {
     let browser;
     try {
       console.log(`[${id}] Starting scrape for: ${url}`);
-      browser = await puppeteer.launch({ 
+      
+      // Puppeteer launch options for cloud environments
+      const launchOptions = { 
         headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
-      });
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process']
+      };
+      
+      // Use system Chromium if available (Railway/Render)
+      if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+        launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      }
+      
+      browser = await puppeteer.launch(launchOptions);
       console.log(`[${id}] Browser launched successfully`);
       const page = await browser.newPage();
 

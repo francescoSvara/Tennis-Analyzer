@@ -1,0 +1,12 @@
+# Nixpacks configuration for Railway
+# Ensures Puppeteer dependencies are installed
+
+[phases.setup]
+nixPkgs = ["chromium", "nodejs_18"]
+
+[phases.install]
+cmds = ["npm install"]
+
+[variables]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_EXECUTABLE_PATH = "/nix/store/chromium/bin/chromium"
