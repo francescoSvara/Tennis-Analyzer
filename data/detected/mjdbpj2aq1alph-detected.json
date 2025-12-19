@@ -1,0 +1,435 @@
+{
+  "scrapedEventId": "15222469",
+  "tournamentId": 10122,
+  "seasonId": 67323,
+  "detectedAt": "2025-12-19T20:30:12.896Z",
+  "matches": [
+    {
+      "eventId": 15222299,
+      "slug": "nishesh-basavareddy-dino-prizmic",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 1,
+      "homeTeam": {
+        "id": 349089,
+        "name": "Dino Prižmić",
+        "shortName": "D. Prižmić",
+        "country": "HR",
+        "ranking": 128
+      },
+      "awayTeam": {
+        "id": 407164,
+        "name": "Nishesh Basavareddy",
+        "shortName": "N. Basavareddy",
+        "country": "US",
+        "ranking": 167
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765969200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222367,
+      "slug": "justin-engel-alexander-blockx",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 1,
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 403148,
+        "name": "Justin Engel",
+        "shortName": "J. Engel",
+        "country": "DE",
+        "ranking": 187
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765977300,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222298,
+      "slug": "rafael-jodar-learner-tien",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 1,
+      "homeTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "awayTeam": {
+        "id": 458834,
+        "name": "Rafael Jodar",
+        "shortName": "R. Jodar",
+        "country": "ES",
+        "ranking": 168
+      },
+      "homeScore": 2,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765987200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222366,
+      "slug": "nicolai-budkov-kjaer-martin-landaluce",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 1,
+      "homeTeam": {
+        "id": 417196,
+        "name": "Martin Landaluce",
+        "shortName": "M. Landaluce",
+        "country": "ES",
+        "ranking": 134
+      },
+      "awayTeam": {
+        "id": 483188,
+        "name": "Nicolai Budkov Kjaer",
+        "shortName": "N. Budkov Kjaer",
+        "country": "NO",
+        "ranking": 136
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765995600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222427,
+      "slug": "justin-engel-dino-prizmic",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 349089,
+        "name": "Dino Prižmić",
+        "shortName": "D. Prižmić",
+        "country": "HR",
+        "ranking": 128
+      },
+      "awayTeam": {
+        "id": 403148,
+        "name": "Justin Engel",
+        "shortName": "J. Engel",
+        "country": "DE",
+        "ranking": 187
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766055600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222453,
+      "slug": "nishesh-basavareddy-alexander-blockx",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 407164,
+        "name": "Nishesh Basavareddy",
+        "shortName": "N. Basavareddy",
+        "country": "US",
+        "ranking": 167
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766061900,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222473,
+      "slug": "nicolai-budkov-kjaer-rafael-jodar",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 483188,
+        "name": "Nicolai Budkov Kjaer",
+        "shortName": "N. Budkov Kjaer",
+        "country": "NO",
+        "ranking": 136
+      },
+      "awayTeam": {
+        "id": 458834,
+        "name": "Rafael Jodar",
+        "shortName": "R. Jodar",
+        "country": "ES",
+        "ranking": 168
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766073600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222477,
+      "slug": "martin-landaluce-learner-tien",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "awayTeam": {
+        "id": 417196,
+        "name": "Martin Landaluce",
+        "shortName": "M. Landaluce",
+        "country": "ES",
+        "ranking": 134
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766079300,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222436,
+      "slug": "nishesh-basavareddy-justin-engel",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 3,
+      "homeTeam": {
+        "id": 407164,
+        "name": "Nishesh Basavareddy",
+        "shortName": "N. Basavareddy",
+        "country": "US",
+        "ranking": 167
+      },
+      "awayTeam": {
+        "id": 403148,
+        "name": "Justin Engel",
+        "shortName": "J. Engel",
+        "country": "DE",
+        "ranking": 187
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766142000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222455,
+      "slug": "alexander-blockx-dino-prizmic",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 3,
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 349089,
+        "name": "Dino Prižmić",
+        "shortName": "D. Prižmić",
+        "country": "HR",
+        "ranking": 128
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766147400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15222472,
+      "slug": "nicolai-budkov-kjaer-learner-tien",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": 3,
+      "homeTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "awayTeam": {
+        "id": 483188,
+        "name": "Nicolai Budkov Kjaer",
+        "shortName": "N. Budkov Kjaer",
+        "country": "NO",
+        "ranking": 136
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766166000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15251807,
+      "slug": "nicolai-budkov-kjaer-alexander-blockx",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 483188,
+        "name": "Nicolai Budkov Kjaer",
+        "shortName": "N. Budkov Kjaer",
+        "country": "NO",
+        "ranking": 136
+      },
+      "homeScore": null,
+      "awayScore": null,
+      "status": {
+        "code": 0,
+        "description": "Not started",
+        "type": "notstarted"
+      },
+      "startTimestamp": 1766246400,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15251809,
+      "slug": "learner-tien-nishesh-basavareddy",
+      "sport": "tennis",
+      "tournament": "Next Gen Finals",
+      "tournamentId": 10122,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "awayTeam": {
+        "id": 407164,
+        "name": "Nishesh Basavareddy",
+        "shortName": "N. Basavareddy",
+        "country": "US",
+        "ranking": 167
+      },
+      "homeScore": null,
+      "awayScore": null,
+      "status": {
+        "code": 0,
+        "description": "Not started",
+        "type": "notstarted"
+      },
+      "startTimestamp": 1766253600,
+      "detectedFrom": "tournament"
+    }
+  ]
+}

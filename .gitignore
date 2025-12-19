@@ -9,7 +9,7 @@ build/
 .vite/
 
 # Local data / large JSON (do not commit)
-data/
+# data/  - REMOVED: Including scrape data for Railway deployment
 
 # Environment variables (IMPORTANTE!)
 .env

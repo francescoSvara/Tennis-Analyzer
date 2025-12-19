@@ -1,0 +1,530 @@
+{
+  "api": {
+    "https://api.sofascore.com/api/v1/event/15249197": {
+      "event": {
+        "firstToServe": 1,
+        "tournament": {
+          "name": "ITF M15 Antalya 18 Men",
+          "slug": "itf-m15-antalya-18-men",
+          "category": {
+            "name": "ITF Men",
+            "slug": "itf-men",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 785,
+            "country": {},
+            "flag": "itf-men",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للرجال"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "uniqueTournament": {
+            "name": "ITF M15 Antalya 18 Men",
+            "slug": "itf-m15-antalya-18-men",
+            "category": {
+              "name": "ITF Men",
+              "slug": "itf-men",
+              "sport": {
+                "name": "Tennis",
+                "slug": "tennis",
+                "id": 5
+              },
+              "id": 785,
+              "country": {},
+              "flag": "itf-men",
+              "fieldTranslations": {
+                "nameTranslation": {
+                  "ar": "اتحاد التنس الدولي للرجال"
+                },
+                "shortNameTranslation": {}
+              }
+            },
+            "userCount": 19,
+            "groundType": "Clay",
+            "hasRounds": true,
+            "hasPerformanceGraphFeature": false,
+            "id": 31489,
+            "country": {},
+            "hasEventPlayerStatistics": false,
+            "displayInverseHomeAwayTeams": false
+          },
+          "priority": 0,
+          "competitionType": 2,
+          "id": 171141
+        },
+        "season": {
+          "name": "2025",
+          "year": "2025",
+          "editor": false,
+          "id": 87500
+        },
+        "roundInfo": {
+          "round": 27,
+          "name": "Quarterfinals",
+          "slug": "quarterfinals",
+          "cupRoundType": 4
+        },
+        "customId": "iqwsbEKb",
+        "status": {
+          "code": 100,
+          "description": "Ended",
+          "type": "finished"
+        },
+        "winnerCode": 2,
+        "homeTeam": {
+          "name": "Imanol Lopez Morillo",
+          "slug": "lopez-morillo-imanol",
+          "shortName": "I. Lopez Morillo",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 340,
+          "playerTeamInfo": {
+            "birthplace": "Palma de Mallorca",
+            "height": 1.83,
+            "weight": 85,
+            "plays": "right-handed",
+            "prizeCurrent": 10509,
+            "prizeTotal": 81964,
+            "id": 2823,
+            "birthDateTimestamp": 942883200,
+            "prizeCurrentRaw": {
+              "value": 10509,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 81964,
+              "currency": "EUR"
+            },
+            "currentRanking": 683
+          },
+          "nameCode": "LOP",
+          "ranking": 683,
+          "disabled": false,
+          "national": false,
+          "type": 1,
+          "id": 213951,
+          "country": {
+            "alpha2": "ES",
+            "alpha3": "ESP",
+            "name": "Spain",
+            "slug": "spain"
+          },
+          "fullName": "Imanol Lopez Morillo",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "إيمانول لوبيز مورييو",
+              "ru": "Лопес Морильо, Иманол"
+            },
+            "shortNameTranslation": {
+              "ar": "إ. مورييو"
+            }
+          },
+          "timeActive": []
+        },
+        "awayTeam": {
+          "name": "Ivan Nedelko",
+          "slug": "nedelko-ivan",
+          "shortName": "I. Nedelko",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 160,
+          "playerTeamInfo": {
+            "residence": "St. Petersburg, Russia",
+            "birthplace": "St. Petersburg, Russia",
+            "height": 1.85,
+            "weight": 80,
+            "plays": "right-handed",
+            "turnedPro": "2006",
+            "prizeCurrent": 5094,
+            "prizeTotal": 292410,
+            "id": 621,
+            "birthDateTimestamp": 516240000,
+            "prizeCurrentRaw": {
+              "value": 5094,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 292410,
+              "currency": "EUR"
+            },
+            "currentRanking": 1004
+          },
+          "nameCode": "NED",
+          "ranking": 1004,
+          "national": false,
+          "type": 1,
+          "id": 53308,
+          "country": {
+            "alpha2": "RU",
+            "alpha3": "RUS",
+            "name": "Russia",
+            "slug": "russia"
+          },
+          "fullName": "Ivan Nedelko",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "إيفان نيديلكو",
+              "ru": "Неделко, Иван",
+              "hi": "इवान नेदेल्को",
+              "bn": "ইভান নেডেলকো"
+            },
+            "shortNameTranslation": {
+              "ar": "إ. نيديلكو"
+            }
+          },
+          "timeActive": []
+        },
+        "homeScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 3,
+          "period2": 4,
+          "point": "0"
+        },
+        "awayScore": {
+          "current": 2,
+          "display": 2,
+          "period1": 6,
+          "period2": 6,
+          "point": "0"
+        },
+        "coverage": -1,
+        "time": {},
+        "changes": {
+          "changes": [
+            "status.code",
+            "status.description",
+            "status.type"
+          ],
+          "changeTimestamp": 1766135290
+        },
+        "hasGlobalHighlights": false,
+        "crowdsourcingDataDisplayEnabled": false,
+        "id": 15249197,
+        "defaultPeriodCount": 3,
+        "slug": "imanol-lopez-morillo-ivan-nedelko",
+        "startTimestamp": 1766127600,
+        "periods": {
+          "point": "Game",
+          "current": "Match",
+          "period1": "1st set",
+          "period2": "2nd set",
+          "period3": "3rd set",
+          "period4": "4th set",
+          "period5": "5th set"
+        },
+        "finalResultOnly": false,
+        "feedLocked": false,
+        "groundType": "Clay",
+        "showTotoPromo": true,
+        "isEditor": false
+      }
+    }
+  },
+  "createdAt": "2025-12-19T20:30:17.311Z",
+  "lastSync": "2025-12-19T20:45:08.505Z",
+  "syncType": "manual-sync",
+  "eventId": "15249197",
+  "liveData": {
+    "eventId": "15249197",
+    "timestamp": "2025-12-19T20:45:07.827Z",
+    "syncType": "complete",
+    "event": {
+      "firstToServe": 1,
+      "tournament": {
+        "name": "ITF M15 Antalya 18 Men",
+        "slug": "itf-m15-antalya-18-men",
+        "category": {
+          "name": "ITF Men",
+          "slug": "itf-men",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "id": 785,
+          "country": {},
+          "flag": "itf-men",
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "اتحاد التنس الدولي للرجال"
+            },
+            "shortNameTranslation": {}
+          }
+        },
+        "uniqueTournament": {
+          "name": "ITF M15 Antalya 18 Men",
+          "slug": "itf-m15-antalya-18-men",
+          "category": {
+            "name": "ITF Men",
+            "slug": "itf-men",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 785,
+            "country": {},
+            "flag": "itf-men",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للرجال"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "userCount": 19,
+          "groundType": "Clay",
+          "hasRounds": true,
+          "hasPerformanceGraphFeature": false,
+          "id": 31489,
+          "country": {},
+          "hasEventPlayerStatistics": false,
+          "displayInverseHomeAwayTeams": false
+        },
+        "priority": 0,
+        "competitionType": 2,
+        "id": 171141
+      },
+      "season": {
+        "name": "2025",
+        "year": "2025",
+        "editor": false,
+        "id": 87500
+      },
+      "roundInfo": {
+        "round": 27,
+        "name": "Quarterfinals",
+        "slug": "quarterfinals",
+        "cupRoundType": 4
+      },
+      "customId": "iqwsbEKb",
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "winnerCode": 2,
+      "homeTeam": {
+        "name": "Imanol Lopez Morillo",
+        "slug": "lopez-morillo-imanol",
+        "shortName": "I. Lopez Morillo",
+        "gender": "M",
+        "sport": {
+          "name": "Tennis",
+          "slug": "tennis",
+          "id": 5
+        },
+        "userCount": 340,
+        "playerTeamInfo": {
+          "birthplace": "Palma de Mallorca",
+          "height": 1.83,
+          "weight": 85,
+          "plays": "right-handed",
+          "prizeCurrent": 10509,
+          "prizeTotal": 81964,
+          "id": 2823,
+          "birthDateTimestamp": 942883200,
+          "prizeCurrentRaw": {
+            "value": 10509,
+            "currency": "EUR"
+          },
+          "prizeTotalRaw": {
+            "value": 81964,
+            "currency": "EUR"
+          },
+          "currentRanking": 683
+        },
+        "nameCode": "LOP",
+        "ranking": 683,
+        "disabled": false,
+        "national": false,
+        "type": 1,
+        "id": 213951,
+        "country": {
+          "alpha2": "ES",
+          "alpha3": "ESP",
+          "name": "Spain",
+          "slug": "spain"
+        },
+        "fullName": "Imanol Lopez Morillo",
+        "subTeams": [],
+        "teamColors": {
+          "primary": "#374df5",
+          "secondary": "#374df5",
+          "text": "#ffffff"
+        },
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "إيمانول لوبيز مورييو",
+            "ru": "Лопес Морильо, Иманол"
+          },
+          "shortNameTranslation": {
+            "ar": "إ. مورييو"
+          }
+        },
+        "timeActive": []
+      },
+      "awayTeam": {
+        "name": "Ivan Nedelko",
+        "slug": "nedelko-ivan",
+        "shortName": "I. Nedelko",
+        "gender": "M",
+        "sport": {
+          "name": "Tennis",
+          "slug": "tennis",
+          "id": 5
+        },
+        "userCount": 160,
+        "playerTeamInfo": {
+          "residence": "St. Petersburg, Russia",
+          "birthplace": "St. Petersburg, Russia",
+          "height": 1.85,
+          "weight": 80,
+          "plays": "right-handed",
+          "turnedPro": "2006",
+          "prizeCurrent": 5094,
+          "prizeTotal": 292410,
+          "id": 621,
+          "birthDateTimestamp": 516240000,
+          "prizeCurrentRaw": {
+            "value": 5094,
+            "currency": "EUR"
+          },
+          "prizeTotalRaw": {
+            "value": 292410,
+            "currency": "EUR"
+          },
+          "currentRanking": 1004
+        },
+        "nameCode": "NED",
+        "ranking": 1004,
+        "national": false,
+        "type": 1,
+        "id": 53308,
+        "country": {
+          "alpha2": "RU",
+          "alpha3": "RUS",
+          "name": "Russia",
+          "slug": "russia"
+        },
+        "fullName": "Ivan Nedelko",
+        "subTeams": [],
+        "teamColors": {
+          "primary": "#374df5",
+          "secondary": "#374df5",
+          "text": "#ffffff"
+        },
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "إيفان نيديلكو",
+            "ru": "Неделко, Иван",
+            "hi": "इवान नेदेल्को",
+            "bn": "ইভান নেডেলকো"
+          },
+          "shortNameTranslation": {
+            "ar": "إ. نيديلكو"
+          }
+        },
+        "timeActive": []
+      },
+      "homeScore": {
+        "current": 0,
+        "display": 0,
+        "period1": 3,
+        "period2": 4,
+        "point": "0"
+      },
+      "awayScore": {
+        "current": 2,
+        "display": 2,
+        "period1": 6,
+        "period2": 6,
+        "point": "0"
+      },
+      "coverage": -1,
+      "time": {},
+      "changes": {
+        "changes": [
+          "status.code",
+          "status.description",
+          "status.type"
+        ],
+        "changeTimestamp": 1766135290
+      },
+      "hasGlobalHighlights": false,
+      "crowdsourcingDataDisplayEnabled": false,
+      "id": 15249197,
+      "defaultPeriodCount": 3,
+      "slug": "imanol-lopez-morillo-ivan-nedelko",
+      "startTimestamp": 1766127600,
+      "periods": {
+        "point": "Game",
+        "current": "Match",
+        "period1": "1st set",
+        "period2": "2nd set",
+        "period3": "3rd set",
+        "period4": "4th set",
+        "period5": "5th set"
+      },
+      "finalResultOnly": false,
+      "feedLocked": false,
+      "groundType": "Clay",
+      "showTotoPromo": true,
+      "isEditor": false
+    },
+    "pointByPoint": [],
+    "statistics": [],
+    "powerRankings": [],
+    "incidents": [],
+    "lineups": null,
+    "h2h": {
+      "teamDuel": {
+        "homeWins": 0,
+        "awayWins": 1,
+        "draws": 0
+      },
+      "managerDuel": null
+    },
+    "odds": null,
+    "graph": null,
+    "errors": [],
+    "dataCompleteness": {
+      "lineups": false,
+      "statistics": false,
+      "incidents": false,
+      "graph": false,
+      "powerRankings": false,
+      "pointByPoint": false,
+      "h2h": true,
+      "event": true,
+      "total": 25
+    }
+  }
+}
