@@ -9,3 +9,7 @@ nodeVersion = "20"
 
 [deploy]
 startCommand = "cd backend && npm start"
+
+[env]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_SKIP_DOWNLOAD = "true"
