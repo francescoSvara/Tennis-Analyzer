@@ -283,12 +283,63 @@ export default function App() {
       // Normalizza i dati in base alla fonte
       let normalizedData;
       if (data.source === 'database') {
-        // Dati dal DB hanno struttura diversa
+        // Dati dal DB: usa raw_json se disponibile (contiene i dati originali SofaScore)
+        // Altrimenti costruisci un oggetto evento compatibile
+        const rawJson = data.raw_json || {};
+        
+        // Costruisci homeScore e awayScore dai dati scores del DB
+        const buildScoreFromDb = (scores, homeSetsWon, awaySetsWon) => {
+          const homeScore = rawJson.homeScore || { current: homeSetsWon };
+          const awayScore = rawJson.awayScore || { current: awaySetsWon };
+          
+          // Aggiungi i punteggi dei set (period1, period2, etc.)
+          if (Array.isArray(scores) && scores.length > 0) {
+            scores.forEach(s => {
+              if (s.set_number) {
+                homeScore[`period${s.set_number}`] = s.home_games;
+                awayScore[`period${s.set_number}`] = s.away_games;
+                if (s.home_tiebreak !== null) homeScore[`period${s.set_number}TieBreak`] = s.home_tiebreak;
+                if (s.away_tiebreak !== null) awayScore[`period${s.set_number}TieBreak`] = s.away_tiebreak;
+              }
+            });
+          }
+          
+          return { homeScore, awayScore };
+        };
+        
+        const { homeScore, awayScore } = buildScoreFromDb(data.scores, data.home_sets_won, data.away_sets_won);
+        
+        // Costruisci l'oggetto event usando i dati raw_json o i campi DB
+        const eventObj = rawJson.id ? rawJson : {
+          id: data.id,
+          homeTeam: { 
+            id: data.home_player_id, 
+            name: data.home_name || rawJson.homeTeam?.name || '',
+            shortName: rawJson.homeTeam?.shortName || data.home_name || '',
+            country: { alpha2: data.home_country || rawJson.homeTeam?.country?.alpha2 || '' }
+          },
+          awayTeam: { 
+            id: data.away_player_id, 
+            name: data.away_name || rawJson.awayTeam?.name || '',
+            shortName: rawJson.awayTeam?.shortName || data.away_name || '',
+            country: { alpha2: data.away_country || rawJson.awayTeam?.country?.alpha2 || '' }
+          },
+          homeScore,
+          awayScore,
+          status: rawJson.status || { type: data.status_type, description: data.status_description },
+          tournament: rawJson.tournament || { name: data.tournament_name },
+          startTimestamp: data.start_time ? Math.floor(new Date(data.start_time).getTime() / 1000) : rawJson.startTimestamp,
+          winnerCode: data.winner_code || rawJson.winnerCode,
+          firstToServe: data.first_to_serve || rawJson.firstToServe
+        };
+        
+        // Combina i dati
         normalizedData = {
-          event: data,
-          pointByPoint: data.pointByPoint || [],
-          statistics: data.statistics || [],
-          powerRankings: data.powerRankings || [],
+          event: eventObj,
+          pointByPoint: rawJson.pointByPoint || data.pointByPoint || [],
+          statistics: rawJson.statistics || data.statistics || [],
+          tennisPowerRankings: rawJson.tennisPowerRankings || data.powerRankings || [],
+          scores: data.scores || [],
           ...data
         };
         console.log('💾 Dati normalizzati dal DB:', normalizedData);

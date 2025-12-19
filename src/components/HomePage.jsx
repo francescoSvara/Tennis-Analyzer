@@ -149,15 +149,14 @@ function HomePage({ onMatchSelect }) {
     setLoading(true);
     setError(null);
     try {
-      // Usa l'API /api/matches che legge dai file JSON (formattazione corretta)
-      // In futuro può essere sostituita con API database formattata
-      const matchesRes = await fetch(`/api/matches?sport=${selectedSport}`);
+      // Usa l'API /api/db/matches che legge dal database Supabase
+      const matchesRes = await fetch(`/api/db/matches?limit=50`);
       if (!matchesRes.ok) {
         throw new Error(`Errore HTTP: ${matchesRes.status}`);
       }
       const matchesData = await matchesRes.json();
       setMatches(matchesData.matches || []);
-      console.log(`📁 Loaded ${matchesData.matches?.length || 0} matches from files`);
+      console.log(`📁 Loaded ${matchesData.matches?.length || 0} matches from database`);
       
       // Carica suggeriti e rilevati in parallelo
       const [suggestedRes, detectedRes, trackedRes] = await Promise.all([

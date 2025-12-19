@@ -455,19 +455,60 @@ async function getMatchById(matchId) {
     .eq('match_id', matchId)
     .order('set_number');
 
-  // Power rankings
-  const { data: powerRankings } = await supabase
+  // Power rankings - mappa i campi DB al formato originale SofaScore
+  const { data: powerRankingsRaw } = await supabase
     .from('power_rankings')
     .select('*')
     .eq('match_id', matchId)
     .order('set_number')
     .order('game_number');
 
-  // Statistiche
-  const { data: statistics } = await supabase
+  // Trasforma in formato compatibile con frontend
+  const powerRankings = (powerRankingsRaw || []).map(pr => ({
+    set: pr.set_number,
+    game: pr.game_number,
+    value: pr.value,
+    breakOccurred: pr.break_occurred,
+    zone: pr.zone,
+    status: pr.status
+  }));
+
+  // Statistiche raw dal DB
+  const { data: statsRaw } = await supabase
     .from('match_statistics')
     .select('*')
     .eq('match_id', matchId);
+
+  // Ricostruisci statistiche nel formato originale SofaScore
+  const statisticsByPeriod = {};
+  for (const stat of statsRaw || []) {
+    const period = stat.period || 'ALL';
+    if (!statisticsByPeriod[period]) {
+      statisticsByPeriod[period] = { period, groups: {} };
+    }
+    if (!statisticsByPeriod[period].groups[stat.group_name]) {
+      statisticsByPeriod[period].groups[stat.group_name] = { 
+        groupName: stat.group_name, 
+        statisticsItems: [] 
+      };
+    }
+    statisticsByPeriod[period].groups[stat.group_name].statisticsItems.push({
+      name: stat.stat_name,
+      key: stat.stat_key,
+      home: stat.home_value,
+      away: stat.away_value,
+      homeValue: stat.home_numeric,
+      awayValue: stat.away_numeric,
+      compareCode: stat.compare_code,
+      statisticsType: stat.statistics_type
+    });
+  }
+  
+  // Converti in array con groups come array
+  const statistics = Object.values(statisticsByPeriod).map(p => ({
+    period: p.period,
+    groups: Object.values(p.groups)
+  }));
 
   // Momentum summary
   const { data: momentumSummary } = await supabase
@@ -476,12 +517,16 @@ async function getMatchById(matchId) {
     .eq('match_id', matchId)
     .single();
 
+  // Point-by-point
+  const pointByPoint = await getPointByPoint(matchId);
+
   return {
     ...match,
     scores,
     powerRankings,
     statistics,
-    momentumSummary
+    momentumSummary,
+    pointByPoint
   };
 }
 

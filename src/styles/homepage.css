@@ -1739,6 +1739,17 @@
 
 .progress-ring-container {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.progress-ring-container svg {
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 
 /* Tournament Card Body */
@@ -2990,12 +3001,175 @@
   .tournament-card-header {
     flex-wrap: wrap;
     gap: 10px;
+    padding: 12px 14px;
+  }
+  
+  .tournament-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .tournament-sport-icon {
+    font-size: 1.3rem;
+    width: 36px;
+    height: 36px;
   }
   
   .tournament-name {
     font-size: 0.85rem;
+    line-height: 1.3;
+    word-break: break-word;
   }
   
+  .tournament-meta {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+  
+  .tournament-category {
+    font-size: 0.7rem;
+  }
+  
+  .tournament-date {
+    font-size: 0.65rem;
+  }
+  
+  .tournament-stats {
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+  }
+  
+  .stat-label {
+    font-size: 0.6rem;
+  }
+  
+  .progress-ring-container {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .progress-ring-container svg {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .progress-ring-text {
+    font-size: 10px !important;
+  }
+  
+  .expand-icon {
+    font-size: 0.6rem;
+  }
+  
+  /* Tournament Body Mobile */
+  .tournament-card-body {
+    padding: 0 14px 14px;
+  }
+  
+  .status-breakdown {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 0;
+  }
+  
+  .status-item {
+    font-size: 0.75rem;
+    gap: 6px;
+  }
+  
+  .status-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  /* Tournament Events Summary Mobile */
+  .tournament-events-summary {
+    padding: 12px;
+  }
+  
+  .events-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .events-header h5 {
+    font-size: 0.8rem;
+  }
+  
+  .coverage-stats {
+    gap: 8px;
+  }
+  
+  .coverage-rate {
+    font-size: 1rem;
+  }
+  
+  .coverage-detail {
+    font-size: 0.7rem;
+  }
+  
+  .coverage-bar {
+    height: 5px;
+  }
+  
+  /* Missing Events Mobile */
+  .missing-events h6 {
+    font-size: 0.75rem;
+  }
+  
+  .missing-event {
+    padding: 8px 10px;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  
+  .event-teams {
+    font-size: 0.8rem;
+    margin-right: 0;
+  }
+  
+  .event-status {
+    font-size: 0.65rem;
+  }
+  
+  /* Mini Match Mobile */
+  .mini-match {
+    padding: 8px 10px;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  
+  .mini-match-teams {
+    font-size: 0.8rem;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .mini-match-meta {
+    gap: 8px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .mini-status {
+    font-size: 0.6rem;
+    padding: 2px 5px;
+  }
+  
+  .mini-completeness {
+    font-size: 0.7rem;
+  }
+
   .tournament-count {
     font-size: 0.7rem;
   }
@@ -3036,6 +3210,7 @@
   
   .monitoring-overlay {
     padding: 0;
+    align-items: stretch;
   }
   
   .tab-btn {
@@ -3072,5 +3247,42 @@
   
   .summary-label {
     font-size: 0.65rem;
+  }
+  
+  /* Tournament extra small */
+  .tournament-info {
+    gap: 10px;
+  }
+  
+  .tournament-sport-icon {
+    font-size: 1.1rem;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .tournament-name {
+    font-size: 0.8rem;
+  }
+  
+  .tournament-stats {
+    gap: 8px;
+  }
+  
+  .stat-value {
+    font-size: 1rem;
+  }
+  
+  .progress-ring-container {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .progress-ring-container svg {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .progress-ring-text {
+    font-size: 9px !important;
   }
 }

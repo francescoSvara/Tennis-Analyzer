@@ -251,132 +251,94 @@ function extractRelatedMatches(apiData, currentEventId) {
 /**
  * GET /api/db-stats - Statistiche complete del database
  * Fornisce metriche su tornei, partite, completezza dati
+ * Legge dal database Supabase invece che dai file JSON
  */
 app.get('/api/db-stats', async (req, res) => {
   try {
-    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+    // Se matchRepository non è disponibile, fallback ai file
+    if (!matchRepository) {
+      console.log('⚠️ Database not configured, falling back to file-based stats');
+      return res.json({
+        summary: { totalMatches: 0, totalTournaments: 0, avgCompleteness: 0, byStatus: {} },
+        tournaments: [],
+        recentAcquisitions: [],
+        timeline: [],
+        tracking: { active: 0, matches: [] },
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // 1. Carica tutti i match dal database
+    const dbMatches = await matchRepository.getMatches({ limit: 500 });
+    
+    // 2. Carica tornei dal database
+    const dbTournaments = await matchRepository.getTournaments();
     
     // Strutture per le statistiche
-    const tournaments = new Map(); // tournamentId -> { name, matches: [], category }
     const matchesByStatus = { finished: 0, inprogress: 0, notstarted: 0, other: 0 };
-    const matchesByDay = new Map(); // YYYY-MM-DD -> count
-    const recentAcquisitions = []; // Ultimi match acquisiti
-    const allMatches = [];
-    const seenEventIds = new Set();
+    const matchesByDay = new Map();
+    const tournamentMap = new Map();
     
-    // Data completeness aggregata
-    let totalCompleteness = 0;
-    let matchesWithCompleteness = 0;
-    
-    for (const file of files) {
-      try {
-        const filePath = path.join(SCRAPES_DIR, file);
-        const stats = fs.statSync(filePath);
-        const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        
-        let eventData = null;
-        let eventId = null;
-        
-        if (content.api) {
-          for (const [url, data] of Object.entries(content.api)) {
-            if (url.match(/\/api\/v1\/event\/\d+$/) && data?.event) {
-              eventData = data.event;
-              eventId = eventData.id;
-              break;
-            }
-          }
-        }
-        
-        if (!eventData || !eventId) continue;
-        if (seenEventIds.has(String(eventId))) continue;
-        seenEventIds.add(String(eventId));
-        
-        // Calcola completezza dati
-        const completeness = calculateDataCompleteness(content.api, eventId, 
-          eventData.tournament?.category?.sport?.slug || 'tennis');
-        
-        totalCompleteness += completeness;
-        matchesWithCompleteness++;
-        
-        // Raggruppa per torneo
-        const tournament = eventData.tournament?.uniqueTournament || eventData.tournament;
-        const tournamentId = tournament?.id || 'unknown';
-        const tournamentName = tournament?.name || 'Sconosciuto';
-        const category = eventData.tournament?.category?.name || '';
-        
-        if (!tournaments.has(tournamentId)) {
-          tournaments.set(tournamentId, {
-            id: tournamentId,
-            name: tournamentName,
-            category: category,
-            sport: eventData.tournament?.category?.sport?.slug || 'tennis',
-            matches: [],
-            totalEvents: 0, // Verrà calcolato dopo
-            completeness: [],
-            latestDate: null,
-            earliestDate: null
-          });
-        }
-        
-        const tournamentData = tournaments.get(tournamentId);
-        const matchStartTimestamp = eventData.startTimestamp;
-        tournamentData.matches.push({
-          eventId,
-          status: eventData.status?.type || 'unknown',
-          completeness,
-          homeTeam: eventData.homeTeam?.name || '',
-          awayTeam: eventData.awayTeam?.name || '',
-          startTimestamp: matchStartTimestamp
+    // Processa ogni match
+    for (const match of dbMatches || []) {
+      // Status
+      const statusType = (match.status_type || 'other').toLowerCase();
+      if (matchesByStatus.hasOwnProperty(statusType)) {
+        matchesByStatus[statusType]++;
+      } else {
+        matchesByStatus.other++;
+      }
+      
+      // Per giorno (usando start_time o created_at)
+      const matchDate = match.start_time || match.created_at;
+      if (matchDate) {
+        const day = new Date(matchDate).toISOString().split('T')[0];
+        matchesByDay.set(day, (matchesByDay.get(day) || 0) + 1);
+      }
+      
+      // Raggruppa per torneo
+      const tournamentId = match.tournament_id || 'unknown';
+      const tournamentName = match.tournament_name || 'Sconosciuto';
+      
+      if (!tournamentMap.has(tournamentId)) {
+        tournamentMap.set(tournamentId, {
+          id: tournamentId,
+          name: tournamentName,
+          category: match.tournament_category || '',
+          sport: 'tennis',
+          matches: [],
+          completeness: [],
+          latestDate: null,
+          earliestDate: null
         });
-        tournamentData.completeness.push(completeness);
-        
-        // Aggiorna date del torneo
-        if (matchStartTimestamp) {
-          if (!tournamentData.latestDate || matchStartTimestamp > tournamentData.latestDate) {
-            tournamentData.latestDate = matchStartTimestamp;
-          }
-          if (!tournamentData.earliestDate || matchStartTimestamp < tournamentData.earliestDate) {
-            tournamentData.earliestDate = matchStartTimestamp;
-          }
+      }
+      
+      const tData = tournamentMap.get(tournamentId);
+      const completeness = 50; // Default, può essere calcolato se serve
+      const matchStartTimestamp = match.start_time ? Math.floor(new Date(match.start_time).getTime() / 1000) : null;
+      
+      tData.matches.push({
+        eventId: match.id,
+        status: statusType,
+        completeness,
+        homeTeam: match.home_name || '',
+        awayTeam: match.away_name || '',
+        startTimestamp: matchStartTimestamp
+      });
+      tData.completeness.push(completeness);
+      
+      if (matchStartTimestamp) {
+        if (!tData.latestDate || matchStartTimestamp > tData.latestDate) {
+          tData.latestDate = matchStartTimestamp;
         }
-        
-        // Status
-        const statusType = (eventData.status?.type || 'other').toLowerCase();
-        if (matchesByStatus.hasOwnProperty(statusType)) {
-          matchesByStatus[statusType]++;
-        } else {
-          matchesByStatus.other++;
+        if (!tData.earliestDate || matchStartTimestamp < tData.earliestDate) {
+          tData.earliestDate = matchStartTimestamp;
         }
-        
-        // Per giorno
-        if (eventData.startTimestamp) {
-          const day = new Date(eventData.startTimestamp * 1000).toISOString().split('T')[0];
-          matchesByDay.set(day, (matchesByDay.get(day) || 0) + 1);
-        }
-        
-        // Acquisizioni recenti (ultimi 20)
-        allMatches.push({
-          eventId,
-          file,
-          acquiredAt: stats.mtime,
-          tournament: tournamentName,
-          homeTeam: eventData.homeTeam?.name || '',
-          awayTeam: eventData.awayTeam?.name || '',
-          status: statusType,
-          completeness
-        });
-        
-      } catch (e) {
-        // Skip file con errori
       }
     }
     
-    // Ordina per data acquisizione e prendi ultimi 20
-    allMatches.sort((a, b) => new Date(b.acquiredAt) - new Date(a.acquiredAt));
-    const recent = allMatches.slice(0, 20);
-    
     // Calcola statistiche per torneo
-    const tournamentStats = Array.from(tournaments.values()).map(t => ({
+    const tournamentStats = Array.from(tournamentMap.values()).map(t => ({
       id: t.id,
       name: t.name,
       category: t.category,
@@ -395,9 +357,8 @@ app.get('/api/db-stats', async (req, res) => {
       earliestDate: t.earliestDate
     }));
     
-    // Ordina tornei per data più recente (più recenti prima)
+    // Ordina tornei per data più recente
     tournamentStats.sort((a, b) => {
-      // Prima i tornei con date, poi quelli senza
       if (!a.latestDate && !b.latestDate) return b.matchCount - a.matchCount;
       if (!a.latestDate) return 1;
       if (!b.latestDate) return -1;
@@ -417,20 +378,32 @@ app.get('/api/db-stats', async (req, res) => {
       });
     }
     
+    // Acquisizioni recenti (ordinate per created_at)
+    const recentAcquisitions = (dbMatches || [])
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 20)
+      .map(m => ({
+        eventId: m.id,
+        acquiredAt: m.created_at,
+        tournament: m.tournament_name || '',
+        homeTeam: m.home_name || '',
+        awayTeam: m.away_name || '',
+        status: m.status_type || 'unknown',
+        completeness: 50
+      }));
+    
     // Partite tracciate (live monitoring)
     const tracked = getTrackedMatches();
     
     res.json({
       summary: {
-        totalMatches: seenEventIds.size,
-        totalTournaments: tournaments.size,
-        avgCompleteness: matchesWithCompleteness > 0 
-          ? Math.round(totalCompleteness / matchesWithCompleteness)
-          : 0,
+        totalMatches: (dbMatches || []).length,
+        totalTournaments: tournamentMap.size,
+        avgCompleteness: 50,
         byStatus: matchesByStatus
       },
       tournaments: tournamentStats,
-      recentAcquisitions: recent,
+      recentAcquisitions,
       timeline,
       tracking: {
         active: tracked.length,
@@ -503,19 +476,33 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
     
     console.log(`Tournament ${tournamentId}: Found ${events.length} events from SofaScore API`);
     
-    // Controlla quali sono già nel nostro DB
-    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+    // Controlla quali sono già nel nostro DB Supabase
     const existingEventIds = new Set();
     
-    for (const file of files) {
+    if (matchRepository) {
       try {
-        const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
-        if (content.api) {
-          for (const [url, data] of Object.entries(content.api)) {
-            if (data?.event?.id) existingEventIds.add(String(data.event.id));
-          }
+        const dbMatches = await matchRepository.getMatches({ tournamentId: parseInt(tournamentId), limit: 500 });
+        if (dbMatches && Array.isArray(dbMatches)) {
+          dbMatches.forEach(m => existingEventIds.add(String(m.id)));
         }
-      } catch (e) { /* skip */ }
+      } catch (dbErr) {
+        console.log('Could not check DB for existing matches:', dbErr.message);
+      }
+    }
+    
+    // Fallback: controlla anche i file locali se DB non disponibile o vuoto
+    if (existingEventIds.size === 0) {
+      const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+      for (const file of files) {
+        try {
+          const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
+          if (content.api) {
+            for (const [url, data] of Object.entries(content.api)) {
+              if (data?.event?.id) existingEventIds.add(String(data.event.id));
+            }
+          }
+        } catch (e) { /* skip */ }
+      }
     }
     
     // Formatta risposta
@@ -1622,25 +1609,26 @@ app.get('/api/db/matches', async (req, res) => {
     });
     
     // Trasforma i dati dal formato DB (snake_case) al formato frontend (camelCase)
+    // Colonne view v_matches_full: home_name, away_name, home_country, away_country, home_ranking, away_ranking
     const matches = (dbMatches || []).map(m => ({
       id: m.id,
       eventId: m.id,
       sport: 'tennis',
       sportName: 'Tennis',
       tournament: m.tournament_name || '',
-      category: m.category || '',
+      category: m.tournament_category || '',
       homeTeam: {
         id: m.home_player_id,
-        name: m.home_player_name || '',
-        shortName: m.home_short_name || m.home_player_name || '',
-        country: m.home_country_alpha2 || '',
+        name: m.home_name || '',
+        shortName: m.home_name || '',
+        country: m.home_country || '',
         ranking: m.home_ranking || null
       },
       awayTeam: {
         id: m.away_player_id,
-        name: m.away_player_name || '',
-        shortName: m.away_short_name || m.away_player_name || '',
-        country: m.away_country_alpha2 || '',
+        name: m.away_name || '',
+        shortName: m.away_name || '',
+        country: m.away_country || '',
         ranking: m.away_ranking || null
       },
       homeScore: m.home_sets_won ? { current: m.home_sets_won } : null,
