@@ -1,38 +1,61 @@
-# 🎾 SofaScore Tennis Match Database
+# 🎾 Tennis-Analyzer
 
-## 📖 Documentazione Completa
-
-> **Sistema di scraping e analisi partite di tennis da SofaScore**  
-> Ultimo aggiornamento: 19 Dicembre 2025
+**Sistema di scraping e analisi partite di tennis (SofaScore)**
 
 ---
 
-## 🚀 QUICK START
+## 📌 Descrizione
+Tennis-Analyzer esegue scraping delle API SofaScore, salva dati match in JSON e fornisce una UI per analisi, monitoraggio live e statistiche. Backend: Node.js/Express + Puppeteer. Frontend: React + Vite.
 
-### Avvio del Progetto
+---
 
-**Terminale 1 - Backend (porta 3001):**
-```bash
-cd backend
-node server.js
-```
+## 🚀 Quick start (sviluppo)
+1. Clona il repository
+   ```bash
+   git clone https://github.com/francescoSvara/Tennis-Analyzer.git
+   cd Tennis-Analyzer
+   ```
+2. Installa dipendenze
+   ```bash
+   npm install
+   cd backend && npm install
+   ```
+3. Crea i file `.env` copiando `.env.example` e inserendo le tue credenziali Supabase
+   ```bash
+   cp .env.example .env
+   cp backend/.env.example backend/.env
+   ```
+4. Avvia il backend (porta 3001)
+   ```bash
+   cd backend
+   node server.js
+   ```
+5. Avvia il frontend
+   ```bash
+   cd ..
+   npm run dev
+   ```
+6. Apri `http://localhost:5173`
 
-**Terminale 2 - Frontend (porta 5173/5174):**
-```bash
-npm run dev
-```
+---
 
-Apri **http://localhost:5173** nel browser.
+## ⚙️ Requisiti
+- Node.js v18+
+- NPM
+- Chrome (Puppeteer lo installa automaticamente quando necessario)
 
-### Requisiti
-- Node.js 18+
-- Chrome (installato automaticamente da Puppeteer)
+---
 
-### Environment Variables
-- Copia `.env.example` in `.env` (root) e `backend/.env` se necessario e riempi i valori reali.
-- **Backend**: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `PORT` (opzionale)
-- **Frontend**: `VITE_API_URL` (URL base del backend in produzione), `VITE_SUPABASE_ANON_KEY` (opzionale)
-- **Sicurezza**: Non commettere file `.env` reali — sono già ignorati da `.gitignore`.
+## 🔐 Variabili d'ambiente (principali)
+- BACKEND (server)
+  - `SUPABASE_URL` — URL progetto Supabase
+  - `SUPABASE_SERVICE_KEY` — Service role key (solo backend)
+  - `PORT` — porta (default 3001)
+- FRONTEND (Vite)
+  - `VITE_API_URL` — (opzionale) URL base API in produzione
+  - `VITE_SUPABASE_ANON_KEY` — (opzionale) chiave anon per accessi client
+
+> Nota: mai inserire `SUPABASE_SERVICE_KEY` nel frontend. Usa i segreti della piattaforma (Vercel/Render) per le env in produzione.
 
 ---
 
