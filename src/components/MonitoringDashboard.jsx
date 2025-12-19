@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiUrl } from '../config';
 
 /**
  * MonitoringDashboard Component
@@ -130,7 +131,7 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
     if (!force && events) return;
     setLoadingEvents(true);
     try {
-      const res = await fetch(`/api/tournament/${tournament.id}/events`);
+      const res = await fetch(apiUrl(`/api/tournament/${tournament.id}/events`));
       if (res.ok) {
         const data = await res.json();
         setEvents(data);
@@ -176,7 +177,7 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
     setLinkError('');
     
     try {
-      const res = await fetch('/api/scrape', {
+      const res = await fetch(apiUrl('/api/scrape'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: linkInput.trim() })
@@ -207,7 +208,7 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
     if (onMatchSelect) {
       try {
         // Prova prima a caricare il match specifico dal DB
-        const res = await fetch(`/api/matches?sport=tennis`);
+        const res = await fetch(apiUrl(`/api/matches?sport=tennis`));
         if (res.ok) {
           const data = await res.json();
           // Trova il match completo con lo stesso eventId (confronto come stringa)
@@ -218,7 +219,7 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
           } else {
             console.warn('Match non trovato nella lista, provo a caricarlo direttamente:', match.eventId);
             // Se non trovato nella lista, prova a caricarlo direttamente
-            const directRes = await fetch(`/api/match/${match.eventId}`);
+            const directRes = await fetch(apiUrl(`/api/match/${match.eventId}`));
             if (directRes.ok) {
               const directData = await directRes.json();
               onMatchSelect(directData);
@@ -256,7 +257,7 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
       const syncPromises = incompleteMatches.map(async (match) => {
         const url = `https://www.sofascore.com/event/${match.eventId}`;
         try {
-          await fetch('/api/scrape', {
+          await fetch(apiUrl('/api/scrape'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url })
@@ -483,7 +484,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/db-stats');
+      const res = await fetch(apiUrl('/api/db-stats'));
       if (!res.ok) throw new Error('Failed to fetch stats');
       const data = await res.json();
       setStats(data);
@@ -511,7 +512,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
     setScrapeMessage('');
     
     try {
-      const res = await fetch('/api/scrape', {
+      const res = await fetch(apiUrl('/api/scrape'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: scrapeUrl.trim() })

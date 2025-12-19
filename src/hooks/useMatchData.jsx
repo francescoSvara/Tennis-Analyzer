@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { apiUrl } from '../config';
 
 // Stati del fetch
 export const FetchState = {
@@ -71,8 +72,8 @@ export function useMatchData(eventId, options = {}) {
 
     try {
       const url = forceRefresh 
-        ? `/api/match/${eventIdRef.current}/refresh`
-        : `/api/match/${eventIdRef.current}`;
+        ? apiUrl(`/api/match/${eventIdRef.current}/refresh`)
+        : apiUrl(`/api/match/${eventIdRef.current}`);
       
       const response = await fetch(url);
       
@@ -160,7 +161,7 @@ export function useMatchData(eventId, options = {}) {
     if (!eventIdRef.current) return false;
 
     try {
-      const response = await fetch(`/api/track/${eventIdRef.current}`, {
+      const response = await fetch(apiUrl(`/api/track/${eventIdRef.current}`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -184,7 +185,7 @@ export function useMatchData(eventId, options = {}) {
     if (!eventIdRef.current) return false;
 
     try {
-      const response = await fetch(`/api/track/${eventIdRef.current}`, {
+      const response = await fetch(apiUrl(`/api/track/${eventIdRef.current}`), {
         method: 'DELETE'
       });
       const result = await response.json();
@@ -281,7 +282,7 @@ export function useMatchList(options = {}) {
       if (limit) params.set('limit', limit);
       if (status) params.set('status', status);
       
-      const response = await fetch(`/api/db/matches?${params}`);
+      const response = await fetch(apiUrl(`/api/db/matches?${params}`));
       if (!response.ok) throw new Error('Failed to fetch matches');
       
       const data = await response.json();
@@ -291,7 +292,7 @@ export function useMatchList(options = {}) {
       setError(err.message);
       // Fallback: prova API file-based
       try {
-        const fallbackResponse = await fetch('/api/matches');
+        const fallbackResponse = await fetch(apiUrl('/api/matches'));
         if (fallbackResponse.ok) {
           const fallbackData = await fallbackResponse.json();
           setMatches(fallbackData.matches || []);
@@ -326,7 +327,7 @@ export function useTrackedMatches() {
 
   const fetchTracked = useCallback(async () => {
     try {
-      const response = await fetch('/api/tracked');
+      const response = await fetch(apiUrl('/api/tracked'));
       if (response.ok) {
         const data = await response.json();
         setTracked(data.matches || []);

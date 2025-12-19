@@ -2,6 +2,8 @@
 // SAFE RENDER - Helper per renderizzare valori in modo sicuro in React
 // ============================================================================
 
+import { apiUrl } from './config';
+
 /**
  * Converte qualsiasi valore in stringa renderizzabile per React.
  * Gestisce oggetti, array, null/undefined in modo sicuro evitando
@@ -72,7 +74,7 @@ export function countPointDescriptions(points) {
 export async function fetchPointByPoint(eventId) {
   if (!eventId) return [];
   try {
-    const res = await fetch(`/api/event/${eventId}/point-by-point`);
+    const res = await fetch(apiUrl(`/api/event/${eventId}/point-by-point`));
     if (!res.ok) return [];
     const data = await res.json();
     return data.pointByPoint || [];
@@ -90,7 +92,7 @@ export async function fetchPointByPoint(eventId) {
 export async function fetchStatistics(eventId) {
   if (!eventId) return [];
   try {
-    const res = await fetch(`/api/event/${eventId}/statistics`);
+    const res = await fetch(apiUrl(`/api/event/${eventId}/statistics`));
     if (!res.ok) return [];
     const data = await res.json();
     return data.statistics || [];
@@ -108,7 +110,7 @@ export async function fetchStatistics(eventId) {
 export async function fetchPowerRankings(eventId) {
   if (!eventId) return [];
   try {
-    const res = await fetch(`/api/event/${eventId}/power-rankings`);
+    const res = await fetch(apiUrl(`/api/event/${eventId}/power-rankings`));
     if (!res.ok) return [];
     const data = await res.json();
     return data.tennisPowerRankings || [];
@@ -126,7 +128,7 @@ export async function fetchPowerRankings(eventId) {
 export async function fetchLiveData(eventId) {
   if (!eventId) return null;
   try {
-    const res = await fetch(`/api/event/${eventId}/live`);
+    const res = await fetch(apiUrl(`/api/event/${eventId}/live`));
     if (!res.ok) return null;
     return await res.json();
   } catch (e) {

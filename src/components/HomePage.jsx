@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import SportSidebar from './SportSidebar';
 import MatchGrid from './MatchGrid';
 import MonitoringDashboard from './MonitoringDashboard';
+import { apiUrl } from '../config';
 
 // Modal per aggiungere un nuovo match (manteniamo per uso futuro)
 function AddMatchModal({ onClose, onSuccess }) {
@@ -19,7 +20,7 @@ function AddMatchModal({ onClose, onSuccess }) {
     setStatus('scraping');
 
     try {
-      const response = await fetch('/api/scrape', {
+      const response = await fetch(apiUrl('/api/scrape'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() })
@@ -43,7 +44,7 @@ function AddMatchModal({ onClose, onSuccess }) {
         const eventId = eventIdMatch[1];
         // Avvia tracking automatico per partite live
         try {
-          await fetch(`/api/track/${eventId}`, {
+          await fetch(apiUrl(`/api/track/${eventId}`), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'inprogress' })
@@ -212,7 +213,7 @@ function HomePage({ onMatchSelect }) {
   const handleAddSuggested = async (match) => {
     try {
       const sofaUrl = `https://www.sofascore.com/event/${match.eventId}`;
-      const response = await fetch('/api/scrape', {
+      const response = await fetch(apiUrl('/api/scrape'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: sofaUrl })

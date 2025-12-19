@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
+import { WS_URL } from '../config';
 
 // Stati della connessione
 export const ConnectionState = {
@@ -24,7 +25,7 @@ export const ConnectionState = {
 export function useLiveMatch(eventId, options = {}) {
   const {
     autoConnect = true,
-    serverUrl = window.location.origin,
+    serverUrl = WS_URL || window.location.origin,
     onData = null,
     onError = null,
     onConnectionChange = null

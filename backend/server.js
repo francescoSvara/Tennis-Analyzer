@@ -74,11 +74,30 @@ function getRealisticStatus(status, startTimestamp, winnerCode) {
 const app = express();
 const server = http.createServer(app);
 
+// Lista origini consentite (dev + produzione)
+const getAllowedOrigins = () => {
+  const origins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173'
+  ];
+  
+  // Aggiungi domini Vercel dalla env var
+  if (process.env.FRONTEND_URL) {
+    origins.push(process.env.FRONTEND_URL);
+  }
+  
+  // Pattern per Vercel preview URLs
+  return origins;
+};
+
 // CORS middleware per tutte le route Express
 app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+  const allowedOrigins = getAllowedOrigins();
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
+  
+  // Permetti origini nella lista o pattern Vercel (.vercel.app)
+  if (allowedOrigins.includes(origin) || (origin && origin.endsWith('.vercel.app'))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -92,10 +111,19 @@ app.use((req, res, next) => {
   next();
 });
 
-// Setup Socket.IO con CORS per Vite dev server
+// Setup Socket.IO con CORS per Vite dev server e produzione
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      const allowedOrigins = getAllowedOrigins();
+      // Permetti origini nella lista, Vercel patterns, o requests senza origin (mobile/server)
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Permetti comunque in produzione, log warning
+        console.warn(`⚠️ CORS: Origin ${origin} not in allowed list`);
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true
   },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../config';
 
 /**
  * SavedScrapes - Component to list and load saved scrapes
@@ -19,7 +20,7 @@ export default function SavedScrapes({ onLoad, collapsed = true }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/scrapes');
+      const res = await fetch(apiUrl('/api/scrapes'));
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
       setScrapes(json.scrapes || []);
@@ -40,7 +41,7 @@ export default function SavedScrapes({ onLoad, collapsed = true }) {
   const loadScrape = async (id) => {
     setLoadingId(id);
     try {
-      const res = await fetch(`/api/scrapes/${id}`);
+      const res = await fetch(apiUrl(`/api/scrapes/${id}`));
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       if (onLoad) {
