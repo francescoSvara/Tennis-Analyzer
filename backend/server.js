@@ -79,15 +79,15 @@ const getAllowedOrigins = () => {
   const origins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'https://tennis-analyzer.vercel.app'  // Produzione Vercel
   ];
   
-  // Aggiungi domini Vercel dalla env var
+  // Aggiungi domini Vercel dalla env var (per flessibilità)
   if (process.env.FRONTEND_URL) {
     origins.push(process.env.FRONTEND_URL);
   }
   
-  // Pattern per Vercel preview URLs
   return origins;
 };
 
