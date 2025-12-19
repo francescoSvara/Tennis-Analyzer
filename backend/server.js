@@ -135,6 +135,17 @@ initLiveManager(io);
 
 app.use(bodyParser.json());
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development',
+    supabase: !!supabaseClient?.supabase,
+    database: !!matchRepository
+  });
+});
+
 // Directory per i file di scrape
 const DATA_DIR = path.resolve(__dirname, '..', 'data');
 const SCRAPES_DIR = path.join(DATA_DIR, 'scrapes');
