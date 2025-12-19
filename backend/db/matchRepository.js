@@ -5,6 +5,15 @@
 
 const { supabase, handleSupabaseError } = require('./supabase');
 
+// Helper per verificare se Supabase è disponibile
+function checkSupabase() {
+  if (!supabase) {
+    console.warn('⚠️ Supabase not available, skipping database operation');
+    return false;
+  }
+  return true;
+}
+
 // ============================================================================
 // PLAYERS
 // ============================================================================
@@ -15,6 +24,7 @@ const { supabase, handleSupabaseError } = require('./supabase');
  * @returns {Object} Giocatore inserito/aggiornato
  */
 async function upsertPlayer(player) {
+  if (!checkSupabase()) return null;
   if (!player || !player.id) return null;
   
   const playerData = {
@@ -49,6 +59,7 @@ async function upsertPlayer(player) {
  * Inserisce o aggiorna un torneo
  */
 async function upsertTournament(tournament) {
+  if (!checkSupabase()) return null;
   if (!tournament || !tournament.id) return null;
 
   const tournamentData = {
@@ -84,6 +95,10 @@ async function upsertTournament(tournament) {
  * @returns {Object} Match inserito con ID
  */
 async function insertMatch(matchData, sourceUrl = null) {
+  if (!checkSupabase()) {
+    console.warn('⚠️ Database not available, match not saved to DB');
+    return null;
+  }
   const startTime = Date.now();
   const logEntry = {
     source_url: sourceUrl || 'unknown',
@@ -412,6 +427,7 @@ function parseNumeric(val) {
  * Recupera tutti i match con filtri opzionali
  */
 async function getMatches(options = {}) {
+  if (!checkSupabase()) return [];
   const { limit = 50, offset = 0, status, tournamentId, playerId, orderBy = 'start_time' } = options;
 
   let query = supabase
@@ -434,6 +450,7 @@ async function getMatches(options = {}) {
  * Recupera un match specifico con tutti i dati correlati
  */
 async function getMatchById(matchId) {
+  if (!checkSupabase()) return null;
   // Match base
   const { data: match, error: matchError } = await supabase
     .from('v_matches_full')
@@ -534,6 +551,7 @@ async function getMatchById(matchId) {
  * Recupera point-by-point per un match
  */
 async function getPointByPoint(matchId) {
+  if (!checkSupabase()) return [];
   const { data, error } = await supabase
     .from('point_by_point')
     .select('*')
@@ -567,6 +585,7 @@ async function getPointByPoint(matchId) {
  * Recupera le statistiche per un match
  */
 async function getStatistics(matchId, period = 'ALL') {
+  if (!checkSupabase()) return { period, groups: [] };
   const { data, error } = await supabase
     .from('match_statistics')
     .select('*')
@@ -617,6 +636,7 @@ async function searchPlayers(query, limit = 10) {
  * Recupera tutti i tornei
  */
 async function getTournaments() {
+  if (!checkSupabase()) return [];
   const { data, error } = await supabase
     .from('tournaments')
     .select('*')
