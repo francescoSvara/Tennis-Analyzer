@@ -500,7 +500,5 @@ Progetto privato - Tutti i diritti riservati.
 
 ---
 
-*Documentazione generata il 19 Dicembre 2025*
-#   T e n n i s - A n a l y z e r 
- 
- 
+*Ultimo aggiornamento: 19 Dicembre 2025*
+
