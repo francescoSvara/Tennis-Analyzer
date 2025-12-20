@@ -118,43 +118,9 @@ function formatDateRange(earliest, latest) {
 }
 
 // Card per singolo torneo
-function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshData, onMatchSelect }) {
-  const [events, setEvents] = useState(null);
-  const [loadingEvents, setLoadingEvents] = useState(false);
-  
-  const loadTournamentEvents = useCallback(async (force = false) => {
-    if (loadingEvents) return;
-    if (!force && events) return;
-    setLoadingEvents(true);
-    try {
-      // Usa uniqueTournamentId se disponibile per chiamare SofaScore, altrimenti usa id (season)
-      const tournamentIdToUse = tournament.uniqueTournamentId || tournament.id;
-      const res = await fetch(apiUrl(`/api/tournament/${tournamentIdToUse}/events?seasonId=${tournament.id}`));
-      if (res.ok) {
-        const data = await res.json();
-        setEvents(data);
-      }
-    } catch (e) {
-      console.error('Error loading tournament events:', e);
-    } finally {
-      setLoadingEvents(false);
-    }
-  }, [tournament.id, loadingEvents]);
-  
-  // Carica eventi subito al mount per avere la copertura corretta
-  useEffect(() => {
-    loadTournamentEvents();
-  }, [tournament.id]);
-  
-  // Ricarica eventi quando refreshKey cambia (nuovo match aggiunto)
-  useEffect(() => {
-    if (refreshKey > 0) {
-      loadTournamentEvents(true);
-    }
-  }, [refreshKey]);
-  
-  // Percentuale da mostrare: usa copertura (match in DB / totali) se disponibile, altrimenti completezza media
-  const displayPercentage = events?.stats?.completionRate ?? tournament.avgCompleteness;
+function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
+  // Usa avgCompleteness come percentuale (rappresenta la completezza media dei dati)
+  const displayPercentage = tournament.avgCompleteness;
   
   const dateRange = formatDateRange(tournament.earliestDate, tournament.latestDate);
   
@@ -253,46 +219,11 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
             </div>
           </div>
           
-          {/* Tournament events coverage */}
-          {loadingEvents && (
-            <div className="loading-events">
-              <span className="spinner"></span> Caricamento statistiche...
-            </div>
-          )}
-          
-          {events && (
-            <div className="tournament-events-summary">
-              <div className="events-header">
-                <h5>📊 Copertura Torneo</h5>
-                <div className="coverage-stats">
-                  <span className="coverage-rate">{events.stats.completionRate}%</span>
-                  <span className="coverage-detail">
-                    {events.stats.inDatabase}/{events.stats.total} partite salvate
-                  </span>
-                </div>
-              </div>
-              
-              <div className="coverage-bar">
-                <div 
-                  className="coverage-fill" 
-                  style={{ width: `${events.stats.completionRate}%` }}
-                />
-              </div>
-              
-              {/* Nota quando usiamo solo dati locali */}
-              {events.note && events.stats.total > 0 && (
-                <div className="coverage-note">
-                  <small>✓ {tournament.matchCount} match nel database</small>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Sezione Match Salvati */}
+          {/* Sezione Match nel Database */}
           {tournament.matches.length > 0 && (
             <div className="tournament-matches saved-matches">
               <div className="matches-header">
-                <h5>✅ Match nel Database ({tournament.matches.length})</h5>
+                <h5>🎾 Match nel Database ({tournament.matches.length})</h5>
               </div>
               <div className="matches-scroll">
                 {tournament.matches.slice(0, 10).map(m => (
@@ -317,39 +248,6 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
               </div>
             </div>
           )}
-          
-          {/* Sezione Match Non Salvati */}
-          {events && events.stats.missing > 0 && (
-            <div className="tournament-matches missing-matches">
-              <div className="matches-header">
-                <h5>⚠️ Match Non Salvati ({events.stats.missing})</h5>
-                <span className="missing-info-hint">Match rilevati ma non nel database</span>
-              </div>
-              <div className="matches-scroll">
-                {events.events
-                  .filter(e => !e.inDatabase)
-                  .slice(0, 10)
-                  .map(e => (
-                    <div 
-                      key={e.eventId} 
-                      className="mini-match missing-match"
-                      title="Match rilevato ma non ancora nel database"
-                    >
-                      <span className="mini-match-teams">
-                        {e.homeTeam} vs {e.awayTeam}
-                      </span>
-                      <div className="mini-match-meta">
-                        <span className={`mini-status ${e.status}`}>{e.status}</span>
-                        <span className="missing-icon">❌</span>
-                      </div>
-                    </div>
-                  ))}
-                {events.stats.missing > 10 && (
-                  <div className="more-matches">...e altri {events.stats.missing - 10} match</div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -363,14 +261,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const [error, setError] = useState(null);
   const [expandedTournament, setExpandedTournament] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'recent' | 'tracking'
-  
-  // Stati per sync match
-  const [syncingMatch, setSyncingMatch] = useState(null);
-  const [syncingAll, setSyncingAll] = useState(false);
-  const [syncProgress, setSyncProgress] = useState({ current: 0, total: 0 });
-  
-  // Chiave per forzare refresh dei componenti figli quando dati cambiano
-  const [refreshKey, setRefreshKey] = useState(0);
   
   const loadStats = useCallback(async () => {
     setLoading(true);
@@ -386,69 +276,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       setLoading(false);
     }
   }, []);
-  
-  // Funzione per aggiornare tutto dopo un cambiamento
-  const refreshData = useCallback(() => {
-    loadStats();
-    setRefreshKey(prev => prev + 1);
-    if (onMatchesUpdated) onMatchesUpdated();
-  }, [loadStats, onMatchesUpdated]);
-  
-  // Funzione per aggiungere un match via scrape
-  const handleScrapeMatch = async (e) => {
-    e.preventDefault();
-    if (!scrapeUrl.trim()) return;
-    
-    setScrapeLoading(true);
-    setScrapeStatus(null);
-    setScrapeMessage('');
-    
-    try {
-      const res = await fetch(apiUrl('/api/scrape'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: scrapeUrl.trim() })
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        setScrapeStatus('success');
-        setScrapeMessage(`Match acquisito: ${data.match?.homeTeam || 'Unknown'} vs ${data.match?.awayTeam || 'Unknown'}`);
-        setScrapeUrl('');
-        refreshData(); // Aggiorna statistiche, grafici e copertura tornei
-      } else if (res.status === 409) {
-        setScrapeStatus('duplicate');
-        setScrapeMessage(data.message || 'Match già presente nel database');
-      } else if (res.status === 503 && data.error === 'blocked') {
-        setScrapeStatus('error');
-        setScrapeMessage('⚠️ SofaScore blocca le richieste dal server. Usa lo scraping da localhost.');
-      } else {
-        setScrapeStatus('error');
-        setScrapeMessage(data.message || 'Errore durante lo scraping');
-      }
-    } catch (err) {
-      setScrapeStatus('error');
-      setScrapeMessage('Errore di connessione al server');
-    } finally {
-      setScrapeLoading(false);
-    }
-  };
-  
-  // Funzione per sincronizzare un match
-  const handleSyncMatch = async (eventId) => {
-    setSyncingMatch(eventId);
-    try {
-      const res = await fetch(apiUrl(`/api/sync/${eventId}`), { method: 'POST' });
-      if (res.ok) {
-        refreshData(); // Aggiorna tutto dopo sync
-      }
-    } catch (err) {
-      console.error('Sync error:', err);
-    } finally {
-      setSyncingMatch(null);
-    }
-  };
   
   // Filtra match incompleti (non 100% O non finished) - TUTTI, non limitati
   const getIncompleteMatches = useCallback(() => {
@@ -472,34 +299,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       hasPrev: incompletePage > 1
     };
   }, [getIncompleteMatches, incompletePage]);
-  
-  // Funzione per sincronizzare tutti i match incompleti
-  const handleSyncAllIncomplete = async () => {
-    const incompleteMatches = getIncompleteMatches();
-    if (incompleteMatches.length === 0) return;
-    
-    setSyncingAll(true);
-    setSyncProgress({ current: 0, total: incompleteMatches.length });
-    
-    for (let i = 0; i < incompleteMatches.length; i++) {
-      const match = incompleteMatches[i];
-      setSyncProgress({ current: i + 1, total: incompleteMatches.length });
-      setSyncingMatch(match.eventId);
-      
-      try {
-        await fetch(apiUrl(`/api/sync/${match.eventId}`), { method: 'POST' });
-        // Piccola pausa per non sovraccaricare il server
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (err) {
-        console.error(`Sync error for ${match.eventId}:`, err);
-      }
-    }
-    
-    setSyncingMatch(null);
-    setSyncingAll(false);
-    setSyncProgress({ current: 0, total: 0 });
-    refreshData(); // Aggiorna tutto dopo sync completo
-  };
   
   useEffect(() => {
     if (isOpen) {
@@ -671,8 +470,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                     tournament={t}
                     expanded={expandedTournament === t.id}
                     onExpand={(id) => setExpandedTournament(expandedTournament === id ? null : id)}
-                    refreshKey={refreshKey}
-                    onRefreshData={refreshData}
                     onMatchSelect={onMatchSelect}
                   />
                 ))}
@@ -684,24 +481,9 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             <div className="tab-content recent-tab">
               <div className="recent-header">
                 <div className="recent-title-section">
-                  <h3>🔄 Match da Completare</h3>
-                  <span className="recent-count">{paginatedIncomplete.total} match incompleti</span>
+                  <h3>⚠️ Match Incompleti</h3>
+                  <span className="recent-count">{paginatedIncomplete.total} match da completare</span>
                 </div>
-                <button 
-                  className="sync-all-btn"
-                  onClick={handleSyncAllIncomplete}
-                  disabled={syncingAll || paginatedIncomplete.total === 0}
-                  title="Aggiorna tutti i match incompleti"
-                >
-                  {syncingAll ? (
-                    <>
-                      <span className="spinner small"></span>
-                      {syncProgress.current}/{syncProgress.total}
-                    </>
-                  ) : (
-                    <>🔄 Aggiorna Tutti</>
-                  )}
-                </button>
               </div>
               
               {paginatedIncomplete.total === 0 ? (
@@ -709,7 +491,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   <span className="no-incomplete-icon">✅</span>
                   <p>Tutti i match sono completi!</p>
                   <span className="no-incomplete-hint">
-                    Non ci sono match da aggiornare
+                    Nessun match con dati mancanti
                   </span>
                 </div>
               ) : (
@@ -734,18 +516,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                             })}
                           </span>
                         </div>
-                        <button 
-                          className="sync-match-btn"
-                          onClick={() => handleSyncMatch(match.eventId)}
-                          disabled={syncingMatch === match.eventId || syncingAll}
-                          title="Aggiorna dati match"
-                        >
-                          {syncingMatch === match.eventId ? (
-                            <span className="spinner small"></span>
-                          ) : (
-                            '🔄'
-                          )}
-                        </button>
                       </div>
                     ))}
                   </div>
