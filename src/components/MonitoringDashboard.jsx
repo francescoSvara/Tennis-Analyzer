@@ -489,13 +489,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedTournament, setExpandedTournament] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'recent' | 'tracking' | 'add'
-  
-  // Stati per aggiunta match
-  const [scrapeUrl, setScrapeUrl] = useState('');
-  const [scrapeLoading, setScrapeLoading] = useState(false);
-  const [scrapeStatus, setScrapeStatus] = useState(null); // 'success' | 'error' | 'duplicate'
-  const [scrapeMessage, setScrapeMessage] = useState('');
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'recent' | 'tracking'
   
   // Stati per sync match
   const [syncingMatch, setSyncingMatch] = useState(null);
@@ -662,12 +656,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
         {/* Tabs */}
         <div className="monitoring-tabs">
           <button 
-            className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`}
-            onClick={() => setActiveTab('add')}
-          >
-            ➕ Aggiungi
-          </button>
-          <button 
             className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
@@ -706,40 +694,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             <div className="monitoring-error">
               <span>❌ {error}</span>
               <button onClick={loadStats}>Riprova</button>
-            </div>
-          )}
-          
-          {/* Tab Aggiungi Match - Reindirizza a scraper locale */}
-          {activeTab === 'add' && (
-            <div className="tab-content add-tab">
-              <div className="add-match-section">
-                <h3>➕ Aggiungi Nuovo Match</h3>
-                
-                <div className="local-scraper-notice">
-                  <div className="notice-icon">⚠️</div>
-                  <div className="notice-content">
-                    <h4>Scraping disponibile solo in locale</h4>
-                    <p>
-                      SofaScore blocca le richieste dai server cloud. 
-                      Per acquisire nuovi match, usa lo <strong>Scraper Locale</strong>.
-                    </p>
-                    <div className="notice-steps">
-                      <h5>Come fare:</h5>
-                      <ol>
-                        <li>Apri la cartella <code>Tennis-Scraper-Local</code></li>
-                        <li>Esegui <code>npm install</code> (solo la prima volta)</li>
-                        <li>Esegui <code>npm run dev</code></li>
-                        <li>Vai su <code>http://localhost:5174</code></li>
-                        <li>Incolla i link SofaScore e clicca "Acquisisci"</li>
-                      </ol>
-                    </div>
-                    <p className="notice-info">
-                      I match acquisiti dallo scraper locale appariranno automaticamente qui! 
-                      Entrambi usano lo stesso database Supabase.
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
           
