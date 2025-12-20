@@ -119,39 +119,109 @@ function formatDateRange(earliest, latest) {
 
 // Card per singolo torneo
 function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
-  // Usa avgCompleteness come percentuale (rappresenta la completezza media dei dati)
-  const displayPercentage = tournament.avgCompleteness;
+  const [tournamentEvents, setTournamentEvents] = useState(null);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [eventsError, setEventsError] = useState(null);
   
   const dateRange = formatDateRange(tournament.earliestDate, tournament.latestDate);
   
+  // Carica eventi dal API SofaScore direttamente (dal browser)
+  const loadTournamentEvents = useCallback(async () => {
+    if (loadingEvents || tournamentEvents) return;
+    setLoadingEvents(true);
+    setEventsError(null);
+    
+    try {
+      // Usa uniqueTournamentId per chiamare SofaScore direttamente
+      const uniqueTournamentId = tournament.uniqueTournamentId;
+      const seasonId = tournament.id;
+      
+      if (!uniqueTournamentId) {
+        setEventsError('ID torneo non disponibile');
+        return;
+      }
+      
+      // Chiamata diretta a SofaScore API dal browser
+      const url = `https://www.sofascore.com/api/v1/unique-tournament/${uniqueTournamentId}/season/${seasonId}/events/last/0`;
+      const res = await fetch(url);
+      
+      if (!res.ok) {
+        throw new Error(`SofaScore API error: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      setTournamentEvents(data.events || []);
+    } catch (e) {
+      console.error('Error loading tournament events from SofaScore:', e);
+      setEventsError('Impossibile caricare eventi da SofaScore');
+    } finally {
+      setLoadingEvents(false);
+    }
+  }, [tournament.uniqueTournamentId, tournament.id, loadingEvents, tournamentEvents]);
+  
+  // Carica eventi quando si espande la card
+  useEffect(() => {
+    if (expanded && !tournamentEvents && !loadingEvents) {
+      loadTournamentEvents();
+    }
+  }, [expanded, tournamentEvents, loadingEvents, loadTournamentEvents]);
+  
+  // Calcola statistiche di copertura
+  const coverageStats = useMemo(() => {
+    if (!tournamentEvents) {
+      return {
+        total: 0,
+        saved: tournament.matchCount,
+        missing: 0,
+        percentage: tournament.avgCompleteness,
+        missingMatches: []
+      };
+    }
+    
+    // Set di eventId salvati nel database
+    const savedEventIds = new Set(tournament.matches.map(m => String(m.eventId)));
+    
+    // Trova partite mancanti (su SofaScore ma non nel DB)
+    const missingMatches = tournamentEvents.filter(event => {
+      return !savedEventIds.has(String(event.id));
+    }).map(event => ({
+      eventId: event.id,
+      homeTeam: event.homeTeam?.name || 'TBD',
+      awayTeam: event.awayTeam?.name || 'TBD',
+      status: event.status?.type || 'unknown',
+      startTimestamp: event.startTimestamp,
+      slug: event.slug,
+      url: `https://www.sofascore.com/${event.slug}/${event.id}`
+    }));
+    
+    const total = tournamentEvents.length;
+    const saved = tournament.matchCount;
+    const missing = missingMatches.length;
+    const percentage = total > 0 ? Math.round((saved / total) * 100) : 0;
+    
+    return { total, saved, missing, percentage, missingMatches };
+  }, [tournamentEvents, tournament.matches, tournament.matchCount, tournament.avgCompleteness]);
+  
   // Handler click su partita esistente - naviga a scheda match
   const handleExistingMatchClick = async (match) => {
-    // Carica il match completo dal backend usando l'eventId
     if (onMatchSelect) {
       try {
-        // Prova prima a caricare il match specifico dal DB
         const res = await fetch(apiUrl(`/api/matches?sport=tennis`));
         if (res.ok) {
           const data = await res.json();
-          // Trova il match completo con lo stesso eventId (confronto come stringa)
           const fullMatch = data.matches.find(m => String(m.eventId) === String(match.eventId));
           if (fullMatch) {
-            console.log('Match completo trovato:', fullMatch);
             onMatchSelect(fullMatch);
           } else {
-            console.warn('Match non trovato nella lista, provo a caricarlo direttamente:', match.eventId);
-            // Se non trovato nella lista, prova a caricarlo direttamente
             const directRes = await fetch(apiUrl(`/api/match/${match.eventId}`));
             if (directRes.ok) {
               const directData = await directRes.json();
               onMatchSelect(directData);
             } else {
-              console.error('Match non trovato, uso dati minimi');
               onMatchSelect(match);
             }
           }
         } else {
-          console.error('Errore caricamento matches:', res.status);
           onMatchSelect(match);
         }
       } catch (err) {
@@ -159,6 +229,11 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
         onMatchSelect(match);
       }
     }
+  };
+  
+  // Copia link negli appunti
+  const copyToClipboard = (url) => {
+    navigator.clipboard.writeText(url);
   };
   
   return (
@@ -182,19 +257,23 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
         
         <div className="tournament-stats">
           <div className="stat-item">
-            <span className="stat-value">{tournament.matchCount}</span>
+            <span className="stat-value">{coverageStats.saved}</span>
             <span className="stat-label">Salvate</span>
           </div>
-          <div className="stat-item progress-stat">
-            {/* Progress ring per desktop */}
-            <div className="progress-ring-wrapper">
-              <ProgressRing percentage={displayPercentage} size={48} strokeWidth={5} />
+          {coverageStats.total > 0 && (
+            <div className="stat-item">
+              <span className="stat-value">{coverageStats.total}</span>
+              <span className="stat-label">Totali</span>
             </div>
-            {/* Testo per mobile */}
+          )}
+          <div className="stat-item progress-stat">
+            <div className="progress-ring-wrapper">
+              <ProgressRing percentage={coverageStats.percentage} size={48} strokeWidth={5} />
+            </div>
             <span className="progress-text-mobile" style={{
-              color: displayPercentage >= 80 ? '#10b981' : displayPercentage >= 50 ? '#f59e0b' : '#ef4444'
+              color: coverageStats.percentage >= 80 ? '#10b981' : coverageStats.percentage >= 50 ? '#f59e0b' : '#ef4444'
             }}>
-              {displayPercentage}%
+              {coverageStats.percentage}%
             </span>
           </div>
           <span className={`expand-icon ${expanded ? 'rotated' : ''}`}>▼</span>
@@ -203,6 +282,40 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
       
       {expanded && (
         <div className="tournament-card-body">
+          {/* Loading state */}
+          {loadingEvents && (
+            <div className="loading-events">
+              <span className="spinner"></span> Caricamento eventi da SofaScore...
+            </div>
+          )}
+          
+          {/* Error state */}
+          {eventsError && (
+            <div className="events-error">
+              ⚠️ {eventsError}
+            </div>
+          )}
+          
+          {/* Coverage Summary */}
+          {tournamentEvents && (
+            <div className="coverage-summary">
+              <div className="coverage-stat">
+                <span className="coverage-number saved">{coverageStats.saved}</span>
+                <span className="coverage-label">Salvate</span>
+              </div>
+              <div className="coverage-divider">/</div>
+              <div className="coverage-stat">
+                <span className="coverage-number total">{coverageStats.total}</span>
+                <span className="coverage-label">Totali</span>
+              </div>
+              <div className="coverage-divider">=</div>
+              <div className="coverage-stat">
+                <span className="coverage-number missing">{coverageStats.missing}</span>
+                <span className="coverage-label">Mancanti</span>
+              </div>
+            </div>
+          )}
+          
           {/* Status breakdown */}
           <div className="status-breakdown">
             <div className="status-item finished">
@@ -219,11 +332,42 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
             </div>
           </div>
           
+          {/* Sezione Match MANCANTI (da scrapare) */}
+          {coverageStats.missingMatches.length > 0 && (
+            <div className="tournament-matches missing-matches">
+              <div className="matches-header">
+                <h5>❌ Match Mancanti ({coverageStats.missingMatches.length})</h5>
+                <span className="matches-hint">Copia link per scraping locale</span>
+              </div>
+              <div className="matches-scroll">
+                {coverageStats.missingMatches.slice(0, 15).map(m => (
+                  <div 
+                    key={m.eventId} 
+                    className="mini-match missing-match"
+                    onClick={() => copyToClipboard(m.url)}
+                    title={`Clicca per copiare link: ${m.url}`}
+                  >
+                    <span className="mini-match-teams">
+                      {m.homeTeam} vs {m.awayTeam}
+                    </span>
+                    <div className="mini-match-meta">
+                      <span className={`mini-status ${m.status}`}>{m.status}</span>
+                      <span className="copy-icon">📋</span>
+                    </div>
+                  </div>
+                ))}
+                {coverageStats.missingMatches.length > 15 && (
+                  <div className="more-matches">...e altri {coverageStats.missingMatches.length - 15} match mancanti</div>
+                )}
+              </div>
+            </div>
+          )}
+          
           {/* Sezione Match nel Database */}
           {tournament.matches.length > 0 && (
             <div className="tournament-matches saved-matches">
               <div className="matches-header">
-                <h5>🎾 Match nel Database ({tournament.matches.length})</h5>
+                <h5>✅ Match nel Database ({tournament.matches.length})</h5>
               </div>
               <div className="matches-scroll">
                 {tournament.matches.slice(0, 10).map(m => (
