@@ -988,72 +988,36 @@ app.get('/api/suggested-matches', async (req, res) => {
   }
 });
 
-// GET /api/detected-matches - Recupera partite rilevate dai file di detected (dal torneo dello scraping)
+// GET /api/detected-matches - Recupera partite rilevate dalla tabella detected_matches (non ancora acquisite)
 app.get('/api/detected-matches', async (req, res) => {
   try {
-    const detectedDir = path.join(DATA_DIR, 'detected');
+    const { data: detectedMatches, error } = await supabase
+      .from('detected_matches')
+      .select('*')
+      .eq('is_acquired', false)
+      .order('start_time', { ascending: true });
     
-    // Crea la directory se non esiste
-    if (!fs.existsSync(detectedDir)) {
-      return res.json({ matches: [], count: 0 });
+    if (error) {
+      console.error('Error fetching detected matches from DB:', error);
+      return res.status(500).json({ error: error.message });
     }
     
-    const files = fs.readdirSync(detectedDir).filter(f => f.endsWith('-detected.json'));
-    
-    // Raccogli tutti gli eventId già nel database
-    const existingEventIds = new Set();
-    const scrapeFiles = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
-    
-    for (const file of scrapeFiles) {
-      try {
-        const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
-        if (content.api) {
-          for (const [url, data] of Object.entries(content.api)) {
-            if (url.match(/\/api\/v1\/event\/\d+$/) && data?.event?.id) {
-              existingEventIds.add(String(data.event.id));
-            }
-          }
-        }
-      } catch (e) { /* skip */ }
-    }
-    
-    // Raccogli tutte le partite rilevate non ancora nel DB
-    const detectedMatches = [];
-    const seenIds = new Set();
-    
-    for (const file of files) {
-      try {
-        const content = JSON.parse(fs.readFileSync(path.join(detectedDir, file), 'utf8'));
-        if (content.matches && Array.isArray(content.matches)) {
-          for (const match of content.matches) {
-            const eventId = String(match.eventId);
-            // Solo se non già nel DB e non già visto
-            if (!existingEventIds.has(eventId) && !seenIds.has(eventId)) {
-              seenIds.add(eventId);
-              detectedMatches.push({
-                ...match,
-                isDetected: true,
-                detectedAt: content.detectedAt,
-                sourceEventId: content.scrapedEventId
-              });
-            }
-          }
-        }
-      } catch (e) {
-        console.error(`Error reading detected file ${file}:`, e.message);
-      }
-    }
-    
-    // Ordina per data di inizio (prossime partite prima)
-    detectedMatches.sort((a, b) => {
-      const timeA = a.startTimestamp || 0;
-      const timeB = b.startTimestamp || 0;
-      return timeA - timeB;
-    });
+    // Formatta i match per il frontend
+    const formattedMatches = (detectedMatches || []).map(m => ({
+      eventId: m.id,
+      homeTeam: { name: m.home_team_name },
+      awayTeam: { name: m.away_team_name },
+      tournament: { name: m.tournament_name },
+      status: m.status,
+      statusType: m.status_type,
+      startTimestamp: m.start_time ? new Date(m.start_time).getTime() / 1000 : null,
+      isDetected: true,
+      tournamentId: m.tournament_id
+    }));
     
     res.json({ 
-      matches: detectedMatches,
-      count: detectedMatches.length 
+      matches: formattedMatches,
+      count: formattedMatches.length 
     });
   } catch (err) {
     console.error('Error fetching detected matches:', err.message);
