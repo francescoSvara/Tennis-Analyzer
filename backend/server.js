@@ -2002,6 +2002,124 @@ app.get('/api/match/:eventId/refresh', async (req, res) => {
 
 // Optional: serve frontend in dev if needed
 const PORT = process.env.PORT || 3001;
+// GET /api/matches/merged - Prova prima il database, fallback ai file locali
+app.get('/api/matches/merged', async (req, res) => {
+  try {
+    // Prova prima il database
+    if (matchRepository) {
+      try {
+        const { limit, offset, status } = req.query;
+        const dbMatches = await matchRepository.getMatches({
+          limit: limit ? parseInt(limit) : 50,
+          offset: offset ? parseInt(offset) : 0,
+          status
+        });
+        
+        if (dbMatches && dbMatches.length > 0) {
+          const matches = dbMatches.map(m => ({
+            id: m.id,
+            eventId: m.id,
+            sport: 'tennis',
+            sportName: 'Tennis',
+            tournament: m.tournament_name || '',
+            category: m.tournament_category || '',
+            homeTeam: {
+              id: m.home_player_id,
+              name: m.home_name || '',
+              shortName: m.home_name || '',
+              country: m.home_country || '',
+              ranking: m.home_ranking || null
+            },
+            awayTeam: {
+              id: m.away_player_id,
+              name: m.away_name || '',
+              shortName: m.away_name || '',
+              country: m.away_country || '',
+              ranking: m.away_ranking || null
+            },
+            homeScore: m.home_sets_won ? { current: m.home_sets_won } : null,
+            awayScore: m.away_sets_won ? { current: m.away_sets_won } : null,
+            status: {
+              code: m.status_code,
+              type: m.status_type,
+              description: m.status_description
+            },
+            startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
+            winnerCode: m.winner_code,
+            dataCompleteness: m.data_completeness || 50,
+            source: 'database'
+          }));
+          return res.json({ matches, count: matches.length, source: 'database' });
+        }
+      } catch (dbErr) {
+        console.warn('⚠️ Database fetch failed, falling back to files:', dbErr.message);
+      }
+    }
+    
+    // Fallback: file locali
+    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+    const matches = [];
+    const seenEventIds = new Set();
+    
+    for (const file of files) {
+      try {
+        const filePath = path.join(SCRAPES_DIR, file);
+        const stats = fs.statSync(filePath);
+        const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        
+        let eventData = null;
+        if (content.api) {
+          for (const [url, data] of Object.entries(content.api)) {
+            if (url.match(/\/api\/v1\/event\/\d+$/) && data?.event) {
+              eventData = data.event;
+              break;
+            }
+          }
+        }
+        
+        if (eventData && !seenEventIds.has(String(eventData.id))) {
+          seenEventIds.add(String(eventData.id));
+          matches.push({
+            id: file.replace('.json', ''),
+            fileDate: stats.mtime,
+            eventId: eventData.id,
+            sport: eventData.tournament?.category?.sport?.slug || 'tennis',
+            sportName: eventData.tournament?.category?.sport?.name || 'Tennis',
+            tournament: eventData.tournament?.uniqueTournament?.name || eventData.tournament?.name || '',
+            category: eventData.tournament?.category?.name || '',
+            homeTeam: {
+              name: eventData.homeTeam?.name || '',
+              shortName: eventData.homeTeam?.shortName || '',
+              country: eventData.homeTeam?.country?.alpha2 || '',
+              ranking: eventData.homeTeam?.ranking || null
+            },
+            awayTeam: {
+              name: eventData.awayTeam?.name || '',
+              shortName: eventData.awayTeam?.shortName || '',
+              country: eventData.awayTeam?.country?.alpha2 || '',
+              ranking: eventData.awayTeam?.ranking || null
+            },
+            homeScore: eventData.homeScore || null,
+            awayScore: eventData.awayScore || null,
+            status: getRealisticStatus(eventData.status, eventData.startTimestamp, eventData.winnerCode) || { type: 'unknown' },
+            startTimestamp: eventData.startTimestamp || null,
+            winnerCode: eventData.winnerCode || null,
+            dataCompleteness: calculateDataCompleteness(content.api, eventData.id) || 50,
+            source: 'files'
+          });
+        }
+      } catch (fileErr) {
+        console.warn(`⚠️ Error reading file ${file}:`, fileErr.message);
+      }
+    }
+    
+    res.json({ matches, count: matches.length, source: 'files' });
+  } catch (err) {
+    console.error('Error in /api/matches/merged:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 server.listen(PORT, () => {
   console.info(`🚀 Scraper backend listening on port ${PORT} (HTTP + WebSocket)`);
   

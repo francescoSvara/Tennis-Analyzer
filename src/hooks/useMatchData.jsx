@@ -282,7 +282,8 @@ export function useMatchList(options = {}) {
       if (limit) params.set('limit', limit);
       if (status) params.set('status', status);
       
-      const response = await fetch(apiUrl(`/api/db/matches?${params}`));
+      // Usa l'endpoint merged che prova DB prima, poi fallback ai file
+      const response = await fetch(apiUrl(`/api/matches/merged?${params}`));
       if (!response.ok) throw new Error('Failed to fetch matches');
       
       const data = await response.json();
@@ -290,17 +291,7 @@ export function useMatchList(options = {}) {
       setError(null);
     } catch (err) {
       setError(err.message);
-      // Fallback: prova API file-based
-      try {
-        const fallbackResponse = await fetch(apiUrl('/api/matches'));
-        if (fallbackResponse.ok) {
-          const fallbackData = await fallbackResponse.json();
-          setMatches(fallbackData.matches || []);
-          setError(null);
-        }
-      } catch (fallbackErr) {
-        // Keep original error
-      }
+      console.error('Error fetching matches:', err);
     } finally {
       setLoading(false);
     }
