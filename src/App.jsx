@@ -10,6 +10,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import IndicatorsChart from './components/IndicatorsChart';
 import MomentumChart from './components/MomentumChart';
 import HomePage from './components/HomePage';
+import { apiUrl } from './config';
 
 import './styles/overviewcharts.css';
 import './styles/homepage.css';
@@ -276,7 +277,7 @@ export default function App() {
       // Usa la nuova API ibrida che legge da DB -> File -> SofaScore
       const eventId = match.eventId || match.id;
       console.log('📡 Carico match con eventId:', eventId);
-      const response = await fetch(`/api/match/${eventId}`);
+      const response = await fetch(apiUrl(`/api/match/${eventId}`));
       const data = await response.json();
       console.log('📦 Dati ricevuti dal backend:', data);
       
@@ -370,7 +371,7 @@ export default function App() {
       const matchStatus = data.event?.status?.type || data.status_type;
       if (matchStatus === 'inprogress') {
         try {
-          await fetch(`/api/track/${eventId}`, {
+          await fetch(apiUrl(`/api/track/${eventId}`), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: matchStatus })
@@ -407,7 +408,7 @@ export default function App() {
     if (!eventId) return;
     setSyncStatus('checking');
     try {
-      const response = await fetch(`/api/check-data/${eventId}`);
+      const response = await fetch(apiUrl(`/api/check-data/${eventId}`));
       const data = await response.json();
       if (data.dataCompleteness) {
         setDataCompleteness(data.dataCompleteness);
@@ -429,7 +430,7 @@ export default function App() {
     setSyncStatus('syncing');
     try {
       // Usa la nuova API sync che aggiorna DB
-      const response = await fetch(`/api/sync/${eventId}`, { method: 'POST' });
+      const response = await fetch(apiUrl(`/api/sync/${eventId}`), { method: 'POST' });
       const data = await response.json();
       
       if (data.success) {
@@ -437,7 +438,7 @@ export default function App() {
         setSyncStatus('synced');
         
         // Ricarica i dati aggiornati dalla nuova API
-        const refreshResponse = await fetch(`/api/match/${eventId}`);
+        const refreshResponse = await fetch(apiUrl(`/api/match/${eventId}`));
         const refreshData = await refreshResponse.json();
         
         if (refreshData.source === 'database') {
@@ -691,10 +692,10 @@ export default function App() {
     if (!jobId) return;
     pollRef.current = setInterval(async () => {
       try {
-        const sRes = await fetch(`/api/status/${jobId}`);
+        const sRes = await fetch(apiUrl(`/api/status/${jobId}`));
         const sJson = await sRes.json();
         if (sJson.status === 'finished') {
-          const dRes = await fetch(`/api/data/${jobId}`);
+          const dRes = await fetch(apiUrl(`/api/data/${jobId}`));
           const dJson = await dRes.json();
           // keep full backend response for complete display
           setRawData(dJson);
@@ -797,7 +798,7 @@ export default function App() {
         setIsBackgroundRefresh(true);
         try {
           // Usa la nuova API che legge dal DB (già aggiornato dallo scheduler)
-          const response = await fetch(`/api/match/${eventId}`);
+          const response = await fetch(apiUrl(`/api/match/${eventId}`));
           if (response.ok) {
             const data = await response.json();
             

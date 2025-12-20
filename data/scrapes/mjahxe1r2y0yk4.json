@@ -1,0 +1,2689 @@
+{
+  "api": {
+    "https://www.sofascore.com/api/v1/country/alpha2": {
+      "alpha2": "IT",
+      "continent_code": "EU",
+      "country": "italy",
+      "city": "castelverde",
+      "region_code": "IT-CR"
+    },
+    "https://www.sofascore.com/api/v1/sport/3600/event-count": {
+      "snooker": {
+        "live": 3,
+        "total": 16
+      },
+      "badminton": {
+        "live": 0,
+        "total": 20
+      },
+      "futsal": {
+        "live": 1,
+        "total": 43
+      },
+      "ice-hockey": {
+        "live": 5,
+        "total": 135
+      },
+      "minifootball": {
+        "live": 4,
+        "total": 31
+      },
+      "darts": {
+        "live": 1,
+        "total": 19
+      },
+      "table-tennis": {
+        "live": 26,
+        "total": 1140
+      },
+      "american-football": {
+        "live": 0,
+        "total": 2
+      },
+      "floorball": {
+        "live": 0,
+        "total": 6
+      },
+      "football": {
+        "live": 46,
+        "total": 462
+      },
+      "tennis": {
+        "live": 15,
+        "total": 279
+      },
+      "baseball": {
+        "live": 0,
+        "total": 14
+      },
+      "basketball": {
+        "live": 36,
+        "total": 387
+      },
+      "bandy": {
+        "live": 0,
+        "total": 4
+      },
+      "handball": {
+        "live": 6,
+        "total": 98
+      },
+      "cricket": {
+        "live": 0,
+        "total": 7
+      },
+      "waterpolo": {
+        "live": 2,
+        "total": 3
+      },
+      "esports": {
+        "live": 4,
+        "total": 50
+      },
+      "volleyball": {
+        "live": 9,
+        "total": 99
+      }
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country": {
+      "countrySportPriorities": [
+        {
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 751
+        },
+        {
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 752
+        },
+        {
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 753
+        },
+        {
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 3,
+          "id": 754
+        },
+        {
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 4,
+          "id": 755
+        },
+        {
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 5,
+          "id": 756
+        },
+        {
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 6,
+          "id": 757
+        },
+        {
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 7,
+          "id": 758
+        },
+        {
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 8,
+          "id": 759
+        },
+        {
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 9,
+          "id": 760
+        },
+        {
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 10,
+          "id": 761
+        },
+        {
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 11,
+          "id": 762
+        },
+        {
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 12,
+          "id": 763
+        },
+        {
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 13,
+          "id": 764
+        },
+        {
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 14,
+          "id": 765
+        },
+        {
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 15,
+          "id": 766
+        },
+        {
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 16,
+          "id": 767
+        },
+        {
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 17,
+          "id": 768
+        },
+        {
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 18,
+          "id": 769
+        },
+        {
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 770
+        },
+        {
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 771
+        },
+        {
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 772
+        },
+        {
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 773
+        },
+        {
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 774
+        },
+        {
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 775
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/pregame-form": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/point-by-point": {
+      "pointByPoint": []
+    },
+    "https://www.sofascore.com/api/v1/team/402532/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Catarina Melleiro",
+            "slug": "ibiraba-melleiro-junior-catarina-melleiro",
+            "shortName": "C. Melleiro",
+            "gender": "F",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 159,
+            "nameCode": "IBI",
+            "ranking": 1325,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 402532,
+            "country": {
+              "alpha2": "BR",
+              "alpha3": "BRA",
+              "name": "Brazil",
+              "slug": "brazil"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "كاتارينا ميلييرو"
+              },
+              "shortNameTranslation": {
+                "ar": "ك. ميلييرو"
+              }
+            }
+          },
+          "type": 6,
+          "rowName": "Catarina Mellei Ibiaraba Melleiro",
+          "ranking": 1325,
+          "points": 7,
+          "previousRanking": 1349,
+          "bestRanking": 1073,
+          "id": 203587,
+          "country": {},
+          "rankingClass": "team"
+        },
+        {
+          "team": {
+            "name": "Catarina Melleiro",
+            "slug": "ibiraba-melleiro-junior-catarina-melleiro",
+            "shortName": "C. Melleiro",
+            "gender": "F",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 159,
+            "nameCode": "IBI",
+            "ranking": 1325,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 402532,
+            "country": {
+              "alpha2": "BR",
+              "alpha3": "BRA",
+              "name": "Brazil",
+              "slug": "brazil"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "كاتارينا ميلييرو"
+              },
+              "shortNameTranslation": {
+                "ar": "ك. ميلييرو"
+              }
+            }
+          },
+          "type": 35,
+          "rowName": "Catarina Ibiraba Melleiro Junior",
+          "ranking": 3594,
+          "points": 8.64,
+          "previousRanking": 3598,
+          "previousPoints": 8.63,
+          "bestRanking": 2679,
+          "id": 193185,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1757592165
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/h2h": {
+      "teamDuel": {
+        "homeWins": 1,
+        "awayWins": 0,
+        "draws": 0
+      },
+      "managerDuel": null
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/incidents": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/tv/event/15230501/country-channels": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/managers": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/votes": {
+      "vote": {
+        "vote1": 198,
+        "vote2": 20,
+        "voteX": null
+      },
+      "bothTeamsToScoreVote": {
+        "voteYes": 0,
+        "voteNo": 0
+      },
+      "firstTeamToScoreVote": {
+        "voteHome": 0,
+        "voteNoGoal": 0,
+        "voteAway": 0
+      },
+      "whoShouldHaveWonVote": {
+        "vote1": 0,
+        "vote2": 0
+      }
+    },
+    "https://www.sofascore.com/api/v1/sofascore-news/en/posts?categories=news": [
+      {
+        "id": 83594,
+        "slug": "fiorentina-the-collapse-record-breaking-season-goes-negative",
+        "date": "2025-12-17T15:54:04",
+        "title": "Fiorentina, the Collapse: Record-Breaking Season Goes Negative",
+        "excerpt": "Fiorentina is experiencing a record-breaking season: no wins, the lowest rating average in their recent history, and a decline in key player performances. Numbers, analysis, and the causes of a profound crisis that leaves the Viola facing crucial decisions.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070389689-1.jpg",
+        "tags": [
+          {
+            "id": 8218,
+            "slug": "fiorentina-en",
+            "name": "Fiorentina"
+          },
+          {
+            "id": 86,
+            "slug": "football",
+            "name": "Football"
+          },
+          {
+            "id": 26,
+            "slug": "serie-a",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83569,
+        "slug": "sofascore-player-of-the-season-2024-25-full-winter-league-winners",
+        "date": "2025-12-17T11:11:28",
+        "title": "Sofascore Player of the Season 2025: Full Winter League Winners",
+        "excerpt": "Winter leagues wrapped up with standout performers across the world. Here are all Sofascore Player of the Season winners announced so far, from Asia to the Americas.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/05/POTS-trophy-1.jpg",
+        "tags": [
+          {
+            "id": 5217,
+            "slug": "player-of-the-season",
+            "name": "Player of the Season"
+          },
+          {
+            "id": 5218,
+            "slug": "pots",
+            "name": "POTS"
+          }
+        ]
+      },
+      {
+        "id": 83420,
+        "slug": "sofascore-and-euroleague-team-up-for-a-new-fan-experience",
+        "date": "2025-12-17T09:00:00",
+        "title": "Sofascore and EuroLeague Team Up for a New Fan Experience",
+        "excerpt": "Sofascore joins forces with EuroLeague TV to bring fans closer to elite basketball. Users get an exclusive 15 percent discount on monthly and annual plans with code SOFA15.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/EuroLeague-title-image.png",
+        "tags": [
+          {
+            "id": 5401,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          {
+            "id": 8160,
+            "slug": "euroleague",
+            "name": "EuroLeague"
+          }
+        ]
+      },
+      {
+        "id": 83553,
+        "slug": "laliga-matchday-16-review",
+        "date": "2025-12-16T21:29:50",
+        "title": "LaLiga Matchday 16 Review",
+        "excerpt": "La Liga’s matchday 16 brought comebacks, resounding victories, and a postponement. Barcelona and Real Madrid secured decisive victories, while Girona and Celta impressed on the road. Raphinha and Tsygankov stood out, with the standings remaining tight and competitive.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/IMG_6001.jpg",
+        "tags": [
+          {
+            "id": 86,
+            "slug": "football",
+            "name": "Football"
+          },
+          {
+            "id": 3867,
+            "slug": "laliga",
+            "name": "LaLiga"
+          },
+          {
+            "id": 7193,
+            "slug": "review",
+            "name": "Review"
+          }
+        ]
+      },
+      {
+        "id": 83510,
+        "slug": "premier-league-matchday-16-review",
+        "date": "2025-12-16T14:11:13",
+        "title": "Premier League Matchday 16 Review",
+        "excerpt": "Matchday 16 had everything: wild draws, heavy upsets and title contenders holding firm as the Premier League table tightens at both ends.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Morgan-Rogers.jpg",
+        "tags": [
+          {
+            "id": 86,
+            "slug": "football",
+            "name": "Football"
+          },
+          {
+            "id": 124,
+            "slug": "premier-league",
+            "name": "Premier League"
+          },
+          {
+            "id": 7193,
+            "slug": "review",
+            "name": "Review"
+          }
+        ]
+      },
+      {
+        "id": 83495,
+        "slug": "numbers-dont-lie-good-luck-xabi-youre-gonna-need-it",
+        "date": "2025-12-16T11:48:15",
+        "title": "Numbers Don’t Lie: Good Luck Xabi, You’re Gonna Need It",
+        "excerpt": "Xabi Alonso’s Real Madrid start is solid on paper, tense in reality. At the Bernabéu, results are never enough and patience rarely exists.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/11/NDL_studioBackground_v1.png"
+      },
+      {
+        "id": 83479,
+        "slug": "atp-next-gen-finals-a-proving-ground-for-future-stars",
+        "date": "2025-12-16T09:47:29",
+        "title": "ATP Next Gen Finals: A Proving Ground for Future Stars",
+        "excerpt": "Who are the next tennis stars ready to shine on the ATP Tour stage? The Next Gen ATP Finals bring together the game’s brightest young talents, with bold rules adding extra edge in Jeddah.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Nex-Gen-Finals-title.jpg",
+        "tags": [
+          {
+            "id": 8198,
+            "slug": "atp",
+            "name": "ATP"
+          },
+          {
+            "id": 8196,
+            "slug": "next-gen-finals",
+            "name": "Next Gen Finals"
+          },
+          {
+            "id": 5862,
+            "slug": "tennis",
+            "name": "Tennis"
+          }
+        ]
+      },
+      {
+        "id": 83462,
+        "slug": "fifa-intercontinental-cup-flamengo-face-psg-chasing-historic-title",
+        "date": "2025-12-15T20:41:12",
+        "title": "FIFA Intercontinental Cup: Flamengo face PSG chasing historic title",
+        "excerpt": "Brazilian clubs have not lifted a world title since Corinthians in 2012. Here’s the full breakdown of Flamengo vs PSG, tactical analysis, key players, prize money and both teams’ 2025/26 form.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070308762-1.jpg",
+        "tags": [
+          {
+            "id": 8179,
+            "slug": "copa-intercontinental-en",
+            "name": "Copa Intercontinental"
+          },
+          {
+            "id": 5681,
+            "slug": "fifa",
+            "name": "FIFA"
+          },
+          {
+            "id": 7555,
+            "slug": "flamengo",
+            "name": "Flamengo"
+          },
+          {
+            "id": 8181,
+            "slug": "intercontinental-cup",
+            "name": "Intercontinental Cup"
+          },
+          {
+            "id": 6343,
+            "slug": "psg",
+            "name": "PSG"
+          }
+        ]
+      },
+      {
+        "id": 83411,
+        "slug": "sofascore-fantasy-arrives-for-afcon-2025",
+        "date": "2025-12-15T20:10:00",
+        "title": "Sofascore Fantasy Arrives for AFCON 2025",
+        "excerpt": "AFCON Fantasy arrives on Sofascore with real time stats and simple squad building. Follow every match and make each moment count for your team.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Fantasy-AFCON-title.jpg",
+        "tags": [
+          {
+            "id": 8059,
+            "slug": "afcon",
+            "name": "AFCON"
+          },
+          {
+            "id": 6435,
+            "slug": "fantasy",
+            "name": "Fantasy"
+          }
+        ]
+      },
+      {
+        "id": 83428,
+        "slug": "nba-western-conference-week-7-and-8-review",
+        "date": "2025-12-15T15:26:20",
+        "title": "NBA Western Conference Week 7 and 8 Review",
+        "excerpt": "Weeks 7 and 8 in the Western Conference saw Oklahoma City remain on top despite their streak ending, with Denver and Houston gaining momentum. Nikola Jokić continues to dominate individually, while the Lakers and Spurs stay close in an increasingly competitive playoff race.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070196331.jpg",
+        "tags": [
+          {
+            "id": 5399,
+            "slug": "nba",
+            "name": "NBA"
+          },
+          {
+            "id": 7193,
+            "slug": "review",
+            "name": "Review"
+          },
+          {
+            "id": 8162,
+            "slug": "western",
+            "name": "Western"
+          }
+        ]
+      }
+    ],
+    "https://www.sofascore.com/api/v1/team/422804/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Sarah Barry",
+            "slug": "barry-sarah",
+            "shortName": "S. Barry",
+            "gender": "F",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 31,
+            "nameCode": "BAR",
+            "national": false,
+            "type": 1,
+            "id": 422804,
+            "country": {
+              "alpha2": "CA",
+              "alpha3": "CAN",
+              "name": "Canada",
+              "slug": "canada"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "سارة باري"
+              },
+              "shortNameTranslation": {
+                "ar": "س. باري"
+              }
+            }
+          },
+          "type": 35,
+          "rowName": "Sarah Barry",
+          "ranking": 3771,
+          "points": 8.54,
+          "previousRanking": 3773,
+          "previousPoints": 8.55,
+          "bestRanking": 2619,
+          "id": 194790,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1760011375
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15230501": {
+      "event": {
+        "firstToServe": 2,
+        "tournament": {
+          "name": "ITF W15 Lima 3 Women",
+          "slug": "itf-w15-lima-3-women",
+          "category": {
+            "name": "ITF Women",
+            "slug": "itf-women",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 213,
+            "country": {},
+            "flag": "itf-women",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للسيدات"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "uniqueTournament": {
+            "name": "ITF W15 Lima 3 Women",
+            "slug": "itf-w15-lima-3-women",
+            "category": {
+              "name": "ITF Women",
+              "slug": "itf-women",
+              "sport": {
+                "name": "Tennis",
+                "slug": "tennis",
+                "id": 5
+              },
+              "id": 213,
+              "country": {},
+              "flag": "itf-women",
+              "fieldTranslations": {
+                "nameTranslation": {
+                  "ar": "اتحاد التنس الدولي للسيدات"
+                },
+                "shortNameTranslation": {}
+              }
+            },
+            "userCount": 6,
+            "groundType": "Clay",
+            "hasRounds": true,
+            "hasPerformanceGraphFeature": false,
+            "id": 31503,
+            "country": {},
+            "hasEventPlayerStatistics": false,
+            "displayInverseHomeAwayTeams": false
+          },
+          "priority": 0,
+          "competitionType": 2,
+          "id": 171155
+        },
+        "season": {
+          "name": "2025",
+          "year": "2025",
+          "editor": false,
+          "id": 87516
+        },
+        "roundInfo": {
+          "round": 6,
+          "name": "Round of 32",
+          "slug": "round-of-32",
+          "cupRoundType": 16
+        },
+        "customId": "Haldsegud",
+        "status": {
+          "code": 8,
+          "description": "1st set",
+          "type": "inprogress"
+        },
+        "homeTeam": {
+          "name": "Catarina Melleiro",
+          "slug": "ibiraba-melleiro-junior-catarina-melleiro",
+          "shortName": "C. Melleiro",
+          "gender": "F",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 159,
+          "playerTeamInfo": {
+            "birthplace": "-",
+            "prizeCurrent": 5299,
+            "prizeTotal": 12638,
+            "id": 12429,
+            "prizeCurrentRaw": {
+              "value": 5299,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 12638,
+              "currency": "EUR"
+            },
+            "currentRanking": 1325
+          },
+          "nameCode": "IBI",
+          "ranking": 1325,
+          "disabled": false,
+          "national": false,
+          "type": 1,
+          "id": 402532,
+          "country": {
+            "alpha2": "BR",
+            "alpha3": "BRA",
+            "name": "Brazil",
+            "slug": "brazil"
+          },
+          "fullName": "Catarina Melleiro",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "كاتارينا ميلييرو"
+            },
+            "shortNameTranslation": {
+              "ar": "ك. ميلييرو"
+            }
+          },
+          "timeActive": []
+        },
+        "awayTeam": {
+          "name": "Sarah Barry",
+          "slug": "barry-sarah",
+          "shortName": "S. Barry",
+          "gender": "F",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 31,
+          "nameCode": "BAR",
+          "national": false,
+          "type": 1,
+          "id": 422804,
+          "country": {
+            "alpha2": "CA",
+            "alpha3": "CAN",
+            "name": "Canada",
+            "slug": "canada"
+          },
+          "fullName": "Sarah Barry",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "سارة باري"
+            },
+            "shortNameTranslation": {
+              "ar": "س. باري"
+            }
+          },
+          "timeActive": []
+        },
+        "homeScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 5,
+          "point": "0"
+        },
+        "awayScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 4,
+          "point": "0"
+        },
+        "coverage": -1,
+        "time": {},
+        "changes": {
+          "changes": [
+            "homeScore.period1",
+            "homeScore.point",
+            "awayScore.point",
+            "firstToServe"
+          ],
+          "changeTimestamp": 1766005118
+        },
+        "hasGlobalHighlights": false,
+        "crowdsourcingDataDisplayEnabled": false,
+        "id": 15230501,
+        "defaultPeriodCount": 3,
+        "slug": "sarah-barry-catarina-melleiro",
+        "startTimestamp": 1766001600,
+        "periods": {
+          "point": "Game",
+          "current": "Match",
+          "period1": "1st set",
+          "period2": "2nd set",
+          "period3": "3rd set",
+          "period4": "4th set",
+          "period5": "5th set"
+        },
+        "lastPeriod": "period1",
+        "finalResultOnly": false,
+        "feedLocked": true,
+        "groundType": "Clay",
+        "showTotoPromo": true,
+        "isEditor": false
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/tennis-power": {
+      "tennisPowerRankings": []
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web",
+          "campaignId": 9,
+          "oddsOffset": 0,
+          "id": 21818,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy",
+            "slug": "admiralbet-italy",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 645,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 21819,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 21820,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 22113,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/branding/providers/IT/web": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country/IT": {
+      "countrySportPriorities": [
+        {
+          "country": "IT",
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 226
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 227
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 228
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 3,
+          "id": 229
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 4,
+          "id": 230
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 5,
+          "id": 231
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 6,
+          "id": 232
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 7,
+          "id": 233
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 8,
+          "id": 234
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 9,
+          "id": 235
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 10,
+          "id": 236
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 11,
+          "id": 237
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 12,
+          "id": 238
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 13,
+          "id": 239
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 14,
+          "id": 240
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 15,
+          "id": 241
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 16,
+          "id": 242
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 17,
+          "id": 243
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 18,
+          "id": 244
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 245
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 246
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 247
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 248
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 249
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 250
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-odds": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web-odds",
+          "campaignId": 8,
+          "oddsOffset": 0,
+          "id": 15067,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy Odds Tab",
+            "slug": "admiralbet-italy-odds-tab",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1178,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web-odds",
+          "campaignId": 8,
+          "id": 15070,
+          "impressionCostEncrypted": "4H+l2X9qJbX/h1COpSR6yfxZFiuX6qSY"
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 15069,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 15068,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/odds/1/all": {
+      "markets": [
+        {
+          "structureType": 1,
+          "marketId": 1,
+          "marketName": "Full time",
+          "isLive": true,
+          "fid": 186549916,
+          "suspended": false,
+          "id": 187656620,
+          "marketGroup": "Home/Away",
+          "marketPeriod": "Match",
+          "choices": [
+            {
+              "initialFractionalValue": "4/5",
+              "fractionalValue": "2/7",
+              "sourceId": 197436214,
+              "name": "1",
+              "change": -1
+            },
+            {
+              "initialFractionalValue": "19/20",
+              "fractionalValue": "5/2",
+              "sourceId": 197436210,
+              "name": "2",
+              "change": 1
+            }
+          ]
+        },
+        {
+          "structureType": 1,
+          "marketId": 1,
+          "marketName": "Full time",
+          "isLive": false,
+          "fid": 186502471,
+          "suspended": false,
+          "id": 186463455,
+          "marketGroup": "Home/Away",
+          "marketPeriod": "Match",
+          "choices": [
+            {
+              "initialFractionalValue": "8/11",
+              "fractionalValue": "8/11",
+              "sourceId": 191215418,
+              "name": "1",
+              "change": 0
+            },
+            {
+              "initialFractionalValue": "1/1",
+              "fractionalValue": "1/1",
+              "sourceId": 191215463,
+              "name": "2",
+              "change": 0
+            }
+          ]
+        }
+      ],
+      "eventId": 15230501
+    },
+    "https://www.sofascore.com/api/v1/event/newly-added-events": {
+      "events": [
+        {
+          "eventId": 15235150,
+          "homeTeamId": 1156473,
+          "awayTeamId": 299132,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235245,
+          "homeTeamId": 347773,
+          "awayTeamId": 1156472,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235264,
+          "homeTeamId": 374460,
+          "awayTeamId": 349962,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235279,
+          "homeTeamId": 1156116,
+          "awayTeamId": 1159601,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235284,
+          "homeTeamId": 467121,
+          "awayTeamId": 1158347,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15235287,
+          "homeTeamId": 1157730,
+          "awayTeamId": 1157920,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15235329,
+          "homeTeamId": 1159602,
+          "awayTeamId": 1159603,
+          "uniqueTournamentId": 24627
+        },
+        {
+          "eventId": 15235331,
+          "homeTeamId": 1159604,
+          "awayTeamId": 1159605,
+          "uniqueTournamentId": 24626
+        },
+        {
+          "eventId": 15235332,
+          "homeTeamId": 51293,
+          "awayTeamId": 230056,
+          "uniqueTournamentId": 19804
+        },
+        {
+          "eventId": 15235341,
+          "homeTeamId": 445626,
+          "awayTeamId": 385060,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15235343,
+          "homeTeamId": 1159544,
+          "awayTeamId": 1156965,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235361,
+          "homeTeamId": 1156960,
+          "awayTeamId": 1157175,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235493,
+          "homeTeamId": 1154652,
+          "awayTeamId": 1156993,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235600,
+          "homeTeamId": 1157480,
+          "awayTeamId": 1157452,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15235610,
+          "homeTeamId": 406801,
+          "awayTeamId": 378772,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15235652,
+          "homeTeamId": 343667,
+          "awayTeamId": 363738,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15235698,
+          "homeTeamId": 343423,
+          "awayTeamId": 1159601,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235740,
+          "homeTeamId": 1156475,
+          "awayTeamId": 1156474,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235749,
+          "homeTeamId": 556490,
+          "awayTeamId": 504212,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15235796,
+          "homeTeamId": 292436,
+          "awayTeamId": 495088,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15235802,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156552,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235803,
+          "homeTeamId": 409936,
+          "awayTeamId": 1150842,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235804,
+          "homeTeamId": 1154651,
+          "awayTeamId": 417855,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235806,
+          "homeTeamId": 1154652,
+          "awayTeamId": 1156474,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235820,
+          "homeTeamId": 1156315,
+          "awayTeamId": 1156553,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235822,
+          "homeTeamId": 240397,
+          "awayTeamId": 126100,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15235846,
+          "homeTeamId": 348896,
+          "awayTeamId": 1154647,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235852,
+          "homeTeamId": 1156721,
+          "awayTeamId": 1156333,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235855,
+          "homeTeamId": 1154647,
+          "awayTeamId": 346720,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235869,
+          "homeTeamId": 1156475,
+          "awayTeamId": 1156993,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235870,
+          "homeTeamId": 1154647,
+          "awayTeamId": 360181,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235874,
+          "homeTeamId": 1158272,
+          "awayTeamId": 292783,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15235880,
+          "homeTeamId": 1156725,
+          "awayTeamId": 1154637,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235884,
+          "homeTeamId": 499173,
+          "awayTeamId": 501294,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15235886,
+          "homeTeamId": 423623,
+          "awayTeamId": 289943,
+          "uniqueTournamentId": 31518
+        },
+        {
+          "eventId": 15235888,
+          "homeTeamId": 343601,
+          "awayTeamId": 424403,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235890,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156553,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235896,
+          "homeTeamId": 1137916,
+          "awayTeamId": 1131600,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15235971,
+          "homeTeamId": 1154652,
+          "awayTeamId": 1156475,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15235977,
+          "homeTeamId": 487299,
+          "awayTeamId": 1102026,
+          "uniqueTournamentId": 31518
+        },
+        {
+          "eventId": 15235993,
+          "homeTeamId": 292436,
+          "awayTeamId": 126100,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15236036,
+          "homeTeamId": 1156315,
+          "awayTeamId": 1156552,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236054,
+          "homeTeamId": 1159601,
+          "awayTeamId": 1154667,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236057,
+          "homeTeamId": 360296,
+          "awayTeamId": 383522,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236076,
+          "homeTeamId": 316039,
+          "awayTeamId": 292513,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15236077,
+          "homeTeamId": 1156474,
+          "awayTeamId": 1156993,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236090,
+          "homeTeamId": 126094,
+          "awayTeamId": 281957,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15236118,
+          "homeTeamId": 383522,
+          "awayTeamId": 344331,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236119,
+          "homeTeamId": 344331,
+          "awayTeamId": 360296,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236137,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236194,
+          "homeTeamId": 1156461,
+          "awayTeamId": 1156458,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236243,
+          "homeTeamId": 1156553,
+          "awayTeamId": 1156552,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236247,
+          "homeTeamId": 344282,
+          "awayTeamId": 343663,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236257,
+          "homeTeamId": 269957,
+          "awayTeamId": 292336,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15236272,
+          "homeTeamId": 1156544,
+          "awayTeamId": 1156310,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236275,
+          "homeTeamId": 353210,
+          "awayTeamId": 351298,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236286,
+          "homeTeamId": 353296,
+          "awayTeamId": 479828,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236306,
+          "homeTeamId": 316039,
+          "awayTeamId": 281957,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15236307,
+          "homeTeamId": 410854,
+          "awayTeamId": 398477,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15236308,
+          "homeTeamId": 466145,
+          "awayTeamId": 409834,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15236314,
+          "homeTeamId": 299132,
+          "awayTeamId": 1156473,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236316,
+          "homeTeamId": 354585,
+          "awayTeamId": 476109,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236331,
+          "homeTeamId": 377672,
+          "awayTeamId": 1159601,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236349,
+          "homeTeamId": 1156472,
+          "awayTeamId": 347773,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15236354,
+          "homeTeamId": 360296,
+          "awayTeamId": 414294,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15236355,
+          "homeTeamId": 240397,
+          "awayTeamId": 495088,
+          "uniqueTournamentId": 9500
+        },
+        {
+          "eventId": 15236368,
+          "homeTeamId": 233653,
+          "awayTeamId": 381663,
+          "uniqueTournamentId": 9500
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-featured": {
+      "providers": [],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/15230501/statistics": {
+      "statistics": [
+        {
+          "period": "ALL",
+          "groups": [
+            {
+              "groupName": "Service",
+              "statisticsItems": [
+                {
+                  "name": "Aces",
+                  "home": "4",
+                  "away": "0",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 4,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "aces"
+                },
+                {
+                  "name": "Double faults",
+                  "home": "3",
+                  "away": "0",
+                  "compareCode": 1,
+                  "statisticsType": "negative",
+                  "valueType": "event",
+                  "homeValue": 3,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "doubleFaults"
+                }
+              ]
+            },
+            {
+              "groupName": "Points",
+              "statisticsItems": [
+                {
+                  "name": "Total",
+                  "home": "29",
+                  "away": "25",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 29,
+                  "awayValue": 25,
+                  "renderType": 1,
+                  "key": "pointsTotal"
+                },
+                {
+                  "name": "Service points won",
+                  "home": "2",
+                  "away": "0",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 2,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "servicePointsScored"
+                },
+                {
+                  "name": "Max points in a row",
+                  "home": "5",
+                  "away": "6",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 5,
+                  "awayValue": 6,
+                  "renderType": 1,
+                  "key": "maxPointsInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Games",
+              "statisticsItems": [
+                {
+                  "name": "Service games won",
+                  "home": "3",
+                  "away": "2",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 3,
+                  "awayValue": 2,
+                  "renderType": 1,
+                  "key": "serviceGamesWon"
+                },
+                {
+                  "name": "Max games in a row",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "maxGamesInRow"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "https://api.sofascore.com/api/v1/event/15230501": {
+      "event": {
+        "firstToServe": 2,
+        "tournament": {
+          "name": "ITF W15 Lima 3 Women",
+          "slug": "itf-w15-lima-3-women",
+          "category": {
+            "name": "ITF Women",
+            "slug": "itf-women",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 213,
+            "country": {},
+            "flag": "itf-women",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للسيدات"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "uniqueTournament": {
+            "name": "ITF W15 Lima 3 Women",
+            "slug": "itf-w15-lima-3-women",
+            "category": {
+              "name": "ITF Women",
+              "slug": "itf-women",
+              "sport": {
+                "name": "Tennis",
+                "slug": "tennis",
+                "id": 5
+              },
+              "id": 213,
+              "country": {},
+              "flag": "itf-women",
+              "fieldTranslations": {
+                "nameTranslation": {
+                  "ar": "اتحاد التنس الدولي للسيدات"
+                },
+                "shortNameTranslation": {}
+              }
+            },
+            "userCount": 6,
+            "groundType": "Clay",
+            "hasRounds": true,
+            "hasPerformanceGraphFeature": false,
+            "id": 31503,
+            "country": {},
+            "hasEventPlayerStatistics": false,
+            "displayInverseHomeAwayTeams": false
+          },
+          "priority": 0,
+          "competitionType": 2,
+          "id": 171155
+        },
+        "season": {
+          "name": "2025",
+          "year": "2025",
+          "editor": false,
+          "id": 87516
+        },
+        "roundInfo": {
+          "round": 6,
+          "name": "Round of 32",
+          "slug": "round-of-32",
+          "cupRoundType": 16
+        },
+        "customId": "Haldsegud",
+        "status": {
+          "code": 100,
+          "description": "Ended",
+          "type": "finished"
+        },
+        "winnerCode": 1,
+        "homeTeam": {
+          "name": "Catarina Melleiro",
+          "slug": "ibiraba-melleiro-junior-catarina-melleiro",
+          "shortName": "C. Melleiro",
+          "gender": "F",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 159,
+          "playerTeamInfo": {
+            "birthplace": "-",
+            "prizeCurrent": 5299,
+            "prizeTotal": 12638,
+            "id": 12429,
+            "prizeCurrentRaw": {
+              "value": 5299,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 12638,
+              "currency": "EUR"
+            },
+            "currentRanking": 1325
+          },
+          "nameCode": "IBI",
+          "ranking": 1325,
+          "disabled": false,
+          "national": false,
+          "type": 1,
+          "id": 402532,
+          "country": {
+            "alpha2": "BR",
+            "alpha3": "BRA",
+            "name": "Brazil",
+            "slug": "brazil"
+          },
+          "fullName": "Catarina Melleiro",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "كاتارينا ميلييرو"
+            },
+            "shortNameTranslation": {
+              "ar": "ك. ميلييرو"
+            }
+          },
+          "timeActive": []
+        },
+        "awayTeam": {
+          "name": "Sarah Barry",
+          "slug": "barry-sarah",
+          "shortName": "S. Barry",
+          "gender": "F",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 31,
+          "nameCode": "BAR",
+          "national": false,
+          "type": 1,
+          "id": 422804,
+          "country": {
+            "alpha2": "CA",
+            "alpha3": "CAN",
+            "name": "Canada",
+            "slug": "canada"
+          },
+          "fullName": "Sarah Barry",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "سارة باري"
+            },
+            "shortNameTranslation": {
+              "ar": "س. باري"
+            }
+          },
+          "timeActive": []
+        },
+        "homeScore": {
+          "current": 2,
+          "display": 2,
+          "period1": 6,
+          "period2": 6,
+          "point": "0"
+        },
+        "awayScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 4,
+          "period2": 3,
+          "point": "0"
+        },
+        "coverage": -1,
+        "time": {},
+        "changes": {
+          "changes": [
+            "status.code",
+            "status.description",
+            "status.type"
+          ],
+          "changeTimestamp": 1766010063
+        },
+        "hasGlobalHighlights": false,
+        "crowdsourcingDataDisplayEnabled": false,
+        "id": 15230501,
+        "defaultPeriodCount": 3,
+        "slug": "sarah-barry-catarina-melleiro",
+        "startTimestamp": 1766001600,
+        "periods": {
+          "point": "Game",
+          "current": "Match",
+          "period1": "1st set",
+          "period2": "2nd set",
+          "period3": "3rd set",
+          "period4": "4th set",
+          "period5": "5th set"
+        },
+        "finalResultOnly": false,
+        "feedLocked": false,
+        "groundType": "Clay",
+        "showTotoPromo": true,
+        "isEditor": false
+      }
+    }
+  },
+  "lastSync": "2025-12-19T17:43:14.516Z",
+  "syncType": "manual-sync",
+  "liveData": {
+    "eventId": "15230501",
+    "timestamp": "2025-12-19T17:43:13.393Z",
+    "syncType": "complete",
+    "event": {
+      "firstToServe": 2,
+      "tournament": {
+        "name": "ITF W15 Lima 3 Women",
+        "slug": "itf-w15-lima-3-women",
+        "category": {
+          "name": "ITF Women",
+          "slug": "itf-women",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "id": 213,
+          "country": {},
+          "flag": "itf-women",
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "اتحاد التنس الدولي للسيدات"
+            },
+            "shortNameTranslation": {}
+          }
+        },
+        "uniqueTournament": {
+          "name": "ITF W15 Lima 3 Women",
+          "slug": "itf-w15-lima-3-women",
+          "category": {
+            "name": "ITF Women",
+            "slug": "itf-women",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 213,
+            "country": {},
+            "flag": "itf-women",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للسيدات"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "userCount": 6,
+          "groundType": "Clay",
+          "hasRounds": true,
+          "hasPerformanceGraphFeature": false,
+          "id": 31503,
+          "country": {},
+          "hasEventPlayerStatistics": false,
+          "displayInverseHomeAwayTeams": false
+        },
+        "priority": 0,
+        "competitionType": 2,
+        "id": 171155
+      },
+      "season": {
+        "name": "2025",
+        "year": "2025",
+        "editor": false,
+        "id": 87516
+      },
+      "roundInfo": {
+        "round": 6,
+        "name": "Round of 32",
+        "slug": "round-of-32",
+        "cupRoundType": 16
+      },
+      "customId": "Haldsegud",
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "winnerCode": 1,
+      "homeTeam": {
+        "name": "Catarina Melleiro",
+        "slug": "ibiraba-melleiro-junior-catarina-melleiro",
+        "shortName": "C. Melleiro",
+        "gender": "F",
+        "sport": {
+          "name": "Tennis",
+          "slug": "tennis",
+          "id": 5
+        },
+        "userCount": 159,
+        "playerTeamInfo": {
+          "birthplace": "-",
+          "prizeCurrent": 5299,
+          "prizeTotal": 12638,
+          "id": 12429,
+          "prizeCurrentRaw": {
+            "value": 5299,
+            "currency": "EUR"
+          },
+          "prizeTotalRaw": {
+            "value": 12638,
+            "currency": "EUR"
+          },
+          "currentRanking": 1325
+        },
+        "nameCode": "IBI",
+        "ranking": 1325,
+        "disabled": false,
+        "national": false,
+        "type": 1,
+        "id": 402532,
+        "country": {
+          "alpha2": "BR",
+          "alpha3": "BRA",
+          "name": "Brazil",
+          "slug": "brazil"
+        },
+        "fullName": "Catarina Melleiro",
+        "subTeams": [],
+        "teamColors": {
+          "primary": "#374df5",
+          "secondary": "#374df5",
+          "text": "#ffffff"
+        },
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "كاتارينا ميلييرو"
+          },
+          "shortNameTranslation": {
+            "ar": "ك. ميلييرو"
+          }
+        },
+        "timeActive": []
+      },
+      "awayTeam": {
+        "name": "Sarah Barry",
+        "slug": "barry-sarah",
+        "shortName": "S. Barry",
+        "gender": "F",
+        "sport": {
+          "name": "Tennis",
+          "slug": "tennis",
+          "id": 5
+        },
+        "userCount": 31,
+        "nameCode": "BAR",
+        "national": false,
+        "type": 1,
+        "id": 422804,
+        "country": {
+          "alpha2": "CA",
+          "alpha3": "CAN",
+          "name": "Canada",
+          "slug": "canada"
+        },
+        "fullName": "Sarah Barry",
+        "subTeams": [],
+        "teamColors": {
+          "primary": "#374df5",
+          "secondary": "#374df5",
+          "text": "#ffffff"
+        },
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "سارة باري"
+          },
+          "shortNameTranslation": {
+            "ar": "س. باري"
+          }
+        },
+        "timeActive": []
+      },
+      "homeScore": {
+        "current": 2,
+        "display": 2,
+        "period1": 6,
+        "period2": 6,
+        "point": "0"
+      },
+      "awayScore": {
+        "current": 0,
+        "display": 0,
+        "period1": 4,
+        "period2": 3,
+        "point": "0"
+      },
+      "coverage": -1,
+      "time": {},
+      "changes": {
+        "changes": [
+          "status.code",
+          "status.description",
+          "status.type"
+        ],
+        "changeTimestamp": 1766010063
+      },
+      "hasGlobalHighlights": false,
+      "crowdsourcingDataDisplayEnabled": false,
+      "id": 15230501,
+      "defaultPeriodCount": 3,
+      "slug": "sarah-barry-catarina-melleiro",
+      "startTimestamp": 1766001600,
+      "periods": {
+        "point": "Game",
+        "current": "Match",
+        "period1": "1st set",
+        "period2": "2nd set",
+        "period3": "3rd set",
+        "period4": "4th set",
+        "period5": "5th set"
+      },
+      "finalResultOnly": false,
+      "feedLocked": false,
+      "groundType": "Clay",
+      "showTotoPromo": true,
+      "isEditor": false
+    },
+    "pointByPoint": [],
+    "statistics": [],
+    "powerRankings": [],
+    "incidents": [],
+    "lineups": null,
+    "h2h": {
+      "teamDuel": {
+        "homeWins": 2,
+        "awayWins": 0,
+        "draws": 0
+      },
+      "managerDuel": null
+    },
+    "odds": null,
+    "graph": null,
+    "errors": [],
+    "dataCompleteness": {
+      "statistics": false,
+      "incidents": false,
+      "graph": false,
+      "powerRankings": false,
+      "lineups": false,
+      "event": true,
+      "pointByPoint": false,
+      "h2h": true,
+      "total": 25
+    }
+  }
+}

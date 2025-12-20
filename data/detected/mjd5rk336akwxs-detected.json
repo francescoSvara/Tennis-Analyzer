@@ -1,0 +1,965 @@
+{
+  "scrapedEventId": "14957028",
+  "tournamentId": 2404,
+  "seasonId": 67291,
+  "detectedAt": "2025-12-19T17:43:57.542Z",
+  "matches": [
+    {
+      "eventId": 14957278,
+      "slug": "learner-tien-andrey-rublev",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "awayTeam": {
+        "id": 106755,
+        "name": "Andrey Rublev",
+        "shortName": "A. Rublev",
+        "country": "RU",
+        "ranking": 16
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761678600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957160,
+      "slug": "taylor-fritz-aleksandar-vukic",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "awayTeam": {
+        "id": 124656,
+        "name": "Aleksandar Vukic",
+        "shortName": "A. Vukic",
+        "country": "AU",
+        "ranking": 82
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761684000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14961769,
+      "slug": "valentin-vacherot-arthur-rinderknech",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 63606,
+        "name": "Arthur Rinderknech",
+        "shortName": "A. Rinderknech",
+        "country": "FR",
+        "ranking": 29
+      },
+      "awayTeam": {
+        "id": 158912,
+        "name": "Valentin Vacherot",
+        "shortName": "V. Vacherot",
+        "country": "MC",
+        "ranking": 31
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761732000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957027,
+      "slug": "daniel-altmaier-casper-ruud",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 127208,
+        "name": "Daniel Altmaier",
+        "shortName": "D. Altmaier",
+        "country": "DE",
+        "ranking": 46
+      },
+      "awayTeam": {
+        "id": 119248,
+        "name": "Casper Ruud",
+        "shortName": "C. Ruud",
+        "country": "NO",
+        "ranking": 12
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761732000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957219,
+      "slug": "francisco-cerundolo-miomir-kecmanovic",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 221012,
+        "name": "Francisco Cerundolo",
+        "shortName": "F. Cerundolo",
+        "country": "AR",
+        "ranking": 21
+      },
+      "awayTeam": {
+        "id": 198592,
+        "name": "Miomir Kecmanovic",
+        "shortName": "M. Kecmanovic",
+        "country": "RS",
+        "ranking": 52
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761737700,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14962396,
+      "slug": "felix-auger-aliassime-alexandre-muller",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "awayTeam": {
+        "id": 88992,
+        "name": "Alexandre Muller",
+        "shortName": "A. Muller",
+        "country": "FR",
+        "ranking": 42
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761738000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14962395,
+      "slug": "camilo-ugo-carabelli-alexander-zverev",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 196122,
+        "name": "Camilo Ugo Carabelli",
+        "shortName": "C. Ugo Carabelli",
+        "country": "AR",
+        "ranking": 49
+      },
+      "awayTeam": {
+        "id": 57163,
+        "name": "Alexander Zverev",
+        "shortName": "A. Zverev",
+        "country": "DE",
+        "ranking": 3
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761743700,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14963151,
+      "slug": "arthur-cazaux-alejandro-davidovich-fokina",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 157456,
+        "name": "Alejandro Davidovich Fokina",
+        "shortName": "A. Davidovich Fokina",
+        "country": "ES",
+        "ranking": 14
+      },
+      "awayTeam": {
+        "id": 287803,
+        "name": "Arthur Cazaux",
+        "shortName": "A. Cazaux",
+        "country": "FR",
+        "ranking": 66
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761750300,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957713,
+      "slug": "jannik-sinner-zizou-bergs",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 170946,
+        "name": "Zizou Bergs",
+        "shortName": "Z. Bergs",
+        "country": "BE",
+        "ranking": 43
+      },
+      "awayTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761754500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957714,
+      "slug": "lorenzo-musetti-lorenzo-sonego",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 261015,
+        "name": "Lorenzo Musetti",
+        "shortName": "L. Musetti",
+        "country": "IT",
+        "ranking": 8
+      },
+      "awayTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761758700,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14962394,
+      "slug": "corentin-moutet-alexander-bublik",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 175014,
+        "name": "Corentin Moutet",
+        "shortName": "C. Moutet",
+        "country": "FR",
+        "ranking": 35
+      },
+      "awayTeam": {
+        "id": 163480,
+        "name": "Alexander Bublik",
+        "shortName": "A. Bublik",
+        "country": "KZ",
+        "ranking": 11
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761760800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14961770,
+      "slug": "gabriel-diallo-alex-de-minaur",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 280151,
+        "name": "Gabriel Diallo",
+        "shortName": "G. Diallo",
+        "country": "CA",
+        "ranking": 41
+      },
+      "awayTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761767100,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14962422,
+      "slug": "joao-fonseca-karen-khachanov",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 90080,
+        "name": "Karen Khachanov",
+        "shortName": "K. Khachanov",
+        "country": "RU",
+        "ranking": 18
+      },
+      "awayTeam": {
+        "id": 403869,
+        "name": "Joao Fonseca",
+        "shortName": "J. Fonseca",
+        "country": "BR",
+        "ranking": 24
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761769200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14968724,
+      "slug": "valentin-vacherot-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "awayTeam": {
+        "id": 158912,
+        "name": "Valentin Vacherot",
+        "shortName": "V. Vacherot",
+        "country": "MC",
+        "ranking": 31
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761818400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14962423,
+      "slug": "daniil-medvedev-grigor-dimitrov",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 23581,
+        "name": "Grigor Dimitrov",
+        "shortName": "G. Dimitrov",
+        "country": "BG",
+        "ranking": 44
+      },
+      "awayTeam": {
+        "id": 163504,
+        "name": "Daniil Medvedev",
+        "shortName": "D. Medvedev",
+        "country": "RU",
+        "ranking": 13
+      },
+      "homeScore": null,
+      "awayScore": null,
+      "status": {
+        "code": 91,
+        "description": "Walkover",
+        "type": "finished"
+      },
+      "startTimestamp": 1761818400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14968726,
+      "slug": "felix-auger-aliassime-daniel-altmaier",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "awayTeam": {
+        "id": 127208,
+        "name": "Daniel Altmaier",
+        "shortName": "D. Altmaier",
+        "country": "DE",
+        "ranking": 46
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761825300,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14964665,
+      "slug": "ben-shelton-andrey-rublev",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "awayTeam": {
+        "id": 106755,
+        "name": "Andrey Rublev",
+        "shortName": "A. Rublev",
+        "country": "RU",
+        "ranking": 16
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761831000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14970154,
+      "slug": "alexander-bublik-taylor-fritz",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "awayTeam": {
+        "id": 163480,
+        "name": "Alexander Bublik",
+        "shortName": "A. Bublik",
+        "country": "KZ",
+        "ranking": 11
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761836400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14970806,
+      "slug": "alex-de-minaur-karen-khachanov",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 90080,
+        "name": "Karen Khachanov",
+        "shortName": "K. Khachanov",
+        "country": "RU",
+        "ranking": 18
+      },
+      "awayTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761837600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14970052,
+      "slug": "daniil-medvedev-lorenzo-sonego",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "awayTeam": {
+        "id": 163504,
+        "name": "Daniil Medvedev",
+        "shortName": "D. Medvedev",
+        "country": "RU",
+        "ranking": 13
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761843300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14969925,
+      "slug": "francisco-cerundolo-jannik-sinner",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 221012,
+        "name": "Francisco Cerundolo",
+        "shortName": "F. Cerundolo",
+        "country": "AR",
+        "ranking": 21
+      },
+      "awayTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761847200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14970051,
+      "slug": "alejandro-davidovich-fokina-alexander-zverev",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 157456,
+        "name": "Alejandro Davidovich Fokina",
+        "shortName": "A. Davidovich Fokina",
+        "country": "ES",
+        "ranking": 14
+      },
+      "awayTeam": {
+        "id": 57163,
+        "name": "Alexander Zverev",
+        "shortName": "A. Zverev",
+        "country": "DE",
+        "ranking": 3
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761853200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14975365,
+      "slug": "felix-auger-aliassime-valentin-vacherot",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 158912,
+        "name": "Valentin Vacherot",
+        "shortName": "V. Vacherot",
+        "country": "MC",
+        "ranking": 31
+      },
+      "awayTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761915600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14975700,
+      "slug": "alex-de-minaur-alexander-bublik",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 163480,
+        "name": "Alexander Bublik",
+        "shortName": "A. Bublik",
+        "country": "KZ",
+        "ranking": 11
+      },
+      "awayTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761921600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14976345,
+      "slug": "ben-shelton-jannik-sinner",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "awayTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761933600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14976618,
+      "slug": "daniil-medvedev-alexander-zverev",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 163504,
+        "name": "Daniil Medvedev",
+        "shortName": "D. Medvedev",
+        "country": "RU",
+        "ranking": 13
+      },
+      "awayTeam": {
+        "id": 57163,
+        "name": "Alexander Zverev",
+        "shortName": "A. Zverev",
+        "country": "DE",
+        "ranking": 3
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761939600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982026,
+      "slug": "felix-auger-aliassime-alexander-bublik",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "awayTeam": {
+        "id": 163480,
+        "name": "Alexander Bublik",
+        "shortName": "A. Bublik",
+        "country": "KZ",
+        "ranking": 11
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762003800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982769,
+      "slug": "jannik-sinner-alexander-zverev",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 57163,
+        "name": "Alexander Zverev",
+        "shortName": "A. Zverev",
+        "country": "DE",
+        "ranking": 3
+      },
+      "awayTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762012800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14988818,
+      "slug": "jannik-sinner-felix-auger-aliassime",
+      "sport": "tennis",
+      "tournament": "Paris",
+      "tournamentId": 2404,
+      "category": "ATP",
+      "round": "Final",
+      "homeTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "awayTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762092000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    }
+  ]
+}

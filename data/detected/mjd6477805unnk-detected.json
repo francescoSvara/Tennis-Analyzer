@@ -1,0 +1,470 @@
+{
+  "scrapedEventId": "15017492",
+  "tournamentId": 2517,
+  "seasonId": 67326,
+  "detectedAt": "2025-12-19T17:53:41.274Z",
+  "matches": [
+    {
+      "eventId": 15017510,
+      "slug": "ben-shelton-alexander-zverev",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 1,
+      "homeTeam": {
+        "id": 57163,
+        "name": "Alexander Zverev",
+        "shortName": "A. Zverev",
+        "country": "DE",
+        "ranking": 3
+      },
+      "awayTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762716600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15023082,
+      "slug": "lorenzo-musetti-taylor-fritz",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 1,
+      "homeTeam": {
+        "id": 261015,
+        "name": "Lorenzo Musetti",
+        "shortName": "L. Musetti",
+        "country": "IT",
+        "ranking": 8
+      },
+      "awayTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762779600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15022917,
+      "slug": "jannik-sinner-felix-auger-aliassime",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 1,
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762803000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15017473,
+      "slug": "carlos-alcaraz-taylor-fritz",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "awayTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762866000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15023098,
+      "slug": "lorenzo-musetti-alex-de-minaur",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 261015,
+        "name": "Lorenzo Musetti",
+        "shortName": "L. Musetti",
+        "country": "IT",
+        "ranking": 8
+      },
+      "awayTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762889400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15022925,
+      "slug": "ben-shelton-felix-auger-aliassime",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "awayTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762952400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15017503,
+      "slug": "jannik-sinner-alexander-zverev",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 2,
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 57163,
+        "name": "Alexander Zverev",
+        "shortName": "A. Zverev",
+        "country": "DE",
+        "ranking": 3
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762975800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15017474,
+      "slug": "alex-de-minaur-taylor-fritz",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 3,
+      "homeTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "awayTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1763038800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15023095,
+      "slug": "carlos-alcaraz-lorenzo-musetti",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 3,
+      "homeTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "awayTeam": {
+        "id": 261015,
+        "name": "Lorenzo Musetti",
+        "shortName": "L. Musetti",
+        "country": "IT",
+        "ranking": 8
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1763062200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15017512,
+      "slug": "ben-shelton-jannik-sinner",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 3,
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1763125200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15022926,
+      "slug": "felix-auger-aliassime-alexander-zverev",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": 3,
+      "homeTeam": {
+        "id": 57163,
+        "name": "Alexander Zverev",
+        "shortName": "A. Zverev",
+        "country": "DE",
+        "ranking": 3
+      },
+      "awayTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1763148600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15087204,
+      "slug": "jannik-sinner-alex-de-minaur",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1763213400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15104536,
+      "slug": "carlos-alcaraz-felix-auger-aliassime",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "awayTeam": {
+        "id": 192013,
+        "name": "Felix Auger-Aliassime",
+        "shortName": "F. Auger-Aliassime",
+        "country": "CA",
+        "ranking": 5
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1763235000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15108295,
+      "slug": "carlos-alcaraz-jannik-sinner",
+      "sport": "tennis",
+      "tournament": "ATP Finals",
+      "tournamentId": 2517,
+      "category": "ATP",
+      "round": "Final",
+      "homeTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "awayTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1763312400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    }
+  ]
+}

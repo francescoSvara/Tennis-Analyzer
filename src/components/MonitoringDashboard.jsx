@@ -544,7 +544,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const handleSyncMatch = async (eventId) => {
     setSyncingMatch(eventId);
     try {
-      const res = await fetch(`/api/sync/${eventId}`, { method: 'POST' });
+      const res = await fetch(apiUrl(`/api/sync/${eventId}`), { method: 'POST' });
       if (res.ok) {
         refreshData(); // Aggiorna tutto dopo sync
       }
@@ -577,7 +577,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       setSyncingMatch(match.eventId);
       
       try {
-        await fetch(`/api/sync/${match.eventId}`, { method: 'POST' });
+        await fetch(apiUrl(`/api/sync/${match.eventId}`), { method: 'POST' });
         // Piccola pausa per non sovraccaricare il server
         await new Promise(resolve => setTimeout(resolve, 500));
       } catch (err) {

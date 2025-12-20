@@ -1,0 +1,4216 @@
+{
+  "api": {
+    "https://www.sofascore.com/api/v1/country/alpha2": {
+      "alpha2": "IT",
+      "continent_code": "EU",
+      "country": "italy",
+      "city": "piacenza",
+      "region_code": "IT-PC"
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country": {
+      "countrySportPriorities": [
+        {
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 751
+        },
+        {
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 752
+        },
+        {
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 753
+        },
+        {
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 3,
+          "id": 754
+        },
+        {
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 4,
+          "id": 755
+        },
+        {
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 5,
+          "id": 756
+        },
+        {
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 6,
+          "id": 757
+        },
+        {
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 7,
+          "id": 758
+        },
+        {
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 8,
+          "id": 759
+        },
+        {
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 9,
+          "id": 760
+        },
+        {
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 10,
+          "id": 761
+        },
+        {
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 11,
+          "id": 762
+        },
+        {
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 12,
+          "id": 763
+        },
+        {
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 13,
+          "id": 764
+        },
+        {
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 14,
+          "id": 765
+        },
+        {
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 15,
+          "id": 766
+        },
+        {
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 16,
+          "id": 767
+        },
+        {
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 17,
+          "id": 768
+        },
+        {
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 18,
+          "id": 769
+        },
+        {
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 770
+        },
+        {
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 771
+        },
+        {
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 772
+        },
+        {
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 773
+        },
+        {
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 774
+        },
+        {
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 775
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/votes": {
+      "vote": {
+        "vote1": 70,
+        "vote2": 305,
+        "voteX": null
+      },
+      "bothTeamsToScoreVote": {
+        "voteYes": 0,
+        "voteNo": 0
+      },
+      "firstTeamToScoreVote": {
+        "voteHome": 0,
+        "voteNoGoal": 0,
+        "voteAway": 0
+      },
+      "whoShouldHaveWonVote": {
+        "vote1": 0,
+        "vote2": 0
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/point-by-point": {
+      "pointByPoint": []
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/pregame-form": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/sofascore-news/it/posts?page=1&per_page=12&categories=news-it": [
+      {
+        "id": 83644,
+        "slug": "il-psg-batte-il-flamengo-leuropa-domina-ancora-il-mondiale-per-club",
+        "date": "2025-12-18T11:41:02",
+        "title": "Il PSG Batte il Flamengo, l’Europa Domina Ancora il Mondiale per Club",
+        "excerpt": "Il Flamengo è stato sconfitto dal PSG nella finale intercontinentale e l’Europa ha mantenuto la leadership nei titoli mondiali per club. Un nuovo capitolo in un divario competitivo crescente.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070426677-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5694,
+            "slug": "fifa-it",
+            "name": "FIFA"
+          },
+          {
+            "id": 8028,
+            "slug": "flamengo-it",
+            "name": "Flamengo"
+          },
+          {
+            "id": 8194,
+            "slug": "mondiale-per-club",
+            "name": "Mondiale per Club"
+          },
+          {
+            "id": 6348,
+            "slug": "psg-it",
+            "name": "PSG"
+          }
+        ]
+      },
+      {
+        "id": 83603,
+        "slug": "i-new-york-knicks-battono-i-san-antonio-spurs-nella-finale-della-coppa-nba-ponendo-fine-a-52-anni-di-siccita-di-trofei",
+        "date": "2025-12-17T23:13:33",
+        "title": "I New York Knicks Battono i San Antonio Spurs nella Finale della Coppa NBA, Ponendo fine a 52 anni di Siccità di Trofei",
+        "excerpt": "I New York Knicks superano i San Antonio Spurs nella finale di NBA Cup e interrompono un digiuno di 52 anni, trascinati da Jalen Brunson e OG Anunoby.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1058521457-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5535,
+            "slug": "nba-it",
+            "name": "NBA"
+          },
+          {
+            "id": 7713,
+            "slug": "nba-cup-it",
+            "name": "NBA Cup"
+          },
+          {
+            "id": 8224,
+            "slug": "new-york-knicks-it",
+            "name": "New York Knicks"
+          }
+        ]
+      },
+      {
+        "id": 83586,
+        "slug": "fiorentina-il-crollo-stagione-da-record-in-negativo",
+        "date": "2025-12-17T15:49:05",
+        "title": "Fiorentina, il Crollo: Stagione da Record in Negativo",
+        "excerpt": "La Fiorentina vive una delle stagioni più difficili di sempre, tra record negativi, rendimento in calo e un’identità mai trovata.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070389689-1-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 8216,
+            "slug": "fiorentina",
+            "name": "Fiorentina"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83560,
+        "slug": "recap-16a-giornata-laliga",
+        "date": "2025-12-16T21:28:16",
+        "title": "Recap 16a Giornata LaLiga",
+        "excerpt": "La 16ª giornata della Liga ha regalato rimonte, vittorie schiaccianti e un rinvio. Barcellona e Real Madrid hanno ottenuto vittorie decisive, mentre Girona e Celta hanno impressionato in trasferta. Raphinha e Tsygankov si sono distinti, con una classifica che si è mantenuta serrata e competitiva.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/IMG_6001-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5594,
+            "slug": "laliga-it",
+            "name": "LaLiga"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          }
+        ]
+      },
+      {
+        "id": 83527,
+        "slug": "recap-16a-giornata-di-premier-league",
+        "date": "2025-12-16T14:20:01",
+        "title": "Recap 16a Giornata di Premier League",
+        "excerpt": "La 16ª giornata di Premier League regala spettacolo e sorprese: big vincenti, scivoloni pesanti e una classifica sempre più corta.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Morgan-Rogers-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5609,
+            "slug": "premier-league-it",
+            "name": "Premier League"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          }
+        ]
+      },
+      {
+        "id": 83503,
+        "slug": "i-numeri-non-mentono-buona-fortuna-xabi-ne-avrai-bisogno",
+        "date": "2025-12-16T12:54:00",
+        "title": "I Numeri non Mentono: Buona Fortuna Xabi, ne Avrai Bisogno",
+        "excerpt": "Xabi Alonso vive il primo vero stress al Real Madrid: risultati discreti, critiche feroci e un ambiente dove vincere non basta mai.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/11/NDL_studioBackground_v1-1024x576.png",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 7170,
+            "slug": "numbers-dont-lie-it",
+            "name": "Numbers don't lie"
+          },
+          {
+            "id": 6067,
+            "slug": "real-madrid-it",
+            "name": "Real Madrid"
+          },
+          {
+            "id": 8200,
+            "slug": "xabi-alonso",
+            "name": "Xabi Alonso"
+          }
+        ]
+      },
+      {
+        "id": 83470,
+        "slug": "coppa-intercontinentale-fifa-il-flamengo-affronta-il-psg-alla-ricerca-di-un-titolo-storico",
+        "date": "2025-12-15T23:26:40",
+        "title": "Mondiale per Club FIFA: il Flamengo Affronta il PSG alla Ricerca di un Titolo Storico",
+        "excerpt": "I club brasiliani non hanno vinto un titolo mondiale dal Corinthians nel 2012. Ecco la ripartizione completa di Flamengo vs PSG, l’analisi tattica, i giocatori chiave, il montepremi e la forma di entrambe le squadre nella stagione 2025/26.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070308762-1-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5694,
+            "slug": "fifa-it",
+            "name": "FIFA"
+          },
+          {
+            "id": 8028,
+            "slug": "flamengo-it",
+            "name": "Flamengo"
+          },
+          {
+            "id": 8194,
+            "slug": "mondiale-per-club",
+            "name": "Mondiale per Club"
+          },
+          {
+            "id": 6348,
+            "slug": "psg-it",
+            "name": "PSG"
+          }
+        ]
+      },
+      {
+        "id": 83467,
+        "slug": "recap-della-settimana-7-e-8-della-western-conference-nba",
+        "date": "2025-12-15T23:15:10",
+        "title": "Recap della Settimana 7 e 8 della Western Conference NBA",
+        "excerpt": "Le settimane 7 e 8 della Western Conference hanno visto Oklahoma City rimanere in testa nonostante la fine della striscia positiva, con Denver e Houston che guadagnano slancio. Nikola Jokić continua a dominare individualmente, mentre Lakers e Spurs restano vicini in una corsa ai playoff sempre più competitiva.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070196331-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5535,
+            "slug": "nba-it",
+            "name": "NBA"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          },
+          {
+            "id": 8184,
+            "slug": "western-it",
+            "name": "Western"
+          }
+        ]
+      },
+      {
+        "id": 83412,
+        "slug": "stagione-sofascore-i-giocatori-e-le-squadre-piu-aperti-nel-2025",
+        "date": "2025-12-15T13:49:33",
+        "title": "Stagione Sofascore: i Giocatori e le Squadre più Cercate del 2025",
+        "excerpt": "I club, i giocatori e gli eventi più cercati su Sofascore nel 2025. Il calcio è stato il settore trainante dell’anno, con Barcellona, ​​Real Madrid e star internazionali in cima alle ricerche in tutto il mondo.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Title-Yamal_Mbappe-1024x576.jpg",
+        "tags": [
+          {
+            "id": 8158,
+            "slug": "barcellona",
+            "name": "Barcellona"
+          },
+          {
+            "id": 8155,
+            "slug": "kylian-mbappe-it",
+            "name": "Kylian Mbappe"
+          },
+          {
+            "id": 5597,
+            "slug": "lamine-yamal-it",
+            "name": "Lamine Yamal"
+          },
+          {
+            "id": 6067,
+            "slug": "real-madrid-it",
+            "name": "Real Madrid"
+          },
+          {
+            "id": 8144,
+            "slug": "sofascore-season-it",
+            "name": "Sofascore Season"
+          }
+        ]
+      },
+      {
+        "id": 83361,
+        "slug": "fantaconsigli-serie-a-15a-giornata",
+        "date": "2025-12-12T09:44:18",
+        "title": "Fantaconsigli Serie A – 15a Giornata",
+        "excerpt": "Consigli pratici per la 15ª giornata: giocatori affidabili, possibili sorprese e scelte utili per completare la formazione senza rischi inutili.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/ITA_Fantasy-Serie-A-R15-1024x576.jpg",
+        "tags": [
+          {
+            "id": 6927,
+            "slug": "fantasy-it",
+            "name": "Fantasy"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83330,
+        "slug": "serie-a-2025-26-flop-milionari-vs-sorprese-pazzesche",
+        "date": "2025-12-11T22:12:29",
+        "title": "Serie A 2025/26: Flop Milionari vs. Sorprese Pazzesche",
+        "excerpt": "Analisi reale e fantacalcistica della Serie A 2025/26: Openda, Nkunku e Bailey faticano nonostante investimenti pesanti, mentre Giovane, Vardy e Højlund stanno brillando oltre ogni attesa. Dati, contesto e valutazioni sui giocatori più discussi dell’ultima sessione di mercato.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Bailey-1-1024x576.jpg",
+        "tags": [
+          {
+            "id": 6984,
+            "slug": "fantacalcio",
+            "name": "Fantacalcio"
+          },
+          {
+            "id": 6927,
+            "slug": "fantasy-it",
+            "name": "Fantasy"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83319,
+        "slug": "sofascore-stagione-2025-gli-atleti-piu-popolari-al-mondo-sport-per-sport",
+        "date": "2025-12-11T20:56:40",
+        "title": "Sofascore Stagione 2025: gli Atleti più Popolari al Mondo, Sport per Sport",
+        "excerpt": "Sofascore Season svela gli atleti più seguiti in tutti i principali sport nel 2025. Uno sguardo completo ai giocatori più seguiti dai fan durante l’anno.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Most-Popular-Athletes-Title-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5803,
+            "slug": "american-football-it",
+            "name": "Football americano"
+          },
+          {
+            "id": 5523,
+            "slug": "basketball-it",
+            "name": "Pallacanestro"
+          },
+          {
+            "id": 8144,
+            "slug": "sofascore-season-it",
+            "name": "Sofascore Season"
+          },
+          {
+            "id": 5930,
+            "slug": "tennis-it",
+            "name": "Tennis"
+          }
+        ]
+      }
+    ],
+    "https://www.sofascore.com/api/v1/event/15249202/incidents": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/h2h": {
+      "teamDuel": null,
+      "managerDuel": null
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/managers": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15249202": {
+      "event": {
+        "tournament": {
+          "name": "ITF M15 Lima 3 Men",
+          "slug": "itf-m15-lima-3-men",
+          "category": {
+            "name": "ITF Men",
+            "slug": "itf-men",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 785,
+            "country": {},
+            "flag": "itf-men",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للرجال"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "uniqueTournament": {
+            "name": "ITF M15 Lima 3 Men",
+            "slug": "itf-m15-lima-3-men",
+            "category": {
+              "name": "ITF Men",
+              "slug": "itf-men",
+              "sport": {
+                "name": "Tennis",
+                "slug": "tennis",
+                "id": 5
+              },
+              "id": 785,
+              "country": {},
+              "flag": "itf-men",
+              "fieldTranslations": {
+                "nameTranslation": {
+                  "ar": "اتحاد التنس الدولي للرجال"
+                },
+                "shortNameTranslation": {}
+              }
+            },
+            "userCount": 16,
+            "groundType": "Clay",
+            "hasRounds": true,
+            "hasPerformanceGraphFeature": false,
+            "id": 31495,
+            "country": {},
+            "hasEventPlayerStatistics": false,
+            "displayInverseHomeAwayTeams": false
+          },
+          "priority": 0,
+          "competitionType": 2,
+          "id": 171147
+        },
+        "season": {
+          "name": "2025",
+          "year": "2025",
+          "editor": false,
+          "id": 87508
+        },
+        "roundInfo": {
+          "round": 27,
+          "name": "Quarterfinals",
+          "slug": "quarterfinals",
+          "cupRoundType": 4
+        },
+        "customId": "GlKbsPoHd",
+        "status": {
+          "code": 100,
+          "description": "Ended",
+          "type": "finished"
+        },
+        "winnerCode": 1,
+        "homeTeam": {
+          "name": "Enzo Kohlmann de Freitas",
+          "slug": "kohlmann-de-freitas-enzo",
+          "shortName": "E. K. d. Freitas",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 235,
+          "playerTeamInfo": {
+            "birthplace": "São Paulo",
+            "height": 1.78,
+            "weight": 75,
+            "plays": "right-handed",
+            "prizeCurrent": 4534,
+            "prizeTotal": 9623,
+            "id": 18549,
+            "birthDateTimestamp": 1158364800,
+            "prizeCurrentRaw": {
+              "value": 4534,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 9623,
+              "currency": "EUR"
+            },
+            "currentRanking": 1034
+          },
+          "nameCode": "KOH",
+          "ranking": 1034,
+          "national": false,
+          "type": 1,
+          "id": 455740,
+          "country": {
+            "alpha2": "BR",
+            "alpha3": "BRA",
+            "name": "Brazil",
+            "slug": "brazil"
+          },
+          "fullName": "Enzo Kohlmann de Freitas",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "إنزو كولمان دي فريتاس"
+            },
+            "shortNameTranslation": {
+              "ar": "إ. دي فريتاس"
+            }
+          },
+          "timeActive": []
+        },
+        "awayTeam": {
+          "name": "Pierre Delage",
+          "slug": "delage-pierre",
+          "shortName": "P. Delage",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 217,
+          "playerTeamInfo": {
+            "birthplace": "Arès",
+            "height": 1.98,
+            "weight": 97,
+            "plays": "right-handed",
+            "prizeCurrent": 10228,
+            "prizeTotal": 39021,
+            "id": 2814,
+            "birthDateTimestamp": 980121600,
+            "prizeCurrentRaw": {
+              "value": 10228,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 39021,
+              "currency": "EUR"
+            },
+            "currentRanking": 694
+          },
+          "nameCode": "DEL",
+          "ranking": 753,
+          "national": false,
+          "type": 1,
+          "id": 213081,
+          "country": {
+            "alpha2": "FR",
+            "alpha3": "FRA",
+            "name": "France",
+            "slug": "france"
+          },
+          "fullName": "Pierre Delage",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "بيير ديلاج"
+            },
+            "shortNameTranslation": {
+              "ar": "ب. ديلاج"
+            }
+          },
+          "timeActive": []
+        },
+        "homeScore": {
+          "current": 2,
+          "display": 2,
+          "period1": 6,
+          "period2": 6,
+          "point": "0"
+        },
+        "awayScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 4,
+          "period2": 2,
+          "point": "0"
+        },
+        "coverage": -1,
+        "time": {},
+        "changes": {
+          "changes": [
+            "status.code",
+            "status.description",
+            "status.type"
+          ],
+          "changeTimestamp": 1766162999
+        },
+        "hasGlobalHighlights": false,
+        "crowdsourcingDataDisplayEnabled": false,
+        "id": 15249202,
+        "defaultPeriodCount": 3,
+        "slug": "enzo-kohlmann-de-freitas-pierre-delage",
+        "startTimestamp": 1766156400,
+        "periods": {
+          "point": "Game",
+          "current": "Match",
+          "period1": "1st set",
+          "period2": "2nd set",
+          "period3": "3rd set",
+          "period4": "4th set",
+          "period5": "5th set"
+        },
+        "finalResultOnly": false,
+        "feedLocked": false,
+        "groundType": "Clay",
+        "showTotoPromo": true,
+        "isEditor": false,
+        "eventFilters": {
+          "category": [
+            "singles"
+          ],
+          "level": [
+            "pro"
+          ],
+          "tournament": [
+            "lower"
+          ],
+          "gender": [
+            "M"
+          ]
+        }
+      }
+    },
+    "https://www.sofascore.com/api/v1/tv/event/15249202/country-channels": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/team/213081/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Pierre Delage",
+            "slug": "delage-pierre",
+            "shortName": "P. Delage",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 217,
+            "nameCode": "DEL",
+            "ranking": 753,
+            "national": false,
+            "type": 1,
+            "id": 213081,
+            "country": {
+              "alpha2": "FR",
+              "alpha3": "FRA",
+              "name": "France",
+              "slug": "france"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "بيير ديلاج"
+              },
+              "shortNameTranslation": {
+                "ar": "ب. ديلاج"
+              }
+            }
+          },
+          "tournamentsPlayed": 25,
+          "type": 5,
+          "rowName": "Pierre Delage",
+          "ranking": 753,
+          "points": 39,
+          "previousRanking": 787,
+          "previousPoints": 35,
+          "bestRanking": 741,
+          "id": 1632,
+          "country": {
+            "alpha2": "FR",
+            "alpha3": "FRA",
+            "name": "France",
+            "slug": "france"
+          },
+          "rankingClass": "team"
+        },
+        {
+          "team": {
+            "name": "Pierre Delage",
+            "slug": "delage-pierre",
+            "shortName": "P. Delage",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 217,
+            "nameCode": "DEL",
+            "ranking": 753,
+            "national": false,
+            "type": 1,
+            "id": 213081,
+            "country": {
+              "alpha2": "FR",
+              "alpha3": "FRA",
+              "name": "France",
+              "slug": "france"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "بيير ديلاج"
+              },
+              "shortNameTranslation": {
+                "ar": "ب. ديلاج"
+              }
+            }
+          },
+          "type": 7,
+          "rowName": "Pierre Delage",
+          "ranking": 694,
+          "points": 47,
+          "previousRanking": 753,
+          "id": 208705,
+          "country": {},
+          "rankingClass": "livetennis"
+        },
+        {
+          "team": {
+            "name": "Pierre Delage",
+            "slug": "delage-pierre",
+            "shortName": "P. Delage",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 217,
+            "nameCode": "DEL",
+            "ranking": 753,
+            "national": false,
+            "type": 1,
+            "id": 213081,
+            "country": {
+              "alpha2": "FR",
+              "alpha3": "FRA",
+              "name": "France",
+              "slug": "france"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "بيير ديلاج"
+              },
+              "shortNameTranslation": {
+                "ar": "ب. ديلاج"
+              }
+            }
+          },
+          "type": 34,
+          "rowName": "Pierre Delage",
+          "ranking": 730,
+          "points": 13.57,
+          "previousRanking": 766,
+          "previousPoints": 13.54,
+          "bestRanking": 393,
+          "id": 181656,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1760011277
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/sport/3600/event-count": {
+      "snooker": {
+        "live": 1,
+        "total": 4
+      },
+      "badminton": {
+        "live": 0,
+        "total": 19
+      },
+      "futsal": {
+        "live": 2,
+        "total": 94
+      },
+      "ice-hockey": {
+        "live": 38,
+        "total": 171
+      },
+      "minifootball": {
+        "live": 3,
+        "total": 62
+      },
+      "darts": {
+        "live": 0,
+        "total": 33
+      },
+      "table-tennis": {
+        "live": 32,
+        "total": 1127
+      },
+      "american-football": {
+        "live": 1,
+        "total": 4
+      },
+      "floorball": {
+        "live": 1,
+        "total": 5
+      },
+      "football": {
+        "live": 28,
+        "total": 397
+      },
+      "tennis": {
+        "live": 8,
+        "total": 148
+      },
+      "baseball": {
+        "live": 0,
+        "total": 13
+      },
+      "basketball": {
+        "live": 40,
+        "total": 409
+      },
+      "bandy": {
+        "live": 4,
+        "total": 11
+      },
+      "handball": {
+        "live": 4,
+        "total": 56
+      },
+      "cricket": {
+        "live": 1,
+        "total": 17
+      },
+      "waterpolo": {
+        "live": 0,
+        "total": 1
+      },
+      "rugby": {
+        "live": 0,
+        "total": 14
+      },
+      "esports": {
+        "live": 4,
+        "total": 52
+      },
+      "volleyball": {
+        "live": 12,
+        "total": 73
+      }
+    },
+    "https://www.sofascore.com/api/v1/team/455740/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Enzo Kohlmann de Freitas",
+            "slug": "kohlmann-de-freitas-enzo",
+            "shortName": "E. K. d. Freitas",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 235,
+            "nameCode": "KOH",
+            "ranking": 1034,
+            "national": false,
+            "type": 1,
+            "id": 455740,
+            "country": {
+              "alpha2": "BR",
+              "alpha3": "BRA",
+              "name": "Brazil",
+              "slug": "brazil"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "إنزو كولمان دي فريتاس"
+              },
+              "shortNameTranslation": {
+                "ar": "إ. دي فريتاس"
+              }
+            }
+          },
+          "type": 5,
+          "rowName": "Enzo Kohlmann De Freitas",
+          "ranking": 1034,
+          "points": 15,
+          "previousRanking": 1035,
+          "previousPoints": 15,
+          "bestRanking": 913,
+          "id": 63041,
+          "country": {},
+          "rankingClass": "team"
+        },
+        {
+          "team": {
+            "name": "Enzo Kohlmann de Freitas",
+            "slug": "kohlmann-de-freitas-enzo",
+            "shortName": "E. K. d. Freitas",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 235,
+            "nameCode": "KOH",
+            "ranking": 1034,
+            "national": false,
+            "type": 1,
+            "id": 455740,
+            "country": {
+              "alpha2": "BR",
+              "alpha3": "BRA",
+              "name": "Brazil",
+              "slug": "brazil"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "إنزو كولمان دي فريتاس"
+              },
+              "shortNameTranslation": {
+                "ar": "إ. دي فريتاس"
+              }
+            }
+          },
+          "type": 34,
+          "rowName": "Enzo Kohlmann de Freitas",
+          "ranking": 1151,
+          "points": 13.18,
+          "previousRanking": 1152,
+          "previousPoints": 13.19,
+          "bestRanking": 862,
+          "id": 182234,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1761220853
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/tennis-power": {
+      "tennisPowerRankings": []
+    },
+    "https://www.sofascore.com/api/v1/branding/providers/IT/web": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web",
+          "campaignId": 9,
+          "oddsOffset": 0,
+          "id": 21818,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy",
+            "slug": "admiralbet-italy",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 645,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 21819,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 21820,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 22113,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country/IT": {
+      "countrySportPriorities": [
+        {
+          "country": "IT",
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 226
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 227
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 228
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 3,
+          "id": 229
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 4,
+          "id": 230
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 5,
+          "id": 231
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 6,
+          "id": 232
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 7,
+          "id": 233
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 8,
+          "id": 234
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 9,
+          "id": 235
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 10,
+          "id": 236
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 11,
+          "id": 237
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 12,
+          "id": 238
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 13,
+          "id": 239
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 14,
+          "id": 240
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 15,
+          "id": 241
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 16,
+          "id": 242
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 17,
+          "id": 243
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 18,
+          "id": 244
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 245
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 246
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 247
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 248
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 249
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 250
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-odds": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web-odds",
+          "campaignId": 8,
+          "oddsOffset": 0,
+          "id": 15067,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy Odds Tab",
+            "slug": "admiralbet-italy-odds-tab",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1178,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web-odds",
+          "campaignId": 8,
+          "id": 15070,
+          "impressionCostEncrypted": "4H+l2X9qJbX/h1COpSR6yfxZFiuX6qSY"
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 15069,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 15068,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/odds/1/all": {
+      "markets": [
+        {
+          "structureType": 1,
+          "marketId": 1,
+          "marketName": "Full time",
+          "isLive": false,
+          "fid": 186648395,
+          "suspended": false,
+          "id": 189157360,
+          "marketGroup": "Home/Away",
+          "marketPeriod": "Match",
+          "choices": [
+            {
+              "initialFractionalValue": "6/4",
+              "fractionalValue": "6/4",
+              "sourceId": 209660852,
+              "name": "1",
+              "winning": true,
+              "change": 0
+            },
+            {
+              "initialFractionalValue": "1/2",
+              "fractionalValue": "1/2",
+              "sourceId": 209660960,
+              "name": "2",
+              "winning": false,
+              "change": 0
+            }
+          ]
+        }
+      ],
+      "eventId": 15249202
+    },
+    "https://www.sofascore.com/api/v1/event/15249202/provider/1/winning-odds": {
+      "home": null,
+      "away": {
+        "fractionalValue": "1/2",
+        "expected": 67,
+        "actual": 44,
+        "id": 18830839
+      }
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-featured": {
+      "providers": [],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/newly-added-events": {
+      "events": [
+        {
+          "eventId": 15250656,
+          "homeTeamId": 1157175,
+          "awayTeamId": 1159544,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250658,
+          "homeTeamId": 1156965,
+          "awayTeamId": 1159544,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250659,
+          "homeTeamId": 1157175,
+          "awayTeamId": 1156993,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250660,
+          "homeTeamId": 1156993,
+          "awayTeamId": 1156965,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250661,
+          "homeTeamId": 468570,
+          "awayTeamId": 423272,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250662,
+          "homeTeamId": 1157175,
+          "awayTeamId": 1156965,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250674,
+          "homeTeamId": 1157746,
+          "awayTeamId": 343965,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250680,
+          "homeTeamId": 1156993,
+          "awayTeamId": 1159544,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250753,
+          "homeTeamId": 343962,
+          "awayTeamId": 351264,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250754,
+          "homeTeamId": 1157342,
+          "awayTeamId": 424455,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250757,
+          "homeTeamId": 1158417,
+          "awayTeamId": 1158415,
+          "uniqueTournamentId": 21866
+        },
+        {
+          "eventId": 15250783,
+          "homeTeamId": 1149278,
+          "awayTeamId": 1125042,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250784,
+          "homeTeamId": 355310,
+          "awayTeamId": 458587,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250807,
+          "homeTeamId": 350205,
+          "awayTeamId": 1154662,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250818,
+          "homeTeamId": 364400,
+          "awayTeamId": 385669,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250859,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250860,
+          "homeTeamId": 488028,
+          "awayTeamId": 1151883,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250861,
+          "homeTeamId": 365237,
+          "awayTeamId": 459828,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250862,
+          "homeTeamId": 374774,
+          "awayTeamId": 373832,
+          "uniqueTournamentId": 16254
+        },
+        {
+          "eventId": 15250871,
+          "homeTeamId": 398479,
+          "awayTeamId": 481710,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250872,
+          "homeTeamId": 424538,
+          "awayTeamId": 409968,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250873,
+          "homeTeamId": 412636,
+          "awayTeamId": 410440,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250874,
+          "homeTeamId": 410058,
+          "awayTeamId": 398486,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250875,
+          "homeTeamId": 522792,
+          "awayTeamId": 470122,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250876,
+          "homeTeamId": 1044038,
+          "awayTeamId": 461161,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250877,
+          "homeTeamId": 409860,
+          "awayTeamId": 1156343,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250878,
+          "homeTeamId": 481363,
+          "awayTeamId": 483980,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250879,
+          "homeTeamId": 1158506,
+          "awayTeamId": 1157668,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250880,
+          "homeTeamId": 1156849,
+          "awayTeamId": 482074,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250881,
+          "homeTeamId": 410188,
+          "awayTeamId": 410941,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250882,
+          "homeTeamId": 515420,
+          "awayTeamId": 445964,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250883,
+          "homeTeamId": 482691,
+          "awayTeamId": 1115666,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250884,
+          "homeTeamId": 481731,
+          "awayTeamId": 481751,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250885,
+          "homeTeamId": 482076,
+          "awayTeamId": 481517,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250886,
+          "homeTeamId": 1156663,
+          "awayTeamId": 482330,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250887,
+          "homeTeamId": 483926,
+          "awayTeamId": 484952,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250888,
+          "homeTeamId": 409884,
+          "awayTeamId": 1089157,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250889,
+          "homeTeamId": 481372,
+          "awayTeamId": 480746,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250890,
+          "homeTeamId": 482691,
+          "awayTeamId": 482330,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250891,
+          "homeTeamId": 481731,
+          "awayTeamId": 484952,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250892,
+          "homeTeamId": 448101,
+          "awayTeamId": 410361,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250893,
+          "homeTeamId": 421438,
+          "awayTeamId": 410941,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250894,
+          "homeTeamId": 482076,
+          "awayTeamId": 480746,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250895,
+          "homeTeamId": 1115666,
+          "awayTeamId": 1156663,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250896,
+          "homeTeamId": 481751,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250897,
+          "homeTeamId": 409884,
+          "awayTeamId": 410361,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250898,
+          "homeTeamId": 523618,
+          "awayTeamId": 355226,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250899,
+          "homeTeamId": 481517,
+          "awayTeamId": 481372,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250900,
+          "homeTeamId": 482691,
+          "awayTeamId": 1156663,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250901,
+          "homeTeamId": 481731,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250902,
+          "homeTeamId": 1089157,
+          "awayTeamId": 448101,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250903,
+          "homeTeamId": 421438,
+          "awayTeamId": 355226,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250904,
+          "homeTeamId": 482076,
+          "awayTeamId": 481372,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250905,
+          "homeTeamId": 482330,
+          "awayTeamId": 1115666,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250906,
+          "homeTeamId": 484952,
+          "awayTeamId": 481751,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250907,
+          "homeTeamId": 409884,
+          "awayTeamId": 448101,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250908,
+          "homeTeamId": 410941,
+          "awayTeamId": 523618,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250909,
+          "homeTeamId": 480746,
+          "awayTeamId": 481517,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250910,
+          "homeTeamId": 410361,
+          "awayTeamId": 1089157,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250911,
+          "homeTeamId": 421438,
+          "awayTeamId": 523618,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250912,
+          "homeTeamId": 355226,
+          "awayTeamId": 410941,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250913,
+          "homeTeamId": 481733,
+          "awayTeamId": 480755,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250914,
+          "homeTeamId": 446961,
+          "awayTeamId": 481731,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250915,
+          "homeTeamId": 480739,
+          "awayTeamId": 549576,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250916,
+          "homeTeamId": 483926,
+          "awayTeamId": 1156351,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250917,
+          "homeTeamId": 1156855,
+          "awayTeamId": 501592,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250918,
+          "homeTeamId": 355849,
+          "awayTeamId": 448100,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250919,
+          "homeTeamId": 481677,
+          "awayTeamId": 1156662,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250920,
+          "homeTeamId": 481733,
+          "awayTeamId": 1156351,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250921,
+          "homeTeamId": 446961,
+          "awayTeamId": 501592,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250922,
+          "homeTeamId": 409918,
+          "awayTeamId": 445964,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250923,
+          "homeTeamId": 411794,
+          "awayTeamId": 494212,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250924,
+          "homeTeamId": 480739,
+          "awayTeamId": 1156662,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250925,
+          "homeTeamId": 480755,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250926,
+          "homeTeamId": 481731,
+          "awayTeamId": 1156855,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250927,
+          "homeTeamId": 355849,
+          "awayTeamId": 445964,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250928,
+          "homeTeamId": 466093,
+          "awayTeamId": 412080,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250929,
+          "homeTeamId": 549576,
+          "awayTeamId": 481677,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250930,
+          "homeTeamId": 481733,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250931,
+          "homeTeamId": 446961,
+          "awayTeamId": 1156855,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250932,
+          "homeTeamId": 448100,
+          "awayTeamId": 409918,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250933,
+          "homeTeamId": 411794,
+          "awayTeamId": 412080,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250934,
+          "homeTeamId": 480739,
+          "awayTeamId": 481677,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250935,
+          "homeTeamId": 1156351,
+          "awayTeamId": 480755,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250936,
+          "homeTeamId": 501592,
+          "awayTeamId": 481731,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250937,
+          "homeTeamId": 355849,
+          "awayTeamId": 409918,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250938,
+          "homeTeamId": 494212,
+          "awayTeamId": 466093,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250939,
+          "homeTeamId": 1156662,
+          "awayTeamId": 549576,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250940,
+          "homeTeamId": 445964,
+          "awayTeamId": 448100,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250941,
+          "homeTeamId": 411794,
+          "awayTeamId": 466093,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250942,
+          "homeTeamId": 412080,
+          "awayTeamId": 494212,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250982,
+          "homeTeamId": 1158015,
+          "awayTeamId": 1159840,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250988,
+          "homeTeamId": 1156316,
+          "awayTeamId": 1156459,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250989,
+          "homeTeamId": 1156954,
+          "awayTeamId": 418035,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250994,
+          "homeTeamId": 418603,
+          "awayTeamId": 414595,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250996,
+          "homeTeamId": 1156555,
+          "awayTeamId": 1156561,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250997,
+          "homeTeamId": 495667,
+          "awayTeamId": 455493,
+          "uniqueTournamentId": 31563
+        },
+        {
+          "eventId": 15251012,
+          "homeTeamId": 350205,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251048,
+          "homeTeamId": 464025,
+          "awayTeamId": 1137916,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15251049,
+          "homeTeamId": 364821,
+          "awayTeamId": 499173,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15251063,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156459,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251082,
+          "homeTeamId": 1156316,
+          "awayTeamId": 1156315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251121,
+          "homeTeamId": 1154662,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251186,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156316,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251298,
+          "homeTeamId": 1156459,
+          "awayTeamId": 1156315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251440,
+          "homeTeamId": 405350,
+          "awayTeamId": 382955,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251442,
+          "homeTeamId": 402744,
+          "awayTeamId": 424646,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251454,
+          "homeTeamId": 1157711,
+          "awayTeamId": 1158143,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15251505,
+          "homeTeamId": 1156965,
+          "awayTeamId": 1156993,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251522,
+          "homeTeamId": 466046,
+          "awayTeamId": 419353,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251523,
+          "homeTeamId": 353296,
+          "awayTeamId": 375154,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251525,
+          "homeTeamId": 1154653,
+          "awayTeamId": 1156962,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251537,
+          "homeTeamId": 1157936,
+          "awayTeamId": 1158141,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15251560,
+          "homeTeamId": 1159544,
+          "awayTeamId": 1157175,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251561,
+          "homeTeamId": 1157444,
+          "awayTeamId": 380742,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251584,
+          "homeTeamId": 1154663,
+          "awayTeamId": 1154652,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251585,
+          "homeTeamId": 254885,
+          "awayTeamId": 126244,
+          "uniqueTournamentId": 2122
+        },
+        {
+          "eventId": 15251630,
+          "homeTeamId": 1156544,
+          "awayTeamId": 1156461,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251632,
+          "homeTeamId": 344278,
+          "awayTeamId": 1158362,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251646,
+          "homeTeamId": 1154653,
+          "awayTeamId": 1154652,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251657,
+          "homeTeamId": 410020,
+          "awayTeamId": 412497,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15251658,
+          "homeTeamId": 409846,
+          "awayTeamId": 481160,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15251659,
+          "homeTeamId": 548882,
+          "awayTeamId": 446418,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15251660,
+          "homeTeamId": 410019,
+          "awayTeamId": 410438,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15251661,
+          "homeTeamId": 481710,
+          "awayTeamId": 1043000,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15251662,
+          "homeTeamId": 458857,
+          "awayTeamId": 409850,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15251663,
+          "homeTeamId": 409852,
+          "awayTeamId": 496658,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15251664,
+          "homeTeamId": 126230,
+          "awayTeamId": 25083,
+          "uniqueTournamentId": 2122
+        },
+        {
+          "eventId": 15251665,
+          "homeTeamId": 213383,
+          "awayTeamId": 146862,
+          "uniqueTournamentId": 2122
+        },
+        {
+          "eventId": 15251666,
+          "homeTeamId": 254885,
+          "awayTeamId": 25083,
+          "uniqueTournamentId": 2122
+        },
+        {
+          "eventId": 15251667,
+          "homeTeamId": 126230,
+          "awayTeamId": 126244,
+          "uniqueTournamentId": 2122
+        },
+        {
+          "eventId": 15251668,
+          "homeTeamId": 481379,
+          "awayTeamId": 446961,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251669,
+          "homeTeamId": 459484,
+          "awayTeamId": 928460,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251670,
+          "homeTeamId": 481943,
+          "awayTeamId": 984543,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251671,
+          "homeTeamId": 503330,
+          "awayTeamId": 459804,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251672,
+          "homeTeamId": 1077741,
+          "awayTeamId": 1089157,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251673,
+          "homeTeamId": 461074,
+          "awayTeamId": 464814,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251674,
+          "homeTeamId": 1079431,
+          "awayTeamId": 475170,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251675,
+          "homeTeamId": 526370,
+          "awayTeamId": 445385,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251676,
+          "homeTeamId": 505599,
+          "awayTeamId": 494477,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15251679,
+          "homeTeamId": 1159995,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251680,
+          "homeTeamId": 1159995,
+          "awayTeamId": 1154662,
+          "uniqueTournamentId": 15004
+        }
+      ]
+    },
+    "https://api.sofascore.com/api/v1/event/15249202": {
+      "event": {
+        "tournament": {
+          "name": "ITF M15 Lima 3 Men",
+          "slug": "itf-m15-lima-3-men",
+          "category": {
+            "name": "ITF Men",
+            "slug": "itf-men",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 785,
+            "country": {},
+            "flag": "itf-men",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للرجال"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "uniqueTournament": {
+            "name": "ITF M15 Lima 3 Men",
+            "slug": "itf-m15-lima-3-men",
+            "category": {
+              "name": "ITF Men",
+              "slug": "itf-men",
+              "sport": {
+                "name": "Tennis",
+                "slug": "tennis",
+                "id": 5
+              },
+              "id": 785,
+              "country": {},
+              "flag": "itf-men",
+              "fieldTranslations": {
+                "nameTranslation": {
+                  "ar": "اتحاد التنس الدولي للرجال"
+                },
+                "shortNameTranslation": {}
+              }
+            },
+            "userCount": 16,
+            "groundType": "Clay",
+            "hasRounds": true,
+            "hasPerformanceGraphFeature": false,
+            "id": 31495,
+            "country": {},
+            "hasEventPlayerStatistics": false,
+            "displayInverseHomeAwayTeams": false
+          },
+          "priority": 0,
+          "competitionType": 2,
+          "id": 171147
+        },
+        "season": {
+          "name": "2025",
+          "year": "2025",
+          "editor": false,
+          "id": 87508
+        },
+        "roundInfo": {
+          "round": 27,
+          "name": "Quarterfinals",
+          "slug": "quarterfinals",
+          "cupRoundType": 4
+        },
+        "customId": "GlKbsPoHd",
+        "status": {
+          "code": 100,
+          "description": "Ended",
+          "type": "finished"
+        },
+        "winnerCode": 1,
+        "homeTeam": {
+          "name": "Enzo Kohlmann de Freitas",
+          "slug": "kohlmann-de-freitas-enzo",
+          "shortName": "E. K. d. Freitas",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 235,
+          "playerTeamInfo": {
+            "birthplace": "São Paulo",
+            "height": 1.78,
+            "weight": 75,
+            "plays": "right-handed",
+            "prizeCurrent": 4534,
+            "prizeTotal": 9623,
+            "id": 18549,
+            "birthDateTimestamp": 1158364800,
+            "prizeCurrentRaw": {
+              "value": 4534,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 9623,
+              "currency": "EUR"
+            },
+            "currentRanking": 1034
+          },
+          "nameCode": "KOH",
+          "ranking": 1034,
+          "national": false,
+          "type": 1,
+          "id": 455740,
+          "country": {
+            "alpha2": "BR",
+            "alpha3": "BRA",
+            "name": "Brazil",
+            "slug": "brazil"
+          },
+          "fullName": "Enzo Kohlmann de Freitas",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "إنزو كولمان دي فريتاس"
+            },
+            "shortNameTranslation": {
+              "ar": "إ. دي فريتاس"
+            }
+          },
+          "timeActive": []
+        },
+        "awayTeam": {
+          "name": "Pierre Delage",
+          "slug": "delage-pierre",
+          "shortName": "P. Delage",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 217,
+          "playerTeamInfo": {
+            "birthplace": "Arès",
+            "height": 1.98,
+            "weight": 97,
+            "plays": "right-handed",
+            "prizeCurrent": 10228,
+            "prizeTotal": 39021,
+            "id": 2814,
+            "birthDateTimestamp": 980121600,
+            "prizeCurrentRaw": {
+              "value": 10228,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 39021,
+              "currency": "EUR"
+            },
+            "currentRanking": 694
+          },
+          "nameCode": "DEL",
+          "ranking": 753,
+          "national": false,
+          "type": 1,
+          "id": 213081,
+          "country": {
+            "alpha2": "FR",
+            "alpha3": "FRA",
+            "name": "France",
+            "slug": "france"
+          },
+          "fullName": "Pierre Delage",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "بيير ديلاج"
+            },
+            "shortNameTranslation": {
+              "ar": "ب. ديلاج"
+            }
+          },
+          "timeActive": []
+        },
+        "homeScore": {
+          "current": 2,
+          "display": 2,
+          "period1": 6,
+          "period2": 6,
+          "point": "0"
+        },
+        "awayScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 4,
+          "period2": 2,
+          "point": "0"
+        },
+        "coverage": -1,
+        "time": {},
+        "changes": {
+          "changes": [
+            "status.code",
+            "status.description",
+            "status.type"
+          ],
+          "changeTimestamp": 1766162999
+        },
+        "hasGlobalHighlights": false,
+        "crowdsourcingDataDisplayEnabled": false,
+        "id": 15249202,
+        "defaultPeriodCount": 3,
+        "slug": "enzo-kohlmann-de-freitas-pierre-delage",
+        "startTimestamp": 1766156400,
+        "periods": {
+          "point": "Game",
+          "current": "Match",
+          "period1": "1st set",
+          "period2": "2nd set",
+          "period3": "3rd set",
+          "period4": "4th set",
+          "period5": "5th set"
+        },
+        "finalResultOnly": false,
+        "feedLocked": false,
+        "groundType": "Clay",
+        "showTotoPromo": true,
+        "isEditor": false,
+        "eventFilters": {
+          "category": [
+            "singles"
+          ],
+          "level": [
+            "pro"
+          ],
+          "tournament": [
+            "lower"
+          ],
+          "gender": [
+            "M"
+          ]
+        }
+      }
+    }
+  },
+  "detectedMatches": [
+    {
+      "eventId": 15227068,
+      "slug": "victor-hugo-remondy-pagotto-rodrigo-varillas",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 455020,
+        "name": "Rodrigo Varillas",
+        "shortName": "R. Varillas",
+        "country": "PE",
+        "ranking": null
+      },
+      "awayTeam": {
+        "id": 508354,
+        "name": "Victor Hugo Remondy Pagotto",
+        "shortName": "V. H. R. Pagotto",
+        "country": "BR",
+        "ranking": 1331
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765895400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15227066,
+      "slug": "enzo-kohlmann-de-freitas-rafael-de-alba",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 250472,
+        "name": "Rafael De Alba",
+        "shortName": "R. De Alba",
+        "country": "MX",
+        "ranking": 1037
+      },
+      "awayTeam": {
+        "id": 455740,
+        "name": "Enzo Kohlmann de Freitas",
+        "shortName": "E. K. d. Freitas",
+        "country": "BR",
+        "ranking": 1034
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765895400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15227067,
+      "slug": "enzo-camargo-lima-strong-kirchheimer",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 95259,
+        "name": "Strong Kirchheimer",
+        "shortName": "S. Kirchheimer",
+        "country": "US",
+        "ranking": 695
+      },
+      "awayTeam": {
+        "id": 371456,
+        "name": "Enzo Camargo Lima",
+        "shortName": "E. C. Lima",
+        "country": "BR",
+        "ranking": 1106
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765895640,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15227069,
+      "slug": "nicolas-villalon-gerard-campana-lee",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 380044,
+        "name": "Gerard Campana Lee",
+        "shortName": "G. C. Lee",
+        "country": "KR",
+        "ranking": 638
+      },
+      "awayTeam": {
+        "id": 395251,
+        "name": "Nicolas Villalon",
+        "shortName": "N. Villalon",
+        "country": "CL",
+        "ranking": 985
+      },
+      "homeScore": 1,
+      "awayScore": 0,
+      "status": {
+        "code": 92,
+        "description": "Retired",
+        "type": "finished"
+      },
+      "startTimestamp": 1765900800,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15232916,
+      "slug": "ricardo-ramos-felipe-de-dios",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 379443,
+        "name": "Felipe de Dios",
+        "shortName": "F. de Dios",
+        "country": "AR",
+        "ranking": 1395
+      },
+      "awayTeam": {
+        "id": 1116439,
+        "name": "Ricardo Ramos",
+        "shortName": "Ricardo Ramos",
+        "country": "PE",
+        "ranking": null
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765982400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231184,
+      "slug": "benjamin-torrealba-ignacio-monzon",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 107483,
+        "name": "Ignacio Monzon",
+        "shortName": "I. Monzon",
+        "country": "AR",
+        "ranking": 746
+      },
+      "awayTeam": {
+        "id": 409970,
+        "name": "Benjamin Torrealba",
+        "shortName": "B. Torrealba",
+        "country": "CL",
+        "ranking": 839
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765982400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231206,
+      "slug": "vicente-monge-thiago-agustin-pernas",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 285844,
+        "name": "Thiago Agustin Pernas",
+        "shortName": "T. Pernas",
+        "country": "AR",
+        "ranking": 1249
+      },
+      "awayTeam": {
+        "id": 825530,
+        "name": "Vicente Monge",
+        "shortName": "V. Monge",
+        "country": "PE",
+        "ranking": null
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765987200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231205,
+      "slug": "ryan-dickerson-davide-pontoglio",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 67418,
+        "name": "Davide Pontoglio",
+        "shortName": "D. Pontoglio",
+        "country": "IT",
+        "ranking": null
+      },
+      "awayTeam": {
+        "id": 332537,
+        "name": "Ryan Dickerson",
+        "shortName": "R. Dickerson",
+        "country": "US",
+        "ranking": 713
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765987200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231207,
+      "slug": "bautista-de-la-pena-luis-jose-nakamine",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 500984,
+        "name": "Bautista de la Pena",
+        "shortName": "B. de la Peña",
+        "country": "CL",
+        "ranking": null
+      },
+      "awayTeam": {
+        "id": 486635,
+        "name": "Luis Jose Nakamine",
+        "shortName": "L. J. Nakamine",
+        "country": "PE",
+        "ranking": null
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765988100,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15230526,
+      "slug": "diego-gomez-pierre-delage",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 1100753,
+        "name": "Diego Gomez",
+        "shortName": "D. Gomez",
+        "country": "PE",
+        "ranking": null
+      },
+      "awayTeam": {
+        "id": 213081,
+        "name": "Pierre Delage",
+        "shortName": "P. Delage",
+        "country": "FR",
+        "ranking": 753
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765989600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231201,
+      "slug": "valentin-garay-joaquin-guilleme",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 425267,
+        "name": "Joaquin Guilleme",
+        "shortName": "J. Guilleme",
+        "country": "NI",
+        "ranking": 1365
+      },
+      "awayTeam": {
+        "id": 460293,
+        "name": "Valentin Garay",
+        "shortName": "V. Garay",
+        "country": "AR",
+        "ranking": 1470
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765990800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231209,
+      "slug": "valerio-aboian-nicolas-bruna",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 186264,
+        "name": "Nicolas Bruna",
+        "shortName": "N. Bruna",
+        "country": "CL",
+        "ranking": 1045
+      },
+      "awayTeam": {
+        "id": 297139,
+        "name": "Valerio Aboian",
+        "shortName": "V. Aboian",
+        "country": "AR",
+        "ranking": 550
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765992600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231202,
+      "slug": "nicolas-baena-gabriel-schenekenberg",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 415575,
+        "name": "Gabriel Schenekenberg",
+        "shortName": "G. Schenekenberg",
+        "country": "BR",
+        "ranking": 1269
+      },
+      "awayTeam": {
+        "id": 1100750,
+        "name": "Nicolas Baena",
+        "shortName": "N. Baena",
+        "country": "PE",
+        "ranking": null
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765995300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231208,
+      "slug": "bautista-vilicich-ryan-fishback",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 329533,
+        "name": "Bautista Vilicich",
+        "shortName": "B. Vilicich",
+        "country": "AR",
+        "ranking": 828
+      },
+      "awayTeam": {
+        "id": 289180,
+        "name": "Ryan Fishback",
+        "shortName": "R. Fishback",
+        "country": "US",
+        "ranking": 627
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765996200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231183,
+      "slug": "christopher-li-oriol-roca-batalla",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 51100,
+        "name": "Oriol Roca Batalla",
+        "shortName": "O. Roca Batalla",
+        "country": "ES",
+        "ranking": 509
+      },
+      "awayTeam": {
+        "id": 300486,
+        "name": "Christopher Li",
+        "shortName": "C. Li",
+        "country": "PE",
+        "ranking": 1071
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765996200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231203,
+      "slug": "diego-ortiz-gamonal-toby-alex-kodat",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 407899,
+        "name": "Diego Ortiz Gamonal",
+        "shortName": "D. Ortiz Gamonal",
+        "country": "CL",
+        "ranking": null
+      },
+      "awayTeam": {
+        "id": 297199,
+        "name": "Toby Alex Kodat",
+        "shortName": "T. A. Kodat",
+        "country": "US",
+        "ranking": 661
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1765998000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15236955,
+      "slug": "felipe-de-dios-ryan-dickerson",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 379443,
+        "name": "Felipe de Dios",
+        "shortName": "F. de Dios",
+        "country": "AR",
+        "ranking": 1395
+      },
+      "awayTeam": {
+        "id": 332537,
+        "name": "Ryan Dickerson",
+        "shortName": "R. Dickerson",
+        "country": "US",
+        "ranking": 713
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766068200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15236954,
+      "slug": "nicolas-baena-toby-alex-kodat",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 1100750,
+        "name": "Nicolas Baena",
+        "shortName": "N. Baena",
+        "country": "PE",
+        "ranking": null
+      },
+      "awayTeam": {
+        "id": 297199,
+        "name": "Toby Alex Kodat",
+        "shortName": "T. A. Kodat",
+        "country": "US",
+        "ranking": 661
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766068200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15236957,
+      "slug": "luis-jose-nakamine-bautista-vilicich",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 486635,
+        "name": "Luis Jose Nakamine",
+        "shortName": "L. J. Nakamine",
+        "country": "PE",
+        "ranking": null
+      },
+      "awayTeam": {
+        "id": 329533,
+        "name": "Bautista Vilicich",
+        "shortName": "B. Vilicich",
+        "country": "AR",
+        "ranking": 828
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766068200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15231586,
+      "slug": "victor-hugo-remondy-pagotto-gerard-campana-lee",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 380044,
+        "name": "Gerard Campana Lee",
+        "shortName": "G. C. Lee",
+        "country": "KR",
+        "ranking": 638
+      },
+      "awayTeam": {
+        "id": 508354,
+        "name": "Victor Hugo Remondy Pagotto",
+        "shortName": "V. H. R. Pagotto",
+        "country": "BR",
+        "ranking": 1331
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766068200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15236958,
+      "slug": "enzo-kohlmann-de-freitas-strong-kirchheimer",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 95259,
+        "name": "Strong Kirchheimer",
+        "shortName": "S. Kirchheimer",
+        "country": "US",
+        "ranking": 695
+      },
+      "awayTeam": {
+        "id": 455740,
+        "name": "Enzo Kohlmann de Freitas",
+        "shortName": "E. K. d. Freitas",
+        "country": "BR",
+        "ranking": 1034
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766068200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15236956,
+      "slug": "thiago-agustin-pernas-ignacio-monzon",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 107483,
+        "name": "Ignacio Monzon",
+        "shortName": "I. Monzon",
+        "country": "AR",
+        "ranking": 746
+      },
+      "awayTeam": {
+        "id": 285844,
+        "name": "Thiago Agustin Pernas",
+        "shortName": "T. Pernas",
+        "country": "AR",
+        "ranking": 1249
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766071800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15236959,
+      "slug": "valerio-aboian-pierre-delage",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 213081,
+        "name": "Pierre Delage",
+        "shortName": "P. Delage",
+        "country": "FR",
+        "ranking": 753
+      },
+      "awayTeam": {
+        "id": 297139,
+        "name": "Valerio Aboian",
+        "shortName": "V. Aboian",
+        "country": "AR",
+        "ranking": 550
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766075400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15236953,
+      "slug": "joaquin-guilleme-oriol-roca-batalla",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 51100,
+        "name": "Oriol Roca Batalla",
+        "shortName": "O. Roca Batalla",
+        "country": "ES",
+        "ranking": 509
+      },
+      "awayTeam": {
+        "id": 425267,
+        "name": "Joaquin Guilleme",
+        "shortName": "J. Guilleme",
+        "country": "NI",
+        "ranking": 1365
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766077200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15249203,
+      "slug": "bautista-vilicich-thiago-agustin-pernas",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 285844,
+        "name": "Thiago Agustin Pernas",
+        "shortName": "T. Pernas",
+        "country": "AR",
+        "ranking": 1249
+      },
+      "awayTeam": {
+        "id": 329533,
+        "name": "Bautista Vilicich",
+        "shortName": "B. Vilicich",
+        "country": "AR",
+        "ranking": 828
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1766156400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15248882,
+      "slug": "gerard-campana-lee-ryan-dickerson",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 380044,
+        "name": "Gerard Campana Lee",
+        "shortName": "G. C. Lee",
+        "country": "KR",
+        "ranking": 638
+      },
+      "awayTeam": {
+        "id": 332537,
+        "name": "Ryan Dickerson",
+        "shortName": "R. Dickerson",
+        "country": "US",
+        "ranking": 713
+      },
+      "homeScore": 1,
+      "awayScore": 1,
+      "status": {
+        "code": 10,
+        "description": "3rd set",
+        "type": "inprogress"
+      },
+      "startTimestamp": 1766156400,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 15249204,
+      "slug": "toby-alex-kodat-oriol-roca-batalla",
+      "sport": "tennis",
+      "tournament": "ITF M15 Lima 3 Men",
+      "tournamentId": 31495,
+      "category": "ITF Men",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 51100,
+        "name": "Oriol Roca Batalla",
+        "shortName": "O. Roca Batalla",
+        "country": "ES",
+        "ranking": 509
+      },
+      "awayTeam": {
+        "id": 297199,
+        "name": "Toby Alex Kodat",
+        "shortName": "T. A. Kodat",
+        "country": "US",
+        "ranking": 661
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": {
+        "code": 8,
+        "description": "1st set",
+        "type": "inprogress"
+      },
+      "startTimestamp": 1766163600,
+      "detectedFrom": "tournament"
+    }
+  ],
+  "lastSync": "2025-12-19T17:43:32.857Z",
+  "syncType": "manual-sync",
+  "liveData": {
+    "eventId": "15249202",
+    "timestamp": "2025-12-19T17:43:31.964Z",
+    "syncType": "complete",
+    "event": {
+      "tournament": {
+        "name": "ITF M15 Lima 3 Men",
+        "slug": "itf-m15-lima-3-men",
+        "category": {
+          "name": "ITF Men",
+          "slug": "itf-men",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "id": 785,
+          "country": {},
+          "flag": "itf-men",
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "اتحاد التنس الدولي للرجال"
+            },
+            "shortNameTranslation": {}
+          }
+        },
+        "uniqueTournament": {
+          "name": "ITF M15 Lima 3 Men",
+          "slug": "itf-m15-lima-3-men",
+          "category": {
+            "name": "ITF Men",
+            "slug": "itf-men",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 785,
+            "country": {},
+            "flag": "itf-men",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "اتحاد التنس الدولي للرجال"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "userCount": 16,
+          "groundType": "Clay",
+          "hasRounds": true,
+          "hasPerformanceGraphFeature": false,
+          "id": 31495,
+          "country": {},
+          "hasEventPlayerStatistics": false,
+          "displayInverseHomeAwayTeams": false
+        },
+        "priority": 0,
+        "competitionType": 2,
+        "id": 171147
+      },
+      "season": {
+        "name": "2025",
+        "year": "2025",
+        "editor": false,
+        "id": 87508
+      },
+      "roundInfo": {
+        "round": 27,
+        "name": "Quarterfinals",
+        "slug": "quarterfinals",
+        "cupRoundType": 4
+      },
+      "customId": "GlKbsPoHd",
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "winnerCode": 1,
+      "homeTeam": {
+        "name": "Enzo Kohlmann de Freitas",
+        "slug": "kohlmann-de-freitas-enzo",
+        "shortName": "E. K. d. Freitas",
+        "gender": "M",
+        "sport": {
+          "name": "Tennis",
+          "slug": "tennis",
+          "id": 5
+        },
+        "userCount": 235,
+        "playerTeamInfo": {
+          "birthplace": "São Paulo",
+          "height": 1.78,
+          "weight": 75,
+          "plays": "right-handed",
+          "prizeCurrent": 4534,
+          "prizeTotal": 9623,
+          "id": 18549,
+          "birthDateTimestamp": 1158364800,
+          "prizeCurrentRaw": {
+            "value": 4534,
+            "currency": "EUR"
+          },
+          "prizeTotalRaw": {
+            "value": 9623,
+            "currency": "EUR"
+          },
+          "currentRanking": 1034
+        },
+        "nameCode": "KOH",
+        "ranking": 1034,
+        "national": false,
+        "type": 1,
+        "id": 455740,
+        "country": {
+          "alpha2": "BR",
+          "alpha3": "BRA",
+          "name": "Brazil",
+          "slug": "brazil"
+        },
+        "fullName": "Enzo Kohlmann de Freitas",
+        "subTeams": [],
+        "teamColors": {
+          "primary": "#374df5",
+          "secondary": "#374df5",
+          "text": "#ffffff"
+        },
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "إنزو كولمان دي فريتاس"
+          },
+          "shortNameTranslation": {
+            "ar": "إ. دي فريتاس"
+          }
+        },
+        "timeActive": []
+      },
+      "awayTeam": {
+        "name": "Pierre Delage",
+        "slug": "delage-pierre",
+        "shortName": "P. Delage",
+        "gender": "M",
+        "sport": {
+          "name": "Tennis",
+          "slug": "tennis",
+          "id": 5
+        },
+        "userCount": 217,
+        "playerTeamInfo": {
+          "birthplace": "Arès",
+          "height": 1.98,
+          "weight": 97,
+          "plays": "right-handed",
+          "prizeCurrent": 10228,
+          "prizeTotal": 39021,
+          "id": 2814,
+          "birthDateTimestamp": 980121600,
+          "prizeCurrentRaw": {
+            "value": 10228,
+            "currency": "EUR"
+          },
+          "prizeTotalRaw": {
+            "value": 39021,
+            "currency": "EUR"
+          },
+          "currentRanking": 694
+        },
+        "nameCode": "DEL",
+        "ranking": 753,
+        "national": false,
+        "type": 1,
+        "id": 213081,
+        "country": {
+          "alpha2": "FR",
+          "alpha3": "FRA",
+          "name": "France",
+          "slug": "france"
+        },
+        "fullName": "Pierre Delage",
+        "subTeams": [],
+        "teamColors": {
+          "primary": "#374df5",
+          "secondary": "#374df5",
+          "text": "#ffffff"
+        },
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "بيير ديلاج"
+          },
+          "shortNameTranslation": {
+            "ar": "ب. ديلاج"
+          }
+        },
+        "timeActive": []
+      },
+      "homeScore": {
+        "current": 2,
+        "display": 2,
+        "period1": 6,
+        "period2": 6,
+        "point": "0"
+      },
+      "awayScore": {
+        "current": 0,
+        "display": 0,
+        "period1": 4,
+        "period2": 2,
+        "point": "0"
+      },
+      "coverage": -1,
+      "time": {},
+      "changes": {
+        "changes": [
+          "status.code",
+          "status.description",
+          "status.type"
+        ],
+        "changeTimestamp": 1766162999
+      },
+      "hasGlobalHighlights": false,
+      "crowdsourcingDataDisplayEnabled": false,
+      "id": 15249202,
+      "defaultPeriodCount": 3,
+      "slug": "enzo-kohlmann-de-freitas-pierre-delage",
+      "startTimestamp": 1766156400,
+      "periods": {
+        "point": "Game",
+        "current": "Match",
+        "period1": "1st set",
+        "period2": "2nd set",
+        "period3": "3rd set",
+        "period4": "4th set",
+        "period5": "5th set"
+      },
+      "finalResultOnly": false,
+      "feedLocked": false,
+      "groundType": "Clay",
+      "showTotoPromo": true,
+      "isEditor": false,
+      "eventFilters": {
+        "category": [
+          "singles"
+        ],
+        "level": [
+          "pro"
+        ],
+        "tournament": [
+          "lower"
+        ],
+        "gender": [
+          "M"
+        ]
+      }
+    },
+    "pointByPoint": [],
+    "statistics": [],
+    "powerRankings": [],
+    "incidents": [],
+    "lineups": null,
+    "h2h": {
+      "teamDuel": {
+        "homeWins": 1,
+        "awayWins": 0,
+        "draws": 0
+      },
+      "managerDuel": null
+    },
+    "odds": null,
+    "graph": null,
+    "errors": [],
+    "dataCompleteness": {
+      "graph": false,
+      "incidents": false,
+      "statistics": false,
+      "lineups": false,
+      "event": true,
+      "pointByPoint": false,
+      "powerRankings": false,
+      "h2h": true,
+      "total": 25
+    }
+  }
+}

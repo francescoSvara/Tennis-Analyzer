@@ -1,0 +1,963 @@
+{
+  "scrapedEventId": "14992152",
+  "tournamentId": 2496,
+  "seasonId": 67301,
+  "detectedAt": "2025-12-19T17:05:04.044Z",
+  "matches": [
+    {
+      "eventId": 14988819,
+      "slug": "luca-van-assche-moez-echargui",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Qualification Final",
+      "homeTeam": {
+        "id": 335102,
+        "name": "Luca Van Assche",
+        "shortName": "L. Van Assche",
+        "country": "FR",
+        "ranking": 166
+      },
+      "awayTeam": {
+        "id": 153826,
+        "name": "Moez Echargui",
+        "shortName": "M. Echargui",
+        "country": "TN",
+        "ranking": 135
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762086600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982551,
+      "slug": "arthur-cazaux-adrian-mannarino",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 287803,
+        "name": "Arthur Cazaux",
+        "shortName": "A. Cazaux",
+        "country": "FR",
+        "ranking": 66
+      },
+      "awayTeam": {
+        "id": 15894,
+        "name": "Adrian Mannarino",
+        "shortName": "A. Mannarino",
+        "country": "FR",
+        "ranking": 69
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762092000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982555,
+      "slug": "terence-atmane-hugo-gaston",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 273679,
+        "name": "Terence Atmane",
+        "shortName": "T. Atmane",
+        "country": "FR",
+        "ranking": 63
+      },
+      "awayTeam": {
+        "id": 205906,
+        "name": "Hugo Gaston",
+        "shortName": "H. Gaston",
+        "country": "FR",
+        "ranking": 97
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762099500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982554,
+      "slug": "aleksandar-kovacevic-tallon-griekspoor",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 122368,
+        "name": "Tallon Griekspoor",
+        "shortName": "T. Griekspoor",
+        "country": "NL",
+        "ranking": 25
+      },
+      "awayTeam": {
+        "id": 187608,
+        "name": "Aleksandar Kovacevic",
+        "shortName": "A. Kovacevic",
+        "country": "US",
+        "ranking": 60
+      },
+      "homeScore": null,
+      "awayScore": null,
+      "status": {
+        "code": 70,
+        "description": "Canceled",
+        "type": "canceled"
+      },
+      "startTimestamp": 1762164000,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982552,
+      "slug": "giovanni-mpetshi-perricard-tomas-machac",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 289146,
+        "name": "Giovanni Mpetshi Perricard",
+        "shortName": "G. Mpetshi Perricard",
+        "country": "FR",
+        "ranking": 58
+      },
+      "awayTeam": {
+        "id": 238300,
+        "name": "Tomas Machac",
+        "shortName": "T. Machac",
+        "country": "CZ",
+        "ranking": 32
+      },
+      "homeScore": null,
+      "awayScore": null,
+      "status": {
+        "code": 70,
+        "description": "Canceled",
+        "type": "canceled"
+      },
+      "startTimestamp": 1762164000,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982549,
+      "slug": "learner-tien-ugo-blanchet",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 200777,
+        "name": "Ugo Blanchet",
+        "shortName": "U. Blanchet",
+        "country": "FR",
+        "ranking": 145
+      },
+      "awayTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762173000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14992077,
+      "slug": "jan-choinski-lorenzo-sonego",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 105607,
+        "name": "Jan Choinski",
+        "shortName": "J. Choinski",
+        "country": "GB",
+        "ranking": 125
+      },
+      "awayTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762174800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14992076,
+      "slug": "clement-tabur-aleksandar-kovacevic",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 206602,
+        "name": "Clement Tabur",
+        "shortName": "C. Tabur",
+        "country": "FR",
+        "ranking": 202
+      },
+      "awayTeam": {
+        "id": 187608,
+        "name": "Aleksandar Kovacevic",
+        "shortName": "A. Kovacevic",
+        "country": "US",
+        "ranking": 60
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762177800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14992145,
+      "slug": "giovanni-mpetshi-perricard-vitaliy-sachko",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 289146,
+        "name": "Giovanni Mpetshi Perricard",
+        "shortName": "G. Mpetshi Perricard",
+        "country": "FR",
+        "ranking": 58
+      },
+      "awayTeam": {
+        "id": 100069,
+        "name": "Vitaliy Sachko",
+        "shortName": "V. Sachko",
+        "country": "UA",
+        "ranking": 169
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762184100,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982556,
+      "slug": "valentin-royer-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 255449,
+        "name": "Valentin Royer",
+        "shortName": "V. Royer",
+        "country": "FR",
+        "ranking": 57
+      },
+      "awayTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762190700,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982553,
+      "slug": "matteo-berrettini-quentin-halys",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 112783,
+        "name": "Matteo Berrettini",
+        "shortName": "M. Berrettini",
+        "country": "IT",
+        "ranking": 56
+      },
+      "awayTeam": {
+        "id": 90798,
+        "name": "Quentin Halys",
+        "shortName": "Q. Halys",
+        "country": "FR",
+        "ranking": 91
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762199400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14992151,
+      "slug": "luca-van-assche-kyrian-jacquet",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 267577,
+        "name": "Kyrian Jacquet",
+        "shortName": "K. Jacquet",
+        "country": "FR",
+        "ranking": 138
+      },
+      "awayTeam": {
+        "id": 335102,
+        "name": "Luca Van Assche",
+        "shortName": "L. Van Assche",
+        "country": "FR",
+        "ranking": 166
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762254000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982548,
+      "slug": "daniel-altmaier-arthur-rinderknech",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 127208,
+        "name": "Daniel Altmaier",
+        "shortName": "D. Altmaier",
+        "country": "DE",
+        "ranking": 46
+      },
+      "awayTeam": {
+        "id": 63606,
+        "name": "Arthur Rinderknech",
+        "shortName": "A. Rinderknech",
+        "country": "FR",
+        "ranking": 29
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762261200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14982550,
+      "slug": "corentin-moutet-aleksandar-vukic",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 175014,
+        "name": "Corentin Moutet",
+        "shortName": "C. Moutet",
+        "country": "FR",
+        "ranking": 35
+      },
+      "awayTeam": {
+        "id": 124656,
+        "name": "Aleksandar Vukic",
+        "shortName": "A. Vukic",
+        "country": "AU",
+        "ranking": 82
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762267200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956457,
+      "slug": "flavio-cobolli-lorenzo-sonego",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 273680,
+        "name": "Flavio Cobolli",
+        "shortName": "F. Cobolli",
+        "country": "IT",
+        "ranking": 22
+      },
+      "awayTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762278300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956448,
+      "slug": "arthur-cazaux-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 287803,
+        "name": "Arthur Cazaux",
+        "shortName": "A. Cazaux",
+        "country": "FR",
+        "ranking": 66
+      },
+      "awayTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762287900,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956458,
+      "slug": "kyrian-jacquet-dan-added",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 191842,
+        "name": "Dan Added",
+        "shortName": "D. Added",
+        "country": "FR",
+        "ranking": 201
+      },
+      "awayTeam": {
+        "id": 267577,
+        "name": "Kyrian Jacquet",
+        "shortName": "K. Jacquet",
+        "country": "FR",
+        "ranking": 138
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762340400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956463,
+      "slug": "alexander-blockx-clement-tabur",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 206602,
+        "name": "Clement Tabur",
+        "shortName": "C. Tabur",
+        "country": "FR",
+        "ranking": 202
+      },
+      "awayTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762344600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956460,
+      "slug": "learner-tien-moez-echargui",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "awayTeam": {
+        "id": 153826,
+        "name": "Moez Echargui",
+        "shortName": "M. Echargui",
+        "country": "TN",
+        "ranking": 135
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762347600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956464,
+      "slug": "hugo-gaston-daniel-altmaier",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 205906,
+        "name": "Hugo Gaston",
+        "shortName": "H. Gaston",
+        "country": "FR",
+        "ranking": 97
+      },
+      "awayTeam": {
+        "id": 127208,
+        "name": "Daniel Altmaier",
+        "shortName": "D. Altmaier",
+        "country": "DE",
+        "ranking": 46
+      },
+      "homeScore": 1,
+      "awayScore": 1,
+      "status": {
+        "code": 92,
+        "description": "Retired",
+        "type": "finished"
+      },
+      "startTimestamp": 1762354500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956452,
+      "slug": "alexander-bublik-vitaliy-sachko",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 100069,
+        "name": "Vitaliy Sachko",
+        "shortName": "V. Sachko",
+        "country": "UA",
+        "ranking": 169
+      },
+      "awayTeam": {
+        "id": 163480,
+        "name": "Alexander Bublik",
+        "shortName": "A. Bublik",
+        "country": "KZ",
+        "ranking": 11
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762362000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956456,
+      "slug": "aleksandar-vukic-matteo-berrettini",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 124656,
+        "name": "Aleksandar Vukic",
+        "shortName": "A. Vukic",
+        "country": "AU",
+        "ranking": 82
+      },
+      "awayTeam": {
+        "id": 112783,
+        "name": "Matteo Berrettini",
+        "shortName": "M. Berrettini",
+        "country": "IT",
+        "ranking": 56
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762371000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956453,
+      "slug": "kyrian-jacquet-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 267577,
+        "name": "Kyrian Jacquet",
+        "shortName": "K. Jacquet",
+        "country": "FR",
+        "ranking": 138
+      },
+      "awayTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762434000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956450,
+      "slug": "daniel-altmaier-lorenzo-sonego",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "awayTeam": {
+        "id": 127208,
+        "name": "Daniel Altmaier",
+        "shortName": "D. Altmaier",
+        "country": "DE",
+        "ranking": 46
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762443600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956451,
+      "slug": "learner-tien-matteo-berrettini",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 112783,
+        "name": "Matteo Berrettini",
+        "shortName": "M. Berrettini",
+        "country": "IT",
+        "ranking": 56
+      },
+      "awayTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762452300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956449,
+      "slug": "clement-tabur-vitaliy-sachko",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 206602,
+        "name": "Clement Tabur",
+        "shortName": "C. Tabur",
+        "country": "FR",
+        "ranking": 202
+      },
+      "awayTeam": {
+        "id": 100069,
+        "name": "Vitaliy Sachko",
+        "shortName": "V. Sachko",
+        "country": "UA",
+        "ranking": 169
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762459500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956459,
+      "slug": "lorenzo-sonego-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "awayTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762525800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956454,
+      "slug": "learner-tien-vitaliy-sachko",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 100069,
+        "name": "Vitaliy Sachko",
+        "shortName": "V. Sachko",
+        "country": "UA",
+        "ranking": 169
+      },
+      "awayTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762534800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14956455,
+      "slug": "learner-tien-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Metz",
+      "tournamentId": 2496,
+      "category": "ATP",
+      "round": "Final",
+      "homeTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "awayTeam": {
+        "id": 412818,
+        "name": "Learner Tien",
+        "shortName": "L. Tien",
+        "country": "US",
+        "ranking": 28
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762615800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    }
+  ]
+}

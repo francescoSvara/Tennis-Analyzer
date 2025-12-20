@@ -1,0 +1,5495 @@
+{
+  "api": {
+    "https://www.sofascore.com/api/v1/country/alpha2": {
+      "alpha2": "IT",
+      "continent_code": "EU",
+      "country": "italy",
+      "city": "piacenza",
+      "region_code": "IT-PC"
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country": {
+      "countrySportPriorities": [
+        {
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 751
+        },
+        {
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 752
+        },
+        {
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 753
+        },
+        {
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 3,
+          "id": 754
+        },
+        {
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 4,
+          "id": 755
+        },
+        {
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 5,
+          "id": 756
+        },
+        {
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 6,
+          "id": 757
+        },
+        {
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 7,
+          "id": 758
+        },
+        {
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 8,
+          "id": 759
+        },
+        {
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 9,
+          "id": 760
+        },
+        {
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 10,
+          "id": 761
+        },
+        {
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 11,
+          "id": 762
+        },
+        {
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 12,
+          "id": 763
+        },
+        {
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 13,
+          "id": 764
+        },
+        {
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 14,
+          "id": 765
+        },
+        {
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 15,
+          "id": 766
+        },
+        {
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 16,
+          "id": 767
+        },
+        {
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 17,
+          "id": 768
+        },
+        {
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 18,
+          "id": 769
+        },
+        {
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 770
+        },
+        {
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 771
+        },
+        {
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 772
+        },
+        {
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 773
+        },
+        {
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 774
+        },
+        {
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 775
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/incidents": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/point-by-point": {
+      "pointByPoint": [
+        {
+          "set": 2,
+          "games": [
+            {
+              "game": 9,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 3,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "A",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 3,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 6,
+                "awayScore": 3,
+                "serving": 2,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 8,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 5,
+                "awayScore": 3,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 7,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 4,
+                "awayScore": 3,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 6,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 4,
+                "awayScore": 2,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 5,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 2,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 4,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 1,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 3,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 1,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 2,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 0,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 1,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 2,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 1,
+                "awayScore": 0,
+                "serving": 2,
+                "scoring": 1
+              }
+            }
+          ]
+        },
+        {
+          "set": 1,
+          "games": [
+            {
+              "game": 10,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 3,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 6,
+                "awayScore": 4,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 9,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 2,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 2,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "A",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 2,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 5,
+                "awayScore": 4,
+                "serving": 2,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 8,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 4,
+                "awayScore": 4,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 7,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 4,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 6,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 3,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 5,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 3,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 4,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 2,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 3,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 1,
+                "awayScore": 2,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 2,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 1,
+                "awayScore": 1,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 1,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 2,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 2,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "A",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 0,
+                "awayScore": 1,
+                "serving": 2,
+                "scoring": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/team/390214/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Alexander Blockx",
+            "slug": "blockx-alexander",
+            "shortName": "A. Blockx",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 3704,
+            "nameCode": "BLO",
+            "ranking": 116,
+            "national": false,
+            "type": 1,
+            "id": 390214,
+            "country": {
+              "alpha2": "BE",
+              "alpha3": "BEL",
+              "name": "Belgium",
+              "slug": "belgium"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "ألكسندر بلوكس"
+              },
+              "shortNameTranslation": {
+                "ar": "أ. بلوكس"
+              }
+            }
+          },
+          "tournamentsPlayed": 21,
+          "type": 5,
+          "rowName": "Alexander Blockx",
+          "ranking": 116,
+          "points": 542,
+          "previousRanking": 116,
+          "previousPoints": 542,
+          "bestRanking": 101,
+          "id": 2033,
+          "country": {
+            "alpha2": "BE",
+            "alpha3": "BEL",
+            "name": "Belgium",
+            "slug": "belgium"
+          },
+          "rankingClass": "team"
+        },
+        {
+          "team": {
+            "name": "Alexander Blockx",
+            "slug": "blockx-alexander",
+            "shortName": "A. Blockx",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 3704,
+            "nameCode": "BLO",
+            "ranking": 116,
+            "national": false,
+            "type": 1,
+            "id": 390214,
+            "country": {
+              "alpha2": "BE",
+              "alpha3": "BEL",
+              "name": "Belgium",
+              "slug": "belgium"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "ألكسندر بلوكس"
+              },
+              "shortNameTranslation": {
+                "ar": "أ. بلوكس"
+              }
+            }
+          },
+          "type": 7,
+          "rowName": "Alexander Blockx",
+          "ranking": 116,
+          "points": 542,
+          "previousRanking": 116,
+          "id": 208035,
+          "country": {},
+          "rankingClass": "livetennis"
+        },
+        {
+          "team": {
+            "name": "Alexander Blockx",
+            "slug": "blockx-alexander",
+            "shortName": "A. Blockx",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 3704,
+            "nameCode": "BLO",
+            "ranking": 116,
+            "national": false,
+            "type": 1,
+            "id": 390214,
+            "country": {
+              "alpha2": "BE",
+              "alpha3": "BEL",
+              "name": "Belgium",
+              "slug": "belgium"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "ألكسندر بلوكس"
+              },
+              "shortNameTranslation": {
+                "ar": "أ. بلوكس"
+              }
+            }
+          },
+          "type": 34,
+          "rowName": "Alexander Blockx",
+          "ranking": 121,
+          "points": 14.79,
+          "previousRanking": 122,
+          "previousPoints": 14.78,
+          "bestRanking": 112,
+          "id": 180997,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1757592041
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/tv/event/14932267/country-channels": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/sofascore-news/it/posts?page=1&per_page=12&categories=news-it": [
+      {
+        "id": 83644,
+        "slug": "il-psg-batte-il-flamengo-leuropa-domina-ancora-il-mondiale-per-club",
+        "date": "2025-12-18T11:41:02",
+        "title": "Il PSG Batte il Flamengo, l’Europa Domina Ancora il Mondiale per Club",
+        "excerpt": "Il Flamengo è stato sconfitto dal PSG nella finale intercontinentale e l’Europa ha mantenuto la leadership nei titoli mondiali per club. Un nuovo capitolo in un divario competitivo crescente.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070426677-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5694,
+            "slug": "fifa-it",
+            "name": "FIFA"
+          },
+          {
+            "id": 8028,
+            "slug": "flamengo-it",
+            "name": "Flamengo"
+          },
+          {
+            "id": 8194,
+            "slug": "mondiale-per-club",
+            "name": "Mondiale per Club"
+          },
+          {
+            "id": 6348,
+            "slug": "psg-it",
+            "name": "PSG"
+          }
+        ]
+      },
+      {
+        "id": 83603,
+        "slug": "i-new-york-knicks-battono-i-san-antonio-spurs-nella-finale-della-coppa-nba-ponendo-fine-a-52-anni-di-siccita-di-trofei",
+        "date": "2025-12-17T23:13:33",
+        "title": "I New York Knicks Battono i San Antonio Spurs nella Finale della Coppa NBA, Ponendo fine a 52 anni di Siccità di Trofei",
+        "excerpt": "I New York Knicks superano i San Antonio Spurs nella finale di NBA Cup e interrompono un digiuno di 52 anni, trascinati da Jalen Brunson e OG Anunoby.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1058521457-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5535,
+            "slug": "nba-it",
+            "name": "NBA"
+          },
+          {
+            "id": 7713,
+            "slug": "nba-cup-it",
+            "name": "NBA Cup"
+          },
+          {
+            "id": 8224,
+            "slug": "new-york-knicks-it",
+            "name": "New York Knicks"
+          }
+        ]
+      },
+      {
+        "id": 83586,
+        "slug": "fiorentina-il-crollo-stagione-da-record-in-negativo",
+        "date": "2025-12-17T15:49:05",
+        "title": "Fiorentina, il Crollo: Stagione da Record in Negativo",
+        "excerpt": "La Fiorentina vive una delle stagioni più difficili di sempre, tra record negativi, rendimento in calo e un’identità mai trovata.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070389689-1-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 8216,
+            "slug": "fiorentina",
+            "name": "Fiorentina"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83560,
+        "slug": "recap-16a-giornata-laliga",
+        "date": "2025-12-16T21:28:16",
+        "title": "Recap 16a Giornata LaLiga",
+        "excerpt": "La 16ª giornata della Liga ha regalato rimonte, vittorie schiaccianti e un rinvio. Barcellona e Real Madrid hanno ottenuto vittorie decisive, mentre Girona e Celta hanno impressionato in trasferta. Raphinha e Tsygankov si sono distinti, con una classifica che si è mantenuta serrata e competitiva.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/IMG_6001-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5594,
+            "slug": "laliga-it",
+            "name": "LaLiga"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          }
+        ]
+      },
+      {
+        "id": 83527,
+        "slug": "recap-16a-giornata-di-premier-league",
+        "date": "2025-12-16T14:20:01",
+        "title": "Recap 16a Giornata di Premier League",
+        "excerpt": "La 16ª giornata di Premier League regala spettacolo e sorprese: big vincenti, scivoloni pesanti e una classifica sempre più corta.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Morgan-Rogers-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5609,
+            "slug": "premier-league-it",
+            "name": "Premier League"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          }
+        ]
+      },
+      {
+        "id": 83503,
+        "slug": "i-numeri-non-mentono-buona-fortuna-xabi-ne-avrai-bisogno",
+        "date": "2025-12-16T12:54:00",
+        "title": "I Numeri non Mentono: Buona Fortuna Xabi, ne Avrai Bisogno",
+        "excerpt": "Xabi Alonso vive il primo vero stress al Real Madrid: risultati discreti, critiche feroci e un ambiente dove vincere non basta mai.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/11/NDL_studioBackground_v1-1024x576.png",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 7170,
+            "slug": "numbers-dont-lie-it",
+            "name": "Numbers don't lie"
+          },
+          {
+            "id": 6067,
+            "slug": "real-madrid-it",
+            "name": "Real Madrid"
+          },
+          {
+            "id": 8200,
+            "slug": "xabi-alonso",
+            "name": "Xabi Alonso"
+          }
+        ]
+      },
+      {
+        "id": 83470,
+        "slug": "coppa-intercontinentale-fifa-il-flamengo-affronta-il-psg-alla-ricerca-di-un-titolo-storico",
+        "date": "2025-12-15T23:26:40",
+        "title": "Mondiale per Club FIFA: il Flamengo Affronta il PSG alla Ricerca di un Titolo Storico",
+        "excerpt": "I club brasiliani non hanno vinto un titolo mondiale dal Corinthians nel 2012. Ecco la ripartizione completa di Flamengo vs PSG, l’analisi tattica, i giocatori chiave, il montepremi e la forma di entrambe le squadre nella stagione 2025/26.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070308762-1-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5694,
+            "slug": "fifa-it",
+            "name": "FIFA"
+          },
+          {
+            "id": 8028,
+            "slug": "flamengo-it",
+            "name": "Flamengo"
+          },
+          {
+            "id": 8194,
+            "slug": "mondiale-per-club",
+            "name": "Mondiale per Club"
+          },
+          {
+            "id": 6348,
+            "slug": "psg-it",
+            "name": "PSG"
+          }
+        ]
+      },
+      {
+        "id": 83467,
+        "slug": "recap-della-settimana-7-e-8-della-western-conference-nba",
+        "date": "2025-12-15T23:15:10",
+        "title": "Recap della Settimana 7 e 8 della Western Conference NBA",
+        "excerpt": "Le settimane 7 e 8 della Western Conference hanno visto Oklahoma City rimanere in testa nonostante la fine della striscia positiva, con Denver e Houston che guadagnano slancio. Nikola Jokić continua a dominare individualmente, mentre Lakers e Spurs restano vicini in una corsa ai playoff sempre più competitiva.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070196331-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5535,
+            "slug": "nba-it",
+            "name": "NBA"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          },
+          {
+            "id": 8184,
+            "slug": "western-it",
+            "name": "Western"
+          }
+        ]
+      },
+      {
+        "id": 83412,
+        "slug": "stagione-sofascore-i-giocatori-e-le-squadre-piu-aperti-nel-2025",
+        "date": "2025-12-15T13:49:33",
+        "title": "Stagione Sofascore: i Giocatori e le Squadre più Cercate del 2025",
+        "excerpt": "I club, i giocatori e gli eventi più cercati su Sofascore nel 2025. Il calcio è stato il settore trainante dell’anno, con Barcellona, ​​Real Madrid e star internazionali in cima alle ricerche in tutto il mondo.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Title-Yamal_Mbappe-1024x576.jpg",
+        "tags": [
+          {
+            "id": 8158,
+            "slug": "barcellona",
+            "name": "Barcellona"
+          },
+          {
+            "id": 8155,
+            "slug": "kylian-mbappe-it",
+            "name": "Kylian Mbappe"
+          },
+          {
+            "id": 5597,
+            "slug": "lamine-yamal-it",
+            "name": "Lamine Yamal"
+          },
+          {
+            "id": 6067,
+            "slug": "real-madrid-it",
+            "name": "Real Madrid"
+          },
+          {
+            "id": 8144,
+            "slug": "sofascore-season-it",
+            "name": "Sofascore Season"
+          }
+        ]
+      },
+      {
+        "id": 83361,
+        "slug": "fantaconsigli-serie-a-15a-giornata",
+        "date": "2025-12-12T09:44:18",
+        "title": "Fantaconsigli Serie A – 15a Giornata",
+        "excerpt": "Consigli pratici per la 15ª giornata: giocatori affidabili, possibili sorprese e scelte utili per completare la formazione senza rischi inutili.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/ITA_Fantasy-Serie-A-R15-1024x576.jpg",
+        "tags": [
+          {
+            "id": 6927,
+            "slug": "fantasy-it",
+            "name": "Fantasy"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83330,
+        "slug": "serie-a-2025-26-flop-milionari-vs-sorprese-pazzesche",
+        "date": "2025-12-11T22:12:29",
+        "title": "Serie A 2025/26: Flop Milionari vs. Sorprese Pazzesche",
+        "excerpt": "Analisi reale e fantacalcistica della Serie A 2025/26: Openda, Nkunku e Bailey faticano nonostante investimenti pesanti, mentre Giovane, Vardy e Højlund stanno brillando oltre ogni attesa. Dati, contesto e valutazioni sui giocatori più discussi dell’ultima sessione di mercato.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Bailey-1-1024x576.jpg",
+        "tags": [
+          {
+            "id": 6984,
+            "slug": "fantacalcio",
+            "name": "Fantacalcio"
+          },
+          {
+            "id": 6927,
+            "slug": "fantasy-it",
+            "name": "Fantasy"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83319,
+        "slug": "sofascore-stagione-2025-gli-atleti-piu-popolari-al-mondo-sport-per-sport",
+        "date": "2025-12-11T20:56:40",
+        "title": "Sofascore Stagione 2025: gli Atleti più Popolari al Mondo, Sport per Sport",
+        "excerpt": "Sofascore Season svela gli atleti più seguiti in tutti i principali sport nel 2025. Uno sguardo completo ai giocatori più seguiti dai fan durante l’anno.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Most-Popular-Athletes-Title-1024x576.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5803,
+            "slug": "american-football-it",
+            "name": "Football americano"
+          },
+          {
+            "id": 5523,
+            "slug": "basketball-it",
+            "name": "Pallacanestro"
+          },
+          {
+            "id": 8144,
+            "slug": "sofascore-season-it",
+            "name": "Sofascore Season"
+          },
+          {
+            "id": 5930,
+            "slug": "tennis-it",
+            "name": "Tennis"
+          }
+        ]
+      }
+    ],
+    "https://www.sofascore.com/api/v1/event/14932267": {
+      "event": {
+        "firstToServe": 2,
+        "awayTeamSeed": "Q",
+        "tournament": {
+          "name": "Bratislava 2, Slovakia",
+          "slug": "bratislava-2-slovakia",
+          "category": {
+            "name": "Challenger",
+            "slug": "challenger",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 72,
+            "country": {},
+            "flag": "challenger",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "تحدي (تنس)",
+                "hi": "डेनमार्क",
+                "bn": "চ্যালেঞ্জার"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "uniqueTournament": {
+            "name": "Bratislava, Slovakia",
+            "slug": "bratislava-slovakia",
+            "category": {
+              "name": "Challenger",
+              "slug": "challenger",
+              "sport": {
+                "name": "Tennis",
+                "slug": "tennis",
+                "id": 5
+              },
+              "id": 72,
+              "country": {},
+              "flag": "challenger",
+              "fieldTranslations": {
+                "nameTranslation": {
+                  "ar": "تحدي (تنس)",
+                  "hi": "डेनमार्क",
+                  "bn": "চ্যালেঞ্জার"
+                },
+                "shortNameTranslation": {}
+              }
+            },
+            "userCount": 133,
+            "groundType": "Hardcourt indoor",
+            "tennisPoints": 125,
+            "hasRounds": true,
+            "hasPerformanceGraphFeature": false,
+            "id": 14402,
+            "country": {},
+            "hasEventPlayerStatistics": false,
+            "displayInverseHomeAwayTeams": false,
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "براتيسلافا، سلوفاكيا"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "priority": 0,
+          "isGroup": false,
+          "competitionType": 2,
+          "id": 166947,
+          "endTimestamp": 1762041600,
+          "startTimestamp": 1761523200,
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "براتيسلافا 2، سلوفاكيا"
+            },
+            "shortNameTranslation": {}
+          }
+        },
+        "season": {
+          "name": "ATP Challenger Bratislava II, Slovakia Men Singles 2025",
+          "year": "2025",
+          "editor": false,
+          "id": 80586
+        },
+        "roundInfo": {
+          "round": 29,
+          "name": "Final",
+          "slug": "final",
+          "cupRoundType": 1
+        },
+        "customId": "ADXbsoegd",
+        "status": {
+          "code": 100,
+          "description": "Ended",
+          "type": "finished"
+        },
+        "winnerCode": 1,
+        "venue": {
+          "city": {
+            "name": "Bratislava"
+          },
+          "hidden": true,
+          "slug": "centre-court",
+          "name": "Centre Court",
+          "id": 52452,
+          "country": {
+            "alpha2": "SK",
+            "alpha3": "SVK",
+            "name": "Slovakia",
+            "slug": "slovakia"
+          },
+          "stadium": {
+            "name": "Centre Court"
+          }
+        },
+        "homeTeam": {
+          "name": "Alexander Blockx",
+          "slug": "blockx-alexander",
+          "shortName": "A. Blockx",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 3704,
+          "playerTeamInfo": {
+            "birthplace": "Antwerp",
+            "height": 1.93,
+            "weight": 83,
+            "plays": "right-handed",
+            "prizeCurrent": 311377,
+            "prizeTotal": 439970,
+            "id": 5678,
+            "birthDateTimestamp": 1112918400,
+            "prizeCurrentRaw": {
+              "value": 311377,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 439970,
+              "currency": "EUR"
+            },
+            "currentRanking": 116
+          },
+          "nameCode": "BLO",
+          "ranking": 116,
+          "national": false,
+          "type": 1,
+          "id": 390214,
+          "country": {
+            "alpha2": "BE",
+            "alpha3": "BEL",
+            "name": "Belgium",
+            "slug": "belgium"
+          },
+          "fullName": "Alexander Blockx",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "ألكسندر بلوكس"
+            },
+            "shortNameTranslation": {
+              "ar": "أ. بلوكس"
+            }
+          },
+          "timeActive": []
+        },
+        "awayTeam": {
+          "name": "Titouan Droguet",
+          "slug": "droguet-titouan",
+          "shortName": "T. Droguet",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 1708,
+          "playerTeamInfo": {
+            "birthplace": "Villeneuve saint Georges",
+            "height": 1.91,
+            "weight": 80,
+            "plays": "right-handed",
+            "prizeCurrent": 266254,
+            "prizeTotal": 690011,
+            "id": 3015,
+            "birthDateTimestamp": 992563200,
+            "prizeCurrentRaw": {
+              "value": 266254,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 690011,
+              "currency": "EUR"
+            },
+            "currentRanking": 149
+          },
+          "nameCode": "DRO",
+          "ranking": 149,
+          "national": false,
+          "type": 1,
+          "id": 243925,
+          "country": {
+            "alpha2": "FR",
+            "alpha3": "FRA",
+            "name": "France",
+            "slug": "france"
+          },
+          "fullName": "Titouan Droguet",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "تيتوان دروجيه",
+              "ru": "Дроге, Титуан",
+              "hi": "तीतुआन द्रोगुएट",
+              "bn": "টিটুয়ান দ্রোগেট"
+            },
+            "shortNameTranslation": {
+              "ar": "ت. دروجيه"
+            }
+          },
+          "timeActive": []
+        },
+        "homeScore": {
+          "current": 2,
+          "display": 2,
+          "period1": 6,
+          "period2": 6,
+          "point": "A",
+          "normaltime": 2
+        },
+        "awayScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 4,
+          "period2": 3,
+          "point": "40",
+          "normaltime": 0
+        },
+        "time": {
+          "period1": 2202,
+          "period2": 1960,
+          "currentPeriodStartTimestamp": 1762094817
+        },
+        "changes": {
+          "changes": [
+            "time.currentPeriodStart"
+          ],
+          "changeTimestamp": 1762096973
+        },
+        "hasGlobalHighlights": false,
+        "crowdsourcingDataDisplayEnabled": false,
+        "id": 14932267,
+        "defaultPeriodCount": 3,
+        "slug": "alexander-blockx-titouan-droguet",
+        "currentPeriodStartTimestamp": 1762094817,
+        "startTimestamp": 1762092000,
+        "periods": {
+          "point": "Game",
+          "current": "Match",
+          "period1": "1st set",
+          "period2": "2nd set",
+          "period3": "3rd set",
+          "period4": "4th set",
+          "period5": "5th set"
+        },
+        "finalResultOnly": false,
+        "hasBet365LiveStream": true,
+        "bet365ExcludedCountryCodes": [
+          "??",
+          "AN",
+          "CU",
+          "IR",
+          "KP",
+          "SY",
+          "VE",
+          "GR",
+          "RU",
+          "CH",
+          "CA"
+        ],
+        "feedLocked": false,
+        "groundType": "Hardcourt indoor",
+        "showTotoPromo": true,
+        "isEditor": false
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/votes": {
+      "vote": {
+        "vote1": 1598,
+        "vote2": 309,
+        "voteX": null
+      },
+      "bothTeamsToScoreVote": {
+        "voteYes": 0,
+        "voteNo": 0
+      },
+      "firstTeamToScoreVote": {
+        "voteHome": 0,
+        "voteNoGoal": 0,
+        "voteAway": 0
+      },
+      "whoShouldHaveWonVote": {
+        "vote1": 0,
+        "vote2": 0
+      }
+    },
+    "https://www.sofascore.com/api/v1/sport/3600/event-count": {
+      "snooker": {
+        "live": 1,
+        "total": 4
+      },
+      "badminton": {
+        "live": 0,
+        "total": 19
+      },
+      "futsal": {
+        "live": 1,
+        "total": 95
+      },
+      "ice-hockey": {
+        "live": 37,
+        "total": 171
+      },
+      "minifootball": {
+        "live": 2,
+        "total": 62
+      },
+      "darts": {
+        "live": 1,
+        "total": 33
+      },
+      "table-tennis": {
+        "live": 28,
+        "total": 1103
+      },
+      "american-football": {
+        "live": 1,
+        "total": 4
+      },
+      "floorball": {
+        "live": 1,
+        "total": 5
+      },
+      "football": {
+        "live": 32,
+        "total": 395
+      },
+      "tennis": {
+        "live": 9,
+        "total": 148
+      },
+      "baseball": {
+        "live": 0,
+        "total": 13
+      },
+      "basketball": {
+        "live": 40,
+        "total": 408
+      },
+      "bandy": {
+        "live": 4,
+        "total": 11
+      },
+      "handball": {
+        "live": 5,
+        "total": 56
+      },
+      "cricket": {
+        "live": 2,
+        "total": 17
+      },
+      "waterpolo": {
+        "live": 0,
+        "total": 1
+      },
+      "rugby": {
+        "live": 0,
+        "total": 14
+      },
+      "esports": {
+        "live": 4,
+        "total": 52
+      },
+      "volleyball": {
+        "live": 11,
+        "total": 73
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/pregame-form": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/managers": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/h2h": {
+      "teamDuel": {
+        "homeWins": 1,
+        "awayWins": 0,
+        "draws": 0
+      },
+      "managerDuel": null
+    },
+    "https://www.sofascore.com/api/v1/team/243925/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Titouan Droguet",
+            "slug": "droguet-titouan",
+            "shortName": "T. Droguet",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 1708,
+            "nameCode": "DRO",
+            "ranking": 149,
+            "national": false,
+            "type": 1,
+            "id": 243925,
+            "country": {
+              "alpha2": "FR",
+              "alpha3": "FRA",
+              "name": "France",
+              "slug": "france"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "تيتوان دروجيه",
+                "ru": "Дроге, Титуан",
+                "hi": "तीतुआन द्रोगुएट",
+                "bn": "টিটুয়ান দ্রোগেট"
+              },
+              "shortNameTranslation": {
+                "ar": "ت. دروجيه"
+              }
+            }
+          },
+          "tournamentsPlayed": 21,
+          "type": 5,
+          "rowName": "Titouan Droguet",
+          "ranking": 149,
+          "points": 410,
+          "previousRanking": 149,
+          "previousPoints": 410,
+          "bestRanking": 130,
+          "id": 1031,
+          "country": {
+            "alpha2": "FR",
+            "alpha3": "FRA",
+            "name": "France",
+            "slug": "france"
+          },
+          "rankingClass": "team"
+        },
+        {
+          "team": {
+            "name": "Titouan Droguet",
+            "slug": "droguet-titouan",
+            "shortName": "T. Droguet",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 1708,
+            "nameCode": "DRO",
+            "ranking": 149,
+            "national": false,
+            "type": 1,
+            "id": 243925,
+            "country": {
+              "alpha2": "FR",
+              "alpha3": "FRA",
+              "name": "France",
+              "slug": "france"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "تيتوان دروجيه",
+                "ru": "Дроге, Титуан",
+                "hi": "तीतुआन द्रोगुएट",
+                "bn": "টিটুয়ান দ্রোগেট"
+              },
+              "shortNameTranslation": {
+                "ar": "ت. دروجيه"
+              }
+            }
+          },
+          "type": 7,
+          "rowName": "Titouan Droguet",
+          "ranking": 149,
+          "points": 410,
+          "previousRanking": 149,
+          "id": 208068,
+          "country": {},
+          "rankingClass": "livetennis"
+        },
+        {
+          "team": {
+            "name": "Titouan Droguet",
+            "slug": "droguet-titouan",
+            "shortName": "T. Droguet",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 1708,
+            "nameCode": "DRO",
+            "ranking": 149,
+            "national": false,
+            "type": 1,
+            "id": 243925,
+            "country": {
+              "alpha2": "FR",
+              "alpha3": "FRA",
+              "name": "France",
+              "slug": "france"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "تيتوان دروجيه",
+                "ru": "Дроге, Титуан",
+                "hi": "तीतुआन द्रोगुएट",
+                "bn": "টিটুয়ান দ্রোগেট"
+              },
+              "shortNameTranslation": {
+                "ar": "ت. دروجيه"
+              }
+            }
+          },
+          "type": 34,
+          "rowName": "Titouan Droguet",
+          "ranking": 182,
+          "points": 14.49,
+          "previousRanking": 183,
+          "previousPoints": 14.48,
+          "bestRanking": 77,
+          "id": 180975,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1760011272
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/tennis-power": {
+      "tennisPowerRankings": [
+        {
+          "set": 1,
+          "game": 1,
+          "value": -10,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 2,
+          "value": 10,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 3,
+          "value": -28.8,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 4,
+          "value": 24,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 5,
+          "value": -54,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 6,
+          "value": 49,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 7,
+          "value": -54,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 8,
+          "value": 29,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 9,
+          "value": 15,
+          "breakOccurred": true
+        },
+        {
+          "set": 1,
+          "game": 10,
+          "value": 63.8,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 1,
+          "value": 55,
+          "breakOccurred": true
+        },
+        {
+          "set": 2,
+          "game": 2,
+          "value": 65,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 3,
+          "value": -10,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 4,
+          "value": 34,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 5,
+          "value": -10,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 6,
+          "value": 34,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 7,
+          "value": -24,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 8,
+          "value": 29,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 9,
+          "value": 20,
+          "breakOccurred": true
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/branding/providers/IT/web": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web",
+          "campaignId": 9,
+          "oddsOffset": 0,
+          "id": 21818,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy",
+            "slug": "admiralbet-italy",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 645,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 21819,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 21820,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 22113,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country/IT": {
+      "countrySportPriorities": [
+        {
+          "country": "IT",
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 226
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 227
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 228
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 3,
+          "id": 229
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 4,
+          "id": 230
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 5,
+          "id": 231
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 6,
+          "id": 232
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 7,
+          "id": 233
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 8,
+          "id": 234
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 9,
+          "id": 235
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 10,
+          "id": 236
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 11,
+          "id": 237
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 12,
+          "id": 238
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 13,
+          "id": 239
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 14,
+          "id": 240
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 15,
+          "id": 241
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 16,
+          "id": 242
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 17,
+          "id": 243
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 18,
+          "id": 244
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 245
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 246
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 247
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 248
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 249
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 250
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-odds": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web-odds",
+          "campaignId": 8,
+          "oddsOffset": 0,
+          "id": 15067,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy Odds Tab",
+            "slug": "admiralbet-italy-odds-tab",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1178,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web-odds",
+          "campaignId": 8,
+          "id": 15070,
+          "impressionCostEncrypted": "4H+l2X9qJbX/h1COpSR6yfxZFiuX6qSY"
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 15069,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 15068,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/odds/1/all": {
+      "markets": [
+        {
+          "sourceId": 184043333,
+          "structureType": 1,
+          "marketId": 1,
+          "marketName": "Full time",
+          "isLive": false,
+          "fid": 184043333,
+          "suspended": false,
+          "id": 139292648,
+          "marketGroup": "Home/Away",
+          "marketPeriod": "Match",
+          "choices": [
+            {
+              "initialFractionalValue": "57/100",
+              "fractionalValue": "53/100",
+              "sourceId": 2008246962,
+              "name": "1",
+              "winning": true,
+              "change": -1
+            },
+            {
+              "initialFractionalValue": "5/4",
+              "fractionalValue": "69/50",
+              "sourceId": 2008247074,
+              "name": "2",
+              "winning": false,
+              "change": 1
+            }
+          ]
+        },
+        {
+          "sourceId": 184043333,
+          "structureType": 1,
+          "marketId": 11,
+          "marketName": "First set winner",
+          "isLive": false,
+          "fid": 184043333,
+          "suspended": false,
+          "id": 139398102,
+          "marketGroup": "Home/Away",
+          "marketPeriod": "1st set",
+          "choices": [
+            {
+              "initialFractionalValue": "4/7",
+              "fractionalValue": "8/13",
+              "sourceId": 2008251387,
+              "name": "1",
+              "winning": true,
+              "change": 1
+            },
+            {
+              "initialFractionalValue": "5/4",
+              "fractionalValue": "6/5",
+              "sourceId": 2008251518,
+              "name": "2",
+              "winning": false,
+              "change": -1
+            }
+          ]
+        },
+        {
+          "sourceId": 184043333,
+          "structureType": 2,
+          "marketId": 12,
+          "marketName": "Total games won",
+          "choiceGroup": "23.5",
+          "isLive": false,
+          "fid": 184043333,
+          "suspended": false,
+          "id": 139398103,
+          "marketGroup": "Total sets/games",
+          "marketPeriod": "Extra time",
+          "choices": [
+            {
+              "initialFractionalValue": "10/11",
+              "fractionalValue": "5/6",
+              "sourceId": 2008519431,
+              "name": "Over",
+              "winning": false,
+              "change": -1
+            },
+            {
+              "initialFractionalValue": "4/5",
+              "fractionalValue": "5/6",
+              "sourceId": 2008519177,
+              "name": "Under",
+              "winning": true,
+              "change": 1
+            }
+          ]
+        }
+      ],
+      "eventId": 14932267
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/provider/1/winning-odds": {
+      "home": {
+        "fractionalValue": "11/25",
+        "expected": 69,
+        "actual": 58,
+        "id": 17820316
+      },
+      "away": {
+        "fractionalValue": "163/100",
+        "expected": 38,
+        "actual": 21,
+        "id": 17820317
+      }
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-featured": {
+      "providers": [],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/newly-added-events": {
+      "events": [
+        {
+          "eventId": 15250542,
+          "homeTeamId": 364014,
+          "awayTeamId": 455493,
+          "uniqueTournamentId": 31563
+        },
+        {
+          "eventId": 15250543,
+          "homeTeamId": 1159640,
+          "awayTeamId": 495667,
+          "uniqueTournamentId": 31563
+        },
+        {
+          "eventId": 15250544,
+          "homeTeamId": 1157815,
+          "awayTeamId": 1156738,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250612,
+          "homeTeamId": 1159841,
+          "awayTeamId": 343445,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250656,
+          "homeTeamId": 1157175,
+          "awayTeamId": 1159544,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250658,
+          "homeTeamId": 1156965,
+          "awayTeamId": 1159544,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250659,
+          "homeTeamId": 1157175,
+          "awayTeamId": 1156993,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250660,
+          "homeTeamId": 1156993,
+          "awayTeamId": 1156965,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250661,
+          "homeTeamId": 468570,
+          "awayTeamId": 423272,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250662,
+          "homeTeamId": 1157175,
+          "awayTeamId": 1156965,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250674,
+          "homeTeamId": 1157746,
+          "awayTeamId": 343965,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250680,
+          "homeTeamId": 1156993,
+          "awayTeamId": 1159544,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250753,
+          "homeTeamId": 343962,
+          "awayTeamId": 351264,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250754,
+          "homeTeamId": 1157342,
+          "awayTeamId": 424455,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250757,
+          "homeTeamId": 1158417,
+          "awayTeamId": 1158415,
+          "uniqueTournamentId": 21866
+        },
+        {
+          "eventId": 15250783,
+          "homeTeamId": 1149278,
+          "awayTeamId": 1125042,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250784,
+          "homeTeamId": 355310,
+          "awayTeamId": 458587,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15250807,
+          "homeTeamId": 350205,
+          "awayTeamId": 1154662,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250818,
+          "homeTeamId": 364400,
+          "awayTeamId": 385669,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250859,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250860,
+          "homeTeamId": 488028,
+          "awayTeamId": 1151883,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250861,
+          "homeTeamId": 365237,
+          "awayTeamId": 459828,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15250862,
+          "homeTeamId": 374774,
+          "awayTeamId": 373832,
+          "uniqueTournamentId": 16254
+        },
+        {
+          "eventId": 15250871,
+          "homeTeamId": 398479,
+          "awayTeamId": 481710,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250872,
+          "homeTeamId": 424538,
+          "awayTeamId": 409968,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250873,
+          "homeTeamId": 412636,
+          "awayTeamId": 410440,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250874,
+          "homeTeamId": 410058,
+          "awayTeamId": 398486,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250875,
+          "homeTeamId": 522792,
+          "awayTeamId": 470122,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250876,
+          "homeTeamId": 1044038,
+          "awayTeamId": 461161,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15250877,
+          "homeTeamId": 409860,
+          "awayTeamId": 1156343,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250878,
+          "homeTeamId": 481363,
+          "awayTeamId": 483980,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250879,
+          "homeTeamId": 1158506,
+          "awayTeamId": 1157668,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250880,
+          "homeTeamId": 1156849,
+          "awayTeamId": 482074,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250881,
+          "homeTeamId": 410188,
+          "awayTeamId": 410941,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250882,
+          "homeTeamId": 515420,
+          "awayTeamId": 445964,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250883,
+          "homeTeamId": 482691,
+          "awayTeamId": 1115666,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250884,
+          "homeTeamId": 481731,
+          "awayTeamId": 481751,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250885,
+          "homeTeamId": 482076,
+          "awayTeamId": 481517,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250886,
+          "homeTeamId": 1156663,
+          "awayTeamId": 482330,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250887,
+          "homeTeamId": 483926,
+          "awayTeamId": 484952,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250888,
+          "homeTeamId": 409884,
+          "awayTeamId": 1089157,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250889,
+          "homeTeamId": 481372,
+          "awayTeamId": 480746,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250890,
+          "homeTeamId": 482691,
+          "awayTeamId": 482330,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250891,
+          "homeTeamId": 481731,
+          "awayTeamId": 484952,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250892,
+          "homeTeamId": 448101,
+          "awayTeamId": 410361,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250893,
+          "homeTeamId": 421438,
+          "awayTeamId": 410941,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250894,
+          "homeTeamId": 482076,
+          "awayTeamId": 480746,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250895,
+          "homeTeamId": 1115666,
+          "awayTeamId": 1156663,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250896,
+          "homeTeamId": 481751,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250897,
+          "homeTeamId": 409884,
+          "awayTeamId": 410361,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250898,
+          "homeTeamId": 523618,
+          "awayTeamId": 355226,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250899,
+          "homeTeamId": 481517,
+          "awayTeamId": 481372,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250900,
+          "homeTeamId": 482691,
+          "awayTeamId": 1156663,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250901,
+          "homeTeamId": 481731,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250902,
+          "homeTeamId": 1089157,
+          "awayTeamId": 448101,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250903,
+          "homeTeamId": 421438,
+          "awayTeamId": 355226,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250904,
+          "homeTeamId": 482076,
+          "awayTeamId": 481372,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250905,
+          "homeTeamId": 482330,
+          "awayTeamId": 1115666,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250906,
+          "homeTeamId": 484952,
+          "awayTeamId": 481751,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250907,
+          "homeTeamId": 409884,
+          "awayTeamId": 448101,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250908,
+          "homeTeamId": 410941,
+          "awayTeamId": 523618,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250909,
+          "homeTeamId": 480746,
+          "awayTeamId": 481517,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250910,
+          "homeTeamId": 410361,
+          "awayTeamId": 1089157,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250911,
+          "homeTeamId": 421438,
+          "awayTeamId": 523618,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250912,
+          "homeTeamId": 355226,
+          "awayTeamId": 410941,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250913,
+          "homeTeamId": 481733,
+          "awayTeamId": 480755,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250914,
+          "homeTeamId": 446961,
+          "awayTeamId": 481731,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250915,
+          "homeTeamId": 480739,
+          "awayTeamId": 549576,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250916,
+          "homeTeamId": 483926,
+          "awayTeamId": 1156351,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250917,
+          "homeTeamId": 1156855,
+          "awayTeamId": 501592,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250918,
+          "homeTeamId": 355849,
+          "awayTeamId": 448100,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250919,
+          "homeTeamId": 481677,
+          "awayTeamId": 1156662,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250920,
+          "homeTeamId": 481733,
+          "awayTeamId": 1156351,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250921,
+          "homeTeamId": 446961,
+          "awayTeamId": 501592,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250922,
+          "homeTeamId": 409918,
+          "awayTeamId": 445964,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250923,
+          "homeTeamId": 411794,
+          "awayTeamId": 494212,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250924,
+          "homeTeamId": 480739,
+          "awayTeamId": 1156662,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250925,
+          "homeTeamId": 480755,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250926,
+          "homeTeamId": 481731,
+          "awayTeamId": 1156855,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250927,
+          "homeTeamId": 355849,
+          "awayTeamId": 445964,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250928,
+          "homeTeamId": 466093,
+          "awayTeamId": 412080,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250929,
+          "homeTeamId": 549576,
+          "awayTeamId": 481677,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250930,
+          "homeTeamId": 481733,
+          "awayTeamId": 483926,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250931,
+          "homeTeamId": 446961,
+          "awayTeamId": 1156855,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250932,
+          "homeTeamId": 448100,
+          "awayTeamId": 409918,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250933,
+          "homeTeamId": 411794,
+          "awayTeamId": 412080,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250934,
+          "homeTeamId": 480739,
+          "awayTeamId": 481677,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250935,
+          "homeTeamId": 1156351,
+          "awayTeamId": 480755,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250936,
+          "homeTeamId": 501592,
+          "awayTeamId": 481731,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250937,
+          "homeTeamId": 355849,
+          "awayTeamId": 409918,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250938,
+          "homeTeamId": 494212,
+          "awayTeamId": 466093,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250939,
+          "homeTeamId": 1156662,
+          "awayTeamId": 549576,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250940,
+          "homeTeamId": 445964,
+          "awayTeamId": 448100,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250941,
+          "homeTeamId": 411794,
+          "awayTeamId": 466093,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250942,
+          "homeTeamId": 412080,
+          "awayTeamId": 494212,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15250982,
+          "homeTeamId": 1158015,
+          "awayTeamId": 1159840,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250988,
+          "homeTeamId": 1156316,
+          "awayTeamId": 1156459,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250989,
+          "homeTeamId": 1156954,
+          "awayTeamId": 418035,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250994,
+          "homeTeamId": 418603,
+          "awayTeamId": 414595,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250996,
+          "homeTeamId": 1156555,
+          "awayTeamId": 1156561,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15250997,
+          "homeTeamId": 495667,
+          "awayTeamId": 455493,
+          "uniqueTournamentId": 31563
+        },
+        {
+          "eventId": 15251012,
+          "homeTeamId": 350205,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251048,
+          "homeTeamId": 464025,
+          "awayTeamId": 1137916,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15251049,
+          "homeTeamId": 364821,
+          "awayTeamId": 499173,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15251063,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156459,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251082,
+          "homeTeamId": 1156316,
+          "awayTeamId": 1156315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251121,
+          "homeTeamId": 1154662,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251186,
+          "homeTeamId": 1156660,
+          "awayTeamId": 1156316,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251298,
+          "homeTeamId": 1156459,
+          "awayTeamId": 1156315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251440,
+          "homeTeamId": 405350,
+          "awayTeamId": 382955,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251442,
+          "homeTeamId": 402744,
+          "awayTeamId": 424646,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251454,
+          "homeTeamId": 1157711,
+          "awayTeamId": 1158143,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15251505,
+          "homeTeamId": 1156965,
+          "awayTeamId": 1156993,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251522,
+          "homeTeamId": 466046,
+          "awayTeamId": 419353,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251523,
+          "homeTeamId": 353296,
+          "awayTeamId": 375154,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251525,
+          "homeTeamId": 1154653,
+          "awayTeamId": 1156962,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251537,
+          "homeTeamId": 1157936,
+          "awayTeamId": 1158141,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15251560,
+          "homeTeamId": 1159544,
+          "awayTeamId": 1157175,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251561,
+          "homeTeamId": 1157444,
+          "awayTeamId": 380742,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15251584,
+          "homeTeamId": 1154663,
+          "awayTeamId": 1154652,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15251585,
+          "homeTeamId": 254885,
+          "awayTeamId": 126244,
+          "uniqueTournamentId": 2122
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/14932267/statistics": {
+      "statistics": [
+        {
+          "period": "ALL",
+          "groups": [
+            {
+              "groupName": "Service",
+              "statisticsItems": [
+                {
+                  "name": "Aces",
+                  "home": "3",
+                  "away": "1",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 3,
+                  "awayValue": 1,
+                  "renderType": 1,
+                  "key": "aces"
+                },
+                {
+                  "name": "Double faults",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "negative",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "doubleFaults"
+                },
+                {
+                  "name": "First serve",
+                  "home": "28/43 (65%)",
+                  "away": "40/57 (70%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 28,
+                  "awayValue": 40,
+                  "homeTotal": 43,
+                  "awayTotal": 57,
+                  "renderType": 1,
+                  "key": "firstServeAccuracy"
+                },
+                {
+                  "name": "Second serve",
+                  "home": "15/15 (100%)",
+                  "away": "17/17 (100%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 15,
+                  "awayValue": 17,
+                  "homeTotal": 15,
+                  "awayTotal": 17,
+                  "renderType": 1,
+                  "key": "secondServeAccuracy"
+                },
+                {
+                  "name": "First serve points",
+                  "home": "24/28 (86%)",
+                  "away": "26/40 (65%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 24,
+                  "awayValue": 26,
+                  "homeTotal": 28,
+                  "awayTotal": 40,
+                  "renderType": 1,
+                  "key": "firstServePointsAccuracy"
+                },
+                {
+                  "name": "Second serve points",
+                  "home": "12/15 (80%)",
+                  "away": "10/17 (59%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 12,
+                  "awayValue": 10,
+                  "homeTotal": 15,
+                  "awayTotal": 17,
+                  "renderType": 1,
+                  "key": "secondServePointsAccuracy"
+                },
+                {
+                  "name": "Service games played",
+                  "home": "9",
+                  "away": "10",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 9,
+                  "awayValue": 10,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points saved",
+                  "home": "0/0 (0%)",
+                  "away": "5/8 (62%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 0,
+                  "awayValue": 5,
+                  "homeTotal": 0,
+                  "awayTotal": 8,
+                  "renderType": 1,
+                  "key": "breakPointsSaved"
+                }
+              ]
+            },
+            {
+              "groupName": "Points",
+              "statisticsItems": [
+                {
+                  "name": "Total",
+                  "home": "58",
+                  "away": "43",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 58,
+                  "awayValue": 43,
+                  "renderType": 1,
+                  "key": "pointsTotal"
+                },
+                {
+                  "name": "Service points won",
+                  "home": "36",
+                  "away": "36",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 36,
+                  "awayValue": 36,
+                  "renderType": 1,
+                  "key": "servicePointsScored"
+                },
+                {
+                  "name": "Receiver points won",
+                  "home": "22",
+                  "away": "7",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 22,
+                  "awayValue": 7,
+                  "renderType": 1,
+                  "key": "receiverPointsScored"
+                },
+                {
+                  "name": "Max points in a row",
+                  "home": "7",
+                  "away": "5",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 7,
+                  "awayValue": 5,
+                  "renderType": 1,
+                  "key": "maxPointsInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Games",
+              "statisticsItems": [
+                {
+                  "name": "Total won",
+                  "home": "12",
+                  "away": "7",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 12,
+                  "awayValue": 7,
+                  "renderType": 1,
+                  "key": "gamesWon"
+                },
+                {
+                  "name": "Service games won",
+                  "home": "9",
+                  "away": "7",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 9,
+                  "awayValue": 7,
+                  "renderType": 1,
+                  "key": "serviceGamesWon"
+                },
+                {
+                  "name": "Max games in a row",
+                  "home": "5",
+                  "away": "1",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 5,
+                  "awayValue": 1,
+                  "renderType": 1,
+                  "key": "maxGamesInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Return",
+              "statisticsItems": [
+                {
+                  "name": "First serve return points",
+                  "home": "14/40 (35%)",
+                  "away": "4/28 (14%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 14,
+                  "awayValue": 4,
+                  "homeTotal": 40,
+                  "awayTotal": 28,
+                  "renderType": 1,
+                  "key": "firstReturnPoints"
+                },
+                {
+                  "name": "Second serve return points",
+                  "home": "7/17 (41%)",
+                  "away": "3/15 (20%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 7,
+                  "awayValue": 3,
+                  "homeTotal": 17,
+                  "awayTotal": 15,
+                  "renderType": 1,
+                  "key": "secondReturnPoints"
+                },
+                {
+                  "name": "Return games played",
+                  "home": "10",
+                  "away": "9",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 10,
+                  "awayValue": 9,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points converted",
+                  "home": "3",
+                  "away": "0",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 3,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "breakPointsScored"
+                }
+              ]
+            },
+            {
+              "groupName": "Miscellaneous",
+              "statisticsItems": [
+                {
+                  "name": "Tiebreaks",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "tiebreaks"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "period": "1ST",
+          "groups": [
+            {
+              "groupName": "Service",
+              "statisticsItems": [
+                {
+                  "name": "Aces",
+                  "home": "0",
+                  "away": "1",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 1,
+                  "renderType": 1,
+                  "key": "aces"
+                },
+                {
+                  "name": "Double faults",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "negative",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "doubleFaults"
+                },
+                {
+                  "name": "First serve",
+                  "home": "14/24 (58%)",
+                  "away": "22/29 (76%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 14,
+                  "awayValue": 22,
+                  "homeTotal": 24,
+                  "awayTotal": 29,
+                  "renderType": 1,
+                  "key": "firstServeAccuracy"
+                },
+                {
+                  "name": "Second serve",
+                  "home": "10/10 (100%)",
+                  "away": "7/7 (100%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 10,
+                  "awayValue": 7,
+                  "homeTotal": 10,
+                  "awayTotal": 7,
+                  "renderType": 1,
+                  "key": "secondServeAccuracy"
+                },
+                {
+                  "name": "First serve points",
+                  "home": "13/14 (93%)",
+                  "away": "17/22 (77%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 13,
+                  "awayValue": 17,
+                  "homeTotal": 14,
+                  "awayTotal": 22,
+                  "renderType": 1,
+                  "key": "firstServePointsAccuracy"
+                },
+                {
+                  "name": "Second serve points",
+                  "home": "7/10 (70%)",
+                  "away": "3/7 (43%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 7,
+                  "awayValue": 3,
+                  "homeTotal": 10,
+                  "awayTotal": 7,
+                  "renderType": 1,
+                  "key": "secondServePointsAccuracy"
+                },
+                {
+                  "name": "Service games played",
+                  "home": "5",
+                  "away": "5",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 5,
+                  "awayValue": 5,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points saved",
+                  "home": "0/0 (0%)",
+                  "away": "4/5 (80%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 0,
+                  "awayValue": 4,
+                  "homeTotal": 0,
+                  "awayTotal": 5,
+                  "renderType": 1,
+                  "key": "breakPointsSaved"
+                }
+              ]
+            },
+            {
+              "groupName": "Points",
+              "statisticsItems": [
+                {
+                  "name": "Service points won",
+                  "home": "20",
+                  "away": "20",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 20,
+                  "awayValue": 20,
+                  "renderType": 1,
+                  "key": "servicePointsScored"
+                },
+                {
+                  "name": "Receiver points won",
+                  "home": "9",
+                  "away": "4",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 9,
+                  "awayValue": 4,
+                  "renderType": 1,
+                  "key": "receiverPointsScored"
+                },
+                {
+                  "name": "Max points in a row",
+                  "home": "6",
+                  "away": "5",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 6,
+                  "awayValue": 5,
+                  "renderType": 1,
+                  "key": "maxPointsInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Games",
+              "statisticsItems": [
+                {
+                  "name": "Max games in a row",
+                  "home": "3",
+                  "away": "1",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 3,
+                  "awayValue": 1,
+                  "renderType": 1,
+                  "key": "maxGamesInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Return",
+              "statisticsItems": [
+                {
+                  "name": "First serve return points",
+                  "home": "5/22 (22%)",
+                  "away": "1/14 (7%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 5,
+                  "awayValue": 1,
+                  "homeTotal": 22,
+                  "awayTotal": 14,
+                  "renderType": 1,
+                  "key": "firstReturnPoints"
+                },
+                {
+                  "name": "Second serve return points",
+                  "home": "4/7 (57%)",
+                  "away": "3/10 (30%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 4,
+                  "awayValue": 3,
+                  "homeTotal": 7,
+                  "awayTotal": 10,
+                  "renderType": 1,
+                  "key": "secondReturnPoints"
+                },
+                {
+                  "name": "Return games played",
+                  "home": "5",
+                  "away": "5",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 5,
+                  "awayValue": 5,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points converted",
+                  "home": "1",
+                  "away": "0",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 1,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "breakPointsScored"
+                }
+              ]
+            },
+            {
+              "groupName": "Miscellaneous",
+              "statisticsItems": [
+                {
+                  "name": "Tiebreaks",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "tiebreaks"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "period": "2ND",
+          "groups": [
+            {
+              "groupName": "Service",
+              "statisticsItems": [
+                {
+                  "name": "Aces",
+                  "home": "3",
+                  "away": "0",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 3,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "aces"
+                },
+                {
+                  "name": "Double faults",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "negative",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "doubleFaults"
+                },
+                {
+                  "name": "First serve",
+                  "home": "13/19 (68%)",
+                  "away": "19/29 (66%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 13,
+                  "awayValue": 19,
+                  "homeTotal": 19,
+                  "awayTotal": 29,
+                  "renderType": 1,
+                  "key": "firstServeAccuracy"
+                },
+                {
+                  "name": "Second serve",
+                  "home": "6/6 (100%)",
+                  "away": "10/10 (100%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 6,
+                  "awayValue": 10,
+                  "homeTotal": 6,
+                  "awayTotal": 10,
+                  "renderType": 1,
+                  "key": "secondServeAccuracy"
+                },
+                {
+                  "name": "First serve points",
+                  "home": "10/13 (77%)",
+                  "away": "9/19 (47%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 10,
+                  "awayValue": 9,
+                  "homeTotal": 13,
+                  "awayTotal": 19,
+                  "renderType": 1,
+                  "key": "firstServePointsAccuracy"
+                },
+                {
+                  "name": "Second serve points",
+                  "home": "6/6 (100%)",
+                  "away": "7/10 (70%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 6,
+                  "awayValue": 7,
+                  "homeTotal": 6,
+                  "awayTotal": 10,
+                  "renderType": 1,
+                  "key": "secondServePointsAccuracy"
+                },
+                {
+                  "name": "Service games played",
+                  "home": "4",
+                  "away": "5",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 4,
+                  "awayValue": 5,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points saved",
+                  "home": "0/0 (0%)",
+                  "away": "1/3 (33%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 0,
+                  "awayValue": 1,
+                  "homeTotal": 0,
+                  "awayTotal": 3,
+                  "renderType": 1,
+                  "key": "breakPointsSaved"
+                }
+              ]
+            },
+            {
+              "groupName": "Points",
+              "statisticsItems": [
+                {
+                  "name": "Service points won",
+                  "home": "16",
+                  "away": "16",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 16,
+                  "awayValue": 16,
+                  "renderType": 1,
+                  "key": "servicePointsScored"
+                },
+                {
+                  "name": "Receiver points won",
+                  "home": "13",
+                  "away": "3",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 13,
+                  "awayValue": 3,
+                  "renderType": 1,
+                  "key": "receiverPointsScored"
+                },
+                {
+                  "name": "Max points in a row",
+                  "home": "7",
+                  "away": "3",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 7,
+                  "awayValue": 3,
+                  "renderType": 1,
+                  "key": "maxPointsInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Games",
+              "statisticsItems": [
+                {
+                  "name": "Max games in a row",
+                  "home": "2",
+                  "away": "1",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 2,
+                  "awayValue": 1,
+                  "renderType": 1,
+                  "key": "maxGamesInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Return",
+              "statisticsItems": [
+                {
+                  "name": "First serve return points",
+                  "home": "10/19 (52%)",
+                  "away": "3/13 (23%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 10,
+                  "awayValue": 3,
+                  "homeTotal": 19,
+                  "awayTotal": 13,
+                  "renderType": 1,
+                  "key": "firstReturnPoints"
+                },
+                {
+                  "name": "Second serve return points",
+                  "home": "3/10 (30%)",
+                  "away": "0/6 (0%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 3,
+                  "awayValue": 0,
+                  "homeTotal": 10,
+                  "awayTotal": 6,
+                  "renderType": 1,
+                  "key": "secondReturnPoints"
+                },
+                {
+                  "name": "Return games played",
+                  "home": "5",
+                  "away": "4",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 5,
+                  "awayValue": 4,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points converted",
+                  "home": "2",
+                  "away": "0",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 2,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "breakPointsScored"
+                }
+              ]
+            },
+            {
+              "groupName": "Miscellaneous",
+              "statisticsItems": [
+                {
+                  "name": "Tiebreaks",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "tiebreaks"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "detectedMatches": [
+    {
+      "eventId": 14949173,
+      "slug": "martin-landaluce-otto-virtanen",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 417196,
+        "name": "Martin Landaluce",
+        "shortName": "M. Landaluce",
+        "country": "ES",
+        "ranking": 134
+      },
+      "awayTeam": {
+        "id": 229218,
+        "name": "Otto Virtanen",
+        "shortName": "O. Virtanen",
+        "country": "FI",
+        "ranking": 127
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761582900,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949174,
+      "slug": "alexander-blockx-jan-lennard-struff",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 46391,
+        "name": "Jan-Lennard Struff",
+        "shortName": "J. Struff",
+        "country": "DE",
+        "ranking": 84
+      },
+      "awayTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761588300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949167,
+      "slug": "jaime-faria-mackenzie-mcdonald",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 341818,
+        "name": "Jaime Faria",
+        "shortName": "J. Faria",
+        "country": "PT",
+        "ranking": 152
+      },
+      "awayTeam": {
+        "id": 63438,
+        "name": "Mackenzie McDonald",
+        "shortName": "M. McDonald",
+        "country": "US",
+        "ranking": 112
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761588600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949171,
+      "slug": "shintaro-mochizuki-francesco-maestrelli",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 298795,
+        "name": "Shintaro Mochizuki",
+        "shortName": "S. Mochizuki",
+        "country": "JP",
+        "ranking": 100
+      },
+      "awayTeam": {
+        "id": 261017,
+        "name": "Francesco Maestrelli",
+        "shortName": "F. Maestrelli",
+        "country": "IT",
+        "ranking": 139
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761649200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957362,
+      "slug": "billy-harris-jan-choinski",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 105607,
+        "name": "Jan Choinski",
+        "shortName": "J. Choinski",
+        "country": "GB",
+        "ranking": 125
+      },
+      "awayTeam": {
+        "id": 111837,
+        "name": "Billy Harris",
+        "shortName": "B. Harris",
+        "country": "GB",
+        "ranking": 126
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761651300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957363,
+      "slug": "sascha-gueymard-wayenburg-david-pichler",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 340741,
+        "name": "Sascha Gueymard Wayenburg",
+        "shortName": "S. Gueymard Wayenburg",
+        "country": "FR",
+        "ranking": 200
+      },
+      "awayTeam": {
+        "id": 110707,
+        "name": "David Pichler",
+        "shortName": "D. Pichler",
+        "country": "AT",
+        "ranking": 948
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761655800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957371,
+      "slug": "chris-rodesch-alejandro-tabilo",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "awayTeam": {
+        "id": 102151,
+        "name": "Alejandro Tabilo",
+        "shortName": "A. Tabilo",
+        "country": "CL",
+        "ranking": 81
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761659100,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949169,
+      "slug": "filip-misolic-chun-hsin-tseng",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 216488,
+        "name": "Filip Misolic",
+        "shortName": "F. Misolic",
+        "country": "AT",
+        "ranking": 79
+      },
+      "awayTeam": {
+        "id": 207034,
+        "name": "Chun-Hsin Tseng",
+        "shortName": "C. Tseng",
+        "country": "TW",
+        "ranking": 124
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761660600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949170,
+      "slug": "laslo-djere-dusan-lajovic",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 39234,
+        "name": "Dusan Lajovic",
+        "shortName": "D. Lajovic",
+        "country": "RS",
+        "ranking": 120
+      },
+      "awayTeam": {
+        "id": 97231,
+        "name": "Laslo Djere",
+        "shortName": "L. Djere",
+        "country": "RS",
+        "ranking": 98
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761664800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949177,
+      "slug": "raphael-collignon-lukas-klein",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 163636,
+        "name": "Lukas Klein",
+        "shortName": "L. Klein",
+        "country": "SK",
+        "ranking": 142
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761671400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957365,
+      "slug": "vitaliy-sachko-stan-wawrinka",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 100069,
+        "name": "Vitaliy Sachko",
+        "shortName": "V. Sachko",
+        "country": "UA",
+        "ranking": 169
+      },
+      "awayTeam": {
+        "id": 14548,
+        "name": "Stan Wawrinka",
+        "shortName": "S. Wawrinka",
+        "country": "CH",
+        "ranking": 157
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761679800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949168,
+      "slug": "eliot-spizzirri-moez-echargui",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 288748,
+        "name": "Eliot Spizzirri",
+        "shortName": "E. Spizzirri",
+        "country": "US",
+        "ranking": 90
+      },
+      "awayTeam": {
+        "id": 153826,
+        "name": "Moez Echargui",
+        "shortName": "M. Echargui",
+        "country": "TN",
+        "ranking": 135
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761732000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932272,
+      "slug": "tristan-schoolkate-otto-virtanen",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 229218,
+        "name": "Otto Virtanen",
+        "shortName": "O. Virtanen",
+        "country": "FI",
+        "ranking": 127
+      },
+      "awayTeam": {
+        "id": 275471,
+        "name": "Tristan Schoolkate",
+        "shortName": "T. Schoolkate",
+        "country": "AU",
+        "ranking": 99
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761743400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949175,
+      "slug": "francesco-passaro-thiago-agustin-tirante",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 258908,
+        "name": "Francesco Passaro",
+        "shortName": "F. Passaro",
+        "country": "IT",
+        "ranking": 137
+      },
+      "awayTeam": {
+        "id": 221515,
+        "name": "Thiago Agustin Tirante",
+        "shortName": "T. Tirante",
+        "country": "AR",
+        "ranking": 106
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761748200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957364,
+      "slug": "titouan-droguet-alex-molcan",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 145130,
+        "name": "Alex Molcan",
+        "shortName": "A. Molcan",
+        "country": "SK",
+        "ranking": 205
+      },
+      "awayTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761754500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932259,
+      "slug": "alexander-blockx-billy-harris",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 111837,
+        "name": "Billy Harris",
+        "shortName": "B. Harris",
+        "country": "GB",
+        "ranking": 126
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761755100,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932263,
+      "slug": "chris-rodesch-mackenzie-mcdonald",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 63438,
+        "name": "Mackenzie McDonald",
+        "shortName": "M. McDonald",
+        "country": "US",
+        "ranking": 112
+      },
+      "awayTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761759000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949176,
+      "slug": "mark-lajal-norbert-gombos",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 383991,
+        "name": "Mark Lajal",
+        "shortName": "M. Lajal",
+        "country": "EE",
+        "ranking": 148
+      },
+      "awayTeam": {
+        "id": 50139,
+        "name": "Norbert Gombos",
+        "shortName": "N. Gombos",
+        "country": "SK",
+        "ranking": 297
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761760800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932271,
+      "slug": "eliot-spizzirri-chun-hsin-tseng",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 207034,
+        "name": "Chun-Hsin Tseng",
+        "shortName": "C. Tseng",
+        "country": "TW",
+        "ranking": 124
+      },
+      "awayTeam": {
+        "id": 288748,
+        "name": "Eliot Spizzirri",
+        "shortName": "E. Spizzirri",
+        "country": "US",
+        "ranking": 90
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761825600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932270,
+      "slug": "francesco-maestrelli-david-pichler",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 261017,
+        "name": "Francesco Maestrelli",
+        "shortName": "F. Maestrelli",
+        "country": "IT",
+        "ranking": 139
+      },
+      "awayTeam": {
+        "id": 110707,
+        "name": "David Pichler",
+        "shortName": "D. Pichler",
+        "country": "AT",
+        "ranking": 948
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761827100,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932273,
+      "slug": "titouan-droguet-laslo-djere",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "awayTeam": {
+        "id": 97231,
+        "name": "Laslo Djere",
+        "shortName": "L. Djere",
+        "country": "RS",
+        "ranking": 98
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761832800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932269,
+      "slug": "raphael-collignon-stan-wawrinka",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 14548,
+        "name": "Stan Wawrinka",
+        "shortName": "S. Wawrinka",
+        "country": "CH",
+        "ranking": 157
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761840000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932265,
+      "slug": "mark-lajal-thiago-agustin-tirante",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 383991,
+        "name": "Mark Lajal",
+        "shortName": "M. Lajal",
+        "country": "EE",
+        "ranking": 148
+      },
+      "awayTeam": {
+        "id": 221515,
+        "name": "Thiago Agustin Tirante",
+        "shortName": "T. Tirante",
+        "country": "AR",
+        "ranking": 106
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761845400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932266,
+      "slug": "eliot-spizzirri-chris-rodesch",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 288748,
+        "name": "Eliot Spizzirri",
+        "shortName": "E. Spizzirri",
+        "country": "US",
+        "ranking": 90
+      },
+      "awayTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761912000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932264,
+      "slug": "francesco-maestrelli-titouan-droguet",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 261017,
+        "name": "Francesco Maestrelli",
+        "shortName": "F. Maestrelli",
+        "country": "IT",
+        "ranking": 139
+      },
+      "awayTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761921600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932261,
+      "slug": "alexander-blockx-otto-virtanen",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 229218,
+        "name": "Otto Virtanen",
+        "shortName": "O. Virtanen",
+        "country": "FI",
+        "ranking": 127
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761927000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932268,
+      "slug": "mark-lajal-raphael-collignon",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 383991,
+        "name": "Mark Lajal",
+        "shortName": "M. Lajal",
+        "country": "EE",
+        "ranking": 148
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761933600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932260,
+      "slug": "titouan-droguet-chris-rodesch",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "awayTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762002000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932262,
+      "slug": "alexander-blockx-raphael-collignon",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762008000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    }
+  ]
+}

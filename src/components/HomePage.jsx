@@ -151,7 +151,7 @@ function HomePage({ onMatchSelect }) {
     setError(null);
     try {
       // Usa l'API /api/db/matches che legge dal database Supabase
-      const matchesRes = await fetch(`/api/db/matches?limit=50`);
+      const matchesRes = await fetch(apiUrl(`/api/db/matches?limit=50`));
       if (!matchesRes.ok) {
         throw new Error(`Errore HTTP: ${matchesRes.status}`);
       }
@@ -161,9 +161,9 @@ function HomePage({ onMatchSelect }) {
       
       // Carica suggeriti e rilevati in parallelo
       const [suggestedRes, detectedRes, trackedRes] = await Promise.all([
-        fetch(`/api/suggested-matches?sport=${selectedSport}`).catch(() => null),
-        fetch(`/api/detected-matches`).catch(() => null),
-        fetch(`/api/tracked`).catch(() => null)
+        fetch(apiUrl(`/api/suggested-matches?sport=${selectedSport}`)).catch(() => null),
+        fetch(apiUrl(`/api/detected-matches`)).catch(() => null),
+        fetch(apiUrl(`/api/tracked`)).catch(() => null)
       ]);
       
       // Suggeriti sono opzionali, non fallire se non funziona

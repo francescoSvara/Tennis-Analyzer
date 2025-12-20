@@ -1,0 +1,965 @@
+{
+  "scrapedEventId": "14932267",
+  "tournamentId": 14402,
+  "seasonId": 80586,
+  "detectedAt": "2025-12-19T17:05:34.122Z",
+  "matches": [
+    {
+      "eventId": 14949173,
+      "slug": "martin-landaluce-otto-virtanen",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 417196,
+        "name": "Martin Landaluce",
+        "shortName": "M. Landaluce",
+        "country": "ES",
+        "ranking": 134
+      },
+      "awayTeam": {
+        "id": 229218,
+        "name": "Otto Virtanen",
+        "shortName": "O. Virtanen",
+        "country": "FI",
+        "ranking": 127
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761582900,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949174,
+      "slug": "alexander-blockx-jan-lennard-struff",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 46391,
+        "name": "Jan-Lennard Struff",
+        "shortName": "J. Struff",
+        "country": "DE",
+        "ranking": 84
+      },
+      "awayTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761588300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949167,
+      "slug": "jaime-faria-mackenzie-mcdonald",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 341818,
+        "name": "Jaime Faria",
+        "shortName": "J. Faria",
+        "country": "PT",
+        "ranking": 152
+      },
+      "awayTeam": {
+        "id": 63438,
+        "name": "Mackenzie McDonald",
+        "shortName": "M. McDonald",
+        "country": "US",
+        "ranking": 112
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761588600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949171,
+      "slug": "shintaro-mochizuki-francesco-maestrelli",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 298795,
+        "name": "Shintaro Mochizuki",
+        "shortName": "S. Mochizuki",
+        "country": "JP",
+        "ranking": 100
+      },
+      "awayTeam": {
+        "id": 261017,
+        "name": "Francesco Maestrelli",
+        "shortName": "F. Maestrelli",
+        "country": "IT",
+        "ranking": 139
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761649200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957362,
+      "slug": "billy-harris-jan-choinski",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 105607,
+        "name": "Jan Choinski",
+        "shortName": "J. Choinski",
+        "country": "GB",
+        "ranking": 125
+      },
+      "awayTeam": {
+        "id": 111837,
+        "name": "Billy Harris",
+        "shortName": "B. Harris",
+        "country": "GB",
+        "ranking": 126
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761651300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957363,
+      "slug": "sascha-gueymard-wayenburg-david-pichler",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 340741,
+        "name": "Sascha Gueymard Wayenburg",
+        "shortName": "S. Gueymard Wayenburg",
+        "country": "FR",
+        "ranking": 200
+      },
+      "awayTeam": {
+        "id": 110707,
+        "name": "David Pichler",
+        "shortName": "D. Pichler",
+        "country": "AT",
+        "ranking": 948
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761655800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957371,
+      "slug": "chris-rodesch-alejandro-tabilo",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "awayTeam": {
+        "id": 102151,
+        "name": "Alejandro Tabilo",
+        "shortName": "A. Tabilo",
+        "country": "CL",
+        "ranking": 81
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761659100,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949169,
+      "slug": "filip-misolic-chun-hsin-tseng",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 216488,
+        "name": "Filip Misolic",
+        "shortName": "F. Misolic",
+        "country": "AT",
+        "ranking": 79
+      },
+      "awayTeam": {
+        "id": 207034,
+        "name": "Chun-Hsin Tseng",
+        "shortName": "C. Tseng",
+        "country": "TW",
+        "ranking": 124
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761660600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949170,
+      "slug": "laslo-djere-dusan-lajovic",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 39234,
+        "name": "Dusan Lajovic",
+        "shortName": "D. Lajovic",
+        "country": "RS",
+        "ranking": 120
+      },
+      "awayTeam": {
+        "id": 97231,
+        "name": "Laslo Djere",
+        "shortName": "L. Djere",
+        "country": "RS",
+        "ranking": 98
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761664800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949177,
+      "slug": "raphael-collignon-lukas-klein",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 163636,
+        "name": "Lukas Klein",
+        "shortName": "L. Klein",
+        "country": "SK",
+        "ranking": 142
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761671400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957365,
+      "slug": "vitaliy-sachko-stan-wawrinka",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 100069,
+        "name": "Vitaliy Sachko",
+        "shortName": "V. Sachko",
+        "country": "UA",
+        "ranking": 169
+      },
+      "awayTeam": {
+        "id": 14548,
+        "name": "Stan Wawrinka",
+        "shortName": "S. Wawrinka",
+        "country": "CH",
+        "ranking": 157
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761679800,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949168,
+      "slug": "eliot-spizzirri-moez-echargui",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 288748,
+        "name": "Eliot Spizzirri",
+        "shortName": "E. Spizzirri",
+        "country": "US",
+        "ranking": 90
+      },
+      "awayTeam": {
+        "id": 153826,
+        "name": "Moez Echargui",
+        "shortName": "M. Echargui",
+        "country": "TN",
+        "ranking": 135
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761732000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932272,
+      "slug": "tristan-schoolkate-otto-virtanen",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 229218,
+        "name": "Otto Virtanen",
+        "shortName": "O. Virtanen",
+        "country": "FI",
+        "ranking": 127
+      },
+      "awayTeam": {
+        "id": 275471,
+        "name": "Tristan Schoolkate",
+        "shortName": "T. Schoolkate",
+        "country": "AU",
+        "ranking": 99
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761743400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949175,
+      "slug": "francesco-passaro-thiago-agustin-tirante",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 258908,
+        "name": "Francesco Passaro",
+        "shortName": "F. Passaro",
+        "country": "IT",
+        "ranking": 137
+      },
+      "awayTeam": {
+        "id": 221515,
+        "name": "Thiago Agustin Tirante",
+        "shortName": "T. Tirante",
+        "country": "AR",
+        "ranking": 106
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761748200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14957364,
+      "slug": "titouan-droguet-alex-molcan",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 145130,
+        "name": "Alex Molcan",
+        "shortName": "A. Molcan",
+        "country": "SK",
+        "ranking": 205
+      },
+      "awayTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761754500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932259,
+      "slug": "alexander-blockx-billy-harris",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 111837,
+        "name": "Billy Harris",
+        "shortName": "B. Harris",
+        "country": "GB",
+        "ranking": 126
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761755100,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932263,
+      "slug": "chris-rodesch-mackenzie-mcdonald",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 63438,
+        "name": "Mackenzie McDonald",
+        "shortName": "M. McDonald",
+        "country": "US",
+        "ranking": 112
+      },
+      "awayTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761759000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14949176,
+      "slug": "mark-lajal-norbert-gombos",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 383991,
+        "name": "Mark Lajal",
+        "shortName": "M. Lajal",
+        "country": "EE",
+        "ranking": 148
+      },
+      "awayTeam": {
+        "id": 50139,
+        "name": "Norbert Gombos",
+        "shortName": "N. Gombos",
+        "country": "SK",
+        "ranking": 297
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761760800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932271,
+      "slug": "eliot-spizzirri-chun-hsin-tseng",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 207034,
+        "name": "Chun-Hsin Tseng",
+        "shortName": "C. Tseng",
+        "country": "TW",
+        "ranking": 124
+      },
+      "awayTeam": {
+        "id": 288748,
+        "name": "Eliot Spizzirri",
+        "shortName": "E. Spizzirri",
+        "country": "US",
+        "ranking": 90
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761825600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932270,
+      "slug": "francesco-maestrelli-david-pichler",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 261017,
+        "name": "Francesco Maestrelli",
+        "shortName": "F. Maestrelli",
+        "country": "IT",
+        "ranking": 139
+      },
+      "awayTeam": {
+        "id": 110707,
+        "name": "David Pichler",
+        "shortName": "D. Pichler",
+        "country": "AT",
+        "ranking": 948
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761827100,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932273,
+      "slug": "titouan-droguet-laslo-djere",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "awayTeam": {
+        "id": 97231,
+        "name": "Laslo Djere",
+        "shortName": "L. Djere",
+        "country": "RS",
+        "ranking": 98
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761832800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932269,
+      "slug": "raphael-collignon-stan-wawrinka",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 14548,
+        "name": "Stan Wawrinka",
+        "shortName": "S. Wawrinka",
+        "country": "CH",
+        "ranking": 157
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761840000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932265,
+      "slug": "mark-lajal-thiago-agustin-tirante",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 383991,
+        "name": "Mark Lajal",
+        "shortName": "M. Lajal",
+        "country": "EE",
+        "ranking": 148
+      },
+      "awayTeam": {
+        "id": 221515,
+        "name": "Thiago Agustin Tirante",
+        "shortName": "T. Tirante",
+        "country": "AR",
+        "ranking": 106
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761845400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932266,
+      "slug": "eliot-spizzirri-chris-rodesch",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 288748,
+        "name": "Eliot Spizzirri",
+        "shortName": "E. Spizzirri",
+        "country": "US",
+        "ranking": 90
+      },
+      "awayTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761912000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932264,
+      "slug": "francesco-maestrelli-titouan-droguet",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 261017,
+        "name": "Francesco Maestrelli",
+        "shortName": "F. Maestrelli",
+        "country": "IT",
+        "ranking": 139
+      },
+      "awayTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761921600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932261,
+      "slug": "alexander-blockx-otto-virtanen",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "awayTeam": {
+        "id": 229218,
+        "name": "Otto Virtanen",
+        "shortName": "O. Virtanen",
+        "country": "FI",
+        "ranking": 127
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761927000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932268,
+      "slug": "mark-lajal-raphael-collignon",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 383991,
+        "name": "Mark Lajal",
+        "shortName": "M. Lajal",
+        "country": "EE",
+        "ranking": 148
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1761933600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932260,
+      "slug": "titouan-droguet-chris-rodesch",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 243925,
+        "name": "Titouan Droguet",
+        "shortName": "T. Droguet",
+        "country": "FR",
+        "ranking": 149
+      },
+      "awayTeam": {
+        "id": 225273,
+        "name": "Chris Rodesch",
+        "shortName": "C. Rodesch",
+        "country": "LU",
+        "ranking": 210
+      },
+      "homeScore": 2,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762002000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14932262,
+      "slug": "alexander-blockx-raphael-collignon",
+      "sport": "tennis",
+      "tournament": "Bratislava, Slovakia",
+      "tournamentId": 14402,
+      "category": "Challenger",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 355525,
+        "name": "Raphael Collignon",
+        "shortName": "R. Collignon",
+        "country": "BE",
+        "ranking": 87
+      },
+      "awayTeam": {
+        "id": 390214,
+        "name": "Alexander Blockx",
+        "shortName": "A. Blockx",
+        "country": "BE",
+        "ranking": 116
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1762008000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    }
+  ]
+}

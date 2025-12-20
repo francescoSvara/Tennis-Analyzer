@@ -1,0 +1,6075 @@
+{
+  "api": {
+    "https://www.sofascore.com/api/v1/country/alpha2": {
+      "alpha2": "IT",
+      "continent_code": "EU",
+      "country": "italy",
+      "city": "ponte dell'olio",
+      "region_code": "IT-PC"
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/incidents": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country": {
+      "countrySportPriorities": [
+        {
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 751
+        },
+        {
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 752
+        },
+        {
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 753
+        },
+        {
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 3,
+          "id": 754
+        },
+        {
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 4,
+          "id": 755
+        },
+        {
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 5,
+          "id": 756
+        },
+        {
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 6,
+          "id": 757
+        },
+        {
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 7,
+          "id": 758
+        },
+        {
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 8,
+          "id": 759
+        },
+        {
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 9,
+          "id": 760
+        },
+        {
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 10,
+          "id": 761
+        },
+        {
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 11,
+          "id": 762
+        },
+        {
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 12,
+          "id": 763
+        },
+        {
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 13,
+          "id": 764
+        },
+        {
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 14,
+          "id": 765
+        },
+        {
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 15,
+          "id": 766
+        },
+        {
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 16,
+          "id": 767
+        },
+        {
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 17,
+          "id": 768
+        },
+        {
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 18,
+          "id": 769
+        },
+        {
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 770
+        },
+        {
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 771
+        },
+        {
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 772
+        },
+        {
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 773
+        },
+        {
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 774
+        },
+        {
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 775
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/managers": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/point-by-point": {
+      "pointByPoint": [
+        {
+          "set": 2,
+          "games": [
+            {
+              "game": 12,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "A",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 3
+                }
+              ],
+              "score": {
+                "homeScore": 5,
+                "awayScore": 7,
+                "serving": 1,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 11,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 5,
+                "awayScore": 6,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 10,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 5,
+                "awayScore": 5,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 9,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 4,
+                "awayScore": 5,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 8,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 4,
+                "awayScore": 4,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 7,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 1,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 2,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "A",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "A",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 4,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 6,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 1,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 2
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 3,
+                "serving": 1,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 5,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 2,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 2,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 4,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 1,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 1,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 3,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 1,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 2,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 0,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 1,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 2,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 2,
+                  "homePointType": 2,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 1,
+                "awayScore": 0,
+                "serving": 2,
+                "scoring": 1
+              }
+            }
+          ]
+        },
+        {
+          "set": 1,
+          "games": [
+            {
+              "game": 13,
+              "points": [
+                {
+                  "homePoint": "1",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "1",
+                  "awayPoint": "1",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "1",
+                  "awayPoint": "2",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "2",
+                  "awayPoint": "2",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "2",
+                  "awayPoint": "3",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 6
+                },
+                {
+                  "homePoint": "2",
+                  "awayPoint": "4",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "3",
+                  "awayPoint": "4",
+                  "pointDescription": 0,
+                  "homePointType": 6,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "3",
+                  "awayPoint": "5",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 6
+                },
+                {
+                  "homePoint": "4",
+                  "awayPoint": "5",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "4",
+                  "awayPoint": "6",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 3
+                },
+                {
+                  "homePoint": "4",
+                  "awayPoint": "7",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 6,
+                "awayScore": 7,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 12,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "40",
+                  "pointDescription": 1,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "A",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 3,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "A",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 6,
+                "awayScore": 6,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 11,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 1,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 6,
+                "awayScore": 5,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 10,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "40",
+                  "pointDescription": 2,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 5,
+                "awayScore": 5,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 9,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 1,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 5,
+                "awayScore": 4,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 8,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 1,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 4,
+                "awayScore": 4,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 7,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 4,
+                "awayScore": 3,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 6,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 3,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 5,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "A",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 3,
+                "awayScore": 2,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 4,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 1,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "40",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "40",
+                  "pointDescription": 2,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "A",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 2,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 3,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 2,
+                "awayScore": 1,
+                "serving": 1,
+                "scoring": 1
+              }
+            },
+            {
+              "game": 2,
+              "points": [
+                {
+                  "homePoint": "0",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "30",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "0",
+                  "awayPoint": "40",
+                  "pointDescription": 1,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                }
+              ],
+              "score": {
+                "homeScore": 1,
+                "awayScore": 1,
+                "serving": 2,
+                "scoring": 2
+              }
+            },
+            {
+              "game": 1,
+              "points": [
+                {
+                  "homePoint": "15",
+                  "awayPoint": "0",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "15",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 5,
+                  "awayPointType": 1
+                },
+                {
+                  "homePoint": "30",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                },
+                {
+                  "homePoint": "40",
+                  "awayPoint": "15",
+                  "pointDescription": 0,
+                  "homePointType": 1,
+                  "awayPointType": 5
+                }
+              ],
+              "score": {
+                "homeScore": 1,
+                "awayScore": 0,
+                "serving": 1,
+                "scoring": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/team/206570/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Jannik Sinner",
+            "slug": "sinner-jannik",
+            "shortName": "J. Sinner",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 211869,
+            "nameCode": "SIN",
+            "ranking": 2,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 206570,
+            "country": {
+              "alpha2": "IT",
+              "alpha3": "ITA",
+              "name": "Italy",
+              "slug": "italy"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "يانك سينر",
+                "ru": "Синнер, Янник"
+              },
+              "shortNameTranslation": {
+                "ar": "ي. سينر",
+                "hi": "जे. सिनर",
+                "bn": "জে সিনার"
+              }
+            }
+          },
+          "tournamentsPlayed": 19,
+          "type": 5,
+          "rowName": "Jannik Sinner",
+          "ranking": 2,
+          "points": 11500,
+          "previousRanking": 2,
+          "previousPoints": 11500,
+          "bestRanking": 1,
+          "id": 720,
+          "country": {
+            "alpha2": "IT",
+            "alpha3": "ITA",
+            "name": "Italy",
+            "slug": "italy"
+          },
+          "rankingClass": "team"
+        },
+        {
+          "team": {
+            "name": "Jannik Sinner",
+            "slug": "sinner-jannik",
+            "shortName": "J. Sinner",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 211869,
+            "nameCode": "SIN",
+            "ranking": 2,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 206570,
+            "country": {
+              "alpha2": "IT",
+              "alpha3": "ITA",
+              "name": "Italy",
+              "slug": "italy"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "يانك سينر",
+                "ru": "Синнер, Янник"
+              },
+              "shortNameTranslation": {
+                "ar": "ي. سينر",
+                "hi": "जे. सिनर",
+                "bn": "জে সিনার"
+              }
+            }
+          },
+          "type": 7,
+          "rowName": "Jannik Sinner",
+          "ranking": 2,
+          "points": 11500,
+          "previousRanking": 2,
+          "id": 207921,
+          "country": {},
+          "rankingClass": "livetennis"
+        },
+        {
+          "team": {
+            "name": "Jannik Sinner",
+            "slug": "sinner-jannik",
+            "shortName": "J. Sinner",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 211869,
+            "nameCode": "SIN",
+            "ranking": 2,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 206570,
+            "country": {
+              "alpha2": "IT",
+              "alpha3": "ITA",
+              "name": "Italy",
+              "slug": "italy"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "يانك سينر",
+                "ru": "Синнер, Янник"
+              },
+              "shortNameTranslation": {
+                "ar": "ي. سينر",
+                "hi": "जे. सिनर",
+                "bn": "জে সিনার"
+              }
+            }
+          },
+          "type": 34,
+          "rowName": "Jannik Sinner",
+          "ranking": 1,
+          "points": 16.46,
+          "previousPoints": 16.47,
+          "bestRanking": 1,
+          "id": 180838,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1753182955
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/tv/event/15108295/country-channels": {
+      "countryChannels": {
+        "GY": [
+          4024,
+          3177
+        ],
+        "BS": [
+          4024,
+          3177
+        ],
+        "BB": [
+          3177,
+          4024
+        ],
+        "MR": [
+          3177,
+          4024,
+          39
+        ],
+        "MN": [
+          3177,
+          4024
+        ],
+        "UG": [
+          3177,
+          4024
+        ],
+        "UM": [
+          4024,
+          3177
+        ],
+        "LK": [
+          3177,
+          4024,
+          3686
+        ],
+        "JM": [
+          4024,
+          3177
+        ],
+        "BL": [
+          3177,
+          4024
+        ],
+        "IS": [
+          3177,
+          4024
+        ],
+        "LS": [
+          4024,
+          3177
+        ],
+        "DJ": [
+          39,
+          4024,
+          3177
+        ],
+        "OM": [
+          39,
+          4024,
+          3177
+        ],
+        "SV": [
+          3177,
+          4024
+        ],
+        "CW": [
+          4024,
+          3177
+        ],
+        "RE": [
+          4024,
+          3177
+        ],
+        "ID": [
+          4024,
+          3177
+        ],
+        "NO": [
+          4024,
+          3177
+        ],
+        "PW": [
+          4024,
+          3177
+        ],
+        "KR": [
+          4024,
+          3177
+        ],
+        "LV": [
+          3177,
+          4024
+        ],
+        "MQ": [
+          4024,
+          3177
+        ],
+        "SI": [
+          4024,
+          3177
+        ],
+        "QA": [
+          4024,
+          39,
+          3177
+        ],
+        "PE": [
+          3177,
+          4024
+        ],
+        "TO": [
+          4024,
+          3177
+        ],
+        "VU": [
+          4024,
+          3177
+        ],
+        "TD": [
+          4024,
+          3177,
+          39
+        ],
+        "HU": [
+          4024,
+          3177
+        ],
+        "KH": [
+          3177,
+          4024
+        ],
+        "NL": [
+          4024,
+          3177
+        ],
+        "BJ": [
+          4024,
+          3177
+        ],
+        "PT": [
+          4024,
+          3177,
+          3294
+        ],
+        "SO": [
+          39
+        ],
+        "VN": [
+          4024,
+          3177
+        ],
+        "TJ": [
+          3177,
+          4024
+        ],
+        "TM": [
+          3177,
+          4024
+        ],
+        "ST": [
+          3177,
+          4024
+        ],
+        "AO": [
+          4024,
+          3177
+        ],
+        "BR": [
+          3177,
+          7209,
+          4044,
+          4024
+        ],
+        "SK": [
+          4024,
+          3177
+        ],
+        "SM": [
+          613,
+          3177,
+          1219,
+          3151,
+          4024
+        ],
+        "GH": [
+          4024,
+          3177
+        ],
+        "DM": [
+          3177,
+          4024
+        ],
+        "AF": [
+          3177,
+          4024
+        ],
+        "UZ": [
+          4024,
+          3177
+        ],
+        "GB": [
+          4024,
+          3177
+        ],
+        "DE": [
+          3177,
+          4024
+        ],
+        "VG": [
+          3177,
+          4024
+        ],
+        "EG": [
+          4024,
+          39,
+          3177
+        ],
+        "US": [
+          3177,
+          4024
+        ],
+        "WS": [
+          3177,
+          4024
+        ],
+        "BW": [
+          4024,
+          3177
+        ],
+        "GI": [
+          3177,
+          4024
+        ],
+        "SZ": [
+          4024,
+          3177
+        ],
+        "KZ": [
+          3177,
+          4024
+        ],
+        "VI": [
+          4024,
+          3177
+        ],
+        "EC": [
+          3177,
+          4024
+        ],
+        "BI": [
+          3177,
+          4024
+        ],
+        "CA": [
+          3177,
+          4024
+        ],
+        "CZ": [
+          3177,
+          4024
+        ],
+        "BH": [
+          3177,
+          4024,
+          39
+        ],
+        "UA": [
+          3177,
+          4024
+        ],
+        "PL": [
+          3177,
+          4024
+        ],
+        "MT": [
+          3177,
+          1219,
+          4024
+        ],
+        "FR": [
+          4024,
+          3177,
+          289
+        ],
+        "IQ": [
+          39,
+          3177,
+          4024
+        ],
+        "KG": [
+          3177,
+          4024
+        ],
+        "GE": [
+          4024,
+          3177
+        ],
+        "LR": [
+          4024,
+          3177
+        ],
+        "SA": [
+          3177,
+          4024,
+          39
+        ],
+        "GM": [
+          3177,
+          4024
+        ],
+        "ET": [
+          4024,
+          3177
+        ],
+        "CV": [
+          3177,
+          4024
+        ],
+        "ES": [
+          4024,
+          3177,
+          986,
+          2422
+        ],
+        "VE": [
+          3177,
+          4024
+        ],
+        "SX": [
+          4024,
+          3177
+        ],
+        "MA": [
+          3177,
+          39,
+          4024
+        ],
+        "SD": [
+          39
+        ],
+        "AR": [
+          4024,
+          3177
+        ],
+        "TH": [
+          3177,
+          4024
+        ],
+        "KN": [
+          4024,
+          3177
+        ],
+        "KY": [
+          3177,
+          4024
+        ],
+        "MG": [
+          3177,
+          4024
+        ],
+        "FJ": [
+          4024,
+          3177
+        ],
+        "BT": [
+          3177,
+          3686,
+          4024
+        ],
+        "AD": [
+          4024,
+          3177
+        ],
+        "MC": [
+          3177,
+          4024
+        ],
+        "AE": [
+          39,
+          4024,
+          3177
+        ],
+        "IE": [
+          3177,
+          4024
+        ],
+        "BD": [
+          4024,
+          3686,
+          3177
+        ],
+        "NR": [
+          3177,
+          4024
+        ],
+        "SB": [
+          4024,
+          3177
+        ],
+        "MO": [
+          3177,
+          4024
+        ],
+        "AN": [
+          3177,
+          4024
+        ],
+        "IT": [
+          3177,
+          4024,
+          613,
+          3151,
+          1219
+        ],
+        "PH": [
+          3177,
+          4024
+        ],
+        "NU": [
+          3177,
+          4024
+        ],
+        "JO": [
+          39,
+          3177,
+          4024
+        ],
+        "TZ": [
+          4024,
+          3177
+        ],
+        "YT": [
+          4024,
+          3177
+        ],
+        "KM": [
+          4024,
+          3177
+        ],
+        "LA": [
+          4024,
+          3177
+        ],
+        "AU": [
+          3177,
+          4024
+        ],
+        "MM": [
+          4024,
+          3177
+        ],
+        "SE": [
+          3177,
+          4024
+        ],
+        "TV": [
+          4024,
+          3177
+        ],
+        "YE": [
+          39,
+          4024,
+          3177
+        ],
+        "ZM": [
+          4024,
+          3177
+        ],
+        "SR": [
+          3177,
+          4024
+        ],
+        "RO": [
+          3177,
+          412,
+          4024
+        ],
+        "HR": [
+          3177,
+          4024,
+          226
+        ],
+        "JP": [
+          3177,
+          4024
+        ],
+        "BN": [
+          4024,
+          3177
+        ],
+        "LT": [
+          4024,
+          3177
+        ],
+        "HT": [
+          4024,
+          3177
+        ],
+        "RW": [
+          4024,
+          3177
+        ],
+        "MV": [
+          4024,
+          3177,
+          3686
+        ],
+        "MY": [
+          3177,
+          4024
+        ],
+        "MZ": [
+          4024,
+          3177
+        ],
+        "TC": [
+          3177,
+          4024
+        ],
+        "EE": [
+          3177,
+          4024
+        ],
+        "PY": [
+          3177,
+          4024
+        ],
+        "CM": [
+          3177,
+          4024
+        ],
+        "MP": [
+          4024,
+          3177
+        ],
+        "NA": [
+          3177,
+          4024
+        ],
+        "HN": [
+          3177,
+          4024
+        ],
+        "HK": [
+          4024,
+          3177
+        ],
+        "MF": [
+          3177,
+          4024
+        ],
+        "GU": [
+          3177,
+          4024
+        ],
+        "SY": [
+          39
+        ],
+        "PK": [
+          4024,
+          3686,
+          3177
+        ],
+        "PS": [
+          4024,
+          3177,
+          39
+        ],
+        "NC": [
+          4024,
+          3177
+        ],
+        "ZW": [
+          3177,
+          4024
+        ],
+        "GL": [
+          4024,
+          3177
+        ],
+        "BO": [
+          4024,
+          3177
+        ],
+        "EN": [
+          4024,
+          3177
+        ],
+        "SC": [
+          4024,
+          3177
+        ],
+        "MH": [
+          4024,
+          3177
+        ],
+        "ME": [
+          3177,
+          4024
+        ],
+        "CF": [
+          3177,
+          4024
+        ],
+        "MK": [
+          4024,
+          3177
+        ],
+        "MS": [
+          3177,
+          4024
+        ],
+        "AG": [
+          3177,
+          4024
+        ],
+        "GN": [
+          4024,
+          3177
+        ],
+        "GT": [
+          3177,
+          4024
+        ],
+        "GD": [
+          3177,
+          4024
+        ],
+        "TG": [
+          4024,
+          3177
+        ],
+        "BE": [
+          3177,
+          4024
+        ],
+        "VC": [
+          4024,
+          3177
+        ],
+        "BQ": [
+          4024,
+          3177
+        ],
+        "RS": [
+          4024,
+          3177
+        ],
+        "CR": [
+          3177,
+          4024
+        ],
+        "AW": [
+          3177,
+          4024
+        ],
+        "LI": [
+          4024,
+          3177
+        ],
+        "DK": [
+          4024,
+          3177
+        ],
+        "MD": [
+          3177,
+          4024
+        ],
+        "AM": [
+          4024,
+          3177
+        ],
+        "CG": [
+          3177,
+          4024
+        ],
+        "CI": [
+          3177,
+          4024
+        ],
+        "LU": [
+          4024,
+          3177
+        ],
+        "DZ": [
+          39,
+          4024,
+          3177
+        ],
+        "NZ": [
+          4024,
+          3177
+        ],
+        "SG": [
+          3177,
+          4024
+        ],
+        "NI": [
+          4024,
+          3177
+        ],
+        "SN": [
+          3177,
+          4024
+        ],
+        "TR": [
+          3177,
+          4024
+        ],
+        "CL": [
+          3177,
+          4024
+        ],
+        "PA": [
+          3177,
+          4024
+        ],
+        "BG": [
+          1595,
+          3177,
+          4024
+        ],
+        "SS": [
+          39
+        ],
+        "PR": [
+          3177,
+          4024
+        ],
+        "NP": [
+          4024,
+          3686,
+          3177
+        ],
+        "KI": [
+          3177,
+          4024
+        ],
+        "IN": [
+          3686,
+          4024
+        ],
+        "LC": [
+          3177,
+          4024
+        ],
+        "PF": [
+          4024,
+          3177
+        ],
+        "AI": [
+          4024,
+          3177
+        ],
+        "UY": [
+          3177,
+          4024
+        ],
+        "GP": [
+          4024,
+          3177
+        ],
+        "GW": [
+          4024,
+          3177
+        ],
+        "WF": [
+          3177,
+          4024
+        ],
+        "NG": [
+          4024,
+          3177
+        ],
+        "FI": [
+          4024,
+          3177
+        ],
+        "KW": [
+          3177,
+          4024,
+          39
+        ],
+        "ER": [
+          4024,
+          3177
+        ],
+        "LB": [
+          39,
+          4024,
+          3177
+        ],
+        "KE": [
+          3177,
+          4024
+        ],
+        "TT": [
+          3177,
+          4024
+        ],
+        "ZA": [
+          4024,
+          3177
+        ],
+        "CK": [
+          4024,
+          3177
+        ],
+        "MX": [
+          3177,
+          4024
+        ],
+        "LY": [
+          39,
+          4024,
+          3177
+        ],
+        "AZ": [
+          4024,
+          3177
+        ],
+        "GF": [
+          4024,
+          3177
+        ],
+        "CO": [
+          3177,
+          4024
+        ],
+        "IL": [
+          3177,
+          4024
+        ],
+        "SH": [
+          3177,
+          4024
+        ],
+        "DO": [
+          4024,
+          3177
+        ],
+        "CN": [
+          3177
+        ],
+        "FO": [
+          3177,
+          4024
+        ],
+        "BA": [
+          3177,
+          4024,
+          226
+        ],
+        "BM": [
+          3177,
+          4024
+        ],
+        "IR": [
+          39
+        ],
+        "NE": [
+          3177,
+          4024
+        ],
+        "CD": [
+          3177,
+          4024
+        ],
+        "TN": [
+          39,
+          3177,
+          4024
+        ],
+        "BZ": [
+          3177,
+          4024
+        ],
+        "AS": [
+          4024,
+          3177
+        ],
+        "MW": [
+          3177,
+          4024
+        ],
+        "SL": [
+          4024,
+          3177
+        ],
+        "MU": [
+          4024,
+          3177
+        ],
+        "CH": [
+          3177,
+          4024
+        ],
+        "PG": [
+          4024,
+          3177
+        ],
+        "GQ": [
+          4024,
+          3177
+        ],
+        "GA": [
+          4024,
+          3177
+        ],
+        "TL": [
+          4024,
+          3177
+        ],
+        "ML": [
+          4024,
+          3177
+        ],
+        "TW": [
+          4024,
+          3177
+        ],
+        "BF": [
+          3177,
+          4024
+        ]
+      }
+    },
+    "https://www.sofascore.com/api/v1/sport/3600/event-count": {
+      "snooker": {
+        "live": 2,
+        "total": 8
+      },
+      "badminton": {
+        "live": 0,
+        "total": 20
+      },
+      "futsal": {
+        "live": 2,
+        "total": 35
+      },
+      "ice-hockey": {
+        "live": 3,
+        "total": 94
+      },
+      "minifootball": {
+        "live": 1,
+        "total": 26
+      },
+      "darts": {
+        "live": 1,
+        "total": 26
+      },
+      "table-tennis": {
+        "live": 25,
+        "total": 1083
+      },
+      "american-football": {
+        "live": 0,
+        "total": 1
+      },
+      "floorball": {
+        "live": 0,
+        "total": 3
+      },
+      "football": {
+        "live": 40,
+        "total": 238
+      },
+      "tennis": {
+        "live": 14,
+        "total": 213
+      },
+      "baseball": {
+        "live": 0,
+        "total": 16
+      },
+      "basketball": {
+        "live": 9,
+        "total": 316
+      },
+      "handball": {
+        "live": 2,
+        "total": 51
+      },
+      "cricket": {
+        "live": 1,
+        "total": 14
+      },
+      "rugby": {
+        "live": 0,
+        "total": 1
+      },
+      "esports": {
+        "live": 5,
+        "total": 48
+      },
+      "volleyball": {
+        "live": 0,
+        "total": 46
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15108295": {
+      "event": {
+        "firstToServe": 1,
+        "homeTeamSeed": "1",
+        "awayTeamSeed": "2",
+        "tournament": {
+          "name": "Tour Finals Turin, Italy",
+          "slug": "tour-finals-turin-italy",
+          "category": {
+            "name": "ATP",
+            "slug": "atp",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "id": 3,
+            "country": {},
+            "flag": "atp",
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "رابطة محترفي التنس",
+                "hi": "डब्ल्यूटीए",
+                "bn": "এটিপি"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "uniqueTournament": {
+            "name": "ATP Finals",
+            "slug": "atp-finals",
+            "primaryColorHex": "#3dbfed",
+            "secondaryColorHex": "#017ccb",
+            "category": {
+              "name": "ATP",
+              "slug": "atp",
+              "sport": {
+                "name": "Tennis",
+                "slug": "tennis",
+                "id": 5
+              },
+              "id": 3,
+              "country": {},
+              "flag": "atp",
+              "fieldTranslations": {
+                "nameTranslation": {
+                  "ar": "رابطة محترفي التنس",
+                  "hi": "डब्ल्यूटीए",
+                  "bn": "এটিপি"
+                },
+                "shortNameTranslation": {}
+              }
+            },
+            "userCount": 26283,
+            "groundType": "Hardcourt indoor",
+            "hasRounds": true,
+            "hasPerformanceGraphFeature": false,
+            "id": 2517,
+            "country": {},
+            "hasEventPlayerStatistics": false,
+            "displayInverseHomeAwayTeams": false,
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "نهائيات رابطة محترفي التنس",
+                "hi": "एटीपी फाइनल्स",
+                "bn": "এটিপি ফাইনাল"
+              },
+              "shortNameTranslation": {}
+            }
+          },
+          "priority": 0,
+          "isGroup": false,
+          "competitionType": 2,
+          "id": 168997,
+          "endTimestamp": 1763251200,
+          "startTimestamp": 1763164800
+        },
+        "season": {
+          "name": "ATP World Tour Finals Men Singles 2025",
+          "year": "2025",
+          "editor": false,
+          "id": 67326
+        },
+        "roundInfo": {
+          "round": 29,
+          "name": "Final",
+          "slug": "final",
+          "cupRoundType": 1
+        },
+        "customId": "vGHbsytkc",
+        "status": {
+          "code": 100,
+          "description": "Ended",
+          "type": "finished"
+        },
+        "winnerCode": 2,
+        "venue": {
+          "city": {
+            "name": "Turin"
+          },
+          "hidden": true,
+          "slug": "inalpi-arena",
+          "name": "Inalpi Arena",
+          "id": 53127,
+          "country": {
+            "alpha2": "IT",
+            "alpha3": "ITA",
+            "name": "Italy",
+            "slug": "italy"
+          },
+          "stadium": {
+            "name": "Inalpi Arena"
+          }
+        },
+        "homeTeam": {
+          "name": "Carlos Alcaraz",
+          "slug": "alcaraz-carlos",
+          "shortName": "C. Alcaraz",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 233927,
+          "playerTeamInfo": {
+            "residence": "El Palmar, Murcia, Spain",
+            "birthplace": "El Palmar, Murcia, Spain",
+            "height": 1.83,
+            "weight": 74,
+            "plays": "right-handed",
+            "turnedPro": "2018",
+            "prizeCurrent": 16358981,
+            "prizeTotal": 50008205,
+            "id": 3111,
+            "birthDateTimestamp": 1052092800,
+            "prizeCurrentRaw": {
+              "value": 16358981,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 50008205,
+              "currency": "EUR"
+            },
+            "currentRanking": 1
+          },
+          "nameCode": "ALC",
+          "ranking": 1,
+          "class": 4,
+          "disabled": false,
+          "national": false,
+          "type": 1,
+          "id": 275923,
+          "country": {
+            "alpha2": "ES",
+            "alpha3": "ESP",
+            "name": "Spain",
+            "slug": "spain"
+          },
+          "fullName": "Carlos Alcaraz",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "كارلوس ألكاراز",
+              "ru": "Алькарас Гарфия, Карлос"
+            },
+            "shortNameTranslation": {
+              "ar": "ك. ألكاراز",
+              "hi": "सी. अल्काराज़",
+              "bn": "সি আলকারাজ"
+            }
+          },
+          "timeActive": []
+        },
+        "awayTeam": {
+          "name": "Jannik Sinner",
+          "slug": "sinner-jannik",
+          "shortName": "J. Sinner",
+          "gender": "M",
+          "sport": {
+            "name": "Tennis",
+            "slug": "tennis",
+            "id": 5
+          },
+          "userCount": 212033,
+          "playerTeamInfo": {
+            "residence": "Monte Carlo, Monaco",
+            "birthplace": "San Candido, Italy",
+            "height": 1.91,
+            "weight": 77,
+            "plays": "right-handed",
+            "turnedPro": "2018",
+            "prizeCurrent": 16629525,
+            "prizeTotal": 49270211,
+            "id": 481,
+            "birthDateTimestamp": 997920000,
+            "prizeCurrentRaw": {
+              "value": 16629525,
+              "currency": "EUR"
+            },
+            "prizeTotalRaw": {
+              "value": 49270211,
+              "currency": "EUR"
+            },
+            "currentRanking": 1
+          },
+          "nameCode": "SIN",
+          "ranking": 2,
+          "class": 4,
+          "disabled": false,
+          "national": false,
+          "type": 1,
+          "id": 206570,
+          "country": {
+            "alpha2": "IT",
+            "alpha3": "ITA",
+            "name": "Italy",
+            "slug": "italy"
+          },
+          "fullName": "Jannik Sinner",
+          "subTeams": [],
+          "teamColors": {
+            "primary": "#374df5",
+            "secondary": "#374df5",
+            "text": "#ffffff"
+          },
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "يانك سينر",
+              "ru": "Синнер, Янник"
+            },
+            "shortNameTranslation": {
+              "ar": "ي. سينر",
+              "hi": "जे. सिनर",
+              "bn": "জে সিনার"
+            }
+          },
+          "timeActive": []
+        },
+        "homeScore": {
+          "current": 0,
+          "display": 0,
+          "period1": 6,
+          "period2": 5,
+          "period1TieBreak": 4,
+          "point": "40",
+          "normaltime": 0
+        },
+        "awayScore": {
+          "current": 2,
+          "display": 2,
+          "period1": 7,
+          "period2": 7,
+          "period1TieBreak": 7,
+          "point": "A",
+          "normaltime": 2
+        },
+        "time": {
+          "period1": 4087,
+          "period2": 3368,
+          "currentPeriodStartTimestamp": 1763318006
+        },
+        "changes": {
+          "changes": [
+            "time.currentPeriodStart",
+            "time.period2"
+          ],
+          "changeTimestamp": 1763321411
+        },
+        "hasGlobalHighlights": true,
+        "crowdsourcingDataDisplayEnabled": false,
+        "id": 15108295,
+        "defaultPeriodCount": 3,
+        "slug": "carlos-alcaraz-jannik-sinner",
+        "currentPeriodStartTimestamp": 1763318006,
+        "startTimestamp": 1763312400,
+        "periods": {
+          "point": "Game",
+          "current": "Match",
+          "period1": "1st set",
+          "period2": "2nd set",
+          "period3": "3rd set",
+          "period4": "4th set",
+          "period5": "5th set"
+        },
+        "finalResultOnly": false,
+        "hasBet365LiveStream": true,
+        "bet365ExcludedCountryCodes": [
+          "??",
+          "AN",
+          "CU",
+          "IR",
+          "KP",
+          "SY",
+          "VE",
+          "GR",
+          "RU",
+          "CH",
+          "CA"
+        ],
+        "feedLocked": false,
+        "groundType": "Hardcourt indoor",
+        "showTotoPromo": true,
+        "isEditor": false
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/pregame-form": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/sofascore-news/it/posts?categories=news-it": [
+      {
+        "id": 83644,
+        "slug": "il-psg-batte-il-flamengo-leuropa-domina-ancora-il-mondiale-per-club",
+        "date": "2025-12-18T11:41:02",
+        "title": "Il PSG Batte il Flamengo, l’Europa Domina Ancora il Mondiale per Club",
+        "excerpt": "Il Flamengo è stato sconfitto dal PSG nella finale intercontinentale e l’Europa ha mantenuto la leadership nei titoli mondiali per club. Un nuovo capitolo in un divario competitivo crescente.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070426677.jpg",
+        "tags": [
+          {
+            "id": 5694,
+            "slug": "fifa-it",
+            "name": "FIFA"
+          },
+          {
+            "id": 8028,
+            "slug": "flamengo-it",
+            "name": "Flamengo"
+          },
+          {
+            "id": 8194,
+            "slug": "mondiale-per-club",
+            "name": "Mondiale per Club"
+          },
+          {
+            "id": 6348,
+            "slug": "psg-it",
+            "name": "PSG"
+          }
+        ]
+      },
+      {
+        "id": 83603,
+        "slug": "i-new-york-knicks-battono-i-san-antonio-spurs-nella-finale-della-coppa-nba-ponendo-fine-a-52-anni-di-siccita-di-trofei",
+        "date": "2025-12-17T23:13:33",
+        "title": "I New York Knicks Battono i San Antonio Spurs nella Finale della Coppa NBA, Ponendo fine a 52 anni di Siccità di Trofei",
+        "excerpt": "I New York Knicks superano i San Antonio Spurs nella finale di NBA Cup e interrompono un digiuno di 52 anni, trascinati da Jalen Brunson e OG Anunoby.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1058521457.jpg",
+        "tags": [
+          {
+            "id": 5535,
+            "slug": "nba-it",
+            "name": "NBA"
+          },
+          {
+            "id": 7713,
+            "slug": "nba-cup-it",
+            "name": "NBA Cup"
+          },
+          {
+            "id": 8224,
+            "slug": "new-york-knicks-it",
+            "name": "New York Knicks"
+          }
+        ]
+      },
+      {
+        "id": 83586,
+        "slug": "fiorentina-il-crollo-stagione-da-record-in-negativo",
+        "date": "2025-12-17T15:49:05",
+        "title": "Fiorentina, il Crollo: Stagione da Record in Negativo",
+        "excerpt": "La Fiorentina vive una delle stagioni più difficili di sempre, tra record negativi, rendimento in calo e un’identità mai trovata.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070389689-1.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 8216,
+            "slug": "fiorentina",
+            "name": "Fiorentina"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      },
+      {
+        "id": 83560,
+        "slug": "recap-16a-giornata-laliga",
+        "date": "2025-12-16T21:28:16",
+        "title": "Recap 16a Giornata LaLiga",
+        "excerpt": "La 16ª giornata della Liga ha regalato rimonte, vittorie schiaccianti e un rinvio. Barcellona e Real Madrid hanno ottenuto vittorie decisive, mentre Girona e Celta hanno impressionato in trasferta. Raphinha e Tsygankov si sono distinti, con una classifica che si è mantenuta serrata e competitiva.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/IMG_6001.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5594,
+            "slug": "laliga-it",
+            "name": "LaLiga"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          }
+        ]
+      },
+      {
+        "id": 83527,
+        "slug": "recap-16a-giornata-di-premier-league",
+        "date": "2025-12-16T14:20:01",
+        "title": "Recap 16a Giornata di Premier League",
+        "excerpt": "La 16ª giornata di Premier League regala spettacolo e sorprese: big vincenti, scivoloni pesanti e una classifica sempre più corta.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Morgan-Rogers.jpg",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 5609,
+            "slug": "premier-league-it",
+            "name": "Premier League"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          }
+        ]
+      },
+      {
+        "id": 83503,
+        "slug": "i-numeri-non-mentono-buona-fortuna-xabi-ne-avrai-bisogno",
+        "date": "2025-12-16T12:54:00",
+        "title": "I Numeri non Mentono: Buona Fortuna Xabi, ne Avrai Bisogno",
+        "excerpt": "Xabi Alonso vive il primo vero stress al Real Madrid: risultati discreti, critiche feroci e un ambiente dove vincere non basta mai.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/11/NDL_studioBackground_v1.png",
+        "tags": [
+          {
+            "id": 5510,
+            "slug": "calcio",
+            "name": "Calcio"
+          },
+          {
+            "id": 7170,
+            "slug": "numbers-dont-lie-it",
+            "name": "Numbers don't lie"
+          },
+          {
+            "id": 6067,
+            "slug": "real-madrid-it",
+            "name": "Real Madrid"
+          },
+          {
+            "id": 8200,
+            "slug": "xabi-alonso",
+            "name": "Xabi Alonso"
+          }
+        ]
+      },
+      {
+        "id": 83470,
+        "slug": "coppa-intercontinentale-fifa-il-flamengo-affronta-il-psg-alla-ricerca-di-un-titolo-storico",
+        "date": "2025-12-15T23:26:40",
+        "title": "Mondiale per Club FIFA: il Flamengo Affronta il PSG alla Ricerca di un Titolo Storico",
+        "excerpt": "I club brasiliani non hanno vinto un titolo mondiale dal Corinthians nel 2012. Ecco la ripartizione completa di Flamengo vs PSG, l’analisi tattica, i giocatori chiave, il montepremi e la forma di entrambe le squadre nella stagione 2025/26.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070308762-1.jpg",
+        "tags": [
+          {
+            "id": 5694,
+            "slug": "fifa-it",
+            "name": "FIFA"
+          },
+          {
+            "id": 8028,
+            "slug": "flamengo-it",
+            "name": "Flamengo"
+          },
+          {
+            "id": 8194,
+            "slug": "mondiale-per-club",
+            "name": "Mondiale per Club"
+          },
+          {
+            "id": 6348,
+            "slug": "psg-it",
+            "name": "PSG"
+          }
+        ]
+      },
+      {
+        "id": 83467,
+        "slug": "recap-della-settimana-7-e-8-della-western-conference-nba",
+        "date": "2025-12-15T23:15:10",
+        "title": "Recap della Settimana 7 e 8 della Western Conference NBA",
+        "excerpt": "Le settimane 7 e 8 della Western Conference hanno visto Oklahoma City rimanere in testa nonostante la fine della striscia positiva, con Denver e Houston che guadagnano slancio. Nikola Jokić continua a dominare individualmente, mentre Lakers e Spurs restano vicini in una corsa ai playoff sempre più competitiva.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/imago1070196331.jpg",
+        "tags": [
+          {
+            "id": 5535,
+            "slug": "nba-it",
+            "name": "NBA"
+          },
+          {
+            "id": 7198,
+            "slug": "recap",
+            "name": "Recap"
+          },
+          {
+            "id": 8184,
+            "slug": "western-it",
+            "name": "Western"
+          }
+        ]
+      },
+      {
+        "id": 83412,
+        "slug": "stagione-sofascore-i-giocatori-e-le-squadre-piu-aperti-nel-2025",
+        "date": "2025-12-15T13:49:33",
+        "title": "Stagione Sofascore: i Giocatori e le Squadre più Cercate del 2025",
+        "excerpt": "I club, i giocatori e gli eventi più cercati su Sofascore nel 2025. Il calcio è stato il settore trainante dell’anno, con Barcellona, ​​Real Madrid e star internazionali in cima alle ricerche in tutto il mondo.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/Title-Yamal_Mbappe.jpg",
+        "tags": [
+          {
+            "id": 8158,
+            "slug": "barcellona",
+            "name": "Barcellona"
+          },
+          {
+            "id": 8155,
+            "slug": "kylian-mbappe-it",
+            "name": "Kylian Mbappe"
+          },
+          {
+            "id": 5597,
+            "slug": "lamine-yamal-it",
+            "name": "Lamine Yamal"
+          },
+          {
+            "id": 6067,
+            "slug": "real-madrid-it",
+            "name": "Real Madrid"
+          },
+          {
+            "id": 8144,
+            "slug": "sofascore-season-it",
+            "name": "Sofascore Season"
+          }
+        ]
+      },
+      {
+        "id": 83361,
+        "slug": "fantaconsigli-serie-a-15a-giornata",
+        "date": "2025-12-12T09:44:18",
+        "title": "Fantaconsigli Serie A – 15a Giornata",
+        "excerpt": "Consigli pratici per la 15ª giornata: giocatori affidabili, possibili sorprese e scelte utili per completare la formazione senza rischi inutili.",
+        "imageUrl": "https://news-admin.sofascore.com/wp-content/uploads/2025/12/ITA_Fantasy-Serie-A-R15.jpg",
+        "tags": [
+          {
+            "id": 6927,
+            "slug": "fantasy-it",
+            "name": "Fantasy"
+          },
+          {
+            "id": 5486,
+            "slug": "serie-a-it",
+            "name": "Serie A"
+          }
+        ]
+      }
+    ],
+    "https://www.sofascore.com/api/v1/event/15108295/votes": {
+      "vote": {
+        "vote1": 17096,
+        "vote2": 16914,
+        "voteX": null
+      },
+      "bothTeamsToScoreVote": {
+        "voteYes": 0,
+        "voteNo": 0
+      },
+      "firstTeamToScoreVote": {
+        "voteHome": 0,
+        "voteNoGoal": 0,
+        "voteAway": 0
+      },
+      "whoShouldHaveWonVote": {
+        "vote1": 0,
+        "vote2": 0
+      }
+    },
+    "https://www.sofascore.com/api/v1/team/275923/rankings": {
+      "rankings": [
+        {
+          "team": {
+            "name": "Carlos Alcaraz",
+            "slug": "alcaraz-carlos",
+            "shortName": "C. Alcaraz",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 233779,
+            "nameCode": "ALC",
+            "ranking": 1,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 275923,
+            "country": {
+              "alpha2": "ES",
+              "alpha3": "ESP",
+              "name": "Spain",
+              "slug": "spain"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "كارلوس ألكاراز",
+                "ru": "Алькарас Гарфия, Карлос"
+              },
+              "shortNameTranslation": {
+                "ar": "ك. ألكاراز",
+                "hi": "सी. अल्काराज़",
+                "bn": "সি আলকারাজ"
+              }
+            }
+          },
+          "tournamentsPlayed": 17,
+          "type": 5,
+          "rowName": "Carlos Alcaraz",
+          "ranking": 1,
+          "points": 12050,
+          "previousRanking": 1,
+          "previousPoints": 12050,
+          "bestRanking": 1,
+          "id": 701,
+          "country": {
+            "alpha2": "ES",
+            "alpha3": "ESP",
+            "name": "Spain",
+            "slug": "spain"
+          },
+          "rankingClass": "team"
+        },
+        {
+          "team": {
+            "name": "Carlos Alcaraz",
+            "slug": "alcaraz-carlos",
+            "shortName": "C. Alcaraz",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 233779,
+            "nameCode": "ALC",
+            "ranking": 1,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 275923,
+            "country": {
+              "alpha2": "ES",
+              "alpha3": "ESP",
+              "name": "Spain",
+              "slug": "spain"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "كارلوس ألكاراز",
+                "ru": "Алькарас Гарфия, Карлос"
+              },
+              "shortNameTranslation": {
+                "ar": "ك. ألكاراز",
+                "hi": "सी. अल्काराज़",
+                "bn": "সি আলকারাজ"
+              }
+            }
+          },
+          "type": 7,
+          "rowName": "Carlos Alcaraz",
+          "ranking": 1,
+          "points": 12050,
+          "previousRanking": 1,
+          "id": 207920,
+          "country": {},
+          "rankingClass": "livetennis"
+        },
+        {
+          "team": {
+            "name": "Carlos Alcaraz",
+            "slug": "alcaraz-carlos",
+            "shortName": "C. Alcaraz",
+            "gender": "M",
+            "sport": {
+              "name": "Tennis",
+              "slug": "tennis",
+              "id": 5
+            },
+            "userCount": 233779,
+            "nameCode": "ALC",
+            "ranking": 1,
+            "disabled": false,
+            "national": false,
+            "type": 1,
+            "id": 275923,
+            "country": {
+              "alpha2": "ES",
+              "alpha3": "ESP",
+              "name": "Spain",
+              "slug": "spain"
+            },
+            "teamColors": {
+              "primary": "#374df5",
+              "secondary": "#374df5",
+              "text": "#ffffff"
+            },
+            "fieldTranslations": {
+              "nameTranslation": {
+                "ar": "كارلوس ألكاراز",
+                "ru": "Алькарас Гарфия, Карлос"
+              },
+              "shortNameTranslation": {
+                "ar": "ك. ألكاراز",
+                "hi": "सी. अल्काराज़",
+                "bn": "সি আলকারাজ"
+              }
+            }
+          },
+          "type": 34,
+          "rowName": "Carlos Alcaraz",
+          "ranking": 2,
+          "points": 16.39,
+          "previousRanking": 1,
+          "previousPoints": 16.4,
+          "bestRanking": 1,
+          "id": 180839,
+          "country": {},
+          "rankingClass": "utr",
+          "bestRankingDateTimestamp": 1757592039
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/tennis-power": {
+      "tennisPowerRankings": [
+        {
+          "set": 1,
+          "game": 1,
+          "value": 26.8,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 2,
+          "value": -53.34,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 3,
+          "value": 46.42,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 4,
+          "value": -10,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 5,
+          "value": 10,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 6,
+          "value": -29.8,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 7,
+          "value": 19.92,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 8,
+          "value": -32.7,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 9,
+          "value": 10,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 10,
+          "value": -10.1,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 11,
+          "value": 33.06,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 12,
+          "value": -10,
+          "breakOccurred": false
+        },
+        {
+          "set": 1,
+          "game": 13,
+          "value": -50,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 1,
+          "value": 54.2,
+          "breakOccurred": true
+        },
+        {
+          "set": 2,
+          "game": 2,
+          "value": 11.64,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 3,
+          "value": -15.8,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 4,
+          "value": 27.5,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 5,
+          "value": -19.92,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 6,
+          "value": -34.48,
+          "breakOccurred": true
+        },
+        {
+          "set": 2,
+          "game": 7,
+          "value": -18.68,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 8,
+          "value": 44.02,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 9,
+          "value": -43.66,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 10,
+          "value": 26.8,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 11,
+          "value": -32,
+          "breakOccurred": false
+        },
+        {
+          "set": 2,
+          "game": 12,
+          "value": -25,
+          "breakOccurred": true
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/h2h": {
+      "teamDuel": {
+        "homeWins": 6,
+        "awayWins": 4,
+        "draws": 0
+      },
+      "managerDuel": null
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/highlights": {
+      "highlights": [
+        {
+          "title": "C. Alcaraz 0 - 2 J. Sinner",
+          "subtitle": "Full Highlights",
+          "url": "https://www.youtube.com/watch?v=2n70tHqPWDQ",
+          "thumbnailUrl": "https://i.ytimg.com/vi/2n70tHqPWDQ/hqdefault.jpg",
+          "mediaType": 6,
+          "doFollow": false,
+          "keyHighlight": true,
+          "livestream": false,
+          "id": 6949775,
+          "createdAtTimestamp": 1763324399,
+          "sourceUrl": "https://www.youtube.com/watch?v=2n70tHqPWDQ"
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/official-tweets": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web",
+          "campaignId": 9,
+          "oddsOffset": 0,
+          "id": 21818,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy",
+            "slug": "admiralbet-italy",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 645,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 21819,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 21820,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web",
+          "campaignId": 9,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 22113,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/branding/providers/IT/web": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/config/country-sport-priorities/country/IT": {
+      "countrySportPriorities": [
+        {
+          "country": "IT",
+          "sport": {
+            "id": 1,
+            "slug": "football",
+            "name": "Football"
+          },
+          "position": 0,
+          "id": 226
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 5,
+            "slug": "tennis",
+            "name": "Tennis"
+          },
+          "position": 1,
+          "id": 227
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 2,
+            "slug": "basketball",
+            "name": "Basketball"
+          },
+          "position": 2,
+          "id": 228
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 23,
+            "slug": "volleyball",
+            "name": "Volleyball"
+          },
+          "position": 3,
+          "id": 229
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 11,
+            "slug": "motorsport",
+            "name": "Motorsport"
+          },
+          "position": 4,
+          "id": 230
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 12,
+            "slug": "rugby",
+            "name": "Rugby"
+          },
+          "position": 5,
+          "id": 231
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 63,
+            "slug": "american-football",
+            "name": "American football"
+          },
+          "position": 6,
+          "id": 232
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 65,
+            "slug": "cycling",
+            "name": "Cycling"
+          },
+          "position": 7,
+          "id": 233
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 20,
+            "slug": "table-tennis",
+            "name": "Table tennis"
+          },
+          "position": 8,
+          "id": 234
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 4,
+            "slug": "ice-hockey",
+            "name": "Ice hockey"
+          },
+          "position": 9,
+          "id": 235
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 26,
+            "slug": "waterpolo",
+            "name": "Waterpolo"
+          },
+          "position": 10,
+          "id": 236
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 22,
+            "slug": "darts",
+            "name": "Darts"
+          },
+          "position": 11,
+          "id": 237
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 6,
+            "slug": "handball",
+            "name": "Handball"
+          },
+          "position": 12,
+          "id": 238
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 29,
+            "slug": "futsal",
+            "name": "Futsal"
+          },
+          "position": 13,
+          "id": 239
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 64,
+            "slug": "baseball",
+            "name": "Baseball"
+          },
+          "position": 14,
+          "id": 240
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 72,
+            "slug": "esports",
+            "name": "E-sports"
+          },
+          "position": 15,
+          "id": 241
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 62,
+            "slug": "cricket",
+            "name": "Cricket"
+          },
+          "position": 16,
+          "id": 242
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 76,
+            "slug": "mma",
+            "name": "Mixed Martial Arts"
+          },
+          "position": 17,
+          "id": 243
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 31,
+            "slug": "badminton",
+            "name": "Badminton"
+          },
+          "position": 18,
+          "id": 244
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 19,
+            "slug": "snooker",
+            "name": "Snooker"
+          },
+          "position": 19,
+          "id": 245
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 13,
+            "slug": "aussie-rules",
+            "name": "Aussie rules"
+          },
+          "position": 20,
+          "id": 246
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 34,
+            "slug": "beach-volley",
+            "name": "Beach volley"
+          },
+          "position": 21,
+          "id": 247
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 109,
+            "slug": "minifootball",
+            "name": "Minifootball"
+          },
+          "position": 22,
+          "id": 248
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 7,
+            "slug": "floorball",
+            "name": "Floorball"
+          },
+          "position": 23,
+          "id": 249
+        },
+        {
+          "country": "IT",
+          "sport": {
+            "id": 15,
+            "slug": "bandy",
+            "name": "Bandy"
+          },
+          "position": 24,
+          "id": 250
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/video-stories/country/IT": {
+      "error": {
+        "code": 404,
+        "message": "Not Found"
+      }
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/sport-video-highlights/country/IT/extended": {
+      "sportVideoHighlights": [
+        {
+          "id": "C16DC0F962DBB0736DB7FA309E420914037A10B1",
+          "title": "C. Alcaraz vs. J. Sinner Match Highlights Turin November 16, 2025",
+          "description": "C. Alcaraz vs. J. Sinner Match Highlights Turin November 16, 2025, 16-11-25, Final, Nitto ATP Finals 2025, WC, 2025",
+          "sdkId": "691a27af7939ab9a6057b01b",
+          "game": {
+            "eventId": 15108295,
+            "uniqueTournamentId": 2517,
+            "seasonId": 67326,
+            "gameDate": 1763301600,
+            "teams": [
+              {
+                "teamId": 275923,
+                "name": "Carlos Alcaraz",
+                "locale": "Home"
+              },
+              {
+                "teamId": 206570,
+                "name": "Jannik Sinner",
+                "locale": "Visitor"
+              }
+            ],
+            "roundId": 29
+          },
+          "publishDate": 1763321782,
+          "publishMethod": "AUTOMATIC",
+          "live": false,
+          "competitionId": "51642",
+          "storyThumbnailUrl": "https://editorsprodeus2-feeds.prod-cdn.clipro.tv/thumbnails/e8d3b93c-3ae1-4fe4-b964-93db05ec2ca3_0.jpg",
+          "storyThumbnailUrls": [
+            {
+              "url": "https://graphicsfeprodeus2.prod-cdn.clipro.tv/dynamicassets/2ddb0963-b19f-4391-a75e-143c8ad0fc8b.jpg",
+              "aspectRatio": "1x1"
+            },
+            {
+              "url": "https://graphicsfeprodeus2.prod-cdn.clipro.tv/dynamicassets/f7391d88-8bf1-4015-a7b1-927651c8f54c.jpg",
+              "aspectRatio": "2x3"
+            },
+            {
+              "url": "https://editorsprodeus2-feeds.prod-cdn.clipro.tv/thumbnails/e8d3b93c-3ae1-4fe4-b964-93db05ec2ca3_0.jpg",
+              "aspectRatio": "16x9"
+            }
+          ],
+          "lastUpdateTime": 1763321787,
+          "type": "post-game",
+          "storyUrl": "https://sofascore-assets.mvp.fan/games/691a27af7939ab9a6057b01b.html"
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-odds": {
+      "providers": [
+        {
+          "provider": {
+            "name": "bet365 Italy",
+            "slug": "bet365-italy",
+            "defaultBetSlipLink": "https://www.bet365.com/hub/aff/sofascore?affiliate=365_01301314",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1406,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+          "betSlipLink": "https://www.bet365.com/dl/sportsbookredirect/?affiliate=365_842809&bs={parent.fid}-{sourceId}~{fractionalValue}~10&bet=1",
+          "group": 1,
+          "sort": 1,
+          "type": "web-odds",
+          "campaignId": 8,
+          "oddsOffset": 0,
+          "id": 15067,
+          "impressionCostEncrypted": "5mG72X9qJfP1xpneTaW/rjzWmDJldrs="
+        },
+        {
+          "provider": {
+            "name": "AdmiralBet Italy Odds Tab",
+            "slug": "admiralbet-italy-odds-tab",
+            "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1178,
+            "colors": {
+              "primary": "#002454"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "betSlipLink": "https://www.admiralbet.it/gmg/refer/675301425127960001e95c58",
+          "group": 1,
+          "sort": 2,
+          "type": "web-odds",
+          "campaignId": 8,
+          "id": 15070,
+          "impressionCostEncrypted": "4H+l2X9qJbX/h1COpSR6yfxZFiuX6qSY"
+        },
+        {
+          "provider": {
+            "name": "Sisal Italy",
+            "slug": "sisal-italy",
+            "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 814,
+            "colors": {
+              "primary": "#E0E4E9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "betSlipLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "signupLink": "https://ads.sisal.it/promoRedirect?key=ej0xMzUyNDE2MyZsPTEzNjQ0NTE1JnA9MTMxMTAy",
+          "group": 1,
+          "sort": 3,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "oddsOffset": 0,
+          "id": 15069,
+          "impressionCostEncrypted": "5X67x39qJbXaehr37hmOK6Bb4Bt//FO9BA=="
+        },
+        {
+          "provider": {
+            "name": "StarVegas Italy",
+            "slug": "starvegas-italy",
+            "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+            "oddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "liveOddsFrom": {
+              "name": "bet365",
+              "slug": "bet365",
+              "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+              "country": "international",
+              "id": 1,
+              "colors": {
+                "primary": "#017b5b"
+              }
+            },
+            "country": "IT",
+            "id": 1674,
+            "colors": {
+              "primary": "#e0e4e9"
+            }
+          },
+          "branded": true,
+          "weight": 100,
+          "featuredOddsType": "default",
+          "defaultBetSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "betSlipLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "signupLink": "https://www.starvegas.it/gmg/refer/68e6cc164e50c80001e14842",
+          "group": 1,
+          "sort": 4,
+          "type": "web-odds",
+          "campaignId": 8,
+          "fallbackProvider": {
+            "name": "bet365",
+            "slug": "bet365",
+            "defaultBetSlipLink": "https://www.bet365.com/olp/open-account?affiliate=365_01301314",
+            "country": "international",
+            "id": 1,
+            "colors": {
+              "primary": "#017b5b"
+            }
+          },
+          "id": 15068,
+          "impressionCostEncrypted": "53+7x39qJbXaqPa11nMkQLXo8jjkWDGuEA=="
+        }
+      ],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/odds/1/all": {
+      "markets": [
+        {
+          "sourceId": 184837555,
+          "structureType": 1,
+          "marketId": 1,
+          "marketName": "Full time",
+          "isLive": false,
+          "fid": 184837555,
+          "suspended": false,
+          "id": 154805221,
+          "marketGroup": "Home/Away",
+          "marketPeriod": "Match",
+          "choices": [
+            {
+              "initialFractionalValue": "13/10",
+              "fractionalValue": "3/2",
+              "sourceId": 2119954191,
+              "name": "1",
+              "winning": false,
+              "change": 1
+            },
+            {
+              "initialFractionalValue": "31/50",
+              "fractionalValue": "53/100",
+              "sourceId": 2119954200,
+              "name": "2",
+              "winning": true,
+              "change": -1
+            }
+          ]
+        },
+        {
+          "sourceId": 184837555,
+          "structureType": 1,
+          "marketId": 11,
+          "marketName": "First set winner",
+          "isLive": false,
+          "fid": 184837555,
+          "suspended": false,
+          "id": 154867611,
+          "marketGroup": "Home/Away",
+          "marketPeriod": "1st set",
+          "choices": [
+            {
+              "initialFractionalValue": "6/5",
+              "fractionalValue": "13/10",
+              "sourceId": 2119954737,
+              "name": "1",
+              "winning": false,
+              "change": 1
+            },
+            {
+              "initialFractionalValue": "4/6",
+              "fractionalValue": "8/13",
+              "sourceId": 2119954753,
+              "name": "2",
+              "winning": true,
+              "change": -1
+            }
+          ]
+        },
+        {
+          "sourceId": 184837555,
+          "structureType": 2,
+          "marketId": 12,
+          "marketName": "Total games won",
+          "choiceGroup": "23.5",
+          "isLive": false,
+          "fid": 184837555,
+          "suspended": false,
+          "id": 154867612,
+          "marketGroup": "Total sets/games",
+          "marketPeriod": "Extra time",
+          "choices": [
+            {
+              "initialFractionalValue": "5/6",
+              "fractionalValue": "10/11",
+              "sourceId": 2120068519,
+              "name": "Over",
+              "winning": true,
+              "change": 1
+            },
+            {
+              "initialFractionalValue": "5/6",
+              "fractionalValue": "4/5",
+              "sourceId": 2120068430,
+              "name": "Under",
+              "winning": false,
+              "change": -1
+            }
+          ]
+        }
+      ],
+      "eventId": 15108295
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/provider/1/winning-odds": {
+      "home": null,
+      "away": {
+        "fractionalValue": "53/100",
+        "expected": 65,
+        "actual": 67,
+        "id": 18146709
+      }
+    },
+    "https://www.sofascore.com/api/v1/odds/providers/IT/web-featured": {
+      "providers": [],
+      "minimumRequiredProviders": 4
+    },
+    "https://www.sofascore.com/api/v1/event/newly-added-events": {
+      "events": [
+        {
+          "eventId": 15238395,
+          "homeTeamId": 1150843,
+          "awayTeamId": 1156335,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15238396,
+          "homeTeamId": 1159545,
+          "awayTeamId": 1159543,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15238397,
+          "homeTeamId": 1154381,
+          "awayTeamId": 826156,
+          "uniqueTournamentId": 31496
+        },
+        {
+          "eventId": 15238399,
+          "homeTeamId": 69050,
+          "awayTeamId": 230056,
+          "uniqueTournamentId": 19804
+        },
+        {
+          "eventId": 15238400,
+          "homeTeamId": 1159665,
+          "awayTeamId": 1159605,
+          "uniqueTournamentId": 24626
+        },
+        {
+          "eventId": 15238401,
+          "homeTeamId": 131566,
+          "awayTeamId": 231728,
+          "uniqueTournamentId": 21799
+        },
+        {
+          "eventId": 15238402,
+          "homeTeamId": 1159666,
+          "awayTeamId": 1159667,
+          "uniqueTournamentId": 19803
+        },
+        {
+          "eventId": 15238403,
+          "homeTeamId": 1154667,
+          "awayTeamId": 1159601,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15238405,
+          "homeTeamId": 412439,
+          "awayTeamId": 1157785,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15238660,
+          "homeTeamId": 1157128,
+          "awayTeamId": 1154637,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15238675,
+          "homeTeamId": 1159668,
+          "awayTeamId": 1159672,
+          "uniqueTournamentId": 31570
+        },
+        {
+          "eventId": 15238694,
+          "homeTeamId": 411152,
+          "awayTeamId": 398486,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15238695,
+          "homeTeamId": 415413,
+          "awayTeamId": 412636,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15238696,
+          "homeTeamId": 410019,
+          "awayTeamId": 410438,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15238697,
+          "homeTeamId": 483204,
+          "awayTeamId": 481363,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15238698,
+          "homeTeamId": 483980,
+          "awayTeamId": 489404,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15239188,
+          "homeTeamId": 409909,
+          "awayTeamId": 410354,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15239189,
+          "homeTeamId": 409850,
+          "awayTeamId": 410299,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15239190,
+          "homeTeamId": 343965,
+          "awayTeamId": 465983,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15239195,
+          "homeTeamId": 1159670,
+          "awayTeamId": 1159675,
+          "uniqueTournamentId": 31570
+        },
+        {
+          "eventId": 15239196,
+          "homeTeamId": 1159675,
+          "awayTeamId": 1159673,
+          "uniqueTournamentId": 31570
+        },
+        {
+          "eventId": 15239197,
+          "homeTeamId": 1159669,
+          "awayTeamId": 1159673,
+          "uniqueTournamentId": 31570
+        },
+        {
+          "eventId": 15239201,
+          "homeTeamId": 409838,
+          "awayTeamId": 398514,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15239204,
+          "homeTeamId": 1154645,
+          "awayTeamId": 488083,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15239208,
+          "homeTeamId": 465983,
+          "awayTeamId": 344189,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15239209,
+          "homeTeamId": 1159601,
+          "awayTeamId": 1154667,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15239218,
+          "homeTeamId": 343423,
+          "awayTeamId": 1156116,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15239225,
+          "homeTeamId": 1157905,
+          "awayTeamId": 1159545,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15240068,
+          "homeTeamId": 1156137,
+          "awayTeamId": 1154664,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15240537,
+          "homeTeamId": 1156682,
+          "awayTeamId": 1154653,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15241239,
+          "homeTeamId": 1157304,
+          "awayTeamId": 1156120,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15241976,
+          "homeTeamId": 1157916,
+          "awayTeamId": 1159543,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15242479,
+          "homeTeamId": 514316,
+          "awayTeamId": 410942,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15242732,
+          "homeTeamId": 1154653,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15243513,
+          "homeTeamId": 465983,
+          "awayTeamId": 353518,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15243537,
+          "homeTeamId": 499173,
+          "awayTeamId": 1085903,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15243547,
+          "homeTeamId": 494211,
+          "awayTeamId": 515420,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15244081,
+          "homeTeamId": 117916,
+          "awayTeamId": 231728,
+          "uniqueTournamentId": 21799
+        },
+        {
+          "eventId": 15244355,
+          "homeTeamId": 414691,
+          "awayTeamId": 343955,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15244388,
+          "homeTeamId": 450944,
+          "awayTeamId": 468570,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15244389,
+          "homeTeamId": 344189,
+          "awayTeamId": 343965,
+          "uniqueTournamentId": 15006
+        },
+        {
+          "eventId": 15244420,
+          "homeTeamId": 1159545,
+          "awayTeamId": 1159543,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15244514,
+          "homeTeamId": 1157905,
+          "awayTeamId": 1157916,
+          "uniqueTournamentId": 31462
+        },
+        {
+          "eventId": 15244521,
+          "homeTeamId": 1156157,
+          "awayTeamId": 1156167,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15244522,
+          "homeTeamId": 1158414,
+          "awayTeamId": 1158833,
+          "uniqueTournamentId": 21866
+        },
+        {
+          "eventId": 15244816,
+          "homeTeamId": 1157938,
+          "awayTeamId": 1156212,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15244819,
+          "homeTeamId": 1156231,
+          "awayTeamId": 1156169,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15244820,
+          "homeTeamId": 1156162,
+          "awayTeamId": 1156212,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15244821,
+          "homeTeamId": 1156748,
+          "awayTeamId": 1156192,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15244822,
+          "homeTeamId": 1156162,
+          "awayTeamId": 1157938,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15244823,
+          "homeTeamId": 1156157,
+          "awayTeamId": 1156310,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15244825,
+          "homeTeamId": 1156167,
+          "awayTeamId": 1156310,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15245813,
+          "homeTeamId": 1159685,
+          "awayTeamId": 1156157,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15245814,
+          "homeTeamId": 1159685,
+          "awayTeamId": 1156310,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15245817,
+          "homeTeamId": 1159686,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15245819,
+          "homeTeamId": 1159685,
+          "awayTeamId": 1156167,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246233,
+          "homeTeamId": 530881,
+          "awayTeamId": 1089993,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15246234,
+          "homeTeamId": 1089993,
+          "awayTeamId": 458393,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15246235,
+          "homeTeamId": 1089993,
+          "awayTeamId": 424243,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15246236,
+          "homeTeamId": 799152,
+          "awayTeamId": 1089993,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15246237,
+          "homeTeamId": 410013,
+          "awayTeamId": 398476,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15246238,
+          "homeTeamId": 1089993,
+          "awayTeamId": 458393,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15246239,
+          "homeTeamId": 398476,
+          "awayTeamId": 398475,
+          "uniqueTournamentId": 19039
+        },
+        {
+          "eventId": 15246243,
+          "homeTeamId": 480755,
+          "awayTeamId": 1156352,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246244,
+          "homeTeamId": 487880,
+          "awayTeamId": 1156891,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246245,
+          "homeTeamId": 481732,
+          "awayTeamId": 481943,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246246,
+          "homeTeamId": 481379,
+          "awayTeamId": 1156854,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246247,
+          "homeTeamId": 1156963,
+          "awayTeamId": 409860,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246248,
+          "homeTeamId": 984543,
+          "awayTeamId": 485518,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246249,
+          "homeTeamId": 480755,
+          "awayTeamId": 1156854,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246250,
+          "homeTeamId": 487880,
+          "awayTeamId": 409860,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246251,
+          "homeTeamId": 481732,
+          "awayTeamId": 485518,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246252,
+          "homeTeamId": 1156352,
+          "awayTeamId": 481379,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246253,
+          "homeTeamId": 1156891,
+          "awayTeamId": 1156963,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246254,
+          "homeTeamId": 481943,
+          "awayTeamId": 984543,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246255,
+          "homeTeamId": 480755,
+          "awayTeamId": 481379,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246256,
+          "homeTeamId": 487880,
+          "awayTeamId": 1156963,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246257,
+          "homeTeamId": 481732,
+          "awayTeamId": 984543,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246258,
+          "homeTeamId": 1156854,
+          "awayTeamId": 1156352,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246259,
+          "homeTeamId": 409860,
+          "awayTeamId": 1156891,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246260,
+          "homeTeamId": 485518,
+          "awayTeamId": 481943,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246261,
+          "homeTeamId": 482770,
+          "awayTeamId": 481730,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246262,
+          "homeTeamId": 481648,
+          "awayTeamId": 501592,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246263,
+          "homeTeamId": 483819,
+          "awayTeamId": 480754,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246264,
+          "homeTeamId": 481158,
+          "awayTeamId": 1156663,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246265,
+          "homeTeamId": 481965,
+          "awayTeamId": 481366,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246266,
+          "homeTeamId": 489896,
+          "awayTeamId": 411154,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246267,
+          "homeTeamId": 482770,
+          "awayTeamId": 1156663,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246268,
+          "homeTeamId": 481648,
+          "awayTeamId": 481366,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246269,
+          "homeTeamId": 483819,
+          "awayTeamId": 411154,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246270,
+          "homeTeamId": 481730,
+          "awayTeamId": 481158,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246271,
+          "homeTeamId": 501592,
+          "awayTeamId": 481965,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246272,
+          "homeTeamId": 480754,
+          "awayTeamId": 489896,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246273,
+          "homeTeamId": 482770,
+          "awayTeamId": 481158,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246274,
+          "homeTeamId": 481648,
+          "awayTeamId": 481965,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246275,
+          "homeTeamId": 483819,
+          "awayTeamId": 489896,
+          "uniqueTournamentId": 15005
+        },
+        {
+          "eventId": 15246735,
+          "homeTeamId": 410036,
+          "awayTeamId": 406772,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246976,
+          "homeTeamId": 1149278,
+          "awayTeamId": 556490,
+          "uniqueTournamentId": 28824
+        },
+        {
+          "eventId": 15246979,
+          "homeTeamId": 344116,
+          "awayTeamId": 353405,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246980,
+          "homeTeamId": 344116,
+          "awayTeamId": 1156453,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246981,
+          "homeTeamId": 344433,
+          "awayTeamId": 344197,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246982,
+          "homeTeamId": 348733,
+          "awayTeamId": 348477,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246983,
+          "homeTeamId": 386315,
+          "awayTeamId": 344197,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246985,
+          "homeTeamId": 349817,
+          "awayTeamId": 348733,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246986,
+          "homeTeamId": 405120,
+          "awayTeamId": 386315,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246987,
+          "homeTeamId": 344435,
+          "awayTeamId": 344197,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246988,
+          "homeTeamId": 389558,
+          "awayTeamId": 343798,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246989,
+          "homeTeamId": 343798,
+          "awayTeamId": 395488,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246992,
+          "homeTeamId": 344435,
+          "awayTeamId": 394436,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246996,
+          "homeTeamId": 1150838,
+          "awayTeamId": 343456,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15246999,
+          "homeTeamId": 405120,
+          "awayTeamId": 344435,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247000,
+          "homeTeamId": 345352,
+          "awayTeamId": 1156144,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247001,
+          "homeTeamId": 344116,
+          "awayTeamId": 348733,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247002,
+          "homeTeamId": 354555,
+          "awayTeamId": 374396,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247003,
+          "homeTeamId": 410784,
+          "awayTeamId": 418603,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247004,
+          "homeTeamId": 345352,
+          "awayTeamId": 389558,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247006,
+          "homeTeamId": 344072,
+          "awayTeamId": 374295,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247008,
+          "homeTeamId": 419260,
+          "awayTeamId": 1156449,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247009,
+          "homeTeamId": 419260,
+          "awayTeamId": 410045,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247010,
+          "homeTeamId": 409935,
+          "awayTeamId": 1156449,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247011,
+          "homeTeamId": 409935,
+          "awayTeamId": 410045,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247012,
+          "homeTeamId": 409941,
+          "awayTeamId": 418603,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247013,
+          "homeTeamId": 409941,
+          "awayTeamId": 410784,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247014,
+          "homeTeamId": 1154669,
+          "awayTeamId": 343456,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247017,
+          "homeTeamId": 1156449,
+          "awayTeamId": 410034,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247018,
+          "homeTeamId": 349817,
+          "awayTeamId": 353405,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247023,
+          "homeTeamId": 1158469,
+          "awayTeamId": 1157938,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247029,
+          "homeTeamId": 1150840,
+          "awayTeamId": 1156300,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247030,
+          "homeTeamId": 1154666,
+          "awayTeamId": 344072,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247032,
+          "homeTeamId": 1156723,
+          "awayTeamId": 1156300,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247040,
+          "homeTeamId": 1150842,
+          "awayTeamId": 414046,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247042,
+          "homeTeamId": 410045,
+          "awayTeamId": 1156449,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247043,
+          "homeTeamId": 374295,
+          "awayTeamId": 1150840,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247044,
+          "homeTeamId": 419260,
+          "awayTeamId": 409935,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247252,
+          "homeTeamId": 1132156,
+          "awayTeamId": 1159649,
+          "uniqueTournamentId": 29756
+        },
+        {
+          "eventId": 15247369,
+          "homeTeamId": 1159686,
+          "awayTeamId": 1154653,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247735,
+          "homeTeamId": 1159693,
+          "awayTeamId": 410784,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247736,
+          "homeTeamId": 1159693,
+          "awayTeamId": 418603,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247741,
+          "homeTeamId": 1154669,
+          "awayTeamId": 374394,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247743,
+          "homeTeamId": 1154651,
+          "awayTeamId": 409863,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247830,
+          "homeTeamId": 374774,
+          "awayTeamId": 1101271,
+          "uniqueTournamentId": 16254
+        },
+        {
+          "eventId": 15247873,
+          "homeTeamId": 1156682,
+          "awayTeamId": 1156952,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247876,
+          "homeTeamId": 1158469,
+          "awayTeamId": 1156212,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247896,
+          "homeTeamId": 1159686,
+          "awayTeamId": 1156682,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247917,
+          "homeTeamId": 374394,
+          "awayTeamId": 343456,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247939,
+          "homeTeamId": 395488,
+          "awayTeamId": 1157811,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247940,
+          "homeTeamId": 1156144,
+          "awayTeamId": 1157811,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247948,
+          "homeTeamId": 1159693,
+          "awayTeamId": 409941,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247950,
+          "homeTeamId": 343917,
+          "awayTeamId": 1156902,
+          "uniqueTournamentId": 15004
+        },
+        {
+          "eventId": 15247998,
+          "homeTeamId": 1156162,
+          "awayTeamId": 1158469,
+          "uniqueTournamentId": 15004
+        }
+      ]
+    },
+    "https://www.sofascore.com/api/v1/event/15108295/statistics": {
+      "statistics": [
+        {
+          "period": "ALL",
+          "groups": [
+            {
+              "groupName": "Service",
+              "statisticsItems": [
+                {
+                  "name": "Aces",
+                  "home": "5",
+                  "away": "8",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 5,
+                  "awayValue": 8,
+                  "renderType": 1,
+                  "key": "aces"
+                },
+                {
+                  "name": "Double faults",
+                  "home": "0",
+                  "away": "5",
+                  "compareCode": 2,
+                  "statisticsType": "negative",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 5,
+                  "renderType": 1,
+                  "key": "doubleFaults"
+                },
+                {
+                  "name": "First serve",
+                  "home": "49/72 (68%)",
+                  "away": "43/78 (55%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 49,
+                  "awayValue": 43,
+                  "homeTotal": 72,
+                  "awayTotal": 78,
+                  "renderType": 1,
+                  "key": "firstServeAccuracy"
+                },
+                {
+                  "name": "Second serve",
+                  "home": "23/23 (100%)",
+                  "away": "30/35 (86%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 23,
+                  "awayValue": 30,
+                  "homeTotal": 23,
+                  "awayTotal": 35,
+                  "renderType": 1,
+                  "key": "secondServeAccuracy"
+                },
+                {
+                  "name": "First serve points",
+                  "home": "36/49 (73%)",
+                  "away": "36/43 (84%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 36,
+                  "awayValue": 36,
+                  "homeTotal": 49,
+                  "awayTotal": 43,
+                  "renderType": 1,
+                  "key": "firstServePointsAccuracy"
+                },
+                {
+                  "name": "Second serve points",
+                  "home": "13/23 (57%)",
+                  "away": "19/35 (54%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 13,
+                  "awayValue": 19,
+                  "homeTotal": 23,
+                  "awayTotal": 35,
+                  "renderType": 1,
+                  "key": "secondServePointsAccuracy"
+                },
+                {
+                  "name": "Service games played",
+                  "home": "12",
+                  "away": "12",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 12,
+                  "awayValue": 12,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points saved",
+                  "home": "0/2 (0%)",
+                  "away": "2/3 (66%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 0,
+                  "awayValue": 2,
+                  "homeTotal": 2,
+                  "awayTotal": 3,
+                  "renderType": 1,
+                  "key": "breakPointsSaved"
+                }
+              ]
+            },
+            {
+              "groupName": "Points",
+              "statisticsItems": [
+                {
+                  "name": "Total",
+                  "home": "72",
+                  "away": "78",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 72,
+                  "awayValue": 78,
+                  "renderType": 1,
+                  "key": "pointsTotal"
+                },
+                {
+                  "name": "Service points won",
+                  "home": "49",
+                  "away": "55",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 49,
+                  "awayValue": 55,
+                  "renderType": 1,
+                  "key": "servicePointsScored"
+                },
+                {
+                  "name": "Receiver points won",
+                  "home": "23",
+                  "away": "23",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 23,
+                  "awayValue": 23,
+                  "renderType": 1,
+                  "key": "receiverPointsScored"
+                },
+                {
+                  "name": "Max points in a row",
+                  "home": "4",
+                  "away": "4",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 4,
+                  "awayValue": 4,
+                  "renderType": 1,
+                  "key": "maxPointsInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Games",
+              "statisticsItems": [
+                {
+                  "name": "Total won",
+                  "home": "11",
+                  "away": "14",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 11,
+                  "awayValue": 14,
+                  "renderType": 1,
+                  "key": "gamesWon"
+                },
+                {
+                  "name": "Service games won",
+                  "home": "10",
+                  "away": "10",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 10,
+                  "awayValue": 10,
+                  "renderType": 1,
+                  "key": "serviceGamesWon"
+                },
+                {
+                  "name": "Max games in a row",
+                  "home": "2",
+                  "away": "3",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 2,
+                  "awayValue": 3,
+                  "renderType": 1,
+                  "key": "maxGamesInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Return",
+              "statisticsItems": [
+                {
+                  "name": "First serve return points",
+                  "home": "7/43 (16%)",
+                  "away": "13/49 (26%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 7,
+                  "awayValue": 13,
+                  "homeTotal": 43,
+                  "awayTotal": 49,
+                  "renderType": 1,
+                  "key": "firstReturnPoints"
+                },
+                {
+                  "name": "Second serve return points",
+                  "home": "16/35 (45%)",
+                  "away": "10/23 (43%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 16,
+                  "awayValue": 10,
+                  "homeTotal": 35,
+                  "awayTotal": 23,
+                  "renderType": 1,
+                  "key": "secondReturnPoints"
+                },
+                {
+                  "name": "Return games played",
+                  "home": "12",
+                  "away": "12",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 12,
+                  "awayValue": 12,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points converted",
+                  "home": "1",
+                  "away": "2",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 1,
+                  "awayValue": 2,
+                  "renderType": 1,
+                  "key": "breakPointsScored"
+                }
+              ]
+            },
+            {
+              "groupName": "Miscellaneous",
+              "statisticsItems": [
+                {
+                  "name": "Tiebreaks",
+                  "home": "0",
+                  "away": "1",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 1,
+                  "renderType": 1,
+                  "key": "tiebreaks"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "period": "1ST",
+          "groups": [
+            {
+              "groupName": "Service",
+              "statisticsItems": [
+                {
+                  "name": "Aces",
+                  "home": "2",
+                  "away": "6",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 2,
+                  "awayValue": 6,
+                  "renderType": 1,
+                  "key": "aces"
+                },
+                {
+                  "name": "Double faults",
+                  "home": "0",
+                  "away": "2",
+                  "compareCode": 2,
+                  "statisticsType": "negative",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 2,
+                  "renderType": 1,
+                  "key": "doubleFaults"
+                },
+                {
+                  "name": "First serve",
+                  "home": "26/38 (68%)",
+                  "away": "27/44 (61%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 26,
+                  "awayValue": 27,
+                  "homeTotal": 38,
+                  "awayTotal": 44,
+                  "renderType": 1,
+                  "key": "firstServeAccuracy"
+                },
+                {
+                  "name": "Second serve",
+                  "home": "12/12 (100%)",
+                  "away": "15/17 (88%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 12,
+                  "awayValue": 15,
+                  "homeTotal": 12,
+                  "awayTotal": 17,
+                  "renderType": 1,
+                  "key": "secondServeAccuracy"
+                },
+                {
+                  "name": "First serve points",
+                  "home": "20/26 (77%)",
+                  "away": "23/27 (85%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 20,
+                  "awayValue": 23,
+                  "homeTotal": 26,
+                  "awayTotal": 27,
+                  "renderType": 1,
+                  "key": "firstServePointsAccuracy"
+                },
+                {
+                  "name": "Second serve points",
+                  "home": "8/12 (67%)",
+                  "away": "9/17 (53%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 8,
+                  "awayValue": 9,
+                  "homeTotal": 12,
+                  "awayTotal": 17,
+                  "renderType": 1,
+                  "key": "secondServePointsAccuracy"
+                },
+                {
+                  "name": "Service games played",
+                  "home": "6",
+                  "away": "6",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 6,
+                  "awayValue": 6,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points saved",
+                  "home": "0/0 (0%)",
+                  "away": "1/1 (100%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 0,
+                  "awayValue": 1,
+                  "homeTotal": 0,
+                  "awayTotal": 1,
+                  "renderType": 1,
+                  "key": "breakPointsSaved"
+                }
+              ]
+            },
+            {
+              "groupName": "Points",
+              "statisticsItems": [
+                {
+                  "name": "Service points won",
+                  "home": "28",
+                  "away": "32",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 28,
+                  "awayValue": 32,
+                  "renderType": 1,
+                  "key": "servicePointsScored"
+                },
+                {
+                  "name": "Receiver points won",
+                  "home": "12",
+                  "away": "10",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 12,
+                  "awayValue": 10,
+                  "renderType": 1,
+                  "key": "receiverPointsScored"
+                },
+                {
+                  "name": "Max points in a row",
+                  "home": "4",
+                  "away": "4",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 4,
+                  "awayValue": 4,
+                  "renderType": 1,
+                  "key": "maxPointsInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Games",
+              "statisticsItems": [
+                {
+                  "name": "Max games in a row",
+                  "home": "1",
+                  "away": "2",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 1,
+                  "awayValue": 2,
+                  "renderType": 1,
+                  "key": "maxGamesInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Return",
+              "statisticsItems": [
+                {
+                  "name": "First serve return points",
+                  "home": "4/27 (14%)",
+                  "away": "6/26 (23%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 4,
+                  "awayValue": 6,
+                  "homeTotal": 27,
+                  "awayTotal": 26,
+                  "renderType": 1,
+                  "key": "firstReturnPoints"
+                },
+                {
+                  "name": "Second serve return points",
+                  "home": "8/17 (47%)",
+                  "away": "4/12 (33%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 8,
+                  "awayValue": 4,
+                  "homeTotal": 17,
+                  "awayTotal": 12,
+                  "renderType": 1,
+                  "key": "secondReturnPoints"
+                },
+                {
+                  "name": "Return games played",
+                  "home": "6",
+                  "away": "6",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 6,
+                  "awayValue": 6,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points converted",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "breakPointsScored"
+                }
+              ]
+            },
+            {
+              "groupName": "Miscellaneous",
+              "statisticsItems": [
+                {
+                  "name": "Tiebreaks",
+                  "home": "0",
+                  "away": "1",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 1,
+                  "renderType": 1,
+                  "key": "tiebreaks"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "period": "2ND",
+          "groups": [
+            {
+              "groupName": "Service",
+              "statisticsItems": [
+                {
+                  "name": "Aces",
+                  "home": "3",
+                  "away": "2",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 3,
+                  "awayValue": 2,
+                  "renderType": 1,
+                  "key": "aces"
+                },
+                {
+                  "name": "Double faults",
+                  "home": "0",
+                  "away": "3",
+                  "compareCode": 2,
+                  "statisticsType": "negative",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 3,
+                  "renderType": 1,
+                  "key": "doubleFaults"
+                },
+                {
+                  "name": "First serve",
+                  "home": "23/34 (68%)",
+                  "away": "16/34 (47%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 23,
+                  "awayValue": 16,
+                  "homeTotal": 34,
+                  "awayTotal": 34,
+                  "renderType": 1,
+                  "key": "firstServeAccuracy"
+                },
+                {
+                  "name": "Second serve",
+                  "home": "11/11 (100%)",
+                  "away": "15/18 (83%)",
+                  "compareCode": 1,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 11,
+                  "awayValue": 15,
+                  "homeTotal": 11,
+                  "awayTotal": 18,
+                  "renderType": 1,
+                  "key": "secondServeAccuracy"
+                },
+                {
+                  "name": "First serve points",
+                  "home": "16/23 (70%)",
+                  "away": "13/16 (81%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 16,
+                  "awayValue": 13,
+                  "homeTotal": 23,
+                  "awayTotal": 16,
+                  "renderType": 1,
+                  "key": "firstServePointsAccuracy"
+                },
+                {
+                  "name": "Second serve points",
+                  "home": "5/11 (45%)",
+                  "away": "10/18 (56%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 5,
+                  "awayValue": 10,
+                  "homeTotal": 11,
+                  "awayTotal": 18,
+                  "renderType": 1,
+                  "key": "secondServePointsAccuracy"
+                },
+                {
+                  "name": "Service games played",
+                  "home": "6",
+                  "away": "6",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 6,
+                  "awayValue": 6,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points saved",
+                  "home": "0/2 (0%)",
+                  "away": "1/2 (50%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 0,
+                  "awayValue": 1,
+                  "homeTotal": 2,
+                  "awayTotal": 2,
+                  "renderType": 1,
+                  "key": "breakPointsSaved"
+                }
+              ]
+            },
+            {
+              "groupName": "Points",
+              "statisticsItems": [
+                {
+                  "name": "Service points won",
+                  "home": "21",
+                  "away": "23",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 21,
+                  "awayValue": 23,
+                  "renderType": 1,
+                  "key": "servicePointsScored"
+                },
+                {
+                  "name": "Receiver points won",
+                  "home": "11",
+                  "away": "13",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 11,
+                  "awayValue": 13,
+                  "renderType": 1,
+                  "key": "receiverPointsScored"
+                },
+                {
+                  "name": "Max points in a row",
+                  "home": "4",
+                  "away": "4",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 4,
+                  "awayValue": 4,
+                  "renderType": 1,
+                  "key": "maxPointsInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Games",
+              "statisticsItems": [
+                {
+                  "name": "Max games in a row",
+                  "home": "2",
+                  "away": "3",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 2,
+                  "awayValue": 3,
+                  "renderType": 1,
+                  "key": "maxGamesInRow"
+                }
+              ]
+            },
+            {
+              "groupName": "Return",
+              "statisticsItems": [
+                {
+                  "name": "First serve return points",
+                  "home": "3/16 (18%)",
+                  "away": "7/23 (30%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 3,
+                  "awayValue": 7,
+                  "homeTotal": 16,
+                  "awayTotal": 23,
+                  "renderType": 1,
+                  "key": "firstReturnPoints"
+                },
+                {
+                  "name": "Second serve return points",
+                  "home": "8/18 (44%)",
+                  "away": "6/11 (54%)",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "team",
+                  "homeValue": 8,
+                  "awayValue": 6,
+                  "homeTotal": 18,
+                  "awayTotal": 11,
+                  "renderType": 1,
+                  "key": "secondReturnPoints"
+                },
+                {
+                  "name": "Return games played",
+                  "home": "6",
+                  "away": "6",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 6,
+                  "awayValue": 6,
+                  "renderType": 1,
+                  "key": "serviceGamesTotal"
+                },
+                {
+                  "name": "Break points converted",
+                  "home": "1",
+                  "away": "2",
+                  "compareCode": 2,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 1,
+                  "awayValue": 2,
+                  "renderType": 1,
+                  "key": "breakPointsScored"
+                }
+              ]
+            },
+            {
+              "groupName": "Miscellaneous",
+              "statisticsItems": [
+                {
+                  "name": "Tiebreaks",
+                  "home": "0",
+                  "away": "0",
+                  "compareCode": 3,
+                  "statisticsType": "positive",
+                  "valueType": "event",
+                  "homeValue": 0,
+                  "awayValue": 0,
+                  "renderType": 1,
+                  "key": "tiebreaks"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
