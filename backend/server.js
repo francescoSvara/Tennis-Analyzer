@@ -1108,7 +1108,15 @@ app.post('/api/scrape', async (req, res) => {
     
     if (isLikelyApi || isSofascoreUrl) {
       try {
-        const id = await runDirectFetch(url);
+        // Convert SofaScore event page URLs to API endpoints
+        let apiUrl = url;
+        const eventMatch = url.match(/sofascore\.com\/(?:.*?\/)?(?:event\/)?(\d+)/i);
+        if (eventMatch && !url.includes('/api/')) {
+          apiUrl = `https://www.sofascore.com/api/v1/event/${eventMatch[1]}`;
+          console.log(`🔄 Converting URL to API: ${apiUrl}`);
+        }
+        
+        const id = await runDirectFetch(apiUrl);
         // Attendi il completamento e ottieni i dati
         let attempts = 0;
         let status = getStatus(id);
