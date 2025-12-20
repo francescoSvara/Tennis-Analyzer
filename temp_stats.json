@@ -1,0 +1,590 @@
+﻿{
+    "summary":  {
+                    "totalMatches":  26,
+                    "totalTournaments":  14,
+                    "avgCompleteness":  50,
+                    "byStatus":  {
+                                     "finished":  21,
+                                     "inprogress":  1,
+                                     "notstarted":  4,
+                                     "other":  0
+                                 }
+                },
+    "tournaments":  [
+                        {
+                            "id":  110083,
+                            "name":  "United Cup, Singles",
+                            "category":  "United Cup",
+                            "sport":  "tennis",
+                            "matchCount":  1,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  0,
+                                             "inprogress":  0,
+                                             "notstarted":  1
+                                         },
+                            "matches":  [
+                                            "@{eventId=15141988; status=notstarted; completeness=50; homeTeam=Alexander Zverev; awayTeam=Hubert Hurkacz; startTimestamp=1767594600}"
+                                        ],
+                            "latestDate":  1767594600,
+                            "earliestDate":  1767594600
+                        },
+                        {
+                            "id":  171293,
+                            "name":  "Next Gen Finals Jeddah, Saudi Arabia, Green Group",
+                            "category":  "ATP",
+                            "sport":  "tennis",
+                            "matchCount":  2,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  0,
+                                             "inprogress":  0,
+                                             "notstarted":  2
+                                         },
+                            "matches":  [
+                                            "@{eventId=15222472; status=notstarted; completeness=50; homeTeam=Learner Tien; awayTeam=Nicolai Budkov Kjaer; startTimestamp=1766164200}",
+                                            "@{eventId=15222469; status=notstarted; completeness=50; homeTeam=Martin Landaluce; awayTeam=Rafael Jodar; startTimestamp=1766160000}"
+                                        ],
+                            "latestDate":  1766164200,
+                            "earliestDate":  1766160000
+                        },
+                        {
+                            "id":  171147,
+                            "name":  "ITF M15 Lima 3 Men",
+                            "category":  "ITF Men",
+                            "sport":  "tennis",
+                            "matchCount":  4,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  3,
+                                             "inprogress":  1,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15249203; status=finished; completeness=50; homeTeam=Thiago Agustin Pernas; awayTeam=Bautista Vilicich; startTimestamp=1766156400}",
+                                            "@{eventId=15248882; status=inprogress; completeness=50; homeTeam=Gerard Campana Lee; awayTeam=Ryan Dickerson; startTimestamp=1766156400}",
+                                            "@{eventId=15249202; status=finished; completeness=50; homeTeam=Enzo Kohlmann de Freitas; awayTeam=Pierre Delage; startTimestamp=1766156400}",
+                                            "@{eventId=15227068; status=finished; completeness=50; homeTeam=Rodrigo Varillas; awayTeam=Victor Hugo Remondy Pagotto; startTimestamp=1765895400}"
+                                        ],
+                            "latestDate":  1766156400,
+                            "earliestDate":  1765895400
+                        },
+                        {
+                            "id":  171294,
+                            "name":  "Next Gen Finals Jeddah, Saudi Arabia, Red Group",
+                            "category":  "ATP",
+                            "sport":  "tennis",
+                            "matchCount":  4,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  3,
+                                             "inprogress":  0,
+                                             "notstarted":  1
+                                         },
+                            "matches":  [
+                                            "@{eventId=15222455; status=notstarted; completeness=50; homeTeam=Alexander Blockx; awayTeam=Dino Prižmić; startTimestamp=1766146200}",
+                                            "@{eventId=15222436; status=finished; completeness=50; homeTeam=Nishesh Basavareddy; awayTeam=Justin Engel; startTimestamp=1766142000}",
+                                            "@{eventId=15222453; status=finished; completeness=50; homeTeam=Alexander Blockx; awayTeam=Nishesh Basavareddy; startTimestamp=1766061900}",
+                                            "@{eventId=15222427; status=finished; completeness=50; homeTeam=Dino Prižmić; awayTeam=Justin Engel; startTimestamp=1766055600}"
+                                        ],
+                            "latestDate":  1766146200,
+                            "earliestDate":  1766055600
+                        },
+                        {
+                            "id":  171141,
+                            "name":  "ITF M15 Antalya 18 Men",
+                            "category":  "ITF Men",
+                            "sport":  "tennis",
+                            "matchCount":  2,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  2,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15249197; status=finished; completeness=50; homeTeam=Imanol Lopez Morillo; awayTeam=Ivan Nedelko; startTimestamp=1766127600}",
+                                            "@{eventId=15225544; status=finished; completeness=50; homeTeam=Alejo Sanchez Quilez; awayTeam=Mihai Razvan Marinescu; startTimestamp=1765875600}"
+                                        ],
+                            "latestDate":  1766127600,
+                            "earliestDate":  1765875600
+                        },
+                        {
+                            "id":  31495,
+                            "name":  "ITF M15 Lima 3 Men",
+                            "category":  "ITF Men",
+                            "sport":  "tennis",
+                            "matchCount":  3,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  3,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15236957; status=finished; completeness=50; homeTeam=Luis Jose Nakamine; awayTeam=Bautista Vilicich; startTimestamp=1766068200}",
+                                            "@{eventId=15236955; status=finished; completeness=50; homeTeam=Felipe de Dios; awayTeam=Ryan Dickerson; startTimestamp=1766068200}",
+                                            "@{eventId=15231209; status=finished; completeness=50; homeTeam=Nicolas Bruna; awayTeam=Valerio Aboian; startTimestamp=1765992600}"
+                                        ],
+                            "latestDate":  1766068200,
+                            "earliestDate":  1765992600
+                        },
+                        {
+                            "id":  31503,
+                            "name":  "ITF W15 Lima 3 Women",
+                            "category":  "ITF Women",
+                            "sport":  "tennis",
+                            "matchCount":  1,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  1,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15230501; status=finished; completeness=50; homeTeam=Catarina Melleiro; awayTeam=Sarah Barry; startTimestamp=1766001600}"
+                                        ],
+                            "latestDate":  1766001600,
+                            "earliestDate":  1766001600
+                        },
+                        {
+                            "id":  10122,
+                            "name":  "Next Gen Finals",
+                            "category":  "ATP",
+                            "sport":  "tennis",
+                            "matchCount":  2,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  2,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15222366; status=finished; completeness=50; homeTeam=Martin Landaluce; awayTeam=Nicolai Budkov Kjaer; startTimestamp=1765995600}",
+                                            "@{eventId=15222299; status=finished; completeness=50; homeTeam=Dino Prižmić; awayTeam=Nishesh Basavareddy; startTimestamp=1765969200}"
+                                        ],
+                            "latestDate":  1765995600,
+                            "earliestDate":  1765969200
+                        },
+                        {
+                            "id":  31489,
+                            "name":  "ITF M15 Antalya 18 Men",
+                            "category":  "ITF Men",
+                            "sport":  "tennis",
+                            "matchCount":  1,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  1,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15230231; status=finished; completeness=50; homeTeam=Hiromasa Koyama; awayTeam=Dinko Dinev; startTimestamp=1765972800}"
+                                        ],
+                            "latestDate":  1765972800,
+                            "earliestDate":  1765972800
+                        },
+                        {
+                            "id":  31491,
+                            "name":  "ITF M15 Tauranga Men",
+                            "category":  "ITF Men",
+                            "sport":  "tennis",
+                            "matchCount":  1,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  1,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15224840; status=finished; completeness=50; homeTeam=Jack Loutit; awayTeam=Ymerali Ibraimi; startTimestamp=1765943100}"
+                                        ],
+                            "latestDate":  1765943100,
+                            "earliestDate":  1765943100
+                        },
+                        {
+                            "id":  168409,
+                            "name":  "Tour Finals Turin, Italy, Group Jimmy Connors",
+                            "category":  "ATP",
+                            "sport":  "tennis",
+                            "matchCount":  1,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  1,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=15017492; status=finished; completeness=50; homeTeam=Carlos Alcaraz; awayTeam=Alex de Minaur; startTimestamp=1762693200}"
+                                        ],
+                            "latestDate":  1762693200,
+                            "earliestDate":  1762693200
+                        },
+                        {
+                            "id":  167302,
+                            "name":  "Metz, France",
+                            "category":  "ATP",
+                            "sport":  "tennis",
+                            "matchCount":  2,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  2,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=14956463; status=finished; completeness=50; homeTeam=Clement Tabur; awayTeam=Alexander Blockx; startTimestamp=1762344600}",
+                                            "@{eventId=14992152; status=finished; completeness=50; homeTeam=Francesco Passaro; awayTeam=Alexander Blockx; startTimestamp=1762263600}"
+                                        ],
+                            "latestDate":  1762344600,
+                            "earliestDate":  1762263600
+                        },
+                        {
+                            "id":  166947,
+                            "name":  "Bratislava 2, Slovakia",
+                            "category":  "Challenger",
+                            "sport":  "tennis",
+                            "matchCount":  1,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  1,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=14932267; status=finished; completeness=50; homeTeam=Alexander Blockx; awayTeam=Titouan Droguet; startTimestamp=1762092000}"
+                                        ],
+                            "latestDate":  1762092000,
+                            "earliestDate":  1762092000
+                        },
+                        {
+                            "id":  140742,
+                            "name":  "Paris, France",
+                            "category":  "ATP",
+                            "sport":  "tennis",
+                            "matchCount":  1,
+                            "avgCompleteness":  50,
+                            "byStatus":  {
+                                             "finished":  1,
+                                             "inprogress":  0,
+                                             "notstarted":  0
+                                         },
+                            "matches":  [
+                                            "@{eventId=14957028; status=finished; completeness=50; homeTeam=Carlos Alcaraz; awayTeam=Cameron Norrie; startTimestamp=1761674400}"
+                                        ],
+                            "latestDate":  1761674400,
+                            "earliestDate":  1761674400
+                        }
+                    ],
+    "recentAcquisitions":  [
+                               {
+                                   "eventId":  15227068,
+                                   "acquiredAt":  "2025-12-19T20:51:09.54366+00:00",
+                                   "tournament":  "ITF M15 Lima 3 Men",
+                                   "homeTeam":  "Rodrigo Varillas",
+                                   "awayTeam":  "Victor Hugo Remondy Pagotto",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15141988,
+                                   "acquiredAt":  "2025-12-19T20:49:19.006314+00:00",
+                                   "tournament":  "United Cup, Singles",
+                                   "homeTeam":  "Alexander Zverev",
+                                   "awayTeam":  "Hubert Hurkacz",
+                                   "status":  "notstarted",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15017492,
+                                   "acquiredAt":  "2025-12-19T17:53:43.769386+00:00",
+                                   "tournament":  "Tour Finals Turin, Italy, Group Jimmy Connors",
+                                   "homeTeam":  "Carlos Alcaraz",
+                                   "awayTeam":  "Alex de Minaur",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15225544,
+                                   "acquiredAt":  "2025-12-19T17:50:33.269506+00:00",
+                                   "tournament":  "ITF M15 Antalya 18 Men",
+                                   "homeTeam":  "Alejo Sanchez Quilez",
+                                   "awayTeam":  "Mihai Razvan Marinescu",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  14957028,
+                                   "acquiredAt":  "2025-12-19T17:43:59.742085+00:00",
+                                   "tournament":  "Paris, France",
+                                   "homeTeam":  "Carlos Alcaraz",
+                                   "awayTeam":  "Cameron Norrie",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15222453,
+                                   "acquiredAt":  "2025-12-19T17:42:38.490382+00:00",
+                                   "tournament":  "Next Gen Finals Jeddah, Saudi Arabia, Red Group",
+                                   "homeTeam":  "Alexander Blockx",
+                                   "awayTeam":  "Nishesh Basavareddy",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15249202,
+                                   "acquiredAt":  "2025-12-19T17:31:36.615806+00:00",
+                                   "tournament":  "ITF M15 Lima 3 Men",
+                                   "homeTeam":  "Enzo Kohlmann de Freitas",
+                                   "awayTeam":  "Pierre Delage",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15248882,
+                                   "acquiredAt":  "2025-12-19T17:31:15.355145+00:00",
+                                   "tournament":  "ITF M15 Lima 3 Men",
+                                   "homeTeam":  "Gerard Campana Lee",
+                                   "awayTeam":  "Ryan Dickerson",
+                                   "status":  "inprogress",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15249203,
+                                   "acquiredAt":  "2025-12-19T17:30:53.662459+00:00",
+                                   "tournament":  "ITF M15 Lima 3 Men",
+                                   "homeTeam":  "Thiago Agustin Pernas",
+                                   "awayTeam":  "Bautista Vilicich",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  14932267,
+                                   "acquiredAt":  "2025-12-19T17:05:35.309181+00:00",
+                                   "tournament":  "Bratislava 2, Slovakia",
+                                   "homeTeam":  "Alexander Blockx",
+                                   "awayTeam":  "Titouan Droguet",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  14992152,
+                                   "acquiredAt":  "2025-12-19T17:05:05.058845+00:00",
+                                   "tournament":  "Metz, France",
+                                   "homeTeam":  "Francesco Passaro",
+                                   "awayTeam":  "Alexander Blockx",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  14956463,
+                                   "acquiredAt":  "2025-12-19T17:03:47.088843+00:00",
+                                   "tournament":  "Metz, France",
+                                   "homeTeam":  "Clement Tabur",
+                                   "awayTeam":  "Alexander Blockx",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15230231,
+                                   "acquiredAt":  "2025-12-19T16:40:35.209375+00:00",
+                                   "tournament":  "ITF M15 Antalya 18 Men",
+                                   "homeTeam":  "Hiromasa Koyama",
+                                   "awayTeam":  "Dinko Dinev",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15222366,
+                                   "acquiredAt":  "2025-12-19T16:40:32.854642+00:00",
+                                   "tournament":  "Next Gen Finals",
+                                   "homeTeam":  "Martin Landaluce",
+                                   "awayTeam":  "Nicolai Budkov Kjaer",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15230501,
+                                   "acquiredAt":  "2025-12-19T16:40:31.042568+00:00",
+                                   "tournament":  "ITF W15 Lima 3 Women",
+                                   "homeTeam":  "Catarina Melleiro",
+                                   "awayTeam":  "Sarah Barry",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15231209,
+                                   "acquiredAt":  "2025-12-19T16:40:29.299736+00:00",
+                                   "tournament":  "ITF M15 Lima 3 Men",
+                                   "homeTeam":  "Nicolas Bruna",
+                                   "awayTeam":  "Valerio Aboian",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15236955,
+                                   "acquiredAt":  "2025-12-19T16:40:27.610361+00:00",
+                                   "tournament":  "ITF M15 Lima 3 Men",
+                                   "homeTeam":  "Felipe de Dios",
+                                   "awayTeam":  "Ryan Dickerson",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15236957,
+                                   "acquiredAt":  "2025-12-19T16:40:25.898972+00:00",
+                                   "tournament":  "ITF M15 Lima 3 Men",
+                                   "homeTeam":  "Luis Jose Nakamine",
+                                   "awayTeam":  "Bautista Vilicich",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15222299,
+                                   "acquiredAt":  "2025-12-19T16:31:34.391611+00:00",
+                                   "tournament":  "Next Gen Finals",
+                                   "homeTeam":  "Dino Prižmić",
+                                   "awayTeam":  "Nishesh Basavareddy",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               },
+                               {
+                                   "eventId":  15224840,
+                                   "acquiredAt":  "2025-12-19T16:31:28.109741+00:00",
+                                   "tournament":  "ITF M15 Tauranga Men",
+                                   "homeTeam":  "Jack Loutit",
+                                   "awayTeam":  "Ymerali Ibraimi",
+                                   "status":  "finished",
+                                   "completeness":  50
+                               }
+                           ],
+    "timeline":  [
+                     {
+                         "date":  "2025-11-21",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-22",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-23",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-24",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-25",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-26",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-27",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-28",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-29",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-11-30",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-01",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-02",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-03",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-04",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-05",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-06",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-07",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-08",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-09",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-10",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-11",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-12",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-13",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-14",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-15",
+                         "count":  0
+                     },
+                     {
+                         "date":  "2025-12-16",
+                         "count":  2
+                     },
+                     {
+                         "date":  "2025-12-17",
+                         "count":  6
+                     },
+                     {
+                         "date":  "2025-12-18",
+                         "count":  4
+                     },
+                     {
+                         "date":  "2025-12-19",
+                         "count":  8
+                     },
+                     {
+                         "date":  "2025-12-20",
+                         "count":  0
+                     }
+                 ],
+    "tracking":  {
+                     "active":  0,
+                     "matches":  [
+
+                                 ]
+                 },
+    "timestamp":  "2025-12-20T15:23:35.751Z"
+}

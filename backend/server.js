@@ -341,13 +341,30 @@ app.get('/api/db-stats', async (req, res) => {
             const sportSlug = eventData.tournament?.category?.sport?.slug || 'tennis';
             const statusType = eventData.status?.type || 'unknown';
             
+            // Estrai uniqueTournament ID (potrebbe essere oggetto o id diretto)
+            let uniqueTournamentId = null;
+            let uniqueTournamentName = null;
+            const ut = eventData.tournament?.uniqueTournament;
+            if (ut) {
+              if (typeof ut === 'object') {
+                uniqueTournamentId = ut.id;
+                uniqueTournamentName = ut.name;
+              } else if (typeof ut === 'number') {
+                uniqueTournamentId = ut;
+              }
+            }
+            
+            // Usa season ID come fallback per raggruppamento, ma salva uniqueTournamentId separatamente
+            const seasonId = eventData.tournament?.id || eventData.season?.id;
+            
             dbMatches.push({
               id: eventData.id,
               status_type: statusType,
               start_time: eventData.startTimestamp ? new Date(eventData.startTimestamp * 1000).toISOString() : null,
               created_at: new Date().toISOString(),
-              tournament_id: eventData.tournament?.uniqueTournament?.id || eventData.tournament?.id,
-              tournament_name: eventData.tournament?.uniqueTournament?.name || eventData.tournament?.name || 'Unknown',
+              tournament_id: seasonId,
+              unique_tournament_id: uniqueTournamentId,
+              tournament_name: uniqueTournamentName || eventData.tournament?.name || 'Unknown',
               tournament_category: eventData.tournament?.category?.name || '',
               home_name: eventData.homeTeam?.name || '',
               away_name: eventData.awayTeam?.name || '',
@@ -385,10 +402,12 @@ app.get('/api/db-stats', async (req, res) => {
       // Raggruppa per torneo
       const tournamentId = match.tournament_id || 'unknown';
       const tournamentName = match.tournament_name || 'Sconosciuto';
+      const uniqueTournamentId = match.unique_tournament_id;
       
       if (!tournamentMap.has(tournamentId)) {
         tournamentMap.set(tournamentId, {
           id: tournamentId,
+          uniqueTournamentId: uniqueTournamentId,
           name: tournamentName,
           category: match.tournament_category || '',
           sport: 'tennis',
@@ -397,6 +416,9 @@ app.get('/api/db-stats', async (req, res) => {
           latestDate: null,
           earliestDate: null
         });
+      } else if (uniqueTournamentId && !tournamentMap.get(tournamentId).uniqueTournamentId) {
+        // Aggiorna se non avevamo l'uniqueTournamentId
+        tournamentMap.get(tournamentId).uniqueTournamentId = uniqueTournamentId;
       }
       
       const tData = tournamentMap.get(tournamentId);
@@ -426,6 +448,7 @@ app.get('/api/db-stats', async (req, res) => {
     // Calcola statistiche per torneo
     const tournamentStats = Array.from(tournamentMap.values()).map(t => ({
       id: t.id,
+      uniqueTournamentId: t.uniqueTournamentId || null,
       name: t.name,
       category: t.category,
       sport: t.sport,
@@ -516,7 +539,7 @@ app.get('/api/db-stats', async (req, res) => {
  */
 app.get('/api/tournament/:tournamentId/events', async (req, res) => {
   const { tournamentId } = req.params;
-  const { season } = req.query;
+  const { season, seasonId: seasonIdQuery } = req.query;
   
   try {
     const headers = {
@@ -525,9 +548,11 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
       'Referer': 'https://www.sofascore.com/'
     };
     
-    let seasonId = season;
+    let seasonId = season || seasonIdQuery;
     let sofascoreEvents = [];
     let usingSofascoreData = false;
+    
+    console.log(`Tournament events request: tournamentId=${tournamentId}, seasonId=${seasonId}`);
     
     // Prova a chiamare SofaScore API - potrebbe fallire se tournamentId è un season ID
     try {

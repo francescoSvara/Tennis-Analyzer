@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiUrl } from '../config';
 
 /**
@@ -37,11 +37,18 @@ function MiniBarChart({ data, height = 40 }) {
   );
 }
 
-// Progress ring/circle
+// Progress ring/circle con animazione da 0%
 function ProgressRing({ percentage, size = 60, strokeWidth = 6 }) {
+  const [animatedPct, setAnimatedPct] = useState(0);
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (percentage / 100) * circumference;
+  const offset = circumference - (animatedPct / 100) * circumference;
+  
+  // Anima da 0 al valore reale
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimatedPct(percentage), 100);
+    return () => clearTimeout(timer);
+  }, [percentage]);
   
   const getColor = (pct) => {
     if (pct >= 80) return '#10b981';
@@ -73,7 +80,7 @@ function ProgressRing({ percentage, size = 60, strokeWidth = 6 }) {
           style={{
             transform: 'rotate(-90deg)',
             transformOrigin: '50% 50%',
-            transition: 'stroke-dashoffset 0.5s ease'
+            transition: 'stroke-dashoffset 0.8s ease-out'
           }}
         />
       </svg>
@@ -131,7 +138,9 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
     if (!force && events) return;
     setLoadingEvents(true);
     try {
-      const res = await fetch(apiUrl(`/api/tournament/${tournament.id}/events`));
+      // Usa uniqueTournamentId se disponibile per chiamare SofaScore, altrimenti usa id (season)
+      const tournamentIdToUse = tournament.uniqueTournamentId || tournament.id;
+      const res = await fetch(apiUrl(`/api/tournament/${tournamentIdToUse}/events?seasonId=${tournament.id}`));
       if (res.ok) {
         const data = await res.json();
         setEvents(data);
@@ -571,13 +580,28 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
     }
   };
   
-  // Filtra match incompleti (non 100% O non finished)
+  // Filtra match incompleti (non 100% O non finished) - TUTTI, non limitati
   const getIncompleteMatches = useCallback(() => {
     if (!stats?.recentAcquisitions) return [];
     return stats.recentAcquisitions
-      .filter(m => m.completeness < 100 || m.status !== 'finished')
-      .slice(0, 20);
+      .filter(m => m.completeness < 100 || m.status !== 'finished');
   }, [stats]);
+  
+  // Paginazione per la lista incompleti
+  const [incompletePage, setIncompletePage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+  
+  const paginatedIncomplete = useMemo(() => {
+    const all = getIncompleteMatches();
+    const start = (incompletePage - 1) * ITEMS_PER_PAGE;
+    return {
+      items: all.slice(start, start + ITEMS_PER_PAGE),
+      total: all.length,
+      totalPages: Math.ceil(all.length / ITEMS_PER_PAGE),
+      hasNext: start + ITEMS_PER_PAGE < all.length,
+      hasPrev: incompletePage > 1
+    };
+  }, [getIncompleteMatches, incompletePage]);
   
   // Funzione per sincronizzare tutti i match incompleti
   const handleSyncAllIncomplete = async () => {
@@ -857,12 +881,12 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
               <div className="recent-header">
                 <div className="recent-title-section">
                   <h3>🔄 Match da Completare</h3>
-                  <span className="recent-count">{getIncompleteMatches().length} match incompleti</span>
+                  <span className="recent-count">{paginatedIncomplete.total} match incompleti</span>
                 </div>
                 <button 
                   className="sync-all-btn"
                   onClick={handleSyncAllIncomplete}
-                  disabled={syncingAll || getIncompleteMatches().length === 0}
+                  disabled={syncingAll || paginatedIncomplete.total === 0}
                   title="Aggiorna tutti i match incompleti"
                 >
                   {syncingAll ? (
@@ -876,7 +900,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                 </button>
               </div>
               
-              {getIncompleteMatches().length === 0 ? (
+              {paginatedIncomplete.total === 0 ? (
                 <div className="no-incomplete">
                   <span className="no-incomplete-icon">✅</span>
                   <p>Tutti i match sono completi!</p>
@@ -885,41 +909,66 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   </span>
                 </div>
               ) : (
-                <div className="recent-list">
-                  {getIncompleteMatches().map((match, i) => (
-                    <div key={match.eventId} className="recent-item">
-                      <span className="recent-index">{i + 1}</span>
-                      <div className="recent-info">
-                        <span className="recent-teams">{match.homeTeam} vs {match.awayTeam}</span>
-                        <span className="recent-tournament">{match.tournament}</span>
+                <>
+                  <div className="recent-list">
+                    {paginatedIncomplete.items.map((match, i) => (
+                      <div key={match.eventId} className="recent-item">
+                        <span className="recent-index">{(incompletePage - 1) * ITEMS_PER_PAGE + i + 1}</span>
+                        <div className="recent-info">
+                          <span className="recent-teams">{match.homeTeam} vs {match.awayTeam}</span>
+                          <span className="recent-tournament">{match.tournament}</span>
+                        </div>
+                        <div className="recent-meta">
+                          <span className={`recent-status ${match.status}`}>{match.status}</span>
+                          <span className="recent-completeness">{match.completeness}%</span>
+                          <span className="recent-time">
+                            {new Date(match.acquiredAt).toLocaleString('it-IT', { 
+                              day: '2-digit', 
+                              month: 'short', 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+                        <button 
+                          className="sync-match-btn"
+                          onClick={() => handleSyncMatch(match.eventId)}
+                          disabled={syncingMatch === match.eventId || syncingAll}
+                          title="Aggiorna dati match"
+                        >
+                          {syncingMatch === match.eventId ? (
+                            <span className="spinner small"></span>
+                          ) : (
+                            '🔄'
+                          )}
+                        </button>
                       </div>
-                      <div className="recent-meta">
-                        <span className={`recent-status ${match.status}`}>{match.status}</span>
-                        <span className="recent-completeness">{match.completeness}%</span>
-                        <span className="recent-time">
-                          {new Date(match.acquiredAt).toLocaleString('it-IT', { 
-                            day: '2-digit', 
-                            month: 'short', 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </span>
-                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Paginazione */}
+                  {paginatedIncomplete.totalPages > 1 && (
+                    <div className="pagination-controls">
                       <button 
-                        className="sync-match-btn"
-                        onClick={() => handleSyncMatch(match.eventId)}
-                        disabled={syncingMatch === match.eventId || syncingAll}
-                        title="Aggiorna dati match"
+                        className="pagination-btn"
+                        onClick={() => setIncompletePage(p => p - 1)}
+                        disabled={!paginatedIncomplete.hasPrev}
                       >
-                        {syncingMatch === match.eventId ? (
-                          <span className="spinner small"></span>
-                        ) : (
-                          '🔄'
-                        )}
+                        ← Precedente
+                      </button>
+                      <span className="pagination-info">
+                        Pagina {incompletePage} di {paginatedIncomplete.totalPages}
+                      </span>
+                      <button 
+                        className="pagination-btn"
+                        onClick={() => setIncompletePage(p => p + 1)}
+                        disabled={!paginatedIncomplete.hasNext}
+                      >
+                        Successivo →
                       </button>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               )}
             </div>
           )}
