@@ -2,6 +2,8 @@
 
 Tool locale per acquisire dati da SofaScore bypassando i blocchi IP dei server cloud (Railway, Vercel, etc.).
 
+**Ultimo aggiornamento:** 20 Dicembre 2025
+
 ---
 
 ## 🧠 FILOSOFIA PRIMARIA: Acquisizione Ossessiva dei Dati
@@ -34,6 +36,34 @@ Quando inserisci un link nella barra di acquisizione:
 2. **NESSUNA PERDITA** - Se un match aveva dati incompleti, basta ri-inserire il link
 3. **ACCUMULO AUTOMATICO** - Da un singolo match, si scopre l'intero torneo
 4. **ZERO DUPLICATI** - Upsert invece di insert, dati sempre aggiornati
+
+---
+
+## ✨ Funzionalità UI
+
+### Dashboard Statistiche
+- **Contatori animati flip-clock** - I numeri si aggiornano con effetto orologio sveglia
+- **Acquisiti** - Match nel database con dati completi
+- **Mancanti** - Partite rilevate dai tornei ma non ancora acquisite
+- **Totale** - Somma di acquisiti + mancanti
+
+### Status Badge con Colori
+| Status | Colore | Descrizione |
+|--------|--------|-------------|
+| **Not started** | 🔴 Rosso | Partita non ancora iniziata |
+| **Live** | 🔴 Rosso pulsante | Partita in corso |
+| **Ended** | 🟢 Verde | Partita terminata normalmente |
+| **Retired** | ⚫ Grigio | Giocatore ritirato |
+| **Walkover/Cancelled** | ⚫ Grigio | Partita annullata |
+
+### Filtri Automatici
+Le partite con status **Ended**, **Retired**, **Walkover**, **Cancelled**, **Postponed** vengono automaticamente nascoste dalla lista "Partite Recenti" per mostrare solo quelle da completare.
+
+### Paginazione
+- **20 match per pagina** sia per Partite Recenti che Partite Mancanti
+- Navigazione con pulsanti Prec/Succ
+
+---
 
 ### Tabella `detected_matches`: Il Cuore del Sistema
 
@@ -73,6 +103,7 @@ Crea il file `backend/.env`:
 ```env
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_KEY=your-service-key
 PORT=3002
 ```
 

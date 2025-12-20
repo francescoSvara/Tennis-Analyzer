@@ -146,6 +146,7 @@ async function insertMatch(matchData, sourceUrl = null) {
       first_to_serve: matchData.firstToServe || null,
       sofascore_url: sourceUrl,
       extracted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       is_live: matchData.status?.type === 'inprogress',
       raw_json: matchData // Salva JSON completo come backup
     };

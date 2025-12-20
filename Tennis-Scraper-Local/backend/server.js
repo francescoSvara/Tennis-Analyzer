@@ -739,12 +739,6 @@ Endpoints:
 Avvia il frontend con: npm run client
   `);
   
-  // Nota: syncAcquiredMatches richiede la tabella detected_matches
-  // Se non esiste, verrà mostrato un errore ma il server funziona comunque
-  try {
-    console.log('🔄 Tentativo sincronizzazione acquired matches...');
-    await syncAcquiredMatches();
-  } catch (e) {
-    console.log('⚠️ Sync acquired non disponibile (tabella detected_matches non esiste)');
-  }
+  // Server pronto!
+  console.log('✅ Server avviato correttamente');
 });

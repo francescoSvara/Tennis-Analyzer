@@ -381,19 +381,44 @@
       margin-top: 4px;
     }
     
-    .match-status.finished {
+    /* Ended - Verde */
+    .match-status.ended {
       background: rgba(76, 175, 80, 0.2);
       color: #4caf50;
     }
     
+    /* Live - Rosso pulsante */
     .match-status.live {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    /* Not started - Rosso */
+    .match-status.notstarted {
       background: rgba(244, 67, 54, 0.2);
       color: #f44336;
     }
     
-    .match-status.notstarted {
-      background: rgba(255, 152, 0, 0.2);
-      color: #ff9800;
+    /* Retired / Walkover / Cancelled - Grigio */
+    .match-status.retired,
+    .match-status.walkover,
+    .match-status.cancelled,
+    .match-status.postponed,
+    .match-status.interrupted {
+      background: rgba(158, 158, 158, 0.2);
+      color: #9e9e9e;
+    }
+    
+    /* Fallback per altri status finiti */
+    .match-status.finished {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
     }
     
     /* Mini loader for match sync */
@@ -973,24 +998,104 @@
       align-items: center;
       text-align: center;
     }
-    
+
     .stat-box-highlight {
       background: rgba(76, 175, 80, 0.1);
       padding: 8px 16px;
       border-radius: 8px;
       border: 1px solid rgba(76, 175, 80, 0.3);
     }
-    
+
     .stat-box .stat-number {
       font-size: 1.8rem;
       font-weight: bold;
       color: #4caf50;
+      position: relative;
+      display: inline-flex;
+      overflow: hidden;
     }
-    
+
+    /* Flip Clock Effect */
+    .flip-digit {
+      display: inline-block;
+      position: relative;
+      width: 0.65em;
+      height: 1.2em;
+      line-height: 1.2em;
+      text-align: center;
+      perspective: 300px;
+    }
+
+    .flip-digit .digit-current,
+    .flip-digit .digit-next {
+      position: absolute;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(30,30,50,0.9) 0%, rgba(20,20,40,0.9) 49%, rgba(40,40,60,0.9) 51%, rgba(25,25,45,0.9) 100%);
+      border-radius: 4px;
+      backface-visibility: hidden;
+    }
+
+    .flip-digit .digit-current {
+      z-index: 2;
+    }
+
+    .flip-digit .digit-next {
+      z-index: 1;
+      transform: rotateX(180deg);
+    }
+
+    .flip-digit.flipping .digit-current {
+      animation: flipTop 0.4s ease-in forwards;
+    }
+
+    .flip-digit.flipping .digit-next {
+      animation: flipBottom 0.4s ease-out 0.2s forwards;
+    }
+
+    @keyframes flipTop {
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(-90deg); }
+    }
+
+    @keyframes flipBottom {
+      0% { transform: rotateX(90deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    /* Shimmer effect on number change */
+    .stat-number.updating {
+      animation: shimmer 0.5s ease-out;
+    }
+
+    @keyframes shimmer {
+      0% { text-shadow: 0 0 10px rgba(76, 175, 80, 0.8); }
+      50% { text-shadow: 0 0 20px rgba(76, 175, 80, 1), 0 0 30px rgba(76, 175, 80, 0.5); }
+      100% { text-shadow: none; }
+    }
+
+    /* Roll animation for simple approach */
+    .stat-number .roll-digit {
+      display: inline-block;
+      animation: rollIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes rollIn {
+      0% {
+        transform: translateY(-100%) rotateX(90deg);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0) rotateX(0deg);
+        opacity: 1;
+      }
+    }
+
     .stat-box .stat-percent {
       font-size: 0.85rem;
       color: #ffc107;
       font-weight: 600;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
     
     .stat-box .stat-label {
@@ -1151,6 +1256,7 @@
     const API_BASE = '/api';
     const MATCHES_PER_PAGE = 20;
     let currentPage = 1;
+    let currentMissingPage = 1;
     let totalMatches = 0;
     let allMatchesFromDb = []; // Tutti i match dal DB prima del filtro
     let allMatches = [];        // Match visibili in lista (dopo filtro)
@@ -1168,6 +1274,63 @@
       tournaments: []         // Breakdown per torneo
     };
     
+    // Valori precedenti per rilevare cambiamenti
+    let prevStats = {
+      loaded: null,
+      missing: null,
+      total: null,
+      list: null,
+      last24h: null
+    };
+    
+    // Anima un numero con effetto flip clock
+    function animateNumber(element, newValue, duration = 400) {
+      const oldValue = parseInt(element.textContent) || 0;
+      if (oldValue === newValue) return;
+      
+      // Crea contenitore per i digit animati
+      const digits = String(newValue).split('');
+      const oldDigits = String(oldValue).padStart(digits.length, ' ').split('');
+      
+      let html = '';
+      digits.forEach((digit, i) => {
+        const oldDigit = oldDigits[i] || '';
+        const changed = oldDigit !== digit;
+        
+        if (changed) {
+          html += `<span class="roll-digit" style="animation-delay: ${i * 50}ms">${digit}</span>`;
+        } else {
+          html += `<span>${digit}</span>`;
+        }
+      });
+      
+      element.innerHTML = html;
+      element.classList.add('updating');
+      
+      setTimeout(() => {
+        element.classList.remove('updating');
+      }, duration + digits.length * 50);
+    }
+    
+    // Anima percentuale
+    function animatePercent(element, newValue) {
+      const oldText = element.textContent;
+      if (oldText === newValue) return;
+      
+      element.style.transform = 'scale(0.8)';
+      element.style.opacity = '0.5';
+      
+      setTimeout(() => {
+        element.textContent = newValue;
+        element.style.transform = 'scale(1.1)';
+        element.style.opacity = '1';
+        
+        setTimeout(() => {
+          element.style.transform = 'scale(1)';
+        }, 150);
+      }, 150);
+    }
+    
     // Update all stats counters with percentages
     function updateStatsDisplay() {
       // LOGICA STATS:
@@ -1179,27 +1342,47 @@
       const toAcquire = missingMatches.length;     // Match rilevati senza link
       const totalDetected = inDb + toAcquire;      // Totale rilevato
       
-      // Riga 1: Statistiche principali (coerenti con le tab)
-      document.getElementById('loadedMatchesCount').textContent = inDb;
-      document.getElementById('missingMatchesCount').textContent = toAcquire;
-      document.getElementById('totalMatchesCount').textContent = totalDetected;
+      // Riga 1: Statistiche principali con animazione flip
+      const loadedEl = document.getElementById('loadedMatchesCount');
+      const missingEl = document.getElementById('missingMatchesCount');
+      const totalEl = document.getElementById('totalMatchesCount');
       
-      // Calcola percentuali
-      if (totalDetected > 0) {
-        const loadedPercent = Math.round((inDb / totalDetected) * 100);
-        const missingPercent = Math.round((toAcquire / totalDetected) * 100);
-        document.getElementById('loadedPercent').textContent = loadedPercent + '%';
-        document.getElementById('missingPercent').textContent = missingPercent + '%';
-      } else {
-        document.getElementById('loadedPercent').textContent = '0%';
-        document.getElementById('missingPercent').textContent = '0%';
+      if (prevStats.loaded !== inDb) {
+        animateNumber(loadedEl, inDb);
+        prevStats.loaded = inDb;
+      }
+      if (prevStats.missing !== toAcquire) {
+        animateNumber(missingEl, toAcquire);
+        prevStats.missing = toAcquire;
+      }
+      if (prevStats.total !== totalDetected) {
+        animateNumber(totalEl, totalDetected);
+        prevStats.total = totalDetected;
       }
       
-      // Riga 2: Contatori secondari
-      // - "In lista Recenti" = partite visibili nella tab Recenti (dopo filtri)
-      // - "Ultime 24h" = acquisite nelle ultime 24h
-      document.getElementById('listTotalMatches').textContent = allMatches.length;
-      document.getElementById('last24hMatches').textContent = advancedStats.acquiredLast24h || 0;
+      // Calcola e anima percentuali
+      if (totalDetected > 0) {
+        const loadedPercent = Math.round((inDb / totalDetected) * 100) + '%';
+        const missingPercent = Math.round((toAcquire / totalDetected) * 100) + '%';
+        animatePercent(document.getElementById('loadedPercent'), loadedPercent);
+        animatePercent(document.getElementById('missingPercent'), missingPercent);
+      } else {
+        animatePercent(document.getElementById('loadedPercent'), '0%');
+        animatePercent(document.getElementById('missingPercent'), '0%');
+      }
+      
+      // Riga 2: Contatori secondari con animazione
+      const listEl = document.getElementById('listTotalMatches');
+      const last24hEl = document.getElementById('last24hMatches');
+      
+      if (prevStats.list !== allMatches.length) {
+        animateNumber(listEl, allMatches.length);
+        prevStats.list = allMatches.length;
+      }
+      if (prevStats.last24h !== (advancedStats.acquiredLast24h || 0)) {
+        animateNumber(last24hEl, advancedStats.acquiredLast24h || 0);
+        prevStats.last24h = advancedStats.acquiredLast24h || 0;
+      }
       
       // Badge partite mancanti (coerente con toAcquire)
       const missingCountBadge = document.getElementById('missingCountBadge');
@@ -1305,7 +1488,24 @@
       const score = m.home_sets_won !== null && m.away_sets_won !== null 
         ? `${m.home_sets_won} - ${m.away_sets_won}` 
         : '';
-      const statusClass = m.is_live ? 'live' : 'finished';
+      // Determina classe CSS per lo status
+      const statusDesc = (m.status_description || '').toLowerCase();
+      let statusClass = 'finished'; // default
+      if (m.is_live) {
+        statusClass = 'live';
+      } else if (statusDesc.includes('not started')) {
+        statusClass = 'notstarted';
+      } else if (statusDesc.includes('ended')) {
+        statusClass = 'ended';
+      } else if (statusDesc.includes('retired')) {
+        statusClass = 'retired';
+      } else if (statusDesc.includes('walkover')) {
+        statusClass = 'walkover';
+      } else if (statusDesc.includes('cancelled') || statusDesc.includes('postponed')) {
+        statusClass = 'cancelled';
+      } else if (statusDesc.includes('interrupted')) {
+        statusClass = 'interrupted';
+      }
       const statusText = m.is_live ? 'LIVE' : (m.status_description || '');
       // In Supabase, match.id IS the sofascore event ID
       const sofascoreId = m.id || '';
@@ -1402,16 +1602,20 @@
         
         // Filtra partite per la visualizzazione:
         // - Se completezza >= 100% → nascondi
-        // - Se status = "Ended" E ha un risultato (sets vinti) → nascondi (considerata completa)
+        // - Se status = "Ended" o "Retired" → nascondi (partita conclusa)
+        // - Se status = "Walkover", "Cancelled", "Postponed" → nascondi
         allMatches = fetchedMatches.filter(m => {
           const isComplete = (m.completeness || 0) >= 100;
-          const isEnded = m.status_description === 'Ended';
-          const hasScore = m.home_sets_won !== null && m.away_sets_won !== null;
+          const statusDesc = (m.status_description || '').toLowerCase();
+          
+          // Status che indicano partita conclusa o non più rilevante
+          const finishedStatuses = ['ended', 'retired', 'walkover', 'cancelled', 'postponed', 'abandoned'];
+          const isFinished = finishedStatuses.some(s => statusDesc.includes(s));
           
           // Se completa al 100%, nascondi
           if (isComplete) return false;
-          // Se finita con risultato, considerala completa e nascondi
-          if (isEnded && hasScore) return false;
+          // Se partita conclusa (ended, retired, etc.), nascondi
+          if (isFinished) return false;
           
           return true;
         });
@@ -1458,14 +1662,8 @@
         
         missingMatches = data.missingMatches;
         
-        // Filtra partite mancanti: escludi quelle già finite con risultato
-        missingMatches = missingMatches.filter(m => {
-          const isEnded = m.status?.description === 'Ended' || m.status?.type === 'finished';
-          const hasScore = m.homeScore?.current !== undefined && m.awayScore?.current !== undefined;
-          // Se finita CON risultato, probabilmente non ci interessa
-          if (isEnded && hasScore) return false;
-          return true;
-        });
+        // NON filtriamo più - vogliamo TUTTE le partite mancanti
+        // Filosofia: acquisizione ossessiva di tutti i dati disponibili
         
         console.log(`📋 Partite mancanti rilevate: ${missingMatches.length}`);
         
@@ -1491,18 +1689,6 @@
         console.error('Error loading missing matches:', e);
         missingList.innerHTML = '<div class="loading">Errore caricamento partite mancanti</div>';
       }
-    }
-            <div class="card-left">
-              <div class="players">${homeName} vs ${awayName}</div>
-              <div class="round-info">${tournamentName}${roundName ? ' • ' + roundName : ''}</div>
-            </div>
-            <div class="card-right">
-              <span class="status-badge">${statusText}</span>
-              ${startTime ? `<div class="date-info">${startTime}</div>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
     }
     
     // Render current page of matches
@@ -1721,7 +1907,14 @@
       badge.textContent = missingMatches.length;
       badge.style.display = 'inline-block';
       
-      list.innerHTML = missingMatches.map((m, idx) => {
+      // Paginazione
+      const totalPages = Math.ceil(missingMatches.length / MATCHES_PER_PAGE);
+      const start = (currentMissingPage - 1) * MATCHES_PER_PAGE;
+      const end = start + MATCHES_PER_PAGE;
+      const pageMatches = missingMatches.slice(start, end);
+      
+      let html = pageMatches.map((m, idx) => {
+        const realIndex = start + idx; // Indice reale nell'array completo
         const homeName = m.homeTeam?.name || m.homeTeam?.shortName || 'TBD';
         const awayName = m.awayTeam?.name || m.awayTeam?.shortName || 'TBD';
         const statusText = m.status?.description || 'Da acquisire';
@@ -1730,7 +1923,7 @@
         const startTime = m.startTimestamp ? formatDate(new Date(m.startTimestamp * 1000).toISOString()) : '';
         
         return `
-          <div class="missing-match-card" onclick="openMissingModal(${idx})" title="Clicca per acquisire">
+          <div class="missing-match-card" onclick="openMissingModal(${realIndex})" title="Clicca per acquisire">
             <div class="card-left">
               <div class="players">${homeName} vs ${awayName}</div>
               <div class="round-info">${tournamentName}${roundName ? ' • ' + roundName : ''}</div>
@@ -1742,6 +1935,32 @@
           </div>
         `;
       }).join('');
+      
+      // Aggiungi paginazione se necessaria
+      if (missingMatches.length > MATCHES_PER_PAGE) {
+        html += `
+          <div class="pagination">
+            <button onclick="changeMissingPage(-1)" ${currentMissingPage === 1 ? 'disabled' : ''}>
+              ← Prec
+            </button>
+            <span>Pagina ${currentMissingPage} di ${totalPages} (${missingMatches.length} totali)</span>
+            <button onclick="changeMissingPage(1)" ${currentMissingPage === totalPages ? 'disabled' : ''}>
+              Succ →
+            </button>
+          </div>
+        `;
+      }
+      
+      list.innerHTML = html;
+    }
+    
+    // Cambia pagina partite mancanti
+    function changeMissingPage(delta) {
+      const totalPages = Math.ceil(missingMatches.length / MATCHES_PER_PAGE);
+      currentMissingPage = Math.max(1, Math.min(totalPages, currentMissingPage + delta));
+      renderMissingMatches();
+      // Scroll to top of missing list
+      document.getElementById('missingList').scrollTop = 0;
     }
     
     // Enter key to submit
@@ -1878,7 +2097,6 @@
           // Remove from missing list
           const eventId = extractEventIdFromUrl(url);
           if (eventId) {
-            const eventId = parseInt(eventMatch[1]);
             missingMatches = missingMatches.filter(m => m.id !== eventId);
             
             if (missingMatches.length === 0) {
