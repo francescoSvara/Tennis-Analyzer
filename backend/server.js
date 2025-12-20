@@ -991,11 +991,23 @@ app.get('/api/suggested-matches', async (req, res) => {
 // GET /api/detected-matches - Recupera partite rilevate dalla tabella detected_matches (non ancora acquisite)
 app.get('/api/detected-matches', async (req, res) => {
   try {
+    // Prima ottieni il count totale dei mancanti
+    const { count: totalMissing, error: countError } = await supabase
+      .from('detected_matches')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_acquired', false);
+    
+    if (countError) {
+      console.error('Error counting detected matches:', countError);
+    }
+    
+    // Poi ottieni i dati (limitati per performance)
     const { data: detectedMatches, error } = await supabase
       .from('detected_matches')
       .select('*')
       .eq('is_acquired', false)
-      .order('start_time', { ascending: true });
+      .order('start_time', { ascending: true })
+      .limit(100);
     
     if (error) {
       console.error('Error fetching detected matches from DB:', error);
@@ -1017,7 +1029,8 @@ app.get('/api/detected-matches', async (req, res) => {
     
     res.json({ 
       matches: formattedMatches,
-      count: formattedMatches.length 
+      count: formattedMatches.length,
+      totalCount: totalMissing || formattedMatches.length
     });
   } catch (err) {
     console.error('Error fetching detected matches:', err.message);
@@ -1813,6 +1826,10 @@ app.get('/api/db/matches', async (req, res) => {
   }
   try {
     const { limit, offset, status, tournamentId, playerId, orderBy } = req.query;
+    
+    // Ottieni il conteggio totale
+    const totalCount = await matchRepository.countMatches({ status, tournamentId, playerId });
+    
     const dbMatches = await matchRepository.getMatches({
       limit: limit ? parseInt(limit) : 50,
       offset: offset ? parseInt(offset) : 0,
@@ -1858,7 +1875,7 @@ app.get('/api/db/matches', async (req, res) => {
       source: 'database'
     }));
     
-    res.json({ matches, count: matches.length, source: 'database' });
+    res.json({ matches, count: matches.length, totalCount, source: 'database' });
   } catch (err) {
     console.error('Error fetching matches:', err.message);
     res.status(500).json({ error: err.message });

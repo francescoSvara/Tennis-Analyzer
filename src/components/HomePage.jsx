@@ -140,6 +140,8 @@ function HomePage({ onMatchSelect }) {
   const [matches, setMatches] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [detectedMatches, setDetectedMatches] = useState([]);
+  const [totalMatchCount, setTotalMatchCount] = useState(0);
+  const [totalDetectedCount, setTotalDetectedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -150,13 +152,14 @@ function HomePage({ onMatchSelect }) {
     setLoading(true);
     setError(null);
     try {
-      // Usa l'API /api/db/matches che legge dal database Supabase
-      const matchesRes = await fetch(apiUrl(`/api/db/matches?limit=50`));
+      // Usa l'API /api/db/matches che legge dal database Supabase (senza limit per avere tutti)
+      const matchesRes = await fetch(apiUrl(`/api/db/matches?limit=500`));
       if (!matchesRes.ok) {
         throw new Error(`Errore HTTP: ${matchesRes.status}`);
       }
       const matchesData = await matchesRes.json();
       setMatches(matchesData.matches || []);
+      setTotalMatchCount(matchesData.totalCount || matchesData.matches?.length || 0);
       console.log(`📁 Loaded ${matchesData.matches?.length || 0} matches from database`);
       
       // Carica suggeriti e rilevati in parallelo
@@ -172,14 +175,11 @@ function HomePage({ onMatchSelect }) {
         setSuggestedMatches(suggestedData.matches || []);
       }
       
-      // Partite rilevate (dal torneo)
+      // Partite rilevate (dal torneo) - mostra le mancanti
       if (detectedRes?.ok) {
         const detectedData = await detectedRes.json();
-        // Filtra per sport se necessario
-        const filtered = (detectedData.matches || []).filter(m => 
-          !selectedSport || m.sport === selectedSport
-        );
-        setDetectedMatches(filtered);
+        setDetectedMatches(detectedData.matches || []);
+        setTotalDetectedCount(detectedData.totalCount || detectedData.count || 0);
       }
       
       // Log partite tracciate
@@ -267,9 +267,9 @@ function HomePage({ onMatchSelect }) {
               {selectedSport === 'rugby-union' && '🏉 Rugby Matches'}
             </h2>
             <span className="match-count">
-              {loading ? '...' : `${matches.length} match`}
-              {detectedMatches.length > 0 && !loading && (
-                <span className="detected-count"> · {detectedMatches.length} rilevate</span>
+              {loading ? '...' : `${totalMatchCount} salvate`}
+              {totalDetectedCount > 0 && !loading && (
+                <span className="detected-count"> · {totalDetectedCount} mancanti</span>
               )}
             </span>
           </div>
