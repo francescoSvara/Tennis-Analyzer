@@ -439,6 +439,7 @@ async function getMatches(options = {}) {
     .from('matches')
     .select(`
       *,
+      raw_json,
       home_player:players!matches_home_player_id_fkey(id, name, full_name, short_name, country_name, country_alpha2, current_ranking),
       away_player:players!matches_away_player_id_fkey(id, name, full_name, short_name, country_name, country_alpha2, current_ranking),
       tournament:tournaments!matches_tournament_id_fkey(id, name, category, ground_type, country)

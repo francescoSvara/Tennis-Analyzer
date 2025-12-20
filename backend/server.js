@@ -402,7 +402,15 @@ app.get('/api/db-stats', async (req, res) => {
       // Raggruppa per torneo
       const tournamentId = match.tournament_id || 'unknown';
       const tournamentName = match.tournament_name || 'Sconosciuto';
-      const uniqueTournamentId = match.unique_tournament_id;
+      
+      // Estrai uniqueTournamentId - può venire da unique_tournament_id (file) o raw_json (DB)
+      let uniqueTournamentId = match.unique_tournament_id;
+      if (!uniqueTournamentId && match.raw_json) {
+        try {
+          const rawData = typeof match.raw_json === 'string' ? JSON.parse(match.raw_json) : match.raw_json;
+          uniqueTournamentId = rawData?.tournament?.uniqueTournament?.id;
+        } catch (e) { /* ignore parse errors */ }
+      }
       
       if (!tournamentMap.has(tournamentId)) {
         tournamentMap.set(tournamentId, {
