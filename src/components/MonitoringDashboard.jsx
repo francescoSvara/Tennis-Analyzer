@@ -125,7 +125,7 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
   // Statistiche copertura reale
   const coverage = tournament.coverage || {};
   const hasCoverageData = coverage.totalDetected > 0;
-  const coveragePercentage = coverage.percentage || 100;
+  const coveragePercentage = hasCoverageData ? (coverage.percentage || 0) : 100;
   const missingCount = coverage.missing || 0;
   const missingMatches = tournament.missingMatches || [];
   
@@ -203,25 +203,29 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
       
       {expanded && (
         <div className="tournament-card-body">
-          {/* Coverage info - solo se abbiamo dati */}
-          {hasCoverageData && (
-            <div className="coverage-info">
-              <div className="coverage-bar-container">
-                <div 
-                  className="coverage-bar-fill" 
-                  style={{ 
-                    width: `${coveragePercentage}%`,
-                    backgroundColor: coveragePercentage >= 80 ? '#10b981' : coveragePercentage >= 50 ? '#f59e0b' : '#ef4444'
-                  }}
-                />
-              </div>
+          {/* Coverage info - sempre mostrata */}
+          <div className="coverage-info">
+            <div className="coverage-bar-container">
+              <div 
+                className="coverage-bar-fill" 
+                style={{ 
+                  width: `${coveragePercentage}%`,
+                  backgroundColor: coveragePercentage >= 80 ? '#10b981' : coveragePercentage >= 50 ? '#f59e0b' : '#ef4444'
+                }}
+              />
+            </div>
+            {hasCoverageData ? (
               <div className="coverage-stats">
                 <span className="coverage-acquired">✅ {coverage.acquired} acquisite</span>
                 <span className="coverage-missing">⚠️ {missingCount} mancanti</span>
                 <span className="coverage-total">📊 {coverage.totalDetected} totali</span>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="coverage-stats">
+                <span className="coverage-total">📊 {tournament.total_matches} match in DB</span>
+              </div>
+            )}
+          </div>
           
           {/* Status breakdown */}
           <div className="status-breakdown">
