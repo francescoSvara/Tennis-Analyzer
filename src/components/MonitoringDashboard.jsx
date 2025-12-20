@@ -122,17 +122,6 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
   const [events, setEvents] = useState(null);
   const [loadingEvents, setLoadingEvents] = useState(false);
   
-  // Stati per modale inserimento link
-  const [showLinkModal, setShowLinkModal] = useState(false);
-  const [selectedMissingMatch, setSelectedMissingMatch] = useState(null);
-  const [linkInput, setLinkInput] = useState('');
-  const [linkLoading, setLinkLoading] = useState(false);
-  const [linkError, setLinkError] = useState('');
-  
-  // Stati per sync match esistenti
-  const [syncingMatchId, setSyncingMatchId] = useState(null);
-  const [syncingAllMatches, setSyncingAllMatches] = useState(false);
-  
   const loadTournamentEvents = useCallback(async (force = false) => {
     if (loadingEvents) return;
     if (!force && events) return;
@@ -169,48 +158,6 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
   
   const dateRange = formatDateRange(tournament.earliestDate, tournament.latestDate);
   
-  // Handler click su partita mancante - apre modale per inserire link
-  const handleMissingClick = (match) => {
-    setSelectedMissingMatch(match);
-    setLinkInput('');
-    setLinkError('');
-    setShowLinkModal(true);
-  };
-  
-  // Handler submit link per partita mancante
-  const handleLinkSubmit = async (e) => {
-    e.preventDefault();
-    if (!linkInput.trim()) return;
-    
-    setLinkLoading(true);
-    setLinkError('');
-    
-    try {
-      const res = await fetch(apiUrl('/api/scrape'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: linkInput.trim() })
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        setShowLinkModal(false);
-        setSelectedMissingMatch(null);
-        setLinkInput('');
-        // Refresh dati
-        loadTournamentEvents(true);
-        if (onRefreshData) onRefreshData();
-      } else {
-        setLinkError(data.message || 'Errore durante lo scraping');
-      }
-    } catch (err) {
-      setLinkError('Errore di connessione al server');
-    } finally {
-      setLinkLoading(false);
-    }
-  };
-  
   // Handler click su partita esistente - naviga a scheda match
   const handleExistingMatchClick = async (match) => {
     // Carica il match completo dal backend usando l'eventId
@@ -245,44 +192,6 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
         console.error('Error loading full match:', err);
         onMatchSelect(match);
       }
-    }
-  };
-  
-  // Handler per aggiornare tutte le partite incomplete
-  const handleSyncAllIncomplete = async () => {
-    if (syncingAllMatches) return;
-    
-    // Filtra partite che non sono (finished AND 100%)
-    const incompleteMatches = tournament.matches.filter(m => 
-      m.status !== 'finished' || m.completeness < 100
-    );
-    
-    if (incompleteMatches.length === 0) return;
-    
-    setSyncingAllMatches(true);
-    
-    try {
-      // Sync tutte le partite incomplete in parallelo
-      const syncPromises = incompleteMatches.map(async (match) => {
-        const url = `https://www.sofascore.com/event/${match.eventId}`;
-        try {
-          await fetch(apiUrl('/api/scrape'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url })
-          });
-        } catch (err) {
-          console.error(`Error syncing match ${match.eventId}:`, err);
-        }
-      });
-      
-      await Promise.all(syncPromises);
-      
-      // Refresh dati
-      loadTournamentEvents(true);
-      if (onRefreshData) onRefreshData();
-    } finally {
-      setSyncingAllMatches(false);
     }
   };
   
@@ -376,104 +285,68 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
                   <small>✓ {tournament.matchCount} match nel database</small>
                 </div>
               )}
-              
-              {events.stats.missing > 0 && (
-                <div className="missing-events">
-                  <h6>⚠️ {events.stats.missing} partite mancanti</h6>
-                  <div className="missing-list">
-                    {events.events
-                      .filter(e => !e.inDatabase)
-                      .slice(0, 5)
-                      .map(e => (
-                        <div 
-                          key={e.eventId} 
-                          className="missing-event clickable"
-                          onClick={() => handleMissingClick(e)}
-                          title="Clicca per aggiungere link"
-                        >
-                          <span className="event-teams">{e.homeTeam} vs {e.awayTeam}</span>
-                          <span className={`event-status ${e.status}`}>{e.status}</span>
-                        </div>
-                      ))
-                    }
-                    {events.stats.missing > 5 && (
-                      <span className="more-missing">...e altre {events.stats.missing - 5}</span>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           )}
           
-          {/* Match list */}
-          <div className="tournament-matches">
-            <div className="matches-header">
-              <h5>Match Salvati</h5>
-              <button 
-                className="sync-matches-btn"
-                onClick={handleSyncAllIncomplete}
-                disabled={syncingAllMatches || tournament.matches.filter(m => m.status !== 'finished' || m.completeness < 100).length === 0}
-                title="Aggiorna tutte le partite incomplete"
-              >
-                {syncingAllMatches ? (
-                  <><span className="btn-loader"></span> Aggiornamento...</>
-                ) : (
-                  <><span className="sync-icon">🔄</span> Aggiorna</>
-                )}
-              </button>
-            </div>
-            <div className="matches-scroll">
-              {tournament.matches.slice(0, 10).map(m => (
-                <div 
-                  key={m.eventId} 
-                  className="mini-match clickable"
-                  onClick={() => handleExistingMatchClick(m)}
-                  title="Clicca per aprire scheda match"
-                >
-                  <span className="mini-match-teams">
-                    {m.homeTeam} vs {m.awayTeam}
-                  </span>
-                  <div className="mini-match-meta">
-                    <span className={`mini-status ${m.status}`}>{m.status}</span>
-                    <span className="mini-completeness">{m.completeness}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Modale inserimento link */}
-          {showLinkModal && (
-            <div className="link-modal-overlay" onClick={() => setShowLinkModal(false)}>
-              <div className="link-modal" onClick={e => e.stopPropagation()}>
-                <div className="link-modal-header">
-                  <h4>Aggiungi Partita</h4>
-                  <button className="close-modal" onClick={() => setShowLinkModal(false)}>×</button>
-                </div>
-                <div className="link-modal-body">
-                  <p className="match-info">
-                    <strong>{selectedMissingMatch?.homeTeam}</strong> vs <strong>{selectedMissingMatch?.awayTeam}</strong>
-                  </p>
-                  <form onSubmit={handleLinkSubmit}>
-                    <input
-                      type="text"
-                      className="link-input"
-                      placeholder="Incolla link SofaScore..."
-                      value={linkInput}
-                      onChange={(e) => setLinkInput(e.target.value)}
-                      autoFocus
-                    />
-                    {linkError && <p className="link-error">{linkError}</p>}
-                    <div className="link-modal-actions">
-                      <button type="button" className="btn-cancel" onClick={() => setShowLinkModal(false)}>
-                        Annulla
-                      </button>
-                      <button type="submit" className="btn-submit" disabled={linkLoading || !linkInput.trim()}>
-                        {linkLoading ? <span className="btn-loader"></span> : 'Aggiungi'}
-                      </button>
+          {/* Sezione Match Salvati */}
+          {tournament.matches.length > 0 && (
+            <div className="tournament-matches saved-matches">
+              <div className="matches-header">
+                <h5>✅ Match nel Database ({tournament.matches.length})</h5>
+              </div>
+              <div className="matches-scroll">
+                {tournament.matches.slice(0, 10).map(m => (
+                  <div 
+                    key={m.eventId} 
+                    className="mini-match clickable saved-match"
+                    onClick={() => handleExistingMatchClick(m)}
+                    title="Clicca per aprire scheda match"
+                  >
+                    <span className="mini-match-teams">
+                      {m.homeTeam} vs {m.awayTeam}
+                    </span>
+                    <div className="mini-match-meta">
+                      <span className={`mini-status ${m.status}`}>{m.status}</span>
+                      <span className="mini-completeness">{m.completeness}%</span>
                     </div>
-                  </form>
-                </div>
+                  </div>
+                ))}
+                {tournament.matches.length > 10 && (
+                  <div className="more-matches">...e altri {tournament.matches.length - 10} match</div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Sezione Match Non Salvati */}
+          {events && events.stats.missing > 0 && (
+            <div className="tournament-matches missing-matches">
+              <div className="matches-header">
+                <h5>⚠️ Match Non Salvati ({events.stats.missing})</h5>
+                <span className="missing-info-hint">Match rilevati ma non nel database</span>
+              </div>
+              <div className="matches-scroll">
+                {events.events
+                  .filter(e => !e.inDatabase)
+                  .slice(0, 10)
+                  .map(e => (
+                    <div 
+                      key={e.eventId} 
+                      className="mini-match missing-match"
+                      title="Match rilevato ma non ancora nel database"
+                    >
+                      <span className="mini-match-teams">
+                        {e.homeTeam} vs {e.awayTeam}
+                      </span>
+                      <div className="mini-match-meta">
+                        <span className={`mini-status ${e.status}`}>{e.status}</span>
+                        <span className="missing-icon">❌</span>
+                      </div>
+                    </div>
+                  ))}
+                {events.stats.missing > 10 && (
+                  <div className="more-matches">...e altri {events.stats.missing - 10} match</div>
+                )}
               </div>
             </div>
           )}
