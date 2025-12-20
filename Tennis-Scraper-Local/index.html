@@ -1170,14 +1170,14 @@
     
     // Update all stats counters with percentages
     function updateStatsDisplay() {
-      // I dati devono essere COERENTI con quello che si vede nelle tab
-      // - "Acquisiti" = partite nel DB (totalInDb) 
-      // - "Mancanti" = partite nella tab Mancanti (missingMatches.length)
-      // - "Totale" = Acquisiti + Mancanti
+      // LOGICA STATS:
+      // - "Acquisiti" = partite nel DB matches (abbiamo il link, dati completi)
+      // - "Mancanti" = partite rilevate dai tornei ma NON nel DB (non abbiamo il link)
+      // - "Totale" = Acquisiti + Mancanti (tutto ciò che abbiamo rilevato)
       
-      const inDb = advancedStats.totalInDb || 0;
-      const toAcquire = missingMatches.length;
-      const totalDetected = inDb + toAcquire;
+      const inDb = advancedStats.totalInDb || 0;  // Match con link acquisito
+      const toAcquire = missingMatches.length;     // Match rilevati senza link
+      const totalDetected = inDb + toAcquire;      // Totale rilevato
       
       // Riga 1: Statistiche principali (coerenti con le tab)
       document.getElementById('loadedMatchesCount').textContent = inDb;
@@ -1233,37 +1233,18 @@
       return false;
     }
     
-    // Load advanced stats from DB (detected_matches)
-    // Se detected_matches non esiste, usa stats base
+    // Load stats from DB
+    // Acquisiti = match nel DB (abbiamo il link)
+    // Mancanti = calcolato da loadMissingMatches()
     async function loadAdvancedStats() {
-      // Prima carica sempre le stats base per avere totalInDb
       try {
-        const basicRes = await fetch(`${API_BASE}/stats`);
-        const basicData = await basicRes.json();
-        advancedStats.totalInDb = basicData.totalMatches || 0;
-        advancedStats.acquiredLast24h = basicData.matchesLast24h || 0;
-      } catch (e) {
-        console.error('Error loading basic stats:', e);
-      }
-      
-      // Poi prova a caricare advanced stats (detected_matches)
-      try {
-        const res = await fetch(`${API_BASE}/advanced-stats`);
+        const res = await fetch(`${API_BASE}/stats`);
         const data = await res.json();
-        
-        // Se advanced-stats ha dati validi, usali
-        if (data.totalDetected > 0) {
-          advancedStats = {
-            ...advancedStats, // mantieni totalInDb e acquiredLast24h
-            totalDetected: data.totalDetected || 0,
-            totalAcquired: data.totalAcquired || 0,
-            totalMissing: data.totalMissing || 0,
-            acquisitionRate: data.acquisitionRate || 0,
-            tournaments: data.tournaments || []
-          };
-        }
+        advancedStats.totalInDb = data.totalMatches || 0;       // Match acquisiti (hanno link)
+        advancedStats.acquiredLast24h = data.matchesLast24h || 0;
+        console.log(`📊 Stats DB: ${advancedStats.totalInDb} match acquisiti, ${advancedStats.acquiredLast24h} ultime 24h`);
       } catch (e) {
-        console.error('Advanced stats not available:', e);
+        console.error('Error loading stats:', e);
       }
       
       updateStatsDisplay();
@@ -1452,78 +1433,52 @@
       }
     }
     
-    // Load missing matches from detected_matches DB
+    // Load missing matches - partite rilevate dai tornei ma NON nel nostro DB
+    // Queste sono partite di cui NON abbiamo il link/dati completi
     async function loadMissingMatches() {
       const missingList = document.getElementById('missingList');
       const tournamentInfo = document.getElementById('tournamentInfo');
       const missingCountBadge = document.getElementById('missingCountBadge');
       
-      missingList.innerHTML = '<div class="loading">Caricamento partite mancanti dal DB...</div>';
+      missingList.innerHTML = '<div class="loading">Scansione tornei per partite mancanti...</div>';
       
       try {
-        // Prima prova a caricare dal nuovo sistema detected_matches
-        const res = await fetch(`${API_BASE}/detected-missing`);
+        // Usa /api/missing-matches che scansiona i tornei recenti
+        const res = await fetch(`${API_BASE}/missing-matches`);
         const data = await res.json();
         
-        if (data.matches && data.matches.length > 0) {
-          missingMatches = data.matches;
-          
-          // Filtra partite mancanti: escludi quelle già finite con risultato
-          missingMatches = missingMatches.filter(m => {
-            const isEnded = m.status === 'Ended' || m.status_type === 'finished';
-            const hasScore = m.home_score !== null && m.away_score !== null;
-            if (isEnded && hasScore) return false;
-            return true;
-          });
-          
-          if (missingMatches.length === 0) {
-            missingList.innerHTML = '<div class="loading">Tutte le partite rilevate sono acquisite!</div>';
-            missingCountBadge.style.display = 'none';
-            updateStatsDisplay();
-            return;
-          }
-          
-          // Raggruppa per torneo
-          const tournamentNames = [...new Set(missingMatches.map(m => m.tournament_name).filter(Boolean))];
-          tournamentInfo.textContent = `Tornei: ${tournamentNames.join(', ')} - ${missingMatches.length} partite da acquisire`;
-          
-          missingCountBadge.textContent = missingMatches.length;
-          missingCountBadge.style.display = 'inline-block';
-          
-          updateStatsDisplay();
-          renderMissingMatchesFromDb();
-          return;
-        }
-        
-        // Fallback: usa il vecchio sistema /api/missing-matches
-        const fallbackRes = await fetch(`${API_BASE}/missing-matches`);
-        const fallbackData = await fallbackRes.json();
-        
-        if (!fallbackData.missingMatches || fallbackData.missingMatches.length === 0) {
+        if (!data.missingMatches || data.missingMatches.length === 0) {
+          missingMatches = [];
           missingList.innerHTML = '<div class="loading">Tutte le partite dei tornei recenti sono acquisite!</div>';
           missingCountBadge.style.display = 'none';
+          tournamentInfo.textContent = 'Nessuna partita mancante rilevata';
+          updateStatsDisplay();
           return;
         }
         
-        missingMatches = fallbackData.missingMatches;
+        missingMatches = data.missingMatches;
         
         // Filtra partite mancanti: escludi quelle già finite con risultato
         missingMatches = missingMatches.filter(m => {
           const isEnded = m.status?.description === 'Ended' || m.status?.type === 'finished';
           const hasScore = m.homeScore?.current !== undefined && m.awayScore?.current !== undefined;
+          // Se finita CON risultato, probabilmente non ci interessa
           if (isEnded && hasScore) return false;
           return true;
         });
         
+        console.log(`📋 Partite mancanti rilevate: ${missingMatches.length}`);
+        
         if (missingMatches.length === 0) {
           missingList.innerHTML = '<div class="loading">Tutte le partite dei tornei recenti sono acquisite!</div>';
           missingCountBadge.style.display = 'none';
+          tournamentInfo.textContent = 'Nessuna partita mancante';
           updateStatsDisplay();
           return;
         }
         
         // Raggruppa per torneo
-        const tournamentNames = [...new Set(missingMatches.map(m => m.tournamentName))];
+        const tournamentNames = [...new Set(missingMatches.map(m => m.tournamentName).filter(Boolean))];
         tournamentInfo.textContent = `Tornei: ${tournamentNames.join(', ')} - ${missingMatches.length} partite da acquisire`;
         
         missingCountBadge.textContent = missingMatches.length;
@@ -1537,31 +1492,6 @@
         missingList.innerHTML = '<div class="loading">Errore caricamento partite mancanti</div>';
       }
     }
-    
-    // Render missing matches from detected_matches DB
-    function renderMissingMatchesFromDb() {
-      const list = document.getElementById('missingList');
-      const badge = document.getElementById('missingCountBadge');
-      
-      if (missingMatches.length === 0) {
-        list.innerHTML = '<div class="loading">Nessuna partita mancante</div>';
-        badge.style.display = 'none';
-        return;
-      }
-      
-      badge.textContent = missingMatches.length;
-      badge.style.display = 'inline-block';
-      
-      list.innerHTML = missingMatches.map((m, idx) => {
-        const homeName = m.home_team_name || 'TBD';
-        const awayName = m.away_team_name || 'TBD';
-        const statusText = m.status || 'Da acquisire';
-        const roundName = m.round_name || '';
-        const tournamentName = m.tournament_name || '';
-        const startTime = m.start_time ? formatDate(m.start_time) : '';
-        
-        return `
-          <div class="missing-match-card" onclick="openMissingModalFromDb(${idx})" title="Clicca per acquisire">
             <div class="card-left">
               <div class="players">${homeName} vs ${awayName}</div>
               <div class="round-info">${tournamentName}${roundName ? ' • ' + roundName : ''}</div>
@@ -1573,34 +1503,6 @@
           </div>
         `;
       }).join('');
-    }
-    
-    // Open modal for missing match from DB (detected_matches format)
-    function openMissingModalFromDb(index) {
-      selectedMissingMatch = missingMatches[index];
-      if (!selectedMissingMatch) return;
-      
-      const modal = document.getElementById('linkModal');
-      const matchInfo = document.getElementById('modalMatchInfo');
-      const linkInput = document.getElementById('modalLinkInput');
-      const validation = document.getElementById('modalValidation');
-      const submitBtn = document.getElementById('modalSubmitBtn');
-      
-      const homeName = selectedMissingMatch.home_team_name || 'TBD';
-      const awayName = selectedMissingMatch.away_team_name || 'TBD';
-      
-      matchInfo.innerHTML = `
-        <strong>Partita selezionata:</strong><br>
-        ${homeName} vs ${awayName}<br>
-        <small>ID atteso: ${selectedMissingMatch.id}</small>
-      `;
-      
-      linkInput.value = '';
-      validation.innerHTML = '';
-      validation.className = 'modal-validation';
-      submitBtn.disabled = true;
-      
-      modal.style.display = 'flex';
     }
     
     // Render current page of matches
