@@ -434,7 +434,8 @@ async function getMatches(options = {}) {
     limit = 50, 
     offset = 0, 
     status, 
-    tournamentId, 
+    tournamentId,
+    tournamentCategory,  // Nuovo: categoria torneo (ATP, WTA, Challenger, ITF Men, ITF Women)
     playerId,
     playerSearch,  // Nuovo: ricerca per nome giocatore
     dateFrom,      // Nuovo: data inizio (ISO string)
@@ -454,6 +455,22 @@ async function getMatches(options = {}) {
     
     // Se nessun giocatore trovato, ritorna vuoto
     if (playerIds.length === 0) {
+      return [];
+    }
+  }
+  
+  // Se c'è filtro per categoria torneo, trova gli ID dei tornei che matchano
+  let categoryTournamentIds = [];
+  if (tournamentCategory) {
+    const { data: tournaments } = await supabase
+      .from('tournaments')
+      .select('id')
+      .eq('category', tournamentCategory);
+    
+    categoryTournamentIds = (tournaments || []).map(t => t.id);
+    
+    // Se nessun torneo trovato, ritorna vuoto
+    if (categoryTournamentIds.length === 0) {
       return [];
     }
   }
@@ -477,6 +494,11 @@ async function getMatches(options = {}) {
   if (status) query = query.eq('status_type', status);
   if (tournamentId) query = query.eq('tournament_id', tournamentId);
   if (playerId) query = query.or(`home_player_id.eq.${playerId},away_player_id.eq.${playerId}`);
+  
+  // Filtro per categoria torneo
+  if (categoryTournamentIds.length > 0) {
+    query = query.in('tournament_id', categoryTournamentIds);
+  }
   
   // Filtro per data
   if (dateFrom) query = query.gte('start_time', dateFrom);
@@ -909,7 +931,7 @@ async function getMissingMatches(limit = 500) {
  */
 async function countMatches(options = {}) {
   if (!checkSupabase()) return 0;
-  const { status, tournamentId, playerSearch, dateFrom, dateTo } = options;
+  const { status, tournamentId, tournamentCategory, playerSearch, dateFrom, dateTo } = options;
   
   // Se c'è ricerca per giocatore, prima trova gli ID dei player che matchano
   let playerIds = [];
@@ -927,12 +949,29 @@ async function countMatches(options = {}) {
     }
   }
   
+  // Se c'è filtro per categoria torneo, trova gli ID dei tornei che matchano
+  let categoryTournamentIds = [];
+  if (tournamentCategory) {
+    const { data: tournaments } = await supabase
+      .from('tournaments')
+      .select('id')
+      .eq('category', tournamentCategory);
+    
+    categoryTournamentIds = (tournaments || []).map(t => t.id);
+    
+    // Se nessun torneo trovato, ritorna 0
+    if (categoryTournamentIds.length === 0) {
+      return 0;
+    }
+  }
+  
   let query = supabase
     .from('matches')
     .select('id', { count: 'exact', head: true });
   
   if (status) query = query.eq('status_type', status);
   if (tournamentId) query = query.eq('tournament_id', tournamentId);
+  if (categoryTournamentIds.length > 0) query = query.in('tournament_id', categoryTournamentIds);
   if (dateFrom) query = query.gte('start_time', dateFrom);
   if (dateTo) query = query.lte('start_time', dateTo);
   

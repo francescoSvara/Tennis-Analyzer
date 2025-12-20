@@ -655,7 +655,7 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
 
 /**
  * GET /api/matches/search - Ricerca match con filtri
- * Query params: status, tournamentId, playerSearch, dateFrom, dateTo, page, limit
+ * Query params: status, tournamentId, tournamentCategory, playerSearch, dateFrom, dateTo, page, limit
  */
 app.get('/api/matches/search', async (req, res) => {
   try {
@@ -666,6 +666,7 @@ app.get('/api/matches/search', async (req, res) => {
     const {
       status,
       tournamentId,
+      tournamentCategory,
       playerSearch,
       dateFrom,
       dateTo,
@@ -681,6 +682,7 @@ app.get('/api/matches/search', async (req, res) => {
     const totalCount = await matchRepository.countMatches({
       status,
       tournamentId: tournamentId ? parseInt(tournamentId, 10) : undefined,
+      tournamentCategory,
       playerSearch,
       dateFrom,
       dateTo
@@ -690,6 +692,7 @@ app.get('/api/matches/search', async (req, res) => {
     const matches = await matchRepository.getMatches({
       status,
       tournamentId: tournamentId ? parseInt(tournamentId, 10) : undefined,
+      tournamentCategory,
       playerSearch,
       dateFrom,
       dateTo,

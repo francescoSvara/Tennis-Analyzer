@@ -320,6 +320,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const [searchFilters, setSearchFilters] = useState({
     status: '',
     tournamentId: '',
+    tournamentCategory: '',
     playerSearch: '',
     dateFrom: '',
     dateTo: ''
@@ -364,6 +365,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       const params = new URLSearchParams();
       if (searchFilters.status) params.set('status', searchFilters.status);
       if (searchFilters.tournamentId) params.set('tournamentId', searchFilters.tournamentId);
+      if (searchFilters.tournamentCategory) params.set('tournamentCategory', searchFilters.tournamentCategory);
       if (searchFilters.playerSearch) params.set('playerSearch', searchFilters.playerSearch);
       if (searchFilters.dateFrom) params.set('dateFrom', searchFilters.dateFrom);
       if (searchFilters.dateTo) params.set('dateTo', searchFilters.dateTo);
@@ -393,6 +395,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
     setSearchFilters({
       status: '',
       tournamentId: '',
+      tournamentCategory: '',
       playerSearch: '',
       dateFrom: '',
       dateTo: ''
@@ -626,9 +629,39 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                     />
                   </div>
                   
-                  {/* Torneo */}
+                  {/* Categoria Torneo */}
                   <div className="filter-group">
-                    <label>🏆 Torneo</label>
+                    <label>🏆 Categoria</label>
+                    <select
+                      value={searchFilters.tournamentCategory}
+                      onChange={(e) => updateFilter('tournamentCategory', e.target.value)}
+                    >
+                      <option value="">Tutte</option>
+                      <option value="ATP">ATP</option>
+                      <option value="WTA">WTA</option>
+                      <option value="Challenger">Challenger</option>
+                      <option value="ITF Men">ITF Men</option>
+                      <option value="ITF Women">ITF Women</option>
+                    </select>
+                  </div>
+                                    {/* Categoria Torneo */}
+                  <div className="filter-group">
+                    <label>🏏️ Categoria</label>
+                    <select
+                      value={searchFilters.tournamentCategory}
+                      onChange={(e) => updateFilter('tournamentCategory', e.target.value)}
+                    >
+                      <option value="">Tutte</option>
+                      <option value="ATP">ATP</option>
+                      <option value="WTA">WTA</option>
+                      <option value="Challenger">Challenger</option>
+                      <option value="ITF Men">ITF Men</option>
+                      <option value="ITF Women">ITF Women</option>
+                    </select>
+                  </div>
+                                    {/* Torneo */}
+                  <div className="filter-group">
+                    <label>🎾 Torneo</label>
                     <select
                       value={searchFilters.tournamentId}
                       onChange={(e) => updateFilter('tournamentId', e.target.value)}
