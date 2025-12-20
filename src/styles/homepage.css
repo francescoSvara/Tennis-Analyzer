@@ -234,7 +234,7 @@
 .home-main {
   flex: 1;
   padding: 28px 32px;
-  overflow-y: auto;
+  overflow: auto;
 }
 
 .home-main-header {
@@ -1415,7 +1415,7 @@
 /* Content */
 .monitoring-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   padding: 24px 28px;
   scrollbar-width: thin;
   scrollbar-color: rgba(139, 92, 246, 0.4) rgba(0, 0, 0, 0.2);
@@ -2249,7 +2249,7 @@
   flex-direction: column;
   gap: 6px;
   max-height: 200px;
-  overflow-y: auto;
+  overflow: auto;
 }
 
 .mini-match {
@@ -3221,7 +3221,7 @@
   
   .monitoring-tabs {
     display: flex;
-    overflow-x: auto;
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
@@ -3243,7 +3243,7 @@
   
   .monitoring-content {
     padding: 16px;
-    overflow-y: auto;
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
