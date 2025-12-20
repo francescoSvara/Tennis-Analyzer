@@ -582,13 +582,15 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
           if (content.api) {
             for (const [url, data] of Object.entries(content.api)) {
               if (data?.event?.id) {
+                const eventId = data.event.id;
                 const eventTournamentId = data.event.tournament?.uniqueTournament?.id || data.event.tournament?.id;
-                existingEventIds.add(String(data.event.id));
+                existingEventIds.add(String(eventId));
                 
-                // Se il match appartiene a questo torneo (check sia unique-tournament che season ID)
-                if (String(eventTournamentId) === String(tournamentId)) {
+                // Se il match appartiene a questo torneo E non è già stato aggiunto
+                if (String(eventTournamentId) === String(tournamentId) && 
+                    !existingMatches.find(em => em.eventId === eventId)) {
                   existingMatches.push({
-                    eventId: data.event.id,
+                    eventId: eventId,
                     homeTeam: data.event.homeTeam?.name || '',
                     awayTeam: data.event.awayTeam?.name || '',
                     status: data.event.status?.type || 'unknown',
