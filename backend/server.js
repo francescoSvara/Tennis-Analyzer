@@ -300,28 +300,65 @@ function extractRelatedMatches(apiData, currentEventId) {
 /**
  * GET /api/db-stats - Statistiche complete del database
  * Fornisce metriche su tornei, partite, completezza dati
- * Legge dal database Supabase invece che dai file JSON
+ * Legge dal database Supabase, con fallback ai file JSON locali
  */
 app.get('/api/db-stats', async (req, res) => {
   try {
-    // Se matchRepository non è disponibile, fallback ai file
-    if (!matchRepository) {
-      console.log('⚠️ Database not configured, falling back to file-based stats');
-      return res.json({
-        summary: { totalMatches: 0, totalTournaments: 0, avgCompleteness: 0, byStatus: {} },
-        tournaments: [],
-        recentAcquisitions: [],
-        timeline: [],
-        tracking: { active: 0, matches: [] },
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    // 1. Carica tutti i match dal database
-    const dbMatches = await matchRepository.getMatches({ limit: 500 });
+    let dbMatches = [];
+    let dbTournaments = [];
     
-    // 2. Carica tornei dal database
-    const dbTournaments = await matchRepository.getTournaments();
+    // Prova a caricare dal database
+    if (matchRepository) {
+      try {
+        dbMatches = await matchRepository.getMatches({ limit: 500 }) || [];
+        dbTournaments = await matchRepository.getTournaments() || [];
+        console.log(`📊 DB Stats: Found ${dbMatches.length} matches in database`);
+      } catch (dbErr) {
+        console.log('⚠️ Database query failed, falling back to files:', dbErr.message);
+      }
+    }
+    
+    // Fallback o integrazione con file locali se DB vuoto o non disponibile
+    if (dbMatches.length === 0) {
+      console.log('📂 DB Stats: Loading from local files...');
+      const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+      
+      for (const file of files) {
+        try {
+          const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
+          let eventData = null;
+          
+          if (content.api) {
+            for (const [url, data] of Object.entries(content.api)) {
+              if (url.match(/\/api\/v1\/event\/\d+$/) && data?.event) {
+                eventData = data.event;
+                break;
+              }
+            }
+          }
+          
+          if (eventData) {
+            const sportSlug = eventData.tournament?.category?.sport?.slug || 'tennis';
+            const statusType = eventData.status?.type || 'unknown';
+            
+            dbMatches.push({
+              id: eventData.id,
+              status_type: statusType,
+              start_time: eventData.startTimestamp ? new Date(eventData.startTimestamp * 1000).toISOString() : null,
+              created_at: new Date().toISOString(),
+              tournament_id: eventData.tournament?.uniqueTournament?.id || eventData.tournament?.id,
+              tournament_name: eventData.tournament?.uniqueTournament?.name || eventData.tournament?.name || 'Unknown',
+              tournament_category: eventData.tournament?.category?.name || '',
+              home_name: eventData.homeTeam?.name || '',
+              away_name: eventData.awayTeam?.name || '',
+              sport: sportSlug,
+              data_completeness: calculateDataCompleteness(content.api, eventData.id, sportSlug)
+            });
+          }
+        } catch (e) { /* skip */ }
+      }
+      console.log(`📂 DB Stats: Loaded ${dbMatches.length} matches from files`);
+    }
     
     // Strutture per le statistiche
     const matchesByStatus = { finished: 0, inprogress: 0, notstarted: 0, other: 0 };
@@ -525,22 +562,11 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
     
     console.log(`Tournament ${tournamentId}: Found ${events.length} events from SofaScore API`);
     
-    // Controlla quali sono già nel nostro DB Supabase
+    // Controlla quali sono già nel nostro DB - cerca per event ID (match ID)
     const existingEventIds = new Set();
     
-    if (matchRepository) {
-      try {
-        const dbMatches = await matchRepository.getMatches({ tournamentId: parseInt(tournamentId), limit: 500 });
-        if (dbMatches && Array.isArray(dbMatches)) {
-          dbMatches.forEach(m => existingEventIds.add(String(m.id)));
-        }
-      } catch (dbErr) {
-        console.log('Could not check DB for existing matches:', dbErr.message);
-      }
-    }
-    
-    // Fallback: controlla anche i file locali se DB non disponibile o vuoto
-    if (existingEventIds.size === 0) {
+    // Prima controlla i file locali (sempre disponibili)
+    try {
       const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
       for (const file of files) {
         try {
@@ -551,6 +577,25 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
             }
           }
         } catch (e) { /* skip */ }
+      }
+      console.log(`Found ${existingEventIds.size} events in local files`);
+    } catch (e) {
+      console.log('Could not check local files:', e.message);
+    }
+    
+    // Poi controlla anche il DB Supabase (potrebbe avere match aggiuntivi)
+    if (matchRepository) {
+      try {
+        // Cerca tutti i match (senza filtro torneo perché l'ID potrebbe non coincidere)
+        const dbMatches = await matchRepository.getMatches({ limit: 1000 });
+        if (dbMatches && Array.isArray(dbMatches)) {
+          dbMatches.forEach(m => {
+            if (m.id) existingEventIds.add(String(m.id));
+          });
+          console.log(`Total ${existingEventIds.size} events after DB check`);
+        }
+      } catch (dbErr) {
+        console.log('Could not check DB for existing matches:', dbErr.message);
       }
     }
     

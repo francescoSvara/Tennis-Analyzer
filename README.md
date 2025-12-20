@@ -403,7 +403,61 @@ Partite di un torneo da SofaScore con % copertura nel DB locale.
 
 ---
 
-## 🛠️ COMANDI UTILI
+## � DEPLOYMENT IN PRODUZIONE
+
+### Setup Vercel (Frontend)
+1. Collega il repository GitHub a Vercel
+2. Imposta le variabili d'ambiente nel dashboard Vercel:
+   ```
+   VITE_API_URL=https://tennis-analyzer-production.up.railway.app
+   ```
+3. Build command: `npm run build`
+4. Output directory: `dist`
+
+### Setup Railway (Backend)
+1. Collega il repository GitHub a Railway
+2. Imposta le variabili d'ambiente:
+   ```
+   PORT=3001
+   NODE_ENV=production
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_SERVICE_KEY=your_service_role_key
+   FRONTEND_URL=https://tennis-analyzer.vercel.app
+   PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+   ```
+3. Start command: `cd backend && node server.js`
+4. Root directory: (lascia vuoto o `/`)
+
+### Setup Supabase (Database)
+1. Crea un nuovo progetto su Supabase
+2. Esegui le migration SQL per creare le tabelle:
+   - `players`, `tournaments`, `matches`, `match_scores`
+   - `point_by_point`, `power_rankings`, `match_statistics`
+3. Copia URL e Service Role Key dal dashboard API
+
+### Troubleshooting Produzione
+
+#### Errore CORS
+Se il frontend mostra errori CORS con `localhost:3001`:
+- ✅ Verifica che `VITE_API_URL` su Vercel punti a Railway
+- ✅ Verifica che `FRONTEND_URL` su Railway sia l'URL Vercel
+- ✅ Redeploy sia Vercel che Railway dopo modifiche env
+
+#### Database Monitor vuoto
+Se la sezione tornei non mostra dati:
+- ✅ Verifica che Supabase sia connesso (controlla logs Railway)
+- ✅ Il sistema usa file locali come fallback se DB non disponibile
+- ✅ Verifica che esistano file in `data/scrapes/` sul server
+
+#### Partite mancanti al 100%
+Se tutte le partite risultano "mancanti" nel torneo:
+- ✅ Il sistema ora controlla sia file locali che database
+- ✅ Verifica che gli scrape siano stati salvati correttamente
+- ✅ L'eventId deve corrispondere tra SofaScore API e dati salvati
+
+---
+
+## �🛠️ COMANDI UTILI
 
 ### Avvio Sviluppo
 ```bash

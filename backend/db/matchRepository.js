@@ -425,14 +425,24 @@ function parseNumeric(val) {
 
 /**
  * Recupera tutti i match con filtri opzionali
+ * Usa query diretta con join invece di view per compatibilità
  */
 async function getMatches(options = {}) {
   if (!checkSupabase()) return [];
   const { limit = 50, offset = 0, status, tournamentId, playerId, orderBy = 'start_time' } = options;
 
+  // Prima prova la view, se fallisce usa query diretta
+  let data, error;
+  
+  // Query con join diretti per evitare dipendenza dalla view
   let query = supabase
-    .from('v_matches_full')
-    .select('*')
+    .from('matches')
+    .select(`
+      *,
+      home_player:players!matches_home_player_id_fkey(id, name, full_name, short_name, country_name, country_alpha2, current_ranking),
+      away_player:players!matches_away_player_id_fkey(id, name, full_name, short_name, country_name, country_alpha2, current_ranking),
+      tournament:tournaments!matches_tournament_id_fkey(id, name, category, ground_type, country)
+    `)
     .order(orderBy, { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -440,10 +450,55 @@ async function getMatches(options = {}) {
   if (tournamentId) query = query.eq('tournament_id', tournamentId);
   if (playerId) query = query.or(`home_player_id.eq.${playerId},away_player_id.eq.${playerId}`);
 
-  const { data, error } = await query;
-  handleSupabaseError(error, 'fetching matches');
+  const result = await query;
+  data = result.data;
+  error = result.error;
+
+  // Se la query con join fallisce (foreign key diversa), prova query semplice
+  if (error) {
+    console.log('⚠️ Join query failed, trying simple query:', error.message);
+    
+    const simpleQuery = supabase
+      .from('matches')
+      .select('*')
+      .order(orderBy, { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    if (status) simpleQuery.eq('status_type', status);
+    if (tournamentId) simpleQuery.eq('tournament_id', tournamentId);
+    
+    const simpleResult = await simpleQuery;
+    
+    if (simpleResult.error) {
+      handleSupabaseError(simpleResult.error, 'fetching matches');
+      return [];
+    }
+    
+    // Mappa dati nel formato atteso dal frontend
+    data = (simpleResult.data || []).map(m => ({
+      ...m,
+      home_name: m.home_name || 'Unknown',
+      away_name: m.away_name || 'Unknown',
+      tournament_name: m.tournament_name || 'Unknown Tournament',
+      tournament_category: m.tournament_category || ''
+    }));
+  } else {
+    // Mappa i dati dal join al formato flat atteso
+    data = (data || []).map(m => ({
+      ...m,
+      home_name: m.home_player?.name || m.home_player?.full_name || 'Unknown',
+      away_name: m.away_player?.name || m.away_player?.full_name || 'Unknown',
+      home_country: m.home_player?.country_alpha2 || '',
+      away_country: m.away_player?.country_alpha2 || '',
+      home_ranking: m.home_player?.current_ranking,
+      away_ranking: m.away_player?.current_ranking,
+      tournament_name: m.tournament?.name || 'Unknown Tournament',
+      tournament_category: m.tournament?.category || '',
+      tournament_ground: m.tournament?.ground_type || ''
+    }));
+  }
   
-  return data;
+  return data || [];
 }
 
 /**
@@ -451,19 +506,54 @@ async function getMatches(options = {}) {
  */
 async function getMatchById(matchId) {
   if (!checkSupabase()) return null;
-  // Match base
-  const { data: match, error: matchError } = await supabase
-    .from('v_matches_full')
-    .select('*')
+  
+  // Query diretta con join
+  const { data: matchRaw, error: matchError } = await supabase
+    .from('matches')
+    .select(`
+      *,
+      home_player:players!matches_home_player_id_fkey(id, name, full_name, short_name, country_name, country_alpha2, current_ranking),
+      away_player:players!matches_away_player_id_fkey(id, name, full_name, short_name, country_name, country_alpha2, current_ranking),
+      tournament:tournaments!matches_tournament_id_fkey(id, name, category, ground_type, country)
+    `)
     .eq('id', matchId)
     .single();
 
+  // Se join fallisce, prova query semplice
+  let match = matchRaw;
   if (matchError) {
     if (matchError.code === 'PGRST116') return null; // Not found
-    handleSupabaseError(matchError, 'fetching match');
+    
+    console.log('⚠️ Join query failed for match, trying simple:', matchError.message);
+    const { data: simpleMatch, error: simpleError } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('id', matchId)
+      .single();
+    
+    if (simpleError) {
+      if (simpleError.code === 'PGRST116') return null;
+      handleSupabaseError(simpleError, 'fetching match');
+      return null;
+    }
+    match = simpleMatch;
   }
 
   if (!match) return null;
+  
+  // Mappa al formato atteso
+  const mappedMatch = {
+    ...match,
+    home_name: match.home_player?.name || match.home_player?.full_name || match.home_name || 'Unknown',
+    away_name: match.away_player?.name || match.away_player?.full_name || match.away_name || 'Unknown',
+    home_country: match.home_player?.country_alpha2 || '',
+    away_country: match.away_player?.country_alpha2 || '',
+    home_ranking: match.home_player?.current_ranking,
+    away_ranking: match.away_player?.current_ranking,
+    tournament_name: match.tournament?.name || match.tournament_name || 'Unknown Tournament',
+    tournament_category: match.tournament?.category || match.tournament_category || '',
+    tournament_ground: match.tournament?.ground_type || ''
+  };
 
   // Punteggi set
   const { data: scores } = await supabase
@@ -527,18 +617,24 @@ async function getMatchById(matchId) {
     groups: Object.values(p.groups)
   }));
 
-  // Momentum summary
-  const { data: momentumSummary } = await supabase
-    .from('v_momentum_summary')
-    .select('*')
-    .eq('match_id', matchId)
-    .single();
+  // Momentum summary (skip se view non esiste)
+  let momentumSummary = null;
+  try {
+    const { data: msData } = await supabase
+      .from('v_momentum_summary')
+      .select('*')
+      .eq('match_id', matchId)
+      .single();
+    momentumSummary = msData;
+  } catch (e) {
+    console.log('⚠️ v_momentum_summary not available:', e.message);
+  }
 
   // Point-by-point
   const pointByPoint = await getPointByPoint(matchId);
 
   return {
-    ...match,
+    ...mappedMatch,
     scores,
     powerRankings,
     statistics,
