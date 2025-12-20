@@ -90,13 +90,16 @@ export async function scrapeEvent(url) {
     try {
       const result = { api: {}, mapping: null };
       
-      // Lista degli endpoint da chiamare
+      // Lista degli endpoint da chiamare - SCRAPE COMPLETO
       const endpoints = [
         `https://www.sofascore.com/api/v1/event/${eventId}`,
         `https://www.sofascore.com/api/v1/event/${eventId}/statistics`,
         `https://www.sofascore.com/api/v1/event/${eventId}/lineups`,
         `https://www.sofascore.com/api/v1/event/${eventId}/odds/1/all`,
-        `https://www.sofascore.com/api/v1/event/${eventId}/h2h`
+        `https://www.sofascore.com/api/v1/event/${eventId}/h2h`,
+        // ESSENZIALI per tennis:
+        `https://www.sofascore.com/api/v1/event/${eventId}/point-by-point`,
+        `https://www.sofascore.com/api/v1/event/${eventId}/tennis-power-rankings`
       ];
       
       // Chiama tutti gli endpoint
