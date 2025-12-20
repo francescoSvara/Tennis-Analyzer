@@ -430,7 +430,33 @@ function parseNumeric(val) {
  */
 async function getMatches(options = {}) {
   if (!checkSupabase()) return [];
-  const { limit = 50, offset = 0, status, tournamentId, playerId, orderBy = 'start_time' } = options;
+  const { 
+    limit = 50, 
+    offset = 0, 
+    status, 
+    tournamentId, 
+    playerId,
+    playerSearch,  // Nuovo: ricerca per nome giocatore
+    dateFrom,      // Nuovo: data inizio (ISO string)
+    dateTo,        // Nuovo: data fine (ISO string)
+    orderBy = 'start_time' 
+  } = options;
+
+  // Se c'è ricerca per giocatore, prima trova gli ID dei player che matchano
+  let playerIds = [];
+  if (playerSearch) {
+    const { data: players } = await supabase
+      .from('players')
+      .select('id')
+      .ilike('name', `%${playerSearch}%`);
+    
+    playerIds = (players || []).map(p => p.id);
+    
+    // Se nessun giocatore trovato, ritorna vuoto
+    if (playerIds.length === 0) {
+      return [];
+    }
+  }
 
   // Prima prova la view, se fallisce usa query diretta
   let data, error;
@@ -451,6 +477,17 @@ async function getMatches(options = {}) {
   if (status) query = query.eq('status_type', status);
   if (tournamentId) query = query.eq('tournament_id', tournamentId);
   if (playerId) query = query.or(`home_player_id.eq.${playerId},away_player_id.eq.${playerId}`);
+  
+  // Filtro per data
+  if (dateFrom) query = query.gte('start_time', dateFrom);
+  if (dateTo) query = query.lte('start_time', dateTo);
+  
+  // Filtro per player IDs trovati dalla ricerca nome
+  if (playerIds.length > 0) {
+    // Costruisci filtro OR per home_player_id o away_player_id
+    const playerFilters = playerIds.map(id => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(',');
+    query = query.or(playerFilters);
+  }
 
   const result = await query;
   data = result.data;
@@ -460,14 +497,21 @@ async function getMatches(options = {}) {
   if (error) {
     console.log('⚠️ Join query failed, trying simple query:', error.message);
     
-    const simpleQuery = supabase
+    let simpleQuery = supabase
       .from('matches')
       .select('*')
       .order(orderBy, { ascending: false })
       .range(offset, offset + limit - 1);
     
-    if (status) simpleQuery.eq('status_type', status);
-    if (tournamentId) simpleQuery.eq('tournament_id', tournamentId);
+    if (status) simpleQuery = simpleQuery.eq('status_type', status);
+    if (tournamentId) simpleQuery = simpleQuery.eq('tournament_id', tournamentId);
+    if (dateFrom) simpleQuery = simpleQuery.gte('start_time', dateFrom);
+    if (dateTo) simpleQuery = simpleQuery.lte('start_time', dateTo);
+    // Per playerSearch usa gli stessi playerIds già trovati
+    if (playerIds.length > 0) {
+      const playerFilters = playerIds.map(id => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(',');
+      simpleQuery = simpleQuery.or(playerFilters);
+    }
     
     const simpleResult = await simpleQuery;
     
@@ -860,6 +904,129 @@ async function getMissingMatches(limit = 500) {
   return data || [];
 }
 
+/**
+ * Conta i match con filtri (per paginazione)
+ */
+async function countMatches(options = {}) {
+  if (!checkSupabase()) return 0;
+  const { status, tournamentId, playerSearch, dateFrom, dateTo } = options;
+  
+  // Se c'è ricerca per giocatore, prima trova gli ID dei player che matchano
+  let playerIds = [];
+  if (playerSearch) {
+    const { data: players } = await supabase
+      .from('players')
+      .select('id')
+      .ilike('name', `%${playerSearch}%`);
+    
+    playerIds = (players || []).map(p => p.id);
+    
+    // Se nessun giocatore trovato, ritorna 0
+    if (playerIds.length === 0) {
+      return 0;
+    }
+  }
+  
+  let query = supabase
+    .from('matches')
+    .select('id', { count: 'exact', head: true });
+  
+  if (status) query = query.eq('status_type', status);
+  if (tournamentId) query = query.eq('tournament_id', tournamentId);
+  if (dateFrom) query = query.gte('start_time', dateFrom);
+  if (dateTo) query = query.lte('start_time', dateTo);
+  
+  // Filtro per player IDs trovati dalla ricerca nome
+  if (playerIds.length > 0) {
+    const playerFilters = playerIds.map(id => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(',');
+    query = query.or(playerFilters);
+  }
+  
+  const { count, error } = await query;
+  
+  if (error) {
+    console.log('countMatches error:', error.message);
+    return 0;
+  }
+  
+  return count || 0;
+}
+
+/**
+ * Recupera lista tornei distinti (per dropdown filtri)
+ */
+async function getDistinctTournaments() {
+  if (!checkSupabase()) return [];
+  
+  // Prova prima dalla tabella tournaments
+  const { data: tournamentsData, error: tournamentsError } = await supabase
+    .from('tournaments')
+    .select('id, name, category');
+  
+  if (!tournamentsError && tournamentsData && tournamentsData.length > 0) {
+    // Conta match per ogni torneo
+    const { data: matchCounts } = await supabase
+      .from('matches')
+      .select('tournament_id');
+    
+    const countMap = {};
+    for (const m of matchCounts || []) {
+      countMap[m.tournament_id] = (countMap[m.tournament_id] || 0) + 1;
+    }
+    
+    return tournamentsData
+      .map(t => ({
+        id: t.id,
+        name: t.name || 'Unknown',
+        category: t.category || '',
+        matchCount: countMap[t.id] || 0
+      }))
+      .filter(t => t.matchCount > 0)
+      .sort((a, b) => b.matchCount - a.matchCount);
+  }
+  
+  // Fallback: raggruppa da matches
+  const { data, error } = await supabase
+    .from('matches')
+    .select('tournament_id');
+  
+  if (error) {
+    console.log('getDistinctTournaments error:', error.message);
+    return [];
+  }
+  
+  // Raggruppa e conta
+  const countMap = {};
+  for (const m of data || []) {
+    if (m.tournament_id) {
+      countMap[m.tournament_id] = (countMap[m.tournament_id] || 0) + 1;
+    }
+  }
+  
+  // Recupera nomi tornei dalla tabella tournaments
+  const tournamentIds = Object.keys(countMap);
+  if (tournamentIds.length === 0) return [];
+  
+  const { data: tournamentNames } = await supabase
+    .from('tournaments')
+    .select('id, name, category')
+    .in('id', tournamentIds);
+  
+  const nameMap = {};
+  for (const t of tournamentNames || []) {
+    nameMap[t.id] = { name: t.name, category: t.category };
+  }
+  
+  return tournamentIds
+    .map(id => ({
+      id: parseInt(id),
+      name: nameMap[id]?.name || `Tournament ${id}`,
+      category: nameMap[id]?.category || '',
+      matchCount: countMap[id]
+    }))
+    .sort((a, b) => b.matchCount - a.matchCount);
+}
+
 module.exports = {
   // Write
   upsertPlayer,
@@ -874,6 +1041,8 @@ module.exports = {
   searchPlayers,
   getTournaments,
   getExtractionLogs,
+  countMatches,
+  getDistinctTournaments,
   
   // Detected matches (read-only)
   getDetectedMatchesByTournament,

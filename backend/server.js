@@ -649,6 +649,112 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
   }
 });
 
+// ============================================================================
+// MATCH SEARCH API - Ricerca filtrata match dal database
+// ============================================================================
+
+/**
+ * GET /api/matches/search - Ricerca match con filtri
+ * Query params: status, tournamentId, playerSearch, dateFrom, dateTo, page, limit
+ */
+app.get('/api/matches/search', async (req, res) => {
+  try {
+    if (!matchRepository) {
+      return res.status(503).json({ error: 'Database not available' });
+    }
+    
+    const {
+      status,
+      tournamentId,
+      playerSearch,
+      dateFrom,
+      dateTo,
+      page = 1,
+      limit = 20
+    } = req.query;
+    
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = Math.min(parseInt(limit, 10) || 20, 100); // Max 100
+    const offset = (pageNum - 1) * limitNum;
+    
+    // Conta totale per paginazione
+    const totalCount = await matchRepository.countMatches({
+      status,
+      tournamentId: tournamentId ? parseInt(tournamentId, 10) : undefined,
+      playerSearch,
+      dateFrom,
+      dateTo
+    });
+    
+    // Recupera match con filtri
+    const matches = await matchRepository.getMatches({
+      status,
+      tournamentId: tournamentId ? parseInt(tournamentId, 10) : undefined,
+      playerSearch,
+      dateFrom,
+      dateTo,
+      limit: limitNum,
+      offset
+    });
+    
+    // Formatta risposta
+    res.json({
+      matches: matches.map(m => ({
+        eventId: m.id,
+        homeTeam: m.home_name || 'Unknown',
+        awayTeam: m.away_name || 'Unknown',
+        tournament: m.tournament_name || 'Unknown',
+        tournamentId: m.tournament_id,
+        category: m.tournament_category || '',
+        status: m.status_type || 'unknown',
+        startTime: m.start_time,
+        homeScore: m.home_sets_won,
+        awayScore: m.away_sets_won,
+        winnerCode: m.winner_code,
+        roundName: m.round_name,
+        sofascoreUrl: m.sofascore_url
+      })),
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limitNum),
+        hasNext: pageNum * limitNum < totalCount,
+        hasPrev: pageNum > 1
+      },
+      filters: {
+        status: status || null,
+        tournamentId: tournamentId || null,
+        playerSearch: playerSearch || null,
+        dateFrom: dateFrom || null,
+        dateTo: dateTo || null
+      }
+    });
+    
+  } catch (err) {
+    console.error('Error searching matches:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/matches/tournaments - Lista tornei per dropdown filtro
+ */
+app.get('/api/matches/tournaments', async (req, res) => {
+  try {
+    if (!matchRepository) {
+      return res.status(503).json({ error: 'Database not available' });
+    }
+    
+    const tournaments = await matchRepository.getDistinctTournaments();
+    res.json({ tournaments });
+    
+  } catch (err) {
+    console.error('Error fetching tournaments:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/matches - Restituisce lista di tutti i match salvati (senza duplicati per eventId)
 app.get('/api/matches', async (req, res) => {
   try {

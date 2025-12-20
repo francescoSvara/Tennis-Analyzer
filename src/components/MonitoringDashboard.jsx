@@ -310,7 +310,20 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedTournament, setExpandedTournament] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'recent' | 'tracking'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'explore' | 'tracking'
+  
+  // === ESPLORA MATCH - Stati filtri ===
+  const [searchFilters, setSearchFilters] = useState({
+    status: '',
+    tournamentId: '',
+    playerSearch: '',
+    dateFrom: '',
+    dateTo: ''
+  });
+  const [searchResults, setSearchResults] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchPage, setSearchPage] = useState(1);
+  const [availableTournaments, setAvailableTournaments] = useState([]);
   
   const loadStats = useCallback(async () => {
     setLoading(true);
@@ -326,6 +339,62 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       setLoading(false);
     }
   }, []);
+  
+  // === ESPLORA MATCH - Carica lista tornei per dropdown ===
+  const loadTournaments = useCallback(async () => {
+    try {
+      const res = await fetch(apiUrl('/api/matches/tournaments'));
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableTournaments(data.tournaments || []);
+      }
+    } catch (e) {
+      console.error('Error loading tournaments:', e);
+    }
+  }, []);
+  
+  // === ESPLORA MATCH - Cerca match con filtri ===
+  const searchMatches = useCallback(async (page = 1) => {
+    setSearchLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchFilters.status) params.set('status', searchFilters.status);
+      if (searchFilters.tournamentId) params.set('tournamentId', searchFilters.tournamentId);
+      if (searchFilters.playerSearch) params.set('playerSearch', searchFilters.playerSearch);
+      if (searchFilters.dateFrom) params.set('dateFrom', searchFilters.dateFrom);
+      if (searchFilters.dateTo) params.set('dateTo', searchFilters.dateTo);
+      params.set('page', page);
+      params.set('limit', 20);
+      
+      const res = await fetch(apiUrl(`/api/matches/search?${params.toString()}`));
+      if (res.ok) {
+        const data = await res.json();
+        setSearchResults(data);
+        setSearchPage(page);
+      }
+    } catch (e) {
+      console.error('Error searching matches:', e);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [searchFilters]);
+  
+  // Aggiorna filtro
+  const updateFilter = (key, value) => {
+    setSearchFilters(prev => ({ ...prev, [key]: value }));
+  };
+  
+  // Reset filtri
+  const resetFilters = () => {
+    setSearchFilters({
+      status: '',
+      tournamentId: '',
+      playerSearch: '',
+      dateFrom: '',
+      dateTo: ''
+    });
+    setSearchResults(null);
+  };
   
   // Filtra match incompleti (non 100% O non finished) - TUTTI, non limitati
   const getIncompleteMatches = useCallback(() => {
@@ -355,6 +424,13 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       loadStats();
     }
   }, [isOpen, loadStats]);
+  
+  // Carica tornei quando si apre tab Esplora
+  useEffect(() => {
+    if (isOpen && activeTab === 'explore' && availableTournaments.length === 0) {
+      loadTournaments();
+    }
+  }, [isOpen, activeTab, availableTournaments.length, loadTournaments]);
   
   if (!isOpen) return null;
   
@@ -390,10 +466,10 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             🏆 Tornei
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'recent' ? 'active' : ''}`}
-            onClick={() => setActiveTab('recent')}
+            className={`tab-btn ${activeTab === 'explore' ? 'active' : ''}`}
+            onClick={() => setActiveTab('explore')}
           >
-            🕐 Recenti
+            🔍 Esplora Match
           </button>
           <button 
             className={`tab-btn ${activeTab === 'tracking' ? 'active' : ''}`}
@@ -527,72 +603,181 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             </div>
           )}
           
-          {stats && activeTab === 'recent' && (
-            <div className="tab-content recent-tab">
-              <div className="recent-header">
-                <div className="recent-title-section">
-                  <h3>⚠️ Match Incompleti</h3>
-                  <span className="recent-count">{paginatedIncomplete.total} match da completare</span>
+          {/* === TAB ESPLORA MATCH === */}
+          {activeTab === 'explore' && (
+            <div className="tab-content explore-tab">
+              {/* Form Filtri */}
+              <div className="explore-filters">
+                <h3>🔍 Cerca Match nel Database</h3>
+                
+                <div className="filters-grid">
+                  {/* Ricerca Giocatore */}
+                  <div className="filter-group">
+                    <label>👤 Giocatore</label>
+                    <input
+                      type="text"
+                      placeholder="Nome giocatore..."
+                      value={searchFilters.playerSearch}
+                      onChange={(e) => updateFilter('playerSearch', e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Torneo */}
+                  <div className="filter-group">
+                    <label>🏆 Torneo</label>
+                    <select
+                      value={searchFilters.tournamentId}
+                      onChange={(e) => updateFilter('tournamentId', e.target.value)}
+                    >
+                      <option value="">Tutti i tornei</option>
+                      {availableTournaments.map(t => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.matchCount})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Status */}
+                  <div className="filter-group">
+                    <label>📊 Status</label>
+                    <select
+                      value={searchFilters.status}
+                      onChange={(e) => updateFilter('status', e.target.value)}
+                    >
+                      <option value="">Tutti</option>
+                      <option value="finished">Finite</option>
+                      <option value="inprogress">In Corso</option>
+                      <option value="notstarted">Da Iniziare</option>
+                    </select>
+                  </div>
+                  
+                  {/* Data Da */}
+                  <div className="filter-group">
+                    <label>📅 Da</label>
+                    <input
+                      type="date"
+                      value={searchFilters.dateFrom}
+                      onChange={(e) => updateFilter('dateFrom', e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Data A */}
+                  <div className="filter-group">
+                    <label>📅 A</label>
+                    <input
+                      type="date"
+                      value={searchFilters.dateTo}
+                      onChange={(e) => updateFilter('dateTo', e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="filter-actions">
+                  <button 
+                    className="search-btn"
+                    onClick={() => searchMatches(1)}
+                    disabled={searchLoading}
+                  >
+                    {searchLoading ? '⏳ Cerco...' : '🔍 Cerca'}
+                  </button>
+                  <button 
+                    className="reset-btn"
+                    onClick={resetFilters}
+                  >
+                    ↺ Reset
+                  </button>
                 </div>
               </div>
               
-              {paginatedIncomplete.total === 0 ? (
-                <div className="no-incomplete">
-                  <span className="no-incomplete-icon">✅</span>
-                  <p>Tutti i match sono completi!</p>
-                  <span className="no-incomplete-hint">
-                    Nessun match con dati mancanti
-                  </span>
-                </div>
-              ) : (
-                <>
-                  <div className="recent-list">
-                    {paginatedIncomplete.items.map((match, i) => (
-                      <div key={match.eventId} className="recent-item">
-                        <span className="recent-index">{(incompletePage - 1) * ITEMS_PER_PAGE + i + 1}</span>
-                        <div className="recent-info">
-                          <span className="recent-teams">{match.homeTeam} vs {match.awayTeam}</span>
-                          <span className="recent-tournament">{match.tournament}</span>
-                        </div>
-                        <div className="recent-meta">
-                          <span className={`recent-status ${match.status}`}>{match.status}</span>
-                          <span className="recent-completeness">{match.completeness}%</span>
-                          <span className="recent-time">
-                            {new Date(match.acquiredAt).toLocaleString('it-IT', { 
-                              day: '2-digit', 
-                              month: 'short', 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+              {/* Risultati */}
+              {searchResults && (
+                <div className="explore-results">
+                  <div className="results-header">
+                    <span className="results-count">
+                      {searchResults.pagination.total} match trovati
+                    </span>
                   </div>
                   
-                  {/* Paginazione */}
-                  {paginatedIncomplete.totalPages > 1 && (
-                    <div className="pagination-controls">
-                      <button 
-                        className="pagination-btn"
-                        onClick={() => setIncompletePage(p => p - 1)}
-                        disabled={!paginatedIncomplete.hasPrev}
-                      >
-                        ← Precedente
-                      </button>
-                      <span className="pagination-info">
-                        Pagina {incompletePage} di {paginatedIncomplete.totalPages}
-                      </span>
-                      <button 
-                        className="pagination-btn"
-                        onClick={() => setIncompletePage(p => p + 1)}
-                        disabled={!paginatedIncomplete.hasNext}
-                      >
-                        Successivo →
-                      </button>
+                  {searchResults.matches.length === 0 ? (
+                    <div className="no-results">
+                      <span>🔍</span>
+                      <p>Nessun match trovato con questi filtri</p>
                     </div>
+                  ) : (
+                    <>
+                      <div className="results-list">
+                        {searchResults.matches.map((match) => (
+                          <div 
+                            key={match.eventId} 
+                            className="result-item clickable"
+                            onClick={() => onMatchSelect && onMatchSelect(match)}
+                          >
+                            <div className="result-main">
+                              <span className="result-teams">
+                                {match.homeTeam} vs {match.awayTeam}
+                              </span>
+                              <span className="result-tournament">{match.tournament}</span>
+                            </div>
+                            <div className="result-meta">
+                              <span className={`result-status ${match.status}`}>
+                                {match.status === 'finished' ? '✓ Finita' : 
+                                 match.status === 'inprogress' ? '● Live' : 
+                                 '○ Da iniziare'}
+                              </span>
+                              {match.startTime && (
+                                <span className="result-date">
+                                  {new Date(match.startTime).toLocaleDateString('it-IT', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              )}
+                              {match.homeScore !== null && match.awayScore !== null && (
+                                <span className="result-score">
+                                  {match.homeScore} - {match.awayScore}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Paginazione */}
+                      {searchResults.pagination.totalPages > 1 && (
+                        <div className="pagination-controls">
+                          <button 
+                            className="pagination-btn"
+                            onClick={() => searchMatches(searchPage - 1)}
+                            disabled={!searchResults.pagination.hasPrev || searchLoading}
+                          >
+                            ← Precedente
+                          </button>
+                          <span className="pagination-info">
+                            Pagina {searchResults.pagination.page} di {searchResults.pagination.totalPages}
+                          </span>
+                          <button 
+                            className="pagination-btn"
+                            onClick={() => searchMatches(searchPage + 1)}
+                            disabled={!searchResults.pagination.hasNext || searchLoading}
+                          >
+                            Successivo →
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
-                </>
+                </div>
+              )}
+              
+              {/* Messaggio iniziale */}
+              {!searchResults && !searchLoading && (
+                <div className="explore-hint">
+                  <span>💡</span>
+                  <p>Usa i filtri sopra per cercare match nel database</p>
+                  <small>Puoi filtrare per giocatore, torneo, status o data</small>
+                </div>
               )}
             </div>
           )}
