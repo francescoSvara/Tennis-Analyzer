@@ -358,6 +358,13 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
     }
   }, []);
   
+  // Carica stats quando il modale si apre
+  useEffect(() => {
+    if (isOpen) {
+      loadStats();
+    }
+  }, [isOpen, loadStats]);
+  
   // === ESPLORA MATCH - Cerca match con filtri ===
   const searchMatches = useCallback(async (page = 1) => {
     setSearchLoading(true);
@@ -426,11 +433,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
     };
   }, [getIncompleteMatches, incompletePage]);
   
-  useEffect(() => {
-    if (isOpen) {
-      loadStats();
-    }
-  }, [isOpen, loadStats]);
   
   // Carica tornei quando si apre tab Esplora
   useEffect(() => {
@@ -644,22 +646,8 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                       <option value="ITF Women">ITF Women</option>
                     </select>
                   </div>
-                                    {/* Categoria Torneo */}
-                  <div className="filter-group">
-                    <label>🏏️ Categoria</label>
-                    <select
-                      value={searchFilters.tournamentCategory}
-                      onChange={(e) => updateFilter('tournamentCategory', e.target.value)}
-                    >
-                      <option value="">Tutte</option>
-                      <option value="ATP">ATP</option>
-                      <option value="WTA">WTA</option>
-                      <option value="Challenger">Challenger</option>
-                      <option value="ITF Men">ITF Men</option>
-                      <option value="ITF Women">ITF Women</option>
-                    </select>
-                  </div>
-                                    {/* Torneo */}
+                  
+                  {/* Torneo */}
                   <div className="filter-group">
                     <label>🎾 Torneo</label>
                     <select
