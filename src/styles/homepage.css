@@ -1508,8 +1508,62 @@
 
 .summary-card.total .summary-icon { background: rgba(59, 130, 246, 0.15); }
 .summary-card.tournaments .summary-icon { background: rgba(245, 158, 11, 0.15); }
-.summary-card.completeness .summary-icon { background: rgba(16, 185, 129, 0.15); }
-.summary-card.tracking .summary-icon { background: rgba(139, 92, 246, 0.15); }
+.summary-card.power-score .summary-icon { background: rgba(139, 92, 246, 0.15); }
+.summary-card.tracking .summary-icon { background: rgba(16, 185, 129, 0.15); }
+
+/* Power Score Details Grid */
+.power-details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+.power-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.power-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.power-detail-label {
+  font-size: 0.8rem;
+  color: var(--home-text-secondary);
+  font-weight: 500;
+}
+
+.power-detail-score {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.power-detail-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.power-detail-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.power-detail-info {
+  font-size: 0.7rem;
+  color: var(--home-text-muted);
+}
 
 .summary-info {
   display: flex;
@@ -3174,6 +3228,10 @@
     grid-template-columns: repeat(2, 1fr);
   }
   
+  .power-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
   .monitoring-dashboard {
     width: 95%;
     max-height: 95vh;
@@ -3195,6 +3253,10 @@
   }
   
   .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .power-details-grid {
     grid-template-columns: 1fr;
   }
   

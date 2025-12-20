@@ -545,11 +545,59 @@ app.get('/api/db-stats', async (req, res) => {
     // Partite tracciate (live monitoring)
     const tracked = getTrackedMatches();
     
+    // === CALCOLO DATABASE POWER SCORE ===
+    // Metriche reali sulla qualità e ricchezza del database
+    let matchesWithScore = 0;
+    let matchesWithWinner = 0;
+    let matchesWithStats = 0;
+    let totalStatsRecords = 0;
+    let detectedCount = 0;
+    
+    // Conta match con dati completi
+    for (const match of dbMatches || []) {
+      if (match.home_sets_won !== null || match.away_sets_won !== null) matchesWithScore++;
+      if (match.winner_code !== null && match.winner_code !== 0) matchesWithWinner++;
+    }
+    
+    // Conta statistiche e detected matches dal DB
+    try {
+      const { count: statsCount } = await supabase.from('match_statistics').select('*', { count: 'exact', head: true });
+      totalStatsRecords = statsCount || 0;
+      matchesWithStats = Math.min((dbMatches || []).length, Math.floor(totalStatsRecords / 10)); // ~10 stats per match
+      
+      const { count: detected } = await supabase.from('detected_matches').select('*', { count: 'exact', head: true });
+      detectedCount = detected || 0;
+    } catch (e) {
+      console.log('Stats count error:', e.message);
+    }
+    
+    const totalMatches = (dbMatches || []).length;
+    
+    // Calcola punteggi parziali (0-100)
+    const coverageScore = detectedCount > 0 ? Math.round((totalMatches / detectedCount) * 100) : 0;
+    const scoreCompleteness = totalMatches > 0 ? Math.round((matchesWithScore / totalMatches) * 100) : 0;
+    const winnerCompleteness = totalMatches > 0 ? Math.round((matchesWithWinner / totalMatches) * 100) : 0;
+    const statsRichness = totalMatches > 0 ? Math.min(100, Math.round((totalStatsRecords / totalMatches) * 3)) : 0;
+    
+    // Power Score finale (media pesata)
+    const powerScore = Math.round(
+      (coverageScore * 0.25) +      // 25% peso copertura
+      (scoreCompleteness * 0.25) +  // 25% peso punteggi
+      (winnerCompleteness * 0.20) + // 20% peso vincitori  
+      (statsRichness * 0.30)        // 30% peso statistiche
+    );
+    
     res.json({
       summary: {
-        totalMatches: (dbMatches || []).length,
+        totalMatches: totalMatches,
         totalTournaments: tournamentMap.size,
-        avgCompleteness: 50,
+        powerScore: powerScore,
+        powerDetails: {
+          coverage: { score: coverageScore, label: 'Copertura', detail: `${totalMatches}/${detectedCount} match` },
+          scores: { score: scoreCompleteness, label: 'Punteggi', detail: `${matchesWithScore}/${totalMatches} completi` },
+          winners: { score: winnerCompleteness, label: 'Vincitori', detail: `${matchesWithWinner}/${totalMatches} definiti` },
+          statistics: { score: statsRichness, label: 'Statistiche', detail: `${totalStatsRecords} record totali` }
+        },
         byStatus: matchesByStatus
       },
       tournaments: tournamentStats,

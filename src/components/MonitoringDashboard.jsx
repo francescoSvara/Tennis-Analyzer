@@ -524,11 +524,12 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   </div>
                 </div>
                 
-                <div className="summary-card completeness">
-                  <div className="summary-icon">✅</div>
+                <div className="summary-card power-score" title={stats.summary.powerDetails ? 
+                  `Copertura: ${stats.summary.powerDetails.coverage.score}%\nPunteggi: ${stats.summary.powerDetails.scores.score}%\nVincitori: ${stats.summary.powerDetails.winners.score}%\nStatistiche: ${stats.summary.powerDetails.statistics.score}%` : ''}>
+                  <div className="summary-icon">⚡</div>
                   <div className="summary-info">
-                    <span className="summary-value">{stats.summary.avgCompleteness}%</span>
-                    <span className="summary-label">Completezza Media</span>
+                    <span className="summary-value">{stats.summary.powerScore || 0}%</span>
+                    <span className="summary-label">Power Score</span>
                   </div>
                 </div>
                 
@@ -540,6 +541,32 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   </div>
                 </div>
               </div>
+              
+              {/* Power Score Details */}
+              {stats.summary.powerDetails && (
+                <div className="power-details-grid">
+                  {Object.entries(stats.summary.powerDetails).map(([key, data]) => (
+                    <div key={key} className="power-detail-item">
+                      <div className="power-detail-header">
+                        <span className="power-detail-label">{data.label}</span>
+                        <span className="power-detail-score">{data.score}%</span>
+                      </div>
+                      <div className="power-detail-bar">
+                        <div 
+                          className="power-detail-fill" 
+                          style={{ 
+                            width: `${data.score}%`,
+                            background: data.score >= 70 ? 'linear-gradient(90deg, #10b981, #34d399)' :
+                                       data.score >= 40 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' :
+                                       'linear-gradient(90deg, #ef4444, #f87171)'
+                          }}
+                        />
+                      </div>
+                      <span className="power-detail-info">{data.detail}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               
               {/* Status Distribution */}
               <div className="status-distribution">
