@@ -2000,6 +2000,13 @@
   font-weight: 300;
 }
 
+.coverage-note {
+  font-size: 0.7rem;
+  color: var(--home-warning);
+  opacity: 0.8;
+  cursor: help;
+}
+
 /* Loading Events State */
 .loading-events {
   display: flex;

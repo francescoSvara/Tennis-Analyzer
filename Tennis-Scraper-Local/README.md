@@ -1,8 +1,50 @@
 # 🎾 Tennis Scraper Local
 
-Tool locale per acquisire dati da SofaScore bypassando i blocchi IP dei server cloud (Railway, Vercel, etc.).
+**Tool locale per acquisire dati da SofaScore bypassando i blocchi IP dei server cloud.**
 
 **Ultimo aggiornamento:** 20 Dicembre 2025
+
+---
+
+## ⚠️ IMPORTANTE: Architettura Separata
+
+Questo progetto è **l'UNICO** che può fare scraping da SofaScore!
+
+### Perché?
+
+SofaScore blocca le richieste provenienti da server cloud (errore 409/403):
+- ❌ Railway → BLOCCATO
+- ❌ Vercel → BLOCCATO  
+- ❌ Heroku → BLOCCATO
+- ✅ **Il tuo PC locale** → FUNZIONA
+
+### Flusso Dati
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🖥️ QUESTO PROGETTO (Tennis-Scraper-Local)                      │
+│  Eseguito sul TUO PC                                             │
+├─────────────────────────────────────────────────────────────────┤
+│  1. Inserisci URL SofaScore                                      │
+│  2. Puppeteer scrapa i dati                                      │
+│  3. Dati salvati su Supabase (cloud)                             │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  ☁️ DATABASE (Supabase)                                          │
+│  I dati sono ora disponibili per:                                │
+│  - Frontend Vercel (tennis-analyzer.vercel.app)                  │
+│  - Backend Railway (API read-only)                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Divisione Responsabilità
+
+| Progetto | Scraping | Lettura DB | Dove gira |
+|----------|----------|------------|-----------|
+| **Tennis-Scraper-Local** | ✅ SÌ | ✅ SÌ | PC Locale |
+| **React-Betfair (questo repo)** | ❌ NO | ✅ SÌ | Railway + Vercel |
 
 ---
 

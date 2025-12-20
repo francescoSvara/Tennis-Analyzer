@@ -538,32 +538,32 @@ app.get('/api/db-stats', async (req, res) => {
 /**
  * GET /api/tournament/:tournamentId/events - Ottieni match per un torneo
  * 
- * Restituisce solo i match già salvati nel database.
- * Nota: questo server è in cloud e non può chiamare SofaScore direttamente.
+ * Restituisce SOLO i match salvati nel database.
+ * Lo scraping viene fatto ESCLUSIVAMENTE dal progetto locale (Tennis-Scraper-Local)
+ * perché Railway/cloud blocca le chiamate a SofaScore (errore 409).
  */
 app.get('/api/tournament/:tournamentId/events', async (req, res) => {
   const { tournamentId } = req.params;
   const { seasonId: seasonIdQuery } = req.query;
+  const seasonId = seasonIdQuery || tournamentId;
   
   try {
-    console.log(`Tournament events request: tournamentId=${tournamentId}, seasonId=${seasonIdQuery}`);
+    console.log(`Tournament events request: tournamentId=${tournamentId}, seasonId=${seasonId}`);
     
     // Raccogli tutti i match esistenti nel DB per questo torneo
     const existingMatches = [];
-    const existingEventIds = new Set();
     
-    // Check DB Supabase - cerca sia per tournament_id (season) che per uniqueTournamentId
+    // Check DB Supabase
     if (matchRepository) {
       try {
         // Prima prova con tournament_id (season_id)
-        let dbMatches = await matchRepository.getMatches({ tournamentId, limit: 1000 });
+        let dbMatches = await matchRepository.getMatches({ tournamentId: seasonId, limit: 1000 });
         
         // Se non trova nulla, prova a cercare tutti i match e filtrare per uniqueTournamentId
         if ((!dbMatches || dbMatches.length === 0) && tournamentId) {
           const allMatches = await matchRepository.getMatches({ limit: 1000 });
           if (allMatches && Array.isArray(allMatches)) {
             dbMatches = allMatches.filter(m => {
-              // Controlla se uniqueTournamentId nel raw_json corrisponde
               if (m.raw_json) {
                 try {
                   const rawData = typeof m.raw_json === 'string' ? JSON.parse(m.raw_json) : m.raw_json;
@@ -578,8 +578,6 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
         
         if (dbMatches && Array.isArray(dbMatches)) {
           dbMatches.forEach(m => {
-            existingEventIds.add(String(m.id));
-            // Aggiungi se non già presente
             if (!existingMatches.find(em => em.eventId === m.id)) {
               existingMatches.push({
                 eventId: m.id,
@@ -587,7 +585,7 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
                 awayTeam: m.away_name || m.away_player?.name || '',
                 status: m.status_type || 'unknown',
                 startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
-                inDatabase: true,
+                completeness: m.data_completeness || 50,
                 winnerCode: m.winner_code
               });
             }
@@ -599,19 +597,17 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
       }
     }
     
-    // Restituisci solo i dati dal database
     const total = existingMatches.length;
     
     res.json({
       tournamentId,
+      seasonId,
       events: existingMatches,
       stats: {
         total,
-        inDatabase: total,
-        missing: 0, // Non possiamo saperlo senza SofaScore
-        completionRate: 100 // Tutti i match che abbiamo sono nel DB
+        inDatabase: total
       },
-      note: 'Dati dal database - lo scraping deve essere fatto dal client locale'
+      note: 'Solo dati dal database. Lo scraping va fatto dal progetto locale.'
     });
     
   } catch (err) {
