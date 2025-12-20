@@ -709,61 +709,35 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             </div>
           )}
           
-          {/* Tab Aggiungi Match */}
+          {/* Tab Aggiungi Match - Reindirizza a scraper locale */}
           {activeTab === 'add' && (
             <div className="tab-content add-tab">
               <div className="add-match-section">
                 <h3>➕ Aggiungi Nuovo Match</h3>
-                <p className="add-match-description">
-                  Inserisci l'URL di un evento SofaScore per acquisire i dati
-                </p>
                 
-                <form onSubmit={handleScrapeMatch} className="add-match-form">
-                  <div className="url-input-wrapper">
-                    <span className="url-icon">🔗</span>
-                    <input
-                      type="url"
-                      value={scrapeUrl}
-                      onChange={(e) => setScrapeUrl(e.target.value)}
-                      placeholder="https://www.sofascore.com/..."
-                      className="url-input"
-                      disabled={scrapeLoading}
-                    />
-                    <button 
-                      type="submit" 
-                      className="scrape-btn"
-                      disabled={scrapeLoading || !scrapeUrl.trim()}
-                    >
-                      {scrapeLoading ? (
-                        <>
-                          <span className="spinner small"></span>
-                          Acquisizione...
-                        </>
-                      ) : (
-                        <>📥 Acquisisci</>
-                      )}
-                    </button>
+                <div className="local-scraper-notice">
+                  <div className="notice-icon">⚠️</div>
+                  <div className="notice-content">
+                    <h4>Scraping disponibile solo in locale</h4>
+                    <p>
+                      SofaScore blocca le richieste dai server cloud. 
+                      Per acquisire nuovi match, usa lo <strong>Scraper Locale</strong>.
+                    </p>
+                    <div className="notice-steps">
+                      <h5>Come fare:</h5>
+                      <ol>
+                        <li>Apri la cartella <code>Tennis-Scraper-Local</code></li>
+                        <li>Esegui <code>npm install</code> (solo la prima volta)</li>
+                        <li>Esegui <code>npm run dev</code></li>
+                        <li>Vai su <code>http://localhost:5174</code></li>
+                        <li>Incolla i link SofaScore e clicca "Acquisisci"</li>
+                      </ol>
+                    </div>
+                    <p className="notice-info">
+                      I match acquisiti dallo scraper locale appariranno automaticamente qui! 
+                      Entrambi usano lo stesso database Supabase.
+                    </p>
                   </div>
-                </form>
-                
-                {scrapeStatus && (
-                  <div className={`scrape-result ${scrapeStatus}`}>
-                    <span className="scrape-result-icon">
-                      {scrapeStatus === 'success' && '✅'}
-                      {scrapeStatus === 'duplicate' && '❌'}
-                      {scrapeStatus === 'error' && '❌'}
-                    </span>
-                    <span className="scrape-result-message">{scrapeMessage}</span>
-                  </div>
-                )}
-                
-                <div className="add-match-tips">
-                  <h4>💡 Suggerimenti</h4>
-                  <ul>
-                    <li>Usa URL diretti di eventi tennis da SofaScore</li>
-                    <li>Formato: <code>sofascore.com/player1-player2/xxYyyZzz#id:12345</code></li>
-                    <li>I match già presenti non verranno duplicati</li>
-                  </ul>
                 </div>
               </div>
             </div>

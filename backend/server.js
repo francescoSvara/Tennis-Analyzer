@@ -1031,7 +1031,26 @@ app.get('/api/detected-matches', async (req, res) => {
   }
 });
 
+// SCRAPING DISABILITATO - SofaScore blocca gli IP dei server cloud
+// Usa Tennis-Scraper-Local per acquisire nuovi match da locale
 app.post('/api/scrape', async (req, res) => {
+  return res.status(503).json({
+    error: 'scraping_disabled',
+    message: 'Lo scraping è disabilitato sul server di produzione.',
+    hint: 'SofaScore blocca le richieste dai server cloud. Usa Tennis-Scraper-Local per acquisire match da localhost.',
+    instructions: [
+      '1. Apri la cartella Tennis-Scraper-Local',
+      '2. Esegui: npm install',
+      '3. Esegui: npm run dev',
+      '4. Apri http://localhost:5174',
+      '5. Inserisci il link SofaScore per acquisire il match'
+    ]
+  });
+});
+
+/*
+// VECCHIO ENDPOINT SCRAPE - MANTENUTO PER RIFERIMENTO
+app.post('/api/scrape-old', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'Missing url' });
   
@@ -1217,6 +1236,7 @@ app.post('/api/scrape', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+*/
 
 // Quick lookup: try to fetch the URL and extract a home player/team name synchronously
 app.post('/api/lookup-name', async (req, res) => {

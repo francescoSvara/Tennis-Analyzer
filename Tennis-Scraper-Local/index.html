@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tennis Scraper Local</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    
+    header p {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      margin-top: 10px;
+    }
+    
+    .status-badge.online {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+      border: 1px solid #4caf50;
+    }
+    
+    .status-badge.offline {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+      border: 1px solid #f44336;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-group {
+      display: flex;
+      gap: 10px;
+    }
+    
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 1rem;
+      min-width: 0;
+    }
+    
+    input[type="text"]::placeholder {
+      color: #666;
+    }
+    
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #4caf50;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      background: #4caf50;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    button:hover {
+      background: #45a049;
+    }
+    
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    
+    .alert {
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      display: none;
+    }
+    
+    .alert.success {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid #4caf50;
+      color: #a5d6a7;
+    }
+    
+    .alert.error {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid #f44336;
+      color: #ef9a9a;
+    }
+    
+    .alert.warning {
+      background: rgba(255, 152, 0, 0.2);
+      border: 1px solid #ff9800;
+      color: #ffe0b2;
+    }
+    
+    .alert.info {
+      background: rgba(33, 150, 243, 0.2);
+      border: 1px solid #2196f3;
+      color: #90caf9;
+    }
+    
+    .alert.show {
+      display: block;
+    }
+    
+    /* Tab system */
+    .matches-card-container {
+      padding: 0 !important;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .tab-header {
+      padding: 20px 24px 0;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+    }
+    
+    .tab-header h2 {
+      margin-bottom: 16px !important;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+      margin: 0 -24px;
+      padding: 0 24px;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      color: #999;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      text-align: center;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .tab-btn:hover {
+      color: #ccc;
+    }
+    
+    .tab-btn.active {
+      color: #fff;
+      border-bottom-color: #4caf50;
+    }
+    
+    .badge {
+      background: #4caf50;
+      color: #000;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px 24px;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0.7; }
+      to { opacity: 1; }
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #4caf50;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 4px;
+    }
+    
+    /* Match list - no overflow-x */
+    .matches-list {
+      margin-top: 16px;
+      max-height: 600px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    
+    .matches-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .matches-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+    
+    .matches-list::-webkit-scrollbar-thumb {
+      background: #4caf50;
+      border-radius: 3px;
+    }
+    
+    /* Match item - clickable, symmetric layout */
+    .match-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    
+    .match-item:hover {
+      background: rgba(76, 175, 80, 0.15);
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+    }
+    
+    .match-item.syncing {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    .match-item.complete {
+      cursor: default;
+      opacity: 0.7;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+    
+    .match-item.complete:hover {
+      background: rgba(0, 0, 0, 0.2);
+      box-shadow: none;
+    }
+    
+    .completeness-badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: bold;
+    }
+    
+    .match-item .match-left {
+      min-width: 0;
+      overflow: hidden;
+    }
+    
+    .match-item .match-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    
+    .match-players {
+      font-weight: 500;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .match-score {
+      font-weight: bold;
+      color: #4caf50;
+      font-size: 0.9rem;
+      background: rgba(76, 175, 80, 0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    
+    .match-tournament {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .match-date {
+      font-size: 0.75rem;
+      color: #666;
+    }
+    
+    .match-status {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    
+    .match-status.finished {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+    }
+    
+    .match-status.live {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+    
+    .match-status.notstarted {
+      background: rgba(255, 152, 0, 0.2);
+      color: #ff9800;
+    }
+    
+    /* Mini loader for match sync */
+    .match-loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 8px 16px;
+      border-radius: 8px;
+      z-index: 10;
+    }
+    
+    .match-loader .mini-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #4caf50;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    .match-loader span {
+      font-size: 0.8rem;
+      color: #4caf50;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #888;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #4caf50;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    /* Loader circolare per bottone */
+    .btn-loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .info-box {
+      background: rgba(33, 150, 243, 0.1);
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .info-box h3 {
+      color: #64b5f6;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .info-box p {
+      color: #90caf9;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    
+    /* Pagination styles */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      flex-wrap: wrap;
+    }
+    
+    .pagination button {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid #4caf50;
+    }
+    
+    .pagination button:hover:not(:disabled) {
+      background: rgba(76, 175, 80, 0.4);
+    }
+    
+    .pagination button:disabled {
+      background: rgba(100, 100, 100, 0.2);
+      border-color: #666;
+      color: #666;
+    }
+    
+    .pagination .page-info {
+      color: #888;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    
+    /* Container card partite mancanti - bordo giallo */
+    .missing-card-container {
+      background: rgba(255, 193, 7, 0.05);
+      border: 2px solid rgba(255, 193, 7, 0.4);
+    }
+    
+    .missing-card-container h2 {
+      color: #ffc107;
+    }
+    
+    .tournament-info {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+    
+    .missing-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .missing-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .missing-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+    
+    .missing-list::-webkit-scrollbar-thumb {
+      background: #ffc107;
+      border-radius: 3px;
+    }
+    
+    /* Card singola partita mancante - giallo coerente come match recenti */
+    .missing-match-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    
+    .missing-match-card:hover {
+      background: rgba(255, 193, 7, 0.2);
+      border-color: rgba(255, 193, 7, 0.5);
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    }
+    
+    .missing-match-card .card-left {
+      min-width: 0;
+    }
+    
+    .missing-match-card .card-right {
+      text-align: right;
+    }
+    
+    .missing-match-card .players {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .missing-match-card .round-info {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 4px;
+    }
+    
+    .missing-match-card .status-badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      display: inline-block;
+    }
+    
+    .missing-match-card .date-info {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+      
+      header h1 {
+        font-size: 1.5rem;
+      }
+      
+      header p {
+        font-size: 0.8rem;
+      }
+      
+      .card {
+        padding: 16px;
+      }
+      
+      .card h2 {
+        font-size: 1rem;
+      }
+      
+      .form-group {
+        flex-direction: column;
+      }
+      
+      .form-group button {
+        width: 100%;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      
+      .stat-item {
+        padding: 12px 8px;
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+      }
+      
+      .stat-label {
+        font-size: 0.75rem;
+      }
+      
+      .match-item {
+        padding: 12px;
+        gap: 8px;
+      }
+      
+      .match-players {
+        font-size: 0.85rem;
+      }
+      
+      .match-score {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+      }
+      
+      .match-tournament {
+        font-size: 0.75rem;
+      }
+      
+      .match-date {
+        font-size: 0.7rem;
+      }
+      
+      .match-status {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+      }
+      
+      .pagination {
+        gap: 8px;
+      }
+      
+      .pagination button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+      
+      .pagination .page-info {
+        font-size: 0.75rem;
+        width: 100%;
+        order: -1;
+      }
+      
+      .info-box {
+        padding: 12px;
+      }
+      
+      .info-box h3 {
+        font-size: 0.85rem;
+      }
+      
+      .info-box p {
+        font-size: 0.8rem;
+      }
+      
+      .missing-section {
+        padding: 12px;
+      }
+      
+      .missing-item {
+        padding: 8px 10px;
+      }
+      
+      .missing-item .missing-teams {
+        font-size: 0.8rem;
+      }
+      
+      .modal .modal-content {
+        width: 95%;
+        margin: 10px;
+      }
+    }
+    
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(76, 175, 80, 0.1);
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+    }
+    
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .modal-close {
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #666;
+      transition: all 0.2s;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    
+    .modal-close:hover {
+      color: #f44336;
+      background: rgba(244, 67, 54, 0.1);
+    }
+    
+    .modal-body {
+      padding: 24px;
+    }
+    
+    .modal-body p {
+      margin-bottom: 20px;
+      color: #ccc;
+      line-height: 1.6;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-radius: 10px;
+      border-left: 3px solid #4caf50;
+    }
+    
+    .modal-body p strong {
+      color: #4caf50;
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    .modal-body p small {
+      color: #888;
+      font-size: 0.85rem;
+    }
+    
+    .modal-body input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+    
+    .modal-body input:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+    
+    .modal-body input::placeholder {
+      color: #666;
+    }
+    
+    .modal-validation {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-validation:empty {
+      display: none;
+    }
+    
+    .modal-validation.success {
+      background: rgba(76, 175, 80, 0.15);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+    
+    .modal-validation.warning {
+      background: rgba(255, 152, 0, 0.15);
+      color: #ff9800;
+      border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+    
+    .modal-validation.error {
+      background: rgba(244, 67, 54, 0.15);
+      color: #f44336;
+      border: 1px solid rgba(244, 67, 54, 0.3);
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 18px 24px;
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .modal-footer button {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .modal-footer .btn-cancel {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ccc;
+    }
+    
+    .modal-footer .btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    
+    .modal-footer button:not(.btn-cancel) {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      border: none;
+    }
+    
+    .modal-footer button:not(.btn-cancel):hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+    
+    .modal-footer button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* Missing item additional styles */
+    .missing-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+    
+    .missing-left {
+      min-width: 0;
+    }
+    
+    .missing-info {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 2px;
+    }
+    
+    .missing-right {
+      text-align: right;
+    }
+    
+    /* Stats Summary Card */
+    .stats-summary-card {
+      padding: 16px 24px !important;
+      margin-bottom: 16px;
+    }
+    
+    .stats-summary {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .stats-row-main {
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stats-row-secondary {
+      padding-top: 12px;
+      gap: 30px;
+    }
+    
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .stat-box-highlight {
+      background: rgba(76, 175, 80, 0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+    
+    .stat-box .stat-number {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #4caf50;
+    }
+    
+    .stat-box .stat-percent {
+      font-size: 0.85rem;
+      color: #ffc107;
+      font-weight: 600;
+    }
+    
+    .stat-box .stat-label {
+      font-size: 0.7rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    
+    .stat-box-small {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .stat-label-small {
+      font-size: 0.75rem;
+      color: #888;
+    }
+    
+    .stat-value-small {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #64b5f6;
+    }
+    
+    @media (max-width: 600px) {
+      .stats-summary {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      
+      .stat-box .stat-number {
+        font-size: 1.4rem;
+      }
+      
+      .stat-box .stat-label {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎾 Tennis Scraper Local</h1>
+      <p>Scraping da IP locale per bypassare i blocchi dei server cloud</p>
+      <span id="serverStatus" class="status-badge offline">Checking...</span>
+    </header>
+    
+    <div class="info-box">
+      <h3>🧠 Filosofia: Acquisizione Ossessiva</h3>
+      <p>
+        <strong>Ogni link inserito = scrape completo + aggiornamento DB.</strong><br>
+        Anche se il match esiste già, tutti i dati vengono ri-scaricati e aggiornati.<br>
+        Ogni scrape scansiona automaticamente l'intero torneo per trovare partite mancanti.
+      </p>
+    </div>
+    
+    <div class="card">
+      <h2>📥 Acquisisci / Aggiorna Match</h2>
+      <p style="color: #888; font-size: 0.85rem; margin-bottom: 12px;">
+        Incolla qualsiasi link SofaScore - i dati verranno sempre scaricati e aggiornati
+      </p>
+      <div class="form-group">
+        <input type="text" id="urlInput" placeholder="Incolla link SofaScore (es: sofascore.com/event/12345)" />
+        <button id="scrapeBtn" onclick="scrapeMatch()">🔄 Scrape</button>
+      </div>
+      <div id="alertSuccess" class="alert success"></div>
+      <div id="alertError" class="alert error"></div>
+      <div id="alertInfo" class="alert info"></div>
+    </div>
+    
+    <!-- Stats Summary -->
+    <div class="card stats-summary-card">
+      <!-- Riga 1: Statistiche principali con percentuali -->
+      <div class="stats-summary stats-row-main">
+        <div class="stat-box">
+          <span class="stat-number" id="loadedMatchesCount">0</span>
+          <span class="stat-percent" id="loadedPercent">0%</span>
+          <span class="stat-label">Acquisiti</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number" id="missingMatchesCount">0</span>
+          <span class="stat-percent" id="missingPercent">0%</span>
+          <span class="stat-label">Mancanti</span>
+        </div>
+        <div class="stat-box stat-box-highlight">
+          <span class="stat-number" id="totalMatchesCount">0</span>
+          <span class="stat-percent">100%</span>
+          <span class="stat-label">Totale</span>
+        </div>
+      </div>
+      
+      <!-- Riga 2: Contatori secondari -->
+      <div class="stats-summary stats-row-secondary">
+        <div class="stat-box-small">
+          <span class="stat-label-small">📋 In lista Recenti:</span>
+          <span class="stat-value-small" id="listTotalMatches">0</span>
+        </div>
+        <div class="stat-box-small">
+          <span class="stat-label-small">⏰ Ultime 24h:</span>
+          <span class="stat-value-small" id="last24hMatches">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sezione unificata Partite Mancanti e Recenti con tab -->
+    <div id="matchesCard" class="card matches-card-container">
+      <div class="tab-header">
+        <h2 id="cardTitle">📋 Match</h2>
+        <div class="tab-buttons">
+          <button class="tab-btn" data-tab="missing" onclick="switchTab('missing')">
+            ⚠️ Partite Mancanti <span id="missingCountBadge" class="badge" style="display: none;">0</span>
+          </button>
+          <button class="tab-btn active" data-tab="recent" onclick="switchTab('recent')">
+            📋 Partite Recenti <span class="badge" id="recentCountBadge">0</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Tab Partite Mancanti -->
+      <div id="missingTab" class="tab-content">
+        <p id="tournamentInfo" class="tournament-info"></p>
+        <div id="missingList" class="missing-list"></div>
+      </div>
+      
+      <!-- Tab Partite Recenti -->
+      <div id="recentTab" class="tab-content active">
+        <div id="matchesList" class="matches-list">
+          <div class="loading">Caricamento...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal per inserimento link -->
+  <div id="linkModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔗 Collega Partita</h3>
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p id="modalMatchInfo"></p>
+        <input type="text" id="modalLinkInput" placeholder="Incolla link SofaScore del match" />
+        <div id="modalValidation" class="modal-validation"></div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn-cancel">Annulla</button>
+        <button onclick="submitModalLink()" id="modalSubmitBtn" disabled>Acquisisci</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const API_BASE = '/api';
+    const MATCHES_PER_PAGE = 20;
+    let currentPage = 1;
+    let totalMatches = 0;
+    let allMatchesFromDb = []; // Tutti i match dal DB prima del filtro
+    let allMatches = [];        // Match visibili in lista (dopo filtro)
+    let missingMatches = [];    // Partite da acquisire
+    let selectedMissingMatch = null;
+    
+    // Stats avanzate dal DB (detected_matches)
+    let advancedStats = {
+      totalInDb: 0,           // Partite nel DB matches
+      acquiredLast24h: 0,     // Acquisite ultime 24h
+      totalDetected: 0,       // Totale rilevate
+      totalAcquired: 0,       // Già acquisite
+      totalMissing: 0,        // Da acquisire
+      acquisitionRate: 0,     // Percentuale acquisizione
+      tournaments: []         // Breakdown per torneo
+    };
+    
+    // Update all stats counters with percentages
+    function updateStatsDisplay() {
+      // I dati devono essere COERENTI con quello che si vede nelle tab
+      // - "Acquisiti" = partite nel DB (totalInDb) 
+      // - "Mancanti" = partite nella tab Mancanti (missingMatches.length)
+      // - "Totale" = Acquisiti + Mancanti
+      
+      const inDb = advancedStats.totalInDb || 0;
+      const toAcquire = missingMatches.length;
+      const totalDetected = inDb + toAcquire;
+      
+      // Riga 1: Statistiche principali (coerenti con le tab)
+      document.getElementById('loadedMatchesCount').textContent = inDb;
+      document.getElementById('missingMatchesCount').textContent = toAcquire;
+      document.getElementById('totalMatchesCount').textContent = totalDetected;
+      
+      // Calcola percentuali
+      if (totalDetected > 0) {
+        const loadedPercent = Math.round((inDb / totalDetected) * 100);
+        const missingPercent = Math.round((toAcquire / totalDetected) * 100);
+        document.getElementById('loadedPercent').textContent = loadedPercent + '%';
+        document.getElementById('missingPercent').textContent = missingPercent + '%';
+      } else {
+        document.getElementById('loadedPercent').textContent = '0%';
+        document.getElementById('missingPercent').textContent = '0%';
+      }
+      
+      // Riga 2: Contatori secondari
+      // - "In lista Recenti" = partite visibili nella tab Recenti (dopo filtri)
+      // - "Ultime 24h" = acquisite nelle ultime 24h
+      document.getElementById('listTotalMatches').textContent = allMatches.length;
+      document.getElementById('last24hMatches').textContent = advancedStats.acquiredLast24h || 0;
+      
+      // Badge partite mancanti (coerente con toAcquire)
+      const missingCountBadge = document.getElementById('missingCountBadge');
+      if (toAcquire > 0) {
+        missingCountBadge.textContent = toAcquire;
+        missingCountBadge.style.display = 'inline-block';
+      } else {
+        missingCountBadge.style.display = 'none';
+      }
+      
+      // Badge partite recenti (mostra quante sono in lista)
+      const recentCountBadge = document.getElementById('recentCountBadge');
+      if (recentCountBadge) {
+        recentCountBadge.textContent = allMatches.length;
+      }
+    }
+    
+    // Check server status
+    async function checkServerStatus() {
+      const badge = document.getElementById('serverStatus');
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if (res.ok) {
+          badge.textContent = '🟢 Server Online';
+          badge.className = 'status-badge online';
+          return true;
+        }
+      } catch (e) {}
+      badge.textContent = '🔴 Server Offline';
+      badge.className = 'status-badge offline';
+      return false;
+    }
+    
+    // Load advanced stats from DB (detected_matches)
+    // Se detected_matches non esiste, usa stats base
+    async function loadAdvancedStats() {
+      // Prima carica sempre le stats base per avere totalInDb
+      try {
+        const basicRes = await fetch(`${API_BASE}/stats`);
+        const basicData = await basicRes.json();
+        advancedStats.totalInDb = basicData.totalMatches || 0;
+        advancedStats.acquiredLast24h = basicData.matchesLast24h || 0;
+      } catch (e) {
+        console.error('Error loading basic stats:', e);
+      }
+      
+      // Poi prova a caricare advanced stats (detected_matches)
+      try {
+        const res = await fetch(`${API_BASE}/advanced-stats`);
+        const data = await res.json();
+        
+        // Se advanced-stats ha dati validi, usali
+        if (data.totalDetected > 0) {
+          advancedStats = {
+            ...advancedStats, // mantieni totalInDb e acquiredLast24h
+            totalDetected: data.totalDetected || 0,
+            totalAcquired: data.totalAcquired || 0,
+            totalMissing: data.totalMissing || 0,
+            acquisitionRate: data.acquisitionRate || 0,
+            tournaments: data.tournaments || []
+          };
+        }
+      } catch (e) {
+        console.error('Advanced stats not available:', e);
+      }
+      
+      updateStatsDisplay();
+    }
+    
+    // Format date
+    function formatDate(dateStr) {
+      if (!dateStr) return 'N/A';
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return 'N/A';
+      return date.toLocaleDateString('it-IT', { 
+        day: '2-digit', 
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    
+    // Switch tab
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.getElementById('missingTab').classList.remove('active');
+      document.getElementById('recentTab').classList.remove('active');
+      
+      // Remove active from all buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      // Show selected tab
+      if (tabName === 'missing') {
+        document.getElementById('missingTab').classList.add('active');
+        document.querySelector('[data-tab="missing"]').classList.add('active');
+      } else if (tabName === 'recent') {
+        document.getElementById('recentTab').classList.add('active');
+        document.querySelector('[data-tab="recent"]').classList.add('active');
+      }
+    }
+    
+    // Get player name safely
+    function getPlayerName(player) {
+      if (!player) return 'Unknown';
+      if (typeof player === 'string') return player;
+      return player.name || player.short_name || 'Unknown';
+    }
+    
+    // Get tournament name safely
+    function getTournamentName(tournament) {
+      if (!tournament) return 'N/A';
+      if (typeof tournament === 'string') return tournament;
+      return tournament.name || 'N/A';
+    }
+    
+    // Render match item - clickable to refresh (disabled if 100%)
+    function renderMatch(m, index) {
+      const homeName = getPlayerName(m.home_player);
+      const awayName = getPlayerName(m.away_player);
+      const tournamentName = getTournamentName(m.tournament);
+      const dateStr = formatDate(m.extracted_at || m.start_time);
+      const score = m.home_sets_won !== null && m.away_sets_won !== null 
+        ? `${m.home_sets_won} - ${m.away_sets_won}` 
+        : '';
+      const statusClass = m.is_live ? 'live' : 'finished';
+      const statusText = m.is_live ? 'LIVE' : (m.status_description || '');
+      // In Supabase, match.id IS the sofascore event ID
+      const sofascoreId = m.id || '';
+      
+      // Percentuale completamento
+      const completeness = m.completeness || 0;
+      const isComplete = completeness >= 100;
+      const completenessColor = completeness >= 100 ? '#4caf50' : completeness >= 70 ? '#ff9800' : '#f44336';
+      
+      return `
+        <div class="match-item ${isComplete ? 'complete' : ''}" 
+             data-match-id="${m.id}" 
+             data-sofascore-id="${sofascoreId}" 
+             ${!isComplete ? `onclick="refreshSingleMatch(this, '${sofascoreId}')"` : ''} 
+             title="${isComplete ? 'Match completo' : 'Clicca per aggiornare'}">
+          <div class="match-left">
+            <div class="match-players">
+              ${homeName} vs ${awayName}
+              ${score ? `<span class="match-score">${score}</span>` : ''}
+              <span class="completeness-badge" style="background: ${completenessColor}">${completeness}%</span>
+            </div>
+            <div class="match-tournament">
+              ${tournamentName}
+              ${m.round_name ? ` • ${m.round_name}` : ''}
+            </div>
+          </div>
+          <div class="match-right">
+            <div class="match-date">${dateStr}</div>
+            ${statusText ? `<span class="match-status ${statusClass}">${statusText}</span>` : ''}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Refresh single match on click - fa SEMPRE scrape completo e aggiorna
+    async function refreshSingleMatch(element, sofascoreId) {
+      if (!sofascoreId) {
+        console.warn('No sofascore_id for this match');
+        return;
+      }
+      
+      // Already syncing
+      if (element.classList.contains('syncing')) return;
+      
+      // Add syncing state and loader
+      element.classList.add('syncing');
+      const loaderHtml = `
+        <div class="match-loader">
+          <div class="mini-spinner"></div>
+          <span>Scraping completo...</span>
+        </div>
+      `;
+      element.insertAdjacentHTML('beforeend', loaderHtml);
+      
+      try {
+        const url = `https://www.sofascore.com/event/${sofascoreId}`;
+        const res = await fetch(`${API_BASE}/scrape`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          console.log(`✅ Match ${sofascoreId} ${data.isUpdate ? 'aggiornato' : 'acquisito'}`);
+          
+          // Ricarica tutto
+          await loadAdvancedStats();
+          await loadMatches();
+          await loadMissingMatches();
+        } else {
+          console.error('Refresh failed:', data.message || data.error);
+        }
+      } catch (e) {
+        console.error('Error refreshing match:', e);
+      } finally {
+        // Remove syncing state
+        element.classList.remove('syncing');
+        const loader = element.querySelector('.match-loader');
+        if (loader) loader.remove();
+      }
+    }
+    
+    // Load recent matches with pagination and completeness
+    async function loadMatches() {
+      const container = document.getElementById('matchesList');
+      try {
+        const res = await fetch(`${API_BASE}/matches?limit=200&completeness=true`);
+        let fetchedMatches = await res.json();
+        
+        // Salva tutti i match dal DB (prima del filtro)
+        allMatchesFromDb = fetchedMatches;
+        
+        // Filtra partite per la visualizzazione:
+        // - Se completezza >= 100% → nascondi
+        // - Se status = "Ended" E ha un risultato (sets vinti) → nascondi (considerata completa)
+        allMatches = fetchedMatches.filter(m => {
+          const isComplete = (m.completeness || 0) >= 100;
+          const isEnded = m.status_description === 'Ended';
+          const hasScore = m.home_sets_won !== null && m.away_sets_won !== null;
+          
+          // Se completa al 100%, nascondi
+          if (isComplete) return false;
+          // Se finita con risultato, considerala completa e nascondi
+          if (isEnded && hasScore) return false;
+          
+          return true;
+        });
+        
+        console.log('Match dal DB:', allMatchesFromDb.length, '| Visibili in lista:', allMatches.length);
+        
+        // Aggiorna contatori
+        updateStatsDisplay();
+        
+        if (!allMatches.length) {
+          container.innerHTML = '<div class="loading">Nessun match da completare</div>';
+          return;
+        }
+        
+        renderMatchesPage();
+      } catch (e) {
+        console.error('Error loading matches:', e);
+        container.innerHTML = '<div class="loading">Errore caricamento match</div>';
+      }
+    }
+    
+    // Load missing matches from detected_matches DB
+    async function loadMissingMatches() {
+      const missingList = document.getElementById('missingList');
+      const tournamentInfo = document.getElementById('tournamentInfo');
+      const missingCountBadge = document.getElementById('missingCountBadge');
+      
+      missingList.innerHTML = '<div class="loading">Caricamento partite mancanti dal DB...</div>';
+      
+      try {
+        // Prima prova a caricare dal nuovo sistema detected_matches
+        const res = await fetch(`${API_BASE}/detected-missing`);
+        const data = await res.json();
+        
+        if (data.matches && data.matches.length > 0) {
+          missingMatches = data.matches;
+          
+          // Filtra partite mancanti: escludi quelle già finite con risultato
+          missingMatches = missingMatches.filter(m => {
+            const isEnded = m.status === 'Ended' || m.status_type === 'finished';
+            const hasScore = m.home_score !== null && m.away_score !== null;
+            if (isEnded && hasScore) return false;
+            return true;
+          });
+          
+          if (missingMatches.length === 0) {
+            missingList.innerHTML = '<div class="loading">Tutte le partite rilevate sono acquisite!</div>';
+            missingCountBadge.style.display = 'none';
+            updateStatsDisplay();
+            return;
+          }
+          
+          // Raggruppa per torneo
+          const tournamentNames = [...new Set(missingMatches.map(m => m.tournament_name).filter(Boolean))];
+          tournamentInfo.textContent = `Tornei: ${tournamentNames.join(', ')} - ${missingMatches.length} partite da acquisire`;
+          
+          missingCountBadge.textContent = missingMatches.length;
+          missingCountBadge.style.display = 'inline-block';
+          
+          updateStatsDisplay();
+          renderMissingMatchesFromDb();
+          return;
+        }
+        
+        // Fallback: usa il vecchio sistema /api/missing-matches
+        const fallbackRes = await fetch(`${API_BASE}/missing-matches`);
+        const fallbackData = await fallbackRes.json();
+        
+        if (!fallbackData.missingMatches || fallbackData.missingMatches.length === 0) {
+          missingList.innerHTML = '<div class="loading">Tutte le partite dei tornei recenti sono acquisite!</div>';
+          missingCountBadge.style.display = 'none';
+          return;
+        }
+        
+        missingMatches = fallbackData.missingMatches;
+        
+        // Filtra partite mancanti: escludi quelle già finite con risultato
+        missingMatches = missingMatches.filter(m => {
+          const isEnded = m.status?.description === 'Ended' || m.status?.type === 'finished';
+          const hasScore = m.homeScore?.current !== undefined && m.awayScore?.current !== undefined;
+          if (isEnded && hasScore) return false;
+          return true;
+        });
+        
+        if (missingMatches.length === 0) {
+          missingList.innerHTML = '<div class="loading">Tutte le partite dei tornei recenti sono acquisite!</div>';
+          missingCountBadge.style.display = 'none';
+          updateStatsDisplay();
+          return;
+        }
+        
+        // Raggruppa per torneo
+        const tournamentNames = [...new Set(missingMatches.map(m => m.tournamentName))];
+        tournamentInfo.textContent = `Tornei: ${tournamentNames.join(', ')} - ${missingMatches.length} partite da acquisire`;
+        
+        missingCountBadge.textContent = missingMatches.length;
+        missingCountBadge.style.display = 'inline-block';
+        
+        updateStatsDisplay();
+        renderMissingMatches();
+        
+      } catch (e) {
+        console.error('Error loading missing matches:', e);
+        missingList.innerHTML = '<div class="loading">Errore caricamento partite mancanti</div>';
+      }
+    }
+    
+    // Render missing matches from detected_matches DB
+    function renderMissingMatchesFromDb() {
+      const list = document.getElementById('missingList');
+      const badge = document.getElementById('missingCountBadge');
+      
+      if (missingMatches.length === 0) {
+        list.innerHTML = '<div class="loading">Nessuna partita mancante</div>';
+        badge.style.display = 'none';
+        return;
+      }
+      
+      badge.textContent = missingMatches.length;
+      badge.style.display = 'inline-block';
+      
+      list.innerHTML = missingMatches.map((m, idx) => {
+        const homeName = m.home_team_name || 'TBD';
+        const awayName = m.away_team_name || 'TBD';
+        const statusText = m.status || 'Da acquisire';
+        const roundName = m.round_name || '';
+        const tournamentName = m.tournament_name || '';
+        const startTime = m.start_time ? formatDate(m.start_time) : '';
+        
+        return `
+          <div class="missing-match-card" onclick="openMissingModalFromDb(${idx})" title="Clicca per acquisire">
+            <div class="card-left">
+              <div class="players">${homeName} vs ${awayName}</div>
+              <div class="round-info">${tournamentName}${roundName ? ' • ' + roundName : ''}</div>
+            </div>
+            <div class="card-right">
+              <span class="status-badge">${statusText}</span>
+              ${startTime ? `<div class="date-info">${startTime}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Open modal for missing match from DB (detected_matches format)
+    function openMissingModalFromDb(index) {
+      selectedMissingMatch = missingMatches[index];
+      if (!selectedMissingMatch) return;
+      
+      const modal = document.getElementById('linkModal');
+      const matchInfo = document.getElementById('modalMatchInfo');
+      const linkInput = document.getElementById('modalLinkInput');
+      const validation = document.getElementById('modalValidation');
+      const submitBtn = document.getElementById('modalSubmitBtn');
+      
+      const homeName = selectedMissingMatch.home_team_name || 'TBD';
+      const awayName = selectedMissingMatch.away_team_name || 'TBD';
+      
+      matchInfo.innerHTML = `
+        <strong>Partita selezionata:</strong><br>
+        ${homeName} vs ${awayName}<br>
+        <small>ID atteso: ${selectedMissingMatch.id}</small>
+      `;
+      
+      linkInput.value = '';
+      validation.innerHTML = '';
+      validation.className = 'modal-validation';
+      submitBtn.disabled = true;
+      
+      modal.style.display = 'flex';
+    }
+    
+    // Render current page of matches
+    function renderMatchesPage() {
+      const container = document.getElementById('matchesList');
+      const totalPages = Math.ceil(allMatches.length / MATCHES_PER_PAGE);
+      const start = (currentPage - 1) * MATCHES_PER_PAGE;
+      const end = start + MATCHES_PER_PAGE;
+      const pageMatches = allMatches.slice(start, end);
+      
+      let html = pageMatches.map(renderMatch).join('');
+      
+      // Add pagination if needed
+      if (allMatches.length > MATCHES_PER_PAGE) {
+        html += `
+          <div class="pagination">
+            <button onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>
+              ← Precedente
+            </button>
+            <span class="page-info">
+              Pagina ${currentPage} di ${totalPages} (${allMatches.length} match)
+            </span>
+            <button onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''}>
+              Successiva →
+            </button>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+      
+      // Smooth scroll to top of list
+      container.scrollTop = 0;
+    }
+    
+    // Change page
+    function changePage(delta) {
+      const totalPages = Math.ceil(allMatches.length / MATCHES_PER_PAGE);
+      const newPage = currentPage + delta;
+      if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        renderMatchesPage();
+      }
+    }
+    
+    // Scrape match - SEMPRE fa scrape completo e aggiorna
+    async function scrapeMatch() {
+      const url = document.getElementById('urlInput').value.trim();
+      const btn = document.getElementById('scrapeBtn');
+      const alertSuccess = document.getElementById('alertSuccess');
+      const alertError = document.getElementById('alertError');
+      const alertInfo = document.getElementById('alertInfo');
+      
+      // Hide all alerts
+      alertSuccess.className = 'alert success';
+      alertError.className = 'alert error';
+      alertInfo.className = 'alert info';
+      
+      if (!url) {
+        alertError.textContent = 'Inserisci un URL SofaScore';
+        alertError.className = 'alert error show';
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-loader"></span> Scraping...';
+      
+      try {
+        const res = await fetch(`${API_BASE}/scrape`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          // Error
+          alertError.textContent = `❌ ${data.message || data.error || 'Errore sconosciuto'}`;
+          alertError.className = 'alert error show';
+        } else {
+          // Success - mostra messaggio appropriato (nuovo o aggiornato)
+          const msg = data.message || `${data.isUpdate ? '♻️ Aggiornato' : '✅ Acquisito'}: ${data.match?.homeTeam} vs ${data.match?.awayTeam}`;
+          
+          if (data.isUpdate) {
+            // Era un aggiornamento
+            alertInfo.textContent = msg;
+            alertInfo.className = 'alert info show';
+          } else {
+            // Nuovo match
+            alertSuccess.textContent = msg;
+            alertSuccess.className = 'alert success show';
+          }
+          
+          document.getElementById('urlInput').value = '';
+          
+          // Reset to first page and reload data
+          currentPage = 1;
+          await loadAdvancedStats();
+          await loadMatches();
+          
+          // Detect missing matches from tournament (cascade già fatto dal server)
+          if (data.tournamentId) {
+            await loadMissingMatches();
+          }
+        }
+      } catch (e) {
+        alertError.textContent = `❌ Errore di connessione: ${e.message}`;
+        alertError.className = 'alert error show';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 Scrape';
+      }
+    }
+    
+    // Detect missing matches from a tournament and save to detected_matches DB
+    async function detectMissingFromTournament(tournamentId, tournamentName) {
+      const missingList = document.getElementById('missingList');
+      const tournamentInfo = document.getElementById('tournamentInfo');
+      const missingCountBadge = document.getElementById('missingCountBadge');
+      
+      try {
+        console.log('Scansione torneo e salvataggio in DB:', tournamentId);
+        
+        // Usa il nuovo endpoint che scansiona E salva in detected_matches
+        const scanRes = await fetch(`${API_BASE}/scan-tournament/${tournamentId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tournamentName })
+        });
+        
+        if (scanRes.ok) {
+          const scanData = await scanRes.json();
+          console.log('Scansione completata:', scanData);
+          
+          // Ricarica stats e partite mancanti dal DB
+          await loadAdvancedStats();
+          await loadMissingMatches();
+          await loadMatches();
+          
+          // Auto-switch to missing tab se ci sono partite mancanti
+          if (advancedStats.totalMissing > 0) {
+            switchTab('missing');
+          }
+          
+          return;
+        }
+        
+        // Fallback: vecchio sistema se scan fallisce
+        console.log('Fallback al vecchio sistema di rilevamento');
+        
+        // Fetch tournament events direttamente
+        const eventsRes = await fetch(`${API_BASE}/tournament-events/${tournamentId}`);
+        if (!eventsRes.ok) {
+          console.error('Errore recupero eventi torneo');
+          return;
+        }
+        
+        const eventsData = await eventsRes.json();
+        const tournamentEvents = eventsData.events || [];
+        
+        if (tournamentEvents.length === 0) {
+          return;
+        }
+        
+        // Reload matches to get fresh data
+        await loadMatches();
+        
+        // Get existing match IDs from our database
+        const existingIds = new Set(allMatchesFromDb.map(m => m.id));
+        
+        // Filter missing matches
+        missingMatches = tournamentEvents.filter(e => !existingIds.has(e.id));
+        
+        // Filtra quelle già finite con risultato
+        missingMatches = missingMatches.filter(m => {
+          const isEnded = m.status?.description === 'Ended' || m.status?.type === 'finished';
+          const hasScore = m.homeScore?.current !== undefined && m.awayScore?.current !== undefined;
+          if (isEnded && hasScore) return false;
+          return true;
+        });
+        
+        if (missingMatches.length === 0) {
+          console.log('Tutte le partite del torneo sono già nel DB');
+          missingList.innerHTML = '<div class="loading">Tutte le partite del torneo sono già acquisite!</div>';
+          missingCountBadge.style.display = 'none';
+          updateStatsDisplay();
+          return;
+        }
+        
+        // Show missing matches
+        tournamentInfo.textContent = `Torneo: ${tournamentName || 'Sconosciuto'} - ${tournamentEvents.length} totali, ${missingMatches.length} da acquisire`;
+        missingCountBadge.textContent = missingMatches.length;
+        missingCountBadge.style.display = 'inline-block';
+        
+        updateStatsDisplay();
+        renderMissingMatches();
+        switchTab('missing');
+        
+      } catch (e) {
+        console.error('Errore rilevamento partite mancanti:', e);
+      }
+    }
+    
+    // Render missing matches in yellow cards (fallback per vecchio formato SofaScore)
+    function renderMissingMatches() {
+      const list = document.getElementById('missingList');
+      const badge = document.getElementById('missingCountBadge');
+      
+      if (missingMatches.length === 0) {
+        list.innerHTML = '<div class="loading">Nessuna partita mancante</div>';
+        badge.style.display = 'none';
+        return;
+      }
+      
+      badge.textContent = missingMatches.length;
+      badge.style.display = 'inline-block';
+      
+      list.innerHTML = missingMatches.map((m, idx) => {
+        const homeName = m.homeTeam?.name || m.homeTeam?.shortName || 'TBD';
+        const awayName = m.awayTeam?.name || m.awayTeam?.shortName || 'TBD';
+        const statusText = m.status?.description || 'Da acquisire';
+        const roundName = m.roundInfo?.name || '';
+        const tournamentName = m.tournamentName || m.tournament?.uniqueTournament?.name || '';
+        const startTime = m.startTimestamp ? formatDate(new Date(m.startTimestamp * 1000).toISOString()) : '';
+        
+        return `
+          <div class="missing-match-card" onclick="openMissingModal(${idx})" title="Clicca per acquisire">
+            <div class="card-left">
+              <div class="players">${homeName} vs ${awayName}</div>
+              <div class="round-info">${tournamentName}${roundName ? ' • ' + roundName : ''}</div>
+            </div>
+            <div class="card-right">
+              <span class="status-badge">${statusText}</span>
+              ${startTime ? `<div class="date-info">${startTime}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Enter key to submit
+    document.getElementById('urlInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') scrapeMatch();
+    });
+    
+    document.getElementById('modalLinkInput').addEventListener('input', validateModalLink);
+    
+    // Open modal for missing match
+    function openMissingModal(index) {
+      selectedMissingMatch = missingMatches[index];
+      if (!selectedMissingMatch) return;
+      
+      const modal = document.getElementById('linkModal');
+      const matchInfo = document.getElementById('modalMatchInfo');
+      const linkInput = document.getElementById('modalLinkInput');
+      const validation = document.getElementById('modalValidation');
+      const submitBtn = document.getElementById('modalSubmitBtn');
+      
+      const homeName = selectedMissingMatch.homeTeam?.name || 'TBD';
+      const awayName = selectedMissingMatch.awayTeam?.name || 'TBD';
+      
+      matchInfo.innerHTML = `
+        <strong>Partita selezionata:</strong><br>
+        ${homeName} vs ${awayName}<br>
+        <small>ID atteso: ${selectedMissingMatch.id}</small>
+      `;
+      
+      linkInput.value = '';
+      validation.innerHTML = '';
+      validation.className = 'modal-validation';
+      submitBtn.disabled = true;
+      
+      modal.style.display = 'flex';
+    }
+    
+    // Close modal
+    function closeModal() {
+      document.getElementById('linkModal').style.display = 'none';
+      selectedMissingMatch = null;
+    }
+    
+    // Extract event ID from various URL formats
+    function extractEventIdFromUrl(url) {
+      // Format 1: /event/12345
+      let match = url.match(/event\/(\d+)/);
+      if (match) return parseInt(match[1]);
+      
+      // Format 2: #id:12345 (italiano)
+      match = url.match(/#id:(\d+)/);
+      if (match) return parseInt(match[1]);
+      
+      // Format 3: #12345
+      match = url.match(/#(\d+)$/);
+      if (match) return parseInt(match[1]);
+      
+      // Format 4: ID nel path con slug (es: /cuXbseOId che è base36)
+      // Cerca pattern alfanumerico seguito da #id:
+      match = url.match(/\/([a-zA-Z0-9]+)#id:(\d+)/);
+      if (match) return parseInt(match[2]);
+      
+      return null;
+    }
+    
+    // Validate modal link
+    function validateModalLink() {
+      const linkInput = document.getElementById('modalLinkInput');
+      const validation = document.getElementById('modalValidation');
+      const submitBtn = document.getElementById('modalSubmitBtn');
+      const url = linkInput.value.trim();
+      
+      if (!url) {
+        validation.innerHTML = '';
+        validation.className = 'modal-validation';
+        submitBtn.disabled = true;
+        return;
+      }
+      
+      // Verifica che sia un URL SofaScore
+      if (!url.includes('sofascore.com')) {
+        validation.innerHTML = '❌ Inserisci un URL di SofaScore';
+        validation.className = 'modal-validation error';
+        submitBtn.disabled = true;
+        return;
+      }
+      
+      // Extract event ID from URL (supporta più formati)
+      const eventId = extractEventIdFromUrl(url);
+      
+      if (!eventId) {
+        validation.innerHTML = '❌ Impossibile estrarre ID evento dall\'URL';
+        validation.className = 'modal-validation error';
+        submitBtn.disabled = true;
+        return;
+      }
+      
+      const expectedId = selectedMissingMatch?.id;
+      
+      if (eventId === expectedId) {
+        validation.innerHTML = `✅ Link valido! ID ${eventId} corrisponde`;
+        validation.className = 'modal-validation success';
+        submitBtn.disabled = false;
+      } else {
+        validation.innerHTML = `⚠️ ID diverso (${eventId} vs atteso ${expectedId}) - Procedi comunque?`;
+        validation.className = 'modal-validation warning';
+        submitBtn.disabled = false; // Allow anyway but warn
+      }
+    }
+    
+    // Submit modal link
+    async function submitModalLink() {
+      const linkInput = document.getElementById('modalLinkInput');
+      const submitBtn = document.getElementById('modalSubmitBtn');
+      const url = linkInput.value.trim();
+      
+      if (!url) return;
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Acquisendo...';
+      
+      try {
+        const res = await fetch(`${API_BASE}/scrape`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          closeModal();
+          
+          // Remove from missing list
+          const eventId = extractEventIdFromUrl(url);
+          if (eventId) {
+            const eventId = parseInt(eventMatch[1]);
+            missingMatches = missingMatches.filter(m => m.id !== eventId);
+            
+            if (missingMatches.length === 0) {
+              // No more missing matches - switch to recent tab
+              document.getElementById('missingList').innerHTML = '<div class="loading">Tutte le partite del torneo sono state acquisite!</div>';
+              document.getElementById('missingCountBadge').style.display = 'none';
+              switchTab('recent');
+            } else {
+              // Update missing matches display
+              renderMissingMatches();
+            }
+          }
+          
+          // Reload stats and matches
+          currentPage = 1;
+          await loadAdvancedStats();
+          await loadMatches();
+        } else {
+          const validation = document.getElementById('modalValidation');
+          validation.innerHTML = `❌ ${data.message || 'Errore acquisizione'}`;
+          validation.className = 'modal-validation error';
+        }
+      } catch (e) {
+        const validation = document.getElementById('modalValidation');
+        validation.innerHTML = `❌ Errore: ${e.message}`;
+        validation.className = 'modal-validation error';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Acquisisci';
+      }
+    }
+    
+    // Close modal on outside click
+    document.getElementById('linkModal').addEventListener('click', (e) => {
+      if (e.target.id === 'linkModal') closeModal();
+    });
+    
+    // Init
+    async function init() {
+      await checkServerStatus();
+      await loadAdvancedStats();
+      
+      // Carica partite mancanti e match recenti in parallelo
+      await Promise.all([
+        loadMissingMatches(),
+        loadMatches()
+      ]);
+      
+      // Refresh status every 30s
+      setInterval(checkServerStatus, 30000);
+    }
+    
+    init();
+  </script>
+</body>
+</html>
