@@ -1102,9 +1102,11 @@ app.post('/api/scrape', async (req, res) => {
       }
     }
     
-    // Heuristic: if URL looks like an API endpoint or ends with .json, try direct fetch
+    // Heuristic: if URL looks like an API endpoint, ends with .json, or is a SofaScore URL
     const isLikelyApi = /\/api\/|\.json($|\?)/i.test(url);
-    if (isLikelyApi) {
+    const isSofascoreUrl = /sofascore\.com/i.test(url);
+    
+    if (isLikelyApi || isSofascoreUrl) {
       try {
         const id = await runDirectFetch(url);
         // Attendi il completamento e ottieni i dati
