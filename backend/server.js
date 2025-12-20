@@ -505,7 +505,14 @@ app.get('/api/db-stats', async (req, res) => {
 });
 
 /**
- * GET /api/tournament/:tournamentId/events - Ottieni tutte le partite di un torneo da SofaScore
+ * GET /api/tournament/:tournamentId/events - Ottieni statistiche partite per un torneo
+ * 
+ * Nota: tournamentId può essere:
+ * - Un unique-tournament ID di SofaScore (es. 2366 per ATP Finals)
+ * - Un season ID (es. 10122) che viene usato da db-stats
+ * 
+ * L'endpoint prova prima a chiamare SofaScore. Se fallisce (perché l'ID è una season),
+ * restituisce le statistiche basate sui match già nel database.
  */
 app.get('/api/tournament/:tournamentId/events', async (req, res) => {
   const { tournamentId } = req.params;
@@ -519,53 +526,54 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
     };
     
     let seasonId = season;
+    let sofascoreEvents = [];
+    let usingSofascoreData = false;
     
-    // Se non abbiamo una season, proviamo a recuperare le stagioni disponibili
-    if (!seasonId) {
-      try {
+    // Prova a chiamare SofaScore API - potrebbe fallire se tournamentId è un season ID
+    try {
+      // Se non abbiamo una season, proviamo a recuperare le stagioni disponibili
+      if (!seasonId) {
         const seasonsRes = await fetch(`https://api.sofascore.com/api/v1/unique-tournament/${tournamentId}/seasons`, { headers });
         if (seasonsRes.ok) {
           const seasonsData = await seasonsRes.json();
           if (seasonsData.seasons && seasonsData.seasons.length > 0) {
-            // Prendi la stagione più recente
             seasonId = seasonsData.seasons[0].id;
             console.log(`Found season ${seasonId} for tournament ${tournamentId}`);
           }
         }
-      } catch (e) {
-        console.log('Could not fetch seasons, trying with year');
       }
+      
+      // Se abbiamo trovato una stagione, fetch gli eventi
+      if (seasonId) {
+        const [lastRes, nextRes] = await Promise.all([
+          fetch(`https://api.sofascore.com/api/v1/unique-tournament/${tournamentId}/season/${seasonId}/events/last/0`, { headers }),
+          fetch(`https://api.sofascore.com/api/v1/unique-tournament/${tournamentId}/season/${seasonId}/events/next/0`, { headers })
+        ]);
+        
+        if (lastRes.ok) {
+          const lastData = await lastRes.json();
+          if (lastData.events) sofascoreEvents.push(...lastData.events);
+        }
+        
+        if (nextRes.ok) {
+          const nextData = await nextRes.json();
+          if (nextData.events) sofascoreEvents.push(...nextData.events);
+        }
+        
+        if (sofascoreEvents.length > 0) {
+          usingSofascoreData = true;
+          console.log(`Tournament ${tournamentId}: Found ${sofascoreEvents.length} events from SofaScore API`);
+        }
+      }
+    } catch (e) {
+      console.log(`SofaScore API call failed for tournament ${tournamentId}:`, e.message);
     }
     
-    // Fallback all'anno corrente se non troviamo stagioni
-    if (!seasonId) {
-      seasonId = new Date().getFullYear();
-    }
-    
-    // Fetch eventi del torneo
-    const [lastRes, nextRes] = await Promise.all([
-      fetch(`https://api.sofascore.com/api/v1/unique-tournament/${tournamentId}/season/${seasonId}/events/last/0`, { headers }),
-      fetch(`https://api.sofascore.com/api/v1/unique-tournament/${tournamentId}/season/${seasonId}/events/next/0`, { headers })
-    ]);
-    
-    const events = [];
-    
-    if (lastRes.ok) {
-      const lastData = await lastRes.json();
-      if (lastData.events) events.push(...lastData.events);
-    }
-    
-    if (nextRes.ok) {
-      const nextData = await nextRes.json();
-      if (nextData.events) events.push(...nextData.events);
-    }
-    
-    console.log(`Tournament ${tournamentId}: Found ${events.length} events from SofaScore API`);
-    
-    // Controlla quali sono già nel nostro DB - cerca per event ID (match ID)
+    // Raccogli tutti i match esistenti nel DB/file per questo torneo
+    const existingMatches = [];
     const existingEventIds = new Set();
     
-    // Prima controlla i file locali (sempre disponibili)
+    // Check file locali
     try {
       const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
       for (const file of files) {
@@ -573,63 +581,107 @@ app.get('/api/tournament/:tournamentId/events', async (req, res) => {
           const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
           if (content.api) {
             for (const [url, data] of Object.entries(content.api)) {
-              if (data?.event?.id) existingEventIds.add(String(data.event.id));
+              if (data?.event?.id) {
+                const eventTournamentId = data.event.tournament?.uniqueTournament?.id || data.event.tournament?.id;
+                existingEventIds.add(String(data.event.id));
+                
+                // Se il match appartiene a questo torneo (check sia unique-tournament che season ID)
+                if (String(eventTournamentId) === String(tournamentId)) {
+                  existingMatches.push({
+                    eventId: data.event.id,
+                    homeTeam: data.event.homeTeam?.name || '',
+                    awayTeam: data.event.awayTeam?.name || '',
+                    status: data.event.status?.type || 'unknown',
+                    startTimestamp: data.event.startTimestamp,
+                    inDatabase: true,
+                    winnerCode: data.event.winnerCode
+                  });
+                }
+              }
             }
           }
         } catch (e) { /* skip */ }
       }
-      console.log(`Found ${existingEventIds.size} events in local files`);
     } catch (e) {
       console.log('Could not check local files:', e.message);
     }
     
-    // Poi controlla anche il DB Supabase (potrebbe avere match aggiuntivi)
+    // Check DB Supabase
     if (matchRepository) {
       try {
-        // Cerca tutti i match (senza filtro torneo perché l'ID potrebbe non coincidere)
-        const dbMatches = await matchRepository.getMatches({ limit: 1000 });
+        const dbMatches = await matchRepository.getMatches({ tournamentId, limit: 1000 });
         if (dbMatches && Array.isArray(dbMatches)) {
           dbMatches.forEach(m => {
-            if (m.id) existingEventIds.add(String(m.id));
+            existingEventIds.add(String(m.id));
+            // Aggiungi se non già presente dai file
+            if (!existingMatches.find(em => em.eventId === m.id)) {
+              existingMatches.push({
+                eventId: m.id,
+                homeTeam: m.home_name || m.home_player?.name || '',
+                awayTeam: m.away_name || m.away_player?.name || '',
+                status: m.status_type || 'unknown',
+                startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
+                inDatabase: true,
+                winnerCode: m.winner_code
+              });
+            }
           });
-          console.log(`Total ${existingEventIds.size} events after DB check`);
         }
+        console.log(`Found ${existingMatches.length} matches for tournament ${tournamentId} in DB`);
       } catch (dbErr) {
-        console.log('Could not check DB for existing matches:', dbErr.message);
+        console.log('Could not check DB:', dbErr.message);
       }
     }
     
-    // Formatta risposta
-    const formattedEvents = events.map(e => ({
-      eventId: e.id,
-      homeTeam: e.homeTeam?.name || '',
-      awayTeam: e.awayTeam?.name || '',
-      status: e.status?.type || 'unknown',
-      startTimestamp: e.startTimestamp,
-      inDatabase: existingEventIds.has(String(e.id)),
-      winnerCode: e.winnerCode
-    }));
+    // Se abbiamo dati da SofaScore, usali per calcolare copertura
+    if (usingSofascoreData && sofascoreEvents.length > 0) {
+      const formattedEvents = sofascoreEvents.map(e => ({
+        eventId: e.id,
+        homeTeam: e.homeTeam?.name || '',
+        awayTeam: e.awayTeam?.name || '',
+        status: e.status?.type || 'unknown',
+        startTimestamp: e.startTimestamp,
+        inDatabase: existingEventIds.has(String(e.id)),
+        winnerCode: e.winnerCode
+      }));
+      
+      // Dedup
+      const seen = new Set();
+      const uniqueEvents = formattedEvents.filter(e => {
+        if (seen.has(e.eventId)) return false;
+        seen.add(e.eventId);
+        return true;
+      });
+      
+      const inDb = uniqueEvents.filter(e => e.inDatabase).length;
+      const total = uniqueEvents.length;
+      
+      return res.json({
+        tournamentId,
+        events: uniqueEvents,
+        stats: {
+          total,
+          inDatabase: inDb,
+          missing: total - inDb,
+          completionRate: total > 0 ? Math.round((inDb / total) * 100) : 0
+        }
+      });
+    }
     
-    // Dedup
-    const seen = new Set();
-    const uniqueEvents = formattedEvents.filter(e => {
-      if (seen.has(e.eventId)) return false;
-      seen.add(e.eventId);
-      return true;
-    });
-    
-    const inDb = uniqueEvents.filter(e => e.inDatabase).length;
-    const total = uniqueEvents.length;
+    // Fallback: usa solo i dati locali/DB (quando SofaScore API non disponibile)
+    // In questo caso, total = match nel DB, completionRate = 100% per quelli salvati
+    const total = existingMatches.length;
     
     res.json({
       tournamentId,
-      events: uniqueEvents,
+      events: existingMatches,
       stats: {
         total,
-        inDatabase: inDb,
-        missing: total - inDb,
-        completionRate: total > 0 ? Math.round((inDb / total) * 100) : 0
-      }
+        inDatabase: total,
+        missing: 0,
+        completionRate: total > 0 ? 100 : 0  // Tutti i match che abbiamo sono nel DB
+      },
+      note: 'SofaScore API non disponibile - mostrati solo i match già salvati'
     });
     
   } catch (err) {

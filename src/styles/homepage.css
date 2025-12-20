@@ -1708,6 +1708,17 @@
   gap: 20px;
 }
 
+/* Progress mobile/desktop visibility */
+.progress-ring-wrapper {
+  display: block;
+}
+
+.progress-text-mobile {
+  display: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
 .stat-item {
   display: flex;
   flex-direction: column;
@@ -1848,6 +1859,17 @@
   background: linear-gradient(90deg, #10b981, #34d399);
   border-radius: 3px;
   transition: width 0.5s ease;
+}
+
+.coverage-note {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.coverage-note small {
+  color: #10b981;
+  font-size: 0.75rem;
+  opacity: 0.8;
 }
 
 .missing-events {
@@ -3039,6 +3061,22 @@
     gap: 12px;
     flex-shrink: 0;
   }
+
+  /* Nascondi progress ring su mobile, mostra testo */
+  .progress-ring-wrapper {
+    display: none;
+  }
+  
+  .progress-text-mobile {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .progress-stat {
+    min-width: 45px;
+    text-align: center;
+  }
   
   .stat-value {
     font-size: 1.1rem;
@@ -3046,16 +3084,6 @@
   
   .stat-label {
     font-size: 0.6rem;
-  }
-  
-  .progress-ring-container {
-    width: 40px !important;
-    height: 40px !important;
-  }
-  
-  .progress-ring-container svg {
-    width: 40px !important;
-    height: 40px !important;
   }
   
   .progress-ring-text {

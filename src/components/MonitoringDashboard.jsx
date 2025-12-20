@@ -301,8 +301,17 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
             <span className="stat-value">{tournament.matchCount}</span>
             <span className="stat-label">Salvate</span>
           </div>
-          <div className="stat-item">
-            <ProgressRing percentage={displayPercentage} size={48} strokeWidth={5} />
+          <div className="stat-item progress-stat">
+            {/* Progress ring per desktop */}
+            <div className="progress-ring-wrapper">
+              <ProgressRing percentage={displayPercentage} size={48} strokeWidth={5} />
+            </div>
+            {/* Testo per mobile */}
+            <span className="progress-text-mobile" style={{
+              color: displayPercentage >= 80 ? '#10b981' : displayPercentage >= 50 ? '#f59e0b' : '#ef4444'
+            }}>
+              {displayPercentage}%
+            </span>
           </div>
           <span className={`expand-icon ${expanded ? 'rotated' : ''}`}>▼</span>
         </div>
@@ -326,10 +335,10 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
             </div>
           </div>
           
-          {/* Tournament events from SofaScore */}
+          {/* Tournament events coverage */}
           {loadingEvents && (
             <div className="loading-events">
-              <span className="spinner"></span> Caricamento partite torneo...
+              <span className="spinner"></span> Caricamento statistiche...
             </div>
           )}
           
@@ -340,7 +349,7 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
                 <div className="coverage-stats">
                   <span className="coverage-rate">{events.stats.completionRate}%</span>
                   <span className="coverage-detail">
-                    {events.stats.inDatabase}/{events.stats.total} partite
+                    {events.stats.inDatabase}/{events.stats.total} partite salvate
                   </span>
                 </div>
               </div>
@@ -351,6 +360,13 @@ function TournamentCard({ tournament, onExpand, expanded, refreshKey, onRefreshD
                   style={{ width: `${events.stats.completionRate}%` }}
                 />
               </div>
+              
+              {/* Nota quando usiamo solo dati locali */}
+              {events.note && events.stats.total > 0 && (
+                <div className="coverage-note">
+                  <small>✓ {tournament.matchCount} match nel database</small>
+                </div>
+              )}
               
               {events.stats.missing > 0 && (
                 <div className="missing-events">
