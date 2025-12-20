@@ -392,10 +392,10 @@ app.get('/api/db-stats', async (req, res) => {
         matchesByStatus.other++;
       }
       
-      // Per giorno (usando start_time o created_at)
-      const matchDate = match.start_time || match.created_at;
-      if (matchDate) {
-        const day = new Date(matchDate).toISOString().split('T')[0];
+      // Per giorno di ACQUISIZIONE (quando il match è stato salvato nel DB)
+      const acquiredDate = match.created_at;
+      if (acquiredDate) {
+        const day = new Date(acquiredDate).toISOString().split('T')[0];
         matchesByDay.set(day, (matchesByDay.get(day) || 0) + 1);
       }
       
