@@ -758,6 +758,108 @@ async function getExtractionLogs(limit = 20) {
   return data;
 }
 
+// ============================================================================
+// DETECTED MATCHES - Partite rilevate dai tornei (solo lettura)
+// ============================================================================
+
+/**
+ * Recupera tutte le partite rilevate (detected) per un torneo specifico
+ * @param {number} tournamentId - ID del torneo (season_id)
+ * @returns {Array} Lista partite rilevate
+ */
+async function getDetectedMatchesByTournament(tournamentId) {
+  if (!checkSupabase()) return [];
+  
+  const { data, error } = await supabase
+    .from('detected_matches')
+    .select('*')
+    .eq('tournament_id', tournamentId)
+    .order('start_time', { ascending: false });
+  
+  if (error) {
+    // La tabella potrebbe non esistere
+    console.log('detected_matches query error:', error.message);
+    return [];
+  }
+  
+  return data || [];
+}
+
+/**
+ * Recupera statistiche aggregate delle partite rilevate per torneo
+ * @returns {Object} Statistiche per torneo { tournamentId: { total, acquired, missing } }
+ */
+async function getDetectedMatchesStats() {
+  if (!checkSupabase()) return {};
+  
+  const { data, error } = await supabase
+    .from('detected_matches')
+    .select('id, tournament_id, tournament_name, is_acquired, home_team_name, away_team_name, status, status_type, start_time');
+  
+  if (error) {
+    console.log('detected_matches stats error:', error.message);
+    return {};
+  }
+  
+  // Raggruppa per torneo
+  const statsByTournament = {};
+  
+  for (const match of data || []) {
+    const tid = match.tournament_id;
+    if (!statsByTournament[tid]) {
+      statsByTournament[tid] = {
+        tournamentId: tid,
+        tournamentName: match.tournament_name || 'Unknown',
+        total: 0,
+        acquired: 0,
+        missing: 0,
+        missingMatches: []
+      };
+    }
+    
+    statsByTournament[tid].total++;
+    
+    if (match.is_acquired) {
+      statsByTournament[tid].acquired++;
+    } else {
+      statsByTournament[tid].missing++;
+      statsByTournament[tid].missingMatches.push({
+        eventId: match.id,
+        homeTeam: match.home_team_name || 'TBD',
+        awayTeam: match.away_team_name || 'TBD',
+        status: match.status_type || match.status || 'unknown',
+        startTimestamp: match.start_time,
+        isAcquired: false
+      });
+    }
+  }
+  
+  return statsByTournament;
+}
+
+/**
+ * Recupera tutte le partite rilevate NON acquisite (mancanti)
+ * @param {number} limit - Limite risultati
+ * @returns {Array} Lista partite mancanti
+ */
+async function getMissingMatches(limit = 500) {
+  if (!checkSupabase()) return [];
+  
+  const { data, error } = await supabase
+    .from('detected_matches')
+    .select('*')
+    .eq('is_acquired', false)
+    .order('start_timestamp', { ascending: false })
+    .limit(limit);
+  
+  if (error) {
+    console.log('getMissingMatches error:', error.message);
+    return [];
+  }
+  
+  return data || [];
+}
+
 module.exports = {
   // Write
   upsertPlayer,
@@ -771,5 +873,10 @@ module.exports = {
   getStatistics,
   searchPlayers,
   getTournaments,
-  getExtractionLogs
+  getExtractionLogs,
+  
+  // Detected matches (read-only)
+  getDetectedMatchesByTournament,
+  getDetectedMatchesStats,
+  getMissingMatches
 };

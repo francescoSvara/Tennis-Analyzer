@@ -2049,6 +2049,89 @@
   font-style: italic;
 }
 
+/* Coverage Info - barra di progresso copertura torneo */
+.coverage-info {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.coverage-bar-container {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.coverage-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.coverage-info .coverage-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.coverage-info .coverage-stats span {
+  font-size: 0.8rem;
+  color: var(--home-text-secondary);
+}
+
+.coverage-acquired {
+  color: #10b981 !important;
+}
+
+.coverage-missing {
+  color: #f59e0b !important;
+}
+
+.coverage-total {
+  color: #3b82f6 !important;
+}
+
+/* Missing Match item (partita grigia/mancante) */
+.mini-match.missing-match {
+  background: rgba(100, 100, 100, 0.15);
+  border-left: 3px solid #6b7280;
+  opacity: 0.7;
+  cursor: default;
+}
+
+.mini-match.missing-match:hover {
+  background: rgba(100, 100, 100, 0.2);
+}
+
+.mini-match.missing-match .mini-match-teams {
+  color: #9ca3af;
+}
+
+.mini-match.missing-match .event-id {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+/* Missing hint (testo sotto header partite mancanti) */
+.missing-hint {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-style: italic;
+  margin-left: 8px;
+}
+
+/* Stat total (numero totale partite nel torneo) */
+.stat-total {
+  font-size: 0.7em;
+  color: var(--home-text-muted);
+  font-weight: 400;
+}
+
 .mini-match.missing-match {
   border-left: 3px solid #ef4444;
   background: rgba(239, 68, 68, 0.08);

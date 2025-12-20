@@ -122,6 +122,13 @@ function formatDateRange(earliest, latest) {
 function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
   const dateRange = formatDateRange(tournament.earliestDate, tournament.latestDate);
   
+  // Statistiche copertura reale
+  const coverage = tournament.coverage || {};
+  const hasCoverageData = coverage.totalDetected > 0;
+  const coveragePercentage = coverage.percentage || 100;
+  const missingCount = coverage.missing || 0;
+  const missingMatches = tournament.missingMatches || [];
+  
   // Handler click su partita esistente - naviga a scheda match
   const handleExistingMatchClick = async (match) => {
     if (onMatchSelect) {
@@ -172,17 +179,22 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
         
         <div className="tournament-stats">
           <div className="stat-item">
-            <span className="stat-value">{tournament.matchCount}</span>
+            <span className="stat-value">
+              {tournament.matchCount}
+              {hasCoverageData && (
+                <span className="stat-total">/{coverage.totalDetected}</span>
+              )}
+            </span>
             <span className="stat-label">Salvate</span>
           </div>
           <div className="stat-item progress-stat">
             <div className="progress-ring-wrapper">
-              <ProgressRing percentage={tournament.avgCompleteness} size={48} strokeWidth={5} />
+              <ProgressRing percentage={coveragePercentage} size={48} strokeWidth={5} />
             </div>
             <span className="progress-text-mobile" style={{
-              color: tournament.avgCompleteness >= 80 ? '#10b981' : tournament.avgCompleteness >= 50 ? '#f59e0b' : '#ef4444'
+              color: coveragePercentage >= 80 ? '#10b981' : coveragePercentage >= 50 ? '#f59e0b' : '#ef4444'
             }}>
-              {tournament.avgCompleteness}%
+              {coveragePercentage}%
             </span>
           </div>
           <span className={`expand-icon ${expanded ? 'rotated' : ''}`}>▼</span>
@@ -191,6 +203,26 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
       
       {expanded && (
         <div className="tournament-card-body">
+          {/* Coverage info - solo se abbiamo dati */}
+          {hasCoverageData && (
+            <div className="coverage-info">
+              <div className="coverage-bar-container">
+                <div 
+                  className="coverage-bar-fill" 
+                  style={{ 
+                    width: `${coveragePercentage}%`,
+                    backgroundColor: coveragePercentage >= 80 ? '#10b981' : coveragePercentage >= 50 ? '#f59e0b' : '#ef4444'
+                  }}
+                />
+              </div>
+              <div className="coverage-stats">
+                <span className="coverage-acquired">✅ {coverage.acquired} acquisite</span>
+                <span className="coverage-missing">⚠️ {missingCount} mancanti</span>
+                <span className="coverage-total">📊 {coverage.totalDetected} totali</span>
+              </div>
+            </div>
+          )}
+          
           {/* Status breakdown */}
           <div className="status-breakdown">
             <div className="status-item finished">
@@ -232,6 +264,36 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
                 ))}
                 {tournament.matches.length > 10 && (
                   <div className="more-matches">...e altri {tournament.matches.length - 10} match</div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Sezione Match Mancanti (rilevate ma non acquisite) */}
+          {missingMatches.length > 0 && (
+            <div className="tournament-matches missing-matches">
+              <div className="matches-header">
+                <h5>⚠️ Match Mancanti ({missingCount})</h5>
+                <span className="missing-hint">Usa Tennis-Scraper-Local per acquisire</span>
+              </div>
+              <div className="matches-scroll">
+                {missingMatches.slice(0, 10).map(m => (
+                  <div 
+                    key={m.eventId} 
+                    className="mini-match missing-match"
+                    title={`Event ID: ${m.eventId} - Status: ${m.status}`}
+                  >
+                    <span className="mini-match-teams">
+                      {m.homeTeam || 'TBD'} vs {m.awayTeam || 'TBD'}
+                    </span>
+                    <div className="mini-match-meta">
+                      <span className={`mini-status ${m.status || 'unknown'}`}>{m.status || 'N/A'}</span>
+                      <span className="event-id">#{m.eventId}</span>
+                    </div>
+                  </div>
+                ))}
+                {missingMatches.length > 10 && (
+                  <div className="more-matches">...e altre {missingMatches.length - 10} partite mancanti</div>
                 )}
               </div>
             </div>

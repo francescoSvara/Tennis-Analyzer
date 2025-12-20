@@ -453,26 +453,59 @@ app.get('/api/db-stats', async (req, res) => {
       }
     }
     
+    // Recupera statistiche detected_matches per calcolare copertura reale
+    let detectedStats = {};
+    if (matchRepository && matchRepository.getDetectedMatchesStats) {
+      try {
+        detectedStats = await matchRepository.getDetectedMatchesStats();
+        console.log(`📊 DB Stats: Found detected_matches for ${Object.keys(detectedStats).length} tournaments`);
+      } catch (err) {
+        console.log('⚠️ Could not load detected_matches stats:', err.message);
+      }
+    }
+    
     // Calcola statistiche per torneo
-    const tournamentStats = Array.from(tournamentMap.values()).map(t => ({
-      id: t.id,
-      uniqueTournamentId: t.uniqueTournamentId || null,
-      name: t.name,
-      category: t.category,
-      sport: t.sport,
-      matchCount: t.matches.length,
-      avgCompleteness: t.completeness.length > 0 
-        ? Math.round(t.completeness.reduce((a, b) => a + b, 0) / t.completeness.length)
-        : 0,
-      byStatus: {
-        finished: t.matches.filter(m => m.status === 'finished').length,
-        inprogress: t.matches.filter(m => m.status === 'inprogress').length,
-        notstarted: t.matches.filter(m => m.status === 'notstarted').length
-      },
-      matches: t.matches,
-      latestDate: t.latestDate,
-      earliestDate: t.earliestDate
-    }));
+    const tournamentStats = Array.from(tournamentMap.values()).map(t => {
+      // Dati dalla tabella detected_matches
+      const detected = detectedStats[t.id] || null;
+      const totalDetected = detected?.total || 0;
+      const acquiredFromDetected = detected?.acquired || 0;
+      const missingMatches = detected?.missingMatches || [];
+      
+      // Calcola percentuale reale di copertura
+      // Se abbiamo detected_matches, usiamo quella - altrimenti consideriamo 100% (solo DB)
+      const coveragePercentage = totalDetected > 0 
+        ? Math.round((t.matches.length / totalDetected) * 100)
+        : 100; // Se non abbiamo detected_matches, non possiamo calcolare
+      
+      return {
+        id: t.id,
+        uniqueTournamentId: t.uniqueTournamentId || null,
+        name: t.name,
+        category: t.category,
+        sport: t.sport,
+        matchCount: t.matches.length,
+        avgCompleteness: t.completeness.length > 0 
+          ? Math.round(t.completeness.reduce((a, b) => a + b, 0) / t.completeness.length)
+          : 0,
+        byStatus: {
+          finished: t.matches.filter(m => m.status === 'finished').length,
+          inprogress: t.matches.filter(m => m.status === 'inprogress').length,
+          notstarted: t.matches.filter(m => m.status === 'notstarted').length
+        },
+        matches: t.matches,
+        latestDate: t.latestDate,
+        earliestDate: t.earliestDate,
+        // NUOVI CAMPI per copertura reale
+        coverage: {
+          totalDetected,
+          acquired: t.matches.length,
+          missing: totalDetected - t.matches.length,
+          percentage: coveragePercentage
+        },
+        missingMatches: missingMatches.slice(0, 50) // Max 50 partite mancanti per non appesantire
+      };
+    });
     
     // Ordina tornei per data più recente
     tournamentStats.sort((a, b) => {
