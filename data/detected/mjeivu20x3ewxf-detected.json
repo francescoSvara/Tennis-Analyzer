@@ -1,0 +1,998 @@
+{
+  "scrapedEventId": "14061821",
+  "tournamentId": 2361,
+  "seasonId": 63966,
+  "detectedAt": "2025-12-20T16:38:57.224Z",
+  "matches": [
+    {
+      "eventId": 14046399,
+      "slug": "andrey-rublev-adrian-mannarino",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 106755,
+        "name": "Andrey Rublev",
+        "shortName": "A. Rublev",
+        "country": "RU",
+        "ranking": 16
+      },
+      "awayTeam": {
+        "id": 15894,
+        "name": "Adrian Mannarino",
+        "shortName": "A. Mannarino",
+        "country": "FR",
+        "ranking": 69
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751632800,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046396,
+      "slug": "mattia-bellucci-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 294337,
+        "name": "Mattia Bellucci",
+        "shortName": "M. Bellucci",
+        "country": "IT",
+        "ranking": 74
+      },
+      "awayTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "homeScore": 0,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751637300,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046395,
+      "slug": "luciano-darderi-jordan-thompson",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 308084,
+        "name": "Luciano Darderi",
+        "shortName": "L. Darderi",
+        "country": "IT",
+        "ranking": 26
+      },
+      "awayTeam": {
+        "id": 87690,
+        "name": "Jordan Thompson",
+        "shortName": "J. Thompson",
+        "country": "AU",
+        "ranking": 108
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751637600,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046398,
+      "slug": "kamil-majchrzak-arthur-rinderknech",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 108709,
+        "name": "Kamil Majchrzak",
+        "shortName": "K. Majchrzak",
+        "country": "PL",
+        "ranking": 62
+      },
+      "awayTeam": {
+        "id": 63606,
+        "name": "Arthur Rinderknech",
+        "shortName": "A. Rinderknech",
+        "country": "FR",
+        "ranking": 29
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751640000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046391,
+      "slug": "joao-fonseca-nicolas-jarry",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 89632,
+        "name": "Nicolas Jarry",
+        "shortName": "N. Jarry",
+        "country": "CL",
+        "ranking": 123
+      },
+      "awayTeam": {
+        "id": 403869,
+        "name": "Joao Fonseca",
+        "shortName": "J. Fonseca",
+        "country": "BR",
+        "ranking": 24
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751640300,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046397,
+      "slug": "nuno-borges-karen-khachanov",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 125006,
+        "name": "Nuno Borges",
+        "shortName": "N. Borges",
+        "country": "PT",
+        "ranking": 47
+      },
+      "awayTeam": {
+        "id": 90080,
+        "name": "Karen Khachanov",
+        "shortName": "K. Khachanov",
+        "country": "RU",
+        "ranking": 18
+      },
+      "homeScore": 2,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751641200,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046401,
+      "slug": "carlos-alcaraz-jan-lennard-struff",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 46391,
+        "name": "Jan-Lennard Struff",
+        "shortName": "J. Struff",
+        "country": "DE",
+        "ranking": 84
+      },
+      "awayTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751645400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046394,
+      "slug": "jakub-mensik-flavio-cobolli",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 273680,
+        "name": "Flavio Cobolli",
+        "shortName": "F. Cobolli",
+        "country": "IT",
+        "ranking": 22
+      },
+      "awayTeam": {
+        "id": 372312,
+        "name": "Jakub Mensik",
+        "shortName": "J. Mensik",
+        "country": "CZ",
+        "ranking": 19
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751709600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046400,
+      "slug": "jannik-sinner-pedro-martinez",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 77223,
+        "name": "Pedro Martinez",
+        "shortName": "P. Martinez",
+        "country": "ES",
+        "ranking": 93
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751718600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046388,
+      "slug": "brandon-nakashima-lorenzo-sonego",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 235576,
+        "name": "Brandon Nakashima",
+        "shortName": "B. Nakashima",
+        "country": "US",
+        "ranking": 33
+      },
+      "awayTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "homeScore": 2,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751722500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046402,
+      "slug": "sebastian-ofner-grigor-dimitrov",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 23581,
+        "name": "Grigor Dimitrov",
+        "shortName": "G. Dimitrov",
+        "country": "BG",
+        "ranking": 44
+      },
+      "awayTeam": {
+        "id": 83397,
+        "name": "Sebastian Ofner",
+        "shortName": "S. Ofner",
+        "country": "AT",
+        "ranking": 133
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751722500,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046393,
+      "slug": "august-holmgren-alex-de-minaur",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "awayTeam": {
+        "id": 207089,
+        "name": "August Holmgren",
+        "shortName": "A. Holmgren",
+        "country": "DK",
+        "ranking": 193
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751726700,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046387,
+      "slug": "jaume-munar-marin-cilic",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 15387,
+        "name": "Marin Čilić",
+        "shortName": "M. Čilić",
+        "country": "HR",
+        "ranking": 75
+      },
+      "awayTeam": {
+        "id": 126356,
+        "name": "Jaume Munar",
+        "shortName": "J. Munar",
+        "country": "ES",
+        "ranking": 36
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751728500,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046390,
+      "slug": "ben-shelton-marton-fucsovics",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "awayTeam": {
+        "id": 47770,
+        "name": "Marton Fucsovics",
+        "shortName": "M. Fucsovics",
+        "country": "HU",
+        "ranking": 55
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751734500,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046392,
+      "slug": "miomir-kecmanovic-novak-djokovic",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 32",
+      "homeTeam": {
+        "id": 198592,
+        "name": "Miomir Kecmanovic",
+        "shortName": "M. Kecmanovic",
+        "country": "RS",
+        "ranking": 52
+      },
+      "awayTeam": {
+        "id": 14882,
+        "name": "Novak Djokovic",
+        "shortName": "N. Djokovic",
+        "country": "RS",
+        "ranking": 4
+      },
+      "homeScore": 0,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751735100,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046408,
+      "slug": "kamil-majchrzak-karen-khachanov",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 90080,
+        "name": "Karen Khachanov",
+        "shortName": "K. Khachanov",
+        "country": "RU",
+        "ranking": 18
+      },
+      "awayTeam": {
+        "id": 108709,
+        "name": "Kamil Majchrzak",
+        "shortName": "K. Majchrzak",
+        "country": "PL",
+        "ranking": 62
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751796000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046404,
+      "slug": "taylor-fritz-jordan-thompson",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "awayTeam": {
+        "id": 87690,
+        "name": "Jordan Thompson",
+        "shortName": "J. Thompson",
+        "country": "AU",
+        "ranking": 108
+      },
+      "homeScore": 1,
+      "awayScore": 0,
+      "status": {
+        "code": 92,
+        "description": "Retired",
+        "type": "finished"
+      },
+      "startTimestamp": 1751803200,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046407,
+      "slug": "cameron-norrie-nicolas-jarry",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 89632,
+        "name": "Nicolas Jarry",
+        "shortName": "N. Jarry",
+        "country": "CL",
+        "ranking": 123
+      },
+      "awayTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "homeScore": 2,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751808900,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046412,
+      "slug": "carlos-alcaraz-andrey-rublev",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 106755,
+        "name": "Andrey Rublev",
+        "shortName": "A. Rublev",
+        "country": "RU",
+        "ranking": 16
+      },
+      "awayTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751821500,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046406,
+      "slug": "flavio-cobolli-marin-cilic",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 15387,
+        "name": "Marin Čilić",
+        "shortName": "M. Čilić",
+        "country": "HR",
+        "ranking": 75
+      },
+      "awayTeam": {
+        "id": 273680,
+        "name": "Flavio Cobolli",
+        "shortName": "F. Cobolli",
+        "country": "IT",
+        "ranking": 22
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751882400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046405,
+      "slug": "alex-de-minaur-novak-djokovic",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 201239,
+        "name": "Alex de Minaur",
+        "shortName": "A. de Minaur",
+        "country": "AU",
+        "ranking": 7
+      },
+      "awayTeam": {
+        "id": 14882,
+        "name": "Novak Djokovic",
+        "shortName": "N. Djokovic",
+        "country": "RS",
+        "ranking": 4
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751891400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046410,
+      "slug": "ben-shelton-lorenzo-sonego",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "awayTeam": {
+        "id": 104847,
+        "name": "Lorenzo Sonego",
+        "shortName": "L. Sonego",
+        "country": "IT",
+        "ranking": 39
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751898600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046411,
+      "slug": "jannik-sinner-grigor-dimitrov",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Round of 16",
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 23581,
+        "name": "Grigor Dimitrov",
+        "shortName": "G. Dimitrov",
+        "country": "BG",
+        "ranking": 44
+      },
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": {
+        "code": 92,
+        "description": "Retired",
+        "type": "finished"
+      },
+      "startTimestamp": 1751910600,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046418,
+      "slug": "taylor-fritz-karen-khachanov",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "awayTeam": {
+        "id": 90080,
+        "name": "Karen Khachanov",
+        "shortName": "K. Khachanov",
+        "country": "RU",
+        "ranking": 18
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751976000,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046416,
+      "slug": "carlos-alcaraz-cameron-norrie",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 95935,
+        "name": "Cameron Norrie",
+        "shortName": "C. Norrie",
+        "country": "GB",
+        "ranking": 27
+      },
+      "awayTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "homeScore": 0,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1751990700,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046415,
+      "slug": "ben-shelton-jannik-sinner",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 385485,
+        "name": "Ben Shelton",
+        "shortName": "B. Shelton",
+        "country": "US",
+        "ranking": 9
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1752071400,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046419,
+      "slug": "flavio-cobolli-novak-djokovic",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Quarterfinals",
+      "homeTeam": {
+        "id": 273680,
+        "name": "Flavio Cobolli",
+        "shortName": "F. Cobolli",
+        "country": "IT",
+        "ranking": 22
+      },
+      "awayTeam": {
+        "id": 14882,
+        "name": "Novak Djokovic",
+        "shortName": "N. Djokovic",
+        "country": "RS",
+        "ranking": 4
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1752074400,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046420,
+      "slug": "carlos-alcaraz-taylor-fritz",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 136042,
+        "name": "Taylor Fritz",
+        "shortName": "T. Fritz",
+        "country": "US",
+        "ranking": 6
+      },
+      "awayTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1752237000,
+      "winnerCode": 2,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046417,
+      "slug": "jannik-sinner-novak-djokovic",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Semifinals",
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 14882,
+        "name": "Novak Djokovic",
+        "shortName": "N. Djokovic",
+        "country": "RS",
+        "ranking": 4
+      },
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1752249300,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    },
+    {
+      "eventId": 14046430,
+      "slug": "carlos-alcaraz-jannik-sinner",
+      "sport": "tennis",
+      "tournament": "Wimbledon",
+      "tournamentId": 2361,
+      "category": "ATP",
+      "round": "Final",
+      "homeTeam": {
+        "id": 206570,
+        "name": "Jannik Sinner",
+        "shortName": "J. Sinner",
+        "country": "IT",
+        "ranking": 2
+      },
+      "awayTeam": {
+        "id": 275923,
+        "name": "Carlos Alcaraz",
+        "shortName": "C. Alcaraz",
+        "country": "ES",
+        "ranking": 1
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": {
+        "code": 100,
+        "description": "Ended",
+        "type": "finished"
+      },
+      "startTimestamp": 1752419700,
+      "winnerCode": 1,
+      "detectedFrom": "tournament"
+    }
+  ]
+}

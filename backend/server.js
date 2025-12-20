@@ -1138,7 +1138,16 @@ app.post('/api/scrape', async (req, res) => {
         
         // Se ancora Unknown, cerca nell'api
         if (data?.api && (homeTeam === 'Unknown' || awayTeam === 'Unknown')) {
-          for (const [url, apiData] of Object.entries(data.api)) {
+          for (const [apiEndpoint, apiData] of Object.entries(data.api)) {
+            // Check if SofaScore returned 403 error
+            if (apiData?.error?.code === 403) {
+              console.log('⚠️ SofaScore returned 403 Forbidden - IP blocked');
+              return res.status(503).json({
+                error: 'blocked',
+                message: 'SofaScore ha bloccato la richiesta. Usa lo scraping da locale.',
+                hint: 'Esegui il backend in locale per acquisire nuovi match'
+              });
+            }
             if (apiData?.event?.homeTeam?.name && homeTeam === 'Unknown') {
               homeTeam = apiData.event.homeTeam.name;
             }

@@ -553,6 +553,9 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       } else if (res.status === 409) {
         setScrapeStatus('duplicate');
         setScrapeMessage(data.message || 'Match già presente nel database');
+      } else if (res.status === 503 && data.error === 'blocked') {
+        setScrapeStatus('error');
+        setScrapeMessage('⚠️ SofaScore blocca le richieste dal server. Usa lo scraping da localhost.');
       } else {
         setScrapeStatus('error');
         setScrapeMessage(data.message || 'Errore durante lo scraping');
