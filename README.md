@@ -63,12 +63,12 @@ Lo scraping va fatto **esclusivamente** dal progetto locale `Tennis-Scraper-Loca
 
 ## 📊 STATISTICHE ATTUALI (21 Dicembre 2025)
 
-- **5448 match** nel database (2807 Sofascore + 2641 storici xlsx)
+- **2794 match** nel database (deduplicati da 5448)
 - **205 giocatori unici** con nomi normalizzati
 - **210 mapping giocatori** per normalizzazione automatica
-- **4420 record normalizzati** nella migrazione
+- **Nessun duplicato** - ogni match è unico
 - **15+ tornei** tracciati (ATP, ITF, Challenger, United Cup)
-- **Giocatori top**: Jannik Sinner (128 match), Carlos Alcaraz (116 match)
+- **Giocatori top**: Jannik Sinner, Carlos Alcaraz (dati completi da Sofascore)
 
 ---
 
@@ -600,6 +600,24 @@ Tennis-Analyzer/
 
 ## 🔄 DATABASE MIGRATIONS
 
+### Deduplicazione Match (21/12/2025)
+**Problema:** Match duplicati tra xlsx e Sofascore (stessi giocatori, date ±1 giorno)
+
+**Soluzione:**
+```bash
+cd backend
+# Fix nomi vuoti nei record Sofascore
+node scripts/fix-sofascore-names.js
+
+# Deduplica match (mantiene quello con più dati)
+node scripts/deduplicate-matches.js
+```
+
+**Risultato:**
+- Da 5448 a **2794 match** (2654 duplicati rimossi)
+- Ogni match ora è UNICO
+- Match Sofascore preferiti (hanno point-by-point, raw_json)
+
 ### Normalizzazione Nomi Giocatori (21/12/2025)
 **Problema:** Nomi duplicati (xlsx: "Sinner J." vs Sofascore: "Jannik Sinner")
 
@@ -610,9 +628,8 @@ node scripts/normalize-player-names.js
 ```
 
 **Risultato:**
-- 4420 record normalizzati
-- 205 giocatori unici
-- 0 duplicati rimasti
+- 210 mapping giocatori ATP
+- Tutti i nomi unificati
 
 ### Import xlsx con ID Numerici
 **Problema:** Supabase richiede BIGINT per `id`, xlsx ha slug testuali
