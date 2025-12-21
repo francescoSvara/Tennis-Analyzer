@@ -256,7 +256,7 @@ function DayGroup({ dateLabel, matches, onMatchClick, onAddSuggested }) {
               isSuggested={match.isSuggested}
               isDetected={match.isDetected}
               onAddToDb={(match.isSuggested || match.isDetected) && onAddSuggested ? () => onAddSuggested(match) : null}
-              dataCompleteness={match.dataCompleteness}
+              dataSources={match.dataSources}
             />
           ))}
         </div>

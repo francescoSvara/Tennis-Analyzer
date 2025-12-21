@@ -699,5 +699,28 @@ Progetto privato - Tutti i diritti riservati.
 
 ---
 
-*Ultimo aggiornamento: 20 Dicembre 2025*
+## 📋 CHANGELOG
 
+### 22 Dicembre 2025
+
+#### 🔧 Fix Visualizzazione Dati dal Database
+- **`src/utils.js` - `extractEventInfo()`**: Modificata per dare priorità all'oggetto `event` già presente alla radice dei dati normalizzati dal DB. Prima cercava in profondità e trovava l'evento dentro `raw_json.api` invece di quello costruito con i campi DB.
+  
+- **`src/utils.js` - `extractStatistics()`**: Modificata per dare priorità all'array `statistics` già normalizzato dal DB. Ora i dati delle statistiche vengono visualizzati correttamente quando provengono dal database.
+
+#### 🔧 Fix Duplicati in Tennis-Scraper-Local
+- **`Tennis-Scraper-Local/backend/db/matchRepository.js` - `findExistingSofascoreMatch()`**: Riscritto per cercare match esistenti per **ID evento SofaScore** invece che per nomi giocatori + data. Questo previene falsi positivi quando lo stesso giocatore ha più partite (es: Alcaraz vs Fritz a Miami e Alcaraz vs Fritz alle Finals sono due match diversi).
+
+#### ✨ Nuova Funzionalità: Salvataggio Power Rankings
+- **`Tennis-Scraper-Local/backend/db/matchRepository.js` - `insertPowerRankings()`**: Nuova funzione per salvare i dati Tennis Power Rankings nel database. Calcola automaticamente le zone di servizio e le variazioni rispetto alla media.
+
+- **`insertMatch()`**: Ora estrae automaticamente i power rankings dallo scrape e li salva nel DB insieme al match.
+
+#### 📝 Note
+- I Power Rankings non sono disponibili per tutti i match su SofaScore (alcuni tornei/match restituiscono 404)
+- La logica di estrazione dati ora privilegia i campi normalizzati del DB rispetto ai dati raw annidati
+- Migliorata la coerenza tra dati scraping locale e visualizzazione frontend
+
+---
+
+*Ultimo aggiornamento: 22 Dicembre 2025*

@@ -184,12 +184,50 @@ async function insertStatistics(matchId, statistics) {
 }
 
 /**
+ * Inserisce i power rankings (momentum del match)
+ */
+async function insertPowerRankings(matchId, powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length === 0) return 0;
+
+  // Prima elimina vecchi rankings
+  await supabase.from('power_rankings').delete().eq('match_id', matchId);
+
+  const rankings = powerRankings.map(pr => {
+    const value = pr.value || 0;
+    let zone = 'balanced_positive';
+    let status = 'neutral';
+    
+    if (value > 60) { zone = 'strong_control'; status = 'positive'; }
+    else if (value >= 20) { zone = 'advantage'; status = 'positive'; }
+    else if (value > -20) { zone = 'balanced_positive'; status = 'neutral'; }
+    else if (value > -40) { zone = 'slight_pressure'; status = 'warning'; }
+    else { zone = 'strong_pressure'; status = 'critical'; }
+    
+    return {
+      match_id: matchId,
+      set_number: pr.set || 1,
+      game_number: pr.game || 1,
+      value: value,
+      break_occurred: pr.breakOccurred || false,
+      zone,
+      status
+    };
+  });
+
+  const { error } = await supabase.from('power_rankings').insert(rankings);
+  if (error) console.error('Error inserting power rankings:', error.message);
+
+  return rankings.length;
+}
+
+/**
  * Inserisce un match nel database
  */
 export async function insertMatch(scrapeData) {
   try {
     let eventData = null;
     let statisticsData = null;
+    let powerRankingsData = null;
     
     if (scrapeData.api) {
       for (const [url, data] of Object.entries(scrapeData.api)) {
@@ -198,6 +236,9 @@ export async function insertMatch(scrapeData) {
         }
         if (url.includes('/statistics') && data?.statistics) {
           statisticsData = data.statistics;
+        }
+        if (url.includes('/tennis-power-rankings') && data?.tennisPowerRankings) {
+          powerRankingsData = data.tennisPowerRankings;
         }
       }
     }
@@ -254,15 +295,16 @@ export async function insertMatch(scrapeData) {
       return null;
     }
     
-    // Inserisci scores e stats
+    // Inserisci scores, stats e power rankings
     const scoresCount = await insertMatchScores(eventData.id, eventData.homeScore, eventData.awayScore);
     const statsCount = await insertStatistics(eventData.id, statisticsData);
+    const prCount = await insertPowerRankings(eventData.id, powerRankingsData);
     
     const homeName = homePlayer?.name || homePlayer?.shortName || 'Unknown';
     const awayName = awayPlayer?.name || awayPlayer?.shortName || 'Unknown';
     
     console.log(`✅ Match inserito: ${homeName} vs ${awayName}`);
-    console.log(`   Event ID: ${eventData.id}, Scores: ${scoresCount}, Stats: ${statsCount}`);
+    console.log(`   Event ID: ${eventData.id}, Scores: ${scoresCount}, Stats: ${statsCount}, PowerRankings: ${prCount}`);
     
     return insertedMatch;
   } catch (err) {
@@ -867,10 +909,11 @@ export async function findMatchingXlsxMatch(sofascoreMatch) {
   const endDate = new Date(matchDate);
   endDate.setDate(endDate.getDate() + 1);
   
+  // Cerca sia xlsx_import che xlsx_2025 (diversi formati di import)
   const { data: xlsxMatches, error } = await supabase
     .from('matches')
     .select('*')
-    .eq('data_source', 'xlsx_import')
+    .in('data_source', ['xlsx_import', 'xlsx_2025'])
     .gte('start_time', startDate.toISOString())
     .lte('start_time', endDate.toISOString());
   
@@ -972,15 +1015,64 @@ export async function mergeXlsxData(sofascoreMatchId, xlsxMatch) {
 }
 
 /**
+ * Elimina un match xlsx dopo che è stato merged
+ */
+export async function deleteXlsxMatch(xlsxMatchId) {
+  const { error } = await supabase
+    .from('matches')
+    .delete()
+    .eq('id', xlsxMatchId);
+  
+  if (error) {
+    console.error(`❌ Errore eliminazione xlsx ${xlsxMatchId}:`, error.message);
+    return false;
+  }
+  
+  console.log(`🗑️ Record xlsx ${xlsxMatchId} eliminato (dati già merged)`);
+  return true;
+}
+
+/**
+ * Cerca un match esistente per ID SofaScore (univoco!)
+ * Questo è il metodo corretto per evitare duplicati
+ */
+export async function findExistingSofascoreMatch(matchData) {
+  const eventId = matchData.id;
+  
+  if (!eventId) return null;
+  
+  // Cerca match con lo stesso ID SofaScore
+  const { data: existingMatch, error } = await supabase
+    .from('matches')
+    .select('*')
+    .eq('id', eventId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error checking existing match:', error.message);
+    return null;
+  }
+  
+  if (existingMatch) {
+    const homeName = matchData.home?.name || matchData.homeTeam?.name || 'Unknown';
+    const awayName = matchData.away?.name || matchData.awayTeam?.name || 'Unknown';
+    console.log(`⚠️ Match già esistente! "${homeName} vs ${awayName}" (ID ${eventId})`);
+    return existingMatch;
+  }
+  
+  return null;
+}
+
+/**
  * Inserisce un match e automaticamente cerca/merge con dati xlsx
+ * Se trova un xlsx corrispondente:
+ * 1. Merge i dati xlsx nel match Sofascore
+ * 2. Elimina il record xlsx duplicato
+ * 
+ * IMPORTANTE: Prima controlla se il match esiste già (evita duplicati sofascore)
  */
 export async function insertMatchWithXlsxMerge(scrapeData) {
-  // Prima inserisci il match normalmente
-  const insertedMatch = await insertMatch(scrapeData);
-  
-  if (!insertedMatch) return null;
-  
-  // Estrai i dati necessari per la ricerca xlsx
+  // Estrai i dati del match per i controlli
   let matchData = null;
   if (scrapeData?.api) {
     for (const [url, response] of Object.entries(scrapeData.api)) {
@@ -991,12 +1083,30 @@ export async function insertMatchWithXlsxMerge(scrapeData) {
     }
   }
   
+  // NUOVO: Prima controlla se esiste già un match sofascore con stessi giocatori/data
+  if (matchData) {
+    const existingMatch = await findExistingSofascoreMatch(matchData);
+    if (existingMatch) {
+      console.log(`🔄 Match già esistente (ID: ${existingMatch.id}), skip inserimento duplicato`);
+      return existingMatch; // Ritorna il match esistente invece di crearne uno nuovo
+    }
+  }
+  
+  // Inserisci il match (ora sappiamo che non esiste)
+  const insertedMatch = await insertMatch(scrapeData);
+  
+  if (!insertedMatch) return null;
+  
   if (matchData) {
     // Cerca match xlsx corrispondente
     const xlsxMatch = await findMatchingXlsxMatch(matchData);
     
     if (xlsxMatch) {
+      // Merge i dati xlsx nel match Sofascore
       await mergeXlsxData(insertedMatch.id, xlsxMatch);
+      
+      // ELIMINA il record xlsx duplicato
+      await deleteXlsxMatch(xlsxMatch.id);
     }
   }
   

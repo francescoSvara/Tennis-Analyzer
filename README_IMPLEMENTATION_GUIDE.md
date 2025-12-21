@@ -60,12 +60,12 @@ toTitleCase(str)               // Utility formattazione
 | # | Task | Status | Priorità |
 |---|------|--------|----------|
 | 1 | Player Stats Aggregator | ✅ COMPLETATO | 🔥 ALTA |
-| 2 | Momentum Volatility & Elasticity | 🔄 IN CORSO | 🔥 ALTA |
-| 3 | Dynamic Surface Thresholds | ⬜ TODO | 🔥 ALTA |
+| 2 | Momentum Volatility & Elasticity | ✅ COMPLETATO | 🔥 ALTA |
+| 3 | Dynamic Surface Thresholds | ✅ INTEGRATO | 🔥 ALTA |
 | 4 | Pressure Index Calculator | ⬜ TODO | 🔥 ALTA |
 | 5 | Multi-Source Odds Analysis | ⬜ TODO | 🟡 MEDIA |
 | 6 | Historical Comeback Rate API | ⬜ TODO | 🟡 MEDIA |
-| 7 | Match Character Classifier | ⬜ TODO | 🟡 MEDIA |
+| 7 | Match Character Classifier | ✅ COMPLETATO | 🟡 MEDIA |
 | 8 | Lay The Winner Enhanced | ⬜ TODO | 🟢 NORMALE |
 | 9 | Set & Break Analysis | ⬜ TODO | 🟢 NORMALE |
 | 10 | Daily Match Evaluation Report | ⬜ TODO | 🟢 NORMALE |

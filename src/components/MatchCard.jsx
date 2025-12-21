@@ -97,7 +97,7 @@ function TournamentWithLogo({ tournament, category }) {
   );
 }
 
-function MatchCard({ match, onClick, isSuggested = false, isDetected = false, onAddToDb, dataCompleteness = null }) {
+function MatchCard({ match, onClick, isSuggested = false, isDetected = false, onAddToDb, dataCompleteness = null, dataSources = null }) {
   if (!match) return null;
   
   const statusBadge = getStatusBadge(match.status);
@@ -107,6 +107,9 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
   // Determina se è un match xlsx (storico)
   const isXlsxMatch = match.dataSource === 'xlsx_import';
   const isMergedMatch = match.dataSource === 'merged_sofascore_xlsx';
+  
+  // Ottieni dataSources dal match se non passato come prop
+  const sources = dataSources || match.dataSources || { sofascore: 50, xlsx: 50, hasBothSources: false };
   
   // Card suggerita o rilevata: stile diverso e non cliccabile
   const cardClass = isDetected 
@@ -121,14 +124,6 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
     if (!isSuggested && !isDetected && onClick) {
       onClick(match);
     }
-  };
-  
-  // Determina il colore della barra di completezza
-  const getCompletenessColor = (percentage) => {
-    if (percentage >= 100) return '#10b981'; // Verde al 100%
-    if (percentage >= 70) return '#f59e0b';  // Arancione
-    if (percentage >= 40) return '#3b82f6';  // Blu
-    return '#6b7280'; // Grigio
   };
   
   return (
@@ -146,14 +141,6 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
         <div className="xlsx-badge">
           <span className="xlsx-icon">📊</span>
           <span className="xlsx-text">Storico</span>
-        </div>
-      )}
-      
-      {/* Badge per match merged */}
-      {isMergedMatch && !isSuggested && !isDetected && (
-        <div className="merged-badge">
-          <span className="merged-icon">🔗</span>
-          <span className="merged-text">Completo</span>
         </div>
       )}
       
@@ -213,26 +200,25 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
         </div>
       </div>
       
-      {/* Barra completezza dati - solo per card normali (non suggerite) */}
-      {!isSuggested && dataCompleteness !== null && (
-        <div className="match-data-completeness">
-          <div className="completeness-info">
-            <span className="completeness-icon">📊</span>
-            <span 
-              className={`completeness-value ${dataCompleteness >= 100 ? 'complete' : ''}`}
-              style={{ color: getCompletenessColor(dataCompleteness) }}
-            >
-              {dataCompleteness}%
-            </span>
-          </div>
-          <div className="completeness-bar-mini">
-            <div 
-              className="completeness-fill-mini"
-              style={{ 
-                width: `${Math.min(dataCompleteness, 100)}%`,
-                backgroundColor: getCompletenessColor(dataCompleteness)
-              }}
-            />
+      {/* Barra fonti dati - mostra proporzione Sofascore (blu) vs XLSX (verde) */}
+      {!isSuggested && !isDetected && sources && (
+        <div className="match-data-sources">
+          <div 
+            className="data-sources-bar"
+            title={`Sofascore: ${sources.sofascore}% | XLSX: ${sources.xlsx}%`}
+          >
+            {sources.sofascore > 0 && (
+              <div 
+                className="source-fill sofascore"
+                style={{ width: `${sources.sofascore}%` }}
+              />
+            )}
+            {sources.xlsx > 0 && (
+              <div 
+                className="source-fill xlsx"
+                style={{ width: `${sources.xlsx}%` }}
+              />
+            )}
           </div>
         </div>
       )}
@@ -256,17 +242,12 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
             ➕ Aggiungi al Database
           </button>
         ) : (
-          <>
-            <span 
-              className={`match-status ${statusBadge.pulse ? 'pulse' : ''}`}
-              style={{ backgroundColor: statusBadge.color }}
-            >
-              {statusBadge.label}
-            </span>
-            {match.eventId && (
-              <span className="match-id">ID: {match.eventId}</span>
-            )}
-          </>
+          <span 
+            className={`match-status ${statusBadge.pulse ? 'pulse' : ''}`}
+            style={{ backgroundColor: statusBadge.color }}
+          >
+            {statusBadge.label}
+          </span>
         )}
       </div>
     </div>

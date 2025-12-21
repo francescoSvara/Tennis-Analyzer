@@ -1,5 +1,15 @@
 import React, { memo, useState, useMemo } from 'react';
-import { interpretGameValue, getStatusColor, getZoneIcon, analyzePowerRankings } from '../utils';
+import { 
+  interpretGameValue, 
+  getStatusColor, 
+  getZoneIcon, 
+  analyzePowerRankings,
+  calculateVolatility,
+  calculateElasticity,
+  analyzeMomentumTrend,
+  classifyMatchCharacter,
+  analyzePowerRankingsEnhanced
+} from '../utils';
 import './MomentumTab.css';
 
 /**
@@ -16,8 +26,8 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
   const [gameCount, setGameCount] = useState(3);
   const [followPlayer, setFollowPlayer] = useState('home'); // 'home' | 'away' | 'both'
 
-  // Analisi completa
-  const analysis = analyzePowerRankings(powerRankings);
+  // Analisi completa potenziata
+  const analysis = useMemo(() => analyzePowerRankingsEnhanced(powerRankings), [powerRankings]);
   
   // Ultimi N game (filtrato)
   const lastNGames = useMemo(() => {
@@ -349,6 +359,72 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
           </div>
         </div>
       </section>
+
+      {/* Sezione Analisi Avanzata */}
+      {analysis && (
+        <section className="momentum-section">
+          <h3 className="momentum-section-title">
+            <span className="momentum-section-icon">🧠</span>
+            Analisi Avanzata
+          </h3>
+          
+          <div className="momentum-advanced-grid">
+            {/* Card Volatilità */}
+            <div className={`momentum-advanced-card volatility-${analysis.volatility?.class?.toLowerCase() || 'stabile'}`}>
+              <div className="advanced-card-icon">📊</div>
+              <div className="advanced-card-label">Volatilità</div>
+              <div className="advanced-card-value">{analysis.volatility?.class || 'N/A'}</div>
+              <div className="advanced-card-detail">
+                Δ medio: {analysis.volatility?.value || 0}
+              </div>
+            </div>
+            
+            {/* Card Elasticità */}
+            <div className={`momentum-advanced-card elasticity-${analysis.elasticity?.class?.toLowerCase() || 'normale'}`}>
+              <div className="advanced-card-icon">🔄</div>
+              <div className="advanced-card-label">Elasticità</div>
+              <div className="advanced-card-value">{analysis.elasticity?.class || 'N/A'}</div>
+              <div className="advanced-card-detail">
+                Fasi negative: {analysis.elasticity?.negative_phases || 0}
+              </div>
+            </div>
+            
+            {/* Card Trend */}
+            <div className={`momentum-advanced-card trend-${analysis.trend?.current_trend?.toLowerCase() || 'stable'}`}>
+              <div className="advanced-card-icon">
+                {analysis.trend?.current_trend === 'RISING' ? '📈' : 
+                 analysis.trend?.current_trend === 'FALLING' ? '📉' : '➖'}
+              </div>
+              <div className="advanced-card-label">Trend Attuale</div>
+              <div className="advanced-card-value">{analysis.trend?.current_trend || 'STABLE'}</div>
+              <div className="advanced-card-detail">
+                Media recente: {analysis.trend?.recent_avg || 0}
+              </div>
+            </div>
+            
+            {/* Card Carattere Match */}
+            <div className="momentum-advanced-card match-character">
+              <div className="advanced-card-icon">🎭</div>
+              <div className="advanced-card-label">Carattere Match</div>
+              <div className="advanced-card-value">{analysis.matchCharacter?.character?.replace(/_/g, ' ') || 'N/A'}</div>
+              <div className="advanced-card-detail">
+                {analysis.matchCharacter?.description || ''}
+              </div>
+            </div>
+          </div>
+          
+          {/* Momentum Shift Alert */}
+          {analysis.trend?.momentum_shift_detected && (
+            <div className="momentum-shift-alert">
+              <span className="shift-icon">⚡</span>
+              <span className="shift-text">
+                Rilevato cambio significativo di momentum! 
+                Media recente ({analysis.trend.recent_avg}) molto diversa dalla media match ({analysis.trend.match_avg})
+              </span>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Analisi per Set */}
       <section className="momentum-section">

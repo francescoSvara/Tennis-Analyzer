@@ -175,6 +175,9 @@ function analyzePowerRankings(powerRankings) {
     if (value > analysis.maxValue) analysis.maxValue = value;
     if (value < analysis.minValue) analysis.minValue = value;
     
+    if (item.breakOccurred) {
+      analysis.breakGames.push({ set: item.set, game: item.game, value });
+    }
     if (value > 60) {
       analysis.dominantGames.push({ set: item.set, game: item.game, value });
     } else if (value < -20) {
@@ -187,10 +190,242 @@ function analyzePowerRankings(powerRankings) {
   return analysis;
 }
 
+// ============================================================================
+// NUOVE FUNZIONI: Volatility, Elasticity, Trend Analysis
+// ============================================================================
+
+/**
+ * Soglie per classificazione volatilità
+ */
+const VOLATILITY_THRESHOLDS = {
+  stable: 15,      // delta medio < 15 = match controllato
+  moderate: 25,    // 15-25 = normale alternanza
+  volatile: 40,    // 25-40 = alti e bassi frequenti
+  extreme: 40      // > 40 = match caotico/emotivo
+};
+
+/**
+ * Calcola la volatilità del momentum (quanto oscilla tra game consecutivi)
+ * @param {Array} powerRankings - Array di { set, game, value }
+ * @returns {Object} { value, class, deltas }
+ */
+function calculateVolatility(powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < 2) {
+    return { value: 0, class: 'STABILE', deltas: [] };
+  }
+
+  const deltas = [];
+  for (let i = 1; i < powerRankings.length; i++) {
+    const prev = powerRankings[i - 1].value || 0;
+    const curr = powerRankings[i].value || 0;
+    deltas.push(Math.abs(curr - prev));
+  }
+
+  const avgDelta = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+  
+  let volatilityClass;
+  if (avgDelta < VOLATILITY_THRESHOLDS.stable) {
+    volatilityClass = 'STABILE';
+  } else if (avgDelta < VOLATILITY_THRESHOLDS.moderate) {
+    volatilityClass = 'MODERATO';
+  } else if (avgDelta < VOLATILITY_THRESHOLDS.volatile) {
+    volatilityClass = 'VOLATILE';
+  } else {
+    volatilityClass = 'MOLTO_VOLATILE';
+  }
+
+  return {
+    value: Math.round(avgDelta * 10) / 10,
+    class: volatilityClass,
+    deltas,
+    maxSwing: Math.max(...deltas),
+    minSwing: Math.min(...deltas)
+  };
+}
+
+/**
+ * Calcola l'elasticità (capacità di recupero da fasi negative)
+ * @param {Array} powerRankings - Array di { set, game, value }
+ * @returns {Object} { value, class, negative_phases, avg_recovery_games }
+ */
+function calculateElasticity(powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < 3) {
+    return { value: 0, class: 'NORMALE', negative_phases: 0, avg_recovery_games: 0 };
+  }
+
+  let negativePhases = 0;
+  let recoveryGames = [];
+  let inNegativePhase = false;
+  let negativeStart = -1;
+
+  for (let i = 0; i < powerRankings.length; i++) {
+    const value = powerRankings[i].value || 0;
+    
+    if (value < -15 && !inNegativePhase) {
+      // Entrato in fase negativa
+      inNegativePhase = true;
+      negativeStart = i;
+    } else if (value > 0 && inNegativePhase) {
+      // Uscito da fase negativa
+      inNegativePhase = false;
+      negativePhases++;
+      recoveryGames.push(i - negativeStart);
+    }
+  }
+
+  const avgRecovery = recoveryGames.length > 0 
+    ? recoveryGames.reduce((a, b) => a + b, 0) / recoveryGames.length 
+    : 0;
+  
+  // Elasticità = 1 / avgRecovery (più veloce a recuperare = più elastico)
+  const elasticityValue = avgRecovery > 0 ? Math.min(1, 1 / avgRecovery) : 0.5;
+  
+  let elasticityClass;
+  if (elasticityValue >= 0.5) {
+    elasticityClass = 'RESILIENTE';
+  } else if (elasticityValue >= 0.33) {
+    elasticityClass = 'NORMALE';
+  } else {
+    elasticityClass = 'FRAGILE';
+  }
+
+  return {
+    value: Math.round(elasticityValue * 100) / 100,
+    class: elasticityClass,
+    negative_phases: negativePhases,
+    avg_recovery_games: Math.round(avgRecovery * 10) / 10
+  };
+}
+
+/**
+ * Classifica il carattere del match basandosi su volatilità, elasticità e break
+ * @param {Object} volatility - Output di calculateVolatility
+ * @param {Object} elasticity - Output di calculateElasticity
+ * @param {number} breakCount - Numero di break nel match
+ * @returns {Object} { character, description }
+ */
+function classifyMatchCharacter(volatility, elasticity, breakCount = 0) {
+  const v = volatility?.class || 'STABILE';
+  const e = elasticity?.class || 'NORMALE';
+  
+  let character, description;
+  
+  if (v === 'MOLTO_VOLATILE' && breakCount >= 4) {
+    character = 'BATTAGLIA_EMOTIVA';
+    description = 'Match con grandi oscillazioni e molti break, emotivamente intenso';
+  } else if (v === 'STABILE' && e === 'RESILIENTE') {
+    character = 'DOMINIO_UNILATERALE';
+    description = 'Un giocatore controlla il match con poca resistenza';
+  } else if (e === 'RESILIENTE' && breakCount >= 2) {
+    character = 'RIMONTE_FREQUENTI';
+    description = 'Match con recuperi frequenti dopo momenti difficili';
+  } else if (v === 'VOLATILE') {
+    character = 'ALTALENA';
+    description = 'Match imprevedibile con continui cambi di momentum';
+  } else {
+    character = 'MATCH_STANDARD';
+    description = 'Andamento regolare senza particolari estremi';
+  }
+
+  return { character, description };
+}
+
+/**
+ * Analizza il trend del momentum (direzione: sale, scende, stabile)
+ * @param {Array} powerRankings - Array di { set, game, value }
+ * @param {number} windowSize - Dimensione finestra per media mobile (default 3)
+ * @returns {Object} { current_trend, recent_avg, match_avg, momentum_shift_detected }
+ */
+function analyzeMomentumTrend(powerRankings, windowSize = 3) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < windowSize) {
+    return { current_trend: 'STABLE', recent_avg: 0, match_avg: 0, momentum_shift_detected: false };
+  }
+
+  // Media totale match
+  const matchAvg = powerRankings.reduce((sum, g) => sum + (g.value || 0), 0) / powerRankings.length;
+  
+  // Media ultimi N game
+  const recentGames = powerRankings.slice(-windowSize);
+  const recentAvg = recentGames.reduce((sum, g) => sum + (g.value || 0), 0) / recentGames.length;
+  
+  // Media N game precedenti (per confronto)
+  const previousGames = powerRankings.slice(-windowSize * 2, -windowSize);
+  const previousAvg = previousGames.length > 0 
+    ? previousGames.reduce((sum, g) => sum + (g.value || 0), 0) / previousGames.length 
+    : matchAvg;
+  
+  // Determina trend
+  const diff = recentAvg - previousAvg;
+  let trend;
+  if (diff > 10) {
+    trend = 'RISING';
+  } else if (diff < -10) {
+    trend = 'FALLING';
+  } else {
+    trend = 'STABLE';
+  }
+  
+  // Detect momentum shift (cambio significativo rispetto alla media)
+  const momentumShift = Math.abs(recentAvg - matchAvg) > 20;
+
+  return {
+    current_trend: trend,
+    recent_avg: Math.round(recentAvg * 10) / 10,
+    match_avg: Math.round(matchAvg * 10) / 10,
+    momentum_shift_detected: momentumShift,
+    trend_strength: Math.abs(diff)
+  };
+}
+
+/**
+ * Analisi potenziata dei powerRankings che include tutto
+ * @param {Array} powerRankings - Array tennisPowerRankings
+ * @param {Object} matchContext - Contesto match { surface, bestOf, series }
+ * @returns {Object} Analisi completa
+ */
+function analyzePowerRankingsEnhanced(powerRankings, matchContext = {}) {
+  const basic = analyzePowerRankings(powerRankings);
+  if (!basic) return null;
+
+  const volatility = calculateVolatility(powerRankings);
+  const elasticity = calculateElasticity(powerRankings);
+  const trend = analyzeMomentumTrend(powerRankings);
+  const breakCount = powerRankings.filter(g => g.breakOccurred).length;
+  const matchCharacter = classifyMatchCharacter(volatility, elasticity, breakCount);
+
+  // Soglie dinamiche per superficie (se disponibile)
+  let thresholds = DEFAULT_THRESHOLDS;
+  if (matchContext.surface) {
+    const surfaceThresholds = {
+      'Hard': { strongControl: 60, advantage: 20, negativePressure: -20 },
+      'Clay': { strongControl: 55, advantage: 18, negativePressure: -18 },
+      'Grass': { strongControl: 65, advantage: 25, negativePressure: -25 }
+    };
+    thresholds = surfaceThresholds[matchContext.surface] || DEFAULT_THRESHOLDS;
+  }
+
+  return {
+    ...basic,
+    volatility,
+    elasticity,
+    trend,
+    matchCharacter,
+    breakCount,
+    thresholds,
+    context: matchContext
+  };
+}
+
 module.exports = {
   interpretGameValue,
   getValueZone,
   getSpecialPointDescription,
   analyzePowerRankings,
-  DEFAULT_THRESHOLDS
+  calculateVolatility,
+  calculateElasticity,
+  classifyMatchCharacter,
+  analyzeMomentumTrend,
+  analyzePowerRankingsEnhanced,
+  DEFAULT_THRESHOLDS,
+  VOLATILITY_THRESHOLDS
 };

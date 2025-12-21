@@ -335,16 +335,45 @@ export default function App() {
           firstToServe: data.first_to_serve || rawJson.firstToServe
         };
         
-        // Estrai powerRankings da tutte le possibili fonti
-        const extractedPowerRankings = rawJson.tennisPowerRankings || rawJson.powerRankings || data.powerRankings || [];
-        const extractedStatistics = rawJson.statistics || data.statistics || [];
-        const extractedPointByPoint = rawJson.pointByPoint || data.pointByPoint || [];
+        // Funzione helper per estrarre dati dalle chiavi API nel raw_json
+        const extractFromApi = (rawJson, keyPattern, dataField) => {
+          if (!rawJson?.api) return null;
+          for (const [url, apiData] of Object.entries(rawJson.api)) {
+            if (url.includes(keyPattern) && apiData?.[dataField]) {
+              return apiData[dataField];
+            }
+          }
+          return null;
+        };
+        
+        // Estrai powerRankings, statistics e pointByPoint dalle chiavi API
+        // NOTA: SofaScore usa sia 'tennis-power-rankings' che 'tennis-power' come endpoint
+        const extractedPowerRankings = 
+          extractFromApi(rawJson, 'tennis-power-rankings', 'tennisPowerRankings') ||
+          extractFromApi(rawJson, 'tennis-power', 'tennisPowerRankings') ||  // Variante URL
+          extractFromApi(rawJson, 'power-rankings', 'powerRankings') ||
+          rawJson.tennisPowerRankings || 
+          rawJson.powerRankings || 
+          data.powerRankings || 
+          data.tennisPowerRankings ||
+          [];
+          
+        const extractedStatistics = 
+          extractFromApi(rawJson, '/statistics', 'statistics') ||
+          rawJson.statistics || 
+          data.statistics || 
+          [];
+          
+        const extractedPointByPoint = 
+          extractFromApi(rawJson, 'point-by-point', 'pointByPoint') ||
+          rawJson.pointByPoint || 
+          data.pointByPoint || 
+          [];
         
         console.log('🔍 Debug estrazione dati:');
-        console.log('   rawJson.tennisPowerRankings:', rawJson.tennisPowerRankings?.length || 'N/A');
-        console.log('   rawJson.powerRankings:', rawJson.powerRankings?.length || 'N/A');
-        console.log('   data.powerRankings:', data.powerRankings?.length || 'N/A');
         console.log('   extractedPowerRankings:', extractedPowerRankings?.length || 0);
+        console.log('   extractedStatistics:', extractedStatistics?.length || 0);
+        console.log('   extractedPointByPoint:', extractedPointByPoint?.length || 0);
         
         // Combina i dati - IMPORTANTE: ...data PRIMA per non sovrascrivere i campi normalizzati
         normalizedData = {
@@ -1294,7 +1323,17 @@ export default function App() {
               <div className="momentum-content">
                 <ErrorBoundary componentName="Momentum">
                   {(() => {
-                    const powerRankings = dataForExtraction ? deepFindAll(dataForExtraction, 'tennisPowerRankings', 5).flat().filter(Boolean) : [];
+                    // Priorità 1: usa tennisPowerRankings già estratti alla radice
+                    let powerRankings = [];
+                    if (Array.isArray(dataForExtraction?.tennisPowerRankings) && dataForExtraction.tennisPowerRankings.length > 0) {
+                      powerRankings = dataForExtraction.tennisPowerRankings;
+                    } else if (Array.isArray(dataForExtraction?.powerRankings) && dataForExtraction.powerRankings.length > 0) {
+                      powerRankings = dataForExtraction.powerRankings;
+                    } else {
+                      // Fallback: cerca in profondità
+                      powerRankings = dataForExtraction ? deepFindAll(dataForExtraction, 'tennisPowerRankings', 5).flat().filter(Boolean) : [];
+                    }
+                    console.log('🎯 MomentumTab powerRankings:', powerRankings?.length || 0, 'items');
                     return (
                       <MomentumTab 
                         powerRankings={powerRankings} 

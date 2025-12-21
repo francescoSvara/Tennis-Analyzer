@@ -773,3 +773,175 @@
     gap: 6px;
   }
 }
+/* ============================================
+   ANALISI AVANZATA - Volatility, Elasticity, Trend
+   ============================================ */
+
+.momentum-advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.momentum-advanced-card {
+  background: rgba(40, 52, 71, 0.8);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.momentum-advanced-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.advanced-card-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.advanced-card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b95a5;
+  margin-bottom: 6px;
+}
+
+.advanced-card-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e4e6eb;
+  margin-bottom: 4px;
+}
+
+.advanced-card-detail {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Volatility Colors */
+.volatility-stabile {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+.volatility-stabile .advanced-card-value { color: #10b981; }
+
+.volatility-moderato {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+.volatility-moderato .advanced-card-value { color: #f59e0b; }
+
+.volatility-volatile {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+.volatility-volatile .advanced-card-value { color: #ef4444; }
+
+.volatility-molto_volatile {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.15);
+}
+.volatility-molto_volatile .advanced-card-value { color: #dc2626; }
+
+/* Elasticity Colors */
+.elasticity-resiliente {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+.elasticity-resiliente .advanced-card-value { color: #10b981; }
+
+.elasticity-normale {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+}
+.elasticity-normale .advanced-card-value { color: #6366f1; }
+
+.elasticity-fragile {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+.elasticity-fragile .advanced-card-value { color: #ef4444; }
+
+/* Trend Colors */
+.trend-rising {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+.trend-rising .advanced-card-value { color: #10b981; }
+
+.trend-falling {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+.trend-falling .advanced-card-value { color: #ef4444; }
+
+.trend-stable {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+}
+.trend-stable .advanced-card-value { color: #6366f1; }
+
+/* Match Character */
+.match-character {
+  border-color: #a855f7;
+  background: rgba(168, 85, 247, 0.1);
+}
+.match-character .advanced-card-value { 
+  color: #a855f7;
+  font-size: 12px;
+}
+
+/* Momentum Shift Alert */
+.momentum-shift-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.shift-icon {
+  font-size: 20px;
+  animation: pulse-shift 1.5s infinite;
+}
+
+.shift-text {
+  font-size: 13px;
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+@keyframes pulse-shift {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .momentum-advanced-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .advanced-card-value {
+    font-size: 13px;
+  }
+  
+  .match-character .advanced-card-value {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .momentum-advanced-grid {
+    grid-template-columns: 1fr;
+  }
+}

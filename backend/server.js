@@ -1999,43 +1999,101 @@ app.get('/api/db/matches', async (req, res) => {
       dataSource
     });
     
+    // Calcola la proporzione dati Sofascore vs XLSX per ogni match
+    const calculateDataSources = (m) => {
+      // Campi tipici da Sofascore (raw_json con API, player IDs, etc.)
+      const sofascoreFields = [
+        m.raw_json?.api,           // API data completa
+        m.home_player_id,          // Player ID
+        m.away_player_id,          // Player ID
+        m.raw_json?.mapping,       // Mapping data
+        m.status_code,             // Status dettagliato
+        m.round_name               // Round info
+      ];
+      
+      // Campi tipici da XLSX (odds, ranking storici, punteggi set dettagliati)
+      const xlsxFields = [
+        m.odds_b365_winner,        // Quote Bet365
+        m.odds_ps_winner,          // Quote Pinnacle
+        m.odds_max_winner,         // Quote Max
+        m.odds_avg_winner,         // Quote medie
+        m.winner_rank,             // Ranking xlsx
+        m.loser_rank,              // Ranking xlsx
+        m.w1,                      // Punteggi set xlsx
+        m.l1,
+        m.w2,
+        m.l2
+      ];
+      
+      // Conta campi popolati
+      const sofascoreCount = sofascoreFields.filter(f => f !== null && f !== undefined).length;
+      const xlsxCount = xlsxFields.filter(f => f !== null && f !== undefined).length;
+      const totalFields = sofascoreCount + xlsxCount;
+      
+      if (totalFields === 0) {
+        return { sofascore: 50, xlsx: 50, hasBothSources: false };
+      }
+      
+      return {
+        sofascore: Math.round((sofascoreCount / totalFields) * 100),
+        xlsx: Math.round((xlsxCount / totalFields) * 100),
+        hasBothSources: sofascoreCount > 0 && xlsxCount > 0
+      };
+    };
+    
     // Trasforma i dati dal formato DB (snake_case) al formato frontend (camelCase)
     // Colonne view v_matches_full: home_name, away_name, home_country, away_country, home_ranking, away_ranking
-    const matches = (dbMatches || []).map(m => ({
-      id: m.id,
-      eventId: m.id,
-      sport: 'tennis',
-      sportName: 'Tennis',
-      tournament: m.tournament_name || '',
-      category: m.tournament_category || '',
-      surface: m.tournament_ground || '',
-      homeTeam: {
-        id: m.home_player_id,
-        name: m.home_name || '',
-        shortName: m.home_name || '',
-        country: m.home_country || '',
-        ranking: m.home_ranking || null
-      },
-      awayTeam: {
-        id: m.away_player_id,
-        name: m.away_name || '',
-        shortName: m.away_name || '',
-        country: m.away_country || '',
-        ranking: m.away_ranking || null
-      },
-      homeScore: m.home_sets_won ? { current: m.home_sets_won } : null,
-      awayScore: m.away_sets_won ? { current: m.away_sets_won } : null,
-      status: {
-        code: m.status_code,
-        type: m.status_type,
-        description: m.status_description
-      },
-      startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
-      winnerCode: m.winner_code,
-      dataCompleteness: m.data_completeness || 50,
-      dataSource: m.data_source || 'sofascore',
-      source: 'database'
-    }));
+    const matches = (dbMatches || []).map(m => {
+      const dataSources = calculateDataSources(m);
+      
+      // Estrai nomi: prima dal join players, poi da raw_json, poi da winner/loser
+      const raw = m.raw_json || {};
+      const homeName = m.home_name || m.home_player?.name || raw.homeTeam?.name || raw.mapping?.home?.name || m.winner_name || '';
+      const awayName = m.away_name || m.away_player?.name || raw.awayTeam?.name || raw.mapping?.away?.name || m.loser_name || '';
+      const homeCountry = m.home_country || m.home_player?.country_alpha2 || raw.homeTeam?.country?.alpha2 || '';
+      const awayCountry = m.away_country || m.away_player?.country_alpha2 || raw.awayTeam?.country?.alpha2 || '';
+      const homeRanking = m.home_ranking || m.home_player?.current_ranking || raw.homeTeam?.ranking || m.winner_rank || null;
+      const awayRanking = m.away_ranking || m.away_player?.current_ranking || raw.awayTeam?.ranking || m.loser_rank || null;
+      const tournamentName = m.tournament_name || m.tournament?.name || raw.tournament?.uniqueTournament?.name || raw.tournament?.name || m.series || '';
+      const tournamentCategory = m.tournament_category || m.tournament?.category || raw.tournament?.category?.name || m.surface || '';
+      
+      return {
+        id: m.id,
+        eventId: m.id,
+        sport: 'tennis',
+        sportName: 'Tennis',
+        tournament: tournamentName,
+        category: tournamentCategory,
+        surface: m.tournament_ground || m.tournament?.ground_type || m.surface || m.court_type || '',
+        homeTeam: {
+          id: m.home_player_id,
+          name: homeName,
+          shortName: homeName,
+          country: homeCountry,
+          ranking: homeRanking
+        },
+        awayTeam: {
+          id: m.away_player_id,
+          name: awayName,
+          shortName: awayName,
+          country: awayCountry,
+          ranking: awayRanking
+        },
+        homeScore: m.home_sets_won ? { current: m.home_sets_won } : null,
+        awayScore: m.away_sets_won ? { current: m.away_sets_won } : null,
+        status: {
+          code: m.status_code,
+          type: m.status_type,
+          description: m.status_description
+        },
+        startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
+        winnerCode: m.winner_code,
+        dataCompleteness: m.data_completeness || 50,
+        dataSource: m.data_source || 'sofascore',
+        dataSources: dataSources,  // Nuova proprietà con proporzione fonti
+        source: 'database'
+      };
+    });
     
     res.json({ matches, count: matches.length, totalCount, source: 'database' });
   } catch (err) {

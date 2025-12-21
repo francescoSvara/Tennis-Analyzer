@@ -1168,10 +1168,11 @@ async function findMatchingXlsxMatch(sofascoreMatch) {
   const endDate = new Date(matchDate);
   endDate.setDate(endDate.getDate() + 2);
   
+  // Cerca sia xlsx_import che xlsx_2025 (diversi formati di import)
   const { data: xlsxMatches, error } = await supabase
     .from('matches')
     .select('*')
-    .eq('data_source', 'xlsx_import')
+    .in('data_source', ['xlsx_import', 'xlsx_2025'])
     .gte('start_time', startDate.toISOString())
     .lte('start_time', endDate.toISOString());
   

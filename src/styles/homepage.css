@@ -1109,7 +1109,53 @@
 }
 
 /* ============================================
-   DATA COMPLETENESS BAR IN MATCH CARD
+   DATA SOURCES BAR IN MATCH CARD
+   Mostra proporzione dati Sofascore (blu) vs XLSX (verde)
+   ============================================ */
+
+.match-data-sources {
+  margin-bottom: 12px;
+}
+
+.data-sources-bar {
+  display: flex;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: help;
+}
+
+.source-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.source-fill.sofascore {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.source-fill.xlsx {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+/* Hover effect per la barra */
+.data-sources-bar:hover {
+  height: 6px;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
+
+.data-sources-bar:hover .source-fill.sofascore {
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+.data-sources-bar:hover .source-fill.xlsx {
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+/* ============================================
+   LEGACY DATA COMPLETENESS BAR (deprecato)
    ============================================ */
 
 .match-data-completeness {

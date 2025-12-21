@@ -350,6 +350,7 @@ export function analyzePowerRankings(powerRankings) {
     averageValue: 0,
     maxValue: -Infinity,
     minValue: Infinity,
+    breakGames: [],
     dominantGames: [],
     pressureGames: []
   };
@@ -362,6 +363,9 @@ export function analyzePowerRankings(powerRankings) {
     if (value > analysis.maxValue) analysis.maxValue = value;
     if (value < analysis.minValue) analysis.minValue = value;
     
+    if (item.breakOccurred) {
+      analysis.breakGames.push({ set: item.set, game: item.game, value });
+    }
     if (value > 60) {
       analysis.dominantGames.push({ set: item.set, game: item.game, value });
     } else if (value < -20) {
@@ -372,6 +376,179 @@ export function analyzePowerRankings(powerRankings) {
   analysis.averageValue = Math.round((sum / powerRankings.length) * 10) / 10;
 
   return analysis;
+}
+
+// ============================================================================
+// VOLATILITY, ELASTICITY & TREND ANALYSIS
+// ============================================================================
+
+const VOLATILITY_THRESHOLDS = {
+  stable: 15,
+  moderate: 25,
+  volatile: 40,
+  extreme: 40
+};
+
+/**
+ * Calcola la volatilità del momentum
+ */
+export function calculateVolatility(powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < 2) {
+    return { value: 0, class: 'STABILE', deltas: [] };
+  }
+
+  const deltas = [];
+  for (let i = 1; i < powerRankings.length; i++) {
+    const prev = powerRankings[i - 1].value || 0;
+    const curr = powerRankings[i].value || 0;
+    deltas.push(Math.abs(curr - prev));
+  }
+
+  const avgDelta = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+  
+  let volatilityClass;
+  if (avgDelta < VOLATILITY_THRESHOLDS.stable) volatilityClass = 'STABILE';
+  else if (avgDelta < VOLATILITY_THRESHOLDS.moderate) volatilityClass = 'MODERATO';
+  else if (avgDelta < VOLATILITY_THRESHOLDS.volatile) volatilityClass = 'VOLATILE';
+  else volatilityClass = 'MOLTO_VOLATILE';
+
+  return {
+    value: Math.round(avgDelta * 10) / 10,
+    class: volatilityClass,
+    deltas,
+    maxSwing: Math.max(...deltas),
+    minSwing: Math.min(...deltas)
+  };
+}
+
+/**
+ * Calcola l'elasticità (capacità di recupero)
+ */
+export function calculateElasticity(powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < 3) {
+    return { value: 0, class: 'NORMALE', negative_phases: 0, avg_recovery_games: 0 };
+  }
+
+  let negativePhases = 0;
+  let recoveryGames = [];
+  let inNegativePhase = false;
+  let negativeStart = -1;
+
+  for (let i = 0; i < powerRankings.length; i++) {
+    const value = powerRankings[i].value || 0;
+    
+    if (value < -15 && !inNegativePhase) {
+      inNegativePhase = true;
+      negativeStart = i;
+    } else if (value > 0 && inNegativePhase) {
+      inNegativePhase = false;
+      negativePhases++;
+      recoveryGames.push(i - negativeStart);
+    }
+  }
+
+  const avgRecovery = recoveryGames.length > 0 
+    ? recoveryGames.reduce((a, b) => a + b, 0) / recoveryGames.length 
+    : 0;
+  
+  const elasticityValue = avgRecovery > 0 ? Math.min(1, 1 / avgRecovery) : 0.5;
+  
+  let elasticityClass;
+  if (elasticityValue >= 0.5) elasticityClass = 'RESILIENTE';
+  else if (elasticityValue >= 0.33) elasticityClass = 'NORMALE';
+  else elasticityClass = 'FRAGILE';
+
+  return {
+    value: Math.round(elasticityValue * 100) / 100,
+    class: elasticityClass,
+    negative_phases: negativePhases,
+    avg_recovery_games: Math.round(avgRecovery * 10) / 10
+  };
+}
+
+/**
+ * Classifica il carattere del match
+ */
+export function classifyMatchCharacter(volatility, elasticity, breakCount = 0) {
+  const v = volatility?.class || 'STABILE';
+  const e = elasticity?.class || 'NORMALE';
+  
+  let character, description;
+  
+  if (v === 'MOLTO_VOLATILE' && breakCount >= 4) {
+    character = 'BATTAGLIA_EMOTIVA';
+    description = 'Match con grandi oscillazioni e molti break';
+  } else if (v === 'STABILE' && e === 'RESILIENTE') {
+    character = 'DOMINIO_UNILATERALE';
+    description = 'Un giocatore controlla il match';
+  } else if (e === 'RESILIENTE' && breakCount >= 2) {
+    character = 'RIMONTE_FREQUENTI';
+    description = 'Match con recuperi frequenti';
+  } else if (v === 'VOLATILE') {
+    character = 'ALTALENA';
+    description = 'Match imprevedibile';
+  } else {
+    character = 'MATCH_STANDARD';
+    description = 'Andamento regolare';
+  }
+
+  return { character, description };
+}
+
+/**
+ * Analizza il trend del momentum
+ */
+export function analyzeMomentumTrend(powerRankings, windowSize = 3) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < windowSize) {
+    return { current_trend: 'STABLE', recent_avg: 0, match_avg: 0, momentum_shift_detected: false };
+  }
+
+  const matchAvg = powerRankings.reduce((sum, g) => sum + (g.value || 0), 0) / powerRankings.length;
+  const recentGames = powerRankings.slice(-windowSize);
+  const recentAvg = recentGames.reduce((sum, g) => sum + (g.value || 0), 0) / recentGames.length;
+  
+  const previousGames = powerRankings.slice(-windowSize * 2, -windowSize);
+  const previousAvg = previousGames.length > 0 
+    ? previousGames.reduce((sum, g) => sum + (g.value || 0), 0) / previousGames.length 
+    : matchAvg;
+  
+  const diff = recentAvg - previousAvg;
+  let trend;
+  if (diff > 10) trend = 'RISING';
+  else if (diff < -10) trend = 'FALLING';
+  else trend = 'STABLE';
+  
+  return {
+    current_trend: trend,
+    recent_avg: Math.round(recentAvg * 10) / 10,
+    match_avg: Math.round(matchAvg * 10) / 10,
+    momentum_shift_detected: Math.abs(recentAvg - matchAvg) > 20,
+    trend_strength: Math.abs(diff)
+  };
+}
+
+/**
+ * Analisi potenziata completa dei powerRankings
+ */
+export function analyzePowerRankingsEnhanced(powerRankings, matchContext = {}) {
+  const basic = analyzePowerRankings(powerRankings);
+  if (!basic) return null;
+
+  const volatility = calculateVolatility(powerRankings);
+  const elasticity = calculateElasticity(powerRankings);
+  const trend = analyzeMomentumTrend(powerRankings);
+  const breakCount = powerRankings.filter(g => g.breakOccurred).length;
+  const matchCharacter = classifyMatchCharacter(volatility, elasticity, breakCount);
+
+  return {
+    ...basic,
+    volatility,
+    elasticity,
+    trend,
+    matchCharacter,
+    breakCount,
+    context: matchContext
+  };
 }
 
 // Parse a value that may contain numbers mixed with text (e.g. "37/59 (63%)")
@@ -603,6 +780,28 @@ export function normalizeApiResponse(raw) {
 export function extractEventInfo(raw) {
   if (!raw || typeof raw !== 'object') return null;
   
+  // PRIORITÀ 1: Se raw.event esiste già (dati normalizzati dal DB), usalo direttamente
+  // Questo evita che deepFind trovi l'event annidato in raw_json.api invece del nostro
+  if (raw.event && typeof raw.event === 'object' && (raw.event.homeTeam || raw.event.id)) {
+    console.log('🎯 extractEventInfo: usando raw.event esistente', raw.event.homeTeam?.name);
+    return {
+      eventId: raw.event.id || raw.event.customId || null,
+      slug: raw.event.slug || null,
+      home: extractTeamInfo(raw.event.homeTeam),
+      away: extractTeamInfo(raw.event.awayTeam),
+      homeScore: extractScoreInfo(raw.event.homeScore),
+      awayScore: extractScoreInfo(raw.event.awayScore),
+      status: extractStatusInfo(raw.event.status),
+      tournament: extractTournamentInfo(raw.event.tournament || raw.event.uniqueTournament),
+      round: raw.event.roundInfo || null,
+      venue: raw.event.venue || null,
+      startTime: raw.event.startTimestamp ? new Date(raw.event.startTimestamp * 1000) : null,
+      winnerCode: raw.event.winnerCode || null,
+      firstToServe: raw.event.firstToServe || null,
+      _source: 'direct_event'
+    };
+  }
+  
   // First normalize/flatten the data
   const normalized = raw._flat ? raw : normalizeApiResponse(raw);
   const flat = normalized._flat || normalized;
@@ -764,6 +963,32 @@ function extractTournamentInfo(tournament) {
  */
 export function extractStatistics(raw, period = 'ALL') {
   if (!raw || typeof raw !== 'object') return null;
+  
+  // PRIORITÀ 1: Se raw.statistics esiste già in formato array (dati DB normalizzati), usalo direttamente
+  if (Array.isArray(raw.statistics) && raw.statistics.length > 0 && raw.statistics[0].groups) {
+    const periodData = raw.statistics.find(s => s.period === period) || raw.statistics[0];
+    console.log('🎯 extractStatistics: usando raw.statistics esistente, periodo:', periodData?.period);
+    if (periodData && periodData.groups) {
+      return {
+        period: periodData.period || period,
+        groups: periodData.groups.map(group => ({
+          groupName: group.groupName || 'Unknown',
+          items: (group.statisticsItems || []).map(item => ({
+            name: item.name || item.key || 'Unknown',
+            key: item.key || null,
+            home: item.home ?? item.homeValue ?? null,
+            away: item.away ?? item.awayValue ?? null,
+            homeValue: item.homeValue ?? parseNumericValue(item.home),
+            awayValue: item.awayValue ?? parseNumericValue(item.away),
+            compareCode: item.compareCode ?? null,
+            statisticsType: item.statisticsType || null,
+            renderType: item.renderType || null
+          }))
+        })),
+        _availablePeriods: raw.statistics.filter(s => s?.period).map(s => s.period)
+      };
+    }
+  }
   
   // Normalize/flatten the data first
   const normalized = raw._flat ? raw : normalizeApiResponse(raw);
@@ -1137,6 +1362,12 @@ export function extractMatchSummary(raw) {
 export function loadPointByPoint(raw) {
   // First try the new normalized approach
   if (!raw || typeof raw !== 'object') return null;
+  
+  // PRIORITÀ 1: Se raw.pointByPoint esiste già come array (dati normalizzati dal DB), usalo
+  if (Array.isArray(raw.pointByPoint) && raw.pointByPoint.length > 0) {
+    console.log('🎯 loadPointByPoint: usando raw.pointByPoint esistente, sets:', raw.pointByPoint.length);
+    return raw.pointByPoint.slice();
+  }
   
   const normalized = raw._flat ? raw : normalizeApiResponse(raw);
   if (normalized.pointByPoint && Array.isArray(normalized.pointByPoint)) {
