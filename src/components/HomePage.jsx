@@ -137,7 +137,7 @@ function AddMatchModal({ onClose, onSuccess }) {
 
 function HomePage({ onMatchSelect }) {
   const [selectedSport, setSelectedSport] = useState('tennis');
-  const [allMatches, setAllMatches] = useState([]); // Tutti i match caricati
+  const [matches, setMatches] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [detectedMatches, setDetectedMatches] = useState([]);
   const [totalMatchCount, setTotalMatchCount] = useState(0);
@@ -146,26 +146,43 @@ function HomePage({ onMatchSelect }) {
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
-  
-  // Filtri data gerarchici
-  const [selectedYear, setSelectedYear] = useState('all');
-  const [selectedMonth, setSelectedMonth] = useState('all');
-  const [selectedDay, setSelectedDay] = useState('all');
 
   // Funzione per caricare i match
   const loadMatches = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // Carica TUTTI i match dal database (limite alto)
-      const matchesRes = await fetch(apiUrl(`/api/db/matches?limit=10000`));
-      if (!matchesRes.ok) {
-        throw new Error(`Errore HTTP: ${matchesRes.status}`);
+      // Carica TUTTI i match dal database con paginazione
+      let allMatches = [];
+      let offset = 0;
+      const pageSize = 1000; // Supabase ha limite di ~1000 per query
+      let hasMore = true;
+      
+      while (hasMore) {
+        const matchesRes = await fetch(apiUrl(`/api/db/matches?limit=${pageSize}&offset=${offset}`));
+        if (!matchesRes.ok) {
+          throw new Error(`Errore HTTP: ${matchesRes.status}`);
+        }
+        const matchesData = await matchesRes.json();
+        const pageMatches = matchesData.matches || [];
+        allMatches = [...allMatches, ...pageMatches];
+        
+        // Se abbiamo ricevuto meno del pageSize, abbiamo finito
+        if (pageMatches.length < pageSize) {
+          hasMore = false;
+        } else {
+          offset += pageSize;
+        }
+        
+        // Aggiorna totalCount dalla prima risposta
+        if (offset === pageSize) {
+          setTotalMatchCount(matchesData.totalCount || allMatches.length);
+        }
       }
-      const matchesData = await matchesRes.json();
-      setAllMatches(matchesData.matches || []);
-      setTotalMatchCount(matchesData.totalCount || matchesData.matches?.length || 0);
-      console.log(`📁 Loaded ${matchesData.matches?.length || 0} matches from database`);
+      
+      setMatches(allMatches);
+      setTotalMatchCount(allMatches.length);
+      console.log(`📁 Loaded ${allMatches.length} matches from database (all pages)`);
       
       // Carica suggeriti e rilevati in parallelo
       const [suggestedRes, detectedRes, trackedRes] = await Promise.all([
@@ -197,91 +214,16 @@ function HomePage({ onMatchSelect }) {
     } catch (err) {
       console.error('Errore caricamento match:', err);
       setError('Impossibile caricare i match. Verifica che il backend sia attivo su porta 3001.');
-      setAllMatches([]);
+      setMatches([]);
     } finally {
       setLoading(false);
     }
   }, [selectedSport]);
 
-  // Carica i match quando cambia lo sport o il filtro
+  // Carica i match quando cambia lo sport
   useEffect(() => {
     loadMatches();
   }, [loadMatches]);
-
-  // Calcola gli anni disponibili dai match
-  const availableYears = React.useMemo(() => {
-    const years = new Set();
-    allMatches.forEach(m => {
-      if (m.startTimestamp) {
-        const date = new Date(m.startTimestamp * 1000);
-        years.add(date.getFullYear());
-      }
-    });
-    return Array.from(years).sort((a, b) => b - a); // Ordine decrescente
-  }, [allMatches]);
-
-  // Calcola i mesi disponibili per l'anno selezionato
-  const availableMonths = React.useMemo(() => {
-    if (selectedYear === 'all') return [];
-    const months = new Set();
-    allMatches.forEach(m => {
-      if (m.startTimestamp) {
-        const date = new Date(m.startTimestamp * 1000);
-        if (date.getFullYear() === parseInt(selectedYear)) {
-          months.add(date.getMonth() + 1); // 1-12
-        }
-      }
-    });
-    return Array.from(months).sort((a, b) => b - a); // Ordine decrescente
-  }, [allMatches, selectedYear]);
-
-  // Calcola i giorni disponibili per anno/mese selezionato
-  const availableDays = React.useMemo(() => {
-    if (selectedYear === 'all' || selectedMonth === 'all') return [];
-    const days = new Set();
-    allMatches.forEach(m => {
-      if (m.startTimestamp) {
-        const date = new Date(m.startTimestamp * 1000);
-        if (date.getFullYear() === parseInt(selectedYear) && 
-            (date.getMonth() + 1) === parseInt(selectedMonth)) {
-          days.add(date.getDate());
-        }
-      }
-    });
-    return Array.from(days).sort((a, b) => b - a); // Ordine decrescente
-  }, [allMatches, selectedYear, selectedMonth]);
-
-  // Filtra i match in base ai filtri selezionati
-  const filteredMatches = React.useMemo(() => {
-    return allMatches.filter(m => {
-      if (!m.startTimestamp) return selectedYear === 'all'; // Mostra match senza data solo se "tutti"
-      
-      const date = new Date(m.startTimestamp * 1000);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-
-      if (selectedYear !== 'all' && year !== parseInt(selectedYear)) return false;
-      if (selectedMonth !== 'all' && month !== parseInt(selectedMonth)) return false;
-      if (selectedDay !== 'all' && day !== parseInt(selectedDay)) return false;
-      
-      return true;
-    });
-  }, [allMatches, selectedYear, selectedMonth, selectedDay]);
-
-  // Reset filtri figli quando cambia il genitore
-  useEffect(() => {
-    setSelectedMonth('all');
-    setSelectedDay('all');
-  }, [selectedYear]);
-
-  useEffect(() => {
-    setSelectedDay('all');
-  }, [selectedMonth]);
-
-  // Nomi dei mesi in italiano
-  const monthNames = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
-                      'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
   const handleMatchClick = (match) => {
     if (onMatchSelect) {
@@ -347,54 +289,8 @@ function HomePage({ onMatchSelect }) {
               {selectedSport === 'rugby-union' && '🏉 Rugby Matches'}
             </h2>
             
-            {/* Filtri Data Gerarchici */}
-            <div className="date-filters">
-              {/* Anno */}
-              <select 
-                className="date-filter-select"
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-              >
-                <option value="all">📅 Tutti gli anni ({totalMatchCount})</option>
-                {availableYears.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-
-              {/* Mese - visibile solo se anno selezionato */}
-              {selectedYear !== 'all' && (
-                <select 
-                  className="date-filter-select"
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                >
-                  <option value="all">📆 Tutti i mesi</option>
-                  {availableMonths.map(month => (
-                    <option key={month} value={month}>{monthNames[month]}</option>
-                  ))}
-                </select>
-              )}
-
-              {/* Giorno - visibile solo se mese selezionato */}
-              {selectedYear !== 'all' && selectedMonth !== 'all' && (
-                <select 
-                  className="date-filter-select"
-                  value={selectedDay}
-                  onChange={(e) => setSelectedDay(e.target.value)}
-                >
-                  <option value="all">📅 Tutti i giorni</option>
-                  {availableDays.map(day => (
-                    <option key={day} value={day}>{day}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-            
             <span className="match-count">
-              {loading ? '...' : `${filteredMatches.length} visualizzate`}
-              {filteredMatches.length !== totalMatchCount && !loading && (
-                <span className="filtered-info"> / {totalMatchCount} totali</span>
-              )}
+              {loading ? '...' : `${totalMatchCount} salvate`}
               {totalDetectedCount > 0 && !loading && (
                 <span className="detected-count"> · {totalDetectedCount} mancanti</span>
               )}
@@ -412,7 +308,7 @@ function HomePage({ onMatchSelect }) {
           
           {/* Match Grid */}
           <MatchGrid 
-            matches={filteredMatches}
+            matches={matches}
             suggestedMatches={suggestedMatches}
             detectedMatches={detectedMatches}
             loading={loading}

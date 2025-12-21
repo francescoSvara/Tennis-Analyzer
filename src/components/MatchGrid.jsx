@@ -33,6 +33,26 @@ function useMidnightRefresh(callback) {
   }, [callback]);
 }
 
+// Funzione per ottenere la label dell'anno
+function getYearLabel(timestamp) {
+  if (!timestamp) return 'Data sconosciuta';
+  const date = new Date(timestamp * 1000);
+  const now = new Date();
+  const year = date.getFullYear();
+  
+  if (year === now.getFullYear()) return 'Quest\'anno';
+  if (year === now.getFullYear() - 1) return 'Anno scorso';
+  if (year === now.getFullYear() + 1) return 'Prossimo anno';
+  return String(year);
+}
+
+// Funzione per ottenere la chiave dell'anno (per ordinamento)
+function getYearKey(timestamp) {
+  if (!timestamp) return '9999';
+  const date = new Date(timestamp * 1000);
+  return String(date.getFullYear());
+}
+
 // Funzione per ottenere la label del mese
 function getMonthLabel(timestamp) {
   if (!timestamp) return 'Data sconosciuta';
@@ -105,6 +125,47 @@ function getDateKey(timestamp) {
   if (!timestamp) return '9999-99-99'; // Date sconosciute alla fine
   const date = new Date(timestamp * 1000);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+// Componente per gruppo di anni collassabile
+function YearGroup({ yearLabel, yearKey, monthGroups, onMatchClick, onAddSuggested, defaultExpanded = false }) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  
+  // Conta totale partite nell'anno
+  const totalCount = monthGroups.reduce((sum, mg) => sum + mg.matches.length, 0);
+  
+  return (
+    <div className="year-group">
+      <button 
+        className={`year-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="year-group-title">
+          <span className="year-group-icon">{isExpanded ? '▼' : '▶'}</span>
+          <span className="year-group-label">{yearLabel}</span>
+          <span className="year-group-count">
+            {totalCount} {totalCount === 1 ? 'partita' : 'partite'}
+          </span>
+        </div>
+      </button>
+      
+      {isExpanded && (
+        <div className="year-group-content">
+          {monthGroups.map((monthGroup) => (
+            <MonthGroup
+              key={monthGroup.monthKey}
+              monthLabel={monthGroup.monthLabel}
+              monthKey={monthGroup.monthKey}
+              matches={monthGroup.matches}
+              onMatchClick={onMatchClick}
+              onAddSuggested={onAddSuggested}
+              defaultExpanded={monthGroup.monthKey === getMonthKey(Date.now() / 1000)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // Componente per gruppo di mesi collassabile
@@ -217,85 +278,81 @@ function MatchGrid({ matches, loading, onMatchClick, suggestedMatches = [], dete
   // Hook per aggiornare le date a mezzanotte
   useMidnightRefresh(handleMidnight);
   
-  // Raggruppa le partite per MESE (inclusi suggeriti e rilevati) - DEVE essere prima dei return condizionali
-  const groupedByMonth = useMemo(() => {
+  // Raggruppa le partite per ANNO > MESE (inclusi suggeriti e rilevati)
+  const groupedByYear = useMemo(() => {
     // Raccogli tutti gli eventId già nel database per evitare duplicati
     const existingEventIds = new Set((matches || []).map(m => String(m.eventId)));
     
-    const groups = {};
+    const yearGroups = {};
     
-    // Aggiungi match esistenti
-    (matches || []).forEach(match => {
+    // Funzione helper per aggiungere un match al gruppo corretto
+    const addMatchToGroup = (match, isSuggested, isDetected) => {
+      const yearKey = getYearKey(match.startTimestamp);
+      const yearLabel = getYearLabel(match.startTimestamp);
       const monthKey = getMonthKey(match.startTimestamp);
       const monthLabel = getMonthLabel(match.startTimestamp);
       
-      if (!groups[monthKey]) {
-        groups[monthKey] = {
+      if (!yearGroups[yearKey]) {
+        yearGroups[yearKey] = {
+          yearKey,
+          yearLabel,
+          monthGroups: {}
+        };
+      }
+      
+      if (!yearGroups[yearKey].monthGroups[monthKey]) {
+        yearGroups[yearKey].monthGroups[monthKey] = {
           monthKey,
           monthLabel,
           matches: []
         };
       }
-      groups[monthKey].matches.push({ ...match, isSuggested: false, isDetected: false });
+      
+      yearGroups[yearKey].monthGroups[monthKey].matches.push({ 
+        ...match, 
+        isSuggested, 
+        isDetected 
+      });
+    };
+    
+    // Aggiungi match esistenti
+    (matches || []).forEach(match => {
+      addMatchToGroup(match, false, false);
     });
     
     // Aggiungi match suggeriti (da API, non nel DB)
     (suggestedMatches || []).forEach(match => {
-      const monthKey = getMonthKey(match.startTimestamp);
-      const monthLabel = getMonthLabel(match.startTimestamp);
-      
-      if (!groups[monthKey]) {
-        groups[monthKey] = {
-          monthKey,
-          monthLabel,
-          matches: []
-        };
-      }
-      // Evita duplicati (controlla eventId)
-      const exists = groups[monthKey].matches.some(m => String(m.eventId) === String(match.eventId));
-      if (!exists && !existingEventIds.has(String(match.eventId))) {
-        groups[monthKey].matches.push({ ...match, isSuggested: true, isDetected: false });
+      if (!existingEventIds.has(String(match.eventId))) {
+        addMatchToGroup(match, true, false);
       }
     });
     
     // Aggiungi match rilevati (dal torneo, non nel DB)
     (detectedMatches || []).forEach(match => {
-      // Salta se già nel database
-      if (existingEventIds.has(String(match.eventId))) return;
-      
-      const monthKey = getMonthKey(match.startTimestamp);
-      const monthLabel = getMonthLabel(match.startTimestamp);
-      
-      if (!groups[monthKey]) {
-        groups[monthKey] = {
-          monthKey,
-          monthLabel,
-          matches: []
-        };
-      }
-      // Evita duplicati (controlla eventId)
-      const exists = groups[monthKey].matches.some(m => String(m.eventId) === String(match.eventId));
-      if (!exists) {
-        groups[monthKey].matches.push({ ...match, isSuggested: false, isDetected: true });
+      if (!existingEventIds.has(String(match.eventId))) {
+        addMatchToGroup(match, false, true);
       }
     });
     
     // Se non ci sono gruppi, ritorna array vuoto
-    if (Object.keys(groups).length === 0) return [];
+    if (Object.keys(yearGroups).length === 0) return [];
     
-    // Ordina i gruppi per mese (più recenti in alto) e le partite all'interno per data e orario
-    return Object.values(groups)
-      .sort((a, b) => b.monthKey.localeCompare(a.monthKey))
-      .map(group => ({
-        ...group,
-        matches: group.matches.sort((a, b) => {
-          // Prima per data/orario (più recenti prima)
-          const timeA = a.startTimestamp || 0;
-          const timeB = b.startTimestamp || 0;
-          if (timeA !== timeB) return timeB - timeA;
-          // Poi per torneo
-          return (a.tournament || '').localeCompare(b.tournament || '');
-        })
+    // Converti e ordina
+    return Object.values(yearGroups)
+      .sort((a, b) => b.yearKey.localeCompare(a.yearKey)) // Anni più recenti prima
+      .map(yearGroup => ({
+        ...yearGroup,
+        monthGroups: Object.values(yearGroup.monthGroups)
+          .sort((a, b) => b.monthKey.localeCompare(a.monthKey)) // Mesi più recenti prima
+          .map(monthGroup => ({
+            ...monthGroup,
+            matches: monthGroup.matches.sort((a, b) => {
+              const timeA = a.startTimestamp || 0;
+              const timeB = b.startTimestamp || 0;
+              if (timeA !== timeB) return timeB - timeA;
+              return (a.tournament || '').localeCompare(b.tournament || '');
+            })
+          }))
       }));
   }, [matches, suggestedMatches, detectedMatches]);
   
@@ -323,18 +380,18 @@ function MatchGrid({ matches, loading, onMatchClick, suggestedMatches = [], dete
     );
   }
 
-  // Match grid con gruppi per MESE
+  // Match grid con gruppi per ANNO > MESE > GIORNO
   return (
     <div className="match-grid-grouped">
-      {groupedByMonth.map((group) => (
-        <MonthGroup
-          key={group.monthKey}
-          monthLabel={group.monthLabel}
-          monthKey={group.monthKey}
-          matches={group.matches}
+      {groupedByYear.map((yearGroup) => (
+        <YearGroup
+          key={yearGroup.yearKey}
+          yearLabel={yearGroup.yearLabel}
+          yearKey={yearGroup.yearKey}
+          monthGroups={yearGroup.monthGroups}
           onMatchClick={onMatchClick}
           onAddSuggested={onAddSuggested}
-          defaultExpanded={group.monthKey === getMonthKey(Date.now() / 1000)} // Espandi solo mese corrente
+          defaultExpanded={yearGroup.yearKey === getYearKey(Date.now() / 1000)}
         />
       ))}
     </div>
