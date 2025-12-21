@@ -63,10 +63,56 @@ Lo scraping va fatto **esclusivamente** dal progetto locale `Tennis-Scraper-Loca
 
 ## 📊 STATISTICHE ATTUALI (21 Dicembre 2025)
 
-- **2670+ match** nel database (26 Sofascore + 2644 storici xlsx)
-- **178 partite rilevate** dai tornei monitorati
+- **5448 match** nel database (2807 Sofascore + 2641 storici xlsx)
+- **205 giocatori unici** con nomi normalizzati
+- **210 mapping giocatori** per normalizzazione automatica
+- **4420 record normalizzati** nella migrazione
 - **15+ tornei** tracciati (ATP, ITF, Challenger, United Cup)
-- **Giocatori top**: Zverev, Alcaraz, Hurkacz, de Minaur, Tien
+- **Giocatori top**: Jannik Sinner (128 match), Carlos Alcaraz (116 match)
+
+---
+
+## 🔄 DATA NORMALIZATION LAYER (NUOVO!)
+
+### Problema Risolto
+I dati provenienti da fonti diverse (xlsx, Sofascore) avevano formati diversi:
+- xlsx: `"Sinner J."`, `"Alcaraz C."`  
+- Sofascore: `"Jannik Sinner"`, `"Carlos Alcaraz"`
+
+### Soluzione Implementata
+**`backend/services/dataNormalizer.js`** con 210 mapping completi:
+
+```javascript
+// Esempio utilizzo
+const { normalizePlayerName } = require('./services/dataNormalizer');
+
+normalizePlayerName("Sinner J.")     // → "Jannik Sinner"
+normalizePlayerName("Alcaraz C.")    // → "Carlos Alcaraz"
+normalizePlayerName("Djokovic N.")   // → "Novak Djokovic"
+```
+
+### Script di Migrazione
+```bash
+# Normalizza tutti i nomi nel database esistente
+cd backend
+node scripts/normalize-player-names.js
+
+# Dry run (solo preview)
+node scripts/normalize-player-names.js --dry-run
+```
+
+### Unified Import Gateway
+**`backend/services/unifiedImporter.js`** - Gateway unico per qualsiasi fonte:
+
+```javascript
+const { importXlsx, importSofascoreJson } = require('./services/unifiedImporter');
+
+// Import da xlsx
+await importXlsx('/path/to/2025.xlsx');
+
+// Import da Sofascore JSON
+await importSofascoreJson(sofascoreData);
+```
 
 ---
 
@@ -331,6 +377,7 @@ Tennis-Analyzer è un sistema completo per:
 
 ## 🔧 API ENDPOINTS PRINCIPALI
 
+### Match & Database
 | Endpoint | Metodo | Descrizione |
 |----------|--------|-------------|
 | `/api/health` | GET | Health check con status Supabase |
@@ -341,6 +388,66 @@ Tennis-Analyzer è un sistema completo per:
 | `/api/tournament/:id/events` | GET | Partite torneo con copertura |
 | `/api/sync/:eventId` | POST | Sincronizza dati match |
 | `/api/tracked` | GET | Partite in monitoraggio |
+
+### Player Stats API (NUOVO!)
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/player/search?q=xxx` | GET | Ricerca giocatori (autocomplete) |
+| `/api/player/:name/stats` | GET | Statistiche complete giocatore |
+| `/api/player/:name/matches` | GET | Lista match giocatore |
+| `/api/player/h2h?player1=xxx&player2=yyy` | GET | Head to Head |
+
+**Esempio Response `/api/player/Jannik%20Sinner/stats`:**
+```json
+{
+  "overall": { "total": 128, "wins": 116, "losses": 12, "winRate": 0.906 },
+  "bySurface": {
+    "Hard": { "total": 84, "wins": 78, "winRate": 0.929 },
+    "Clay": { "total": 26, "wins": 22, "winRate": 0.846 },
+    "Grass": { "total": 18, "wins": 16, "winRate": 0.889 }
+  },
+  "byFormat": {
+    "BO3": { "total": 72, "wins": 64, "winRate": 0.889 },
+    "BO5": { "total": 56, "wins": 52, "winRate": 0.929 }
+  },
+  "bySeries": {
+    "Grand Slam": { "total": 56, "wins": 52, "winRate": 0.929 },
+    "Masters 1000": { "total": 38, "wins": 32, "winRate": 0.842 }
+  }
+}
+```
+
+---
+
+## 📂 STRUTTURA SERVIZI BACKEND
+
+```
+backend/
+├── server.js                    # Express server principale
+├── db/
+│   ├── supabase.js              # Client Supabase
+│   └── matchRepository.js       # Queries database
+├── services/
+│   ├── dataNormalizer.js        # 🆕 Normalizzazione nomi/superfici
+│   ├── unifiedImporter.js       # 🆕 Gateway import xlsx/Sofascore  
+│   └── playerStatsService.js    # 🆕 Statistiche giocatori
+├── scripts/
+│   ├── normalize-player-names.js    # 🆕 Migrazione DB
+│   └── generate-player-mappings.js  # 🆕 Generatore mapping
+├── scraper/
+│   └── sofascoreScraper.js      # Scraping (SOLO LOCALE!)
+└── utils/
+    └── valueInterpreter.js      # Calcoli momentum/value
+```
+
+### File Chiave
+
+| File | Scopo | Note |
+|------|-------|------|
+| `dataNormalizer.js` | 210 mapping giocatori ATP | Converte "Sinner J." → "Jannik Sinner" |
+| `unifiedImporter.js` | Import da qualsiasi fonte | xlsx, Sofascore JSON, manual |
+| `playerStatsService.js` | API statistiche giocatori | Win rate per superficie/serie |
+| `normalize-player-names.js` | Script migrazione | Normalizza DB esistente |
 
 ---
 
@@ -466,21 +573,60 @@ Tennis-Analyzer/
 - [x] Database Monitor Dashboard
 - [x] Live tracking automatico
 - [x] Raggruppamento match per data
-- [x] **Import dati storici xlsx** (2644+ match ATP 2025)
+- [x] **Import dati storici xlsx** (2641+ match ATP 2025)
 - [x] **Auto-merge Sofascore + xlsx** (quote, ranking, punteggi set)
 - [x] **Documentazione schema DB completo** (50+ campi con formule)
+- [x] **🆕 Data Normalization Layer** (210 mapping giocatori ATP)
+- [x] **🆕 Player Stats API** (statistiche per superficie/serie)
+- [x] **🆕 Unified Import Gateway** (xlsx + Sofascore)
+- [x] **🆕 PredictorTab Frontend** (confronto statistiche in-match)
+- [x] **🆕 ManualPredictor** (predictor da DB Monitor)
 
 ### 🔜 Prossimi Step
-- [ ] Ricerca per nome giocatore
-- [ ] Filtri avanzati (torneo, status, data)
-- [ ] Notifiche match importanti
-- [ ] Export dati CSV/Excel
+- [ ] Momentum Volatility & Elasticity Calculator
+- [ ] Dynamic Surface Thresholds
+- [ ] Pressure Index Calculator
+- [ ] Multi-Source Odds Analysis
+- [ ] Historical Comeback Rate API
+- [ ] Match Character Classifier
 
 ### 📅 Futuro
 - [ ] Altri sport (Calcio, Basket)
 - [ ] Integrazione API Betfair
 - [ ] App mobile React Native
 - [ ] Predizioni ML/AI
+
+---
+
+## 🔄 DATABASE MIGRATIONS
+
+### Normalizzazione Nomi Giocatori (21/12/2025)
+**Problema:** Nomi duplicati (xlsx: "Sinner J." vs Sofascore: "Jannik Sinner")
+
+**Soluzione:**
+```bash
+cd backend
+node scripts/normalize-player-names.js
+```
+
+**Risultato:**
+- 4420 record normalizzati
+- 205 giocatori unici
+- 0 duplicati rimasti
+
+### Import xlsx con ID Numerici
+**Problema:** Supabase richiede BIGINT per `id`, xlsx ha slug testuali
+
+**Soluzione:** Hash numerici in `unifiedImporter.js`
+```javascript
+// Genera ID numerico da data+giocatori
+function generateXlsxId(match) {
+  const hash = createHash('md5')
+    .update(`${match.Date}_${match.Winner}_${match.Loser}`)
+    .digest('hex');
+  return BigInt('0x' + hash.slice(0, 12)) % BigInt('999999999999');
+}
+```
 
 ---
 

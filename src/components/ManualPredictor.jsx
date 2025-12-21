@@ -16,6 +16,7 @@ function PlayerSearch({ label, selectedPlayer, onSelect, placeholder, className 
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [error, setError] = useState(null);
   const inputRef = React.useRef(null);
   const dropdownRef = React.useRef(null);
 
@@ -23,20 +24,32 @@ function PlayerSearch({ label, selectedPlayer, onSelect, placeholder, className 
   useEffect(() => {
     if (query.length < 2) {
       setResults([]);
+      setError(null);
       return;
     }
 
     const timer = setTimeout(async () => {
       setIsLoading(true);
+      setError(null);
       try {
-        const res = await fetch(`${apiUrl}/api/player/search?q=${encodeURIComponent(query)}&limit=10`);
+        const url = `${apiUrl}/api/player/search?q=${encodeURIComponent(query)}&limit=10`;
+        console.log('[ManualPredictor] Searching:', url);
+        const res = await fetch(url);
+        const data = await res.json();
+        console.log('[ManualPredictor] Search result:', data);
+        
         if (res.ok) {
-          const data = await res.json();
           setResults(data.players || []);
           setShowDropdown(true);
+          if (data.players?.length === 0) {
+            setError('Nessun giocatore trovato');
+          }
+        } else {
+          setError(data.error || 'Errore ricerca');
         }
       } catch (err) {
-        console.error('Search error:', err);
+        console.error('[ManualPredictor] Search error:', err);
+        setError('Errore connessione: ' + err.message);
       } finally {
         setIsLoading(false);
       }
@@ -58,10 +71,12 @@ function PlayerSearch({ label, selectedPlayer, onSelect, placeholder, className 
   }, []);
 
   const handleSelect = (player) => {
+    console.log('[ManualPredictor] Selected player:', player);
     onSelect(player);
     setQuery('');
     setShowDropdown(false);
     setResults([]);
+    setError(null);
   };
 
   return (
@@ -71,7 +86,7 @@ function PlayerSearch({ label, selectedPlayer, onSelect, placeholder, className 
       {selectedPlayer ? (
         <div className="selected-player">
           <span className="selected-name">{selectedPlayer.name}</span>
-          <span className="selected-matches">{selectedPlayer.totalMatches} match</span>
+          <span className="selected-matches">{selectedPlayer.totalMatches || '?'} match</span>
           <button 
             className="clear-btn"
             onClick={() => onSelect(null)}
@@ -103,12 +118,14 @@ function PlayerSearch({ label, selectedPlayer, onSelect, placeholder, className 
                 >
                   <span className="result-name">{player.name}</span>
                   <span className="result-meta">
-                    {player.totalMatches} match • {(player.winRate * 100).toFixed(0)}% WR
+                    {player.totalMatches} match • {((player.winRate || 0) * 100).toFixed(0)}% WR
                   </span>
                 </li>
               ))}
             </ul>
           )}
+          
+          {error && <div className="search-error">{error}</div>}
         </div>
       )}
     </div>
@@ -116,47 +133,48 @@ function PlayerSearch({ label, selectedPlayer, onSelect, placeholder, className 
 }
 
 // ============================================
-// STAT COMPARISON ROW
+// DEBUG INFO COMPONENT
 // ============================================
-function ComparisonRow({ label, homeValue, awayValue, format = 'percent', higherIsBetter = true }) {
-  const homeNum = parseFloat(homeValue) || 0;
-  const awayNum = parseFloat(awayValue) || 0;
+function DebugInfo({ label, data }) {
+  const [expanded, setExpanded] = useState(false);
   
-  const total = homeNum + awayNum || 1;
-  const homePercent = (homeNum / total) * 100;
-  const awayPercent = (awayNum / total) * 100;
-  
-  const homeIsWinner = higherIsBetter ? homeNum > awayNum : homeNum < awayNum;
-  const awayIsWinner = higherIsBetter ? awayNum > homeNum : awayNum < homeNum;
-  
+  return (
+    <div className="debug-info">
+      <button 
+        className="debug-toggle"
+        onClick={() => setExpanded(!expanded)}
+      >
+        🔍 {label} {expanded ? '▼' : '▶'}
+      </button>
+      {expanded && (
+        <pre className="debug-content">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// STAT ROW COMPONENT
+// ============================================
+function StatRow({ label, homeValue, awayValue, format = 'auto' }) {
   const formatValue = (val) => {
+    if (val === null || val === undefined) return 'N/A';
     if (format === 'percent') return `${(val * 100).toFixed(1)}%`;
     if (format === 'number') return val.toFixed(0);
-    if (format === 'decimal') return val.toFixed(2);
-    return val;
+    if (typeof val === 'number') {
+      if (val >= 0 && val <= 1) return `${(val * 100).toFixed(1)}%`;
+      return val.toFixed(2);
+    }
+    return String(val);
   };
 
   return (
-    <div className="comparison-row">
-      <span className={`comparison-value home ${homeIsWinner ? 'winner' : ''}`}>
-        {formatValue(homeValue)}
-      </span>
-      <div className="comparison-center">
-        <span className="comparison-label">{label}</span>
-        <div className="comparison-bar-container">
-          <div 
-            className="comparison-bar home" 
-            style={{ width: `${homePercent}%` }}
-          />
-          <div 
-            className="comparison-bar away" 
-            style={{ width: `${awayPercent}%` }}
-          />
-        </div>
-      </div>
-      <span className={`comparison-value away ${awayIsWinner ? 'winner' : ''}`}>
-        {formatValue(awayValue)}
-      </span>
+    <div className="stat-row">
+      <span className="stat-value home">{formatValue(homeValue)}</span>
+      <span className="stat-label">{label}</span>
+      <span className="stat-value away">{formatValue(awayValue)}</span>
     </div>
   );
 }
@@ -170,84 +188,116 @@ export default function ManualPredictor() {
   const [homeStats, setHomeStats] = useState(null);
   const [awayStats, setAwayStats] = useState(null);
   const [h2hStats, setH2hStats] = useState(null);
-  const [loading, setLoading] = useState({ home: false, away: false, h2h: false });
+  const [loading, setLoading] = useState({ home: false, away: false, h2h: false, calc: false });
   const [surface, setSurface] = useState('all');
   const [format, setFormat] = useState('all');
+  const [calculated, setCalculated] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
-  // Fetch player stats when selected
-  const fetchPlayerStats = useCallback(async (player, type) => {
-    if (!player) {
-      if (type === 'home') setHomeStats(null);
-      else setAwayStats(null);
-      return;
-    }
+  // Reset calculation when players change
+  useEffect(() => {
+    setCalculated(false);
+    setHomeStats(null);
+    setAwayStats(null);
+    setH2hStats(null);
+  }, [homePlayer, awayPlayer, surface, format]);
 
-    setLoading(prev => ({ ...prev, [type]: true }));
+  // Fetch player stats
+  const fetchPlayerStats = async (player, type) => {
+    if (!player) return null;
+
     try {
       const params = new URLSearchParams();
       if (surface !== 'all') params.append('surface', surface);
       if (format !== 'all') params.append('format', format);
       
-      const res = await fetch(`${apiUrl}/api/player/${encodeURIComponent(player.name)}/stats?${params}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (type === 'home') setHomeStats(data);
-        else setAwayStats(data);
+      const url = `${apiUrl}/api/player/${encodeURIComponent(player.name)}/stats?${params}`;
+      console.log(`[ManualPredictor] Fetching ${type} stats:`, url);
+      
+      const res = await fetch(url);
+      const data = await res.json();
+      console.log(`[ManualPredictor] ${type} stats response:`, data);
+      
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
       }
+      
+      return data;
     } catch (err) {
-      console.error(`Error fetching ${type} stats:`, err);
-    } finally {
-      setLoading(prev => ({ ...prev, [type]: false }));
+      console.error(`[ManualPredictor] Error fetching ${type} stats:`, err);
+      throw err;
     }
-  }, [surface, format]);
+  };
 
-  // Fetch H2H when both players selected
-  const fetchH2H = useCallback(async () => {
-    if (!homePlayer || !awayPlayer) {
-      setH2hStats(null);
-      return;
-    }
+  // Fetch H2H
+  const fetchH2H = async () => {
+    if (!homePlayer || !awayPlayer) return null;
 
-    setLoading(prev => ({ ...prev, h2h: true }));
     try {
       const params = new URLSearchParams({
         player1: homePlayer.name,
         player2: awayPlayer.name
       });
       
-      const res = await fetch(`${apiUrl}/api/player/h2h?${params}`);
-      if (res.ok) {
-        const data = await res.json();
-        setH2hStats(data);
+      const url = `${apiUrl}/api/player/h2h?${params}`;
+      console.log('[ManualPredictor] Fetching H2H:', url);
+      
+      const res = await fetch(url);
+      const data = await res.json();
+      console.log('[ManualPredictor] H2H response:', data);
+      
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
       }
+      
+      return data;
     } catch (err) {
-      console.error('Error fetching H2H:', err);
-    } finally {
-      setLoading(prev => ({ ...prev, h2h: false }));
+      console.error('[ManualPredictor] Error fetching H2H:', err);
+      throw err;
     }
-  }, [homePlayer, awayPlayer]);
+  };
 
-  // Effects
-  useEffect(() => {
-    fetchPlayerStats(homePlayer, 'home');
-  }, [homePlayer, fetchPlayerStats]);
+  // MAIN CALCULATE BUTTON HANDLER
+  const handleCalculate = async () => {
+    if (!homePlayer || !awayPlayer) {
+      setApiError('Seleziona entrambi i giocatori');
+      return;
+    }
 
-  useEffect(() => {
-    fetchPlayerStats(awayPlayer, 'away');
-  }, [awayPlayer, fetchPlayerStats]);
+    setLoading({ home: true, away: true, h2h: true, calc: true });
+    setApiError(null);
+    setCalculated(false);
 
-  useEffect(() => {
-    fetchH2H();
-  }, [fetchH2H]);
+    try {
+      // Fetch all data in parallel
+      const [home, away, h2h] = await Promise.all([
+        fetchPlayerStats(homePlayer, 'home'),
+        fetchPlayerStats(awayPlayer, 'away'),
+        fetchH2H()
+      ]);
 
-  // Calculate prediction
+      setHomeStats(home);
+      setAwayStats(away);
+      setH2hStats(h2h);
+      setCalculated(true);
+    } catch (err) {
+      setApiError('Errore nel calcolo: ' + err.message);
+    } finally {
+      setLoading({ home: false, away: false, h2h: false, calc: false });
+    }
+  };
+
+  // Calculate prediction from stats
   const calculatePrediction = () => {
     if (!homeStats || !awayStats) return null;
 
-    const homeWR = homeStats.winRate || 0;
-    const awayWR = awayStats.winRate || 0;
-    const homeMatches = homeStats.totalMatches || 0;
-    const awayMatches = awayStats.totalMatches || 0;
+    // Estrai i dati dalle stats
+    const homeWR = homeStats.overall?.win_rate || homeStats.winRate || 0;
+    const awayWR = awayStats.overall?.win_rate || awayStats.winRate || 0;
+    const homeMatches = homeStats.overall?.total_matches || homeStats.totalMatches || 0;
+    const awayMatches = awayStats.overall?.total_matches || awayStats.totalMatches || 0;
+    const homeComeback = homeStats.overall?.comeback_rate || 0;
+    const awayComeback = awayStats.overall?.comeback_rate || 0;
 
     // Weight by number of matches (more data = more reliable)
     const homeWeight = Math.min(homeMatches / 50, 1);
@@ -256,14 +306,14 @@ export default function ManualPredictor() {
     // H2H bonus
     let h2hBonus = { home: 0, away: 0 };
     if (h2hStats && h2hStats.totalMatches > 0) {
-      const h2hHomeWR = h2hStats.player1Wins / h2hStats.totalMatches;
+      const h2hHomeWR = (h2hStats.player1Wins || 0) / h2hStats.totalMatches;
       h2hBonus.home = (h2hHomeWR - 0.5) * 0.15;
-      h2hBonus.away = (1 - h2hHomeWR - 0.5) * 0.15;
+      h2hBonus.away = ((1 - h2hHomeWR) - 0.5) * 0.15;
     }
 
     // Comeback rate bonus
-    const homeComebackBonus = (homeStats.comebackRate || 0) * 0.1;
-    const awayComebackBonus = (awayStats.comebackRate || 0) * 0.1;
+    const homeComebackBonus = homeComeback * 0.1;
+    const awayComebackBonus = awayComeback * 0.1;
 
     // Calculate weighted probabilities
     let homeProb = homeWR * homeWeight + h2hBonus.home + homeComebackBonus;
@@ -284,18 +334,24 @@ export default function ManualPredictor() {
       awayProb,
       confidence,
       favorite: homeProb > awayProb ? homePlayer.name : awayPlayer.name,
-      edge: Math.abs(homeProb - awayProb)
+      edge: Math.abs(homeProb - awayProb),
+      // Debug data
+      _debug: {
+        homeWR, awayWR, homeMatches, awayMatches, homeWeight, awayWeight,
+        h2hBonus, homeComebackBonus, awayComebackBonus
+      }
     };
   };
 
-  const prediction = calculatePrediction();
+  const prediction = calculated ? calculatePrediction() : null;
+  const bothPlayersSelected = homePlayer && awayPlayer;
 
   return (
     <div className="manual-predictor">
       <div className="predictor-header">
         <h2><span className="predictor-icon">🔮</span> Manual Predictor</h2>
         <p className="predictor-subtitle">
-          Seleziona due giocatori per confrontare le loro statistiche storiche
+          Seleziona due giocatori e clicca "Calcola" per confrontare le statistiche
         </p>
       </div>
 
@@ -342,127 +398,179 @@ export default function ManualPredictor() {
         />
       </div>
 
-      {/* Stats Comparison */}
-      {(homeStats || awayStats) && (
-        <div className="stats-comparison">
-          <h3 className="section-title">
-            <span className="section-icon">📊</span>
-            Confronto Statistiche
-          </h3>
-          
-          {loading.home || loading.away ? (
-            <div className="comparison-loading">
-              <div className="loading-spinner"></div>
-              <span>Caricamento statistiche...</span>
-            </div>
+      {/* CALCULATE BUTTON */}
+      <div className="calculate-section">
+        <button 
+          className={`calculate-btn ${loading.calc ? 'loading' : ''} ${bothPlayersSelected ? 'ready' : 'disabled'}`}
+          onClick={handleCalculate}
+          disabled={!bothPlayersSelected || loading.calc}
+        >
+          {loading.calc ? (
+            <>
+              <span className="btn-spinner"></span>
+              Calcolo in corso...
+            </>
           ) : (
-            <div className="comparison-rows">
-              <ComparisonRow 
-                label="Win Rate"
-                homeValue={homeStats?.winRate || 0}
-                awayValue={awayStats?.winRate || 0}
-              />
-              <ComparisonRow 
-                label="Partite Giocate"
-                homeValue={homeStats?.totalMatches || 0}
-                awayValue={awayStats?.totalMatches || 0}
-                format="number"
-              />
-              <ComparisonRow 
-                label="Comeback Rate"
-                homeValue={homeStats?.comebackRate || 0}
-                awayValue={awayStats?.comebackRate || 0}
-              />
-              <ComparisonRow 
-                label="ROI Storico"
-                homeValue={homeStats?.roi || 0}
-                awayValue={awayStats?.roi || 0}
-                format="percent"
-              />
-            </div>
+            <>
+              🎯 CALCOLA PREVISIONE
+            </>
           )}
-        </div>
-      )}
-
-      {/* H2H Section */}
-      {h2hStats && h2hStats.totalMatches > 0 && (
-        <div className="h2h-section">
-          <h3 className="section-title">
-            <span className="section-icon">⚔️</span>
-            Head to Head
-          </h3>
-          <div className="h2h-content">
-            <div className="h2h-score">
-              <span className="h2h-player home">{homePlayer?.name}</span>
-              <span className="h2h-record">
-                {h2hStats.player1Wins} - {h2hStats.player2Wins}
-              </span>
-              <span className="h2h-player away">{awayPlayer?.name}</span>
-            </div>
-            <p className="h2h-total">{h2hStats.totalMatches} incontri totali</p>
+        </button>
+        
+        {apiError && (
+          <div className="api-error">
+            ❌ {apiError}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Prediction Summary */}
-      {prediction && (
-        <div className={`prediction-summary ${
-          prediction.confidence > 0.7 ? 'high' : 
-          prediction.confidence > 0.4 ? 'medium' : 'low'
-        }`}>
-          <h3 className="section-title">
-            <span className="section-icon">🎯</span>
-            Previsione
-          </h3>
-          
-          <div className="prediction-bars">
-            <div className="prediction-player home">
-              <span className="prediction-name">{homePlayer?.name}</span>
-              <div className="prediction-bar-container">
-                <div 
-                  className="prediction-bar"
-                  style={{ width: `${prediction.homeProb * 100}%` }}
-                />
-              </div>
-              <span className="prediction-prob">{(prediction.homeProb * 100).toFixed(1)}%</span>
-            </div>
+      {/* RESULTS - Always show structure when calculated */}
+      {calculated && (
+        <>
+          {/* Stats Comparison */}
+          <div className="stats-comparison">
+            <h3 className="section-title">
+              <span className="section-icon">📊</span>
+              Dati Giocatori (raw)
+            </h3>
             
-            <div className="prediction-player away">
-              <span className="prediction-name">{awayPlayer?.name}</span>
-              <div className="prediction-bar-container">
-                <div 
-                  className="prediction-bar"
-                  style={{ width: `${prediction.awayProb * 100}%` }}
-                />
+            <div className="stats-grid-dual">
+              {/* Home Player Stats */}
+              <div className="player-stats-box home">
+                <h4>{homePlayer?.name}</h4>
+                <div className="stats-list">
+                  <StatRow label="Win Rate" homeValue={homeStats?.overall?.win_rate} awayValue={null} />
+                  <StatRow label="Partite" homeValue={homeStats?.overall?.total_matches} awayValue={null} format="number" />
+                  <StatRow label="Vittorie" homeValue={homeStats?.overall?.wins} awayValue={null} format="number" />
+                  <StatRow label="Sconfitte" homeValue={homeStats?.overall?.losses} awayValue={null} format="number" />
+                  <StatRow label="Comeback Rate" homeValue={homeStats?.overall?.comeback_rate} awayValue={null} />
+                  <StatRow label="ROI" homeValue={homeStats?.overall?.roi?.roi} awayValue={null} />
+                </div>
+                <DebugInfo label="Raw Data Home" data={homeStats} />
               </div>
-              <span className="prediction-prob">{(prediction.awayProb * 100).toFixed(1)}%</span>
+              
+              {/* Away Player Stats */}
+              <div className="player-stats-box away">
+                <h4>{awayPlayer?.name}</h4>
+                <div className="stats-list">
+                  <StatRow label="Win Rate" homeValue={null} awayValue={awayStats?.overall?.win_rate} />
+                  <StatRow label="Partite" homeValue={null} awayValue={awayStats?.overall?.total_matches} format="number" />
+                  <StatRow label="Vittorie" homeValue={null} awayValue={awayStats?.overall?.wins} format="number" />
+                  <StatRow label="Sconfitte" homeValue={null} awayValue={awayStats?.overall?.losses} format="number" />
+                  <StatRow label="Comeback Rate" homeValue={null} awayValue={awayStats?.overall?.comeback_rate} />
+                  <StatRow label="ROI" homeValue={null} awayValue={awayStats?.overall?.roi?.roi} />
+                </div>
+                <DebugInfo label="Raw Data Away" data={awayStats} />
+              </div>
             </div>
           </div>
-          
-          <div className="prediction-footer">
-            <span className="prediction-favorite">
-              Favorito: <strong>{prediction.favorite}</strong>
-            </span>
-            <span className={`prediction-confidence ${
+
+          {/* H2H Section - Show even if 0 */}
+          <div className="h2h-section">
+            <h3 className="section-title">
+              <span className="section-icon">⚔️</span>
+              Head to Head
+            </h3>
+            <div className="h2h-content">
+              {h2hStats ? (
+                <>
+                  <div className="h2h-score">
+                    <span className="h2h-player home">{homePlayer?.name}</span>
+                    <span className="h2h-record">
+                      {h2hStats.player1Wins || 0} - {h2hStats.player2Wins || 0}
+                    </span>
+                    <span className="h2h-player away">{awayPlayer?.name}</span>
+                  </div>
+                  <p className="h2h-total">{h2hStats.totalMatches || 0} incontri totali</p>
+                </>
+              ) : (
+                <p className="h2h-empty">Nessun H2H trovato nel database</p>
+              )}
+            </div>
+            <DebugInfo label="Raw H2H Data" data={h2hStats} />
+          </div>
+
+          {/* Prediction Summary */}
+          <div className={`prediction-summary ${
+            prediction ? (
               prediction.confidence > 0.7 ? 'high' : 
               prediction.confidence > 0.4 ? 'medium' : 'low'
-            }`}>
-              Affidabilità: {prediction.confidence > 0.7 ? 'Alta' : prediction.confidence > 0.4 ? 'Media' : 'Bassa'}
-            </span>
+            ) : ''
+          }`}>
+            <h3 className="section-title">
+              <span className="section-icon">🎯</span>
+              Previsione
+            </h3>
+            
+            {prediction ? (
+              <>
+                <div className="prediction-bars">
+                  <div className="prediction-player home">
+                    <span className="prediction-name">{homePlayer?.name}</span>
+                    <div className="prediction-bar-container">
+                      <div 
+                        className="prediction-bar"
+                        style={{ width: `${prediction.homeProb * 100}%` }}
+                      />
+                    </div>
+                    <span className="prediction-prob">{(prediction.homeProb * 100).toFixed(1)}%</span>
+                  </div>
+                  
+                  <div className="prediction-player away">
+                    <span className="prediction-name">{awayPlayer?.name}</span>
+                    <div className="prediction-bar-container">
+                      <div 
+                        className="prediction-bar"
+                        style={{ width: `${prediction.awayProb * 100}%` }}
+                      />
+                    </div>
+                    <span className="prediction-prob">{(prediction.awayProb * 100).toFixed(1)}%</span>
+                  </div>
+                </div>
+                
+                <div className="prediction-footer">
+                  <span className="prediction-favorite">
+                    Favorito: <strong>{prediction.favorite}</strong>
+                  </span>
+                  <span className={`prediction-confidence ${
+                    prediction.confidence > 0.7 ? 'high' : 
+                    prediction.confidence > 0.4 ? 'medium' : 'low'
+                  }`}>
+                    Affidabilità: {(prediction.confidence * 100).toFixed(0)}%
+                  </span>
+                </div>
+                
+                <DebugInfo label="Prediction Debug" data={prediction._debug} />
+              </>
+            ) : (
+              <div className="prediction-empty">
+                <p>⚠️ Impossibile calcolare previsione</p>
+                <small>Dati insufficienti per uno o entrambi i giocatori</small>
+              </div>
+            )}
+            
+            <p className="prediction-disclaimer">
+              ⚠️ Previsione basata su dati storici. Non costituisce consiglio di scommessa.
+            </p>
           </div>
-          
-          <p className="prediction-disclaimer">
-            ⚠️ Previsione basata su dati storici. Non costituisce consiglio di scommessa.
-          </p>
-        </div>
+        </>
       )}
 
       {/* Empty State */}
-      {!homePlayer && !awayPlayer && (
+      {!homePlayer && !awayPlayer && !calculated && (
         <div className="empty-state">
           <span className="empty-icon">🎾</span>
           <p>Seleziona due giocatori per iniziare l'analisi</p>
-          <small>Cerca per nome usando i campi sopra</small>
+          <small>Cerca per nome usando i campi sopra, poi clicca "Calcola"</small>
+        </div>
+      )}
+
+      {/* Waiting state - players selected but not calculated */}
+      {bothPlayersSelected && !calculated && !loading.calc && (
+        <div className="waiting-state">
+          <span className="waiting-icon">⏳</span>
+          <p>Giocatori selezionati</p>
+          <small>Clicca "CALCOLA PREVISIONE" per vedere i risultati</small>
         </div>
       )}
     </div>

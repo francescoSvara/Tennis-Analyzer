@@ -409,6 +409,7 @@ async function getPlayerStats(playerName) {
 
 /**
  * Cerca giocatori per nome (autocomplete)
+ * Restituisce oggetti con { name, totalMatches, winRate }
  */
 async function searchPlayers(query, limit = 10) {
   if (!supabase || !query || query.length < 2) return [];
@@ -418,40 +419,62 @@ async function searchPlayers(query, limit = 10) {
     .from('matches')
     .select('winner_name')
     .ilike('winner_name', `%${query}%`)
-    .limit(50);
+    .limit(100);
 
   const { data: losers } = await supabase
     .from('matches')
     .select('loser_name')
     .ilike('loser_name', `%${query}%`)
-    .limit(50);
+    .limit(100);
 
-  // Estrai nomi unici
-  const names = new Set();
+  // Conta occorrenze per ogni nome
+  const playerCounts = {};
   for (const w of winners || []) {
-    if (w.winner_name) names.add(w.winner_name);
+    if (w.winner_name) {
+      if (!playerCounts[w.winner_name]) {
+        playerCounts[w.winner_name] = { wins: 0, losses: 0 };
+      }
+      playerCounts[w.winner_name].wins++;
+    }
   }
   for (const l of losers || []) {
-    if (l.loser_name) names.add(l.loser_name);
+    if (l.loser_name) {
+      if (!playerCounts[l.loser_name]) {
+        playerCounts[l.loser_name] = { wins: 0, losses: 0 };
+      }
+      playerCounts[l.loser_name].losses++;
+    }
   }
 
-  // Ordina per rilevanza (match più preciso prima)
-  const sorted = Array.from(names)
-    .filter(n => n.toLowerCase().includes(query.toLowerCase()))
+  // Converti in array con statistiche
+  const players = Object.entries(playerCounts)
+    .filter(([name]) => name.toLowerCase().includes(query.toLowerCase()))
+    .map(([name, counts]) => {
+      const totalMatches = counts.wins + counts.losses;
+      const winRate = totalMatches > 0 ? counts.wins / totalMatches : 0;
+      return {
+        name,
+        totalMatches,
+        wins: counts.wins,
+        losses: counts.losses,
+        winRate
+      };
+    })
     .sort((a, b) => {
-      const aLower = a.toLowerCase();
-      const bLower = b.toLowerCase();
+      const aLower = a.name.toLowerCase();
+      const bLower = b.name.toLowerCase();
       const qLower = query.toLowerCase();
       
       // Priorità a chi inizia con la query
       if (aLower.startsWith(qLower) && !bLower.startsWith(qLower)) return -1;
       if (!aLower.startsWith(qLower) && bLower.startsWith(qLower)) return 1;
       
-      return a.localeCompare(b);
+      // Poi per numero di match (più dati = più rilevante)
+      return b.totalMatches - a.totalMatches;
     })
     .slice(0, limit);
 
-  return sorted;
+  return players;
 }
 
 /**

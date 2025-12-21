@@ -2,9 +2,51 @@
 
 ## 📋 Guida Operativa per AI Coding Agent
 
-**Versione:** 2.0  
+**Versione:** 2.1  
 **Data:** 21 Dicembre 2025  
 **Scopo:** Documento operativo per implementare le funzionalità nel codice esistente
+
+---
+
+# ✅ FUNZIONALITÀ IMPLEMENTATE (21 Dicembre 2025)
+
+## 📊 Data Normalization Layer
+
+### Implementazione Completata
+**File creati:**
+- `backend/services/dataNormalizer.js` - Servizio centralizzato normalizzazione
+- `backend/services/unifiedImporter.js` - Gateway unico per import dati
+- `backend/scripts/normalize-player-names.js` - Script migrazione DB
+- `backend/scripts/generate-player-mappings.js` - Generatore mapping automatico
+
+### Player Name Mappings
+**210 mapping giocatori ATP** che convertono:
+- `Sinner J.` → `Jannik Sinner`
+- `Alcaraz C.` → `Carlos Alcaraz`
+- `Djokovic N.` → `Novak Djokovic`
+- ... tutti i 210 giocatori ATP attivi
+
+### Funzioni Esportate (dataNormalizer.js)
+```javascript
+normalizePlayerName(name)      // "Sinner J." → "Jannik Sinner"
+normalizeSurface(surface)      // "Hardcourt indoor" → "Hard"
+normalizeTournament(name)      // "Turin" → "ATP Finals"
+generateMatchFingerprint(match) // Crea ID unico per dedup
+areMatchesSame(m1, m2)         // Confronta due match
+toTitleCase(str)               // Utility formattazione
+```
+
+### Database Migration
+- **5448 match totali** nel DB
+- **4420 record normalizzati** (4382 + 38 in 2 passate)
+- **0 nomi abbreviati rimasti**
+- **205 giocatori unici** con nomi standardizzati
+
+### Import 2025.xlsx
+- **2641/2644 match importati** da file xlsx
+- ID numerici generati automaticamente (900000000000+hash)
+- Bypass RLS con SUPABASE_SERVICE_KEY
+- 3 record saltati per valori N/A
 
 ---
 

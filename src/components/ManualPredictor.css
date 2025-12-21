@@ -595,26 +595,262 @@
    EMPTY STATE
    ============================================ */
 
-.empty-state {
+.empty-state,
+.waiting-state {
   text-align: center;
   padding: 60px 24px;
   color: #8b95a5;
 }
 
-.empty-icon {
+.empty-icon,
+.waiting-icon {
   font-size: 48px;
   display: block;
   margin-bottom: 16px;
 }
 
-.empty-state p {
+.empty-state p,
+.waiting-state p {
   margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 500;
   color: #e4e6eb;
 }
 
-.empty-state small {
+.empty-state small,
+.waiting-state small {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.waiting-state {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+/* ============================================
+   CALCULATE BUTTON
+   ============================================ */
+
+.calculate-section {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.calculate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 40px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.calculate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+.calculate-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.calculate-btn.disabled,
+.calculate-btn:disabled {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.calculate-btn.loading {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.btn-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.api-error {
+  margin-top: 16px;
+  padding: 12px 20px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #f87171;
+  font-size: 14px;
+}
+
+/* ============================================
+   SEARCH ERROR
+   ============================================ */
+
+.search-error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 6px;
+  color: #f87171;
+  font-size: 12px;
+}
+
+/* ============================================
+   DEBUG INFO
+   ============================================ */
+
+.debug-info {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 12px;
+}
+
+.debug-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #8b95a5;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.debug-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e4e6eb;
+}
+
+.debug-content {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  font-size: 11px;
+  color: #10b981;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* ============================================
+   STATS GRID DUAL
+   ============================================ */
+
+.stats-grid-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .stats-grid-dual {
+    grid-template-columns: 1fr;
+  }
+}
+
+.player-stats-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.player-stats-box.home {
+  border-left: 3px solid #3b82f6;
+}
+
+.player-stats-box.away {
+  border-left: 3px solid #ef4444;
+}
+
+.player-stats-box h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e4e6eb;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.stat-row .stat-label {
+  font-size: 12px;
+  color: #8b95a5;
+  flex: 1;
+  text-align: center;
+}
+
+.stat-row .stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.stat-row .stat-value.home {
+  text-align: left;
+  color: #60a5fa;
+}
+
+.stat-row .stat-value.away {
+  text-align: right;
+  color: #f87171;
+}
+
+/* ============================================
+   H2H EMPTY
+   ============================================ */
+
+.h2h-empty {
+  text-align: center;
+  color: #8b95a5;
+  font-style: italic;
+  padding: 20px;
+}
+
+/* ============================================
+   PREDICTION EMPTY
+   ============================================ */
+
+.prediction-empty {
+  text-align: center;
+  padding: 30px;
+  color: #8b95a5;
+}
+
+.prediction-empty p {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #f59e0b;
+}
+
+.prediction-empty small {
   font-size: 13px;
   opacity: 0.7;
 }
