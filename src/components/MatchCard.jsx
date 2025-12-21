@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { getTournamentLogo, getSuggestedFileName } from '../utils/tournamentLogos';
 
 // Formatta la data del match
 function formatDate(timestamp, fileDate) {
@@ -62,6 +63,38 @@ function countryToFlag(countryCode) {
     .split('')
     .map(char => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
+}
+
+// Componente per visualizzare il torneo con logo
+function TournamentWithLogo({ tournament, category }) {
+  const [logoError, setLogoError] = useState(false);
+  const logoPath = getTournamentLogo(tournament, category);
+  
+  // Se non c'è logo o c'è stato errore, mostra solo il testo
+  // In console logga il nome file suggerito per debug
+  if (!logoPath || logoError) {
+    // Debug: mostra in console come dovrebbe chiamarsi il file
+    if (tournament && !logoPath) {
+      console.debug(`[Logo mancante] Torneo: "${tournament}" → Rinomina il logo come: "${getSuggestedFileName(tournament)}" e salvalo in public/logos/tournaments/`);
+    }
+    return (
+      <div className="match-tournament">
+        {tournament || 'Unknown Tournament'}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="match-tournament with-logo">
+      <img 
+        src={logoPath} 
+        alt={`${tournament} logo`}
+        className="tournament-logo"
+        onError={() => setLogoError(true)}
+      />
+      <span className="tournament-name">{tournament || 'Unknown Tournament'}</span>
+    </div>
+  );
 }
 
 function MatchCard({ match, onClick, isSuggested = false, isDetected = false, onAddToDb, dataCompleteness = null }) {
@@ -142,11 +175,12 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
         </div>
       )}
       
-      {/* Torneo - nascosto per detected (già nel gruppo) */}
+      {/* Torneo con Logo - nascosto per detected (già nel gruppo) */}
       {!isDetected && (
-        <div className="match-tournament">
-          {match.tournament || 'Unknown Tournament'}
-        </div>
+        <TournamentWithLogo 
+          tournament={match.tournament} 
+          category={match.category}
+        />
       )}
       
       {/* Teams/Players */}
