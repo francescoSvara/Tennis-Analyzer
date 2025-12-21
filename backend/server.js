@@ -2241,10 +2241,13 @@ app.get('/api/match/:eventId', async (req, res) => {
         const dbMatch = await matchRepository.getMatchById(parseInt(eventId));
         if (dbMatch && !forceRefresh) {
           console.log(`📦 Match ${eventId} served from database`);
+          console.log(`   PowerRankings: ${dbMatch.powerRankings?.length || 0}, Statistics: ${dbMatch.statistics?.length || 0}, PBP: ${dbMatch.pointByPoint?.length || 0}`);
           return res.json({
             source: 'database',
             eventId,
             ...dbMatch,
+            // Aggiungi alias per compatibilità frontend
+            tennisPowerRankings: dbMatch.powerRankings || [],
             timestamp: new Date().toISOString()
           });
         }
@@ -2253,28 +2256,30 @@ app.get('/api/match/:eventId', async (req, res) => {
       }
     }
     
-    // 2. Prova dai file salvati
-    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
-    for (const file of files) {
-      try {
-        const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
-        if (content.api) {
-          for (const [url, data] of Object.entries(content.api)) {
-            if (url.includes(`/event/${eventId}`) || data?.event?.id === parseInt(eventId)) {
-              console.log(`📁 Match ${eventId} served from file ${file}`);
-              return res.json({
-                source: 'file',
-                eventId,
-                fileName: file,
-                api: content.api,
-                liveData: content.liveData,
-                lastSync: content.lastSync,
-                timestamp: new Date().toISOString()
-              });
+    // 2. Prova dai file salvati (skip se forceRefresh)
+    if (!forceRefresh) {
+      const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+      for (const file of files) {
+        try {
+          const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
+          if (content.api) {
+            for (const [url, data] of Object.entries(content.api)) {
+              if (url.includes(`/event/${eventId}`) || data?.event?.id === parseInt(eventId)) {
+                console.log(`📁 Match ${eventId} served from file ${file}`);
+                return res.json({
+                  source: 'file',
+                  eventId,
+                  fileName: file,
+                  api: content.api,
+                  liveData: content.liveData,
+                  lastSync: content.lastSync,
+                  timestamp: new Date().toISOString()
+                });
+              }
             }
           }
-        }
-      } catch (e) { /* skip */ }
+        } catch (e) { /* skip */ }
+      }
     }
     
     // 3. Se richiesto refresh o non trovato, fetch da SofaScore
@@ -2291,10 +2296,12 @@ app.get('/api/match/:eventId', async (req, res) => {
       }
     }
     
+    // Aggiungi alias tennisPowerRankings per compatibilità frontend
     res.json({
       source: 'sofascore',
       eventId,
       ...liveData,
+      tennisPowerRankings: liveData.powerRankings || [],
       timestamp: new Date().toISOString()
     });
     

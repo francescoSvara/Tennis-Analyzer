@@ -334,33 +334,88 @@ export default function App() {
           firstToServe: data.first_to_serve || rawJson.firstToServe
         };
         
+        // Estrai powerRankings da tutte le possibili fonti
+        const extractedPowerRankings = rawJson.tennisPowerRankings || rawJson.powerRankings || data.powerRankings || [];
+        const extractedStatistics = rawJson.statistics || data.statistics || [];
+        const extractedPointByPoint = rawJson.pointByPoint || data.pointByPoint || [];
+        
+        console.log('🔍 Debug estrazione dati:');
+        console.log('   rawJson.tennisPowerRankings:', rawJson.tennisPowerRankings?.length || 'N/A');
+        console.log('   rawJson.powerRankings:', rawJson.powerRankings?.length || 'N/A');
+        console.log('   data.powerRankings:', data.powerRankings?.length || 'N/A');
+        console.log('   extractedPowerRankings:', extractedPowerRankings?.length || 0);
+        
         // Combina i dati - IMPORTANTE: ...data PRIMA per non sovrascrivere i campi normalizzati
         normalizedData = {
           ...data,  // Prima i dati grezzi dal DB
           event: eventObj,
-          pointByPoint: rawJson.pointByPoint || data.pointByPoint || [],
-          statistics: rawJson.statistics || data.statistics || [],
-          tennisPowerRankings: rawJson.tennisPowerRankings || data.powerRankings || [],
-          powerRankings: rawJson.tennisPowerRankings || data.powerRankings || [], // Alias per compatibilità
+          pointByPoint: extractedPointByPoint,
+          statistics: extractedStatistics,
+          tennisPowerRankings: extractedPowerRankings,
+          powerRankings: extractedPowerRankings, // Alias per compatibilità
           scores: data.scores || []
         };
+        
+        // Se mancano dati dettagliati, prova a recuperarli da SofaScore
+        const hasPowerRankings = extractedPowerRankings.length > 0;
+        const hasStatistics = extractedStatistics.length > 0;
+        const hasPointByPoint = extractedPointByPoint.length > 0;
+        
+        if (!hasPowerRankings && !hasStatistics && !hasPointByPoint) {
+          console.log('⚠️ Dati dettagliati mancanti nel DB, provo a recuperare da SofaScore...');
+          try {
+            const sofaResponse = await fetch(apiUrl(`/api/match/${eventId}?forceRefresh=true`));
+            const sofaData = await sofaResponse.json();
+            
+            if (sofaData.source === 'sofascore' || sofaData.tennisPowerRankings || sofaData.statistics || sofaData.pointByPoint) {
+              console.log('✅ Dati recuperati da SofaScore');
+              // Merge dei dati SofaScore con quelli DB
+              normalizedData = {
+                ...normalizedData,
+                tennisPowerRankings: sofaData.tennisPowerRankings || sofaData.powerRankings || normalizedData.tennisPowerRankings,
+                powerRankings: sofaData.tennisPowerRankings || sofaData.powerRankings || normalizedData.powerRankings,
+                statistics: sofaData.statistics || normalizedData.statistics,
+                pointByPoint: sofaData.pointByPoint || normalizedData.pointByPoint
+              };
+            }
+          } catch (sofaErr) {
+            console.log('⚠️ Impossibile recuperare dati da SofaScore:', sofaErr.message);
+          }
+        }
+        
         console.log('💾 Dati normalizzati dal DB:', normalizedData);
-        console.log('🔍 PowerRankings dal DB:', data.powerRankings?.length || 0, 'items');
-        console.log('🔍 Statistics dal DB:', data.statistics?.length || 0, 'items');
-        console.log('🔍 PointByPoint dal DB:', data.pointByPoint?.length || 0, 'items');
-        console.log('🔍 RawJson powerRankings:', rawJson.tennisPowerRankings?.length || 0, 'items');
+        console.log('🔍 PowerRankings finale:', normalizedData.powerRankings?.length || 0, 'items');
+        console.log('🔍 Statistics finale:', normalizedData.statistics?.length || 0, 'items');
+        console.log('🔍 PointByPoint finale:', normalizedData.pointByPoint?.length || 0, 'items');
         setRawData(normalizedData);
         setScrapeData(normalizeApiResponse(normalizedData));
       } else if (data.source === 'file') {
         // Dati da file
         console.log('📄 Dati da file:', data);
-        setRawData(data);
-        setScrapeData(normalizeApiResponse(data));
+        // Normalizza i nomi dei campi
+        const normalizedFileData = {
+          ...data,
+          tennisPowerRankings: data.tennisPowerRankings || data.powerRankings || [],
+          powerRankings: data.tennisPowerRankings || data.powerRankings || []
+        };
+        setRawData(normalizedFileData);
+        setScrapeData(normalizeApiResponse(normalizedFileData));
       } else {
-        // Dati da SofaScore
+        // Dati da SofaScore - normalizza i nomi dei campi
         console.log('🌐 Dati da SofaScore:', data);
-        setRawData(data);
-        setScrapeData(normalizeApiResponse(data));
+        console.log('🔍 SofaScore powerRankings:', data.powerRankings?.length || 0, 'items');
+        console.log('🔍 SofaScore tennisPowerRankings:', data.tennisPowerRankings?.length || 0, 'items');
+        console.log('🔍 SofaScore statistics:', data.statistics?.length || 0, 'items');
+        console.log('🔍 SofaScore pointByPoint:', data.pointByPoint?.length || 0, 'items');
+        
+        // Normalizza i nomi dei campi (SofaScore usa powerRankings, frontend usa tennisPowerRankings)
+        const normalizedSofaData = {
+          ...data,
+          tennisPowerRankings: data.tennisPowerRankings || data.powerRankings || [],
+          powerRankings: data.tennisPowerRankings || data.powerRankings || []
+        };
+        setRawData(normalizedSofaData);
+        setScrapeData(normalizeApiResponse(normalizedSofaData));
       }
       
       setLoadedScrapeId(match.id);
