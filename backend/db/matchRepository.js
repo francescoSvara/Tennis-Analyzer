@@ -1148,8 +1148,8 @@ function normalizePlayerName(name) {
 /**
  * Cerca un match xlsx che corrisponde a un match Sofascore
  * Criteri di matching:
- * 1. Stessa data (±1 giorno per timezone)
- * 2. Stesso giocatore (nome normalizzato)
+ * 1. Stessa data (±2 giorni per timezone)
+ * 2. Stesso giocatore (nome normalizzato con matching fuzzy)
  */
 async function findMatchingXlsxMatch(sofascoreMatch) {
   if (!checkSupabase()) return null;
@@ -1162,11 +1162,11 @@ async function findMatchingXlsxMatch(sofascoreMatch) {
   
   if (!matchDate || (!homeName && !awayName)) return null;
   
-  // Cerca match xlsx nella stessa data (±1 giorno)
+  // Cerca match xlsx nella stessa data (±2 giorni per maggiore tolleranza)
   const startDate = new Date(matchDate);
-  startDate.setDate(startDate.getDate() - 1);
+  startDate.setDate(startDate.getDate() - 2);
   const endDate = new Date(matchDate);
-  endDate.setDate(endDate.getDate() + 1);
+  endDate.setDate(endDate.getDate() + 2);
   
   const { data: xlsxMatches, error } = await supabase
     .from('matches')
@@ -1181,12 +1181,29 @@ async function findMatchingXlsxMatch(sofascoreMatch) {
   const homeNormalized = normalizePlayerName(homeName);
   const awayNormalized = normalizePlayerName(awayName);
   
+  // Estrai cognome per matching più robusto
+  const getLastName = (name) => {
+    if (!name) return '';
+    const parts = name.toLowerCase().trim().split(/\s+/);
+    // Se il formato è "Cognome I." ritorna il cognome
+    if (parts.length >= 1 && parts[parts.length - 1].match(/^[a-z]\.?$/)) {
+      return parts[0];
+    }
+    // Altrimenti ritorna l'ultima parte (cognome)
+    return parts[parts.length - 1];
+  };
+  
+  const homeLastName = getLastName(homeName);
+  const awayLastName = getLastName(awayName);
+  
   // Cerca match con giocatori corrispondenti
   for (const xlsx of xlsxMatches) {
     const xlsxWinner = normalizePlayerName(xlsx.winner_name);
     const xlsxLoser = normalizePlayerName(xlsx.loser_name);
+    const xlsxWinnerLast = getLastName(xlsx.winner_name);
+    const xlsxLoserLast = getLastName(xlsx.loser_name);
     
-    // Check se i giocatori corrispondono (in qualsiasi ordine)
+    // Check 1: Match esatto normalizzato
     const homeMatchesWinner = homeNormalized.includes(xlsxWinner) || xlsxWinner.includes(homeNormalized);
     const homeMatchesLoser = homeNormalized.includes(xlsxLoser) || xlsxLoser.includes(homeNormalized);
     const awayMatchesWinner = awayNormalized.includes(xlsxWinner) || xlsxWinner.includes(awayNormalized);
@@ -1194,6 +1211,17 @@ async function findMatchingXlsxMatch(sofascoreMatch) {
     
     if ((homeMatchesWinner && awayMatchesLoser) || (homeMatchesLoser && awayMatchesWinner)) {
       console.log(`🔗 Match trovato! Sofascore "${homeName} vs ${awayName}" = xlsx "${xlsx.winner_name} vs ${xlsx.loser_name}"`);
+      return xlsx;
+    }
+    
+    // Check 2: Match per cognome (più tollerante)
+    const homeLastMatchesWinner = homeLastName === xlsxWinnerLast;
+    const homeLastMatchesLoser = homeLastName === xlsxLoserLast;
+    const awayLastMatchesWinner = awayLastName === xlsxWinnerLast;
+    const awayLastMatchesLoser = awayLastName === xlsxLoserLast;
+    
+    if ((homeLastMatchesWinner && awayLastMatchesLoser) || (homeLastMatchesLoser && awayLastMatchesWinner)) {
+      console.log(`🔗 Match trovato (by cognome)! Sofascore "${homeName} vs ${awayName}" = xlsx "${xlsx.winner_name} vs ${xlsx.loser_name}"`);
       return xlsx;
     }
   }
@@ -1293,8 +1321,9 @@ async function insertMatchWithXlsxMerge(matchData, sourceUrl = null) {
     // Merge i dati
     const mergedMatch = await mergeXlsxData(insertedMatch.id, xlsxMatch);
     
-    // Opzionale: elimina il record xlsx duplicato (commenta se vuoi tenerlo)
-    // await supabase.from('matches').delete().eq('id', xlsxMatch.id);
+    // Elimina il record xlsx duplicato
+    await supabase.from('matches').delete().eq('id', xlsxMatch.id);
+    console.log(`🗑️ Eliminato xlsx duplicato ID ${xlsxMatch.id}`);
     
     return mergedMatch || insertedMatch;
   }
@@ -1304,17 +1333,21 @@ async function insertMatchWithXlsxMerge(matchData, sourceUrl = null) {
 
 /**
  * Esegue il merge batch di tutti i match sofascore con xlsx
+ * Cerca match Sofascore (con home_player_id non null) che non sono già merged
  */
 async function batchMergeXlsxData() {
   if (!checkSupabase()) return { merged: 0, errors: 0 };
   
   console.log('\n🔄 Inizio batch merge Sofascore + xlsx...\n');
   
-  // Prendi tutti i match sofascore che non sono già merged
+  // Prendi tutti i match sofascore che:
+  // 1. Hanno home_player_id (sono da Sofascore, non xlsx)
+  // 2. Non sono già merged
   const { data: sofascoreMatches, error } = await supabase
     .from('matches')
     .select('*')
-    .eq('data_source', 'sofascore')
+    .not('home_player_id', 'is', null)
+    .or('data_source.is.null,data_source.eq.sofascore')
     .order('start_time', { ascending: false });
   
   if (error || !sofascoreMatches) {
@@ -1326,7 +1359,8 @@ async function batchMergeXlsxData() {
   
   let merged = 0;
   let notFound = 0;
-  
+  let deleted = 0;
+
   for (const match of sofascoreMatches) {
     // Estrai i nomi dai dati raw_json (formato Sofascore)
     let homeName = null;
@@ -1358,6 +1392,17 @@ async function batchMergeXlsxData() {
     if (xlsxMatch) {
       await mergeXlsxData(match.id, xlsxMatch);
       merged++;
+      
+      // Elimina il record xlsx duplicato
+      const { error: deleteError } = await supabase
+        .from('matches')
+        .delete()
+        .eq('id', xlsxMatch.id);
+      
+      if (!deleteError) {
+        deleted++;
+        console.log(`🗑️ Eliminato xlsx duplicato ID ${xlsxMatch.id}`);
+      }
     } else {
       notFound++;
     }
@@ -1365,9 +1410,10 @@ async function batchMergeXlsxData() {
   
   console.log(`\n📊 BATCH MERGE COMPLETATO:`);
   console.log(`   ✅ Merged: ${merged}`);
+  console.log(`   🗑️ xlsx eliminati: ${deleted}`);
   console.log(`   ⚪ Non trovati in xlsx: ${notFound}`);
   
-  return { merged, notFound };
+  return { merged, notFound, deleted };
 }
 
 module.exports = {

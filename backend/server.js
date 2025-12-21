@@ -1999,6 +1999,29 @@ app.get('/api/db/matches', async (req, res) => {
   }
 });
 
+// ============================================
+// MERGE XLSX + SOFASCORE
+// ============================================
+
+// Batch merge - trova e unisce tutti i match xlsx con sofascore
+app.post('/api/db/merge/batch', async (req, res) => {
+  if (!matchRepository) {
+    return res.status(503).json({ error: 'Database not configured' });
+  }
+  try {
+    console.log('🔄 Avvio batch merge xlsx + sofascore...');
+    const result = await matchRepository.batchMergeXlsxData();
+    res.json({ 
+      success: true, 
+      message: `Batch merge completato`,
+      ...result 
+    });
+  } catch (err) {
+    console.error('Error batch merge:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get single match with all related data
 app.get('/api/db/matches/:id', async (req, res) => {
   if (!matchRepository) {
