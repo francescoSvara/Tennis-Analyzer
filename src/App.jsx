@@ -1391,13 +1391,12 @@ export default function App() {
               <div className="predictor-content">
                 <ErrorBoundary componentName="Predictor">
                   {(() => {
-                    // Extract player names from eventInfo
-                    const players = eventInfo?.players || {};
-                    const homePlayer = players.home?.name || players.home?.shortName || 'Giocatore 1';
-                    const awayPlayer = players.away?.name || players.away?.shortName || 'Giocatore 2';
+                    // Extract player names from eventInfo (home/away, NOT players)
+                    const homePlayer = eventInfo?.home?.name || eventInfo?.home?.shortName || 'Giocatore 1';
+                    const awayPlayer = eventInfo?.away?.name || eventInfo?.away?.shortName || 'Giocatore 2';
                     // Extract match context (surface, tournament, format)
                     const matchContext = {
-                      surface: eventInfo?.groundType || eventInfo?.surface || null,
+                      surface: eventInfo?.groundType || eventInfo?.surface || eventInfo?.tournament?.groundType || null,
                       tournament: eventInfo?.tournament?.name || eventInfo?.tournamentName || null,
                       format: matchSummary?.format || (eventInfo?.bestOf === 5 ? 'best-of-5' : 'best-of-3'),
                     };

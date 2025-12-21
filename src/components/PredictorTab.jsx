@@ -273,6 +273,15 @@ function PredictionSummary({ homeStats, awayStats, homeName, awayName }) {
   );
 }
 
+// Helper per estrarre il nome del giocatore (supporta sia stringhe che oggetti)
+const extractPlayerName = (player, fallback) => {
+  if (!player) return fallback;
+  // Se è già una stringa, usala direttamente
+  if (typeof player === 'string') return player;
+  // Se è un oggetto, cerca le proprietà standard
+  return player.name || player.fullName || player.shortName || fallback;
+};
+
 // Componente principale PredictorTab
 function PredictorTab({ homePlayer, awayPlayer, matchContext }) {
   const [homeStats, setHomeStats] = useState(null);
@@ -280,9 +289,9 @@ function PredictorTab({ homePlayer, awayPlayer, matchContext }) {
   const [loading, setLoading] = useState({ home: true, away: true });
   const [error, setError] = useState(null);
 
-  // Estrai i nomi dei giocatori
-  const homeName = homePlayer?.name || homePlayer?.fullName || homePlayer?.shortName || 'Home Player';
-  const awayName = awayPlayer?.name || awayPlayer?.fullName || awayPlayer?.shortName || 'Away Player';
+  // Estrai i nomi dei giocatori (supporta sia stringhe che oggetti)
+  const homeName = extractPlayerName(homePlayer, 'Home Player');
+  const awayName = extractPlayerName(awayPlayer, 'Away Player');
 
   // Fetch stats per entrambi i giocatori
   useEffect(() => {
