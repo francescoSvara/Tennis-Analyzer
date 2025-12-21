@@ -157,11 +157,10 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
         </div>
       )}
       
-      {/* Header: Categoria e Data */}
+      {/* Header: Superficie/Categoria e Data */}
       <div className="match-card-header">
         <span className="match-category">
-          {match.category || match.sport || 'Tennis'}
-          {match.surface && <span className="match-surface"> • {match.surface}</span>}
+          {match.surface ? match.surface : (match.category || match.sport || 'Tennis')}
         </span>
         <span className="match-date">
           {formatDate(match.startTimestamp, match.fileDate)}

@@ -140,7 +140,7 @@ const TOURNAMENT_LOGOS = {
   'moselle open': 'metz.png',
   
   // === TEAM EVENTS ===
-  'united cup': 'united-cup.svg',
+  'united cup': 'united-cup.png',
   'atp cup': 'atp-cup.png',
   'davis cup': 'davis-cup.png',
   'laver cup': 'laver-cup.png',
