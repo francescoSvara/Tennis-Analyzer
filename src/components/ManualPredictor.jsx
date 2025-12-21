@@ -32,7 +32,7 @@ function PlayerSearch({ label, selectedPlayer, onSelect, placeholder, className 
       setIsLoading(true);
       setError(null);
       try {
-        const url = `${apiUrl}/api/player/search?q=${encodeURIComponent(query)}&limit=10`;
+        const url = apiUrl(`/api/player/search?q=${encodeURIComponent(query)}&limit=10`);
         console.log('[ManualPredictor] Searching:', url);
         const res = await fetch(url);
         const data = await res.json();
@@ -156,7 +156,7 @@ function DebugInfo({ label, data }) {
 }
 
 // ============================================
-// STAT ROW COMPONENT
+// STAT ROW COMPONENT (legacy)
 // ============================================
 function StatRow({ label, homeValue, awayValue, format = 'auto' }) {
   const formatValue = (val) => {
@@ -175,6 +175,55 @@ function StatRow({ label, homeValue, awayValue, format = 'auto' }) {
       <span className="stat-value home">{formatValue(homeValue)}</span>
       <span className="stat-label">{label}</span>
       <span className="stat-value away">{formatValue(awayValue)}</span>
+    </div>
+  );
+}
+
+// ============================================
+// COMPARISON ROW - Enhanced side-by-side
+// ============================================
+function ComparisonRow({ label, homeValue, awayValue, format = 'auto', higherIsBetter = null }) {
+  const formatValue = (val) => {
+    if (val === null || val === undefined) return '-';
+    if (format === 'percent') {
+      const num = typeof val === 'number' ? val : parseFloat(val);
+      if (num >= 0 && num <= 1) return `${(num * 100).toFixed(1)}%`;
+      return `${num.toFixed(1)}%`;
+    }
+    if (format === 'number') return Math.round(val).toString();
+    if (typeof val === 'number') {
+      if (val >= 0 && val <= 1) return `${(val * 100).toFixed(1)}%`;
+      return val.toFixed(1);
+    }
+    return String(val);
+  };
+
+  // Determina chi è "migliore" se higherIsBetter è specificato
+  const getWinnerClass = (isHome) => {
+    if (higherIsBetter === null) return '';
+    if (homeValue === null || awayValue === null) return '';
+    
+    const homeNum = parseFloat(homeValue) || 0;
+    const awayNum = parseFloat(awayValue) || 0;
+    
+    if (homeNum === awayNum) return '';
+    
+    if (higherIsBetter) {
+      return isHome ? (homeNum > awayNum ? 'winner' : 'loser') : (awayNum > homeNum ? 'winner' : 'loser');
+    } else {
+      return isHome ? (homeNum < awayNum ? 'winner' : 'loser') : (awayNum < homeNum ? 'winner' : 'loser');
+    }
+  };
+
+  return (
+    <div className="comparison-row">
+      <div className={`comparison-value home ${getWinnerClass(true)}`}>
+        {formatValue(homeValue)}
+      </div>
+      <div className="comparison-label">{label}</div>
+      <div className={`comparison-value away ${getWinnerClass(false)}`}>
+        {formatValue(awayValue)}
+      </div>
     </div>
   );
 }
@@ -211,7 +260,7 @@ export default function ManualPredictor() {
       if (surface !== 'all') params.append('surface', surface);
       if (format !== 'all') params.append('format', format);
       
-      const url = `${apiUrl}/api/player/${encodeURIComponent(player.name)}/stats?${params}`;
+      const url = apiUrl(`/api/player/${encodeURIComponent(player.name)}/stats?${params}`);
       console.log(`[ManualPredictor] Fetching ${type} stats:`, url);
       
       const res = await fetch(url);
@@ -239,7 +288,7 @@ export default function ManualPredictor() {
         player2: awayPlayer.name
       });
       
-      const url = `${apiUrl}/api/player/h2h?${params}`;
+      const url = apiUrl(`/api/player/h2h?${params}`);
       console.log('[ManualPredictor] Fetching H2H:', url);
       
       const res = await fetch(url);
@@ -427,66 +476,137 @@ export default function ManualPredictor() {
       {/* RESULTS - Always show structure when calculated */}
       {calculated && (
         <>
-          {/* Stats Comparison */}
+          {/* Stats Comparison - UNIFIED */}
           <div className="stats-comparison">
             <h3 className="section-title">
               <span className="section-icon">📊</span>
-              Dati Giocatori (raw)
+              Confronto Statistiche
             </h3>
             
-            <div className="stats-grid-dual">
-              {/* Home Player Stats */}
-              <div className="player-stats-box home">
-                <h4>{homePlayer?.name}</h4>
-                <div className="stats-list">
-                  <StatRow label="Win Rate" homeValue={homeStats?.overall?.win_rate} awayValue={null} />
-                  <StatRow label="Partite" homeValue={homeStats?.overall?.total_matches} awayValue={null} format="number" />
-                  <StatRow label="Vittorie" homeValue={homeStats?.overall?.wins} awayValue={null} format="number" />
-                  <StatRow label="Sconfitte" homeValue={homeStats?.overall?.losses} awayValue={null} format="number" />
-                  <StatRow label="Comeback Rate" homeValue={homeStats?.overall?.comeback_rate} awayValue={null} />
-                  <StatRow label="ROI" homeValue={homeStats?.overall?.roi?.roi} awayValue={null} />
-                </div>
-                <DebugInfo label="Raw Data Home" data={homeStats} />
-              </div>
-              
-              {/* Away Player Stats */}
-              <div className="player-stats-box away">
-                <h4>{awayPlayer?.name}</h4>
-                <div className="stats-list">
-                  <StatRow label="Win Rate" homeValue={null} awayValue={awayStats?.overall?.win_rate} />
-                  <StatRow label="Partite" homeValue={null} awayValue={awayStats?.overall?.total_matches} format="number" />
-                  <StatRow label="Vittorie" homeValue={null} awayValue={awayStats?.overall?.wins} format="number" />
-                  <StatRow label="Sconfitte" homeValue={null} awayValue={awayStats?.overall?.losses} format="number" />
-                  <StatRow label="Comeback Rate" homeValue={null} awayValue={awayStats?.overall?.comeback_rate} />
-                  <StatRow label="ROI" homeValue={null} awayValue={awayStats?.overall?.roi?.roi} />
-                </div>
-                <DebugInfo label="Raw Data Away" data={awayStats} />
-              </div>
+            {/* Header con nomi giocatori */}
+            <div className="comparison-header">
+              <span className="player-name home">{homePlayer?.name}</span>
+              <span className="vs-divider">vs</span>
+              <span className="player-name away">{awayPlayer?.name}</span>
+            </div>
+            
+            {/* Stats unificate */}
+            <div className="comparison-table">
+              <ComparisonRow 
+                label="Win Rate" 
+                homeValue={homeStats?.overall?.win_rate} 
+                awayValue={awayStats?.overall?.win_rate} 
+                format="percent"
+                higherIsBetter={true}
+              />
+              <ComparisonRow 
+                label="Partite Giocate" 
+                homeValue={homeStats?.overall?.total_matches} 
+                awayValue={awayStats?.overall?.total_matches} 
+                format="number"
+              />
+              <ComparisonRow 
+                label="Vittorie" 
+                homeValue={homeStats?.overall?.wins} 
+                awayValue={awayStats?.overall?.wins} 
+                format="number"
+                higherIsBetter={true}
+              />
+              <ComparisonRow 
+                label="Sconfitte" 
+                homeValue={homeStats?.overall?.losses} 
+                awayValue={awayStats?.overall?.losses} 
+                format="number"
+                higherIsBetter={false}
+              />
+              <ComparisonRow 
+                label="Comeback Rate" 
+                homeValue={homeStats?.overall?.comeback_rate} 
+                awayValue={awayStats?.overall?.comeback_rate} 
+                format="percent"
+                higherIsBetter={true}
+              />
+              <ComparisonRow 
+                label="ROI" 
+                homeValue={homeStats?.overall?.roi?.roi} 
+                awayValue={awayStats?.overall?.roi?.roi} 
+                format="percent"
+                higherIsBetter={true}
+              />
+            </div>
+            
+            {/* Debug toggle */}
+            <div className="debug-row">
+              <DebugInfo label="Raw Home" data={homeStats} />
+              <DebugInfo label="Raw Away" data={awayStats} />
             </div>
           </div>
 
-          {/* H2H Section - Show even if 0 */}
+          {/* H2H Section - Enhanced */}
           <div className="h2h-section">
             <h3 className="section-title">
               <span className="section-icon">⚔️</span>
               Head to Head
             </h3>
-            <div className="h2h-content">
-              {h2hStats ? (
-                <>
-                  <div className="h2h-score">
-                    <span className="h2h-player home">{homePlayer?.name}</span>
-                    <span className="h2h-record">
-                      {h2hStats.player1Wins || 0} - {h2hStats.player2Wins || 0}
-                    </span>
-                    <span className="h2h-player away">{awayPlayer?.name}</span>
+            
+            {h2hStats && h2hStats.totalMatches > 0 ? (
+              <div className="h2h-content-enhanced">
+                {/* Score centrale grande */}
+                <div className="h2h-main-score">
+                  <div className="h2h-side home">
+                    <span className="h2h-name">{homePlayer?.name}</span>
+                    <span className="h2h-wins">{h2hStats.player1Wins || 0}</span>
                   </div>
-                  <p className="h2h-total">{h2hStats.totalMatches || 0} incontri totali</p>
-                </>
-              ) : (
-                <p className="h2h-empty">Nessun H2H trovato nel database</p>
-              )}
-            </div>
+                  <div className="h2h-center">
+                    <span className="h2h-dash">-</span>
+                  </div>
+                  <div className="h2h-side away">
+                    <span className="h2h-wins">{h2hStats.player2Wins || 0}</span>
+                    <span className="h2h-name">{awayPlayer?.name}</span>
+                  </div>
+                </div>
+                
+                {/* Barra visuale */}
+                <div className="h2h-bar-container">
+                  <div 
+                    className="h2h-bar home"
+                    style={{ 
+                      width: h2hStats.totalMatches > 0 
+                        ? `${(h2hStats.player1Wins / h2hStats.totalMatches) * 100}%`
+                        : '50%'
+                    }}
+                  />
+                  <div 
+                    className="h2h-bar away"
+                    style={{ 
+                      width: h2hStats.totalMatches > 0 
+                        ? `${(h2hStats.player2Wins / h2hStats.totalMatches) * 100}%`
+                        : '50%'
+                    }}
+                  />
+                </div>
+                
+                {/* Info aggiuntive */}
+                <div className="h2h-meta">
+                  <span className="h2h-total-matches">
+                    📊 {h2hStats.totalMatches} incontri totali
+                  </span>
+                  {h2hStats.player1Wins !== h2hStats.player2Wins && (
+                    <span className="h2h-leader">
+                      👑 Leader: <strong>
+                        {h2hStats.player1Wins > h2hStats.player2Wins ? homePlayer?.name : awayPlayer?.name}
+                      </strong>
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="h2h-empty">
+                <span className="h2h-empty-icon">🤝</span>
+                <p>Nessun precedente H2H nel database</p>
+                <small>Questi giocatori non si sono mai affrontati (nei dati disponibili)</small>
+              </div>
+            )}
             <DebugInfo label="Raw H2H Data" data={h2hStats} />
           </div>
 

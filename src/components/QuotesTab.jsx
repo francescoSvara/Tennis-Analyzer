@@ -1,17 +1,55 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { apiUrl } from '../config';
 import './QuotesTab.css';
 
 /**
- * QuotesTab - Sezione per analisi quote e value betting
+ * QuotesTab - Sezione AVANZATA per analisi quote e value betting
  * 
  * Calcola probabilità stimate basate su:
+ * - STORICO GIOCATORI (win rate, comeback rate, ROI) dal database
+ * - Win rate per SUPERFICIE specifica
+ * - Win rate per FORMATO (Bo3/Bo5)
  * - Ranking giocatori
- * - Momentum attuale
- * - Statistiche match
- * - Break points
+ * - Momentum attuale del match
+ * - Break points e statistiche live
+ * - Pressure Index
  * 
  * Confronta con quote manuali Betfair per trovare VALUE
  */
+
+// ============================================================================
+// COSTANTI PER IL CALCOLO AVANZATO
+// ============================================================================
+const WEIGHT_FACTORS = {
+  HISTORICAL_WIN_RATE: 0.25,      // Win rate storico generale
+  SURFACE_WIN_RATE: 0.20,         // Win rate sulla superficie corrente
+  FORMAT_WIN_RATE: 0.10,          // Win rate nel formato (Bo3/Bo5)
+  RANKING: 0.15,                  // Differenza ranking
+  MOMENTUM_LIVE: 0.15,            // Momentum nel match corrente
+  COMEBACK_RATE: 0.10,            // Capacità di rimonta
+  EXPERIENCE: 0.05,               // Numero match giocati (esperienza)
+};
+
+// Normalizza la superficie dal torneo
+const normalizeSurface = (surface) => {
+  if (!surface) return null;
+  const s = surface.toLowerCase();
+  if (s.includes('hard')) return 'Hard';
+  if (s.includes('clay') || s.includes('terra')) return 'Clay';
+  if (s.includes('grass') || s.includes('erba')) return 'Grass';
+  if (s.includes('carpet')) return 'Carpet';
+  return null;
+};
+
+// Calcola ELO-like probability basata su ranking
+const calculateRankingProbability = (rankA, rankB) => {
+  if (!rankA || !rankB) return 0.5;
+  // Formula ELO-style: expected score based on ranking difference
+  const K = 400; // Scaling factor
+  const diff = rankB - rankA; // Positive = A is better ranked
+  return 1 / (1 + Math.pow(10, -diff / K));
+};
+
 export default function QuotesTab({ 
   powerRankings = [], 
   eventInfo = {}, 
@@ -22,124 +60,331 @@ export default function QuotesTab({
   const awayName = eventInfo?.away?.name || eventInfo?.away?.shortName || 'Away';
   const homeRanking = eventInfo?.home?.ranking || null;
   const awayRanking = eventInfo?.away?.ranking || null;
+  
+  // Superficie del match corrente
+  const matchSurface = useMemo(() => {
+    return normalizeSurface(
+      eventInfo?.groundType || 
+      eventInfo?.surface || 
+      eventInfo?.tournament?.groundType ||
+      matchSummary?.surface
+    );
+  }, [eventInfo, matchSummary]);
+  
+  // Formato del match (best-of-3 o best-of-5)
+  const matchFormat = useMemo(() => {
+    if (matchSummary?.format?.includes('5') || eventInfo?.bestOf === 5) return 'best_of_5';
+    return 'best_of_3';
+  }, [matchSummary, eventInfo]);
 
   // State per quote manuali Betfair
   const [betfairHomeOdds, setBetfairHomeOdds] = useState('');
   const [betfairAwayOdds, setBetfairAwayOdds] = useState('');
+  
+  // State per statistiche storiche dai DB
+  const [homeHistoricalStats, setHomeHistoricalStats] = useState(null);
+  const [awayHistoricalStats, setAwayHistoricalStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState({ home: false, away: false });
 
-  // Calcola probabilità stimate basate sui dati disponibili
+  // Fetch statistiche storiche dei giocatori
+  useEffect(() => {
+    const fetchPlayerStats = async (playerName, setStats, side) => {
+      if (!playerName || playerName === 'Home' || playerName === 'Away') return;
+      
+      setLoadingStats(prev => ({ ...prev, [side]: true }));
+      try {
+        const response = await fetch(apiUrl(`/api/player/${encodeURIComponent(playerName)}/stats`));
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (err) {
+        console.error(`Error fetching historical stats for ${playerName}:`, err);
+      } finally {
+        setLoadingStats(prev => ({ ...prev, [side]: false }));
+      }
+    };
+
+    fetchPlayerStats(homeName, setHomeHistoricalStats, 'home');
+    fetchPlayerStats(awayName, setAwayHistoricalStats, 'away');
+  }, [homeName, awayName]);
+
+  // ============================================================================
+  // CALCOLO PROBABILITÀ AVANZATO
+  // ============================================================================
   const estimatedProbabilities = useMemo(() => {
-    let homeProb = 50; // Default 50-50
+    let homeScore = 0;
+    let awayScore = 0;
     let factors = [];
+    let totalWeight = 0;
 
-    // 1. RANKING (peso: 30%)
-    if (homeRanking && awayRanking) {
-      // Differenza ranking - chi ha ranking più basso è favorito
-      const rankDiff = awayRanking - homeRanking;
-      let rankBonus = 0;
+    // -------------------------------------------------------------------------
+    // 1. WIN RATE STORICO GENERALE (peso: 25%)
+    // -------------------------------------------------------------------------
+    const homeWR = homeHistoricalStats?.overall?.win_rate;
+    const awayWR = awayHistoricalStats?.overall?.win_rate;
+    
+    if (homeWR !== undefined && awayWR !== undefined) {
+      const weight = WEIGHT_FACTORS.HISTORICAL_WIN_RATE;
+      homeScore += homeWR * weight;
+      awayScore += awayWR * weight;
+      totalWeight += weight;
       
-      if (rankDiff > 100) rankBonus = 15;
-      else if (rankDiff > 50) rankBonus = 10;
-      else if (rankDiff > 20) rankBonus = 5;
-      else if (rankDiff > 0) rankBonus = 2;
-      else if (rankDiff < -100) rankBonus = -15;
-      else if (rankDiff < -50) rankBonus = -10;
-      else if (rankDiff < -20) rankBonus = -5;
-      else if (rankDiff < 0) rankBonus = -2;
-      
-      homeProb += rankBonus;
+      const diff = ((homeWR - awayWR) * 100).toFixed(1);
       factors.push({
-        name: 'Ranking',
-        homeValue: `#${homeRanking}`,
-        awayValue: `#${awayRanking}`,
-        impact: rankBonus > 0 ? `+${rankBonus}% Home` : rankBonus < 0 ? `${rankBonus}% Home` : 'Neutro',
-        weight: '30%'
+        name: '📊 Win Rate Storico',
+        homeValue: `${(homeWR * 100).toFixed(1)}%`,
+        awayValue: `${(awayWR * 100).toFixed(1)}%`,
+        homeMatches: homeHistoricalStats?.total_matches || 0,
+        awayMatches: awayHistoricalStats?.total_matches || 0,
+        impact: diff > 0 ? `+${diff}% Home` : diff < 0 ? `${diff}% Home` : 'Pari',
+        weight: '25%',
+        category: 'historical'
       });
     }
 
-    // 2. MOMENTUM ATTUALE (peso: 25%)
-    if (powerRankings && powerRankings.length > 0) {
-      const lastGames = powerRankings.slice(-5);
-      const avgMomentum = lastGames.reduce((sum, g) => sum + (g.value || 0), 0) / lastGames.length;
+    // -------------------------------------------------------------------------
+    // 2. WIN RATE PER SUPERFICIE (peso: 20%)
+    // -------------------------------------------------------------------------
+    if (matchSurface) {
+      const homeSurfaceWR = homeHistoricalStats?.surfaces?.[matchSurface]?.win_rate;
+      const awaySurfaceWR = awayHistoricalStats?.surfaces?.[matchSurface]?.win_rate;
+      const homeSurfaceMatches = homeHistoricalStats?.surfaces?.[matchSurface]?.matches || 0;
+      const awaySurfaceMatches = awayHistoricalStats?.surfaces?.[matchSurface]?.matches || 0;
       
-      let momentumBonus = 0;
-      if (avgMomentum > 40) momentumBonus = 12;
-      else if (avgMomentum > 20) momentumBonus = 8;
-      else if (avgMomentum > 10) momentumBonus = 4;
-      else if (avgMomentum < -40) momentumBonus = -12;
-      else if (avgMomentum < -20) momentumBonus = -8;
-      else if (avgMomentum < -10) momentumBonus = -4;
-      
-      homeProb += momentumBonus;
-      factors.push({
-        name: 'Momentum (ultimi 5)',
-        homeValue: avgMomentum > 0 ? `+${avgMomentum.toFixed(0)}` : avgMomentum.toFixed(0),
-        awayValue: avgMomentum < 0 ? `+${Math.abs(avgMomentum).toFixed(0)}` : `-${avgMomentum.toFixed(0)}`,
-        impact: momentumBonus > 0 ? `+${momentumBonus}% Home` : momentumBonus < 0 ? `${momentumBonus}% Home` : 'Neutro',
-        weight: '25%'
-      });
-
-      // Break count
-      const homeBreaks = powerRankings.filter(g => g.breakOccurred && g.value > 0).length;
-      const awayBreaks = powerRankings.filter(g => g.breakOccurred && g.value < 0).length;
-      
-      if (homeBreaks !== awayBreaks) {
-        const breakBonus = (homeBreaks - awayBreaks) * 3;
-        homeProb += Math.max(-10, Math.min(10, breakBonus));
+      if (homeSurfaceWR !== undefined && awaySurfaceWR !== undefined && 
+          homeSurfaceMatches >= 2 && awaySurfaceMatches >= 2) {
+        const weight = WEIGHT_FACTORS.SURFACE_WIN_RATE;
+        homeScore += homeSurfaceWR * weight;
+        awayScore += awaySurfaceWR * weight;
+        totalWeight += weight;
+        
+        const diff = ((homeSurfaceWR - awaySurfaceWR) * 100).toFixed(1);
+        const surfaceEmoji = matchSurface === 'Hard' ? '🔵' : matchSurface === 'Clay' ? '🟤' : '🟢';
         factors.push({
-          name: 'Break effettuati',
-          homeValue: homeBreaks.toString(),
-          awayValue: awayBreaks.toString(),
-          impact: breakBonus > 0 ? `+${Math.min(10, breakBonus)}% Home` : `${Math.max(-10, breakBonus)}% Home`,
-          weight: '15%'
+          name: `${surfaceEmoji} Win Rate ${matchSurface}`,
+          homeValue: `${(homeSurfaceWR * 100).toFixed(0)}% (${homeSurfaceMatches}m)`,
+          awayValue: `${(awaySurfaceWR * 100).toFixed(0)}% (${awaySurfaceMatches}m)`,
+          impact: diff > 0 ? `+${diff}% Home` : diff < 0 ? `${diff}% Home` : 'Pari',
+          weight: '20%',
+          category: 'surface'
         });
       }
     }
 
-    // 3. SCORE ATTUALE (peso: 20%)
+    // -------------------------------------------------------------------------
+    // 3. WIN RATE PER FORMATO Bo3/Bo5 (peso: 10%)
+    // -------------------------------------------------------------------------
+    const homeFormatWR = homeHistoricalStats?.formats?.[matchFormat]?.win_rate;
+    const awayFormatWR = awayHistoricalStats?.formats?.[matchFormat]?.win_rate;
+    
+    if (homeFormatWR !== undefined && awayFormatWR !== undefined) {
+      const weight = WEIGHT_FACTORS.FORMAT_WIN_RATE;
+      homeScore += homeFormatWR * weight;
+      awayScore += awayFormatWR * weight;
+      totalWeight += weight;
+      
+      const diff = ((homeFormatWR - awayFormatWR) * 100).toFixed(1);
+      const formatLabel = matchFormat === 'best_of_5' ? 'Best of 5' : 'Best of 3';
+      factors.push({
+        name: `📋 Win Rate ${formatLabel}`,
+        homeValue: `${(homeFormatWR * 100).toFixed(0)}%`,
+        awayValue: `${(awayFormatWR * 100).toFixed(0)}%`,
+        impact: diff > 0 ? `+${diff}% Home` : diff < 0 ? `${diff}% Home` : 'Pari',
+        weight: '10%',
+        category: 'format'
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. RANKING (peso: 15%)
+    // -------------------------------------------------------------------------
+    if (homeRanking && awayRanking) {
+      const weight = WEIGHT_FACTORS.RANKING;
+      const rankProb = calculateRankingProbability(homeRanking, awayRanking);
+      homeScore += rankProb * weight;
+      awayScore += (1 - rankProb) * weight;
+      totalWeight += weight;
+      
+      const rankDiff = awayRanking - homeRanking;
+      let impactText = 'Neutro';
+      if (rankDiff > 50) impactText = `+${(rankProb * 100 - 50).toFixed(0)}% Home`;
+      else if (rankDiff < -50) impactText = `${(rankProb * 100 - 50).toFixed(0)}% Home`;
+      
+      factors.push({
+        name: '🏆 Ranking ATP/WTA',
+        homeValue: `#${homeRanking}`,
+        awayValue: `#${awayRanking}`,
+        impact: impactText,
+        weight: '15%',
+        category: 'ranking'
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. MOMENTUM LIVE NEL MATCH (peso: 15%)
+    // -------------------------------------------------------------------------
+    if (powerRankings && powerRankings.length > 0) {
+      const weight = WEIGHT_FACTORS.MOMENTUM_LIVE;
+      const lastGames = powerRankings.slice(-5);
+      const avgMomentum = lastGames.reduce((sum, g) => sum + (g.value || 0), 0) / lastGames.length;
+      
+      // Normalizza momentum da -100/+100 a 0-1
+      const normalizedMomentum = (avgMomentum + 100) / 200;
+      homeScore += normalizedMomentum * weight;
+      awayScore += (1 - normalizedMomentum) * weight;
+      totalWeight += weight;
+      
+      factors.push({
+        name: '⚡ Momentum Live',
+        homeValue: avgMomentum > 0 ? `+${avgMomentum.toFixed(0)}` : avgMomentum.toFixed(0),
+        awayValue: avgMomentum < 0 ? `+${Math.abs(avgMomentum).toFixed(0)}` : `-${avgMomentum.toFixed(0)}`,
+        impact: avgMomentum > 15 ? `+${(normalizedMomentum * 100 - 50).toFixed(0)}% Home` : 
+                avgMomentum < -15 ? `${(normalizedMomentum * 100 - 50).toFixed(0)}% Home` : 'Neutro',
+        weight: '15%',
+        category: 'live'
+      });
+
+      // Break count (sub-factor del momentum)
+      const homeBreaks = powerRankings.filter(g => g.breakOccurred && g.value > 0).length;
+      const awayBreaks = powerRankings.filter(g => g.breakOccurred && g.value < 0).length;
+      
+      if (homeBreaks > 0 || awayBreaks > 0) {
+        factors.push({
+          name: '🎯 Break Effettuati',
+          homeValue: homeBreaks.toString(),
+          awayValue: awayBreaks.toString(),
+          impact: homeBreaks > awayBreaks ? `+${(homeBreaks - awayBreaks) * 3}% Home` : 
+                  awayBreaks > homeBreaks ? `-${(awayBreaks - homeBreaks) * 3}% Home` : 'Pari',
+          weight: '(incluso)',
+          category: 'live'
+        });
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. COMEBACK RATE (peso: 10%)
+    // -------------------------------------------------------------------------
+    const homeComebackRate = homeHistoricalStats?.overall?.comeback_rate;
+    const awayComebackRate = awayHistoricalStats?.overall?.comeback_rate;
+    
+    if (homeComebackRate !== undefined && awayComebackRate !== undefined) {
+      const weight = WEIGHT_FACTORS.COMEBACK_RATE;
+      homeScore += homeComebackRate * weight;
+      awayScore += awayComebackRate * weight;
+      totalWeight += weight;
+      
+      const diff = ((homeComebackRate - awayComebackRate) * 100).toFixed(1);
+      factors.push({
+        name: '🔄 Comeback Rate',
+        homeValue: `${(homeComebackRate * 100).toFixed(0)}%`,
+        awayValue: `${(awayComebackRate * 100).toFixed(0)}%`,
+        impact: Math.abs(parseFloat(diff)) > 10 ? 
+                (diff > 0 ? `+${diff}% Home` : `${diff}% Home`) : 'Simile',
+        weight: '10%',
+        category: 'historical'
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. ESPERIENZA (peso: 5%)
+    // -------------------------------------------------------------------------
+    const homeMatches = homeHistoricalStats?.total_matches || 0;
+    const awayMatches = awayHistoricalStats?.total_matches || 0;
+    
+    if (homeMatches > 0 && awayMatches > 0) {
+      const weight = WEIGHT_FACTORS.EXPERIENCE;
+      const totalMatches = homeMatches + awayMatches;
+      homeScore += (homeMatches / totalMatches) * weight;
+      awayScore += (awayMatches / totalMatches) * weight;
+      totalWeight += weight;
+      
+      factors.push({
+        name: '📈 Esperienza (DB)',
+        homeValue: `${homeMatches} match`,
+        awayValue: `${awayMatches} match`,
+        impact: homeMatches > awayMatches * 1.5 ? '+Exp Home' : 
+                awayMatches > homeMatches * 1.5 ? '+Exp Away' : 'Simile',
+        weight: '5%',
+        category: 'experience'
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. SET VINTI NEL MATCH (bonus live)
+    // -------------------------------------------------------------------------
     if (matchSummary?.sets && Array.isArray(matchSummary.sets)) {
       const homeSets = matchSummary.sets.filter(s => s.homeScore > s.awayScore).length;
       const awaySets = matchSummary.sets.filter(s => s.awayScore > s.homeScore).length;
       
       if (homeSets !== awaySets) {
-        const setBonus = (homeSets - awaySets) * 8;
-        homeProb += setBonus;
+        const setBonus = (homeSets - awaySets) * 0.08;
+        homeScore += setBonus > 0 ? setBonus : 0;
+        awayScore += setBonus < 0 ? Math.abs(setBonus) : 0;
+        
         factors.push({
-          name: 'Set vinti',
+          name: '🎾 Set Vinti (live)',
           homeValue: homeSets.toString(),
           awayValue: awaySets.toString(),
-          impact: setBonus > 0 ? `+${setBonus}% Home` : `${setBonus}% Home`,
-          weight: '20%'
+          impact: `${setBonus > 0 ? '+' : ''}${(setBonus * 100).toFixed(0)}% Home`,
+          weight: 'bonus',
+          category: 'live'
         });
       }
-    } else if (matchSummary?.homeScore !== undefined && matchSummary?.awayScore !== undefined) {
-      // Try alternative format
-      const homeSets = matchSummary.homeScore || 0;
-      const awaySets = matchSummary.awayScore || 0;
-      
-      if (homeSets !== awaySets) {
-        const setBonus = (homeSets - awaySets) * 8;
-        homeProb += setBonus;
-        factors.push({
-          name: 'Set vinti',
-          homeValue: homeSets.toString(),
-          awayValue: awaySets.toString(),
-          impact: setBonus > 0 ? `+${setBonus}% Home` : `${setBonus}% Home`,
-          weight: '20%'
-        });
+    }
+
+    // -------------------------------------------------------------------------
+    // CALCOLO FINALE
+    // -------------------------------------------------------------------------
+    let homeProb, awayProb;
+    
+    if (totalWeight > 0) {
+      // Normalizza i punteggi
+      const totalScore = homeScore + awayScore;
+      if (totalScore > 0) {
+        homeProb = (homeScore / totalScore) * 100;
+        awayProb = (awayScore / totalScore) * 100;
+      } else {
+        homeProb = 50;
+        awayProb = 50;
+      }
+    } else {
+      // Fallback: usa solo ranking se disponibile
+      if (homeRanking && awayRanking) {
+        const rankProb = calculateRankingProbability(homeRanking, awayRanking);
+        homeProb = rankProb * 100;
+        awayProb = (1 - rankProb) * 100;
+      } else {
+        homeProb = 50;
+        awayProb = 50;
       }
     }
 
     // Limita probabilità tra 5% e 95%
     homeProb = Math.max(5, Math.min(95, homeProb));
-    const awayProb = 100 - homeProb;
+    awayProb = 100 - homeProb;
+
+    // Confidence: quanto siamo sicuri del calcolo (basato su dati disponibili)
+    const confidence = Math.min(100, 
+      (homeHistoricalStats ? 25 : 0) + 
+      (awayHistoricalStats ? 25 : 0) +
+      (homeRanking && awayRanking ? 20 : 0) +
+      (powerRankings.length > 3 ? 20 : powerRankings.length > 0 ? 10 : 0) +
+      (matchSurface ? 10 : 0)
+    );
 
     return {
       home: homeProb,
       away: awayProb,
-      factors
+      factors,
+      confidence,
+      dataQuality: confidence >= 70 ? 'high' : confidence >= 40 ? 'medium' : 'low',
+      hasHistoricalData: !!(homeHistoricalStats || awayHistoricalStats)
     };
-  }, [powerRankings, eventInfo, matchSummary, homeRanking, awayRanking]);
+  }, [
+    powerRankings, eventInfo, matchSummary, homeRanking, awayRanking,
+    homeHistoricalStats, awayHistoricalStats, matchSurface, matchFormat
+  ]);
 
   // Converti probabilità in quote decimali
   const estimatedOdds = useMemo(() => {
@@ -242,15 +487,33 @@ export default function QuotesTab({
           Analisi Quote & Value Betting
         </h2>
         <p className="quotes-subtitle">
-          Confronta le probabilità stimate con le quote Betfair per trovare VALUE
+          Calcolo avanzato basato su statistiche storiche + dati live
         </p>
+        {/* Data Quality Badge */}
+        <div className="data-quality-badge">
+          {loadingStats.home || loadingStats.away ? (
+            <span className="quality-loading">⏳ Caricamento dati storici...</span>
+          ) : (
+            <>
+              <span className={`quality-indicator ${estimatedProbabilities.dataQuality}`}>
+                {estimatedProbabilities.dataQuality === 'high' ? '🟢' : 
+                 estimatedProbabilities.dataQuality === 'medium' ? '🟡' : '🟠'}
+                Affidabilità: {estimatedProbabilities.confidence}%
+              </span>
+              {matchSurface && <span className="surface-badge">📍 {matchSurface}</span>}
+              {estimatedProbabilities.hasHistoricalData && (
+                <span className="historical-badge">📚 Dati storici caricati</span>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Probabilità Stimate */}
       <section className="quotes-section">
         <h3 className="section-title">
           <span className="section-icon">📊</span>
-          Probabilità Stimate
+          Probabilità Stimate (Modello Avanzato)
         </h3>
         
         <div className="probability-display">
@@ -279,11 +542,55 @@ export default function QuotesTab({
           </div>
         </div>
 
-        {/* Fattori */}
+        {/* Fattori raggruppati per categoria */}
         <div className="factors-list">
-          <h4 className="factors-title">Fattori considerati:</h4>
-          {estimatedProbabilities.factors.map((factor, idx) => (
-            <div key={idx} className="factor-row">
+          <h4 className="factors-title">
+            Fattori considerati ({estimatedProbabilities.factors.length}):
+          </h4>
+          
+          {/* Storico */}
+          {estimatedProbabilities.factors.filter(f => f.category === 'historical').length > 0 && (
+            <div className="factors-category">
+              <span className="category-label">📚 Dati Storici</span>
+              {estimatedProbabilities.factors.filter(f => f.category === 'historical').map((factor, idx) => (
+                <div key={`hist-${idx}`} className="factor-row">
+                  <span className="factor-name">{factor.name}</span>
+                  <span className="factor-values">
+                    <span className="factor-home">{factor.homeValue}</span>
+                    <span className="factor-vs">vs</span>
+                    <span className="factor-away">{factor.awayValue}</span>
+                  </span>
+                  <span className={`factor-impact ${factor.impact.includes('+') ? 'positive' : factor.impact.includes('-') ? 'negative' : ''}`}>
+                    {factor.impact}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Superficie e Formato */}
+          {estimatedProbabilities.factors.filter(f => f.category === 'surface' || f.category === 'format').length > 0 && (
+            <div className="factors-category">
+              <span className="category-label">🎾 Superficie & Formato</span>
+              {estimatedProbabilities.factors.filter(f => f.category === 'surface' || f.category === 'format').map((factor, idx) => (
+                <div key={`surf-${idx}`} className="factor-row">
+                  <span className="factor-name">{factor.name}</span>
+                  <span className="factor-values">
+                    <span className="factor-home">{factor.homeValue}</span>
+                    <span className="factor-vs">vs</span>
+                    <span className="factor-away">{factor.awayValue}</span>
+                  </span>
+                  <span className={`factor-impact ${factor.impact.includes('+') ? 'positive' : factor.impact.includes('-') ? 'negative' : ''}`}>
+                    {factor.impact}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Ranking */}
+          {estimatedProbabilities.factors.filter(f => f.category === 'ranking').map((factor, idx) => (
+            <div key={`rank-${idx}`} className="factor-row highlighted">
               <span className="factor-name">{factor.name}</span>
               <span className="factor-values">
                 <span className="factor-home">{factor.homeValue}</span>
@@ -293,6 +600,39 @@ export default function QuotesTab({
               <span className={`factor-impact ${factor.impact.includes('+') ? 'positive' : factor.impact.includes('-') ? 'negative' : ''}`}>
                 {factor.impact}
               </span>
+            </div>
+          ))}
+
+          {/* Live */}
+          {estimatedProbabilities.factors.filter(f => f.category === 'live').length > 0 && (
+            <div className="factors-category live">
+              <span className="category-label">⚡ Dati Live Match</span>
+              {estimatedProbabilities.factors.filter(f => f.category === 'live').map((factor, idx) => (
+                <div key={`live-${idx}`} className="factor-row">
+                  <span className="factor-name">{factor.name}</span>
+                  <span className="factor-values">
+                    <span className="factor-home">{factor.homeValue}</span>
+                    <span className="factor-vs">vs</span>
+                    <span className="factor-away">{factor.awayValue}</span>
+                  </span>
+                  <span className={`factor-impact ${factor.impact.includes('+') ? 'positive' : factor.impact.includes('-') ? 'negative' : ''}`}>
+                    {factor.impact}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Experience */}
+          {estimatedProbabilities.factors.filter(f => f.category === 'experience').map((factor, idx) => (
+            <div key={`exp-${idx}`} className="factor-row subtle">
+              <span className="factor-name">{factor.name}</span>
+              <span className="factor-values">
+                <span className="factor-home">{factor.homeValue}</span>
+                <span className="factor-vs">vs</span>
+                <span className="factor-away">{factor.awayValue}</span>
+              </span>
+              <span className={`factor-impact`}>{factor.impact}</span>
             </div>
           ))}
         </div>

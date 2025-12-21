@@ -8,6 +8,95 @@
 
 ---
 
+## 🆕 ULTIMA SESSIONE - 22 Dicembre 2025
+
+### Nuove Funzionalità Implementate
+
+#### 🌡️ MomentumTab - Redesign Completo
+- **Design semplificato** focalizzato su: CHI ha il momentum e QUANDO sta cambiando
+- **Owner Card** grande con:
+  - Nome giocatore con momentum
+  - Barra forza (0-100%)
+  - Motivo (sta dominando, leggero controllo, equilibrio)
+  - 3 metriche: Valore Attuale, Media 3 Game, Media 5 Game
+- **Alert Cambio Momentum** (mostra SOLO se shift in corso):
+  - Direzione del cambio
+  - Confidenza percentuale
+  - **Causa dello shift**: break, errori, crescita avversario, calo rendimento
+- **Termometro Ultimi 5 Game** - Design intuitivo con:
+  - Header con nomi giocatori (🔵 Home ← EQUILIBRIO → Away 🔴)
+  - Barra bilaterale che si riempie verso il giocatore con momentum
+  - Indicatore chi serve (🎾→ o ←🎾)
+  - Badge BRK! animato per i break
+- **Grafico SVG** pulito con aree colorate home/away
+- **Riepilogo rapido**: Game totali, Break, Media match
+
+#### 🎾 Point-by-Point - Legenda Punteggi
+- Aggiunta legenda sotto header "🎾 = Chi Serve"
+- Colori distintivi per game al servizio Home/Away
+- Badge "Chi Serve" per ogni game
+
+#### � Manual Predictor - Confronto Unificato
+- **Statistiche unificate** in tabella confronto side-by-side
+- Header con nomi giocatori (Home vs Away)
+- **ComparisonRow** con evidenziazione vincitore:
+  - 🟢 Verde = valore migliore
+  - 🔵 Blu = Home player
+  - 🔴 Rosso = Away player
+- **H2H Enhanced**:
+  - Score grande centrale (es. 3 - 1)
+  - Barra visuale proporzionale
+  - Badge "👑 Leader" quando c'è un dominatore
+  - Empty state chiaro quando non ci sono precedenti
+
+#### �🔧 Bug Fix
+- **ManualPredictor**: Corretto uso di `apiUrl()` come funzione (era usata come stringa)
+- Ricerca giocatori ora funziona correttamente
+- Fix endpoint `/api/player/search` per autocomplete
+
+### Funzioni Analisi Momentum
+```javascript
+// Chi ha il momentum e perché
+analyzeMomentumOwner(powerRankings, homeName, awayName)
+// Returns: { owner, strength, reason, lastValue, avgLast3, avgLast5 }
+
+// Detecta se il momentum sta cambiando
+detectMomentumShift(powerRankings, homeName, awayName)
+// Returns: { isShifting, direction, cause, confidence, metrics }
+```
+
+---
+
+## 🆕 SESSIONE PRECEDENTE - 21 Dicembre 2025
+
+### Nuove Funzionalità Implementate
+
+#### 📊 QuotesTab - Calcolo Probabilità Avanzato
+- Sistema multi-fattore con 7 variabili ponderate
+- Fetch automatico statistiche storiche giocatori
+- Win Rate per superficie (Hard/Clay/Grass) e formato (Bo3/Bo5)
+- Formula ELO-style per ranking
+- Indicatore affidabilità calcolo (🟢 Alto / 🟡 Medio / 🟠 Basso)
+
+#### 🎯 Strategie di Base Enhanced
+- **Lay The Winner** - Considera superficie, formato, momentum
+- **Banca Servizio** - Integra Pressure Index (0-100) con breakdown
+- **Super Break** - Volatilità, elasticità, match character
+- UI con barre colorate e badge visivi
+
+#### 🎾 Point-by-Point Enhanced
+- Statistiche per game (Ace, DF, Winner, BP)
+- Rilevamento automatico Break con badge animato
+- Indicatore "chi serve" per ogni game
+- Barra pressione mini nel header game
+- Statistiche aggregate per set
+
+#### 🔧 Bug Fix
+- PredictorTab ora mostra nomi giocatori reali
+- Match Predictor carica statistiche storiche correttamente
+
+---
+
 ## ⚠️ ARCHITETTURA IMPORTANTE
 
 ### 🚫 NO SCRAPING DAL SERVER CLOUD

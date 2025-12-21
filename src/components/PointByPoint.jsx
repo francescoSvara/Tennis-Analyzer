@@ -179,18 +179,28 @@ export default function PointByPoint({
         </div>
       )}
 
-      {summary && (
-        <div className="pbp-summary">
-          <div className="pbp-current">
-            Punto corrente: Home {summary.currentPoint?.home || ''} / Away{' '}
-            {summary.currentPoint?.away || ''}
+      {/* Legenda colori game */}
+      <div className="pbp-legend">
+        <span className="pbp-legend-title">Legenda:</span>
+        <div className="pbp-legend-items">
+          <div className="pbp-legend-item">
+            <span className="pbp-legend-color legend-home-serve"></span>
+            <span>Servizio Home</span>
           </div>
-          <div className="pbp-sets">
-            Set: H [{(summary.sets.home || []).join(', ')}] — A [
-            {(summary.sets.away || []).join(', ')}]
+          <div className="pbp-legend-item">
+            <span className="pbp-legend-color legend-away-serve"></span>
+            <span>Servizio Away</span>
+          </div>
+          <div className="pbp-legend-item">
+            <span className="pbp-legend-color legend-break"></span>
+            <span>Break</span>
+          </div>
+          <div className="pbp-legend-item">
+            <span className="pbp-legend-color legend-tiebreak"></span>
+            <span>Tiebreak</span>
           </div>
         </div>
-      )}
+      </div>
 
       {pbpEntry && pbpEntry.length > 0 ? (
         pbpEntry.map((s, index) => (

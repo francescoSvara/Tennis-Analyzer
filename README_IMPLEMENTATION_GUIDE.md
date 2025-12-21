@@ -2,13 +2,171 @@
 
 ## 📋 Guida Operativa per AI Coding Agent
 
-**Versione:** 2.1  
-**Data:** 21 Dicembre 2025  
+**Versione:** 2.3  
+**Data:** 22 Dicembre 2025  
 **Scopo:** Documento operativo per implementare le funzionalità nel codice esistente
 
 ---
 
+# ✅ FUNZIONALITÀ IMPLEMENTATE (22 Dicembre 2025)
+
+## 🆕 Nuove Implementazioni - Sessione 22 Dicembre
+
+### 🌡️ MomentumTab - Redesign Completo
+**Files:** `src/components/MomentumTab.jsx`, `src/components/MomentumTab.css`
+
+**Obiettivo:** Semplificare l'analisi momentum per capire:
+1. **CHI** ha il momentum attualmente
+2. **QUANDO** sta cambiando
+3. **PERCHÉ** sta cambiando (break, errori, performance avversario)
+
+**Nuove Funzioni:**
+```javascript
+// Analizza chi ha il momentum
+analyzeMomentumOwner(powerRankings, homeName, awayName)
+// Returns: { owner: 'home'|'away'|'balanced', strength: 0-100, reason, lastValue, avgLast3, avgLast5 }
+
+// Detecta shift di momentum
+detectMomentumShift(powerRankings, homeName, awayName)
+// Returns: { isShifting, direction, cause, confidence, metrics: {shift, trendSlope, volatility, recentBreaks} }
+```
+
+**Sezioni UI:**
+1. **Owner Card** - Chi ha il momentum con barra forza e motivo
+2. **Shift Alert** - Alert visuale quando momentum cambia (con causa)
+3. **Grafico SVG** - Andamento con aree home/away colorate
+4. **Termometro 5 Game** - Design bilaterale intuitivo con chi serve
+5. **Riepilogo** - Game totali, Break, Media match
+
+**Termometro Design:**
+- Header con nomi giocatori ai lati (🔵 Home ← EQUILIBRIO → Away 🔴)
+- Barra che si riempie verso il giocatore con momentum
+- Indicatore servizio (🎾→ = Home serve, ←🎾 = Away serve)
+- Badge BRK! animato per i break
+
+### 🎾 Point-by-Point - Legenda Aggiunta
+**File:** `src/components/PointByPoint.jsx`
+
+**Modifica:** Aggiunta legenda "🎾 = Chi Serve" sotto header set
+- Colori distintivi per game al servizio Home/Away
+- Badge "Chi Serve" per ogni game
+
+### 🔧 Bug Fix - ManualPredictor
+**File:** `src/components/ManualPredictor.jsx`
+
+**Problema:** `apiUrl` veniva usata come stringa invece che come funzione
+```javascript
+// ❌ PRIMA (ERRORE)
+const url = `${apiUrl}/api/player/search?q=${query}`;
+
+// ✅ DOPO (CORRETTO)
+const url = apiUrl(`/api/player/search?q=${query}`);
+```
+
+**Endpoint Coinvolti (tutti corretti):**
+- `/api/player/search` - Ricerca autocomplete
+- `/api/player/:name/stats` - Statistiche giocatore
+- `/api/player/h2h` - Head-to-Head
+
+### 🔮 Manual Predictor - UI Unificata
+**Files:** `src/components/ManualPredictor.jsx`, `src/components/ManualPredictor.css`
+
+**Nuovo Componente ComparisonRow:**
+```javascript
+function ComparisonRow({ label, homeValue, awayValue, format, higherIsBetter }) {
+  // Evidenzia automaticamente il "vincitore" in verde
+  // format: 'percent', 'number', 'auto'
+  // higherIsBetter: true/false/null - determina chi ha il valore migliore
+}
+```
+
+**Nuova Struttura Stats Comparison:**
+- Header con nomi giocatori side-by-side
+- ComparisonRow per ogni statistica
+- Evidenziazione automatica del valore migliore (verde)
+- Debug info collassabili
+
+**H2H Enhanced:**
+- Score grande centrale con layout moderno
+- Barra visuale proporzionale alle vittorie
+- Badge "👑 Leader" per il dominatore H2H
+- Empty state professionale quando no precedenti
+
+---
+
 # ✅ FUNZIONALITÀ IMPLEMENTATE (21 Dicembre 2025)
+
+## 🆕 Nuove Implementazioni - Sessione Corrente
+
+### 📊 QuotesTab - Calcolo Avanzato Probabilità
+**File:** `src/components/QuotesTab.jsx`
+
+**Nuove Features:**
+- **Sistema di pesi multi-fattore** per calcolo probabilità accurate
+- **Fetch automatico statistiche storiche** da `/api/player/:name/stats`
+- **Win Rate per Superficie** - Calcolo specifico per Hard/Clay/Grass
+- **Win Rate per Formato** - Differenzia Bo3 vs Bo5
+- **Formula ELO-style** per ranking invece di bonus lineari
+- **Indicatore Affidabilità** - Badge colorato (🟢 Alto / 🟡 Medio / 🟠 Basso)
+- **Fattori raggruppati per categoria**: Storici, Superficie, Ranking, Live
+
+**Pesi del Modello:**
+```javascript
+WEIGHT_FACTORS = {
+  HISTORICAL_WIN_RATE: 0.25,  // Win rate storico
+  SURFACE_WIN_RATE: 0.20,     // Win rate superficie
+  FORMAT_WIN_RATE: 0.10,      // Win rate Bo3/Bo5
+  RANKING: 0.15,              // Differenza ranking ELO
+  MOMENTUM_LIVE: 0.15,        // Momentum match corrente
+  COMEBACK_RATE: 0.10,        // Capacità di rimonta
+  EXPERIENCE: 0.05,           // Match nel database
+}
+```
+
+### 🎯 Strategie di Base - Enhanced
+**File:** `src/utils.js`
+
+**Nuove Funzioni:**
+- `extractKeyStats(data)` - Estrae aces, DF, serve % dalle statistiche
+- `calculatePressureIndex(playerStats)` - Calcola indice pressione 0-100
+- `PRESSURE_THRESHOLDS` - Soglie per DF, 1st%, 2nd%, BPS%
+- `SURFACE_COMEBACK_RATES` - Tassi recupero per superficie
+
+**Strategie Migliorate:**
+1. **Lay The Winner** - Ora considera superficie, formato, momentum, statistiche
+2. **Banca Servizio** - Integra Pressure Index con breakdown dettagliato
+3. **Super Break** - Calcola volatilità, elasticità, match character, dominance score
+
+**UI Migliorata (StrategyCard in App.jsx):**
+- Barra Pressure Index con gradiente colori
+- Barra Confidence con percentuale
+- Badge Match Character (DOMINIO, BATTAGLIA, RIMONTE)
+- Dettagli espandibili con statistiche avanzate
+
+### 🎾 Point-by-Point - Enhanced UI
+**Files:** `src/components/GameBlock.jsx`, `src/components/SetBlock.jsx`
+
+**GameBlock Migliorato:**
+- **Calcolo statistiche game** - Ace, DF, Winner, BP per ogni game
+- **Rilevamento Break** - Badge rosso animato quando c'è break
+- **Serving Indicator** - Mostra chi sta servendo
+- **Barra Pressione Mini** - Indicatore visuale 0-100
+- **Badge speciali** - 🔥 Ace, ❌ DF direttamente nell'header
+
+**SetBlock Migliorato:**
+- **Statistiche aggregate set** - Totale Ace, DF, Break per set
+- **Winner Badge** - Mostra chi ha vinto il set
+- **Stats espanse** - Visualizzazione dettagliata quando espanso
+
+### 🔧 PredictorTab - Fix
+**File:** `src/components/PredictorTab.jsx`, `src/App.jsx`
+
+**Problema risolto:** I nomi giocatori non venivano passati correttamente
+- Aggiunta funzione `extractPlayerName()` che gestisce sia stringhe che oggetti
+- Corretto passaggio props da `eventInfo.players` a `eventInfo.home/away`
+- API `/api/player/:name/stats` funzionante e testata
+
+---
 
 ## 📊 Data Normalization Layer
 
@@ -62,12 +220,12 @@ toTitleCase(str)               // Utility formattazione
 | 1 | Player Stats Aggregator | ✅ COMPLETATO | 🔥 ALTA |
 | 2 | Momentum Volatility & Elasticity | ✅ COMPLETATO | 🔥 ALTA |
 | 3 | Dynamic Surface Thresholds | ✅ INTEGRATO | 🔥 ALTA |
-| 4 | Pressure Index Calculator | ⬜ TODO | 🔥 ALTA |
-| 5 | Multi-Source Odds Analysis | ⬜ TODO | 🟡 MEDIA |
-| 6 | Historical Comeback Rate API | ⬜ TODO | 🟡 MEDIA |
+| 4 | Pressure Index Calculator | ✅ COMPLETATO | 🔥 ALTA |
+| 5 | Multi-Source Odds Analysis | ✅ COMPLETATO | 🟡 MEDIA |
+| 6 | Historical Comeback Rate API | ✅ INTEGRATO | 🟡 MEDIA |
 | 7 | Match Character Classifier | ✅ COMPLETATO | 🟡 MEDIA |
-| 8 | Lay The Winner Enhanced | ⬜ TODO | 🟢 NORMALE |
-| 9 | Set & Break Analysis | ⬜ TODO | 🟢 NORMALE |
+| 8 | Lay The Winner Enhanced | ✅ COMPLETATO | 🟢 NORMALE |
+| 9 | Set & Break Analysis | ✅ COMPLETATO | 🟢 NORMALE |
 | 10 | Daily Match Evaluation Report | ⬜ TODO | 🟢 NORMALE |
 
 ### STATO GENERALE - FRONTEND
@@ -75,6 +233,9 @@ toTitleCase(str)               // Utility formattazione
 |---|------|--------|----------|
 | 1-FE | PredictorTab in Match Detail | ✅ COMPLETATO | 🔥 ALTA |
 | 2-FE | ManualPredictor in DB Monitor | ✅ COMPLETATO | 🟡 MEDIA |
+| 3-FE | QuotesTab Enhanced (Value Betting) | ✅ COMPLETATO | 🔥 ALTA |
+| 4-FE | Strategie di Base Enhanced | ✅ COMPLETATO | 🔥 ALTA |
+| 5-FE | Point-by-Point Enhanced UI | ✅ COMPLETATO | 🟡 MEDIA |
 
 ---
 

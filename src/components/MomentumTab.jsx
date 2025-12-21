@@ -1,469 +1,393 @@
-import React, { memo, useState, useMemo } from 'react';
-import { 
-  interpretGameValue, 
-  getStatusColor, 
-  getZoneIcon, 
-  analyzePowerRankings,
-  calculateVolatility,
-  calculateElasticity,
-  analyzeMomentumTrend,
-  classifyMatchCharacter,
-  analyzePowerRankingsEnhanced
-} from '../utils';
+import React, { memo, useMemo } from 'react';
 import './MomentumTab.css';
 
 /**
- * MomentumTab - Sezione dedicata all'analisi del momentum della partita
- * 
- * @param {Array} powerRankings - Dati tennisPowerRankings
- * @param {Object} eventInfo - Info evento con home/away
+ * Analizza chi ha il momentum e perché
+ */
+function analyzeMomentumOwner(powerRankings, homeName, awayName) {
+  if (!powerRankings || powerRankings.length < 2) {
+    return { owner: 'unknown', strength: 0, reason: 'Dati insufficienti' };
+  }
+  
+  const lastGame = powerRankings[powerRankings.length - 1];
+  const lastValue = lastGame?.value || 0;
+  const last3 = powerRankings.slice(-3);
+  const last5 = powerRankings.slice(-5);
+  
+  const avgLast3 = last3.reduce((a, g) => a + (g.value || 0), 0) / last3.length;
+  const avgLast5 = last5.reduce((a, g) => a + (g.value || 0), 0) / last5.length;
+  
+  // Determina chi ha il momentum
+  let owner, strength, reason;
+  
+  if (lastValue > 30 && avgLast3 > 20) {
+    owner = 'home';
+    strength = Math.min(100, Math.abs(lastValue) + 20);
+    reason = `${homeName} sta dominando`;
+  } else if (lastValue < -30 && avgLast3 < -20) {
+    owner = 'away';
+    strength = Math.min(100, Math.abs(lastValue) + 20);
+    reason = `${awayName} sta dominando`;
+  } else if (lastValue > 15 || avgLast3 > 10) {
+    owner = 'home';
+    strength = Math.min(80, Math.abs(lastValue) + 10);
+    reason = `${homeName} in leggero controllo`;
+  } else if (lastValue < -15 || avgLast3 < -10) {
+    owner = 'away';
+    strength = Math.min(80, Math.abs(lastValue) + 10);
+    reason = `${awayName} in leggero controllo`;
+  } else {
+    owner = 'balanced';
+    strength = 50;
+    reason = 'Match equilibrato';
+  }
+  
+  return { owner, strength, reason, lastValue, avgLast3: Math.round(avgLast3), avgLast5: Math.round(avgLast5) };
+}
+
+/**
+ * Detecta se il momentum sta cambiando
+ */
+function detectMomentumShift(powerRankings, homeName, awayName) {
+  if (!powerRankings || powerRankings.length < 5) {
+    return { isShifting: false, direction: null, cause: null, confidence: 0 };
+  }
+  
+  const last5 = powerRankings.slice(-5);
+  const previous5 = powerRankings.slice(-10, -5);
+  
+  const avgLast5 = last5.reduce((a, g) => a + (g.value || 0), 0) / last5.length;
+  const avgPrev5 = previous5.length > 0 
+    ? previous5.reduce((a, g) => a + (g.value || 0), 0) / previous5.length 
+    : 0;
+  
+  const shift = avgLast5 - avgPrev5;
+  const values = last5.map(g => g.value || 0);
+  
+  // Calcola trend negli ultimi 5 game
+  const trendSlope = (values[values.length - 1] - values[0]) / (values.length - 1);
+  
+  // Conta break recenti
+  const recentBreaks = last5.filter(g => g.breakOccurred).length;
+  
+  // Calcola volatilità (oscillazioni)
+  let volatility = 0;
+  for (let i = 1; i < values.length; i++) {
+    volatility += Math.abs(values[i] - values[i-1]);
+  }
+  volatility = volatility / (values.length - 1);
+  
+  // Determina se c'è uno shift
+  let isShifting = false;
+  let direction = null;
+  let cause = null;
+  let confidence = 0;
+  
+  // Shift significativo: cambio di almeno 20 punti di media
+  if (Math.abs(shift) > 20) {
+    isShifting = true;
+    direction = shift > 0 ? 'to_home' : 'to_away';
+    confidence = Math.min(90, 50 + Math.abs(shift));
+    
+    // Determina la causa
+    if (recentBreaks > 0) {
+      cause = direction === 'to_home' 
+        ? `${homeName} ha breakkato (${recentBreaks} break)`
+        : `${awayName} ha breakkato (${recentBreaks} break)`;
+    } else if (volatility > 30) {
+      cause = 'Errori non forzati stanno cambiando il match';
+    } else if (Math.abs(trendSlope) > 10) {
+      cause = direction === 'to_home'
+        ? `${homeName} sta alzando il livello di gioco`
+        : `${awayName} sta alzando il livello di gioco`;
+    } else {
+      cause = direction === 'to_home'
+        ? `${awayName} sta calando di rendimento`
+        : `${homeName} sta calando di rendimento`;
+    }
+  }
+  // Trend costante in una direzione
+  else if (Math.abs(trendSlope) > 8 && Math.abs(avgLast5) > 15) {
+    isShifting = true;
+    direction = trendSlope > 0 ? 'to_home' : 'to_away';
+    confidence = Math.min(75, 40 + Math.abs(trendSlope) * 3);
+    cause = direction === 'to_home'
+      ? `${homeName} in crescita costante`
+      : `${awayName} in crescita costante`;
+  }
+  
+  return {
+    isShifting,
+    direction,
+    cause,
+    confidence,
+    metrics: {
+      shift: Math.round(shift),
+      trendSlope: trendSlope.toFixed(1),
+      volatility: Math.round(volatility),
+      recentBreaks
+    }
+  };
+}
+
+/**
+ * MomentumTab - Versione semplificata e focalizzata
  */
 function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = false }) {
   const homeName = eventInfo?.home?.name || eventInfo?.home?.shortName || 'Home';
   const awayName = eventInfo?.away?.name || eventInfo?.away?.shortName || 'Away';
 
-  // State per filtri
-  const [gameCount, setGameCount] = useState(3);
-  const [followPlayer, setFollowPlayer] = useState('home'); // 'home' | 'away' | 'both'
+  // Analisi principale
+  const momentumOwner = useMemo(() => 
+    analyzeMomentumOwner(powerRankings, homeName, awayName), 
+    [powerRankings, homeName, awayName]
+  );
+  
+  const momentumShift = useMemo(() => 
+    detectMomentumShift(powerRankings, homeName, awayName), 
+    [powerRankings, homeName, awayName]
+  );
 
-  // Analisi completa potenziata
-  const analysis = useMemo(() => analyzePowerRankingsEnhanced(powerRankings), [powerRankings]);
-  
-  // Ultimi N game (filtrato)
-  const lastNGames = useMemo(() => {
-    return powerRankings.slice(-gameCount);
-  }, [powerRankings, gameCount]);
-  
-  const lastNAnalysis = useMemo(() => {
-    return analyzeLast3Games(lastNGames, homeName, awayName);
-  }, [lastNGames, homeName, awayName]);
-  
-  // Dati per il grafico
-  const chartData = prepareChartData(powerRankings);
-  
-  // Statistiche per set
-  const setStats = analyzeBySet(powerRankings, homeName, awayName);
-
+  // Empty state
   if (!powerRankings || powerRankings.length === 0) {
     return (
       <div className="momentum-tab">
-        <div className="momentum-empty" style={isLive ? { background: '#fff6f6', border: '1px solid #f5cfcf', color: '#c97676' } : {}}>
+        <div className="momentum-empty">
           <div className="momentum-empty-icon">📊</div>
-          <div className="momentum-empty-title">Nessun dato di momentum disponibile</div>
+          <div className="momentum-empty-title">Dati momentum non disponibili</div>
           <div className="momentum-empty-subtitle">
-            {isLive ? 'In Live Mode i dati momentum dovrebbero arrivare in tempo reale; al momento sono assenti.' : 'I dati di momentum vengono estratti da tennisPowerRankings durante la partita'}
+            I dati appariranno quando il match sarà in corso
           </div>
         </div>
       </div>
     );
   }
 
-  // Funzione per interpretare il game dal punto di vista del giocatore selezionato
-  const interpretGameForPlayer = (game, player) => {
-    const value = game.value || 0;
-    const isHome = player === 'home';
-    const playerName = isHome ? homeName : awayName;
-    const opponentName = isHome ? awayName : homeName;
-    
-    // Per home: valori positivi = bene, negativi = male
-    // Per away: valori negativi = bene, positivi = male
-    const adjustedValue = isHome ? value : -value;
-    
-    let status, message, colorClass;
-    
-    if (game.breakOccurred) {
-      // C'è stato un break
-      if (adjustedValue > 20) {
-        status = 'excellent';
-        message = `${playerName} ha breakkato!`;
-        colorClass = 'success';
-      } else if (adjustedValue < -20) {
-        status = 'bad';
-        message = `${playerName} ha subito break`;
-        colorClass = 'danger';
-      } else {
-        status = 'neutral';
-        message = 'Break nel game';
-        colorClass = 'warning';
-      }
-    } else {
-      // Game normale
-      if (adjustedValue > 40) {
-        status = 'excellent';
-        message = `${playerName} domina`;
-        colorClass = 'success';
-      } else if (adjustedValue > 15) {
-        status = 'good';
-        message = `${playerName} in controllo`;
-        colorClass = 'success-light';
-      } else if (adjustedValue > -15) {
-        status = 'neutral';
-        message = 'Game equilibrato';
-        colorClass = 'neutral';
-      } else if (adjustedValue > -40) {
-        status = 'pressure';
-        message = `${playerName} sotto pressione`;
-        colorClass = 'warning';
-      } else {
-        status = 'bad';
-        message = `${playerName} in difficoltà`;
-        colorClass = 'danger';
-      }
-    }
-    
-    return { status, message, colorClass, adjustedValue };
-  };
-
-  // Calcola trend per il giocatore selezionato
-  const calculatePlayerTrend = (games, player) => {
-    if (games.length < 2) return { trend: 'stable', icon: '➖', color: 'neutral' };
-    
-    const isHome = player === 'home';
-    const values = games.map(g => isHome ? (g.value || 0) : -(g.value || 0));
-    
-    let positiveGames = 0;
-    let negativeGames = 0;
-    
-    values.forEach(v => {
-      if (v > 10) positiveGames++;
-      else if (v < -10) negativeGames++;
-    });
-    
-    const lastValue = values[values.length - 1];
-    const firstValue = values[0];
-    const diff = lastValue - firstValue;
-    
-    if (positiveGames >= games.length * 0.6 || diff > 15) {
-      return { trend: 'up', icon: '📈', color: 'success' };
-    } else if (negativeGames >= games.length * 0.6 || diff < -15) {
-      return { trend: 'down', icon: '📉', color: 'danger' };
-    }
-    return { trend: 'stable', icon: '➖', color: 'neutral' };
-  };
-
-  const playerTrend = calculatePlayerTrend(lastNGames, followPlayer === 'both' ? 'home' : followPlayer);
-
   return (
     <div className="momentum-tab">
-      {/* Sezione Ultimi 3 Game */}
-      <section className="momentum-section">
-        <div className="momentum-section-header">
-          <h3 className="momentum-section-title">
-            <span className="momentum-section-icon">⚡</span>
-            Ultimi {gameCount} Game - Trend Attuale
-          </h3>
-          
-          {/* Filtri */}
-          <div className="momentum-filters">
-            {/* Filtro numero game */}
-            <div className="filter-group">
-              <label className="filter-label">Game:</label>
-              <div className="filter-buttons">
-                {[3, 4, 5, 6].map(n => (
-                  <button
-                    key={n}
-                    className={`filter-btn ${gameCount === n ? 'active' : ''}`}
-                    onClick={() => setGameCount(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Filtro giocatore */}
-            <div className="filter-group">
-              <label className="filter-label">Segui:</label>
-              <div className="filter-buttons player-filter">
-                <button
-                  className={`filter-btn player-btn home ${followPlayer === 'home' ? 'active' : ''}`}
-                  onClick={() => setFollowPlayer('home')}
-                >
-                  {homeName.split(' ').pop()}
-                </button>
-                <button
-                  className={`filter-btn player-btn away ${followPlayer === 'away' ? 'active' : ''}`}
-                  onClick={() => setFollowPlayer('away')}
-                >
-                  {awayName.split(' ').pop()}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="momentum-last3-container">
-          {/* Trend indicator in evidenza */}
-          <div className={`trend-banner trend-${playerTrend.color}`}>
-            <span className="trend-banner-icon">{playerTrend.icon}</span>
-            <span className="trend-banner-text">
-              {playerTrend.trend === 'up' && `${followPlayer === 'home' ? homeName : awayName} in crescita`}
-              {playerTrend.trend === 'down' && `${followPlayer === 'home' ? homeName : awayName} in calo`}
-              {playerTrend.trend === 'stable' && 'Situazione stabile'}
+      {/* === SEZIONE 1: CHI HA IL MOMENTUM === */}
+      <section className="momentum-section momentum-owner-section">
+        <div className={`momentum-owner-card owner-${momentumOwner.owner}`}>
+          <div className="owner-header">
+            <span className="owner-icon">
+              {momentumOwner.owner === 'home' ? '🔵' : 
+               momentumOwner.owner === 'away' ? '🔴' : '⚖️'}
             </span>
+            <h2 className="owner-title">
+              {momentumOwner.owner === 'home' ? homeName : 
+               momentumOwner.owner === 'away' ? awayName : 'Equilibrio'}
+            </h2>
           </div>
           
-          {/* Cards dei game */}
-          <div className="momentum-last3-cards" style={{ gridTemplateColumns: `repeat(${Math.min(gameCount, 3)}, 1fr)` }}>
-            {lastNGames.map((game, idx) => {
-              const playerInterpretation = interpretGameForPlayer(game, followPlayer);
-              return (
-                <div 
-                  key={idx} 
-                  className={`momentum-game-card card-${playerInterpretation.colorClass}`}
-                >
-                  <div className="game-card-header">
-                    <span className="game-card-label">Set {game.set} - Game {game.game}</span>
-                    {game.breakOccurred && <span className="game-card-break">BREAK</span>}
-                  </div>
-                  <div className="game-card-value">
-                    <span className={`game-card-indicator ${playerInterpretation.colorClass}`}>
-                      {playerInterpretation.colorClass === 'success' && '✓'}
-                      {playerInterpretation.colorClass === 'success-light' && '↑'}
-                      {playerInterpretation.colorClass === 'neutral' && '•'}
-                      {playerInterpretation.colorClass === 'warning' && '⚠'}
-                      {playerInterpretation.colorClass === 'danger' && '✗'}
-                    </span>
-                    <span className="game-card-number">{Math.round(Math.abs(game.value))}</span>
-                  </div>
-                  <div className="game-card-message">
-                    {playerInterpretation.message}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="owner-strength">
+            <div className="strength-bar-container">
+              <div 
+                className={`strength-bar strength-${momentumOwner.owner}`}
+                style={{ width: `${momentumOwner.strength}%` }}
+              />
+            </div>
+            <span className="strength-value">{momentumOwner.strength}%</span>
           </div>
           
-          {/* Analisi trend */}
-          <div className="momentum-last3-analysis">
-            <div className="trend-stats">
-              <div className="trend-stat">
-                <span className="trend-stat-label">Media ultimi {gameCount}</span>
-                <span className={`trend-stat-value ${lastNAnalysis.avgValue > 0 ? 'positive' : lastNAnalysis.avgValue < 0 ? 'negative' : ''}`}>
-                  {lastNAnalysis.avgValue > 0 ? '+' : ''}{lastNAnalysis.avgValue}
-                </span>
-              </div>
-              <div className="trend-stat">
-                <span className="trend-stat-label">Direzione</span>
-                <span className="trend-stat-value">{lastNAnalysis.direction}</span>
-              </div>
-              <div className="trend-stat">
-                <span className="trend-stat-label">Dominante</span>
-                <span className="trend-stat-value">{lastNAnalysis.dominant}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sezione Grafico Momentum */}
-      <section className="momentum-section">
-        <h3 className="momentum-section-title">
-          <span className="momentum-section-icon">📈</span>
-          Andamento Momentum - Intera Partita
-        </h3>
-        
-        <div className="momentum-chart-container">
-          {/* Legenda */}
-          <div className="momentum-chart-legend">
-            <div className="legend-item legend-home">
-              <span className="legend-color"></span>
-              <span className="legend-name">{homeName}</span>
-              <span className="legend-direction">(valori positivi)</span>
-            </div>
-            <div className="legend-item legend-away">
-              <span className="legend-color"></span>
-              <span className="legend-name">{awayName}</span>
-              <span className="legend-direction">(valori negativi)</span>
-            </div>
-          </div>
+          <div className="owner-reason">{momentumOwner.reason}</div>
           
-          {/* Grafico SVG */}
-          <div className="momentum-chart">
-            <MomentumChart data={chartData} homeName={homeName} awayName={awayName} />
-          </div>
-          
-          {/* Indicatori di set */}
-          <div className="momentum-chart-sets">
-            {Object.keys(setStats).map(setNum => (
-              <div key={setNum} className="set-indicator">
-                <span className="set-badge">Set {setNum}</span>
-                <span className="set-games">{setStats[setNum].games} game</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Sezione Statistiche Generali */}
-      <section className="momentum-section">
-        <h3 className="momentum-section-title">
-          <span className="momentum-section-icon">📊</span>
-          Statistiche Momentum
-        </h3>
-        
-        <div className="momentum-stats-grid">
-          {/* Card Valore Attuale */}
-          <div className="momentum-stat-card momentum-stat-current">
-            <div className="stat-card-label">Valore Attuale</div>
-            <div className="stat-card-value">
-              {getZoneIcon(interpretGameValue({ value: powerRankings[powerRankings.length - 1]?.value })?.zone)}
-              {' '}{powerRankings[powerRankings.length - 1]?.value || 0}
-            </div>
-            <div className="stat-card-sublabel">
-              {interpretGameValue({ value: powerRankings[powerRankings.length - 1]?.value })?.messageIt || 'Equilibrato'}
-            </div>
-          </div>
-          
-          {/* Card Media */}
-          <div className="momentum-stat-card">
-            <div className="stat-card-label">Media Partita</div>
-            <div className={`stat-card-value ${analysis?.averageValue > 0 ? 'text-positive' : analysis?.averageValue < 0 ? 'text-negative' : ''}`}>
-              {analysis?.averageValue > 0 ? '+' : ''}{analysis?.averageValue || 0}
-            </div>
-            <div className="stat-card-sublabel">su {analysis?.totalGames || 0} game</div>
-          </div>
-          
-          {/* Card Range */}
-          <div className="momentum-stat-card">
-            <div className="stat-card-label">Range Valori</div>
-            <div className="stat-card-value stat-card-range">
-              <span className="range-min">{analysis?.minValue || 0}</span>
-              <span className="range-arrow">→</span>
-              <span className="range-max">{analysis?.maxValue || 0}</span>
-            </div>
-            <div className="stat-card-sublabel">min → max</div>
-          </div>
-          
-          {/* Card Game Dominanti */}
-          <div className="momentum-stat-card momentum-stat-dominant">
-            <div className="stat-card-label">Game Dominanti</div>
-            <div className="stat-card-value">🔥 {analysis?.dominantGames?.length || 0}</div>
-            <div className="stat-card-sublabel">value {'>'} 60</div>
-          </div>
-          
-          {/* Card Game in Pressione */}
-          <div className="momentum-stat-card momentum-stat-pressure">
-            <div className="stat-card-label">Game in Pressione</div>
-            <div className="stat-card-value">🚨 {analysis?.pressureGames?.length || 0}</div>
-            <div className="stat-card-sublabel">value {'<'} -20</div>
-          </div>
-          
-          {/* Card Break */}
-          <div className="momentum-stat-card">
-            <div className="stat-card-label">Break nella Partita</div>
-            <div className="stat-card-value">
-              {powerRankings.filter(g => g.breakOccurred).length}
-            </div>
-            <div className="stat-card-sublabel">game con break</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sezione Analisi Avanzata */}
-      {analysis && (
-        <section className="momentum-section">
-          <h3 className="momentum-section-title">
-            <span className="momentum-section-icon">🧠</span>
-            Analisi Avanzata
-          </h3>
-          
-          <div className="momentum-advanced-grid">
-            {/* Card Volatilità */}
-            <div className={`momentum-advanced-card volatility-${analysis.volatility?.class?.toLowerCase() || 'stabile'}`}>
-              <div className="advanced-card-icon">📊</div>
-              <div className="advanced-card-label">Volatilità</div>
-              <div className="advanced-card-value">{analysis.volatility?.class || 'N/A'}</div>
-              <div className="advanced-card-detail">
-                Δ medio: {analysis.volatility?.value || 0}
-              </div>
-            </div>
-            
-            {/* Card Elasticità */}
-            <div className={`momentum-advanced-card elasticity-${analysis.elasticity?.class?.toLowerCase() || 'normale'}`}>
-              <div className="advanced-card-icon">🔄</div>
-              <div className="advanced-card-label">Elasticità</div>
-              <div className="advanced-card-value">{analysis.elasticity?.class || 'N/A'}</div>
-              <div className="advanced-card-detail">
-                Fasi negative: {analysis.elasticity?.negative_phases || 0}
-              </div>
-            </div>
-            
-            {/* Card Trend */}
-            <div className={`momentum-advanced-card trend-${analysis.trend?.current_trend?.toLowerCase() || 'stable'}`}>
-              <div className="advanced-card-icon">
-                {analysis.trend?.current_trend === 'RISING' ? '📈' : 
-                 analysis.trend?.current_trend === 'FALLING' ? '📉' : '➖'}
-              </div>
-              <div className="advanced-card-label">Trend Attuale</div>
-              <div className="advanced-card-value">{analysis.trend?.current_trend || 'STABLE'}</div>
-              <div className="advanced-card-detail">
-                Media recente: {analysis.trend?.recent_avg || 0}
-              </div>
-            </div>
-            
-            {/* Card Carattere Match */}
-            <div className="momentum-advanced-card match-character">
-              <div className="advanced-card-icon">🎭</div>
-              <div className="advanced-card-label">Carattere Match</div>
-              <div className="advanced-card-value">{analysis.matchCharacter?.character?.replace(/_/g, ' ') || 'N/A'}</div>
-              <div className="advanced-card-detail">
-                {analysis.matchCharacter?.description || ''}
-              </div>
-            </div>
-          </div>
-          
-          {/* Momentum Shift Alert */}
-          {analysis.trend?.momentum_shift_detected && (
-            <div className="momentum-shift-alert">
-              <span className="shift-icon">⚡</span>
-              <span className="shift-text">
-                Rilevato cambio significativo di momentum! 
-                Media recente ({analysis.trend.recent_avg}) molto diversa dalla media match ({analysis.trend.match_avg})
+          <div className="owner-stats">
+            <div className="stat-box">
+              <span className="stat-label">Valore Attuale</span>
+              <span className={`stat-value ${momentumOwner.lastValue > 0 ? 'positive' : momentumOwner.lastValue < 0 ? 'negative' : ''}`}>
+                {momentumOwner.lastValue > 0 ? '+' : ''}{momentumOwner.lastValue}
               </span>
             </div>
-          )}
+            <div className="stat-box">
+              <span className="stat-label">Media 3 Game</span>
+              <span className={`stat-value ${momentumOwner.avgLast3 > 0 ? 'positive' : momentumOwner.avgLast3 < 0 ? 'negative' : ''}`}>
+                {momentumOwner.avgLast3 > 0 ? '+' : ''}{momentumOwner.avgLast3}
+              </span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Media 5 Game</span>
+              <span className={`stat-value ${momentumOwner.avgLast5 > 0 ? 'positive' : momentumOwner.avgLast5 < 0 ? 'negative' : ''}`}>
+                {momentumOwner.avgLast5 > 0 ? '+' : ''}{momentumOwner.avgLast5}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* === SEZIONE 2: ALERT CAMBIO MOMENTUM === */}
+      {momentumShift.isShifting && (
+        <section className="momentum-section shift-section">
+          <div className={`shift-alert shift-${momentumShift.direction}`}>
+            <div className="shift-header">
+              <span className="shift-icon">
+                {momentumShift.direction === 'to_home' ? '📈' : '📉'}
+              </span>
+              <h3 className="shift-title">⚠️ Cambio Momentum in Corso</h3>
+            </div>
+            
+            <div className="shift-direction">
+              <span className="shift-arrow">
+                {momentumShift.direction === 'to_home' ? '→' : '←'}
+              </span>
+              <span className="shift-target">
+                Verso {momentumShift.direction === 'to_home' ? homeName : awayName}
+              </span>
+              <span className="shift-confidence">
+                {momentumShift.confidence}% confidenza
+              </span>
+            </div>
+            
+            <div className="shift-cause">
+              <strong>Motivo:</strong> {momentumShift.cause}
+            </div>
+            
+            <div className="shift-metrics">
+              <span className="shift-metric">
+                Shift: {momentumShift.metrics.shift > 0 ? '+' : ''}{momentumShift.metrics.shift}
+              </span>
+              <span className="shift-metric">
+                Trend: {momentumShift.metrics.trendSlope}/game
+              </span>
+              {momentumShift.metrics.recentBreaks > 0 && (
+                <span className="shift-metric break">
+                  🔴 {momentumShift.metrics.recentBreaks} break recenti
+                </span>
+              )}
+            </div>
+          </div>
         </section>
       )}
 
-      {/* Analisi per Set */}
-      <section className="momentum-section">
-        <h3 className="momentum-section-title">
-          <span className="momentum-section-icon">🎯</span>
-          Analisi per Set
+      {/* === SEZIONE 3: GRAFICO MOMENTUM === */}
+      <section className="momentum-section chart-section">
+        <h3 className="section-title">
+          <span className="section-icon">📈</span>
+          Andamento Partita
         </h3>
         
-        <div className="momentum-sets-container">
-          {Object.entries(setStats).map(([setNum, stats]) => (
-            <div key={setNum} className="momentum-set-card">
-              <div className="set-card-header">
-                <span className="set-card-title">Set {setNum}</span>
-                <span className="set-card-games">{stats.games} game</span>
-              </div>
-              
-              <div className="set-card-body">
-                <div className="set-stat">
-                  <span className="set-stat-label">Media</span>
-                  <span className={`set-stat-value ${stats.avgValue > 0 ? 'positive' : stats.avgValue < 0 ? 'negative' : ''}`}>
-                    {stats.avgValue > 0 ? '+' : ''}{stats.avgValue}
+        <div className="chart-legend">
+          <div className="legend-item">
+            <span className="legend-color home"></span>
+            <span>{homeName}</span>
+            <span className="legend-hint">(valori +)</span>
+          </div>
+          <div className="legend-item">
+            <span className="legend-color away"></span>
+            <span>{awayName}</span>
+            <span className="legend-hint">(valori -)</span>
+          </div>
+        </div>
+        
+        <div className="momentum-chart">
+          <MomentumChart data={powerRankings} homeName={homeName} awayName={awayName} />
+        </div>
+      </section>
+
+      {/* === SEZIONE 4: TERMOMETRO ULTIMI GAME === */}
+      <section className="momentum-section recent-section">
+        <h3 className="section-title">
+          <span className="section-icon">🌡️</span>
+          Termometro Ultimi 5 Game
+        </h3>
+        
+        {/* Header con nomi giocatori */}
+        <div className="thermometer-header">
+          <div className="thermo-player home">
+            <span className="thermo-icon">🔵</span>
+            <span className="thermo-name">{homeName}</span>
+          </div>
+          <div className="thermo-center">EQUILIBRIO</div>
+          <div className="thermo-player away">
+            <span className="thermo-name">{awayName}</span>
+            <span className="thermo-icon">🔴</span>
+          </div>
+        </div>
+        
+        <div className="thermometer-games">
+          {powerRankings.slice(-5).map((game, idx) => {
+            const value = game.value || 0;
+            const maxValue = 80; // Valore massimo per la scala
+            const percentage = Math.min(50, (Math.abs(value) / maxValue) * 50);
+            const isHome = value > 0;
+            
+            // Determina chi serviva (game pari = home serve, dispari = away serve, alternando per set)
+            const gameNum = game.game || 1;
+            const setNum = game.set || 1;
+            const homeServes = (gameNum % 2 === 1) === (setNum % 2 === 1);
+            
+            return (
+              <div key={idx} className="thermo-row">
+                {/* Info Game */}
+                <div className="thermo-game-info">
+                  <span className="thermo-game-label">S{game.set} G{game.game}</span>
+                  <span className={`thermo-serve ${homeServes ? 'home' : 'away'}`}>
+                    {homeServes ? '🎾→' : '←🎾'}
                   </span>
                 </div>
-                <div className="set-stat">
-                  <span className="set-stat-label">Dominante</span>
-                  <span className="set-stat-value">{stats.dominant}</span>
+                
+                {/* Termometro */}
+                <div className="thermo-bar-wrapper">
+                  {/* Lato Home (sinistra) */}
+                  <div className="thermo-side home">
+                    <div 
+                      className={`thermo-fill home ${isHome ? 'active' : ''}`}
+                      style={{ width: isHome ? `${percentage}%` : '0%' }}
+                    />
+                  </div>
+                  
+                  {/* Centro */}
+                  <div className="thermo-center-line">
+                    <div className={`thermo-indicator ${Math.abs(value) < 15 ? 'balanced' : isHome ? 'home' : 'away'}`} />
+                  </div>
+                  
+                  {/* Lato Away (destra) */}
+                  <div className="thermo-side away">
+                    <div 
+                      className={`thermo-fill away ${!isHome && value !== 0 ? 'active' : ''}`}
+                      style={{ width: !isHome ? `${percentage}%` : '0%' }}
+                    />
+                  </div>
                 </div>
-                <div className="set-stat">
-                  <span className="set-stat-label">Break</span>
-                  <span className="set-stat-value">{stats.breaks}</span>
+                
+                {/* Valore e Badge */}
+                <div className="thermo-value-box">
+                  <span className={`thermo-value ${isHome ? 'home' : value < 0 ? 'away' : ''}`}>
+                    {value > 0 ? '+' : ''}{Math.round(value)}
+                  </span>
+                  {game.breakOccurred && <span className="thermo-break">BRK!</span>}
                 </div>
               </div>
-              
-              {/* Mini grafico del set */}
-              <div className="set-mini-chart">
-                <MiniSetChart data={stats.values} />
-              </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+        
+        {/* Legenda */}
+        <div className="thermo-legend">
+          <span className="legend-serve">🎾 = Chi Serve</span>
+          <span className="legend-break">BRK = Break</span>
+        </div>
+      </section>
+
+      {/* === SEZIONE 5: RIEPILOGO RAPIDO === */}
+      <section className="momentum-section summary-section">
+        <div className="quick-summary">
+          <div className="summary-item">
+            <span className="summary-icon">🎾</span>
+            <span className="summary-label">Game Totali</span>
+            <span className="summary-value">{powerRankings.length}</span>
+          </div>
+          <div className="summary-item">
+            <span className="summary-icon">🔴</span>
+            <span className="summary-label">Break</span>
+            <span className="summary-value">{powerRankings.filter(g => g.breakOccurred).length}</span>
+          </div>
+          <div className="summary-item">
+            <span className="summary-icon">📊</span>
+            <span className="summary-label">Media Match</span>
+            <span className={`summary-value ${powerRankings.reduce((a, g) => a + (g.value || 0), 0) / powerRankings.length > 0 ? 'positive' : 'negative'}`}>
+              {Math.round(powerRankings.reduce((a, g) => a + (g.value || 0), 0) / powerRankings.length)}
+            </span>
+          </div>
         </div>
       </section>
     </div>
@@ -471,265 +395,88 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
 }
 
 /**
- * Analizza gli ultimi 3 game per determinare il trend
- */
-function analyzeLast3Games(games, homeName, awayName) {
-  if (!games || games.length === 0) {
-    return {
-      avgValue: 0,
-      trendIcon: '➖',
-      trendMessage: 'Nessun dato disponibile',
-      direction: '-',
-      dominant: '-'
-    };
-  }
-
-  const values = games.map(g => g.value || 0);
-  const avgValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-  
-  // Determina trend (crescente, decrescente, stabile)
-  let trend = 'stable';
-  if (values.length >= 2) {
-    const first = values[0];
-    const last = values[values.length - 1];
-    const diff = last - first;
-    
-    if (diff > 10) trend = 'rising';
-    else if (diff < -10) trend = 'falling';
-  }
-  
-  // Determina chi è dominante
-  const dominant = avgValue > 15 ? homeName : avgValue < -15 ? awayName : 'Equilibrio';
-  
-  // Genera messaggi
-  let trendIcon, trendMessage, direction;
-  
-  if (trend === 'rising') {
-    trendIcon = '📈';
-    direction = `↑ Verso ${homeName}`;
-    if (avgValue > 0) {
-      trendMessage = `${homeName} sta aumentando il controllo del match`;
-    } else {
-      trendMessage = `${awayName} sta perdendo momentum`;
-    }
-  } else if (trend === 'falling') {
-    trendIcon = '📉';
-    direction = `↓ Verso ${awayName}`;
-    if (avgValue < 0) {
-      trendMessage = `${awayName} sta prendendo il controllo`;
-    } else {
-      trendMessage = `${homeName} sta perdendo il vantaggio`;
-    }
-  } else {
-    trendIcon = '➡️';
-    direction = 'Stabile';
-    if (avgValue > 20) {
-      trendMessage = `${homeName} mantiene il controllo`;
-    } else if (avgValue < -20) {
-      trendMessage = `${awayName} mantiene il controllo`;
-    } else {
-      trendMessage = 'Situazione equilibrata, entrambi competitivi';
-    }
-  }
-
-  return {
-    avgValue,
-    trendIcon,
-    trendMessage,
-    direction,
-    dominant
-  };
-}
-
-/**
- * Prepara i dati per il grafico
- */
-function prepareChartData(powerRankings) {
-  return powerRankings.map((item, idx) => ({
-    index: idx,
-    set: item.set,
-    game: item.game,
-    value: item.value || 0,
-    breakOccurred: item.breakOccurred || false
-  }));
-}
-
-/**
- * Analizza i dati raggruppati per set
- */
-function analyzeBySet(powerRankings, homeName, awayName) {
-  const bySet = {};
-  
-  for (const item of powerRankings) {
-    const setNum = item.set || 1;
-    if (!bySet[setNum]) {
-      bySet[setNum] = {
-        games: 0,
-        values: [],
-        breaks: 0,
-        sum: 0
-      };
-    }
-    
-    bySet[setNum].games++;
-    bySet[setNum].values.push(item.value || 0);
-    bySet[setNum].sum += item.value || 0;
-    if (item.breakOccurred) bySet[setNum].breaks++;
-  }
-  
-  // Calcola medie e dominante per ogni set
-  for (const setNum in bySet) {
-    const set = bySet[setNum];
-    set.avgValue = Math.round(set.sum / set.games);
-    set.dominant = set.avgValue > 10 ? homeName : set.avgValue < -10 ? awayName : 'Equilibrio';
-  }
-  
-  return bySet;
-}
-
-/**
- * Componente grafico momentum SVG
+ * Grafico Momentum SVG
  */
 function MomentumChart({ data, homeName, awayName }) {
   if (!data || data.length === 0) return null;
   
   const width = 800;
-  const height = 200;
-  const padding = { top: 20, right: 20, bottom: 30, left: 50 };
+  const height = 180;
+  const padding = { top: 20, right: 20, bottom: 25, left: 45 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
   
-  // Trova min e max per scala
-  const values = data.map(d => d.value);
-  const maxVal = Math.max(100, Math.max(...values));
-  const minVal = Math.min(-100, Math.min(...values));
-  const range = maxVal - minVal;
+  const values = data.map(d => d.value || 0);
+  const maxVal = Math.max(80, Math.max(...values.map(Math.abs)));
   
-  // Funzioni di scala
   const scaleX = (idx) => padding.left + (idx / (data.length - 1 || 1)) * chartWidth;
-  const scaleY = (val) => padding.top + chartHeight - ((val - minVal) / range) * chartHeight;
+  const scaleY = (val) => padding.top + chartHeight / 2 - (val / maxVal) * (chartHeight / 2);
   
-  // Genera path per l'area
+  // Area path per home (positivi)
   const areaPathPositive = data.map((d, i) => {
     const x = scaleX(i);
-    const y = d.value > 0 ? scaleY(d.value) : scaleY(0);
+    const y = (d.value || 0) > 0 ? scaleY(d.value) : scaleY(0);
     return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
   }).join(' ') + ` L ${scaleX(data.length - 1)} ${scaleY(0)} L ${scaleX(0)} ${scaleY(0)} Z`;
   
+  // Area path per away (negativi)
   const areaPathNegative = data.map((d, i) => {
     const x = scaleX(i);
-    const y = d.value < 0 ? scaleY(d.value) : scaleY(0);
+    const y = (d.value || 0) < 0 ? scaleY(d.value) : scaleY(0);
     return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
   }).join(' ') + ` L ${scaleX(data.length - 1)} ${scaleY(0)} L ${scaleX(0)} ${scaleY(0)} Z`;
   
-  // Genera path per la linea
+  // Line path
   const linePath = data.map((d, i) => {
-    const x = scaleX(i);
-    const y = scaleY(d.value);
-    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+    return `${i === 0 ? 'M' : 'L'} ${scaleX(i)} ${scaleY(d.value || 0)}`;
   }).join(' ');
-  
-  // Identifica i break points
-  const breakPoints = data.filter(d => d.breakOccurred);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="momentum-svg-chart">
-      {/* Sfondo */}
+    <svg viewBox={`0 0 ${width} ${height}`} className="momentum-svg">
+      {/* Background */}
       <rect x={padding.left} y={padding.top} width={chartWidth} height={chartHeight} fill="rgba(15, 20, 25, 0.6)" rx="4" />
       
-      {/* Griglia orizzontale */}
-      {[-50, 0, 50].map(val => (
-        <g key={val}>
-          <line 
-            x1={padding.left} 
-            y1={scaleY(val)} 
-            x2={width - padding.right} 
-            y2={scaleY(val)} 
-            stroke={val === 0 ? '#3b82f6' : 'rgba(255, 255, 255, 0.15)'} 
-            strokeWidth={val === 0 ? 2 : 1}
-            strokeDasharray={val === 0 ? '0' : '4,4'}
-          />
-          <text x={padding.left - 8} y={scaleY(val) + 4} textAnchor="end" fill="#8b95a5" fontSize="11">
-            {val}
-          </text>
-        </g>
-      ))}
+      {/* Grid lines */}
+      <line x1={padding.left} y1={scaleY(0)} x2={width - padding.right} y2={scaleY(0)} stroke="#3b82f6" strokeWidth="2" />
+      <line x1={padding.left} y1={scaleY(40)} x2={width - padding.right} y2={scaleY(40)} stroke="rgba(255,255,255,0.1)" strokeDasharray="4,4" />
+      <line x1={padding.left} y1={scaleY(-40)} x2={width - padding.right} y2={scaleY(-40)} stroke="rgba(255,255,255,0.1)" strokeDasharray="4,4" />
       
-      {/* Area positiva (home) */}
-      <path d={areaPathPositive} fill="rgba(76, 175, 80, 0.25)" />
+      {/* Labels */}
+      <text x={padding.left - 8} y={scaleY(0) + 4} textAnchor="end" fill="#8b95a5" fontSize="10">0</text>
+      <text x={padding.left - 8} y={scaleY(40) + 4} textAnchor="end" fill="#4ade80" fontSize="10">+40</text>
+      <text x={padding.left - 8} y={scaleY(-40) + 4} textAnchor="end" fill="#f87171" fontSize="10">-40</text>
       
-      {/* Area negativa (away) */}
-      <path d={areaPathNegative} fill="rgba(244, 67, 54, 0.25)" />
+      {/* Areas */}
+      <path d={areaPathPositive} fill="rgba(74, 222, 128, 0.2)" />
+      <path d={areaPathNegative} fill="rgba(248, 113, 113, 0.2)" />
       
-      {/* Linea momentum */}
+      {/* Line */}
       <path d={linePath} fill="none" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       
-      {/* Punti */}
+      {/* Points */}
       {data.map((d, i) => (
         <g key={i}>
           <circle 
             cx={scaleX(i)} 
-            cy={scaleY(d.value)} 
+            cy={scaleY(d.value || 0)} 
             r={d.breakOccurred ? 6 : 4} 
-            fill={d.value > 0 ? '#4ade80' : d.value < 0 ? '#f87171' : '#6b7280'}
+            fill={(d.value || 0) > 0 ? '#4ade80' : (d.value || 0) < 0 ? '#f87171' : '#6b7280'}
             stroke="rgba(30, 41, 59, 0.9)"
             strokeWidth="2"
           />
           {d.breakOccurred && (
-            <text x={scaleX(i)} y={scaleY(d.value) - 10} textAnchor="middle" fill="#f87171" fontSize="10" fontWeight="bold">
+            <text x={scaleX(i)} y={scaleY(d.value || 0) - 10} textAnchor="middle" fill="#fbbf24" fontSize="9" fontWeight="bold">
               BRK
             </text>
           )}
         </g>
       ))}
       
-      {/* Etichette asse X (set) */}
-      <text x={padding.left} y={height - 5} fill="#8b95a5" fontSize="10">Game 1</text>
-      <text x={width - padding.right} y={height - 5} textAnchor="end" fill="#8b95a5" fontSize="10">Game {data.length}</text>
+      {/* X axis labels */}
+      <text x={padding.left} y={height - 5} fill="#8b95a5" fontSize="10">G1</text>
+      <text x={width - padding.right} y={height - 5} textAnchor="end" fill="#8b95a5" fontSize="10">G{data.length}</text>
     </svg>
   );
 }
 
-/**
- * Mini grafico per singolo set
- */
-function MiniSetChart({ data }) {
-  if (!data || data.length === 0) return null;
-  
-  const width = 150;
-  const height = 40;
-  const padding = 4;
-  
-  const values = data;
-  const maxVal = Math.max(50, Math.max(...values.map(Math.abs)));
-  
-  const scaleX = (idx) => padding + (idx / (values.length - 1 || 1)) * (width - 2 * padding);
-  const scaleY = (val) => height / 2 - (val / maxVal) * (height / 2 - padding);
-  
-  const linePath = values.map((val, i) => {
-    const x = scaleX(i);
-    const y = scaleY(val);
-    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-  }).join(' ');
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="mini-set-chart">
-      {/* Linea zero */}
-      <line x1={padding} y1={height/2} x2={width-padding} y2={height/2} stroke="rgba(255, 255, 255, 0.15)" strokeWidth="1" />
-      
-      {/* Linea momentum */}
-      <path d={linePath} fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" />
-      
-      {/* Punti estremi */}
-      {values.length > 0 && (
-        <>
-          <circle cx={scaleX(0)} cy={scaleY(values[0])} r="3" fill={values[0] > 0 ? '#4ade80' : '#f87171'} />
-          <circle cx={scaleX(values.length - 1)} cy={scaleY(values[values.length - 1])} r="3" fill={values[values.length - 1] > 0 ? '#4ade80' : '#f87171'} />
-        </>
-      )}
-    </svg>
-  );
-}
-
-// Memoize MomentumTab to prevent unnecessary re-renders
 export default memo(MomentumTabComponent);

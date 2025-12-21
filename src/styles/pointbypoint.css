@@ -96,6 +96,89 @@
   transform: scale(1.05);
 }
 
+/* ============================================
+   LEGENDA COLORI GAME
+   ============================================ */
+.pbp-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.pbp-legend-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8b95a5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pbp-legend-items {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pbp-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #a0aec0;
+}
+
+.pbp-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-home-serve {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border-left: 3px solid #3b82f6;
+}
+
+.legend-away-serve {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border-left: 3px solid #10b981;
+}
+
+.legend-break {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.legend-tiebreak {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+/* Responsive legenda */
+@media (max-width: 600px) {
+  .pbp-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .pbp-legend-items {
+    gap: 12px;
+  }
+  
+  .pbp-legend-item {
+    font-size: 11px;
+  }
+}
+
 /* Summary Section */
 .pbp-summary {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
@@ -222,6 +305,92 @@
   background: rgba(255, 255, 255, 0.03);
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Set Winner Badge */
+.set-winner-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.set-winner-badge.home {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.set-winner-badge.away {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* Set Mini Stats (header) */
+.set-stats-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.set-stats-mini .set-stat {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.set-stats-mini .set-stat.ace {
+  color: #81c784;
+}
+
+.set-stats-mini .set-stat.break {
+  color: #f87171;
+}
+
+/* Set Stats Expanded (full row) */
+.set-stats-expanded {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 0 12px 12px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.set-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.set-stat-item .stat-icon {
+  font-size: 14px;
+}
+
+.set-stat-item .stat-label {
+  color: #8b95a5;
+  font-weight: 500;
+}
+
+.set-stat-item .stat-value {
+  color: #e4e6eb;
+  font-weight: 700;
+}
+
+.set-stat-item.home {
+  border-left: 2px solid #3b82f6;
+}
+
+.set-stat-item.away {
+  border-left: 2px solid #ef4444;
 }
 
 /* Set Content - Collapsible */
@@ -807,4 +976,236 @@
 
 .pbp-root::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================
+   ENHANCED GAME FEATURES
+   ============================================ */
+
+/* Game con break */
+.game-break {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.05) 100%);
+  border-left: 3px solid #f59e0b;
+}
+
+.game-break .game-header {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
+}
+
+/* ============================================
+   GAME STILI PER SERVIZIO
+   ============================================ */
+
+/* Home serve - blu */
+.game-serve-home {
+  border-left: 3px solid #3b82f6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 100%);
+}
+
+.game-serve-home .game-header {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, transparent 100%);
+}
+
+.game-serve-home .game-title {
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* Away serve - verde */
+.game-serve-away {
+  border-left: 3px solid #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+}
+
+.game-serve-away .game-header {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, transparent 100%);
+}
+
+.game-serve-away .game-title {
+  border-left-color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+/* Tiebreak - viola */
+.game-tiebreak {
+  border-left: 3px solid #a855f7;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.03) 100%);
+}
+
+.game-tiebreak .game-header {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.1) 0%, transparent 100%);
+}
+
+.game-tiebreak .game-title {
+  border-left-color: #a855f7;
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+}
+
+/* Break sovrascrive colore servizio */
+.game-break.game-serve-home,
+.game-break.game-serve-away {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.05) 100%);
+}
+
+.game-break .game-title {
+  border-left-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+/* Header right section */
+.game-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Serving indicator */
+.serving-indicator {
+  margin-left: 6px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.serving-indicator.home {
+  filter: hue-rotate(200deg);
+}
+
+.serving-indicator.away {
+  filter: hue-rotate(0deg);
+}
+
+/* Game badges */
+.game-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.break-badge {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  animation: pulse-break 2s infinite;
+}
+
+@keyframes pulse-break {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.ace-badge {
+  background: rgba(76, 175, 80, 0.15);
+  color: #81c784;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.df-badge {
+  background: rgba(244, 67, 54, 0.15);
+  color: #e57373;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Mini pressure bar */
+.pressure-mini {
+  position: relative;
+  width: 60px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pressure-mini-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.pressure-mini-label {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+}
+
+/* Game stats mini row */
+.game-stats-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.game-stats-mini .stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.game-stats-mini .stat-item.ace {
+  background: rgba(76, 175, 80, 0.1);
+  color: #81c784;
+}
+
+.game-stats-mini .stat-item.df {
+  background: rgba(244, 67, 54, 0.1);
+  color: #e57373;
+}
+
+.game-stats-mini .stat-item.winner {
+  background: rgba(33, 150, 243, 0.1);
+  color: #64b5f6;
+}
+
+.game-stats-mini .stat-item.bp {
+  background: rgba(233, 30, 99, 0.1);
+  color: #f48fb1;
+}
+
+/* Responsive adjustments for new features */
+@media (max-width: 600px) {
+  .game-header-right {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  
+  .pressure-mini {
+    width: 40px;
+  }
+  
+  .game-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+  
+  .game-stats-mini {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+  
+  .game-stats-mini .stat-item {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
 }
