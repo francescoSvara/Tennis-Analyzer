@@ -431,6 +431,14 @@ export function flattenScraperData(raw) {
   
   const flattened = {};
   
+  // PRIMA di tutto, copia i campi top-level che non sono oggetti speciali
+  // Questo preserva tennisPowerRankings, statistics, pointByPoint, etc.
+  for (const [k, v] of Object.entries(raw)) {
+    if (!['api', 'mapping', 'initial', '_raw', '_flat'].includes(k)) {
+      flattened[k] = v;
+    }
+  }
+  
   // If raw has 'api' object with URL keys, extract all values
   if (raw.api && typeof raw.api === 'object') {
     for (const [url, data] of Object.entries(raw.api)) {

@@ -1075,7 +1075,22 @@ export default function App() {
               <div className="overview-content">
                 {/* Grafici full-width */}
                 {(() => {
-                  const powerRankings = dataForExtraction ? deepFindAll(dataForExtraction, 'tennisPowerRankings', 5).flat().filter(Boolean) : [];
+                  // Prova prima al top level, poi usa deepFindAll come fallback
+                  let powerRankings = dataForExtraction.tennisPowerRankings || dataForExtraction.powerRankings || [];
+                  
+                  // Se non trovato al top level, cerca in profondità
+                  if (!powerRankings || powerRankings.length === 0) {
+                    const found = deepFindAll(dataForExtraction, 'tennisPowerRankings', 5).flat().filter(Boolean);
+                    if (found.length > 0) powerRankings = found;
+                  }
+                  if (!powerRankings || powerRankings.length === 0) {
+                    const found = deepFindAll(dataForExtraction, 'powerRankings', 5).flat().filter(Boolean);
+                    if (found.length > 0) powerRankings = found;
+                  }
+                  
+                  // Debug log
+                  console.log('📊 PowerRankings trovati:', powerRankings?.length || 0, powerRankings?.slice(0,3));
+                  
                   return (
                     <>
                       <div style={{ marginBottom: 32 }}>
