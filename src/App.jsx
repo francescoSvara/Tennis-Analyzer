@@ -189,9 +189,146 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
             {analysis.details.homeBreaks !== undefined && (
               <div>💥 Break: {analysis.details.homeName} {analysis.details.homeBreaks} - {analysis.details.awayBreaks} {analysis.details.awayName}</div>
             )}
+            {/* NUOVI DATI POTENZIATI */}
+            {analysis.details.surface && (
+              <div>🎾 Superficie: <strong style={{ color: '#e4e6eb' }}>{analysis.details.surface}</strong> {analysis.details.bestOf === 5 ? '(Bo5)' : '(Bo3)'}</div>
+            )}
+            {analysis.details.comebackRate && (
+              <div>📊 Comeback rate: <strong style={{ color: '#10b981' }}>{analysis.details.comebackRate}%</strong></div>
+            )}
+            {analysis.details.rankingGap && (
+              <div>📈 Gap ranking: <strong style={{ color: '#e4e6eb' }}>{analysis.details.rankingGap}</strong> posizioni</div>
+            )}
+            {analysis.details.volatility && (
+              <div>⚡ Volatilità: <strong style={{ color: analysis.details.volatility === 'MOLTO_VOLATILE' ? '#ef4444' : '#f59e0b' }}>{analysis.details.volatility}</strong></div>
+            )}
+            {analysis.dominanceScore !== undefined && analysis.dominanceScore > 0 && (
+              <div>💪 Dominance: <strong style={{ color: analysis.dominanceScore >= 65 ? '#10b981' : '#f59e0b' }}>{analysis.dominanceScore}/100</strong></div>
+            )}
           </div>
         )}
       </div>
+      
+      {/* Pressure Index Bar (per Banca Servizio) */}
+      {analysis?.pressureIndex && analysis.pressureIndex.value > 0 && (
+        <div style={{
+          background: 'rgba(15, 20, 25, 0.6)',
+          borderRadius: 8,
+          padding: 10,
+          border: '1px solid rgba(255, 255, 255, 0.08)'
+        }}>
+          <div style={{ fontSize: 11, color: '#8b95a5', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+            <span>🔥 Pressure Index</span>
+            <span style={{ 
+              color: analysis.pressureIndex.level === 'CRITICAL' ? '#ef4444' : 
+                     analysis.pressureIndex.level === 'HIGH' ? '#f59e0b' : '#8b95a5',
+              fontWeight: 600
+            }}>{analysis.pressureIndex.level}</span>
+          </div>
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+            <div style={{
+              width: `${analysis.pressureIndex.value}%`,
+              height: '100%',
+              background: analysis.pressureIndex.value >= 70 ? 'linear-gradient(90deg, #ef4444, #dc2626)' :
+                         analysis.pressureIndex.value >= 50 ? 'linear-gradient(90deg, #f59e0b, #d97706)' :
+                         analysis.pressureIndex.value >= 30 ? 'linear-gradient(90deg, #3b82f6, #2563eb)' :
+                         'linear-gradient(90deg, #6b7280, #4b5563)',
+              borderRadius: 4,
+              transition: 'width 0.3s ease'
+            }} />
+          </div>
+          {analysis.pressureIndex.breakdown && Object.keys(analysis.pressureIndex.breakdown).length > 0 && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+              {analysis.details.doubleFaults && (
+                <span style={{ fontSize: 10, color: '#8b95a5' }}>
+                  DF: <strong style={{ color: analysis.pressureIndex.breakdown.doubleFaults === 'CRITICAL' ? '#ef4444' : '#e4e6eb' }}>{analysis.details.doubleFaults}</strong>
+                </span>
+              )}
+              {analysis.details.firstServeWonPct && (
+                <span style={{ fontSize: 10, color: '#8b95a5' }}>
+                  1st%: <strong style={{ color: analysis.details.firstServeWonPct < 55 ? '#ef4444' : '#e4e6eb' }}>{analysis.details.firstServeWonPct}%</strong>
+                </span>
+              )}
+              {analysis.details.breakPointsSavedPct && (
+                <span style={{ fontSize: 10, color: '#8b95a5' }}>
+                  BPS: <strong style={{ color: analysis.details.breakPointsSavedPct < 50 ? '#ef4444' : '#e4e6eb' }}>{analysis.details.breakPointsSavedPct}%</strong>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Confidence Bar */}
+      {analysis?.confidence > 0 && (
+        <div style={{
+          background: 'rgba(15, 20, 25, 0.6)',
+          borderRadius: 8,
+          padding: 10,
+          border: '1px solid rgba(255, 255, 255, 0.08)'
+        }}>
+          <div style={{ fontSize: 11, color: '#8b95a5', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+            <span>📊 Confidence</span>
+            <span style={{ 
+              color: analysis.confidence >= 70 ? '#10b981' : 
+                     analysis.confidence >= 50 ? '#f59e0b' : '#8b95a5',
+              fontWeight: 600
+            }}>{analysis.confidence}%</span>
+          </div>
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
+            <div style={{
+              width: `${analysis.confidence}%`,
+              height: '100%',
+              background: analysis.confidence >= 70 ? 'linear-gradient(90deg, #10b981, #059669)' :
+                         analysis.confidence >= 50 ? 'linear-gradient(90deg, #f59e0b, #d97706)' :
+                         'linear-gradient(90deg, #6b7280, #4b5563)',
+              borderRadius: 4,
+              transition: 'width 0.3s ease'
+            }} />
+          </div>
+          {analysis.factors && Object.keys(analysis.factors).length > 0 && (
+            <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+              {analysis.factors.surface && (
+                <span style={{ fontSize: 9, background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '2px 6px', borderRadius: 4 }}>
+                  {analysis.factors.surface}
+                </span>
+              )}
+              {analysis.factors.format && (
+                <span style={{ fontSize: 9, background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '2px 6px', borderRadius: 4 }}>
+                  {analysis.factors.format}
+                </span>
+              )}
+              {analysis.factors.momentum && (
+                <span style={{ fontSize: 9, background: analysis.factors.momentum === 'FAVORABLE' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(107, 114, 128, 0.2)', color: analysis.factors.momentum === 'FAVORABLE' ? '#34d399' : '#9ca3af', padding: '2px 6px', borderRadius: 4 }}>
+                  Momentum {analysis.factors.momentum}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Match Character (per Super Break) */}
+      {analysis?.matchCharacter && (
+        <div style={{
+          background: analysis.matchCharacter.character === 'DOMINIO' ? 'rgba(16, 185, 129, 0.15)' :
+                     analysis.matchCharacter.character === 'BATTAGLIA_EMOTIVA' ? 'rgba(239, 68, 68, 0.15)' :
+                     'rgba(59, 130, 246, 0.15)',
+          borderRadius: 8,
+          padding: 8,
+          fontSize: 11,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          color: analysis.matchCharacter.character === 'DOMINIO' ? '#10b981' :
+                analysis.matchCharacter.character === 'BATTAGLIA_EMOTIVA' ? '#ef4444' : '#3b82f6'
+        }}>
+          {analysis.matchCharacter.character === 'DOMINIO' ? '👑' :
+           analysis.matchCharacter.character === 'BATTAGLIA_EMOTIVA' ? '⚔️' :
+           analysis.matchCharacter.character === 'RIMONTE_FREQUENTI' ? '🔄' : '🎾'} 
+          <span>{analysis.matchCharacter.description}</span>
+        </div>
+      )}
       
       {/* Recommendation */}
       {analysis?.recommendation && (

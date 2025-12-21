@@ -1565,28 +1565,222 @@ export function calculateScoreFromLink(linkFields = {}, options = {}) {
 // STRATEGIE DI TRADING TENNIS - Analisi automatica
 // ============================================================================
 
+// Soglie empiriche per pressione al servizio
+const PRESSURE_THRESHOLDS = {
+  doubleFaults: { normal: 2, warning: 4, critical: 6 },
+  firstServeWonPct: { excellent: 75, good: 65, warning: 55, critical: 45 },
+  secondServeWonPct: { excellent: 55, good: 45, warning: 35, critical: 25 },
+  breakPointsSavedPct: { excellent: 70, good: 55, warning: 40, critical: 30 }
+};
+
+// Soglie per superficie (comeback rate empirici)
+const SURFACE_COMEBACK_RATES = {
+  'Hard': 0.22,
+  'Clay': 0.28,     // Più rimonte su terra rossa
+  'Grass': 0.18,    // Meno rimonte su erba (più veloce)
+  'Carpet': 0.20,
+  'default': 0.22
+};
+
+/**
+ * Estrae statistiche chiave dal match per le strategie
+ * @param {Object} data - Dati del match
+ * @returns {Object} Statistiche estratte
+ */
+export function extractKeyStats(data) {
+  const stats = extractStatistics(data, 'ALL');
+  if (!stats) return null;
+  
+  const result = {
+    home: {},
+    away: {}
+  };
+  
+  for (const group of stats.groups || []) {
+    for (const item of group.items || []) {
+      const key = item.key || item.name?.toLowerCase().replace(/\s+/g, '_');
+      
+      // Parse percentages from strings like "82/128 (64%)"
+      const parseStatValue = (val) => {
+        if (typeof val === 'number') return val;
+        if (typeof val === 'string') {
+          const pctMatch = val.match(/\((\d+)%\)/);
+          if (pctMatch) return parseInt(pctMatch[1]);
+          const numMatch = val.match(/^(\d+)/);
+          if (numMatch) return parseInt(numMatch[1]);
+        }
+        return null;
+      };
+      
+      if (key?.includes('aces') || key === 'aces') {
+        result.home.aces = parseStatValue(item.home);
+        result.away.aces = parseStatValue(item.away);
+      }
+      if (key?.includes('double') || key?.includes('faults')) {
+        result.home.doubleFaults = parseStatValue(item.home);
+        result.away.doubleFaults = parseStatValue(item.away);
+      }
+      if (key?.includes('first_serve') && key?.includes('points') || key?.includes('firstServePoints')) {
+        result.home.firstServeWonPct = parseStatValue(item.home);
+        result.away.firstServeWonPct = parseStatValue(item.away);
+      }
+      if (key?.includes('second_serve') && key?.includes('points') || key?.includes('secondServePoints')) {
+        result.home.secondServeWonPct = parseStatValue(item.home);
+        result.away.secondServeWonPct = parseStatValue(item.away);
+      }
+      if (key?.includes('break') && key?.includes('saved') || key?.includes('breakPointsSaved')) {
+        result.home.breakPointsSavedPct = parseStatValue(item.home);
+        result.away.breakPointsSavedPct = parseStatValue(item.away);
+      }
+      if (key?.includes('break') && key?.includes('converted') || key?.includes('breakPointsScored')) {
+        result.home.breakPointsConverted = parseStatValue(item.home);
+        result.away.breakPointsConverted = parseStatValue(item.away);
+      }
+      if (key?.includes('total') && group.groupName?.includes('Points') || key === 'pointsTotal') {
+        result.home.totalPoints = parseStatValue(item.home);
+        result.away.totalPoints = parseStatValue(item.away);
+      }
+    }
+  }
+  
+  return result;
+}
+
+/**
+ * Calcola il Pressure Index per un giocatore basato sulle statistiche
+ * @param {Object} playerStats - Statistiche del giocatore
+ * @returns {Object} Pressure index e breakdown
+ */
+export function calculatePressureIndex(playerStats) {
+  if (!playerStats) return { value: 0, level: 'UNKNOWN', breakdown: {} };
+  
+  let pressureIndex = 0;
+  const breakdown = {};
+  
+  // Double Faults (peso: 25%)
+  const df = playerStats.doubleFaults || 0;
+  if (df >= PRESSURE_THRESHOLDS.doubleFaults.critical) {
+    pressureIndex += 25;
+    breakdown.doubleFaults = 'CRITICAL';
+  } else if (df >= PRESSURE_THRESHOLDS.doubleFaults.warning) {
+    pressureIndex += 15;
+    breakdown.doubleFaults = 'WARNING';
+  } else if (df >= PRESSURE_THRESHOLDS.doubleFaults.normal) {
+    pressureIndex += 5;
+    breakdown.doubleFaults = 'NORMAL';
+  } else {
+    breakdown.doubleFaults = 'LOW';
+  }
+  
+  // First Serve Won % (peso: 30%)
+  const fsw = playerStats.firstServeWonPct;
+  if (fsw !== null && fsw !== undefined) {
+    if (fsw < PRESSURE_THRESHOLDS.firstServeWonPct.critical) {
+      pressureIndex += 30;
+      breakdown.firstServe = 'CRITICAL';
+    } else if (fsw < PRESSURE_THRESHOLDS.firstServeWonPct.warning) {
+      pressureIndex += 20;
+      breakdown.firstServe = 'WARNING';
+    } else if (fsw < PRESSURE_THRESHOLDS.firstServeWonPct.good) {
+      pressureIndex += 10;
+      breakdown.firstServe = 'MODERATE';
+    } else {
+      breakdown.firstServe = 'GOOD';
+    }
+  }
+  
+  // Second Serve Won % (peso: 25%)
+  const ssw = playerStats.secondServeWonPct;
+  if (ssw !== null && ssw !== undefined) {
+    if (ssw < PRESSURE_THRESHOLDS.secondServeWonPct.critical) {
+      pressureIndex += 25;
+      breakdown.secondServe = 'CRITICAL';
+    } else if (ssw < PRESSURE_THRESHOLDS.secondServeWonPct.warning) {
+      pressureIndex += 15;
+      breakdown.secondServe = 'WARNING';
+    } else if (ssw < PRESSURE_THRESHOLDS.secondServeWonPct.good) {
+      pressureIndex += 8;
+      breakdown.secondServe = 'MODERATE';
+    } else {
+      breakdown.secondServe = 'GOOD';
+    }
+  }
+  
+  // Break Points Saved % (peso: 20%)
+  const bps = playerStats.breakPointsSavedPct;
+  if (bps !== null && bps !== undefined) {
+    if (bps < PRESSURE_THRESHOLDS.breakPointsSavedPct.critical) {
+      pressureIndex += 20;
+      breakdown.breakPointsSaved = 'CRITICAL';
+    } else if (bps < PRESSURE_THRESHOLDS.breakPointsSavedPct.warning) {
+      pressureIndex += 12;
+      breakdown.breakPointsSaved = 'WARNING';
+    } else if (bps < PRESSURE_THRESHOLDS.breakPointsSavedPct.good) {
+      pressureIndex += 5;
+      breakdown.breakPointsSaved = 'MODERATE';
+    } else {
+      breakdown.breakPointsSaved = 'GOOD';
+    }
+  }
+  
+  // Classify pressure level
+  let level;
+  if (pressureIndex >= 70) level = 'CRITICAL';
+  else if (pressureIndex >= 50) level = 'HIGH';
+  else if (pressureIndex >= 30) level = 'MODERATE';
+  else if (pressureIndex >= 15) level = 'LOW';
+  else level = 'MINIMAL';
+  
+  return { value: pressureIndex, level, breakdown };
+}
+
 /**
  * Analizza la strategia "Lay the Winner"
  * Si banca il tennista che ha vinto il primo set
+ * POTENZIATA: include superficie, formato, momentum, statistiche servizio
  * @param {Object} data - Dati grezzi del match
  * @returns {Object} Analisi della strategia
  */
 export function analyzeLayTheWinner(data) {
   const eventInfo = extractEventInfo(data);
   const pbp = loadPointByPoint(data);
+  const keyStats = extractKeyStats(data);
+  const powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
   
   const result = {
     applicable: false,
     signal: 'none', // 'none', 'weak', 'medium', 'strong'
     message: '',
     details: {},
-    recommendation: ''
+    recommendation: '',
+    // NUOVI campi potenziati
+    confidence: 0,
+    factors: {}
   };
   
   if (!eventInfo) {
     result.message = 'Dati match non disponibili';
     return result;
   }
+  
+  // Estrai info superficie e formato (controlla più campi possibili)
+  let surface = data.surface || eventInfo.surface || data.tournament_ground || 'Unknown';
+  // Normalizza superficie da tournament_ground (es: "Hardcourt indoor" -> "Hard")
+  if (surface.toLowerCase().includes('hard')) surface = 'Hard';
+  else if (surface.toLowerCase().includes('clay') || surface.toLowerCase().includes('terra')) surface = 'Clay';
+  else if (surface.toLowerCase().includes('grass') || surface.toLowerCase().includes('erba')) surface = 'Grass';
+  else if (surface.toLowerCase().includes('carpet')) surface = 'Carpet';
+  
+  const bestOf = data.best_of || eventInfo.bestOf || 3;
+  const comebackBaseRate = SURFACE_COMEBACK_RATES[surface] || SURFACE_COMEBACK_RATES.default;
+  
+  // Bonus formato: +40% per Grand Slam (Bo5)
+  const formatMultiplier = bestOf === 5 ? 1.4 : 1.0;
+  const adjustedComebackRate = comebackBaseRate * formatMultiplier;
+  
+  result.details.surface = surface;
+  result.details.bestOf = bestOf;
+  result.details.comebackRate = Math.round(adjustedComebackRate * 100);
   
   const homeScore = eventInfo.homeScore;
   const awayScore = eventInfo.awayScore;
@@ -1658,15 +1852,68 @@ export function analyzeLayTheWinner(data) {
       result.signal = 'strong';
       result.message = `${loserName} sta recuperando nel 2° set!`;
       result.recommendation = `BANCA ${result.details.firstSetWinnerName} - Il perdente del 1° set sta reagendo`;
+      result.confidence = 75;
     } else if (winnerSecondSetGames - loserSecondSetGames <= 1) {
       result.signal = 'medium';
       result.message = `Secondo set equilibrato (${secondSetHome}-${secondSetAway})`;
       result.recommendation = `Monitora break points per bancare ${result.details.firstSetWinnerName}`;
+      result.confidence = 55;
     } else {
       result.signal = 'weak';
       result.message = `${result.details.firstSetWinnerName} sta dominando anche il 2° set`;
       result.recommendation = 'Strategia meno favorevole - il vincitore 1° set continua a dominare';
+      result.confidence = 25;
     }
+    
+    // POTENZIAMENTO: Analizza momentum per conferma
+    if (powerRankings && powerRankings.length > 0) {
+      const recentMomentum = powerRankings.slice(-5);
+      const avgRecent = recentMomentum.reduce((a, b) => a + (b.value || 0), 0) / recentMomentum.length;
+      
+      // Se il loser del primo set ha momentum positivo, aumenta confidence
+      const loserMomentumPositive = (loserFirstSet === 'home' && avgRecent > 10) || 
+                                    (loserFirstSet === 'away' && avgRecent < -10);
+      
+      if (loserMomentumPositive) {
+        result.confidence = Math.min(95, result.confidence + 15);
+        result.factors.momentum = 'FAVORABLE';
+        result.details.recentMomentum = Math.round(avgRecent);
+      } else {
+        result.factors.momentum = 'NEUTRAL';
+      }
+    }
+    
+    // POTENZIAMENTO: Analizza statistiche servizio del vincitore set 1
+    if (keyStats) {
+      const winnerStats = firstSetWinner === 'home' ? keyStats.home : keyStats.away;
+      const loserStats = firstSetWinner === 'home' ? keyStats.away : keyStats.home;
+      
+      // Se il vincitore ha statistiche servizio in calo, aumenta confidence
+      if (winnerStats.firstServeWonPct && winnerStats.firstServeWonPct < 60) {
+        result.confidence = Math.min(95, result.confidence + 10);
+        result.factors.winnerServe = 'DECLINING';
+        result.details.winnerFirstServe = winnerStats.firstServeWonPct;
+      }
+      
+      // Se il perdente ha buone statistiche servizio, è resiliente
+      if (loserStats.firstServeWonPct && loserStats.firstServeWonPct > 65) {
+        result.confidence = Math.min(95, result.confidence + 5);
+        result.factors.loserServe = 'SOLID';
+        result.details.loserFirstServe = loserStats.firstServeWonPct;
+      }
+      
+      // Doppi falli del vincitore
+      if (winnerStats.doubleFaults && winnerStats.doubleFaults >= 4) {
+        result.confidence = Math.min(95, result.confidence + 5);
+        result.factors.doubleFaults = 'HIGH';
+        result.details.winnerDoubleFaults = winnerStats.doubleFaults;
+      }
+    }
+    
+    // Aggiungi fattori superficie e formato
+    result.factors.surface = surface;
+    result.factors.format = bestOf === 5 ? 'Grand Slam (Bo5)' : 'Standard (Bo3)';
+    result.factors.baseComeback = `${Math.round(comebackBaseRate * 100)}%`;
   }
   
   return result;
@@ -1675,19 +1922,24 @@ export function analyzeLayTheWinner(data) {
 /**
  * Analizza la strategia "Banca Servizio"
  * Si banca chi serve quando è sotto pressione
+ * POTENZIATA: include PRESSURE_INDEX basato su statistiche reali
  * @param {Object} data - Dati grezzi del match
  * @returns {Object} Analisi della strategia
  */
 export function analyzeBancaServizio(data) {
   const eventInfo = extractEventInfo(data);
   const powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  const keyStats = extractKeyStats(data);
   
   const result = {
     applicable: false,
     signal: 'none',
     message: '',
     details: {},
-    recommendation: ''
+    recommendation: '',
+    // NUOVI campi potenziati
+    pressureIndex: null,
+    confidence: 0
   };
   
   if (!eventInfo) {
@@ -1769,13 +2021,51 @@ export function analyzeBancaServizio(data) {
     return result;
   }
 
+  // POTENZIAMENTO: Calcola Pressure Index dal server
+  if (keyStats) {
+    const serverStats = serving === 1 ? keyStats.home : keyStats.away;
+    const pressureData = calculatePressureIndex(serverStats);
+    result.pressureIndex = pressureData;
+    result.details.serverStats = serverStats;
+    
+    // Mostra breakdown pressure
+    if (pressureData.level === 'CRITICAL' || pressureData.level === 'HIGH') {
+      if (result.signal === 'weak' || result.signal === 'none') {
+        result.signal = 'medium';
+      }
+      result.message += ` | ⚠️ Pressure Index: ${pressureData.value}/100 (${pressureData.level})`;
+      result.confidence = Math.min(85, 50 + pressureData.value / 2);
+    } else if (pressureData.level === 'MODERATE') {
+      result.confidence = 40;
+    } else {
+      result.confidence = 25;
+    }
+    
+    // Dettagli statistici
+    if (serverStats.doubleFaults) {
+      result.details.doubleFaults = serverStats.doubleFaults;
+    }
+    if (serverStats.firstServeWonPct) {
+      result.details.firstServeWonPct = serverStats.firstServeWonPct;
+    }
+    if (serverStats.breakPointsSavedPct) {
+      result.details.breakPointsSavedPct = serverStats.breakPointsSavedPct;
+    }
+  }
+
   // Analizza momentum se disponibile
   if (powerRankings.length > 0) {
     const lastMomentum = powerRankings[powerRankings.length - 1];
-    if (lastMomentum?.value < -20) {
-      result.signal = result.signal === 'strong' ? 'strong' : 'medium';
+    if (lastMomentum?.value) {
+      // Se il server ha momentum negativo, aumenta il segnale
+      const serverMomentumBad = (serving === 1 && lastMomentum.value < -15) ||
+                                (serving === 2 && lastMomentum.value > 15);
+      if (serverMomentumBad) {
+        result.signal = result.signal === 'weak' ? 'medium' : result.signal;
+        result.confidence = Math.min(95, result.confidence + 10);
+      }
       result.details.momentum = lastMomentum.value;
-      result.message += ` | Momentum: ${lastMomentum.value}`;
+      result.message += ` | Momentum: ${lastMomentum.value > 0 ? '+' : ''}${lastMomentum.value}`;
     }
   }
 
@@ -1785,6 +2075,7 @@ export function analyzeBancaServizio(data) {
 /**
  * Analizza la strategia "Super Break"
  * Puntare favorito dominante aspettando break point
+ * POTENZIATA: include volatilità, elasticity, analisi dominio completa
  * @param {Object} data - Dati grezzi del match
  * @returns {Object} Analisi della strategia
  */
@@ -1792,13 +2083,18 @@ export function analyzeSuperBreak(data) {
   const eventInfo = extractEventInfo(data);
   const pbp = loadPointByPoint(data);
   const powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  const keyStats = extractKeyStats(data);
   
   const result = {
     applicable: false,
     signal: 'none',
     message: '',
     details: {},
-    recommendation: ''
+    recommendation: '',
+    // NUOVI campi potenziati
+    confidence: 0,
+    dominanceScore: 0,
+    matchCharacter: null
   };
   
   if (!eventInfo) {
@@ -1826,6 +2122,7 @@ export function analyzeSuperBreak(data) {
     }
     result.details.favorito = favorito;
     result.details.sfavorito = sfavorito;
+    result.details.rankingGap = Math.abs(homeRanking - awayRanking);
   } else {
     result.message = 'Ranking non disponibile per determinare favorito';
     result.applicable = true;
@@ -1925,7 +2222,92 @@ export function analyzeSuperBreak(data) {
       result.signal = 'weak';
       result.message = '⚠️ TIE-BREAK in corso - ESCI dalla strategia!';
       result.recommendation = 'Super Break non applicabile durante tie-break';
+      result.confidence = 10;
+      return result;
     }
+  }
+  
+  // POTENZIAMENTO: Calcola volatilità e carattere match
+  if (powerRankings.length >= 5) {
+    const volatilityData = calculateVolatility(powerRankings);
+    const elasticityData = calculateElasticity(powerRankings);
+    
+    result.details.volatility = volatilityData.class;
+    result.details.volatilityValue = volatilityData.value;
+    result.details.elasticity = elasticityData.class;
+    
+    // Classifica il carattere del match
+    const character = classifyMatchCharacter(volatilityData, elasticityData, homeBreaks + awayBreaks);
+    result.matchCharacter = character;
+    
+    // Aggiusta confidence basata sul carattere match
+    if (character.character === 'DOMINIO') {
+      result.confidence = Math.min(95, result.confidence + 20);
+    } else if (character.character === 'BATTAGLIA_EMOTIVA') {
+      result.confidence = Math.max(20, result.confidence - 10);
+      result.message += ' | ⚡ Match molto volatile';
+    } else if (character.character === 'RIMONTE_FREQUENTI') {
+      result.confidence = Math.max(30, result.confidence - 5);
+    }
+  }
+  
+  // POTENZIAMENTO: Analizza statistiche per conferma dominio
+  if (keyStats) {
+    const favoritoStats = favorito.side === 'home' ? keyStats.home : keyStats.away;
+    const sfavoritoStats = favorito.side === 'home' ? keyStats.away : keyStats.home;
+    
+    // Calcola dominance score (0-100)
+    let dominanceScore = 50; // base
+    
+    // Aces advantage
+    if (favoritoStats.aces && sfavoritoStats.aces) {
+      const acesAdv = favoritoStats.aces - sfavoritoStats.aces;
+      dominanceScore += Math.min(10, acesAdv * 2);
+      result.details.acesAdvantage = acesAdv;
+    }
+    
+    // First serve superiority
+    if (favoritoStats.firstServeWonPct && sfavoritoStats.firstServeWonPct) {
+      const serveAdv = favoritoStats.firstServeWonPct - sfavoritoStats.firstServeWonPct;
+      dominanceScore += Math.min(15, serveAdv / 2);
+      result.details.serveAdvantage = Math.round(serveAdv);
+    }
+    
+    // Break points converted advantage
+    if (favoritoStats.breakPointsConverted && sfavoritoStats.breakPointsConverted) {
+      const bpAdv = favoritoStats.breakPointsConverted - sfavoritoStats.breakPointsConverted;
+      dominanceScore += Math.min(15, bpAdv * 5);
+    }
+    
+    // Total points advantage
+    if (favoritoStats.totalPoints && sfavoritoStats.totalPoints) {
+      const totalAdv = favoritoStats.totalPoints - sfavoritoStats.totalPoints;
+      dominanceScore += Math.min(10, totalAdv / 2);
+      result.details.pointsAdvantage = totalAdv;
+    }
+    
+    result.dominanceScore = Math.round(Math.max(0, Math.min(100, dominanceScore)));
+    
+    // Adjust signal based on dominance score
+    if (result.dominanceScore >= 70) {
+      result.signal = 'strong';
+      result.confidence = Math.min(95, result.confidence + 15);
+    } else if (result.dominanceScore >= 55) {
+      if (result.signal === 'weak') result.signal = 'medium';
+      result.confidence = Math.min(85, result.confidence + 5);
+    } else if (result.dominanceScore < 45) {
+      result.signal = 'weak';
+      result.confidence = Math.max(20, result.confidence - 10);
+    }
+  }
+  
+  // Calcola confidence finale basata su tutti i fattori
+  if (result.signal === 'strong') {
+    result.confidence = Math.max(70, result.confidence);
+  } else if (result.signal === 'medium') {
+    result.confidence = Math.max(40, Math.min(70, result.confidence));
+  } else {
+    result.confidence = Math.min(40, result.confidence);
   }
   
   return result;
