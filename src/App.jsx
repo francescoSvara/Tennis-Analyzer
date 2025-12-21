@@ -442,11 +442,57 @@ export default function App() {
         const refreshData = await refreshResponse.json();
         
         if (refreshData.source === 'database') {
+          // Costruisci l'oggetto event correttamente come in handleMatchSelect
+          const rawJson = refreshData.raw_json || {};
+          
+          const buildScoreFromDb = (scores, homeSetsWon, awaySetsWon) => {
+            const homeScore = rawJson.homeScore || { current: homeSetsWon };
+            const awayScore = rawJson.awayScore || { current: awaySetsWon };
+            
+            if (Array.isArray(scores) && scores.length > 0) {
+              scores.forEach(s => {
+                if (s.set_number) {
+                  homeScore[`period${s.set_number}`] = s.home_games;
+                  awayScore[`period${s.set_number}`] = s.away_games;
+                  if (s.home_tiebreak !== null) homeScore[`period${s.set_number}TieBreak`] = s.home_tiebreak;
+                  if (s.away_tiebreak !== null) awayScore[`period${s.set_number}TieBreak`] = s.away_tiebreak;
+                }
+              });
+            }
+            return { homeScore, awayScore };
+          };
+          
+          const { homeScore, awayScore } = buildScoreFromDb(refreshData.scores, refreshData.home_sets_won, refreshData.away_sets_won);
+          
+          const eventObj = rawJson.id ? rawJson : {
+            id: refreshData.id,
+            homeTeam: { 
+              id: refreshData.home_player_id, 
+              name: refreshData.home_name || rawJson.homeTeam?.name || '',
+              shortName: rawJson.homeTeam?.shortName || refreshData.home_name || '',
+              country: { alpha2: refreshData.home_country || rawJson.homeTeam?.country?.alpha2 || '' }
+            },
+            awayTeam: { 
+              id: refreshData.away_player_id, 
+              name: refreshData.away_name || rawJson.awayTeam?.name || '',
+              shortName: rawJson.awayTeam?.shortName || refreshData.away_name || '',
+              country: { alpha2: refreshData.away_country || rawJson.awayTeam?.country?.alpha2 || '' }
+            },
+            homeScore,
+            awayScore,
+            status: rawJson.status || { type: refreshData.status_type, description: refreshData.status_description },
+            tournament: rawJson.tournament || { name: refreshData.tournament_name },
+            startTimestamp: refreshData.start_time ? Math.floor(new Date(refreshData.start_time).getTime() / 1000) : rawJson.startTimestamp,
+            winnerCode: refreshData.winner_code || rawJson.winnerCode,
+            firstToServe: refreshData.first_to_serve || rawJson.firstToServe
+          };
+          
           const normalizedData = {
-            event: refreshData,
-            pointByPoint: refreshData.pointByPoint || [],
-            statistics: refreshData.statistics || [],
-            powerRankings: refreshData.powerRankings || [],
+            event: eventObj,
+            pointByPoint: rawJson.pointByPoint || refreshData.pointByPoint || [],
+            statistics: rawJson.statistics || refreshData.statistics || [],
+            tennisPowerRankings: rawJson.tennisPowerRankings || refreshData.powerRankings || [],
+            scores: refreshData.scores || [],
             ...refreshData
           };
           setRawData(normalizedData);
@@ -803,11 +849,57 @@ export default function App() {
             const data = await response.json();
             
             if (data.source === 'database') {
+              // Costruisci l'oggetto event correttamente
+              const rawJson = data.raw_json || {};
+              
+              const buildScoreFromDb = (scores, homeSetsWon, awaySetsWon) => {
+                const homeScore = rawJson.homeScore || { current: homeSetsWon };
+                const awayScore = rawJson.awayScore || { current: awaySetsWon };
+                
+                if (Array.isArray(scores) && scores.length > 0) {
+                  scores.forEach(s => {
+                    if (s.set_number) {
+                      homeScore[`period${s.set_number}`] = s.home_games;
+                      awayScore[`period${s.set_number}`] = s.away_games;
+                      if (s.home_tiebreak !== null) homeScore[`period${s.set_number}TieBreak`] = s.home_tiebreak;
+                      if (s.away_tiebreak !== null) awayScore[`period${s.set_number}TieBreak`] = s.away_tiebreak;
+                    }
+                  });
+                }
+                return { homeScore, awayScore };
+              };
+              
+              const { homeScore, awayScore } = buildScoreFromDb(data.scores, data.home_sets_won, data.away_sets_won);
+              
+              const eventObj = rawJson.id ? rawJson : {
+                id: data.id,
+                homeTeam: { 
+                  id: data.home_player_id, 
+                  name: data.home_name || rawJson.homeTeam?.name || '',
+                  shortName: rawJson.homeTeam?.shortName || data.home_name || '',
+                  country: { alpha2: data.home_country || rawJson.homeTeam?.country?.alpha2 || '' }
+                },
+                awayTeam: { 
+                  id: data.away_player_id, 
+                  name: data.away_name || rawJson.awayTeam?.name || '',
+                  shortName: rawJson.awayTeam?.shortName || data.away_name || '',
+                  country: { alpha2: data.away_country || rawJson.awayTeam?.country?.alpha2 || '' }
+                },
+                homeScore,
+                awayScore,
+                status: rawJson.status || { type: data.status_type, description: data.status_description },
+                tournament: rawJson.tournament || { name: data.tournament_name },
+                startTimestamp: data.start_time ? Math.floor(new Date(data.start_time).getTime() / 1000) : rawJson.startTimestamp,
+                winnerCode: data.winner_code || rawJson.winnerCode,
+                firstToServe: data.first_to_serve || rawJson.firstToServe
+              };
+              
               const normalizedData = {
-                event: data,
-                pointByPoint: data.pointByPoint || [],
-                statistics: data.statistics || [],
-                powerRankings: data.powerRankings || [],
+                event: eventObj,
+                pointByPoint: rawJson.pointByPoint || data.pointByPoint || [],
+                statistics: rawJson.statistics || data.statistics || [],
+                tennisPowerRankings: rawJson.tennisPowerRankings || data.powerRankings || [],
+                scores: data.scores || [],
                 ...data
               };
               setRawData(normalizedData);
