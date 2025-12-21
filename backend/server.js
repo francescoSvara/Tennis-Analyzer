@@ -548,16 +548,15 @@ app.get('/api/db-stats', async (req, res) => {
     // === CALCOLO DATABASE POWER SCORE ===
     // Metriche reali sulla qualità e ricchezza del database
     
-    // Campi dati REALI che usiamo per calcoli/grafici (escludiamo metadata come created_at, raw_json, etc)
-    const dataFields = [
+    // Campi dati CORE (escludiamo seed che sono opzionali, e metadata)
+    const coreFields = [
       'home_player_id', 'away_player_id', 'tournament_id', 'round_name', 
-      'start_time', 'status_type', 'winner_code', 'home_sets_won', 'away_sets_won',
-      'home_seed', 'away_seed', 'first_to_serve'
+      'start_time', 'status_type', 'winner_code', 'home_sets_won', 'away_sets_won'
     ];
-    const totalFieldsPerMatch = dataFields.length;
+    const totalFieldsPerMatch = coreFields.length;
     
-    let matchesWith100Percent = 0;  // Match con TUTTI i campi pieni
-    let matchesIncomplete = 0;       // Match con almeno un campo vuoto
+    let matchesWith100Percent = 0;  // Match con TUTTI i campi core pieni
+    let matchesIncomplete = 0;       // Match con almeno un campo core vuoto
     let totalFilledFields = 0;       // Totale campi pieni su tutti i match
     let totalPossibleFields = 0;     // Totale campi possibili
     let detectedCount = 0;
@@ -574,7 +573,7 @@ app.get('/api/db-stats', async (req, res) => {
     for (const match of dbMatches || []) {
       let filledFields = 0;
       
-      for (const field of dataFields) {
+      for (const field of coreFields) {
         if (match[field] !== null && match[field] !== undefined && match[field] !== '') {
           filledFields++;
         }
@@ -603,8 +602,16 @@ app.get('/api/db-stats', async (req, res) => {
     
     // Conta detected matches dal DB
     try {
-      const { count: detected } = await supabase.from('detected_matches').select('*', { count: 'exact', head: true });
-      detectedCount = detected || 0;
+      let detectedResult = null;
+      if (matchRepository && matchRepository.supabase) {
+        detectedResult = await matchRepository.supabase.from('detected_matches').select('*', { count: 'exact', head: true });
+      } else if (supabaseClient && supabaseClient.supabase) {
+        detectedResult = await supabaseClient.supabase.from('detected_matches').select('*', { count: 'exact', head: true });
+      }
+      if (detectedResult && detectedResult.count !== null) {
+        detectedCount = detectedResult.count;
+      }
+      console.log('📊 Detected matches count:', detectedCount);
     } catch (e) {
       console.log('Detected count error:', e.message);
     }
