@@ -525,7 +525,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                 </div>
                 
                 <div className="summary-card power-score" title={stats.summary.powerDetails ? 
-                  `Copertura: ${stats.summary.powerDetails.coverage.score}%\nPunteggi: ${stats.summary.powerDetails.scores.score}%\nVincitori: ${stats.summary.powerDetails.winners.score}%\nStatistiche: ${stats.summary.powerDetails.statistics.score}%` : ''}>
+                  `Copertura: ${stats.summary.powerDetails.coverage?.score || 0}%\nMatch Completi: ${stats.summary.powerDetails.completeness?.score || 0}%\nCampi Dati: ${stats.summary.powerDetails.fields?.score || 0}%\nFonti: ${stats.summary.powerDetails.sources?.score || 0}%` : ''}>
                   <div className="summary-icon">⚡</div>
                   <div className="summary-info">
                     <span className="summary-value">{stats.summary.powerScore || 0}%</span>
