@@ -547,44 +547,82 @@ app.get('/api/db-stats', async (req, res) => {
     
     // === CALCOLO DATABASE POWER SCORE ===
     // Metriche reali sulla qualità e ricchezza del database
-    let matchesWithScore = 0;
-    let matchesWithWinner = 0;
-    let matchesWithStats = 0;
-    let totalStatsRecords = 0;
+    
+    // Campi dati REALI che usiamo per calcoli/grafici (escludiamo metadata come created_at, raw_json, etc)
+    const dataFields = [
+      'home_player_id', 'away_player_id', 'tournament_id', 'round_name', 
+      'start_time', 'status_type', 'winner_code', 'home_sets_won', 'away_sets_won',
+      'home_seed', 'away_seed', 'first_to_serve'
+    ];
+    const totalFieldsPerMatch = dataFields.length;
+    
+    let matchesWith100Percent = 0;  // Match con TUTTI i campi pieni
+    let matchesIncomplete = 0;       // Match con almeno un campo vuoto
+    let totalFilledFields = 0;       // Totale campi pieni su tutti i match
+    let totalPossibleFields = 0;     // Totale campi possibili
     let detectedCount = 0;
     
-    // Conta match con dati completi
+    // Conta fonti dati (per ora solo Sofascore)
+    const dataSources = {
+      sofascore: 0,
+      csv: 0,
+      api_external: 0,
+      manual: 0
+    };
+    
+    // Analizza ogni match
     for (const match of dbMatches || []) {
-      if (match.home_sets_won !== null || match.away_sets_won !== null) matchesWithScore++;
-      if (match.winner_code !== null && match.winner_code !== 0) matchesWithWinner++;
+      let filledFields = 0;
+      
+      for (const field of dataFields) {
+        if (match[field] !== null && match[field] !== undefined && match[field] !== '') {
+          filledFields++;
+        }
+      }
+      
+      totalFilledFields += filledFields;
+      totalPossibleFields += totalFieldsPerMatch;
+      
+      if (filledFields === totalFieldsPerMatch) {
+        matchesWith100Percent++;
+      } else {
+        matchesIncomplete++;
+      }
+      
+      // Identifica fonte dati (per ora tutti Sofascore se hanno sofascore_url)
+      if (match.sofascore_url) {
+        dataSources.sofascore++;
+      } else if (match.source === 'csv') {
+        dataSources.csv++;
+      } else if (match.source === 'api') {
+        dataSources.api_external++;
+      } else {
+        dataSources.manual++;
+      }
     }
     
-    // Conta statistiche e detected matches dal DB
+    // Conta detected matches dal DB
     try {
-      const { count: statsCount } = await supabase.from('match_statistics').select('*', { count: 'exact', head: true });
-      totalStatsRecords = statsCount || 0;
-      matchesWithStats = Math.min((dbMatches || []).length, Math.floor(totalStatsRecords / 10)); // ~10 stats per match
-      
       const { count: detected } = await supabase.from('detected_matches').select('*', { count: 'exact', head: true });
       detectedCount = detected || 0;
     } catch (e) {
-      console.log('Stats count error:', e.message);
+      console.log('Detected count error:', e.message);
     }
     
     const totalMatches = (dbMatches || []).length;
     
     // Calcola punteggi parziali (0-100)
     const coverageScore = detectedCount > 0 ? Math.round((totalMatches / detectedCount) * 100) : 0;
-    const scoreCompleteness = totalMatches > 0 ? Math.round((matchesWithScore / totalMatches) * 100) : 0;
-    const winnerCompleteness = totalMatches > 0 ? Math.round((matchesWithWinner / totalMatches) * 100) : 0;
-    const statsRichness = totalMatches > 0 ? Math.min(100, Math.round((totalStatsRecords / totalMatches) * 3)) : 0;
+    const completenessScore = totalMatches > 0 ? Math.round((matchesWith100Percent / totalMatches) * 100) : 0;
+    const fieldsScore = totalPossibleFields > 0 ? Math.round((totalFilledFields / totalPossibleFields) * 100) : 0;
+    const sourcesScore = totalMatches > 0 ? 100 : 0; // Per ora 100% se abbiamo dati, poi aggiungeremo altre fonti
     
     // Power Score finale (media pesata)
     const powerScore = Math.round(
-      (coverageScore * 0.25) +      // 25% peso copertura
-      (scoreCompleteness * 0.25) +  // 25% peso punteggi
-      (winnerCompleteness * 0.20) + // 20% peso vincitori  
-      (statsRichness * 0.30)        // 30% peso statistiche
+      (coverageScore * 0.30) +      // 30% peso copertura
+      (completenessScore * 0.25) +  // 25% peso completezza 100%
+      (fieldsScore * 0.30) +        // 30% peso campi pieni
+      (sourcesScore * 0.15)         // 15% peso diversità fonti
     );
     
     res.json({
@@ -593,10 +631,26 @@ app.get('/api/db-stats', async (req, res) => {
         totalTournaments: tournamentMap.size,
         powerScore: powerScore,
         powerDetails: {
-          coverage: { score: coverageScore, label: 'Copertura', detail: `${totalMatches}/${detectedCount} match` },
-          scores: { score: scoreCompleteness, label: 'Punteggi', detail: `${matchesWithScore}/${totalMatches} completi` },
-          winners: { score: winnerCompleteness, label: 'Vincitori', detail: `${matchesWithWinner}/${totalMatches} definiti` },
-          statistics: { score: statsRichness, label: 'Statistiche', detail: `${totalStatsRecords} record totali` }
+          coverage: { 
+            score: coverageScore, 
+            label: 'Copertura', 
+            detail: `${totalMatches}/${detectedCount} rilevati` 
+          },
+          completeness: { 
+            score: completenessScore, 
+            label: 'Match Completi', 
+            detail: `${matchesWith100Percent} al 100% · ${matchesIncomplete} incompleti` 
+          },
+          fields: { 
+            score: fieldsScore, 
+            label: 'Campi Dati', 
+            detail: `${totalFilledFields}/${totalPossibleFields} pieni` 
+          },
+          sources: { 
+            score: sourcesScore, 
+            label: 'Fonti Dati', 
+            detail: `Sofascore: ${dataSources.sofascore} · Altri: ${dataSources.csv + dataSources.api_external + dataSources.manual}` 
+          }
         },
         byStatus: matchesByStatus
       },
