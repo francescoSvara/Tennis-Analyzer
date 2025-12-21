@@ -334,16 +334,21 @@ export default function App() {
           firstToServe: data.first_to_serve || rawJson.firstToServe
         };
         
-        // Combina i dati
+        // Combina i dati - IMPORTANTE: ...data PRIMA per non sovrascrivere i campi normalizzati
         normalizedData = {
+          ...data,  // Prima i dati grezzi dal DB
           event: eventObj,
           pointByPoint: rawJson.pointByPoint || data.pointByPoint || [],
           statistics: rawJson.statistics || data.statistics || [],
           tennisPowerRankings: rawJson.tennisPowerRankings || data.powerRankings || [],
-          scores: data.scores || [],
-          ...data
+          powerRankings: rawJson.tennisPowerRankings || data.powerRankings || [], // Alias per compatibilità
+          scores: data.scores || []
         };
         console.log('💾 Dati normalizzati dal DB:', normalizedData);
+        console.log('🔍 PowerRankings dal DB:', data.powerRankings?.length || 0, 'items');
+        console.log('🔍 Statistics dal DB:', data.statistics?.length || 0, 'items');
+        console.log('🔍 PointByPoint dal DB:', data.pointByPoint?.length || 0, 'items');
+        console.log('🔍 RawJson powerRankings:', rawJson.tennisPowerRankings?.length || 0, 'items');
         setRawData(normalizedData);
         setScrapeData(normalizeApiResponse(normalizedData));
       } else if (data.source === 'file') {
@@ -488,12 +493,13 @@ export default function App() {
           };
           
           const normalizedData = {
+            ...refreshData,  // Prima i dati grezzi
             event: eventObj,
             pointByPoint: rawJson.pointByPoint || refreshData.pointByPoint || [],
             statistics: rawJson.statistics || refreshData.statistics || [],
             tennisPowerRankings: rawJson.tennisPowerRankings || refreshData.powerRankings || [],
-            scores: refreshData.scores || [],
-            ...refreshData
+            powerRankings: rawJson.tennisPowerRankings || refreshData.powerRankings || [],
+            scores: refreshData.scores || []
           };
           setRawData(normalizedData);
           setScrapeData(normalizeApiResponse(normalizedData));
@@ -895,12 +901,13 @@ export default function App() {
               };
               
               const normalizedData = {
+                ...data,  // Prima i dati grezzi
                 event: eventObj,
                 pointByPoint: rawJson.pointByPoint || data.pointByPoint || [],
                 statistics: rawJson.statistics || data.statistics || [],
                 tennisPowerRankings: rawJson.tennisPowerRankings || data.powerRankings || [],
-                scores: data.scores || [],
-                ...data
+                powerRankings: rawJson.tennisPowerRankings || data.powerRankings || [],
+                scores: data.scores || []
               };
               setRawData(normalizedData);
               setScrapeData(normalizeApiResponse(normalizedData));
