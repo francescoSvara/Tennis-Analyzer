@@ -405,10 +405,16 @@
       color: #f44336;
     }
     
-    /* Retired / Walkover / Cancelled - Grigio */
+    /* Cancelled - Rosso */
+    .match-status.cancelled,
+    .match-status.canceled {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+    
+    /* Retired / Walkover / Postponed - Grigio */
     .match-status.retired,
     .match-status.walkover,
-    .match-status.cancelled,
     .match-status.postponed,
     .match-status.interrupted {
       background: rgba(158, 158, 158, 0.2);
@@ -630,6 +636,53 @@
       font-size: 0.75rem;
       color: #666;
       margin-top: 4px;
+    }
+
+    /* Animazione copia */
+    .missing-match-card.copied {
+      background: rgba(76, 175, 80, 0.3) !important;
+      border-color: rgba(76, 175, 80, 0.6) !important;
+      transform: scale(0.98);
+    }
+    
+    /* Animazione rimozione card acquisita */
+    .missing-match-card {
+      transition: all 0.4s ease;
+    }
+    
+    .missing-match-card.removing {
+      opacity: 0;
+      transform: translateX(100%) scale(0.8);
+      max-height: 0;
+      padding: 0;
+      margin: 0;
+      border: none;
+      overflow: hidden;
+    }
+    
+    /* Toast notification */
+    .copy-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, #4caf50, #45a049);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+      z-index: 10000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      max-width: 90%;
+      text-align: center;
+    }
+    
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
     /* Mobile responsive */
@@ -1147,20 +1200,6 @@
       <span id="serverStatus" class="status-badge offline">Checking...</span>
     </header>
     
-    <div class="info-box">
-      <h3>🧠 Filosofia: Acquisizione Ossessiva</h3>
-      <p>
-        <strong>Ogni link inserito = scrape completo + aggiornamento DB.</strong><br>
-        Anche se il match esiste già, tutti i dati vengono ri-scaricati e aggiornati:<br>
-        • Evento principale, giocatori, torneo<br>
-        • Statistiche dettagliate (aces, doppi falli, break point, ecc.)<br>
-        • Point-by-point (ogni singolo punto del match)<br>
-        • Power rankings/momentum per set e game<br>
-        • Head-to-head, odds, lineup<br>
-        Ogni scrape scansiona automaticamente l'intero torneo per trovare partite mancanti.
-      </p>
-    </div>
-    
     <div class="card">
       <h2>📥 Acquisisci / Aggiorna Match</h2>
       <p style="color: #888; font-size: 0.85rem; margin-bottom: 12px;">
@@ -1614,7 +1653,7 @@
           const statusDesc = (m.status_description || '').toLowerCase();
           
           // Status che indicano partita conclusa o non più rilevante
-          const finishedStatuses = ['ended', 'retired', 'walkover', 'cancelled', 'postponed', 'abandoned'];
+          const finishedStatuses = ['ended', 'retired', 'walkover', 'cancelled', 'canceled', 'postponed', 'abandoned'];
           const isFinished = finishedStatuses.some(s => statusDesc.includes(s));
           
           // Se completa al 100%, nascondi
@@ -1790,15 +1829,13 @@
           
           document.getElementById('urlInput').value = '';
           
-          // Reset to first page and reload data
+          // Aggiorna stats e matches
           currentPage = 1;
           await loadAdvancedStats();
           await loadMatches();
           
-          // Detect missing matches from tournament (cascade già fatto dal server)
-          if (data.tournamentId) {
-            await loadMissingMatches();
-          }
+          // Ricarica lista partite mancanti (semplice e affidabile)
+          await loadMissingMatches();
         }
       } catch (e) {
         alertError.textContent = `❌ Errore di connessione: ${e.message}`;
@@ -1920,6 +1957,7 @@
       
       let html = pageMatches.map((m, idx) => {
         const realIndex = start + idx; // Indice reale nell'array completo
+        const matchId = m.id || m.sofascoreId; // ID della partita per rimozione
         const homeName = m.homeTeam?.name || m.homeTeam?.shortName || 'TBD';
         const awayName = m.awayTeam?.name || m.awayTeam?.shortName || 'TBD';
         const statusText = m.status?.description || 'Da acquisire';
@@ -1928,7 +1966,7 @@
         const startTime = m.startTimestamp ? formatDate(new Date(m.startTimestamp * 1000).toISOString()) : '';
         
         return `
-          <div class="missing-match-card" onclick="openMissingModal(${realIndex})" title="Clicca per acquisire">
+          <div class="missing-match-card" data-match-id="${matchId}" onclick="openMissingModal(${realIndex})" title="Clicca per copiare i nomi">
             <div class="card-left">
               <div class="players">${homeName} vs ${awayName}</div>
               <div class="round-info">${tournamentName}${roundName ? ' • ' + roundName : ''}</div>
@@ -1975,8 +2013,175 @@
     
     document.getElementById('modalLinkInput').addEventListener('input', validateModalLink);
     
-    // Open modal for missing match
+    // Copy players names to clipboard when clicking on missing match
     function openMissingModal(index) {
+      selectedMissingMatch = missingMatches[index];
+      if (!selectedMissingMatch) return;
+      
+      const homeName = selectedMissingMatch.homeTeam?.name || selectedMissingMatch.homeTeam?.shortName || 'TBD';
+      const awayName = selectedMissingMatch.awayTeam?.name || selectedMissingMatch.awayTeam?.shortName || 'TBD';
+      
+      // Crea il testo da copiare: "NomeGiocatore1 vs NomeGiocatore2"
+      const textToCopy = `${homeName} vs ${awayName}`;
+      
+      // Copia negli appunti
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        // Mostra feedback visivo
+        showCopyFeedback(index, textToCopy);
+      }).catch(err => {
+        console.error('Errore nella copia:', err);
+        // Fallback per browser più vecchi
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showCopyFeedback(index, textToCopy);
+      });
+    }
+    
+    // Rimuovi card con animazione quando match viene acquisito
+    function removeMatchCardWithAnimation(matchId) {
+      console.log('🔍 Cerco card con data-match-id:', matchId);
+      
+      // Prova sia come numero che come stringa
+      let card = document.querySelector(`.missing-match-card[data-match-id="${matchId}"]`);
+      if (!card) {
+        card = document.querySelector(`.missing-match-card[data-match-id="${String(matchId)}"]`);
+      }
+      
+      // Debug: mostra tutti gli ID delle card presenti
+      const allCards = document.querySelectorAll('.missing-match-card[data-match-id]');
+      console.log('📋 Card presenti:', Array.from(allCards).map(c => c.dataset.matchId));
+      
+      if (card) {
+        console.log('✅ Card trovata, avvio animazione di rimozione');
+        
+        // Aggiungi classe per animazione
+        card.classList.add('removing');
+        
+        // Rimuovi dalla lista interna dopo l'animazione
+        setTimeout(() => {
+          // Rimuovi dall'array missingMatches
+          const indexToRemove = missingMatches.findIndex(m => 
+            String(m.id) === String(matchId)
+          );
+          
+          console.log('📍 Index da rimuovere:', indexToRemove);
+          
+          if (indexToRemove !== -1) {
+            missingMatches.splice(indexToRemove, 1);
+          }
+          
+          // Rimuovi elemento dal DOM
+          card.remove();
+          
+          // Aggiorna contatore e info
+          updateMissingCounters();
+          
+          // Se la pagina è vuota e ci sono altre pagine, torna indietro
+          const cardsOnPage = document.querySelectorAll('.missing-match-card:not(.removing)').length;
+          if (cardsOnPage === 0 && missingMatches.length > 0) {
+            currentMissingPage = Math.max(1, currentMissingPage - 1);
+            renderMissingMatches();
+          }
+          
+          // Se non ci sono più match, mostra messaggio
+          if (missingMatches.length === 0) {
+            document.getElementById('missingList').innerHTML = 
+              '<div class="loading">🎉 Tutte le partite dei tornei recenti sono acquisite!</div>';
+          }
+        }, 400); // Tempo dell'animazione CSS
+        
+        // Mostra toast di conferma acquisizione
+        showToast('✅ Partita acquisita e rimossa dalla lista');
+        
+      } else {
+        console.log('⚠️ Card non trovata nel DOM (forse su altra pagina)');
+        
+        // Se non troviamo la card (magari su altra pagina), aggiorna in background
+        const indexToRemove = missingMatches.findIndex(m => 
+          String(m.id) === String(matchId)
+        );
+        
+        if (indexToRemove !== -1) {
+          console.log('📍 Rimuovo da array interno, index:', indexToRemove);
+          missingMatches.splice(indexToRemove, 1);
+          updateMissingCounters();
+          showToast('✅ Partita acquisita');
+        }
+      }
+    }
+    
+    // Aggiorna contatori partite mancanti
+    function updateMissingCounters() {
+      const missingCountBadge = document.getElementById('missingCountBadge');
+      const tournamentInfo = document.getElementById('tournamentInfo');
+      
+      if (missingMatches.length === 0) {
+        missingCountBadge.style.display = 'none';
+        tournamentInfo.textContent = 'Nessuna partita mancante';
+      } else {
+        missingCountBadge.textContent = missingMatches.length;
+        missingCountBadge.style.display = 'inline-block';
+        
+        // Aggiorna info tornei
+        const tournamentNames = [...new Set(missingMatches.map(m => m.tournamentName).filter(Boolean))];
+        tournamentInfo.textContent = `Tornei: ${tournamentNames.join(', ')} - ${missingMatches.length} partite da acquisire`;
+      }
+      
+      // Aggiorna anche la paginazione se presente
+      const pagination = document.querySelector('#missingList .pagination span');
+      if (pagination) {
+        const totalPages = Math.ceil(missingMatches.length / MATCHES_PER_PAGE);
+        pagination.textContent = `Pagina ${currentMissingPage} di ${totalPages} (${missingMatches.length} totali)`;
+      }
+    }
+    
+    // Mostra feedback visivo dopo la copia
+    function showCopyFeedback(index, copiedText) {
+      // Trova la card cliccata
+      const cards = document.querySelectorAll('.missing-match-card');
+      const clickedCard = cards[index % MATCHES_PER_PAGE];
+      
+      if (clickedCard) {
+        // Aggiungi classe per animazione
+        clickedCard.classList.add('copied');
+        
+        // Mostra toast notification
+        showToast(`📋 Copiato: ${copiedText}`);
+        
+        // Rimuovi classe dopo animazione
+        setTimeout(() => {
+          clickedCard.classList.remove('copied');
+        }, 500);
+      }
+    }
+    
+    // Toast notification
+    function showToast(message) {
+      // Rimuovi toast esistenti
+      const existingToast = document.querySelector('.copy-toast');
+      if (existingToast) existingToast.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = 'copy-toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      // Rimuovi dopo 2 secondi
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+    
+    // Legacy function - kept for compatibility but now just copies
+    function openMissingModalLegacy(index) {
       selectedMissingMatch = missingMatches[index];
       if (!selectedMissingMatch) return;
       

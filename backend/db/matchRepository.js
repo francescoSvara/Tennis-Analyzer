@@ -440,6 +440,7 @@ async function getMatches(options = {}) {
     playerSearch,  // Nuovo: ricerca per nome giocatore
     dateFrom,      // Nuovo: data inizio (ISO string)
     dateTo,        // Nuovo: data fine (ISO string)
+    dataSource,    // Nuovo: filtro per fonte dati (xlsx_import, sofascore, merged_sofascore_xlsx)
     orderBy = 'start_time' 
   } = options;
 
@@ -504,6 +505,16 @@ async function getMatches(options = {}) {
   if (dateFrom) query = query.gte('start_time', dateFrom);
   if (dateTo) query = query.lte('start_time', dateTo);
   
+  // Filtro per fonte dati
+  if (dataSource) {
+    if (dataSource === 'sofascore') {
+      // Match Sofascore hanno data_source null o 'sofascore'
+      query = query.or('data_source.is.null,data_source.eq.sofascore');
+    } else {
+      query = query.eq('data_source', dataSource);
+    }
+  }
+  
   // Filtro per player IDs trovati dalla ricerca nome
   if (playerIds.length > 0) {
     // Costruisci filtro OR per home_player_id o away_player_id
@@ -529,6 +540,14 @@ async function getMatches(options = {}) {
     if (tournamentId) simpleQuery = simpleQuery.eq('tournament_id', tournamentId);
     if (dateFrom) simpleQuery = simpleQuery.gte('start_time', dateFrom);
     if (dateTo) simpleQuery = simpleQuery.lte('start_time', dateTo);
+    // Filtro per fonte dati
+    if (dataSource) {
+      if (dataSource === 'sofascore') {
+        simpleQuery = simpleQuery.or('data_source.is.null,data_source.eq.sofascore');
+      } else {
+        simpleQuery = simpleQuery.eq('data_source', dataSource);
+      }
+    }
     // Per playerSearch usa gli stessi playerIds già trovati
     if (playerIds.length > 0) {
       const playerFilters = playerIds.map(id => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(',');
@@ -543,26 +562,31 @@ async function getMatches(options = {}) {
     }
     
     // Mappa dati nel formato atteso dal frontend
+    // Usa winner_name/loser_name come fallback per match xlsx senza player_id
     data = (simpleResult.data || []).map(m => ({
       ...m,
-      home_name: m.home_name || 'Unknown',
-      away_name: m.away_name || 'Unknown',
-      tournament_name: m.tournament_name || 'Unknown Tournament',
-      tournament_category: m.tournament_category || ''
+      home_name: m.home_name || m.winner_name || 'Unknown',
+      away_name: m.away_name || m.loser_name || 'Unknown',
+      home_ranking: m.home_ranking || m.winner_rank,
+      away_ranking: m.away_ranking || m.loser_rank,
+      tournament_name: m.tournament_name || m.location || 'Unknown Tournament',
+      tournament_category: m.tournament_category || m.series || '',
+      tournament_ground: m.tournament_ground || m.surface || ''
     }));
   } else {
     // Mappa i dati dal join al formato flat atteso
+    // Usa winner_name/loser_name come fallback per match xlsx senza player_id
     data = (data || []).map(m => ({
       ...m,
-      home_name: m.home_player?.name || m.home_player?.full_name || 'Unknown',
-      away_name: m.away_player?.name || m.away_player?.full_name || 'Unknown',
+      home_name: m.home_player?.name || m.home_player?.full_name || m.winner_name || 'Unknown',
+      away_name: m.away_player?.name || m.away_player?.full_name || m.loser_name || 'Unknown',
       home_country: m.home_player?.country_alpha2 || '',
       away_country: m.away_player?.country_alpha2 || '',
-      home_ranking: m.home_player?.current_ranking,
-      away_ranking: m.away_player?.current_ranking,
-      tournament_name: m.tournament?.name || 'Unknown Tournament',
-      tournament_category: m.tournament?.category || '',
-      tournament_ground: m.tournament?.ground_type || ''
+      home_ranking: m.home_player?.current_ranking || m.winner_rank,
+      away_ranking: m.away_player?.current_ranking || m.loser_rank,
+      tournament_name: m.tournament?.name || m.location || 'Unknown Tournament',
+      tournament_category: m.tournament?.category || m.series || '',
+      tournament_ground: m.tournament?.ground_type || m.surface || ''
     }));
   }
   
@@ -931,7 +955,7 @@ async function getMissingMatches(limit = 500) {
  */
 async function countMatches(options = {}) {
   if (!checkSupabase()) return 0;
-  const { status, tournamentId, tournamentCategory, playerSearch, dateFrom, dateTo } = options;
+  const { status, tournamentId, tournamentCategory, playerSearch, dateFrom, dateTo, dataSource } = options;
   
   // Se c'è ricerca per giocatore, prima trova gli ID dei player che matchano
   let playerIds = [];
@@ -974,6 +998,15 @@ async function countMatches(options = {}) {
   if (categoryTournamentIds.length > 0) query = query.in('tournament_id', categoryTournamentIds);
   if (dateFrom) query = query.gte('start_time', dateFrom);
   if (dateTo) query = query.lte('start_time', dateTo);
+  
+  // Filtro per fonte dati
+  if (dataSource) {
+    if (dataSource === 'sofascore') {
+      query = query.or('data_source.is.null,data_source.eq.sofascore');
+    } else {
+      query = query.eq('data_source', dataSource);
+    }
+  }
   
   // Filtro per player IDs trovati dalla ricerca nome
   if (playerIds.length > 0) {
@@ -1066,11 +1099,288 @@ async function getDistinctTournaments() {
     .sort((a, b) => b.matchCount - a.matchCount);
 }
 
+// ============================================================================
+// MERGE XLSX + SOFASCORE DATA
+// ============================================================================
+
+/**
+ * Normalizza il nome di un giocatore per il matching
+ * "Vukic A." -> "vukic a"
+ * "Aleksandar Vukic" -> "vukic a" (prende iniziale nome)
+ */
+function normalizePlayerName(name) {
+  if (!name) return '';
+  
+  // Rimuovi caratteri speciali e converti in minuscolo
+  let normalized = name.toLowerCase()
+    .replace(/[''`]/g, '')  // Rimuovi apostrofi
+    .replace(/\./g, '')     // Rimuovi punti
+    .replace(/\s+/g, ' ')   // Normalizza spazi
+    .trim();
+  
+  // Dividi in parti
+  const parts = normalized.split(' ');
+  
+  if (parts.length >= 2) {
+    const lastPart = parts[parts.length - 1];
+    const firstPart = parts[0];
+    
+    // CASO xlsx: "Nishikori K" -> cognome è la prima parte lunga
+    // La prima parte è lunga e l'ultima è corta (iniziale)
+    if (firstPart.length > 2 && lastPart.length <= 2) {
+      // È già nel formato xlsx "Cognome N", ritorna così
+      return normalized;
+    }
+    
+    // CASO Sofascore: "Kei Nishikori" -> nome cognome
+    // La prima parte è corta o media, l'ultima è lunga (cognome)
+    if (lastPart.length > 2) {
+      // Converti "Nome Cognome" -> "cognome n"
+      const firstName = parts.slice(0, -1).join(' ');
+      const lastName = parts[parts.length - 1];
+      return `${lastName} ${firstName.charAt(0)}`;
+    }
+  }
+  
+  return normalized;
+}
+
+/**
+ * Cerca un match xlsx che corrisponde a un match Sofascore
+ * Criteri di matching:
+ * 1. Stessa data (±1 giorno per timezone)
+ * 2. Stesso giocatore (nome normalizzato)
+ */
+async function findMatchingXlsxMatch(sofascoreMatch) {
+  if (!checkSupabase()) return null;
+  
+  const homeName = sofascoreMatch.home?.name || sofascoreMatch.homeTeam?.name;
+  const awayName = sofascoreMatch.away?.name || sofascoreMatch.awayTeam?.name;
+  const matchDate = sofascoreMatch.startTimestamp 
+    ? new Date(sofascoreMatch.startTimestamp * 1000) 
+    : null;
+  
+  if (!matchDate || (!homeName && !awayName)) return null;
+  
+  // Cerca match xlsx nella stessa data (±1 giorno)
+  const startDate = new Date(matchDate);
+  startDate.setDate(startDate.getDate() - 1);
+  const endDate = new Date(matchDate);
+  endDate.setDate(endDate.getDate() + 1);
+  
+  const { data: xlsxMatches, error } = await supabase
+    .from('matches')
+    .select('*')
+    .eq('data_source', 'xlsx_import')
+    .gte('start_time', startDate.toISOString())
+    .lte('start_time', endDate.toISOString());
+  
+  if (error || !xlsxMatches) return null;
+  
+  // Normalizza i nomi per il confronto
+  const homeNormalized = normalizePlayerName(homeName);
+  const awayNormalized = normalizePlayerName(awayName);
+  
+  // Cerca match con giocatori corrispondenti
+  for (const xlsx of xlsxMatches) {
+    const xlsxWinner = normalizePlayerName(xlsx.winner_name);
+    const xlsxLoser = normalizePlayerName(xlsx.loser_name);
+    
+    // Check se i giocatori corrispondono (in qualsiasi ordine)
+    const homeMatchesWinner = homeNormalized.includes(xlsxWinner) || xlsxWinner.includes(homeNormalized);
+    const homeMatchesLoser = homeNormalized.includes(xlsxLoser) || xlsxLoser.includes(homeNormalized);
+    const awayMatchesWinner = awayNormalized.includes(xlsxWinner) || xlsxWinner.includes(awayNormalized);
+    const awayMatchesLoser = awayNormalized.includes(xlsxLoser) || xlsxLoser.includes(awayNormalized);
+    
+    if ((homeMatchesWinner && awayMatchesLoser) || (homeMatchesLoser && awayMatchesWinner)) {
+      console.log(`🔗 Match trovato! Sofascore "${homeName} vs ${awayName}" = xlsx "${xlsx.winner_name} vs ${xlsx.loser_name}"`);
+      return xlsx;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Unisce i dati xlsx con un match Sofascore esistente
+ * I dati xlsx aggiungono: ranking, punti, quote, punteggi set dettagliati
+ */
+async function mergeXlsxData(sofascoreMatchId, xlsxMatch) {
+  if (!checkSupabase()) return null;
+  
+  const updateData = {};
+  
+  // Aggiungi solo i campi che xlsx ha e sofascore non ha (o sono più completi)
+  if (xlsxMatch.location) updateData.location = xlsxMatch.location;
+  if (xlsxMatch.series) updateData.series = xlsxMatch.series;
+  if (xlsxMatch.court_type) updateData.court_type = xlsxMatch.court_type;
+  if (xlsxMatch.surface) updateData.surface = xlsxMatch.surface;
+  if (xlsxMatch.best_of) updateData.best_of = xlsxMatch.best_of;
+  
+  // Ranking e punti (xlsx ha dati storici precisi)
+  if (xlsxMatch.winner_rank) updateData.winner_rank = xlsxMatch.winner_rank;
+  if (xlsxMatch.loser_rank) updateData.loser_rank = xlsxMatch.loser_rank;
+  if (xlsxMatch.winner_points) updateData.winner_points = xlsxMatch.winner_points;
+  if (xlsxMatch.loser_points) updateData.loser_points = xlsxMatch.loser_points;
+  
+  // Punteggi set dettagliati
+  if (xlsxMatch.w1 !== null) updateData.w1 = xlsxMatch.w1;
+  if (xlsxMatch.l1 !== null) updateData.l1 = xlsxMatch.l1;
+  if (xlsxMatch.w2 !== null) updateData.w2 = xlsxMatch.w2;
+  if (xlsxMatch.l2 !== null) updateData.l2 = xlsxMatch.l2;
+  if (xlsxMatch.w3 !== null) updateData.w3 = xlsxMatch.w3;
+  if (xlsxMatch.l3 !== null) updateData.l3 = xlsxMatch.l3;
+  if (xlsxMatch.w4 !== null) updateData.w4 = xlsxMatch.w4;
+  if (xlsxMatch.l4 !== null) updateData.l4 = xlsxMatch.l4;
+  if (xlsxMatch.w5 !== null) updateData.w5 = xlsxMatch.w5;
+  if (xlsxMatch.l5 !== null) updateData.l5 = xlsxMatch.l5;
+  if (xlsxMatch.winner_sets !== null) updateData.winner_sets = xlsxMatch.winner_sets;
+  if (xlsxMatch.loser_sets !== null) updateData.loser_sets = xlsxMatch.loser_sets;
+  
+  // Quote (xlsx ha quote di chiusura)
+  if (xlsxMatch.odds_b365_winner) updateData.odds_b365_winner = xlsxMatch.odds_b365_winner;
+  if (xlsxMatch.odds_b365_loser) updateData.odds_b365_loser = xlsxMatch.odds_b365_loser;
+  if (xlsxMatch.odds_ps_winner) updateData.odds_ps_winner = xlsxMatch.odds_ps_winner;
+  if (xlsxMatch.odds_ps_loser) updateData.odds_ps_loser = xlsxMatch.odds_ps_loser;
+  if (xlsxMatch.odds_max_winner) updateData.odds_max_winner = xlsxMatch.odds_max_winner;
+  if (xlsxMatch.odds_max_loser) updateData.odds_max_loser = xlsxMatch.odds_max_loser;
+  if (xlsxMatch.odds_avg_winner) updateData.odds_avg_winner = xlsxMatch.odds_avg_winner;
+  if (xlsxMatch.odds_avg_loser) updateData.odds_avg_loser = xlsxMatch.odds_avg_loser;
+  if (xlsxMatch.odds_bfe_winner) updateData.odds_bfe_winner = xlsxMatch.odds_bfe_winner;
+  if (xlsxMatch.odds_bfe_loser) updateData.odds_bfe_loser = xlsxMatch.odds_bfe_loser;
+  
+  // Comment
+  if (xlsxMatch.comment) updateData.comment = xlsxMatch.comment;
+  
+  // Segna che i dati sono stati merged
+  updateData.data_source = 'merged_sofascore_xlsx';
+  updateData.updated_at = new Date().toISOString();
+  
+  if (Object.keys(updateData).length <= 2) {
+    console.log(`ℹ️ Nessun dato nuovo da xlsx per match ${sofascoreMatchId}`);
+    return null;
+  }
+  
+  const { data, error } = await supabase
+    .from('matches')
+    .update(updateData)
+    .eq('id', sofascoreMatchId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error(`❌ Errore merge match ${sofascoreMatchId}:`, error.message);
+    return null;
+  }
+  
+  console.log(`✅ Match ${sofascoreMatchId} arricchito con dati xlsx (${Object.keys(updateData).length - 2} campi)`);
+  return data;
+}
+
+/**
+ * Inserisce un match Sofascore e automaticamente cerca/merge con dati xlsx
+ */
+async function insertMatchWithXlsxMerge(matchData, sourceUrl = null) {
+  // Prima inserisci il match normalmente
+  const insertedMatch = await insertMatch(matchData, sourceUrl);
+  
+  if (!insertedMatch) return null;
+  
+  // Cerca match xlsx corrispondente
+  const xlsxMatch = await findMatchingXlsxMatch(matchData);
+  
+  if (xlsxMatch) {
+    // Merge i dati
+    const mergedMatch = await mergeXlsxData(insertedMatch.id, xlsxMatch);
+    
+    // Opzionale: elimina il record xlsx duplicato (commenta se vuoi tenerlo)
+    // await supabase.from('matches').delete().eq('id', xlsxMatch.id);
+    
+    return mergedMatch || insertedMatch;
+  }
+  
+  return insertedMatch;
+}
+
+/**
+ * Esegue il merge batch di tutti i match sofascore con xlsx
+ */
+async function batchMergeXlsxData() {
+  if (!checkSupabase()) return { merged: 0, errors: 0 };
+  
+  console.log('\n🔄 Inizio batch merge Sofascore + xlsx...\n');
+  
+  // Prendi tutti i match sofascore che non sono già merged
+  const { data: sofascoreMatches, error } = await supabase
+    .from('matches')
+    .select('*')
+    .eq('data_source', 'sofascore')
+    .order('start_time', { ascending: false });
+  
+  if (error || !sofascoreMatches) {
+    console.error('Errore caricamento match sofascore:', error?.message);
+    return { merged: 0, errors: 1 };
+  }
+  
+  console.log(`📊 Trovati ${sofascoreMatches.length} match Sofascore da verificare\n`);
+  
+  let merged = 0;
+  let notFound = 0;
+  
+  for (const match of sofascoreMatches) {
+    // Estrai i nomi dai dati raw_json (formato Sofascore)
+    let homeName = null;
+    let awayName = null;
+    
+    if (match.raw_json) {
+      // Prova diversi path nel raw_json
+      homeName = match.raw_json.home?.name || 
+                 match.raw_json.homeTeam?.name || 
+                 match.raw_json.mapping?.home?.name;
+      awayName = match.raw_json.away?.name || 
+                 match.raw_json.awayTeam?.name || 
+                 match.raw_json.mapping?.away?.name;
+    }
+    
+    // Se non trovati nel raw_json, usa winner_name/loser_name
+    if (!homeName) homeName = match.winner_name;
+    if (!awayName) awayName = match.loser_name;
+    
+    // Costruisci oggetto per la ricerca
+    const matchData = {
+      home: { name: homeName },
+      away: { name: awayName },
+      startTimestamp: match.start_time ? new Date(match.start_time).getTime() / 1000 : null
+    };
+    
+    const xlsxMatch = await findMatchingXlsxMatch(matchData);
+    
+    if (xlsxMatch) {
+      await mergeXlsxData(match.id, xlsxMatch);
+      merged++;
+    } else {
+      notFound++;
+    }
+  }
+  
+  console.log(`\n📊 BATCH MERGE COMPLETATO:`);
+  console.log(`   ✅ Merged: ${merged}`);
+  console.log(`   ⚪ Non trovati in xlsx: ${notFound}`);
+  
+  return { merged, notFound };
+}
+
 module.exports = {
   // Write
   upsertPlayer,
   upsertTournament,
   insertMatch,
+  insertMatchWithXlsxMerge,
+  
+  // Merge
+  findMatchingXlsxMatch,
+  mergeXlsxData,
+  batchMergeXlsxData,
   
   // Read
   getMatches,

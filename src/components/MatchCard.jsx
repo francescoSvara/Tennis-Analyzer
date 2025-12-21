@@ -71,12 +71,18 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
   const homeTeam = match.homeTeam || {};
   const awayTeam = match.awayTeam || {};
   
+  // Determina se è un match xlsx (storico)
+  const isXlsxMatch = match.dataSource === 'xlsx_import';
+  const isMergedMatch = match.dataSource === 'merged_sofascore_xlsx';
+  
   // Card suggerita o rilevata: stile diverso e non cliccabile
   const cardClass = isDetected 
     ? 'match-card detected-card'
     : isSuggested 
       ? 'match-card suggested-card' 
-      : 'match-card';
+      : isXlsxMatch
+        ? 'match-card xlsx-card'
+        : 'match-card';
   
   const handleClick = () => {
     if (!isSuggested && !isDetected && onClick) {
@@ -102,10 +108,27 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
         </div>
       )}
       
+      {/* Badge per match xlsx (storici) */}
+      {isXlsxMatch && !isSuggested && !isDetected && (
+        <div className="xlsx-badge">
+          <span className="xlsx-icon">📊</span>
+          <span className="xlsx-text">Storico</span>
+        </div>
+      )}
+      
+      {/* Badge per match merged */}
+      {isMergedMatch && !isSuggested && !isDetected && (
+        <div className="merged-badge">
+          <span className="merged-icon">🔗</span>
+          <span className="merged-text">Completo</span>
+        </div>
+      )}
+      
       {/* Header: Categoria e Data */}
       <div className="match-card-header">
         <span className="match-category">
           {match.category || match.sport || 'Tennis'}
+          {match.surface && <span className="match-surface"> • {match.surface}</span>}
         </span>
         <span className="match-date">
           {formatDate(match.startTimestamp, match.fileDate)}

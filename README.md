@@ -61,12 +61,167 @@ Lo scraping va fatto **esclusivamente** dal progetto locale `Tennis-Scraper-Loca
 
 ---
 
-## 📊 STATISTICHE ATTUALI (20 Dicembre 2025)
+## 📊 STATISTICHE ATTUALI (21 Dicembre 2025)
 
-- **26 match** nel database
+- **2670+ match** nel database (26 Sofascore + 2644 storici xlsx)
 - **178 partite rilevate** dai tornei monitorati
 - **15+ tornei** tracciati (ATP, ITF, Challenger, United Cup)
 - **Giocatori top**: Zverev, Alcaraz, Hurkacz, de Minaur, Tien
+
+---
+
+## 🗄️ SCHEMA DATABASE COMPLETO
+
+### Tabella `matches` - Struttura Campi
+
+La tabella `matches` contiene tutti i dati delle partite. I campi sono organizzati per categoria:
+
+#### 📌 Campi Identificativi
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `id` | BIGINT | ID univoco partita (da Sofascore o generato) |
+| `slug` | TEXT | URL-friendly identifier (es: "nadal-r-vs-federer-r") |
+| `data_source` | TEXT | Fonte dati: `sofascore`, `xlsx_import`, `manual` |
+
+#### 🏆 Campi Torneo/Evento
+| Campo | Tipo | Descrizione | Uso per Calcoli |
+|-------|------|-------------|-----------------|
+| `tournament_id` | BIGINT | FK alla tabella tournaments | Join tornei |
+| `location` | TEXT | Città/luogo (Brisbane, Melbourne, etc.) | Analisi per location |
+| `series` | TEXT | Livello: ATP250, ATP500, ATP1000, Grand Slam | Filtri importanza |
+| `court_type` | TEXT | `Indoor` o `Outdoor` | Analisi condizioni |
+| `surface` | TEXT | `Hard`, `Clay`, `Grass`, `Carpet` | Analisi per superficie |
+| `round_name` | TEXT | Turno: 1st Round, Quarterfinal, Final, etc. | Filtri fasi torneo |
+| `best_of` | INTEGER | Formato: 3 o 5 set | Calcoli durata/strategia |
+
+#### 👤 Campi Giocatori
+| Campo | Tipo | Descrizione | Uso per Calcoli |
+|-------|------|-------------|-----------------|
+| `home_player_id` | BIGINT | FK giocatore casa | Join players |
+| `away_player_id` | BIGINT | FK giocatore ospite | Join players |
+| `home_seed` | INTEGER | Testa di serie home | Analisi seeding |
+| `away_seed` | INTEGER | Testa di serie away | Analisi seeding |
+| `winner_name` | TEXT | Nome vincitore (per import xlsx) | Query veloci |
+| `loser_name` | TEXT | Nome perdente (per import xlsx) | Query veloci |
+| `winner_rank` | INTEGER | Ranking vincitore al match | **Analisi ranking** |
+| `loser_rank` | INTEGER | Ranking perdente al match | **Analisi ranking** |
+| `winner_points` | INTEGER | Punti ATP/WTA vincitore | **Analisi punti** |
+| `loser_points` | INTEGER | Punti ATP/WTA perdente | **Analisi punti** |
+
+#### 📊 Campi Punteggio
+| Campo | Tipo | Descrizione | Uso per Calcoli |
+|-------|------|-------------|-----------------|
+| `winner_code` | INTEGER | 1=home vince, 2=away vince | Risultato finale |
+| `home_sets_won` | INTEGER | Set vinti da home | Score finale |
+| `away_sets_won` | INTEGER | Set vinti da away | Score finale |
+| `winner_sets` | INTEGER | Tot set vinti dal vincitore | Analisi dominanza |
+| `loser_sets` | INTEGER | Tot set vinti dal perdente | Analisi competitività |
+| `w1` | INTEGER | Games vinti winner nel SET 1 | **Analisi set** |
+| `l1` | INTEGER | Games vinti loser nel SET 1 | **Analisi set** |
+| `w2` | INTEGER | Games vinti winner nel SET 2 | **Analisi set** |
+| `l2` | INTEGER | Games vinti loser nel SET 2 | **Analisi set** |
+| `w3` | INTEGER | Games vinti winner nel SET 3 | **Analisi set** |
+| `l3` | INTEGER | Games vinti loser nel SET 3 | **Analisi set** |
+| `w4` | INTEGER | Games vinti winner nel SET 4 | **Analisi set** |
+| `l4` | INTEGER | Games vinti loser nel SET 4 | **Analisi set** |
+| `w5` | INTEGER | Games vinti winner nel SET 5 | **Analisi set** |
+| `l5` | INTEGER | Games vinti loser nel SET 5 | **Analisi set** |
+
+#### 💰 Campi Quote Bookmaker
+| Campo | Tipo | Descrizione | Uso per Calcoli |
+|-------|------|-------------|-----------------|
+| `odds_b365_winner` | DECIMAL(6,3) | Quota Bet365 vincitore | **Value betting** |
+| `odds_b365_loser` | DECIMAL(6,3) | Quota Bet365 perdente | **Value betting** |
+| `odds_ps_winner` | DECIMAL(6,3) | Quota Pinnacle vincitore | **Sharp odds** |
+| `odds_ps_loser` | DECIMAL(6,3) | Quota Pinnacle perdente | **Sharp odds** |
+| `odds_max_winner` | DECIMAL(6,3) | Quota MAX vincitore | **Best odds** |
+| `odds_max_loser` | DECIMAL(6,3) | Quota MAX perdente | **Best odds** |
+| `odds_avg_winner` | DECIMAL(6,3) | Quota MEDIA vincitore | **Market consensus** |
+| `odds_avg_loser` | DECIMAL(6,3) | Quota MEDIA perdente | **Market consensus** |
+| `odds_bfe_winner` | DECIMAL(6,3) | Quota Betfair Exchange vincitore | **Exchange odds** |
+| `odds_bfe_loser` | DECIMAL(6,3) | Quota Betfair Exchange perdente | **Exchange odds** |
+
+#### ⏰ Campi Stato/Tempo
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `start_time` | TIMESTAMPTZ | Data/ora inizio match |
+| `status_code` | INTEGER | Codice stato (100=finished) |
+| `status_type` | TEXT | Tipo: `finished`, `inprogress`, `notstarted` |
+| `status_description` | TEXT | Descrizione: Ended, In Progress, etc. |
+| `comment` | TEXT | Note: Completed, Retired, Walkover, etc. |
+| `is_live` | BOOLEAN | True se partita in corso |
+| `first_to_serve` | INTEGER | Chi serve per primo (1 o 2) |
+
+#### 🔗 Campi Metadata
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `sofascore_url` | TEXT | URL originale Sofascore |
+| `raw_json` | JSONB | JSON completo dati Sofascore |
+| `extracted_at` | TIMESTAMPTZ | Quando estratto |
+| `created_at` | TIMESTAMPTZ | Quando creato nel DB |
+| `updated_at` | TIMESTAMPTZ | Ultimo aggiornamento |
+| `last_updated_at` | TIMESTAMPTZ | Legacy update timestamp |
+
+---
+
+### 🧮 FORMULE E CALCOLI UTILI
+
+#### Probabilità implicita dalle quote
+```
+prob_winner = 1 / odds_winner
+prob_loser = 1 / odds_loser
+overround = prob_winner + prob_loser - 1
+true_prob_winner = prob_winner / (prob_winner + prob_loser)
+```
+
+#### Value Bet Detection
+```sql
+-- Trova value bets dove Pinnacle dà quota migliore di Bet365
+SELECT * FROM matches 
+WHERE odds_ps_winner > odds_b365_winner * 1.05
+  AND data_source = 'xlsx_import';
+```
+
+#### Analisi Ranking vs Risultato
+```sql
+-- Upset: quando il giocatore con ranking peggiore vince
+SELECT winner_name, loser_name, winner_rank, loser_rank,
+       loser_rank - winner_rank as rank_difference
+FROM matches 
+WHERE winner_rank > loser_rank  -- Ranking più alto = peggiore
+ORDER BY rank_difference DESC;
+```
+
+#### Analisi per Superficie
+```sql
+-- Win rate per superficie e serie
+SELECT surface, series, 
+       COUNT(*) as total_matches,
+       AVG(winner_sets::float / (winner_sets + loser_sets)) as avg_dominance
+FROM matches 
+WHERE surface IS NOT NULL
+GROUP BY surface, series;
+```
+
+#### Tiebreak Analysis
+```sql
+-- Match con tiebreak (set finiti 7-6)
+SELECT * FROM matches 
+WHERE (w1 = 7 AND l1 = 6) OR (w1 = 6 AND l1 = 7)
+   OR (w2 = 7 AND l2 = 6) OR (w2 = 6 AND l2 = 7);
+```
+
+#### Closing Line Value (CLV)
+```sql
+-- Confronto quote apertura vs chiusura (richiede storico)
+-- CLV positivo = value bet confermato dal mercato
+SELECT winner_name, 
+       odds_ps_winner as pinnacle_odds,
+       odds_avg_winner as market_avg,
+       (odds_ps_winner - odds_avg_winner) / odds_avg_winner * 100 as edge_pct
+FROM matches
+WHERE odds_ps_winner > odds_avg_winner;
+```
 
 ---
 
@@ -311,6 +466,9 @@ Tennis-Analyzer/
 - [x] Database Monitor Dashboard
 - [x] Live tracking automatico
 - [x] Raggruppamento match per data
+- [x] **Import dati storici xlsx** (2644+ match ATP 2025)
+- [x] **Auto-merge Sofascore + xlsx** (quote, ranking, punteggi set)
+- [x] **Documentazione schema DB completo** (50+ campi con formule)
 
 ### 🔜 Prossimi Step
 - [ ] Ricerca per nome giocatore

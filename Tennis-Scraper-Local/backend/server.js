@@ -4,7 +4,8 @@ import cors from 'cors';
 import { scrapeEvent, getStatus, getData, getError, getEventId, extractEventId, directFetch } from './scraper.js';
 import { 
   checkDuplicate, 
-  insertMatch, 
+  insertMatch,
+  insertMatchWithXlsxMerge, 
   getMatches, 
   getStats, 
   getMatchesWithCompleteness, 
@@ -119,8 +120,8 @@ app.post('/api/scrape', async (req, res) => {
       }
     }
     
-    // SEMPRE inserisci/aggiorna nel database (upsert)
-    const match = await insertMatch(data);
+    // SEMPRE inserisci/aggiorna nel database (upsert) + AUTO-MERGE con xlsx
+    const match = await insertMatchWithXlsxMerge(data);
     
     if (!match) {
       return res.status(500).json({ error: 'Errore durante il salvataggio nel database' });
@@ -281,6 +282,8 @@ app.get('/api/missing-matches', async (req, res) => {
     // Ottieni tornei recenti
     const tournaments = await getRecentTournaments();
     
+    console.log('📋 Tornei recenti trovati:', tournaments.length);
+    
     if (tournaments.length === 0) {
       return res.json({ tournaments: [], missingMatches: [] });
     }
@@ -291,6 +294,9 @@ app.get('/api/missing-matches', async (req, res) => {
     for (const tournament of tournaments) {
       // Ottieni ID match esistenti per questo torneo
       const existingIds = await getMatchIdsByTournament(tournament.id);
+      
+      console.log(`🎾 Torneo ${tournament.name} (${tournament.id}): ${existingIds.size} match già acquisiti`);
+      console.log(`   → IDs acquisiti:`, Array.from(existingIds).slice(0, 20)); // Mostra primi 20
       
       // Fetch eventi dal torneo da SofaScore
       try {
@@ -305,8 +311,20 @@ app.get('/api/missing-matches', async (req, res) => {
           const lastData = await directFetch(lastEventsUrl);
           
           if (lastData.events) {
+            console.log(`  → Eventi da SofaScore: ${lastData.events.length}`);
+            
             for (const event of lastData.events) {
-              if (!existingIds.has(event.id)) {
+              const isAcquired = existingIds.has(event.id);
+              const homeName = event.homeTeam?.name || 'TBD';
+              const awayName = event.awayTeam?.name || 'TBD';
+              
+              // Log specifico per Langmo/Sach
+              if (homeName.includes('Langmo') || awayName.includes('Langmo') || 
+                  homeName.includes('Sach') || awayName.includes('Sach')) {
+                console.log(`   🔍 MATCH TROVATO: ${event.id} - ${homeName} vs ${awayName} - Acquisito: ${isAcquired}`);
+              }
+              
+              if (!isAcquired) {
                 allMissingMatches.push({
                   ...event,
                   tournamentId: tournament.id,
@@ -324,6 +342,8 @@ app.get('/api/missing-matches', async (req, res) => {
         console.error(`Errore fetch eventi torneo ${tournament.id}:`, e.message);
       }
     }
+    
+    console.log(`📊 Totale partite mancanti: ${allMissingMatches.length}`);
     
     res.json({ 
       tournaments: tournamentsWithMissing, 

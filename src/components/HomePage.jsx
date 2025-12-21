@@ -146,21 +146,27 @@ function HomePage({ onMatchSelect }) {
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
+  const [dataSourceFilter, setDataSourceFilter] = useState('all'); // 'all', 'sofascore', 'xlsx_import', 'merged'
 
   // Funzione per caricare i match
   const loadMatches = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // Usa l'API /api/db/matches che legge dal database Supabase (senza limit per avere tutti)
-      const matchesRes = await fetch(apiUrl(`/api/db/matches?limit=500`));
+      // Costruisci URL con filtro dataSource se selezionato
+      let url = `/api/db/matches?limit=500`;
+      if (dataSourceFilter && dataSourceFilter !== 'all') {
+        url += `&dataSource=${dataSourceFilter}`;
+      }
+      
+      const matchesRes = await fetch(apiUrl(url));
       if (!matchesRes.ok) {
         throw new Error(`Errore HTTP: ${matchesRes.status}`);
       }
       const matchesData = await matchesRes.json();
       setMatches(matchesData.matches || []);
       setTotalMatchCount(matchesData.totalCount || matchesData.matches?.length || 0);
-      console.log(`📁 Loaded ${matchesData.matches?.length || 0} matches from database`);
+      console.log(`📁 Loaded ${matchesData.matches?.length || 0} matches from database (filter: ${dataSourceFilter})`);
       
       // Carica suggeriti e rilevati in parallelo
       const [suggestedRes, detectedRes, trackedRes] = await Promise.all([
@@ -196,9 +202,9 @@ function HomePage({ onMatchSelect }) {
     } finally {
       setLoading(false);
     }
-  }, [selectedSport]);
+  }, [selectedSport, dataSourceFilter]);
 
-  // Carica i match quando cambia lo sport
+  // Carica i match quando cambia lo sport o il filtro
   useEffect(() => {
     loadMatches();
   }, [loadMatches]);
@@ -266,6 +272,21 @@ function HomePage({ onMatchSelect }) {
               {selectedSport === 'basketball' && '🏀 Basketball Matches'}
               {selectedSport === 'rugby-union' && '🏉 Rugby Matches'}
             </h2>
+            
+            {/* Filtro fonte dati */}
+            <div className="data-source-filter">
+              <select 
+                value={dataSourceFilter} 
+                onChange={(e) => setDataSourceFilter(e.target.value)}
+                className="source-select"
+              >
+                <option value="all">📊 Tutte le fonti ({totalMatchCount})</option>
+                <option value="sofascore">⚡ Sofascore (live)</option>
+                <option value="xlsx_import">📊 Storici (xlsx)</option>
+                <option value="merged_sofascore_xlsx">🔗 Completi (merged)</option>
+              </select>
+            </div>
+            
             <span className="match-count">
               {loading ? '...' : `${totalMatchCount} salvate`}
               {totalDetectedCount > 0 && !loading && (

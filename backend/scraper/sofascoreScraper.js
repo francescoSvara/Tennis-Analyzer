@@ -396,15 +396,16 @@ async function runScraper(url) {
         console.error('Failed to create mapping file', e);
       }
 
-      // ========== SAVE TO DATABASE ==========
+      // ========== SAVE TO DATABASE + AUTO-MERGE XLSX ==========
       if (matchRepository) {
         try {
           // Extract the main event object from collected data
           const eventData = extractEventForDB(collected);
           if (eventData) {
-            const savedMatch = await matchRepository.insertMatch(eventData, url);
+            // Usa insertMatchWithXlsxMerge per unire automaticamente con dati storici xlsx
+            const savedMatch = await matchRepository.insertMatchWithXlsxMerge(eventData, url);
             collected._dbMatchId = savedMatch?.id;
-            console.log('✅ Match saved to database:', savedMatch?.id);
+            console.log('✅ Match saved to database (with xlsx merge):', savedMatch?.id);
           } else {
             console.warn('⚠️ Could not extract event data for database');
           }
@@ -643,14 +644,15 @@ async function runDirectFetch(url) {
         // ignore mapping errors
       }
 
-      // ========== SAVE TO DATABASE ==========
+      // ========== SAVE TO DATABASE + AUTO-MERGE XLSX ==========
       if (matchRepository) {
         try {
           const eventData = extractEventForDB(collected);
           if (eventData) {
-            const savedMatch = await matchRepository.insertMatch(eventData, url);
+            // Usa insertMatchWithXlsxMerge per unire automaticamente con dati storici xlsx
+            const savedMatch = await matchRepository.insertMatchWithXlsxMerge(eventData, url);
             collected._dbMatchId = savedMatch?.id;
-            console.log('✅ Match saved to database:', savedMatch?.id);
+            console.log('✅ Match saved to database (with xlsx merge):', savedMatch?.id);
           }
         } catch (dbError) {
           console.error('❌ Failed to save to database:', dbError.message);

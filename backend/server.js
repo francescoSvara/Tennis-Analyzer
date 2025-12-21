@@ -1937,10 +1937,10 @@ app.get('/api/db/matches', async (req, res) => {
     return res.status(503).json({ error: 'Database not configured' });
   }
   try {
-    const { limit, offset, status, tournamentId, playerId, orderBy } = req.query;
+    const { limit, offset, status, tournamentId, playerId, orderBy, dateFrom, dateTo, dataSource } = req.query;
     
     // Ottieni il conteggio totale
-    const totalCount = await matchRepository.countMatches({ status, tournamentId, playerId });
+    const totalCount = await matchRepository.countMatches({ status, tournamentId, playerId, dateFrom, dateTo, dataSource });
     
     const dbMatches = await matchRepository.getMatches({
       limit: limit ? parseInt(limit) : 50,
@@ -1948,7 +1948,10 @@ app.get('/api/db/matches', async (req, res) => {
       status,
       tournamentId: tournamentId ? parseInt(tournamentId) : undefined,
       playerId: playerId ? parseInt(playerId) : undefined,
-      orderBy
+      orderBy,
+      dateFrom,
+      dateTo,
+      dataSource
     });
     
     // Trasforma i dati dal formato DB (snake_case) al formato frontend (camelCase)
@@ -1960,6 +1963,7 @@ app.get('/api/db/matches', async (req, res) => {
       sportName: 'Tennis',
       tournament: m.tournament_name || '',
       category: m.tournament_category || '',
+      surface: m.tournament_ground || '',
       homeTeam: {
         id: m.home_player_id,
         name: m.home_name || '',
@@ -1984,6 +1988,7 @@ app.get('/api/db/matches', async (req, res) => {
       startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
       winnerCode: m.winner_code,
       dataCompleteness: m.data_completeness || 50,
+      dataSource: m.data_source || 'sofascore',
       source: 'database'
     }));
     

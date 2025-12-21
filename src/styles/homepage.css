@@ -242,6 +242,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .section-title {
@@ -249,6 +251,43 @@
   font-weight: 600;
   color: #fff;
   margin: 0;
+}
+
+/* Filtro fonte dati */
+.data-source-filter {
+  display: flex;
+  align-items: center;
+}
+
+.source-select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--home-border);
+  border-radius: 8px;
+  color: var(--home-text-primary);
+  padding: 8px 32px 8px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--home-transition);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b95a5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.source-select:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--home-accent);
+}
+
+.source-select:focus {
+  outline: none;
+  border-color: var(--home-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.source-select option {
+  background: var(--home-bg-secondary);
+  color: var(--home-text-primary);
 }
 
 .match-count {
@@ -797,6 +836,72 @@
 .suggested-text {
   text-transform: uppercase;
   letter-spacing: 0.3px;
+}
+
+/* Badge per match xlsx (storici) */
+.xlsx-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 0 var(--home-radius) 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.xlsx-icon {
+  font-size: 0.8rem;
+}
+
+.xlsx-text {
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Badge per match merged (sofascore + xlsx) */
+.merged-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 0 var(--home-radius) 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.merged-icon {
+  font-size: 0.8rem;
+}
+
+.merged-text {
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Card xlsx con bordo diverso */
+.match-card.xlsx-card {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.match-card.xlsx-card:hover {
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+}
+
+/* Stile per superficie nel header */
+.match-surface {
+  color: var(--home-text-muted);
+  font-size: 0.75rem;
 }
 
 .add-to-db-btn {
