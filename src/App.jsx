@@ -4,6 +4,7 @@ import PointByPointWidget from './components/PointByPointWidget';
 import Statistics from './components/Statistics';
 import MomentumTab from './components/MomentumTab';
 import QuotesTab from './components/QuotesTab';
+import PredictorTab from './components/PredictorTab';
 import MatchHeader from './components/MatchHeader';
 import SavedScrapes from './components/SavedScrapes';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -999,6 +1000,7 @@ export default function App() {
   // Sidebar navigation items
   const sidebarTabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
+    { id: 'predictor', label: 'Predictor', icon: '🎯' },
     { id: 'quotes', label: 'Quote', icon: '💰' },
     { id: 'pbp', label: 'Point by Point', icon: '🎾' },
     { id: 'stats', label: 'Statistiche', icon: '📈' },
@@ -1215,6 +1217,33 @@ export default function App() {
                     </>
                   );
                 })()}
+              </div>
+            )}
+
+            {/* Predictor Tab */}
+            {activeTab === 'predictor' && (
+              <div className="predictor-content">
+                <ErrorBoundary componentName="Predictor">
+                  {(() => {
+                    // Extract player names from eventInfo
+                    const players = eventInfo?.players || {};
+                    const homePlayer = players.home?.name || players.home?.shortName || 'Giocatore 1';
+                    const awayPlayer = players.away?.name || players.away?.shortName || 'Giocatore 2';
+                    // Extract match context (surface, tournament, format)
+                    const matchContext = {
+                      surface: eventInfo?.groundType || eventInfo?.surface || null,
+                      tournament: eventInfo?.tournament?.name || eventInfo?.tournamentName || null,
+                      format: matchSummary?.format || (eventInfo?.bestOf === 5 ? 'best-of-5' : 'best-of-3'),
+                    };
+                    return (
+                      <PredictorTab 
+                        homePlayer={homePlayer}
+                        awayPlayer={awayPlayer}
+                        matchContext={matchContext}
+                      />
+                    );
+                  })()}
+                </ErrorBoundary>
               </div>
             )}
 

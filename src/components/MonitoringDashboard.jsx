@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiUrl } from '../config';
+import ManualPredictor from './ManualPredictor';
 
 /**
  * MonitoringDashboard Component
@@ -314,7 +315,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedTournament, setExpandedTournament] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'explore' | 'tracking'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'explore' | 'tracking' | 'predictor'
   
   // === ESPLORA MATCH - Stati filtri ===
   const [searchFilters, setSearchFilters] = useState({
@@ -485,6 +486,12 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             onClick={() => setActiveTab('tracking')}
           >
             📡 Live Tracking
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'predictor' ? 'active' : ''}`}
+            onClick={() => setActiveTab('predictor')}
+          >
+            🎯 Predictor
           </button>
         </div>
         
@@ -867,6 +874,13 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   ))}
                 </div>
               )}
+            </div>
+          )}
+          
+          {/* Predictor Tab */}
+          {activeTab === 'predictor' && (
+            <div className="tab-content predictor-tab">
+              <ManualPredictor />
             </div>
           )}
         </div>

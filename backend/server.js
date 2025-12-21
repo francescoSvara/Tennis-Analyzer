@@ -32,6 +32,15 @@ const {
 } = require('./utils/valueInterpreter');
 const { initLiveManager, getStats: getLiveStats, fetchCompleteData, trackMatch, untrackMatch, getTrackedMatches, startScheduler, stopScheduler, syncMatch } = require('./liveManager');
 
+// Player Stats Service (statistiche aggregate giocatori)
+let playerStatsService = null;
+try {
+  playerStatsService = require('./services/playerStatsService');
+  console.log('✅ Player Stats Service loaded');
+} catch (e) {
+  console.warn('⚠️ Player Stats Service not available:', e.message);
+}
+
 // Database imports
 let matchRepository = null;
 let supabaseClient = null;
@@ -2132,6 +2141,104 @@ app.get('/api/db/players/search', async (req, res) => {
     res.json({ players });
   } catch (err) {
     console.error('Error searching players:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================================
+// PLAYER STATS ENDPOINTS (Statistiche Aggregate Giocatori)
+// ============================================================================
+
+/**
+ * GET /api/player/:name/stats - Statistiche complete di un giocatore
+ * Calcola win rate, comeback rate, ROI per superficie/formato/serie
+ */
+app.get('/api/player/:name/stats', async (req, res) => {
+  if (!playerStatsService) {
+    return res.status(503).json({ error: 'Player Stats Service not available' });
+  }
+  try {
+    const playerName = decodeURIComponent(req.params.name);
+    console.log(`📊 API: Getting stats for player: ${playerName}`);
+    
+    const stats = await playerStatsService.getPlayerStats(playerName);
+    
+    if (stats.error) {
+      return res.status(404).json(stats);
+    }
+    
+    res.json(stats);
+  } catch (err) {
+    console.error('Error fetching player stats:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/player/search - Ricerca giocatori per autocomplete
+ * Query param: q (nome parziale), limit (default 10)
+ */
+app.get('/api/player/search', async (req, res) => {
+  if (!playerStatsService) {
+    return res.status(503).json({ error: 'Player Stats Service not available' });
+  }
+  try {
+    const { q, limit } = req.query;
+    if (!q || q.length < 2) {
+      return res.status(400).json({ error: 'Query must be at least 2 characters' });
+    }
+    
+    const players = await playerStatsService.searchPlayers(q, limit ? parseInt(limit) : 10);
+    res.json({ players, count: players.length });
+  } catch (err) {
+    console.error('Error searching players:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/player/h2h - Head to Head comparison tra due giocatori
+ * Query params: player1, player2
+ */
+app.get('/api/player/h2h', async (req, res) => {
+  if (!playerStatsService) {
+    return res.status(503).json({ error: 'Player Stats Service not available' });
+  }
+  try {
+    const { player1, player2 } = req.query;
+    if (!player1 || !player2) {
+      return res.status(400).json({ error: 'Both player1 and player2 are required' });
+    }
+    
+    const h2h = await playerStatsService.getHeadToHeadStats(
+      decodeURIComponent(player1),
+      decodeURIComponent(player2)
+    );
+    res.json(h2h);
+  } catch (err) {
+    console.error('Error fetching H2H stats:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/player/:name/matches - Lista match di un giocatore
+ */
+app.get('/api/player/:name/matches', async (req, res) => {
+  if (!playerStatsService) {
+    return res.status(503).json({ error: 'Player Stats Service not available' });
+  }
+  try {
+    const playerName = decodeURIComponent(req.params.name);
+    const matches = await playerStatsService.getPlayerMatches(playerName);
+    
+    res.json({
+      player: playerName,
+      total_matches: matches.length,
+      matches: matches.slice(0, 50) // Limita a 50 match per risposta
+    });
+  } catch (err) {
+    console.error('Error fetching player matches:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
