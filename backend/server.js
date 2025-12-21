@@ -548,20 +548,29 @@ app.get('/api/db-stats', async (req, res) => {
     // === CALCOLO DATABASE POWER SCORE ===
     // Metriche reali sulla qualità e ricchezza del database
     
-    // Campi dati CORE (escludiamo seed che sono opzionali, e metadata)
-    const coreFields = [
-      'home_player_id', 'away_player_id', 'tournament_id', 'round_name', 
-      'start_time', 'status_type', 'winner_code', 'home_sets_won', 'away_sets_won'
+    // Campi dati BASE (sempre richiesti per tutti i match)
+    const baseFields = [
+      'home_name', 'away_name', 'tournament_id', 'tournament_name',
+      'start_time', 'status_type'
     ];
-    const totalFieldsPerMatch = coreFields.length;
     
-    let matchesWith100Percent = 0;  // Match con TUTTI i campi core pieni
-    let matchesIncomplete = 0;       // Match con almeno un campo core vuoto
+    // Campi RISULTATO (richiesti SOLO per match finiti)
+    const resultFields = [
+      'winner_code', 'home_sets_won', 'away_sets_won'
+    ];
+    
+    // Campi EXTRA per qualità (opzionali ma aumentano il punteggio)
+    const extraFields = [
+      'home_player_id', 'away_player_id', 'round_name', 'surface', 'court_type'
+    ];
+    
+    let matchesWith100Percent = 0;  // Match con TUTTI i campi richiesti pieni
+    let matchesIncomplete = 0;       // Match con almeno un campo richiesto vuoto
     let totalFilledFields = 0;       // Totale campi pieni su tutti i match
     let totalPossibleFields = 0;     // Totale campi possibili
     let detectedCount = 0;
     
-    // Conta fonti dati (per ora solo Sofascore)
+    // Conta fonti dati
     const dataSources = {
       sofascore: 0,
       csv: 0,
@@ -571,31 +580,50 @@ app.get('/api/db-stats', async (req, res) => {
     
     // Analizza ogni match
     for (const match of dbMatches || []) {
-      let filledFields = 0;
+      const isFinished = (match.status_type || '').toLowerCase() === 'finished';
       
-      for (const field of coreFields) {
+      // Determina quali campi sono richiesti per questo match
+      const requiredFields = isFinished 
+        ? [...baseFields, ...resultFields]  // Match finito: serve anche il risultato
+        : baseFields;                        // Match non finito: solo campi base
+      
+      // Conta campi pieni nei campi richiesti
+      let filledRequired = 0;
+      for (const field of requiredFields) {
         if (match[field] !== null && match[field] !== undefined && match[field] !== '') {
-          filledFields++;
+          filledRequired++;
         }
       }
       
-      totalFilledFields += filledFields;
-      totalPossibleFields += totalFieldsPerMatch;
+      // Conta campi extra pieni (per il calcolo generale)
+      let filledExtra = 0;
+      for (const field of extraFields) {
+        if (match[field] !== null && match[field] !== undefined && match[field] !== '') {
+          filledExtra++;
+        }
+      }
       
-      if (filledFields === totalFieldsPerMatch) {
+      // Totale campi per calcolo percentuale globale
+      const totalFieldsForMatch = requiredFields.length + extraFields.length;
+      totalFilledFields += filledRequired + filledExtra;
+      totalPossibleFields += totalFieldsForMatch;
+      
+      // Match completo se ha TUTTI i campi richiesti
+      if (filledRequired === requiredFields.length) {
         matchesWith100Percent++;
       } else {
         matchesIncomplete++;
       }
       
-      // Identifica fonte dati (per ora tutti Sofascore se hanno sofascore_url)
-      if (match.sofascore_url) {
+      // Identifica fonte dati - più accurato
+      if (match.sofascore_url || match.sofascore_id || (match.raw_json && typeof match.raw_json === 'string' && match.raw_json.includes('sofascore'))) {
         dataSources.sofascore++;
-      } else if (match.source === 'csv') {
+      } else if (match.source === 'csv' || match.data_source === 'csv') {
         dataSources.csv++;
-      } else if (match.source === 'api') {
+      } else if (match.source === 'api' || match.data_source === 'api') {
         dataSources.api_external++;
       } else {
+        // Default: se ha raw_json probabilmente viene da API
         dataSources.manual++;
       }
     }
@@ -619,10 +647,18 @@ app.get('/api/db-stats', async (req, res) => {
     const totalMatches = (dbMatches || []).length;
     
     // Calcola punteggi parziali (0-100)
-    const coverageScore = detectedCount > 0 ? Math.round((totalMatches / detectedCount) * 100) : 0;
+    // Copertura: quanti match abbiamo rispetto ai rilevati (detected_matches)
+    const coverageScore = detectedCount > 0 ? Math.min(100, Math.round((totalMatches / detectedCount) * 100)) : 100;
+    
+    // Completezza: quanti match hanno tutti i campi richiesti
     const completenessScore = totalMatches > 0 ? Math.round((matchesWith100Percent / totalMatches) * 100) : 0;
+    
+    // Campi: percentuale media di campi pieni
     const fieldsScore = totalPossibleFields > 0 ? Math.round((totalFilledFields / totalPossibleFields) * 100) : 0;
-    const sourcesScore = totalMatches > 0 ? 100 : 0; // Per ora 100% se abbiamo dati, poi aggiungeremo altre fonti
+    
+    // Fonti: percentuale di match con fonte tracciabile (Sofascore/API/CSV vs manual)
+    const trackedSources = dataSources.sofascore + dataSources.csv + dataSources.api_external;
+    const sourcesScore = totalMatches > 0 ? Math.round((trackedSources / totalMatches) * 100) : 0;
     
     // Power Score finale (media pesata)
     const powerScore = Math.round(
@@ -656,7 +692,7 @@ app.get('/api/db-stats', async (req, res) => {
           sources: { 
             score: sourcesScore, 
             label: 'Fonti Dati', 
-            detail: `Sofascore: ${dataSources.sofascore} · Altri: ${dataSources.csv + dataSources.api_external + dataSources.manual}` 
+            detail: `Tracciati: ${trackedSources} · Manual: ${dataSources.manual}` 
           }
         },
         byStatus: matchesByStatus
