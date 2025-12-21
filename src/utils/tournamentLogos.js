@@ -149,6 +149,10 @@ const TOURNAMENT_LOGOS = {
   'atp finals': 'atp-finals.png',
   'nitto atp finals': 'atp-finals.png',
   'wta finals': 'wta-finals.png',
+  'next gen': 'next-gen-atp-finals.png',
+  'next gen atp finals': 'next-gen-atp-finals.png',
+  'next gen finals': 'next-gen-atp-finals.png',
+  'intesa sanpaolo next gen atp finals': 'next-gen-atp-finals.png',
   
   // === WTA 1000 ===
   'wta indian wells': 'indian-wells.png',
