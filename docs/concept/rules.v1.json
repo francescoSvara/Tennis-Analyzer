@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "description": "Regole architetturali Tennis Analyzer v4.0",
+  "lastUpdated": "2025-12-22",
+  
+  "domains": {
+    "frontend_ui": {
+      "description": "Componenti React di presentazione",
+      "allowedPaths": ["src/components/**/*.jsx", "src/components/**/*.css"],
+      "forbiddenImports": [
+        "supabase",
+        "matchRepository",
+        "liveTrackingRepository",
+        "sofascoreScraper"
+      ],
+      "forbiddenPatterns": [
+        "createClient",
+        "supabase.from",
+        "fetch.*sofascore"
+      ]
+    },
+    
+    "frontend_hooks": {
+      "description": "Custom hooks React",
+      "allowedPaths": ["src/hooks/**/*.js"],
+      "forbiddenImports": [
+        "supabase",
+        "matchRepository"
+      ],
+      "forbiddenPatterns": []
+    },
+    
+    "frontend_utils": {
+      "description": "Utility frontend",
+      "allowedPaths": ["src/utils/**/*.js", "src/utils.js"],
+      "forbiddenImports": [
+        "supabase",
+        "express"
+      ],
+      "forbiddenPatterns": [
+        "impliedProbability.*=.*1.*/"
+      ],
+      "note": "Calcoli odds devono stare nel backend"
+    },
+    
+    "backend_api": {
+      "description": "Express routes e server",
+      "allowedPaths": ["backend/server.js"],
+      "forbiddenImports": [
+        "react",
+        "jsx"
+      ],
+      "forbiddenPatterns": []
+    },
+    
+    "backend_services": {
+      "description": "Business logic layer",
+      "allowedPaths": ["backend/services/**/*.js"],
+      "forbiddenImports": [
+        "react",
+        "express"
+      ],
+      "forbiddenPatterns": [],
+      "note": "I services non devono conoscere Express direttamente"
+    },
+    
+    "backend_db": {
+      "description": "Data access layer",
+      "allowedPaths": ["backend/db/**/*.js"],
+      "forbiddenImports": [
+        "react",
+        "express",
+        "sofascoreScraper"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Repository non devono fare scraping"
+    },
+    
+    "backend_utils": {
+      "description": "Calculation utilities",
+      "allowedPaths": ["backend/utils/**/*.js"],
+      "forbiddenImports": [
+        "react",
+        "express",
+        "supabase"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Utils di calcolo devono essere pure functions"
+    },
+    
+    "backend_scraper": {
+      "description": "External data fetching",
+      "allowedPaths": ["backend/scraper/**/*.js"],
+      "forbiddenImports": [
+        "react"
+      ],
+      "forbiddenPatterns": []
+    }
+  },
+  
+  "invariants": [
+    {
+      "id": "INV-001",
+      "severity": "ERROR",
+      "description": "Frontend non deve accedere direttamente a Supabase",
+      "domains": ["frontend_ui", "frontend_hooks", "frontend_utils"],
+      "matcher": {
+        "type": "import",
+        "pattern": "supabase|@supabase"
+      },
+      "remediation": "Usare API backend invece di accesso diretto DB"
+    },
+    {
+      "id": "INV-002", 
+      "severity": "ERROR",
+      "description": "Frontend non deve fare scraping diretto",
+      "domains": ["frontend_ui", "frontend_hooks", "frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "fetch.*sofascore|axios.*sofascore"
+      },
+      "remediation": "Usare endpoint /api/match/:id invece di scraping diretto"
+    },
+    {
+      "id": "INV-003",
+      "severity": "WARN",
+      "description": "Calcoli odds devono stare nel backend",
+      "domains": ["frontend_ui", "frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "impliedProbability|fairOdds|calculateValue|overround"
+      },
+      "remediation": "Spostare calcoli in backend/utils/valueInterpreter.js"
+    },
+    {
+      "id": "INV-004",
+      "severity": "WARN",
+      "description": "Repository non devono contenere business logic",
+      "domains": ["backend_db"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "calculateHPI|calculateClutch|analyzeMomentum"
+      },
+      "remediation": "Spostare logica in backend/services/"
+    },
+    {
+      "id": "INV-005",
+      "severity": "ERROR",
+      "description": "Utils di calcolo devono essere pure (no DB access)",
+      "domains": ["backend_utils"],
+      "matcher": {
+        "type": "import",
+        "pattern": "supabase|matchRepository"
+      },
+      "remediation": "Utils devono ricevere dati come parametri, non fetchare"
+    },
+    {
+      "id": "INV-006",
+      "severity": "WARN",
+      "description": "Duplicazione logica frontend/backend",
+      "domains": ["frontend_utils"],
+      "matcher": {
+        "type": "function",
+        "pattern": "formatScore|parseScore|calculateMomentum"
+      },
+      "remediation": "Verificare se stessa funzione esiste in backend/utils"
+    },
+    {
+      "id": "INV-007",
+      "severity": "INFO",
+      "description": "Console.log in production code",
+      "domains": ["frontend_ui", "backend_services"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "console\\.log\\("
+      },
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "id": "INV-008",
+      "severity": "WARN",
+      "description": "Hardcoded API URLs",
+      "domains": ["frontend_ui", "frontend_hooks"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "localhost:3001|railway\\.app"
+      },
+      "remediation": "Usare variabili ambiente VITE_API_URL"
+    },
+    {
+      "id": "INV-009",
+      "severity": "ERROR",
+      "description": "Services non devono usare Express direttamente",
+      "domains": ["backend_services"],
+      "matcher": {
+        "type": "import",
+        "pattern": "express|req\\.|res\\."
+      },
+      "remediation": "Services ricevono/restituiscono dati, non gestiscono HTTP"
+    },
+    {
+      "id": "INV-010",
+      "severity": "WARN",
+      "description": "Magic numbers in calcoli",
+      "domains": ["backend_utils", "backend_services"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "\\*\\s*0\\.[0-9]+|/\\s*[0-9]{2,}"
+      },
+      "remediation": "Estrarre costanti con nomi significativi"
+    }
+  ],
+  
+  "allowlist": [
+    {
+      "file": "src/config.js",
+      "rule": "INV-008",
+      "reason": "File di configurazione centralizzato"
+    },
+    {
+      "file": "backend/server.js",
+      "rule": "INV-007",
+      "reason": "Logging startup server"
+    }
+  ]
+}

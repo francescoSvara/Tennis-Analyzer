@@ -1,6 +1,10 @@
 # 🎾 Filosofia Database e Architettura
 
 > Documento di riferimento per capire l'architettura del sistema di acquisizione e consumo dati tennis.
+>
+> **Dominio**: DB – Dati e persistenza
+
+Riferimento: [FILOSOFIA_MADRE.md](FILOSOFIA_MADRE.md) (sezione Mappa documenti)
 
 ---
 
@@ -286,6 +290,8 @@ TABLE raw_events (
 **Problema**: Trigger H2H su ogni INSERT rallenta le write.
 
 **Soluzione**: Coda di task con worker dedicato.
+
+Riferimento: docs/filosofie/FILOSOFIA_STATS_V2.md (sezione DATI DERIVATI)
 
 ```sql
 TABLE calculation_queue (

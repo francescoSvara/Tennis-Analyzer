@@ -2,7 +2,9 @@
 
 > Documento architetturale per la gestione dei match live (polling, tracking, streaming e consolidamento dati).
 >
-> **Obiettivo**: definire come il sistema segue, aggiorna e consolida le partite live senza rompere i principi di DB e Stats.
+> **Dominio**: Live – Runtime match live
+
+Riferimento: [FILOSOFIA_MADRE.md](FILOSOFIA_MADRE.md) (sezione Mappa documenti)
 
 ---
 
@@ -235,8 +237,8 @@ TASK CONSOLIDATE_MATCH(eventId):
 
 ## 1️⃣2️⃣ Collegamenti con altri documenti
 
-- DB: `FILOSOFIA_DB.md` (raw_events + consolidamento)
-- Stats: `FILOSOFIA_STATS.md` (metriche dinamiche)
+Riferimento: docs/filosofie/FILOSOFIA_DB.md (sezione Raw Events Pipeline)
+Riferimento: docs/filosofie/FILOSOFIA_STATS_V2.md (sezione DATI DINAMICI)
 
 ---
 
