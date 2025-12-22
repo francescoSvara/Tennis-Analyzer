@@ -534,12 +534,6 @@ export default function ManualPredictor() {
                 higherIsBetter={true}
               />
             </div>
-            
-            {/* Debug toggle */}
-            <div className="debug-row">
-              <DebugInfo label="Raw Home" data={homeStats} />
-              <DebugInfo label="Raw Away" data={awayStats} />
-            </div>
           </div>
 
           {/* H2H Section - Enhanced */}
@@ -607,7 +601,6 @@ export default function ManualPredictor() {
                 <small>Questi giocatori non si sono mai affrontati (nei dati disponibili)</small>
               </div>
             )}
-            <DebugInfo label="Raw H2H Data" data={h2hStats} />
           </div>
 
           {/* Prediction Summary */}
@@ -659,8 +652,6 @@ export default function ManualPredictor() {
                     Affidabilità: {(prediction.confidence * 100).toFixed(0)}%
                   </span>
                 </div>
-                
-                <DebugInfo label="Prediction Debug" data={prediction._debug} />
               </>
             ) : (
               <div className="prediction-empty">

@@ -633,12 +633,12 @@ app.get('/api/db-stats', async (req, res) => {
     let totalPossibleFields = 0;     // Totale campi possibili
     let detectedCount = 0;
     
-    // Conta fonti dati
+    // Conta fonti dati (Sofascore vs XLSX)
     const dataSources = {
       sofascore: 0,
-      csv: 0,
-      api_external: 0,
-      manual: 0
+      xlsx: 0,
+      merged: 0,  // Match che hanno ENTRAMBE le fonti (arricchiti)
+      unknown: 0
     };
     
     // Analizza ogni match
@@ -678,16 +678,30 @@ app.get('/api/db-stats', async (req, res) => {
         matchesIncomplete++;
       }
       
-      // Identifica fonte dati - più accurato
-      if (match.sofascore_url || match.sofascore_id || (match.raw_json && typeof match.raw_json === 'string' && match.raw_json.includes('sofascore'))) {
+      // Identifica fonte dati - SOFASCORE vs XLSX
+      const isSofascore = match.sofascore_url || match.sofascore_id || 
+                          match.data_source === 'sofascore' ||
+                          (match.raw_json && typeof match.raw_json === 'string' && match.raw_json.includes('sofascore'));
+      
+      const isXlsx = match.data_source === 'xlsx_import' || 
+                     match.data_source === 'xlsx_2025' ||
+                     match.data_source === 'csv' ||
+                     match.source === 'xlsx' ||
+                     match.source === 'csv';
+      
+      // Controlla se è un match merged (ha dati da entrambe le fonti)
+      const isMerged = match.data_source === 'merged' || 
+                       (isSofascore && match.xlsx_data) ||
+                       (match.merged_from && Array.isArray(match.merged_from));
+      
+      if (isMerged) {
+        dataSources.merged++;
+      } else if (isSofascore) {
         dataSources.sofascore++;
-      } else if (match.source === 'csv' || match.data_source === 'csv') {
-        dataSources.csv++;
-      } else if (match.source === 'api' || match.data_source === 'api') {
-        dataSources.api_external++;
+      } else if (isXlsx) {
+        dataSources.xlsx++;
       } else {
-        // Default: se ha raw_json probabilmente viene da API
-        dataSources.manual++;
+        dataSources.unknown++;
       }
     }
     
@@ -719,9 +733,9 @@ app.get('/api/db-stats', async (req, res) => {
     // Campi: percentuale media di campi pieni
     const fieldsScore = totalPossibleFields > 0 ? Math.round((totalFilledFields / totalPossibleFields) * 100) : 0;
     
-    // Fonti: percentuale di match con fonte tracciabile (Sofascore/API/CSV vs manual)
-    const trackedSources = dataSources.sofascore + dataSources.csv + dataSources.api_external;
-    const sourcesScore = totalMatches > 0 ? Math.round((trackedSources / totalMatches) * 100) : 0;
+    // Fonti: percentuale di match con fonte nota (Sofascore + XLSX + Merged vs unknown)
+    const knownSources = dataSources.sofascore + dataSources.xlsx + dataSources.merged;
+    const sourcesScore = totalMatches > 0 ? Math.round((knownSources / totalMatches) * 100) : 0;
     
     // Power Score finale (media pesata)
     const powerScore = Math.round(
@@ -755,7 +769,7 @@ app.get('/api/db-stats', async (req, res) => {
           sources: { 
             score: sourcesScore, 
             label: 'Fonti Dati', 
-            detail: `Tracciati: ${trackedSources} · Manual: ${dataSources.manual}` 
+            detail: `Sofascore: ${dataSources.sofascore} · XLSX: ${dataSources.xlsx}${dataSources.merged > 0 ? ` · Merged: ${dataSources.merged}` : ''}` 
           }
         },
         byStatus: matchesByStatus
