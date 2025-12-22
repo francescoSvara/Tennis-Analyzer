@@ -1,4 +1,27 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { 
+  ChartBar, 
+  Trophy, 
+  MagnifyingGlass, 
+  Broadcast, 
+  Target,
+  User,
+  TennisBall,
+  CalendarBlank,
+  CheckCircle,
+  Warning,
+  XCircle,
+  ArrowsClockwise,
+  SpinnerGap,
+  Flask,
+  CaretDown,
+  Package,
+  Lightbulb,
+  SoccerBall,
+  ArrowLeft,
+  ArrowRight,
+  X
+} from '@phosphor-icons/react';
 import { apiUrl } from '../config';
 import ManualPredictor from './ManualPredictor';
 
@@ -164,15 +187,15 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
       <div className="tournament-card-header" onClick={() => onExpand(tournament.id)}>
         <div className="tournament-info">
           <span className="tournament-sport-icon">
-            {tournament.sport === 'tennis' ? '🎾' : 
-             tournament.sport === 'football' ? '⚽' : '🏆'}
+            {tournament.sport === 'tennis' ? <TennisBall size={20} weight="duotone" /> : 
+             tournament.sport === 'football' ? <SoccerBall size={20} weight="duotone" /> : <Trophy size={20} weight="duotone" />}
           </span>
           <div className="tournament-details">
             <h4 className="tournament-name">{tournament.name}</h4>
             <div className="tournament-meta">
               <span className="tournament-category">{tournament.category}</span>
               {dateRange && (
-                <span className="tournament-date">📅 {dateRange}</span>
+                <span className="tournament-date"><CalendarBlank size={14} weight="duotone" style={{ marginRight: 4 }} />{dateRange}</span>
               )}
             </div>
           </div>
@@ -217,13 +240,13 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
             </div>
             {hasCoverageData ? (
               <div className="coverage-stats">
-                <span className="coverage-acquired">✅ {coverage.acquired} acquisite</span>
-                <span className="coverage-missing">⚠️ {missingCount} mancanti</span>
-                <span className="coverage-total">📊 {coverage.totalDetected} totali</span>
+                <span className="coverage-acquired"><CheckCircle size={14} weight="fill" style={{ marginRight: 4, color: '#10b981' }} />{coverage.acquired} acquisite</span>
+                <span className="coverage-missing"><Warning size={14} weight="fill" style={{ marginRight: 4, color: '#f59e0b' }} />{missingCount} mancanti</span>
+                <span className="coverage-total"><ChartBar size={14} weight="duotone" style={{ marginRight: 4 }} />{coverage.totalDetected} totali</span>
               </div>
             ) : (
               <div className="coverage-stats">
-                <span className="coverage-total">📊 {tournament.total_matches} match in DB</span>
+                <span className="coverage-total"><ChartBar size={14} weight="duotone" style={{ marginRight: 4 }} />{tournament.total_matches} match in DB</span>
               </div>
             )}
           </div>
@@ -248,7 +271,7 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
           {tournament.matches.length > 0 && (
             <div className="tournament-matches saved-matches">
               <div className="matches-header">
-                <h5>✅ Match nel Database ({tournament.matches.length})</h5>
+                <h5><CheckCircle size={16} weight="fill" style={{ marginRight: 6, color: '#10b981' }} />Match nel Database ({tournament.matches.length})</h5>
               </div>
               <div className="matches-scroll">
                 {tournament.matches.slice(0, 10).map(m => (
@@ -278,7 +301,7 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
           {missingMatches.length > 0 && (
             <div className="tournament-matches missing-matches">
               <div className="matches-header">
-                <h5>⚠️ Match Mancanti ({missingCount})</h5>
+                <h5><Warning size={16} weight="fill" style={{ marginRight: 6, color: '#f59e0b' }} />Match Mancanti ({missingCount})</h5>
                 <span className="missing-hint">Usa Tennis-Scraper-Local per acquisire</span>
               </div>
               <div className="matches-scroll">
@@ -400,11 +423,11 @@ const CALCULATED_DATA_FORMULAS = {
 // Helper per renderizzare valori nell'inspector (espande oggetti)
 function renderInspectorValue(value, depth = 0) {
   if (value === null || value === undefined || value === '') {
-    return '❌ N/A';
+    return <><XCircle size={14} weight="fill" style={{ marginRight: 4, color: '#ef4444' }} />N/A</>;
   }
   
   if (typeof value === 'boolean') {
-    return value ? '✅ Sì' : '❌ No';
+    return value ? <><CheckCircle size={14} weight="fill" style={{ marginRight: 4, color: '#10b981' }} />Sì</> : <><XCircle size={14} weight="fill" style={{ marginRight: 4, color: '#ef4444' }} />No</>;
   }
   
   if (typeof value === 'number') {
@@ -742,14 +765,14 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
         {/* Header */}
         <div className="monitoring-header">
           <div className="monitoring-title">
-            <span className="monitoring-icon">📊</span>
+            <span className="monitoring-icon"><ChartBar size={28} weight="duotone" /></span>
             <div>
               <h2>Database Monitor</h2>
               <p>Stato acquisizioni e completezza dati</p>
             </div>
           </div>
           <div className="monitoring-actions">
-            <button className="close-monitoring-btn" onClick={onClose}>✕</button>
+            <button className="close-monitoring-btn" onClick={onClose}><X size={20} weight="bold" /></button>
           </div>
         </div>
         
@@ -759,31 +782,31 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            � Data Inspector
+            <Flask size={18} weight="duotone" style={{ marginRight: 6 }} />Data Inspector
           </button>
           <button 
             className={`tab-btn ${activeTab === 'tournaments' ? 'active' : ''}`}
             onClick={() => setActiveTab('tournaments')}
           >
-            🏆 Tornei
+            <Trophy size={18} weight="duotone" style={{ marginRight: 6 }} />Tornei
           </button>
           <button 
             className={`tab-btn ${activeTab === 'explore' ? 'active' : ''}`}
             onClick={() => setActiveTab('explore')}
           >
-            🔍 Esplora Match
+            <MagnifyingGlass size={18} weight="duotone" style={{ marginRight: 6 }} />Esplora Match
           </button>
           <button 
             className={`tab-btn ${activeTab === 'tracking' ? 'active' : ''}`}
             onClick={() => setActiveTab('tracking')}
           >
-            📡 Live Tracking
+            <Broadcast size={18} weight="duotone" style={{ marginRight: 6 }} />Live Tracking
           </button>
           <button 
             className={`tab-btn ${activeTab === 'predictor' ? 'active' : ''}`}
             onClick={() => setActiveTab('predictor')}
           >
-            🎯 Predictor
+            <Target size={18} weight="duotone" style={{ marginRight: 6 }} />Predictor
           </button>
         </div>
         
@@ -791,14 +814,14 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
         <div className="monitoring-content">
           {loading && !stats && (
             <div className="monitoring-loading">
-              <span className="spinner large"></span>
+              <SpinnerGap size={32} className="spinner large" />
               <p>Caricamento statistiche...</p>
             </div>
           )}
           
           {error && (
             <div className="monitoring-error">
-              <span>❌ {error}</span>
+              <span><XCircle size={18} weight="fill" style={{ marginRight: 6, color: '#ef4444' }} />{error}</span>
               <button onClick={loadStats}>Riprova</button>
             </div>
           )}
@@ -807,7 +830,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             <div className="tab-content overview-tab data-inspector-tab">
               {/* Header */}
               <div className="inspector-main-header">
-                <h3>🔬 Data Inspector</h3>
+                <h3><Flask size={22} weight="duotone" style={{ marginRight: 8 }} />Data Inspector</h3>
                 <p>Analizza dati puri vs calcolati per verificare affidabilità e copertura</p>
               </div>
               
@@ -817,13 +840,13 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   className={`mode-btn ${inspectorMode === 'player' ? 'active' : ''}`}
                   onClick={() => { setInspectorMode('player'); setInspectorData(null); setInspectorSearch(''); setMatchSearchResults([]); }}
                 >
-                  🧑 Giocatore
+                  <User size={16} weight="duotone" style={{ marginRight: 6 }} />Giocatore
                 </button>
                 <button 
                   className={`mode-btn ${inspectorMode === 'match' ? 'active' : ''}`}
                   onClick={() => { setInspectorMode('match'); setInspectorData(null); setInspectorSearch(''); setMatchSearchResults([]); }}
                 >
-                  🎾 Match
+                  <TennisBall size={16} weight="duotone" style={{ marginRight: 6 }} />Match
                 </button>
               </div>
               
@@ -863,7 +886,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                         onClick={loadInspectorData}
                         disabled={inspectorLoading || !inspectorSearch.trim()}
                       >
-                        {inspectorLoading ? '⏳' : '🔍'}
+                        {inspectorLoading ? <SpinnerGap size={16} className="spinner" /> : <MagnifyingGlass size={16} weight="bold" />}
                       </button>
                     </div>
                     
@@ -910,7 +933,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                         onClick={() => searchMatchesForInspector(inspectorSearch)}
                         disabled={inspectorLoading || !inspectorSearch.trim()}
                       >
-                        {inspectorLoading ? '⏳' : '🔍'}
+                        {inspectorLoading ? <SpinnerGap size={16} className="spinner" /> : <MagnifyingGlass size={16} weight="bold" />}
                       </button>
                     </div>
                     
@@ -936,8 +959,8 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                     {/* Selected Match Info */}
                     {selectedMatchId && (
                       <div className="selected-match-badge">
-                        ✅ Match selezionato: {selectedMatchId}
-                        <button onClick={() => { setSelectedMatchId(null); setInspectorData(null); }}>✕</button>
+                        <CheckCircle size={14} weight="fill" style={{ marginRight: 4, color: '#10b981' }} />Match selezionato: {selectedMatchId}
+                        <button onClick={() => { setSelectedMatchId(null); setInspectorData(null); }}><X size={14} weight="bold" /></button>
                       </div>
                     )}
                   </div>
@@ -951,12 +974,12 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   <div className="inspector-results-header">
                     <span className="inspector-entity-name">
                       {inspectorData.type === 'player' 
-                        ? `🧑 ${inspectorData.name || inspectorSearch}` 
-                        : `🎾 ${inspectorData.matchInfo || inspectorData.eventId || selectedMatchId}`}
+                        ? <><User size={18} weight="duotone" style={{ marginRight: 6 }} />{inspectorData.name || inspectorSearch}</> 
+                        : <><TennisBall size={18} weight="duotone" style={{ marginRight: 6 }} />{inspectorData.matchInfo || inspectorData.eventId || selectedMatchId}</>}
                     </span>
                     {inspectorData.coverage && (
                       <span className="inspector-coverage">
-                        📊 Copertura: {inspectorData.coverage.available || 0}/{inspectorData.coverage.total || 0} 
+                        <ChartBar size={16} weight="duotone" style={{ marginRight: 4 }} />Copertura: {inspectorData.coverage.available || 0}/{inspectorData.coverage.total || 0} 
                         ({inspectorData.coverage.total > 0 ? Math.round((inspectorData.coverage.available / inspectorData.coverage.total) * 100) : 0}%)
                       </span>
                     )}
@@ -965,7 +988,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   <div className="inspector-data-grid">
                     {/* Colonna Dati Puri */}
                     <div className="inspector-column raw-data">
-                      <h4>📦 Dati Puri (DB)</h4>
+                      <h4><Package size={18} weight="duotone" style={{ marginRight: 6 }} />Dati Puri (DB)</h4>
                       <div className="inspector-data-list">
                         {inspectorData.rawData && Object.entries(inspectorData.rawData).length > 0 ? (
                           Object.entries(inspectorData.rawData).map(([key, value]) => (
@@ -984,7 +1007,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                     
                     {/* Colonna Dati Calcolati */}
                     <div className="inspector-column calculated-data">
-                      <h4>⚙️ Dati Calcolati <span className="click-hint">(clicca per formula)</span></h4>
+                      <h4><Gear size={18} weight="duotone" style={{ marginRight: 6 }} />Dati Calcolati <span className="click-hint">(clicca per formula)</span></h4>
                       <div className="inspector-data-list">
                         {inspectorData.calculatedData && Object.entries(inspectorData.calculatedData).length > 0 ? (
                           Object.entries(inspectorData.calculatedData).map(([key, value]) => {
@@ -1037,11 +1060,11 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   {/* Data Sources Info */}
                   {inspectorData.sources && (
                     <div className="inspector-sources">
-                      <h4>📡 Fonti Dati</h4>
+                      <h4><Broadcast size={18} weight="duotone" style={{ marginRight: 6 }} />Fonti Dati</h4>
                       <div className="sources-list">
                         {inspectorData.sources.map((src, i) => (
                           <span key={i} className={`source-badge ${src.available ? 'available' : 'missing'}`}>
-                            {src.available ? '✅' : '❌'} {src.name}
+                            {src.available ? <CheckCircle size={14} weight="fill" /> : <XCircle size={14} weight="fill" />} {src.name}
                           </span>
                         ))}
                       </div>
@@ -1053,14 +1076,14 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
               {/* Error */}
               {inspectorData?.error && (
                 <div className="inspector-error">
-                  ❌ {inspectorData.error}
+                  <XCircle size={18} weight="fill" style={{ marginRight: 6, color: '#ef4444' }} />{inspectorData.error}
                 </div>
               )}
               
               {/* Hint iniziale */}
               {!inspectorData && !inspectorLoading && (
                 <div className="inspector-hint">
-                  <span>💡</span>
+                  <Lightbulb size={24} weight="duotone" style={{ marginRight: 8, color: '#f59e0b' }} />
                   <p>
                     {inspectorMode === 'player' 
                       ? 'Inserisci il nome di un giocatore per vedere i suoi dati puri dal DB e le metriche calcolate'
@@ -1092,12 +1115,12 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             <div className="tab-content explore-tab">
               {/* Form Filtri */}
               <div className="explore-filters">
-                <h3>🔍 Cerca Match nel Database</h3>
+                <h3><MagnifyingGlass size={20} weight="duotone" style={{ marginRight: 8 }} />Cerca Match nel Database</h3>
                 
                 <div className="filters-grid">
                   {/* Ricerca Giocatore */}
                   <div className="filter-group">
-                    <label>👤 Giocatore</label>
+                    <label><User size={14} weight="duotone" style={{ marginRight: 4 }} />Giocatore</label>
                     <input
                       type="text"
                       placeholder="Nome giocatore..."
@@ -1108,7 +1131,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   
                   {/* Categoria Torneo */}
                   <div className="filter-group">
-                    <label>🏆 Categoria</label>
+                    <label><Trophy size={14} weight="duotone" style={{ marginRight: 4 }} />Categoria</label>
                     <select
                       value={searchFilters.tournamentCategory}
                       onChange={(e) => updateFilter('tournamentCategory', e.target.value)}
@@ -1124,7 +1147,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   
                   {/* Torneo */}
                   <div className="filter-group">
-                    <label>🎾 Torneo</label>
+                    <label><TennisBall size={14} weight="duotone" style={{ marginRight: 4 }} />Torneo</label>
                     <select
                       value={searchFilters.tournamentId}
                       onChange={(e) => updateFilter('tournamentId', e.target.value)}
@@ -1140,7 +1163,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   
                   {/* Status */}
                   <div className="filter-group">
-                    <label>📊 Status</label>
+                    <label><ChartBar size={14} weight="duotone" style={{ marginRight: 4 }} />Status</label>
                     <select
                       value={searchFilters.status}
                       onChange={(e) => updateFilter('status', e.target.value)}
@@ -1154,7 +1177,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   
                   {/* Data Da */}
                   <div className="filter-group">
-                    <label>📅 Da</label>
+                    <label><CalendarBlank size={14} weight="duotone" style={{ marginRight: 4 }} />Da</label>
                     <input
                       type="date"
                       value={searchFilters.dateFrom}
@@ -1164,7 +1187,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   
                   {/* Data A */}
                   <div className="filter-group">
-                    <label>📅 A</label>
+                    <label><CalendarBlank size={14} weight="duotone" style={{ marginRight: 4 }} />A</label>
                     <input
                       type="date"
                       value={searchFilters.dateTo}
@@ -1179,13 +1202,13 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                     onClick={() => searchMatches(1)}
                     disabled={searchLoading}
                   >
-                    {searchLoading ? '⏳ Cerco...' : '🔍 Cerca'}
+                    {searchLoading ? <><SpinnerGap size={16} className="spinner" style={{ marginRight: 6 }} />Cerco...</> : <><MagnifyingGlass size={16} weight="bold" style={{ marginRight: 6 }} />Cerca</>}
                   </button>
                   <button 
                     className="reset-btn"
                     onClick={resetFilters}
                   >
-                    ↺ Reset
+                    <ArrowsClockwise size={16} weight="bold" style={{ marginRight: 4 }} />Reset
                   </button>
                 </div>
               </div>
@@ -1201,7 +1224,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   
                   {searchResults.matches.length === 0 ? (
                     <div className="no-results">
-                      <span>🔍</span>
+                      <MagnifyingGlass size={32} weight="duotone" style={{ marginBottom: 8, opacity: 0.6 }} />
                       <p>Nessun match trovato con questi filtri</p>
                     </div>
                   ) : (
@@ -1252,7 +1275,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                             onClick={() => searchMatches(searchPage - 1)}
                             disabled={!searchResults.pagination.hasPrev || searchLoading}
                           >
-                            ← Precedente
+                            <ArrowLeft size={16} weight="bold" style={{ marginRight: 4 }} />Precedente
                           </button>
                           <span className="pagination-info">
                             Pagina {searchResults.pagination.page} di {searchResults.pagination.totalPages}
@@ -1262,7 +1285,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                             onClick={() => searchMatches(searchPage + 1)}
                             disabled={!searchResults.pagination.hasNext || searchLoading}
                           >
-                            Successivo →
+                            Successivo<ArrowRight size={16} weight="bold" style={{ marginLeft: 4 }} />
                           </button>
                         </div>
                       )}
@@ -1274,7 +1297,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
               {/* Messaggio iniziale */}
               {!searchResults && !searchLoading && (
                 <div className="explore-hint">
-                  <span>💡</span>
+                  <Lightbulb size={24} weight="duotone" style={{ marginRight: 8, color: '#f59e0b' }} />
                   <p>Usa i filtri sopra per cercare match nel database</p>
                   <small>Puoi filtrare per giocatore, torneo, status o data</small>
                 </div>
@@ -1285,7 +1308,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
           {stats && activeTab === 'tracking' && (
             <div className="tab-content tracking-tab">
               <div className="tracking-header">
-                <h3>📡 Partite in Monitoraggio Automatico</h3>
+                <h3><Broadcast size={22} weight="duotone" style={{ marginRight: 8 }} />Partite in Monitoraggio Automatico</h3>
                 <p className="tracking-info">
                   Queste partite vengono aggiornate automaticamente ogni 30 secondi
                 </p>
@@ -1293,7 +1316,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
               
               {stats.tracking.matches.length === 0 ? (
                 <div className="no-tracking">
-                  <span className="no-tracking-icon">🔇</span>
+                  <Broadcast size={40} weight="duotone" style={{ marginBottom: 12, opacity: 0.5 }} />
                   <p>Nessuna partita in monitoraggio attivo</p>
                   <span className="no-tracking-hint">
                     Le partite live vengono tracciate automaticamente

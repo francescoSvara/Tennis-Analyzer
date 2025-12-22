@@ -1,4 +1,5 @@
 import React from 'react';
+import { MapPin, Broadcast } from '@phosphor-icons/react';
 import { extractEventInfo, safeRender } from '../utils';
 import styles from '../styles/matchHeader.module.css';
 
@@ -70,7 +71,7 @@ function MatchHeaderComponent({ data, eventInfo: externalEventInfo }) {
   const getStatusText = () => {
     if (!status) return '';
     if (status.type === 'finished') return 'Terminato';
-    if (status.type === 'inprogress') return '🔴 LIVE';
+    if (status.type === 'inprogress') return <><Broadcast size={14} weight="fill" style={{ marginRight: 4, color: '#ef4444' }} />LIVE</>;
     if (status.type === 'notstarted') return 'Non iniziato';
     return status.description || '';
   };
@@ -170,7 +171,7 @@ function MatchHeaderComponent({ data, eventInfo: externalEventInfo }) {
       {/* Venue info */}
       {venue && (
         <div className={styles.venueInfo}>
-          📍 {safeRender(venue.name)}{venue.city?.name && `, ${safeRender(venue.city.name)}`}
+          <MapPin size={14} weight="duotone" style={{ marginRight: 4 }} />{safeRender(venue.name)}{venue.city?.name && `, ${safeRender(venue.city.name)}`}
         </div>
       )}
     </div>

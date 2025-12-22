@@ -71,12 +71,46 @@
 
 .home-icon {
   font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  color: var(--home-accent);
 }
 
 .home-header-right {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Player & Monitor Buttons - Premium Style */
+.player-btn,
+.monitor-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--home-border);
+  border-radius: var(--home-radius-sm);
+  color: var(--home-text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--home-transition);
+}
+
+.player-btn:hover,
+.monitor-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--home-accent);
+  color: #fff;
+}
+
+.player-btn .icon,
+.monitor-btn .icon {
+  display: flex;
+  align-items: center;
+  color: var(--home-accent);
 }
 
 .refresh-btn {
@@ -543,6 +577,8 @@
   font-size: 1rem;
   color: var(--home-success);
   transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .year-group-label {
@@ -603,6 +639,8 @@
   font-size: 0.85rem;
   color: var(--home-accent);
   transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .month-group-label {
@@ -666,6 +704,8 @@
 .day-group-icon {
   font-size: 0.7rem;
   color: var(--home-text-muted);
+  display: flex;
+  align-items: center;
 }
 
 .day-group-label {

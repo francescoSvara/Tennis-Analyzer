@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { 
+  DownloadSimple, 
+  ChartBar, 
+  Broadcast, 
+  PlusCircle,
+  MapPin,
+  Calendar,
+  Trophy,
+  User,
+  ArrowRight
+} from '@phosphor-icons/react';
 import { getTournamentLogo, getSuggestedFileName } from '../utils/tournamentLogos';
+import { durations, easings } from '../motion/tokens';
 
 // Formatta la data del match
 function formatDate(timestamp, fileDate) {
@@ -98,6 +111,8 @@ function TournamentWithLogo({ tournament, category }) {
 }
 
 function MatchCard({ match, onClick, isSuggested = false, isDetected = false, onAddToDb, dataCompleteness = null, dataSources = null }) {
+  const prefersReducedMotion = useReducedMotion();
+  
   if (!match) return null;
   
   const statusBadge = getStatusBadge(match.status);
@@ -126,12 +141,32 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
     }
   };
   
+  // Configurazione animazioni
+  const hoverAnimation = !prefersReducedMotion && !isSuggested && !isDetected ? {
+    whileHover: { 
+      y: -4, 
+      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
+    },
+    whileTap: { scale: 0.99 },
+  } : {};
+  
   return (
-    <div className={cardClass} onClick={handleClick}>
+    <motion.div 
+      className={cardClass} 
+      onClick={handleClick}
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+      transition={{
+        duration: durations.normal,
+        ease: easings.premium,
+      }}
+      {...hoverAnimation}
+    >
       {/* Badge per card suggerite */}
       {isSuggested && !isDetected && (
         <div className="suggested-badge">
-          <span className="suggested-icon">📥</span>
+          <DownloadSimple size={14} weight="bold" className="suggested-icon" />
           <span className="suggested-text">Da aggiungere</span>
         </div>
       )}
@@ -139,7 +174,7 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
       {/* Badge per match xlsx (storici) */}
       {isXlsxMatch && !isSuggested && !isDetected && (
         <div className="xlsx-badge">
-          <span className="xlsx-icon">📊</span>
+          <ChartBar size={14} weight="duotone" className="xlsx-icon" />
           <span className="xlsx-text">Storico</span>
         </div>
       )}
@@ -147,9 +182,11 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
       {/* Header: Superficie/Categoria e Data */}
       <div className="match-card-header">
         <span className="match-category">
+          <MapPin size={12} weight="bold" style={{ marginRight: 4, opacity: 0.7 }} />
           {match.surface ? match.surface : (match.category || match.sport || 'Tennis')}
         </span>
         <span className="match-date">
+          <Calendar size={12} weight="bold" style={{ marginRight: 4, opacity: 0.7 }} />
           {formatDate(match.startTimestamp, match.fileDate)}
         </span>
       </div>
@@ -157,6 +194,7 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
       {/* Round info per detected */}
       {isDetected && match.round && (
         <div className="match-round">
+          <Trophy size={12} weight="duotone" style={{ marginRight: 4 }} />
           {match.round}
         </div>
       )}
@@ -228,19 +266,23 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
         {isDetected ? (
           // Footer per card rilevate - solo icona viola
           <div className="detected-indicator">
-            <span className="detected-icon">📡</span>
+            <Broadcast size={16} weight="fill" className="detected-icon" />
             <span>Rilevata</span>
           </div>
         ) : isSuggested ? (
-          <button 
+          <motion.button 
             className="add-to-db-btn"
             onClick={(e) => {
               e.stopPropagation();
               onAddToDb && onAddToDb();
             }}
+            whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: durations.fast, ease: easings.premium }}
           >
-            ➕ Aggiungi al Database
-          </button>
+            <PlusCircle size={16} weight="bold" style={{ marginRight: 6 }} />
+            Aggiungi al Database
+          </motion.button>
         ) : (
           <span 
             className={`match-status ${statusBadge.pulse ? 'pulse' : ''}`}
@@ -250,7 +292,7 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
           </span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

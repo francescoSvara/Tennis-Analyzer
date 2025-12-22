@@ -1,4 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { 
+  ArrowLeft, 
+  ChartLineUp, 
+  ListBullets, 
+  ChartBar, 
+  Code, 
+  Trophy,
+  TennisBall,
+  Target,
+  CurrencyDollar,
+  Lightning,
+  Broadcast,
+  ArrowClockwise
+} from '@phosphor-icons/react';
 import PointByPoint from './components/PointByPoint';
 import PointByPointWidget from './components/PointByPointWidget';
 import Statistics from './components/Statistics';
@@ -13,6 +28,7 @@ import MomentumChart from './components/MomentumChart';
 import HomePage from './components/HomePage';
 import PlayerPage from './components/PlayerPage';
 import { apiUrl } from './config';
+import { durations, easings } from './motion/tokens';
 
 import './styles/overviewcharts.css';
 import './styles/homepage.css';
@@ -1214,16 +1230,17 @@ export default function App() {
   }, [dataForExtraction, liveEventId, checking, status, liveMode]);
 
   // gestionale removed — render main UI as usual
+  const prefersReducedMotion = useReducedMotion();
 
-  // Sidebar navigation items
+  // Sidebar navigation items con icone Phosphor
   const sidebarTabs = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'predictor', label: 'Predictor', icon: '🎯' },
-    { id: 'quotes', label: 'Quote', icon: '💰' },
-    { id: 'pbp', label: 'Point by Point', icon: '🎾' },
-    { id: 'stats', label: 'Statistiche', icon: '📈' },
-    { id: 'momentum', label: 'Momentum', icon: '⚡' },
-    { id: 'raw', label: 'Raw JSON', icon: '🔧' },
+    { id: 'overview', label: 'Overview', icon: ChartLineUp },
+    { id: 'predictor', label: 'Predictor', icon: Target },
+    { id: 'quotes', label: 'Quote', icon: CurrencyDollar },
+    { id: 'pbp', label: 'Point by Point', icon: ListBullets },
+    { id: 'stats', label: 'Statistiche', icon: ChartBar },
+    { id: 'momentum', label: 'Momentum', icon: Lightning },
+    { id: 'raw', label: 'Raw JSON', icon: Code },
   ];
 
   return (
@@ -1300,12 +1317,16 @@ export default function App() {
       {/* Top Bar */}
       <header className="top-bar">
         <div className="top-bar-left">
-          <button className="back-btn" onClick={handleBackToHome}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <motion.button 
+            className="back-btn" 
+            onClick={handleBackToHome}
+            whileHover={!prefersReducedMotion ? { x: -3 } : {}}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: durations.fast, ease: easings.premium }}
+          >
+            <ArrowLeft size={18} weight="bold" />
             <span>Indietro</span>
-          </button>
+          </motion.button>
         </div>
       </header>
 
@@ -1315,16 +1336,34 @@ export default function App() {
         {dataForExtraction && (
           <aside className="sidebar">
             <nav className="sidebar-nav">
-              {sidebarTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  className={`sidebar-tab ${activeTab === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <span className="sidebar-tab-icon">{tab.icon}</span>
-                  <span className="sidebar-tab-label">{tab.label}</span>
-                </button>
-              ))}
+              {sidebarTabs.map((tab) => {
+                const IconComponent = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <motion.button
+                    key={tab.id}
+                    className={`sidebar-tab ${isActive ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab.id)}
+                    whileHover={!prefersReducedMotion ? { x: 4, backgroundColor: 'rgba(255, 255, 255, 0.08)' } : {}}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: durations.fast, ease: easings.premium }}
+                  >
+                    <IconComponent 
+                      size={20} 
+                      weight={isActive ? 'fill' : 'duotone'} 
+                      className="sidebar-tab-icon"
+                    />
+                    <span className="sidebar-tab-label">{tab.label}</span>
+                    {isActive && (
+                      <motion.span
+                        className="sidebar-tab-indicator"
+                        layoutId="tabIndicator"
+                        transition={{ duration: durations.fast, ease: easings.premium }}
+                      />
+                    )}
+                  </motion.button>
+                );
+              })}
             </nav>
           </aside>
         )}
@@ -1429,7 +1468,8 @@ export default function App() {
                         alignItems: 'center',
                         gap: 10
                       }}>
-                        🎯 Strategie di Base Tennis
+                        <Target size={24} weight="duotone" style={{ color: '#3b82f6' }} />
+                        Strategie di Base Tennis
                       </h2>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -1,18 +1,17 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { 
+  TennisBall, 
+  CalendarBlank, 
+  CaretDown, 
+  CaretRight,
+  FolderOpen,
+  Calendar
+} from '@phosphor-icons/react';
 import MatchCard from './MatchCard';
-
-// Skeleton card per loading
-function SkeletonCard() {
-  return (
-    <div className="match-card skeleton">
-      <div className="skeleton-line short"></div>
-      <div className="skeleton-line medium"></div>
-      <div className="skeleton-line long"></div>
-      <div className="skeleton-line long"></div>
-      <div className="skeleton-line short"></div>
-    </div>
-  );
-}
+import { MatchGridSkeleton } from './motion/Skeleton';
+import EmptyState from './motion/EmptyState';
+import { durations, easings, staggerContainer, staggerItem } from '../motion/tokens';
 
 // Hook per aggiornare le date a mezzanotte
 function useMidnightRefresh(callback) {
@@ -130,47 +129,71 @@ function getDateKey(timestamp) {
 // Componente per gruppo di anni collassabile
 function YearGroup({ yearLabel, yearKey, monthGroups, onMatchClick, onAddSuggested, defaultExpanded = false }) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const prefersReducedMotion = useReducedMotion();
   
   // Conta totale partite nell'anno
   const totalCount = monthGroups.reduce((sum, mg) => sum + mg.matches.length, 0);
   
   return (
-    <div className="year-group">
-      <button 
+    <motion.div 
+      className="year-group"
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: durations.normal, ease: easings.premium }}
+    >
+      <motion.button 
         className={`year-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
         onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={!prefersReducedMotion ? { backgroundColor: 'rgba(255, 255, 255, 0.06)' } : {}}
+        whileTap={{ scale: 0.99 }}
       >
         <div className="year-group-title">
-          <span className="year-group-icon">{isExpanded ? '▼' : '▶'}</span>
+          <motion.span 
+            className="year-group-icon"
+            animate={{ rotate: isExpanded ? 0 : -90 }}
+            transition={{ duration: durations.fast, ease: easings.premium }}
+          >
+            <CaretDown size={14} weight="bold" />
+          </motion.span>
+          <Calendar size={16} weight="duotone" style={{ marginRight: 6, opacity: 0.7 }} />
           <span className="year-group-label">{yearLabel}</span>
           <span className="year-group-count">
             {totalCount} {totalCount === 1 ? 'partita' : 'partite'}
           </span>
         </div>
-      </button>
+      </motion.button>
       
-      {isExpanded && (
-        <div className="year-group-content">
-          {monthGroups.map((monthGroup) => (
-            <MonthGroup
-              key={monthGroup.monthKey}
-              monthLabel={monthGroup.monthLabel}
-              monthKey={monthGroup.monthKey}
-              matches={monthGroup.matches}
-              onMatchClick={onMatchClick}
-              onAddSuggested={onAddSuggested}
-              defaultExpanded={monthGroup.monthKey === getMonthKey(Date.now() / 1000)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div 
+            className="year-group-content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: durations.normal, ease: easings.premium }}
+          >
+            {monthGroups.map((monthGroup) => (
+              <MonthGroup
+                key={monthGroup.monthKey}
+                monthLabel={monthGroup.monthLabel}
+                monthKey={monthGroup.monthKey}
+                matches={monthGroup.matches}
+                onMatchClick={onMatchClick}
+                onAddSuggested={onAddSuggested}
+                defaultExpanded={monthGroup.monthKey === getMonthKey(Date.now() / 1000)}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
 // Componente per gruppo di mesi collassabile
 function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggested, defaultExpanded = false }) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const prefersReducedMotion = useReducedMotion();
   
   // Conta match nel DB vs suggeriti vs rilevati
   const dbCount = matches.filter(m => !m.isSuggested && !m.isDetected).length;
@@ -192,13 +215,27 @@ function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggeste
   }, [matches]);
   
   return (
-    <div className="month-group">
-      <button 
+    <motion.div 
+      className="month-group"
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: durations.normal, ease: easings.premium }}
+    >
+      <motion.button 
         className={`month-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
         onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={!prefersReducedMotion ? { backgroundColor: 'rgba(255, 255, 255, 0.04)' } : {}}
+        whileTap={{ scale: 0.99 }}
       >
         <div className="month-group-title">
-          <span className="month-group-icon">{isExpanded ? '▼' : '▶'}</span>
+          <motion.span 
+            className="month-group-icon"
+            animate={{ rotate: isExpanded ? 0 : -90 }}
+            transition={{ duration: durations.fast, ease: easings.premium }}
+          >
+            <CaretDown size={12} weight="bold" />
+          </motion.span>
+          <FolderOpen size={14} weight="duotone" style={{ marginRight: 6, opacity: 0.7 }} />
           <span className="month-group-label">{monthLabel}</span>
           <span className="month-group-count">
             {dbCount} {dbCount === 1 ? 'partita' : 'partite'}
@@ -210,57 +247,96 @@ function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggeste
             )}
           </span>
         </div>
-      </button>
+      </motion.button>
       
-      {isExpanded && (
-        <div className="month-group-content">
-          {dayGroups.map((dayGroup) => (
-            <DayGroup
-              key={dayGroup.dateKey}
-              dateLabel={dayGroup.dateLabel}
-              matches={dayGroup.matches}
-              onMatchClick={onMatchClick}
-              onAddSuggested={onAddSuggested}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div 
+            className="month-group-content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: durations.normal, ease: easings.premium }}
+          >
+            {dayGroups.map((dayGroup) => (
+              <DayGroup
+                key={dayGroup.dateKey}
+                dateLabel={dayGroup.dateLabel}
+                matches={dayGroup.matches}
+                onMatchClick={onMatchClick}
+                onAddSuggested={onAddSuggested}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
 // Componente per sotto-gruppo giornaliero
 function DayGroup({ dateLabel, matches, onMatchClick, onAddSuggested }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
   
   const dbCount = matches.filter(m => !m.isSuggested && !m.isDetected).length;
   
   return (
     <div className="day-group">
-      <button 
+      <motion.button 
         className={`day-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
         onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={!prefersReducedMotion ? { backgroundColor: 'rgba(255, 255, 255, 0.03)' } : {}}
+        whileTap={{ scale: 0.99 }}
       >
-        <span className="day-group-icon">{isExpanded ? '▾' : '▸'}</span>
+        <motion.span 
+          className="day-group-icon"
+          animate={{ rotate: isExpanded ? 0 : -90 }}
+          transition={{ duration: durations.fast, ease: easings.premium }}
+        >
+          <CaretDown size={10} weight="bold" />
+        </motion.span>
+        <CalendarBlank size={12} weight="duotone" style={{ marginRight: 6, opacity: 0.6 }} />
         <span className="day-group-label">{dateLabel}</span>
         <span className="day-group-count">{dbCount}</span>
-      </button>
+      </motion.button>
       
-      {isExpanded && (
-        <div className="day-group-matches">
-          {matches.map((match) => (
-            <MatchCard 
-              key={match.id || match.eventId} 
-              match={match} 
-              onClick={(match.isSuggested || match.isDetected) ? null : onMatchClick}
-              isSuggested={match.isSuggested}
-              isDetected={match.isDetected}
-              onAddToDb={(match.isSuggested || match.isDetected) && onAddSuggested ? () => onAddSuggested(match) : null}
-              dataSources={match.dataSources}
-            />
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div 
+            className="day-group-matches"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: durations.normal, ease: easings.premium }}
+            variants={staggerContainer}
+          >
+            {matches.map((match, index) => (
+              <motion.div
+                key={match.id || match.eventId}
+                variants={staggerItem}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ 
+                  duration: durations.normal, 
+                  ease: easings.premium,
+                  delay: index * 0.04
+                }}
+              >
+                <MatchCard 
+                  match={match} 
+                  onClick={(match.isSuggested || match.isDetected) ? null : onMatchClick}
+                  isSuggested={match.isSuggested}
+                  isDetected={match.isDetected}
+                  onAddToDb={(match.isSuggested || match.isDetected) && onAddSuggested ? () => onAddSuggested(match) : null}
+                  dataSources={match.dataSources}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -356,33 +432,30 @@ function MatchGrid({ matches, loading, onMatchClick, suggestedMatches = [], dete
       }));
   }, [matches, suggestedMatches, detectedMatches]);
   
-  // Skeleton loading
+  // Skeleton loading con nuovo componente
   if (loading) {
-    return (
-      <div className="match-grid">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <SkeletonCard key={i} />
-        ))}
-      </div>
-    );
+    return <MatchGridSkeleton count={6} />;
   }
 
-  // Empty state
+  // Empty state con nuovo componente
   if (!matches || matches.length === 0) {
     return (
-      <div className="match-grid-empty">
-        <div className="empty-content">
-          <span className="empty-icon">🎾</span>
-          <h3>Nessun match trovato</h3>
-          <p>Clicca su "Aggiungi Match" per scaricare dati da SofaScore</p>
-        </div>
-      </div>
+      <EmptyState
+        type="noMatches"
+        title="Nessun match trovato"
+        description="Clicca su 'Aggiungi Match' per scaricare dati da SofaScore"
+      />
     );
   }
 
   // Match grid con gruppi per ANNO > MESE > GIORNO
   return (
-    <div className="match-grid-grouped">
+    <motion.div 
+      className="match-grid-grouped"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+    >
       {groupedByYear.map((yearGroup) => (
         <YearGroup
           key={yearGroup.yearKey}
@@ -394,7 +467,7 @@ function MatchGrid({ matches, loading, onMatchClick, suggestedMatches = [], dete
           defaultExpanded={yearGroup.yearKey === getYearKey(Date.now() / 1000)}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }
 

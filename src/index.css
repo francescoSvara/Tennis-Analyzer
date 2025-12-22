@@ -38,15 +38,24 @@
   --info: #3b82f6;
   --info-bg: rgba(59, 130, 246, 0.15);
   
-  /* Shadows */
+  /* Shadows - Premium */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.5);
   
-  /* Border radius */
+  /* Border radius - Premium 2xl */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  
+  /* Motion tokens - CSS vars for non-JS animations */
+  --motion-fast: 0.18s;
+  --motion-normal: 0.32s;
+  --motion-slow: 0.42s;
+  --motion-ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   
   /* Sidebar width */
   --sidebar-width: 220px;
@@ -692,3 +701,69 @@ pre.data-box {
 }
 
 /* OLD DATA SYNC BAR - REMOVED (now integrated in MatchCard) */
+
+/* ============================================
+   MOTION & ACCESSIBILITY
+   ============================================ */
+
+/* Prefers Reduced Motion - Disabilita animazioni */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   PHOSPHOR ICONS INTEGRATION
+   ============================================ */
+
+/* Icone allineate correttamente */
+.icon,
+[class*="phosphor-"] {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+/* Sport sidebar active indicator */
+.sport-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  background: var(--primary);
+  border-radius: 0 3px 3px 0;
+}
+
+.sport-item {
+  position: relative;
+}
+
+/* Match card hover premium */
+.match-card {
+  transition: transform var(--motion-fast) var(--motion-ease-premium),
+              box-shadow var(--motion-fast) var(--motion-ease-premium);
+}
+
+/* Button hover states */
+.player-btn,
+.monitor-btn,
+.add-match-btn,
+.retry-btn {
+  transition: all var(--motion-fast) var(--motion-ease-premium);
+}
+
+/* Smooth focus states */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

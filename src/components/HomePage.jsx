@@ -1,8 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { 
+  Trophy, 
+  User, 
+  ChartLineUp, 
+  TennisBall,
+  SoccerBall,
+  Basketball,
+  WarningCircle,
+  ArrowClockwise,
+  Database
+} from '@phosphor-icons/react';
 import SportSidebar from './SportSidebar';
 import MatchGrid from './MatchGrid';
 import MonitoringDashboard from './MonitoringDashboard';
 import { apiUrl } from '../config';
+import { durations, easings } from '../motion/tokens';
 
 // Modal per aggiungere un nuovo match (manteniamo per uso futuro)
 function AddMatchModal({ onClose, onSuccess }) {
@@ -261,17 +274,29 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
       <header className="home-header">
         <div className="home-header-left">
           <h1 className="home-title">
-            <span className="home-icon">🏆</span>
+            <Trophy size={28} weight="duotone" className="home-icon" />
             Match Database
           </h1>
         </div>
         <div className="home-header-right">
-          <button className="player-btn" onClick={onNavigateToPlayer}>
-            <span className="icon">👤</span> Player Profiles
-          </button>
-          <button className="monitor-btn" onClick={() => setShowMonitoring(true)}>
-            <span className="icon">📊</span> Database Monitor
-          </button>
+          <motion.button 
+            className="player-btn" 
+            onClick={onNavigateToPlayer}
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: durations.fast, ease: easings.premium }}
+          >
+            <User size={18} weight="duotone" className="icon" /> Player Profiles
+          </motion.button>
+          <motion.button 
+            className="monitor-btn" 
+            onClick={() => setShowMonitoring(true)}
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: durations.fast, ease: easings.premium }}
+          >
+            <ChartLineUp size={18} weight="duotone" className="icon" /> Database Monitor
+          </motion.button>
         </div>
       </header>
 
@@ -286,13 +311,14 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
           {/* Section Header */}
           <div className="home-main-header">
             <h2 className="section-title">
-              {selectedSport === 'tennis' && '🎾 Tennis Matches'}
-              {selectedSport === 'football' && '⚽ Football Matches'}
-              {selectedSport === 'basketball' && '🏀 Basketball Matches'}
-              {selectedSport === 'rugby-union' && '🏉 Rugby Matches'}
+              {selectedSport === 'tennis' && <><TennisBall size={22} weight="duotone" style={{ marginRight: 8 }} />Tennis Matches</>}
+              {selectedSport === 'football' && <><SoccerBall size={22} weight="duotone" style={{ marginRight: 8 }} />Football Matches</>}
+              {selectedSport === 'basketball' && <><Basketball size={22} weight="duotone" style={{ marginRight: 8 }} />Basketball Matches</>}
+              {selectedSport === 'rugby-union' && <><Trophy size={22} weight="duotone" style={{ marginRight: 8 }} />Rugby Matches</>}
             </h2>
             
             <span className="match-count">
+              <Database size={14} weight="bold" style={{ marginRight: 4, opacity: 0.7 }} />
               {loading ? '...' : `${totalMatchCount} salvate`}
               {totalDetectedCount > 0 && !loading && (
                 <span className="detected-count"> · {totalDetectedCount} mancanti</span>
@@ -302,11 +328,24 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
 
           {/* Error Banner */}
           {error && (
-            <div className="error-banner">
-              <span className="error-icon">⚠️</span>
+            <motion.div 
+              className="error-banner"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: durations.normal, ease: easings.premium }}
+            >
+              <WarningCircle size={20} weight="fill" className="error-icon" />
               <span className="error-text">{error}</span>
-              <button className="retry-btn" onClick={loadMatches}>Riprova</button>
-            </div>
+              <motion.button 
+                className="retry-btn" 
+                onClick={loadMatches}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ArrowClockwise size={14} weight="bold" style={{ marginRight: 4 }} />
+                Riprova
+              </motion.button>
+            </motion.div>
           )}
           
           {/* Match Grid */}

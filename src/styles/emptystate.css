@@ -1,0 +1,88 @@
+/* ============================================
+   EMPTY STATE - Design minimale
+   ============================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  min-height: 300px;
+}
+
+.empty-state-icon-wrapper {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 50%;
+  margin-bottom: 24px;
+}
+
+.empty-state-icon {
+  color: var(--home-accent, #3b82f6);
+  opacity: 0.8;
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--home-text-primary, #e4e6eb);
+  margin: 0 0 8px;
+}
+
+.empty-state-description {
+  font-size: 0.95rem;
+  color: var(--home-text-secondary, #8b95a5);
+  margin: 0 0 24px;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.empty-state-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--home-accent, #3b82f6) 0%, var(--home-accent-hover, #2563eb) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+}
+
+.empty-state-action:hover {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+}
+
+/* Varianti per tipo */
+.empty-state.error .empty-state-icon-wrapper {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.empty-state.error .empty-state-icon {
+  color: var(--home-danger, #ef4444);
+}
+
+.empty-state.warning .empty-state-icon-wrapper {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.empty-state.warning .empty-state-icon {
+  color: var(--home-warning, #f59e0b);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .empty-state-action {
+    transition: none;
+  }
+}

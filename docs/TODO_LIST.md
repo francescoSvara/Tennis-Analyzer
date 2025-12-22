@@ -83,6 +83,31 @@ La mappa concettuale è allineata con il codice.
 | 12 | Dynamic Surface Thresholds | 22/12/2025 | Stats |
 | 13 | Enhanced analyzePowerRankings | 22/12/2025 | Stats |
 | 14 | Bug Fix Player Stats + Sofascore | 23/12/2025 | Backend |
+| 15 | **Frontend UI/Motion Premium** | 22/12/2025 | Frontend |
+| 16 | Phosphor Icons integration | 22/12/2025 | Frontend |
+| 17 | Framer Motion animations | 22/12/2025 | Frontend |
+| 18 | Motion tokens system | 22/12/2025 | Frontend |
+| 19 | prefers-reduced-motion support | 22/12/2025 | Frontend |
+
+### Dettagli Frontend UI (completato 22/12/2025)
+
+| Componente | Modifiche |
+|------------|-----------|
+| `HomePage.jsx` | Icone Phosphor, motion hover, bottoni animati |
+| `SportSidebar.jsx` | Icone sport (TennisBall, SoccerBall), hover indicator animato |
+| `MatchCard.jsx` | Icone azioni, hover lift -4px, shadow soft |
+| `MatchGrid.jsx` | Stagger animation, Skeleton/EmptyState |
+| `PlayerPage.jsx` | Icone stats, form streak animato, motion cards |
+| `MonitoringDashboard.jsx` | 30+ emoji → Phosphor icons, spinner animati |
+| `MatchHeader.jsx` | MapPin, Broadcast icons |
+| `motion/tokens.js` | Duration, easings, varianti: fadeUp, cardHover, stagger |
+| `motion/MotionCard.jsx` | Wrapper card con hover lift |
+| `motion/MotionButton.jsx` | Bottoni con micro-interazioni |
+| `motion/MotionList.jsx` | Container con stagger children |
+| `motion/Skeleton.jsx` | Loading shimmer elegante |
+| `motion/EmptyState.jsx` | Stato vuoto animato |
+| `index.css` | Motion tokens CSS, prefers-reduced-motion |
+| `homepage.css` | Stili bottoni, active indicator sidebar |
 
 ---
 

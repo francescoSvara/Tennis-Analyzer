@@ -12,7 +12,36 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { 
+  TennisBall, 
+  Trophy, 
+  ChartLineUp, 
+  Target,
+  Fire,
+  Coins,
+  MagnifyingGlass,
+  SpinnerGap,
+  WarningCircle,
+  Medal,
+  ArrowUp,
+  ArrowDown,
+  CircleWavyCheck,
+  Circle,
+  Star,
+  Crown,
+  User,
+  ArrowClockwise,
+  NumberOne,
+  NumberTwo,
+  NumberThree,
+  Percent,
+  SoccerBall,
+  CalendarBlank,
+  Lightning
+} from '@phosphor-icons/react';
 import { apiUrl } from '../config';
+import { durations, easings } from '../motion/tokens';
 import './PlayerPage.css';
 
 // ============================================================================
@@ -20,21 +49,47 @@ import './PlayerPage.css';
 // ============================================================================
 
 function StatCard({ title, value, subtitle, trend, icon }) {
+  const prefersReducedMotion = useReducedMotion();
   const trendColor = trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#8b95a5';
-  const trendIcon = trend === 'up' ? '↑' : trend === 'down' ? '↓' : '';
+  
+  // Mappa emoji a icone Phosphor
+  const iconMap = {
+    '🏆': Trophy,
+    '🎾': TennisBall,
+    '📊': ChartLineUp,
+    '🎯': Target,
+    '💪': Fire,
+    '1️⃣': Medal,
+    '📈': ChartLineUp,
+    '🔥': Fire,
+    '📅': ChartLineUp,
+    '❄️': CircleWavyCheck,
+  };
+  
+  const IconComponent = iconMap[icon] || ChartLineUp;
   
   return (
-    <div className="stat-card">
+    <motion.div 
+      className="stat-card"
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: durations.normal, ease: easings.premium }}
+      whileHover={!prefersReducedMotion ? { y: -2, boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)' } : {}}
+    >
       <div className="stat-card-header">
-        {icon && <span className="stat-icon">{icon}</span>}
+        <IconComponent size={18} weight="duotone" className="stat-icon" />
         <span className="stat-title">{title}</span>
       </div>
       <div className="stat-value">
         {value}
-        {trend && <span className="stat-trend" style={{ color: trendColor }}>{trendIcon}</span>}
+        {trend && (
+          <span className="stat-trend" style={{ color: trendColor }}>
+            {trend === 'up' ? <ArrowUp size={14} weight="bold" /> : <ArrowDown size={14} weight="bold" />}
+          </span>
+        )}
       </div>
       {subtitle && <div className="stat-subtitle">{subtitle}</div>}
-    </div>
+    </motion.div>
   );
 }
 
@@ -65,18 +120,24 @@ function SurfaceCard({ surface, stats }) {
     'Carpet': '#8b5cf6'
   };
   
+  // Phosphor icons for surfaces
   const surfaceIcons = {
-    'Hard': '🔵',
-    'Clay': '🟤',
-    'Grass': '🟢',
-    'Carpet': '🟣'
+    'Hard': <Circle size={16} weight="fill" color="#3b82f6" />,
+    'Clay': <Circle size={16} weight="fill" color="#f97316" />,
+    'Grass': <Circle size={16} weight="fill" color="#22c55e" />,
+    'Carpet': <Circle size={16} weight="fill" color="#8b5cf6" />
   };
   
   const color = surfaceColors[surface] || '#6b7280';
-  const icon = surfaceIcons[surface] || '⚪';
+  const icon = surfaceIcons[surface] || <Circle size={16} weight="fill" color="#6b7280" />;
   
   return (
-    <div className="surface-card" style={{ borderLeftColor: color }}>
+    <motion.div 
+      className="surface-card" 
+      style={{ borderLeftColor: color }}
+      whileHover={{ scale: 1.01, y: -2 }}
+      transition={{ duration: durations.fast, ease: easings.premium }}
+    >
       <div className="surface-header">
         <span className="surface-icon">{icon}</span>
         <span className="surface-name">{surface}</span>
@@ -89,7 +150,7 @@ function SurfaceCard({ surface, stats }) {
           <span className="losses">{stats.losses}L</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -110,9 +171,23 @@ function SeriesCard({ series, stats }) {
     'ATP Finals': '#a855f7'
   };
   
+  // Icons for series
+  const seriesIcons = {
+    'Grand Slam': <Trophy size={18} weight="duotone" color="#fbbf24" />,
+    'Masters 1000': <Medal size={18} weight="duotone" color="#f97316" />,
+    'ATP500': <Star size={18} weight="duotone" color="#3b82f6" />,
+    'ATP250': <TennisBall size={18} weight="duotone" color="#8b95a5" />,
+    'ATP Finals': <Crown size={18} weight="duotone" color="#a855f7" />
+  };
+  
   return (
-    <div className="series-card">
+    <motion.div 
+      className="series-card"
+      whileHover={{ scale: 1.01, y: -2 }}
+      transition={{ duration: durations.fast, ease: easings.premium }}
+    >
       <div className="series-header">
+        {seriesIcons[series] || <TennisBall size={18} weight="duotone" />}
         <span className="series-name">{series}</span>
         <span className="series-matches">{stats.matches} matches</span>
       </div>
@@ -121,7 +196,7 @@ function SeriesCard({ series, stats }) {
         label="Win Rate" 
         color={seriesColors[series] || '#6b7280'} 
       />
-    </div>
+    </motion.div>
   );
 }
 
@@ -129,12 +204,15 @@ function RecentFormStreak({ results }) {
   return (
     <div className="form-streak">
       {results.map((result, idx) => (
-        <span 
+        <motion.span 
           key={idx} 
           className={`form-result ${result === 'W' ? 'win' : 'loss'}`}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: idx * 0.05, duration: durations.fast }}
         >
           {result}
-        </span>
+        </motion.span>
       ))}
     </div>
   );
@@ -267,7 +345,10 @@ export default function PlayerPage() {
     <div className="player-page">
       {/* Header con ricerca */}
       <div className="player-page-header">
-        <h1>🎾 Player Profile</h1>
+        <h1>
+          <TennisBall size={28} weight="duotone" style={{ marginRight: 10, color: '#3b82f6' }} />
+          Player Profile
+        </h1>
         
         <form onSubmit={handleSearch} className="player-search-form">
           <div className="search-container">
@@ -283,60 +364,90 @@ export default function PlayerPage() {
             />
             
             {/* Suggestions dropdown */}
-            {showSuggestions && (
-              <div className="suggestions-dropdown">
-                {suggestionLoading && (
-                  <div className="suggestion-item loading">
-                    <span className="suggestion-spinner"></span>
-                    Caricamento...
-                  </div>
-                )}
-                {!suggestionLoading && suggestions.map((player, idx) => (
-                  <div
-                    key={idx}
-                    className="suggestion-item"
-                    onClick={() => selectSuggestion(player.name)}
-                  >
-                    <span className="suggestion-name">{player.name}</span>
-                    <span className="suggestion-matches">{player.matchCount} match</span>
-                  </div>
-                ))}
-                {!suggestionLoading && suggestions.length === 0 && searchInput.length >= 2 && (
-                  <div className="suggestion-item no-results">
-                    Nessun giocatore trovato
-                  </div>
-                )}
-              </div>
-            )}
+            <AnimatePresence>
+              {showSuggestions && (
+                <motion.div 
+                  className="suggestions-dropdown"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: durations.fast, ease: easings.premium }}
+                >
+                  {suggestionLoading && (
+                    <div className="suggestion-item loading">
+                      <SpinnerGap size={16} className="suggestion-spinner" />
+                      Caricamento...
+                    </div>
+                  )}
+                  {!suggestionLoading && suggestions.map((player, idx) => (
+                    <motion.div
+                      key={idx}
+                      className="suggestion-item"
+                      onClick={() => selectSuggestion(player.name)}
+                      whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }}
+                    >
+                      <span className="suggestion-name">{player.name}</span>
+                      <span className="suggestion-matches">{player.matchCount} match</span>
+                    </motion.div>
+                  ))}
+                  {!suggestionLoading && suggestions.length === 0 && searchInput.length >= 2 && (
+                    <div className="suggestion-item no-results">
+                      Nessun giocatore trovato
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
-          <button type="submit" className="player-search-btn">
-            🔍 Cerca
-          </button>
+          <motion.button 
+            type="submit" 
+            className="player-search-btn"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <MagnifyingGlass size={18} weight="bold" style={{ marginRight: 6 }} />
+            Cerca
+          </motion.button>
         </form>
       </div>
       
       {/* Loading state */}
       {loading && (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+        <motion.div 
+          className="loading-container"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <SpinnerGap size={40} className="loading-spinner" />
           <p>Caricamento profilo...</p>
-        </div>
+        </motion.div>
       )}
       
       {/* Error state */}
       {error && (
-        <div className="error-container">
-          <p>❌ Errore: {error}</p>
-        </div>
+        <motion.div 
+          className="error-container"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <WarningCircle size={24} weight="fill" style={{ marginRight: 8, color: '#ef4444' }} />
+          <p>Errore: {error}</p>
+        </motion.div>
       )}
       
       {/* No player selected */}
       {!loading && !error && !profile && (
-        <div className="empty-state">
-          <p>🔍 Inserisci il nome di un giocatore per visualizzare il profilo</p>
+        <motion.div 
+          className="empty-state"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: durations.slow, ease: easings.premium }}
+        >
+          <MagnifyingGlass size={48} weight="duotone" style={{ marginBottom: 16, opacity: 0.6 }} />
+          <p>Inserisci il nome di un giocatore per visualizzare il profilo</p>
           <p className="hint">Prova: Sinner, Alcaraz, Djokovic, Medvedev...</p>
-        </div>
+        </motion.div>
       )}
       
       {/* Profile content */}
