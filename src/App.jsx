@@ -1456,6 +1456,26 @@ export default function App() {
                   // Debug log
                   console.log('📊 PowerRankings trovati:', powerRankings?.length || 0, powerRankings?.slice(0,3));
                   
+                  // Prepara matchData per fallback (se no powerRankings)
+                  // Usa dati dal DB o dall'estrazione
+                  const matchDataForFallback = dataForExtraction.dbMatch || dataForExtraction.match || {
+                    // Estrai punteggi set se disponibili
+                    w1: dataForExtraction.homeScore?.period1,
+                    l1: dataForExtraction.awayScore?.period1,
+                    w2: dataForExtraction.homeScore?.period2,
+                    l2: dataForExtraction.awayScore?.period2,
+                    w3: dataForExtraction.homeScore?.period3,
+                    l3: dataForExtraction.awayScore?.period3,
+                    w4: dataForExtraction.homeScore?.period4,
+                    l4: dataForExtraction.awayScore?.period4,
+                    w5: dataForExtraction.homeScore?.period5,
+                    l5: dataForExtraction.awayScore?.period5,
+                    winner_name: eventInfo?.home?.name,
+                    loser_name: eventInfo?.away?.name,
+                    homeScore: dataForExtraction.homeScore,
+                    awayScore: dataForExtraction.awayScore
+                  };
+                  
                   return (
                     <>
                       <div style={{ marginBottom: 32 }}>
@@ -1463,6 +1483,7 @@ export default function App() {
                           powerRankings={powerRankings} 
                           homeName={eventInfo?.home?.name || 'Home'}
                           awayName={eventInfo?.away?.name || 'Away'}
+                          matchData={matchDataForFallback}
                         />
                         
                         <MomentumChart 
