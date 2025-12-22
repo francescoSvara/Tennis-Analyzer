@@ -2,8 +2,8 @@
 
 ## 📋 Guida Operativa per AI Coding Agent
 
-**Versione:** 2.6  
-**Data:** 22 Dicembre 2025  
+**Versione:** 2.7  
+**Data:** 23 Dicembre 2025  
 **Scopo:** Documento operativo per implementare le funzionalità BACKEND rimanenti
 
 ---
@@ -14,7 +14,7 @@
 
 # ✅ TASK COMPLETATI (22 Dicembre 2025 - Sessione 3)
 
-## ✅ Player Profile Aggregator
+## ✅ Player Profile Aggregator (FIX 23/12 - Stats Fix)
 **File:** `backend/services/playerProfileService.js`
 
 **Funzioni implementate:**
@@ -29,6 +29,7 @@
 - `calculateSpecialMetrics(matches)` - Metriche speciali aggregate
 - `analyzeRecentForm(matches, count)` - Trend recenti con streak
 - `aggregateBySurface/Format/Series(matches)` - Aggregazioni per categoria
+- `getPlayerMatches(playerName)` - **FIXED:** Ora cerca sia per winner_name/loser_name che per player_id
 
 ---
 
@@ -141,6 +142,30 @@
 
 ---
 
+# ✅ TASK COMPLETATI (23 Dicembre 2025 - Sessione 4)
+
+## ✅ BUG FIX CRITICO: Player Stats Integration con Sofascore
+**Files modificati:** 
+- `backend/services/playerProfileService.js`
+- `backend/services/playerStatsService.js`
+- `backend/db/matchRepository.js`
+- `backend/scripts/fix-empty-names.js` (NUOVO)
+
+**Problema risolto:**
+I match importati da Sofascore avevano `winner_name` e `loser_name` vuoti, causando:
+- Statistiche che diminuivano quando si scrapavano nuovi match
+- `getPlayerMatches()` non trovava i match Sofascore perché cercava solo per nome
+
+**Soluzioni implementate:**
+1. **Dual Search Strategy**: `getPlayerMatches()` ora cerca ANCHE per `home_player_id`/`away_player_id` con JOIN su tabella `players`
+2. **Auto-populate names**: `insertMatch()` ora calcola e popola `winner_name`/`loser_name` da `winnerCode` o punteggio set
+3. **Merge fix**: `mergeXlsxData()` copia i nomi dal record xlsx se quelli Sofascore sono vuoti
+4. **Script fix esistenti**: `fix-empty-names.js` corregge 24 match con nomi vuoti
+
+**Risultato:** Musetti passa da 57 a 68 match (+11 recuperati)
+
+---
+
 # 🚧 TASK BACKEND DA IMPLEMENTARE
 
 ## ⬜ TASK: Daily Match Evaluation Report
@@ -224,7 +249,7 @@ Calcolare e salvare metriche avanzate partendo dai dati grezzi SofaScore.
 
 ## TODO LIST - Database & Normalizzazione
 
-### / 1.1 Struttura Eventi Normalizzati
+### ⬜ 1.1 Struttura Eventi Normalizzati
 **File:** `backend/db/` o nuovo `backend/metrics/`
 
 Creare una struttura normalizzata per ogni punto del match:
@@ -253,7 +278,7 @@ NormalizedPoint {
 
 ---
 
-### / 1.2 Classificazione Dati PURI vs DERIVATI
+### ⬜ 1.2 Classificazione Dati PURI vs DERIVATI
 
 **DATI PURI** (salvare direttamente):
 - Tournament, Surface, Round
@@ -274,7 +299,7 @@ NormalizedPoint {
 
 ---
 
-### / 1.3 Segmentazione Match
+### ✅ 1.3 Segmentazione Match (COMPLETATO - matchSegmenter.js)
 
 Ogni match va suddiviso in **segmenti logici**:
 
@@ -329,7 +354,7 @@ function analyzeSetDynamics(setScores) {
 
 ## TODO LIST - Momentum Engine
 
-### / 1.4 Momentum Base
+### ✅ 1.4 Momentum Base (COMPLETATO - valueInterpreter.js)
 
 **Input:** `tennisPowerRankings.value` dal JSON SofaScore
 
@@ -346,7 +371,7 @@ momentum_match_avg = MEDIA(momentum_set_avg) per match
 
 ---
 
-### / 1.5 Momentum Volatility
+### ✅ 1.5 Momentum Volatility (COMPLETATO - valueInterpreter.js)
 
 **Definizione:** Quanto il momentum cambia tra game consecutivi.
 
@@ -364,7 +389,7 @@ Momentum_Volatility = MEDIA(tutti i delta)
 
 ---
 
-### / 1.6 Momentum Elasticity
+### ✅ 1.6 Momentum Elasticity (COMPLETATO - valueInterpreter.js)
 
 **Definizione:** Capacità di recuperare momentum negativo.
 
@@ -383,7 +408,7 @@ Elasticity_Score = 1 / (numero medio game per recupero)
 
 ## TODO LIST - Metriche Pressione
 
-### / 1.7 Hold Pressure Index (HPI)
+### ⬜ 1.7 Hold Pressure Index (HPI)
 
 **Definizione:** Capacità di tenere il servizio sotto pressione.
 
@@ -402,7 +427,7 @@ HPI = (game tenuti in pressure) / (game al servizio con pressure)
 
 ---
 
-### / 1.8 Break Resilience Score
+### ⬜ 1.8 Break Resilience Score
 
 **Definizione:** Capacità di salvare break point e reagire.
 
@@ -417,7 +442,7 @@ Peso maggiore nei CRITICAL_GAMES
 
 ---
 
-### / 1.9 Clutch Conversion Rate
+### ⬜ 1.9 Clutch Conversion Rate
 
 **Clutch Points:**
 - Break point
@@ -434,7 +459,7 @@ Clutch_Rate = punti_clutch_vinti / punti_clutch_totali
 
 ---
 
-### / 1.10 Serve Vulnerability Index
+### ⬜ 1.10 Serve Vulnerability Index
 
 **Definizione:** Quanto il servizio peggiora sotto pressione.
 
@@ -450,7 +475,7 @@ Ace_vulnerability = Ace_rate_normal - Ace_rate_pressure
 
 ---
 
-### / 1.11 Set Decay Index
+### ⬜ 1.11 Set Decay Index
 
 **Definizione:** Calo tra set consecutivi.
 
@@ -470,7 +495,7 @@ Set_Decay = MEDIA(delta negativi tra set)
 
 ## TODO LIST - Trading Stats (Metriche Storiche)
 
-### / 1.12 Resilience Metrics
+### ⬜ 1.12 Resilience Metrics
 
 Calcolare per ogni giocatore (storicamente):
 
@@ -488,7 +513,7 @@ Calcolare per ogni giocatore (storicamente):
 
 ---
 
-### / 1.13 Pressure Metrics (Live)
+### ✅ 1.13 Pressure Metrics (Live) (COMPLETATO - pressureCalculator.js)
 
 **Struttura LiveMetric:**
 ```javascript
@@ -644,7 +669,7 @@ if (pressureIndex.level === "HIGH" || pressureIndex.level === "CRITICAL") {
 
 ---
 
-### / 1.14 Player Profile (Aggregato)
+### ⬜ 1.14 Player Profile (Aggregato)
 
 Per ogni giocatore, salvare profilo storico:
 
@@ -675,7 +700,7 @@ PlayerProfile {
 
 ---
 
-### / 1.15 Snapshot Strategici
+### ⬜ 1.15 Snapshot Strategici
 
 Salvare snapshot in momenti chiave:
 
@@ -697,7 +722,7 @@ Salvare snapshot in momenti chiave:
 
 ---
 
-### / 1.16 Live Odds Tracking
+### ⬜ 1.16 Live Odds Tracking
 
 **Quote Live - Dati PURI da salvare:**
 ```javascript
@@ -774,7 +799,7 @@ Stimare probabilità FAIR, confrontarle con mercato, individuare VALUE.
 
 ## TODO LIST - Odds Engine
 
-### / 2.1 Baseline Probabilità
+### ? 2.1 Baseline Probabilità
 
 **Regola fondamentale:**
 ```
@@ -787,7 +812,7 @@ Tutti i fattori successivi sono DELTA incrementali
 
 ---
 
-### / 2.2 Factor Registry
+### ? 2.2 Factor Registry
 
 Ogni fattore è un oggetto con:
 
@@ -803,7 +828,7 @@ Factor {
 
 ---
 
-### / 2.3 Implementare Fattori
+### ? 2.3 Implementare Fattori
 
 | Fattore | Peso PRE-MATCH | Peso IN-PLAY | Note |
 |---------|----------------|--------------|------|
@@ -816,7 +841,7 @@ Factor {
 
 ---
 
-### / 2.4 Ranking Factor
+### ? 2.4 Ranking Factor
 
 ```
 ranking_gap = rank_away - rank_home
@@ -832,7 +857,7 @@ if (match_in_progress):
 
 ---
 
-### / 2.5 Momentum Factor
+### ? 2.5 Momentum Factor
 
 ```
 // Momentum recente pesa più del medio
@@ -850,7 +875,7 @@ adjustment = momentum_score * weight_momentum
 
 ---
 
-### / 2.6 Break Factor
+### ? 2.6 Break Factor
 
 ```
 break_advantage = home_breaks - away_breaks
@@ -867,7 +892,7 @@ adjustment = break_advantage * weight
 
 ---
 
-### / 2.7 Set Factor
+### ? 2.7 Set Factor
 
 ```
 set_advantage = home_sets - away_sets
@@ -887,7 +912,7 @@ if (came_from_behind):
 
 ---
 
-### / 2.8 Clutch/Mental Factor
+### ? 2.8 Clutch/Mental Factor
 
 Usa metriche storiche + live:
 
@@ -906,7 +931,7 @@ else if (clutch_score < 0.3):
 
 ---
 
-### / 2.9 Normalizzazione Probabilità
+### ? 2.9 Normalizzazione Probabilità
 
 ```
 prob_home = 0.50 + SUM(all_adjustments_home)
@@ -924,7 +949,7 @@ prob_away = prob_away / total
 
 ---
 
-### / 2.10 Conversione in Quote FAIR
+### ? 2.10 Conversione in Quote FAIR
 
 ```
 fair_odds_home = 1 / prob_home
@@ -935,7 +960,7 @@ fair_odds_away = 1 / prob_away
 
 ---
 
-### / 2.11 Calcolo VALUE
+### ? 2.11 Calcolo VALUE
 
 ```
 VALUE = market_odds - fair_odds
@@ -948,7 +973,7 @@ VALUE < 0  → quota mercato più bassa (sfavorevole)
 
 ---
 
-### / 2.12 Semaforo VALUE
+### ? 2.12 Semaforo VALUE
 
 ```
 🟢 VERDE (BACK/BUY):   VALUE > +0.15 AND confidence > 0.7
@@ -961,7 +986,7 @@ VALUE < 0  → quota mercato più bassa (sfavorevole)
 
 ---
 
-### / 2.13 Factor Breakdown (Trasparenza)
+### ? 2.13 Factor Breakdown (Trasparenza)
 
 Output per UI:
 ```
@@ -976,7 +1001,7 @@ Output per UI:
 
 ---
 
-### / 2.14 Live Update Logic
+### ? 2.14 Live Update Logic
 
 ```
 // Ricalcola SOLO se cambia un fattore
@@ -998,7 +1023,7 @@ Interpretare i dati calcolati in linguaggio naturale comprensibile.
 
 ## TODO LIST - AI Layer
 
-### / 3.1 Ruolo AI
+### ? 3.1 Ruolo AI
 
 **L'AI È:** Un layer di interpretazione che legge metriche già calcolate.
 
@@ -1021,7 +1046,7 @@ Input vietati:
 
 ---
 
-### / 3.2 Prompt Templates
+### ? 3.2 Prompt Templates
 
 Creare template strutturati per ogni scenario:
 
@@ -1052,7 +1077,7 @@ Output: lista match simili con pattern osservati.
 
 ---
 
-### / 3.3 Event-Driven Activation
+### ? 3.3 Event-Driven Activation
 
 L'AI si attiva SOLO per eventi significativi:
 
@@ -1072,7 +1097,7 @@ TRIGGER_EVENTS = [
 
 ---
 
-### / 3.4 Output Format
+### ? 3.4 Output Format
 
 ```
 AIAnalysis {
@@ -1086,7 +1111,7 @@ AIAnalysis {
 
 ---
 
-### / 3.5 Hard Rules (Limiti)
+### ? 3.5 Hard Rules (Limiti)
 
 L'AI DEVE rifiutare output se:
 - Dati insufficienti (< 10 data points)
@@ -1105,7 +1130,7 @@ L'AI DEVE rifiutare output se:
 
 ---
 
-### / 3.6 AI + Quote (Supporto Indiretto)
+### ? 3.6 AI + Quote (Supporto Indiretto)
 
 L'AI può:
 - ✅ Spiegare PERCHÉ una quota sembra alta/bassa
@@ -1128,7 +1153,7 @@ Filtrare match, identificare opportunità, supportare decisioni trading.
 
 ## TODO LIST - Trading Engine
 
-### / 4.1 Strategie Supportate
+### ? 4.1 Strategie Supportate
 
 ```
 STRATEGIES = {
@@ -1157,7 +1182,7 @@ STRATEGIES = {
 
 ---
 
-### / 4.2 Match Evaluation
+### ? 4.2 Match Evaluation
 
 ```
 function evaluateMatch(match):
@@ -1183,7 +1208,7 @@ function evaluateMatch(match):
 
 ---
 
-### / 4.3 Daily Report
+### ? 4.3 Daily Report
 
 ```
 function generateDailyReport(date):
@@ -1200,7 +1225,7 @@ function generateDailyReport(date):
 
 ---
 
-### / 4.4 Overreaction Detection
+### ? 4.4 Overreaction Detection
 
 ```
 function computeOverreaction(match):
@@ -1218,7 +1243,7 @@ function computeOverreaction(match):
 
 ---
 
-### / 4.5 Output Signal
+### ? 4.5 Output Signal
 
 ```
 MatchSignal {
@@ -1234,7 +1259,7 @@ MatchSignal {
 
 ---
 
-### / 4.6 Feedback Loop (Opzionale)
+### ? 4.6 Feedback Loop (Opzionale)
 
 ```
 function storeOutcome(match_id, strategy, outcome):
@@ -1262,7 +1287,7 @@ Visualizzare dati in modo chiaro e azionabile.
 
 ## TODO LIST - Frontend
 
-### / 5.1 Sezioni Principali
+### ? 5.1 Sezioni Principali
 
 | Sezione | Domanda che risponde |
 |---------|---------------------|
@@ -1275,7 +1300,7 @@ Visualizzare dati in modo chiaro e azionabile.
 
 ---
 
-### / 5.2 Value Display Component
+### ? 5.2 Value Display Component
 
 ```
 ┌─────────────────────────────────────────┐
@@ -1302,7 +1327,7 @@ Visualizzare dati in modo chiaro e azionabile.
 
 ---
 
-### / 5.3 Momentum Chart
+### ? 5.3 Momentum Chart
 
 Visualizzare:
 - Trend momentum nel tempo
@@ -1311,7 +1336,7 @@ Visualizzare:
 
 ---
 
-### / 5.4 Trading Report Dashboard
+### ? 5.4 Trading Report Dashboard
 
 ```
 ┌─────────────────────────────────────────┐
@@ -1462,7 +1487,7 @@ DATASET 2024:
 
 ## TODO LIST - Potenziamento Value Interpreter
 
-### / 6.1 Soglie Dinamiche per Superficie
+### ✅ 6.1 Soglie Dinamiche per Superficie (COMPLETATO - valueInterpreter.js)
 
 **PROBLEMA:** Le soglie attuali sono fisse (>60, >20, etc.)
 **SOLUZIONE:** Soglie diverse per superficie basate su dati empirici
@@ -1497,7 +1522,7 @@ const SURFACE_THRESHOLDS = {
 
 ---
 
-### / 6.2 Soglie Dinamiche per Formato (Bo3 vs Bo5)
+### ⬜ 6.2 Soglie Dinamiche per Formato (Bo3 vs Bo5)
 
 ```javascript
 const FORMAT_ADJUSTMENT = {
@@ -1521,7 +1546,7 @@ if (bestOf === 5) {
 
 ---
 
-### / 6.3 Serie Tournament Weight
+### ⬜ 6.3 Serie Tournament Weight
 
 ```javascript
 const SERIES_CONFIG = {
@@ -1556,7 +1581,7 @@ const SERIES_CONFIG = {
 
 ## TODO LIST - Potenziamento Strategie Trading
 
-### / 6.4 Lay The Winner - Versione Potenziata
+### ⬜ 6.4 Lay The Winner - Versione Potenziata
 
 ```javascript
 function layTheWinnerEnhanced(match, stats) {
@@ -1598,7 +1623,7 @@ function layTheWinnerEnhanced(match, stats) {
 
 ---
 
-### / 6.5 Set & Break Recovery Strategy (NUOVA)
+### ⬜ 6.5 Set & Break Recovery Strategy (NUOVA)
 
 **Strategia mancante nel codice attuale!**
 
@@ -1631,7 +1656,7 @@ function setAndBreakRecoveryStrategy(match, liveStats) {
 
 ---
 
-### / 6.6 Tiebreak Strategy (NUOVA)
+### ⬜ 6.6 Tiebreak Strategy (NUOVA)
 
 **Dati:** 20% dei set finisce al tiebreak
 
@@ -1663,7 +1688,7 @@ function tiebreakStrategy(match, liveStats) {
 
 ## TODO LIST - Potenziamento Value Engine
 
-### / 6.7 Multi-Source Odds Comparison
+### ⬜ 6.7 Multi-Source Odds Comparison
 
 **Dati disponibili:** B365, Pinnacle, Max, Avg per ogni match
 
@@ -1718,7 +1743,7 @@ function calculateMultiSourceValue(match) {
 
 ---
 
-### / 6.8 Ranking-Based Value Adjustment
+### ⬜ 6.8 Ranking-Based Value Adjustment
 
 ```javascript
 function rankingValueAdjustment(match) {
@@ -1761,7 +1786,7 @@ function rankingValueAdjustment(match) {
 
 ---
 
-### / 6.9 Court Type Factor (Indoor vs Outdoor)
+### ⬜ 6.9 Court Type Factor (Indoor vs Outdoor)
 
 ```javascript
 const COURT_CONFIG = {
@@ -1782,7 +1807,7 @@ const COURT_CONFIG = {
 
 ## TODO LIST - Player Profile Enhancement
 
-### / 6.10 Surface-Specific Player Stats
+### ⬜ 6.10 Surface-Specific Player Stats
 
 ```javascript
 // Per ogni giocatore, calcolare da storico xlsx:
@@ -1819,7 +1844,7 @@ const playerSurfaceProfile = {
 
 ---
 
-### / 6.11 Historical ROI Calculator
+### ⬜ 6.11 Historical ROI Calculator
 
 ```javascript
 function calculatePlayerROI(playerName, surface, oddsRange) {
@@ -1877,7 +1902,7 @@ function calculatePlayerROI(playerName, surface, oddsRange) {
 
 ## TODO LIST - Upgrade analizzaTennisPowerRankings
 
-### / 7.1 Aggiungere Volatility al Value Interpreter
+### ✅ 7.1 Aggiungere Volatility al Value Interpreter (COMPLETATO)
 
 **File attuale:** `Interpretare Value su sofascore (codice).txt`
 
@@ -1908,7 +1933,7 @@ function classifyVolatility(volatility) {
 
 ---
 
-### / 7.2 Aggiungere Elasticity
+### ✅ 7.2 Aggiungere Elasticity (COMPLETATO)
 
 ```javascript
 // AGGIUNTA: Calcolo elasticity (capacità recupero)
@@ -1939,7 +1964,7 @@ function calculateElasticity(tennisPowerRankings, targetPlayer) {
 
 ---
 
-### / 7.3 Output Arricchito
+### ⬜ 7.3 Output Arricchito
 
 ```javascript
 function analizzaTennisPowerRankingsEnhanced(tennisPowerRankings, matchContext) {
@@ -1993,7 +2018,7 @@ function generateMatchCharacter(volatility, elasticity, breaks) {
 
 ---
 
-### / 7.4 Upgrade Strategie Base
+### ⬜ 7.4 Upgrade Strategie Base
 
 ```javascript
 // UPGRADE layTheWinnerStrategy
@@ -2043,64 +2068,79 @@ function layTheWinnerStrategyV2(params) {
 
 ## 📋 RIEPILOGO TODO MODULO 7
 
-- / 7.1 Aggiungere Volatility al Value Interpreter
-- / 7.2 Aggiungere Elasticity
-- / 7.3 Output Arricchito con contesto
-- / 7.4 Upgrade Strategie Base con dati storici
+- ✅ 7.1 Aggiungere Volatility al Value Interpreter
+- ✅ 7.2 Aggiungere Elasticity
+- ⬜ 7.3 Output Arricchito con contesto
+- ⬜ 7.4 Upgrade Strategie Base con dati storici
 
 ---
 
-# 📋 RIEPILOGO TODO COMPLETO (AGGIORNATO)
+# 📋 RIEPILOGO TODO COMPLETO (AGGIORNATO 23/12/2025)
 
-## Modulo 1: Database & Metriche (15 TODO)
-- / 1.1 - 1.15 (vedi sezione originale)
+## Modulo 1: Database & Metriche (16 TODO)
+### ✅ Completati (5):
+- ✅ 1.3 Segmentazione Match (matchSegmenter.js)
+- ✅ 1.4 Momentum Base (valueInterpreter.js)
+- ✅ 1.5 Momentum Volatility (valueInterpreter.js)
+- ✅ 1.6 Momentum Elasticity (valueInterpreter.js)
+- ✅ 1.13 Pressure Metrics Live (pressureCalculator.js)
+
+### ⬜ Da fare (11):
+- ⬜ 1.1, 1.2, 1.7-1.12, 1.14-1.16
 
 ## Modulo 2: Odds & Value Engine (14 TODO)
-- / 2.1 - 2.14 (vedi sezione originale)
+- ⬜ 2.1 - 2.14 (tutti pending)
 
 ## Modulo 3: AI Analysis Layer (6 TODO)
-- / 3.1 - 3.6 (vedi sezione originale)
+- ⬜ 3.1 - 3.6 (tutti pending)
 
 ## Modulo 4: Trading Engine (6 TODO)
-- / 4.1 - 4.6 (vedi sezione originale)
+- ⬜ 4.1 - 4.6 (tutti pending)
 
 ## Modulo 5: Frontend (4 TODO)
-- / 5.1 - 5.4 (vedi sezione originale)
+- ⬜ 5.1 - 5.4 (tutti pending)
 
-## Modulo 6: Potenziamenti Storici (11 TODO) 🆕
-- / 6.1 Soglie Dinamiche Superficie
-- / 6.2 Soglie Dinamiche Formato
-- / 6.3 Serie Tournament Weight
-- / 6.4 Lay The Winner Enhanced
-- / 6.5 Set & Break Recovery (NUOVA)
-- / 6.6 Tiebreak Strategy (NUOVA)
-- / 6.7 Multi-Source Odds
-- / 6.8 Ranking-Based Value
-- / 6.9 Court Type Factor
-- / 6.10 Surface-Specific Player Stats
-- / 6.11 Historical ROI Calculator
+## Modulo 6: Potenziamenti Storici (11 TODO)
+### ✅ Completati (1):
+- ✅ 6.1 Soglie Dinamiche Superficie (valueInterpreter.js)
 
-## Modulo 7: Upgrade Codice Esistente (4 TODO) 🆕
-- / 7.1 Volatility al Value Interpreter
-- / 7.2 Elasticity
-- / 7.3 Output Arricchito
-- / 7.4 Upgrade Strategie Base
+### ⬜ Da fare (10):
+- ⬜ 6.2 - 6.11
+
+## Modulo 7: Upgrade Codice Esistente (4 TODO)
+### ✅ Completati (2):
+- ✅ 7.1 Volatility al Value Interpreter
+- ✅ 7.2 Elasticity
+
+### ⬜ Da fare (2):
+- ⬜ 7.3, 7.4
 
 ---
 
-**TOTALE TODO: 61 items** (aggiunto 1.16 Live Odds Tracking)
+## 📊 STATISTICHE AVANZAMENTO
+
+| Modulo | Completati | Totale | % |
+|--------|------------|--------|---|
+| 1. Database & Metriche | 5 | 16 | 31% |
+| 2. Odds Engine | 0 | 14 | 0% |
+| 3. AI Layer | 0 | 6 | 0% |
+| 4. Trading Engine | 0 | 6 | 0% |
+| 5. Frontend | 0 | 4 | 0% |
+| 6. Potenziamenti | 1 | 11 | 9% |
+| 7. Upgrade Codice | 2 | 4 | 50% |
+| **TOTALE** | **8** | **61** | **13%** |
 
 ---
 
 # 📚 DOCUMENTI CORRELATI
 
 - `README.md` - Architettura generale e schema DB
-- `README_SYSTEM_OVERVIEW.md` - Visione filosofica del sistema
-- `README_FRONTEND_OVERVIEW.md` - Mappa concettuale UI
+- `FILOSOFIA_DB.md` - Filosofia Database e Acquisizione Dati
+- `FILOSOFIA_STATS.md` - Filosofia Statistiche
 
 ---
 
 **FINE DOCUMENTO**
 
-*Ultimo aggiornamento: 21 Dicembre 2025*
-*Versione: 2.1 - Aggiunto dettaglio Pressure Metrics, Live Odds Tracking, Break Detection*
+*Ultimo aggiornamento: 23 Dicembre 2025*
+*Versione: 2.7 - Aggiornato stato TODO, fix bug player stats*
