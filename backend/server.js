@@ -755,7 +755,7 @@ app.get('/api/db-stats', async (req, res) => {
           coverage: { 
             score: coverageScore, 
             label: 'Copertura', 
-            detail: `${totalMatches}/${detectedCount} rilevati` 
+            detail: `${totalMatches} acquisiti su ${detectedCount} rilevati` 
           },
           completeness: { 
             score: completenessScore, 
@@ -770,7 +770,7 @@ app.get('/api/db-stats', async (req, res) => {
           sources: { 
             score: sourcesScore, 
             label: 'Fonti Dati', 
-            detail: `Sofascore: ${dataSources.sofascore} · XLSX: ${dataSources.xlsx}${dataSources.merged > 0 ? ` · Merged: ${dataSources.merged}` : ''}` 
+            detail: `Sofascore: ${dataSources.sofascore} · XLSX: ${dataSources.xlsx}${dataSources.merged > 0 ? ` · Merged: ${dataSources.merged}` : ''}${dataSources.unknown > 0 ? ` · N/D: ${dataSources.unknown}` : ''}` 
           }
         },
         byStatus: matchesByStatus
