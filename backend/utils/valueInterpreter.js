@@ -15,6 +15,73 @@ const DEFAULT_THRESHOLDS = {
 };
 
 /**
+ * Soglie dinamiche per superficie
+ * - Hard: soglie standard (60/20/-20)
+ * - Clay: soglie più basse, match più equilibrati (55/18/-18)
+ * - Grass: soglie più alte, match più volatili (65/25/-25)
+ */
+const SURFACE_THRESHOLDS = {
+  'Hard': { 
+    strongControl: 60, 
+    advantage: 20, 
+    negativePressure: -20,
+    description: 'Standard - campo neutro'
+  },
+  'Clay': { 
+    strongControl: 55, 
+    advantage: 18, 
+    negativePressure: -18,
+    description: 'Più equilibrato - scambi lunghi favoriti'
+  },
+  'Grass': { 
+    strongControl: 65, 
+    advantage: 25, 
+    negativePressure: -25,
+    description: 'Più volatile - servizio dominante'
+  },
+  'Indoor Hard': { 
+    strongControl: 62, 
+    advantage: 22, 
+    negativePressure: -22,
+    description: 'Leggermente più veloce del hard outdoor'
+  }
+};
+
+/**
+ * Ottiene le soglie appropriate per una superficie
+ * @param {string} surface - Nome superficie (Hard, Clay, Grass, Indoor Hard)
+ * @returns {Object} Soglie { strongControl, advantage, negativePressure }
+ */
+function getThresholdsForSurface(surface) {
+  if (!surface) return DEFAULT_THRESHOLDS;
+  
+  // Normalizza il nome della superficie
+  const normalizedSurface = surface.trim();
+  
+  // Match esatto
+  if (SURFACE_THRESHOLDS[normalizedSurface]) {
+    return SURFACE_THRESHOLDS[normalizedSurface];
+  }
+  
+  // Match parziale (case-insensitive)
+  const surfaceLower = normalizedSurface.toLowerCase();
+  if (surfaceLower.includes('clay') || surfaceLower.includes('terra')) {
+    return SURFACE_THRESHOLDS['Clay'];
+  }
+  if (surfaceLower.includes('grass') || surfaceLower.includes('erba')) {
+    return SURFACE_THRESHOLDS['Grass'];
+  }
+  if (surfaceLower.includes('indoor')) {
+    return SURFACE_THRESHOLDS['Indoor Hard'];
+  }
+  if (surfaceLower.includes('hard') || surfaceLower.includes('cemento')) {
+    return SURFACE_THRESHOLDS['Hard'];
+  }
+  
+  return DEFAULT_THRESHOLDS;
+}
+
+/**
  * Interpreta il campo value di un game di tennis
  * 
  * @param {Object} gameData - Dati del game dall'API
@@ -25,6 +92,7 @@ const DEFAULT_THRESHOLDS = {
  * @param {string} gameData.description - Descrizione del punto (ace, double_fault, ecc.)
  * @param {Object} options - Opzioni aggiuntive
  * @param {Object} options.thresholds - Soglie personalizzate
+ * @param {string} options.surface - Superficie del match per soglie dinamiche
  * @returns {Object} Interpretazione del game
  */
 function interpretGameValue(gameData, options = {}) {
@@ -38,7 +106,9 @@ function interpretGameValue(gameData, options = {}) {
     awayScore
   } = gameData;
 
-  const thresholds = Object.assign({}, DEFAULT_THRESHOLDS, options.thresholds || {});
+  // Usa soglie dinamiche per superficie se disponibile, altrimenti personalizzate o default
+  const surfaceThresholds = options.surface ? getThresholdsForSurface(options.surface) : DEFAULT_THRESHOLDS;
+  const thresholds = Object.assign({}, surfaceThresholds, options.thresholds || {});
 
   let tags = [];
   let message = '';
@@ -151,11 +221,17 @@ function getSpecialPointDescription(code) {
 
 /**
  * Analizza i dati tennisPowerRankings per estrarre informazioni di momentum
+ * @param {Array} powerRankings - Array di dati momentum
+ * @param {Object} options - Opzioni { surface: string }
+ * @returns {Object} Analisi momentum
  */
-function analyzePowerRankings(powerRankings) {
+function analyzePowerRankings(powerRankings, options = {}) {
   if (!Array.isArray(powerRankings) || powerRankings.length === 0) {
     return null;
   }
+
+  // Usa soglie dinamiche per superficie
+  const thresholds = getThresholdsForSurface(options.surface);
 
   const analysis = {
     totalGames: powerRankings.length,
@@ -164,7 +240,9 @@ function analyzePowerRankings(powerRankings) {
     minValue: Infinity,
     breakGames: [],
     dominantGames: [],
-    pressureGames: []
+    pressureGames: [],
+    surface: options.surface || 'Unknown',
+    thresholdsUsed: thresholds
   };
 
   let sum = 0;
@@ -178,9 +256,10 @@ function analyzePowerRankings(powerRankings) {
     if (item.breakOccurred) {
       analysis.breakGames.push({ set: item.set, game: item.game, value });
     }
-    if (value > 60) {
+    // Usa soglie dinamiche invece di valori fissi
+    if (value > thresholds.strongControl) {
       analysis.dominantGames.push({ set: item.set, game: item.game, value });
-    } else if (value < -20) {
+    } else if (value < thresholds.negativePressure) {
       analysis.pressureGames.push({ set: item.set, game: item.game, value });
     }
   }
@@ -380,11 +459,12 @@ function analyzeMomentumTrend(powerRankings, windowSize = 3) {
 /**
  * Analisi potenziata dei powerRankings che include tutto
  * @param {Array} powerRankings - Array tennisPowerRankings
- * @param {Object} matchContext - Contesto match { surface, bestOf, series }
- * @returns {Object} Analisi completa
+ * @param {Object} matchContext - Contesto match { surface, bestOf, series, homeName, awayName }
+ * @returns {Object} Analisi completa con metriche avanzate
  */
 function analyzePowerRankingsEnhanced(powerRankings, matchContext = {}) {
-  const basic = analyzePowerRankings(powerRankings);
+  // Passa la superficie alla funzione base per usare soglie dinamiche
+  const basic = analyzePowerRankings(powerRankings, { surface: matchContext.surface });
   if (!basic) return null;
 
   const volatility = calculateVolatility(powerRankings);
@@ -393,27 +473,228 @@ function analyzePowerRankingsEnhanced(powerRankings, matchContext = {}) {
   const breakCount = powerRankings.filter(g => g.breakOccurred).length;
   const matchCharacter = classifyMatchCharacter(volatility, elasticity, breakCount);
 
-  // Soglie dinamiche per superficie (se disponibile)
-  let thresholds = DEFAULT_THRESHOLDS;
-  if (matchContext.surface) {
-    const surfaceThresholds = {
-      'Hard': { strongControl: 60, advantage: 20, negativePressure: -20 },
-      'Clay': { strongControl: 55, advantage: 18, negativePressure: -18 },
-      'Grass': { strongControl: 65, advantage: 25, negativePressure: -25 }
-    };
-    thresholds = surfaceThresholds[matchContext.surface] || DEFAULT_THRESHOLDS;
-  }
+  // Usa la funzione helper per ottenere le soglie
+  const thresholds = getThresholdsForSurface(matchContext.surface);
+
+  // === NUOVE METRICHE AVANZATE ===
+  
+  // Analisi per set
+  const setAnalysis = analyzeBySet(powerRankings, thresholds);
+  
+  // Momentum per giocatore (positivo = home advantage, negativo = away advantage)
+  const playerMomentum = analyzePlayerMomentum(powerRankings, matchContext);
+  
+  // Calcola percentuali normalizzate (0-100)
+  const volatilityPercent = Math.min(100, Math.round((volatility.value / 60) * 100));
+  const elasticityPercent = Math.round(elasticity.value * 100);
+  
+  // Adatta soglie per formato Bo3/Bo5
+  const formatAdjustment = getFormatAdjustment(matchContext.bestOf);
+  
+  // Indicatori per trading
+  const tradingIndicators = calculateTradingIndicators(
+    volatility, elasticity, trend, breakCount, matchContext
+  );
 
   return {
     ...basic,
-    volatility,
-    elasticity,
+    volatility: {
+      ...volatility,
+      percent: volatilityPercent
+    },
+    elasticity: {
+      ...elasticity,
+      percent: elasticityPercent
+    },
     trend,
     matchCharacter,
     breakCount,
     thresholds,
-    context: matchContext
+    // Nuovi campi
+    setAnalysis,
+    playerMomentum,
+    formatAdjustment,
+    tradingIndicators,
+    surfaceInfo: {
+      name: matchContext.surface || 'Unknown',
+      thresholdDescription: thresholds.description || 'Default thresholds'
+    },
+    context: matchContext,
+    // Timestamp analisi
+    analyzedAt: new Date().toISOString()
   };
+}
+
+/**
+ * Analizza il momentum suddiviso per set
+ * @param {Array} powerRankings - Array powerRankings
+ * @param {Object} thresholds - Soglie da usare
+ * @returns {Array} Analisi per ogni set
+ */
+function analyzeBySet(powerRankings, thresholds) {
+  const sets = {};
+  
+  for (const item of powerRankings) {
+    const setNum = item.set || 1;
+    if (!sets[setNum]) {
+      sets[setNum] = { games: [], values: [] };
+    }
+    sets[setNum].games.push(item);
+    sets[setNum].values.push(item.value || 0);
+  }
+  
+  return Object.entries(sets).map(([setNum, data]) => {
+    const values = data.values;
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const breaks = data.games.filter(g => g.breakOccurred).length;
+    
+    // Volatilità del set
+    const deltas = [];
+    for (let i = 1; i < values.length; i++) {
+      deltas.push(Math.abs(values[i] - values[i-1]));
+    }
+    const setVolatility = deltas.length > 0 
+      ? deltas.reduce((a, b) => a + b, 0) / deltas.length 
+      : 0;
+    
+    return {
+      set: parseInt(setNum),
+      games: values.length,
+      averageValue: Math.round(avg * 10) / 10,
+      maxValue: max,
+      minValue: min,
+      breaks,
+      volatility: Math.round(setVolatility * 10) / 10,
+      dominant: avg > thresholds.advantage ? 'home' : avg < -thresholds.advantage ? 'away' : 'balanced'
+    };
+  });
+}
+
+/**
+ * Analizza il momentum per giocatore
+ * @param {Array} powerRankings - Array powerRankings
+ * @param {Object} matchContext - Contesto con nomi giocatori
+ * @returns {Object} Momentum per giocatore
+ */
+function analyzePlayerMomentum(powerRankings, matchContext) {
+  const values = powerRankings.map(g => g.value || 0);
+  const positiveGames = values.filter(v => v > 10).length;
+  const negativeGames = values.filter(v => v < -10).length;
+  const neutralGames = values.length - positiveGames - negativeGames;
+  
+  const homeControl = Math.round((positiveGames / values.length) * 100);
+  const awayControl = Math.round((negativeGames / values.length) * 100);
+  
+  // Chi ha avuto più momentum complessivo
+  const totalMomentum = values.reduce((a, b) => a + b, 0);
+  const currentOwner = totalMomentum > 20 ? 'home' : totalMomentum < -20 ? 'away' : 'balanced';
+  
+  // Trend ultimi 5 game
+  const last5 = values.slice(-5);
+  const last5Avg = last5.length > 0 ? last5.reduce((a, b) => a + b, 0) / last5.length : 0;
+  const recentOwner = last5Avg > 10 ? 'home' : last5Avg < -10 ? 'away' : 'balanced';
+  
+  return {
+    home: {
+      name: matchContext.homeName || 'Home',
+      controlPercent: homeControl,
+      gamesWithAdvantage: positiveGames
+    },
+    away: {
+      name: matchContext.awayName || 'Away',
+      controlPercent: awayControl,
+      gamesWithAdvantage: negativeGames
+    },
+    neutral: {
+      percent: Math.round((neutralGames / values.length) * 100),
+      games: neutralGames
+    },
+    currentOwner,
+    recentOwner,
+    totalMomentum: Math.round(totalMomentum)
+  };
+}
+
+/**
+ * Ottiene aggiustamenti basati sul formato (Bo3 vs Bo5)
+ * @param {number} bestOf - Formato match (3 o 5)
+ * @returns {Object} Fattori di aggiustamento
+ */
+function getFormatAdjustment(bestOf) {
+  if (bestOf === 5) {
+    return {
+      format: 'Best of 5',
+      volatilityWeight: 0.8,  // Meno peso alla volatilità (più game = normalizza)
+      elasticityWeight: 1.2,  // Più peso all'elasticità (più tempo per recuperare)
+      breakImportance: 0.7,   // Single break meno decisivo
+      description: 'Match lungo - più opportunità di recupero'
+    };
+  }
+  return {
+    format: 'Best of 3',
+    volatilityWeight: 1.0,
+    elasticityWeight: 1.0,
+    breakImportance: 1.0,
+    description: 'Match corto - ogni break è cruciale'
+  };
+}
+
+/**
+ * Calcola indicatori utili per il trading
+ * @returns {Object} Indicatori trading
+ */
+function calculateTradingIndicators(volatility, elasticity, trend, breakCount, context) {
+  // Risk level basato su volatilità
+  let riskLevel;
+  if (volatility.class === 'MOLTO_VOLATILE') {
+    riskLevel = 'HIGH';
+  } else if (volatility.class === 'VOLATILE') {
+    riskLevel = 'MEDIUM_HIGH';
+  } else if (volatility.class === 'MODERATO') {
+    riskLevel = 'MEDIUM';
+  } else {
+    riskLevel = 'LOW';
+  }
+  
+  // Confidence per lay strategies (più bassa se volatile)
+  const layConfidence = Math.max(20, 100 - (volatility.value * 2));
+  
+  // Opportunità per back the comeback
+  const comebackOpportunity = elasticity.class === 'RESILIENTE' && trend.current_trend === 'FALLING';
+  
+  // Break probability indicator
+  const breakProbability = breakCount > 0 
+    ? Math.min(100, Math.round((breakCount / context.totalGames || 10) * 100 * 1.5))
+    : 30; // Default se no data
+  
+  return {
+    riskLevel,
+    layConfidence: Math.round(layConfidence),
+    comebackOpportunity,
+    breakProbability,
+    recommendedStrategy: getRecommendedStrategy(volatility, elasticity, trend, breakCount)
+  };
+}
+
+/**
+ * Suggerisce strategia basata sui dati
+ */
+function getRecommendedStrategy(volatility, elasticity, trend, breakCount) {
+  if (volatility.class === 'STABILE' && trend.current_trend === 'STABLE') {
+    return { name: 'HOLD', description: 'Match stabile, mantenere posizione' };
+  }
+  if (trend.current_trend === 'FALLING' && elasticity.class === 'RESILIENTE') {
+    return { name: 'BACK_COMEBACK', description: 'Buona opportunità per back sul recupero' };
+  }
+  if (volatility.class === 'MOLTO_VOLATILE' && breakCount >= 4) {
+    return { name: 'CAUTION', description: 'Match imprevedibile, ridurre esposizione' };
+  }
+  if (trend.current_trend === 'RISING' && volatility.class !== 'MOLTO_VOLATILE') {
+    return { name: 'LAY_LOSER', description: 'Momentum positivo, valutare lay sul perdente' };
+  }
+  return { name: 'MONITOR', description: 'Continuare a monitorare' };
 }
 
 module.exports = {
@@ -426,6 +707,14 @@ module.exports = {
   classifyMatchCharacter,
   analyzeMomentumTrend,
   analyzePowerRankingsEnhanced,
+  getThresholdsForSurface,
+  // Nuove funzioni helper
+  analyzeBySet,
+  analyzePlayerMomentum,
+  getFormatAdjustment,
+  calculateTradingIndicators,
+  // Costanti
   DEFAULT_THRESHOLDS,
+  SURFACE_THRESHOLDS,
   VOLATILITY_THRESHOLDS
 };

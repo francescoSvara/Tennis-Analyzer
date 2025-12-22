@@ -157,28 +157,6 @@ export default function PointByPoint({
 
   return (
     <div className="pbp-root">
-      {/* Indicatore live */}
-      {eventId && lastUpdate && (
-        <div className="pbp-live-indicator">
-          <span className="pbp-live-dot" style={{ 
-            backgroundColor: autoRefresh ? '#4caf50' : '#9e9e9e',
-            animation: autoRefresh ? 'pulse 2s infinite' : 'none'
-          }}></span>
-          <span className="pbp-live-text">
-            {autoRefresh ? 'LIVE' : 'Aggiornato'}: {lastUpdate.toLocaleTimeString()}
-          </span>
-          {!autoRefresh && eventId && (
-            <button 
-              className="pbp-refresh-btn"
-              onClick={loadLiveData}
-              title="Aggiorna dati"
-            >
-              🔄
-            </button>
-          )}
-        </div>
-      )}
-
       {/* Legenda colori game */}
       <div className="pbp-legend">
         <span className="pbp-legend-title">Legenda:</span>

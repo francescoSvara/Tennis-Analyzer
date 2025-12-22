@@ -775,3 +775,245 @@
     align-items: center;
   }
 }
+
+/* ============================================
+   SEZIONE: ANALISI AVANZATA (Volatilità, Elasticità, Character)
+   ============================================ */
+
+.advanced-analysis-section {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(25, 35, 50, 0.95) 100%);
+}
+
+/* Match Character Card */
+.match-character-card {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border-left: 4px solid;
+  margin-bottom: 16px;
+}
+
+.character-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.character-emoji {
+  font-size: 32px;
+}
+
+.character-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.character-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.character-desc {
+  font-size: 13px;
+  color: #8b95a5;
+}
+
+/* Grid per Volatilità e Elasticità */
+.analysis-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .analysis-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Metric Card (base) */
+.metric-card {
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.metric-icon {
+  font-size: 18px;
+}
+
+.metric-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e4e6eb;
+  flex: 1;
+}
+
+.metric-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Volatility badges */
+.badge-stabile {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.badge-moderato {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.badge-volatile {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.badge-molto_volatile {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Elasticity badges */
+.badge-resiliente {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.badge-normale {
+  background: rgba(107, 114, 128, 0.2);
+  color: #9ca3af;
+}
+
+.badge-fragile {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Metric Bar */
+.metric-bar-container {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.metric-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* Volatility bars */
+.volatility-bar.vol-stabile {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.volatility-bar.vol-moderato {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.volatility-bar.vol-volatile {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.volatility-bar.vol-molto_volatile {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* Elasticity bars */
+.elasticity-bar.elas-resiliente {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.elasticity-bar.elas-normale {
+  background: linear-gradient(90deg, #6b7280, #9ca3af);
+}
+
+.elasticity-bar.elas-fragile {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* Metric Stats */
+.metric-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.metric-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-stat .stat-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.metric-stat .stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e4e6eb;
+}
+
+/* Metric Explanation */
+.metric-explanation {
+  font-size: 12px;
+  color: #8b95a5;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border-left: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .match-character-card {
+    padding: 12px 16px;
+  }
+  
+  .character-emoji {
+    font-size: 26px;
+  }
+  
+  .character-title {
+    font-size: 15px;
+  }
+  
+  .character-desc {
+    font-size: 12px;
+  }
+  
+  .metric-card {
+    padding: 14px;
+  }
+  
+  .metric-stat .stat-value {
+    font-size: 14px;
+  }
+  
+  .metric-explanation {
+    font-size: 11px;
+  }
+}

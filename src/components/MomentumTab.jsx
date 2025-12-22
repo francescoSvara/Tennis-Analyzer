@@ -1,6 +1,151 @@
 import React, { memo, useMemo } from 'react';
 import './MomentumTab.css';
 
+// ============================================================================
+// NUOVE FUNZIONI: Volatility, Elasticity, Match Character
+// ============================================================================
+
+const VOLATILITY_THRESHOLDS = {
+  stable: 15,      // delta medio < 15 = match controllato
+  moderate: 25,    // 15-25 = normale alternanza
+  volatile: 40,    // 25-40 = alti e bassi frequenti
+  extreme: 40      // > 40 = match caotico/emotivo
+};
+
+/**
+ * Calcola la volatilità del momentum (quanto oscilla tra game consecutivi)
+ */
+function calculateVolatility(powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < 2) {
+    return { value: 0, class: 'STABILE', deltas: [], percentage: 0 };
+  }
+
+  const deltas = [];
+  for (let i = 1; i < powerRankings.length; i++) {
+    const prev = powerRankings[i - 1].value || 0;
+    const curr = powerRankings[i].value || 0;
+    deltas.push(Math.abs(curr - prev));
+  }
+
+  const avgDelta = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+  
+  let volatilityClass;
+  if (avgDelta < VOLATILITY_THRESHOLDS.stable) {
+    volatilityClass = 'STABILE';
+  } else if (avgDelta < VOLATILITY_THRESHOLDS.moderate) {
+    volatilityClass = 'MODERATO';
+  } else if (avgDelta < VOLATILITY_THRESHOLDS.volatile) {
+    volatilityClass = 'VOLATILE';
+  } else {
+    volatilityClass = 'MOLTO_VOLATILE';
+  }
+
+  // Percentuale per la barra (normalizzata su 100)
+  const percentage = Math.min(100, (avgDelta / 60) * 100);
+
+  return {
+    value: Math.round(avgDelta * 10) / 10,
+    class: volatilityClass,
+    deltas,
+    maxSwing: Math.max(...deltas),
+    minSwing: Math.min(...deltas),
+    percentage
+  };
+}
+
+/**
+ * Calcola l'elasticità (capacità di recupero da fasi negative)
+ */
+function calculateElasticity(powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length < 3) {
+    return { value: 0.5, class: 'NORMALE', negative_phases: 0, avg_recovery_games: 0, percentage: 50 };
+  }
+
+  let negativePhases = 0;
+  let recoveryGames = [];
+  let inNegativePhase = false;
+  let negativeStart = -1;
+
+  for (let i = 0; i < powerRankings.length; i++) {
+    const value = powerRankings[i].value || 0;
+    
+    if (value < -15 && !inNegativePhase) {
+      inNegativePhase = true;
+      negativeStart = i;
+    } else if (value > 0 && inNegativePhase) {
+      inNegativePhase = false;
+      negativePhases++;
+      recoveryGames.push(i - negativeStart);
+    }
+  }
+
+  const avgRecovery = recoveryGames.length > 0 
+    ? recoveryGames.reduce((a, b) => a + b, 0) / recoveryGames.length 
+    : 0;
+  
+  const elasticityValue = avgRecovery > 0 ? Math.min(1, 1 / avgRecovery) : 0.5;
+  
+  let elasticityClass;
+  if (elasticityValue >= 0.5) {
+    elasticityClass = 'RESILIENTE';
+  } else if (elasticityValue >= 0.33) {
+    elasticityClass = 'NORMALE';
+  } else {
+    elasticityClass = 'FRAGILE';
+  }
+
+  return {
+    value: Math.round(elasticityValue * 100) / 100,
+    class: elasticityClass,
+    negative_phases: negativePhases,
+    avg_recovery_games: Math.round(avgRecovery * 10) / 10,
+    percentage: elasticityValue * 100
+  };
+}
+
+/**
+ * Classifica il carattere del match
+ */
+function classifyMatchCharacter(volatility, elasticity, breakCount = 0) {
+  const v = volatility?.class || 'STABILE';
+  const e = elasticity?.class || 'NORMALE';
+  
+  let character, description, emoji, color;
+  
+  if (v === 'MOLTO_VOLATILE' && breakCount >= 4) {
+    character = 'BATTAGLIA_EMOTIVA';
+    description = 'Match con grandi oscillazioni e molti break';
+    emoji = '⚔️';
+    color = '#f59e0b';
+  } else if (v === 'STABILE' && e === 'RESILIENTE') {
+    character = 'DOMINIO';
+    description = 'Un giocatore controlla il match';
+    emoji = '👑';
+    color = '#10b981';
+  } else if (e === 'RESILIENTE' && breakCount >= 2) {
+    character = 'RIMONTE';
+    description = 'Frequenti recuperi dopo momenti difficili';
+    emoji = '🔄';
+    color = '#3b82f6';
+  } else if (v === 'VOLATILE') {
+    character = 'ALTALENA';
+    description = 'Continui cambi di momentum';
+    emoji = '🎢';
+    color = '#8b5cf6';
+  } else {
+    character = 'STANDARD';
+    description = 'Andamento regolare';
+    emoji = '📊';
+    color = '#6b7280';
+  }
+
+  return { character, description, emoji, color };
+}
+
+// ============================================================================
+// FUNZIONI ESISTENTI
+// ============================================================================
+
 /**
  * Analizza chi ha il momentum e perché
  */
@@ -148,6 +293,15 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
     [powerRankings, homeName, awayName]
   );
 
+  // NUOVE ANALISI: Volatilità, Elasticità, Match Character
+  const volatility = useMemo(() => calculateVolatility(powerRankings), [powerRankings]);
+  const elasticity = useMemo(() => calculateElasticity(powerRankings), [powerRankings]);
+  const breakCount = useMemo(() => powerRankings.filter(g => g.breakOccurred).length, [powerRankings]);
+  const matchCharacter = useMemo(() => 
+    classifyMatchCharacter(volatility, elasticity, breakCount),
+    [volatility, elasticity, breakCount]
+  );
+
   // Empty state
   if (!powerRankings || powerRankings.length === 0) {
     return (
@@ -257,6 +411,101 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
           </div>
         </section>
       )}
+
+      {/* === SEZIONE 2.5: ANALISI AVANZATA (VOLATILITÀ, ELASTICITÀ, CHARACTER) === */}
+      <section className="momentum-section advanced-analysis-section">
+        <h3 className="section-title">
+          <span className="section-icon">🔬</span>
+          Analisi Avanzata
+        </h3>
+        
+        {/* Match Character Badge */}
+        <div className="match-character-card" style={{ borderColor: matchCharacter.color }}>
+          <div className="character-header">
+            <span className="character-emoji">{matchCharacter.emoji}</span>
+            <div className="character-info">
+              <span className="character-title" style={{ color: matchCharacter.color }}>
+                {matchCharacter.character.replace('_', ' ')}
+              </span>
+              <span className="character-desc">{matchCharacter.description}</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Volatilità e Elasticità side by side */}
+        <div className="analysis-metrics-grid">
+          {/* Volatilità */}
+          <div className={`metric-card volatility-card vol-${volatility.class.toLowerCase()}`}>
+            <div className="metric-header">
+              <span className="metric-icon">📊</span>
+              <span className="metric-title">Volatilità</span>
+              <span className={`metric-badge badge-${volatility.class.toLowerCase()}`}>
+                {volatility.class.replace('_', ' ')}
+              </span>
+            </div>
+            
+            <div className="metric-bar-container">
+              <div 
+                className={`metric-bar volatility-bar vol-${volatility.class.toLowerCase()}`}
+                style={{ width: `${volatility.percentage}%` }}
+              />
+            </div>
+            
+            <div className="metric-stats">
+              <div className="metric-stat">
+                <span className="stat-label">Oscillazione Media</span>
+                <span className="stat-value">{volatility.value}</span>
+              </div>
+              <div className="metric-stat">
+                <span className="stat-label">Max Swing</span>
+                <span className="stat-value">{Math.round(volatility.maxSwing || 0)}</span>
+              </div>
+            </div>
+            
+            <div className="metric-explanation">
+              {volatility.class === 'STABILE' && '✅ Match controllato, poche oscillazioni'}
+              {volatility.class === 'MODERATO' && '📈 Normale alternanza di momenti'}
+              {volatility.class === 'VOLATILE' && '⚠️ Frequenti cambi di momentum'}
+              {volatility.class === 'MOLTO_VOLATILE' && '🔥 Match imprevedibile e caotico'}
+            </div>
+          </div>
+          
+          {/* Elasticità */}
+          <div className={`metric-card elasticity-card elas-${elasticity.class.toLowerCase()}`}>
+            <div className="metric-header">
+              <span className="metric-icon">🔄</span>
+              <span className="metric-title">Elasticità</span>
+              <span className={`metric-badge badge-${elasticity.class.toLowerCase()}`}>
+                {elasticity.class}
+              </span>
+            </div>
+            
+            <div className="metric-bar-container">
+              <div 
+                className={`metric-bar elasticity-bar elas-${elasticity.class.toLowerCase()}`}
+                style={{ width: `${elasticity.percentage}%` }}
+              />
+            </div>
+            
+            <div className="metric-stats">
+              <div className="metric-stat">
+                <span className="stat-label">Fasi Negative</span>
+                <span className="stat-value">{elasticity.negative_phases}</span>
+              </div>
+              <div className="metric-stat">
+                <span className="stat-label">Recupero Medio</span>
+                <span className="stat-value">{elasticity.avg_recovery_games} game</span>
+              </div>
+            </div>
+            
+            <div className="metric-explanation">
+              {elasticity.class === 'RESILIENTE' && '💪 Recupera rapidamente dai momenti difficili'}
+              {elasticity.class === 'NORMALE' && '📊 Capacità di recupero nella media'}
+              {elasticity.class === 'FRAGILE' && '⚠️ Fatica a recuperare dopo cali'}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* === SEZIONE 3: GRAFICO MOMENTUM === */}
       <section className="momentum-section chart-section">

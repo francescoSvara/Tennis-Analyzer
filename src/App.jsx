@@ -473,11 +473,21 @@ export default function App() {
         };
         
         // Funzione helper per estrarre dati dalle chiavi API nel raw_json
+        // Gestisce anche il caso di risposta con errore
         const extractFromApi = (rawJson, keyPattern, dataField) => {
           if (!rawJson?.api) return null;
           for (const [url, apiData] of Object.entries(rawJson.api)) {
-            if (url.includes(keyPattern) && apiData?.[dataField]) {
-              return apiData[dataField];
+            if (url.includes(keyPattern)) {
+              // Salta se c'è un errore nella risposta
+              if (apiData?.error) continue;
+              // Prova il campo specifico
+              if (apiData?.[dataField] && Array.isArray(apiData[dataField])) {
+                return apiData[dataField];
+              }
+              // Se apiData stesso è un array valido
+              if (Array.isArray(apiData) && apiData.length > 0) {
+                return apiData;
+              }
             }
           }
           return null;
@@ -485,32 +495,38 @@ export default function App() {
         
         // Estrai powerRankings, statistics e pointByPoint dalle chiavi API
         // NOTA: SofaScore usa sia 'tennis-power-rankings' che 'tennis-power' come endpoint
+        // Prova anche direttamente dal response del backend se già estratti
         const extractedPowerRankings = 
+          data.powerRankings ||                                              // Dal backend se già estratto
+          data.tennisPowerRankings ||                                        // Alias
           extractFromApi(rawJson, 'tennis-power-rankings', 'tennisPowerRankings') ||
           extractFromApi(rawJson, 'tennis-power', 'tennisPowerRankings') ||  // Variante URL
           extractFromApi(rawJson, 'power-rankings', 'powerRankings') ||
-          rawJson.tennisPowerRankings || 
-          rawJson.powerRankings || 
-          data.powerRankings || 
-          data.tennisPowerRankings ||
+          extractFromApi(rawJson, 'power', 'tennisPowerRankings') ||         // Altra variante
+          rawJson?.tennisPowerRankings || 
+          rawJson?.powerRankings || 
           [];
           
         const extractedStatistics = 
+          data.statistics ||                                                 // Dal backend se già estratto
           extractFromApi(rawJson, '/statistics', 'statistics') ||
-          rawJson.statistics || 
-          data.statistics || 
+          rawJson?.statistics || 
           [];
           
         const extractedPointByPoint = 
+          data.pointByPoint ||                                               // Dal backend se già estratto
           extractFromApi(rawJson, 'point-by-point', 'pointByPoint') ||
-          rawJson.pointByPoint || 
-          data.pointByPoint || 
+          rawJson?.pointByPoint || 
           [];
         
         console.log('🔍 Debug estrazione dati:');
+        console.log('   source:', data.source || 'unknown');
         console.log('   extractedPowerRankings:', extractedPowerRankings?.length || 0);
         console.log('   extractedStatistics:', extractedStatistics?.length || 0);
         console.log('   extractedPointByPoint:', extractedPointByPoint?.length || 0);
+        if (rawJson?.api) {
+          console.log('   API keys disponibili:', Object.keys(rawJson.api).filter(k => k.includes('power') || k.includes('statistic')));
+        }
         
         // Combina i dati - IMPORTANTE: ...data PRIMA per non sovrascrivere i campi normalizzati
         normalizedData = {
@@ -523,30 +539,65 @@ export default function App() {
           scores: data.scores || []
         };
         
-        // Se mancano dati dettagliati, prova a recuperarli da SofaScore
-        const hasPowerRankings = extractedPowerRankings.length > 0;
-        const hasStatistics = extractedStatistics.length > 0;
-        const hasPointByPoint = extractedPointByPoint.length > 0;
+        // Se mancano dati dettagliati, prova a recuperarli
+        const hasPowerRankings = Array.isArray(extractedPowerRankings) && extractedPowerRankings.length > 0;
+        const hasStatistics = Array.isArray(extractedStatistics) && extractedStatistics.length > 0;
+        const hasPointByPoint = Array.isArray(extractedPointByPoint) && extractedPointByPoint.length > 0;
         
         if (!hasPowerRankings && !hasStatistics && !hasPointByPoint) {
-          console.log('⚠️ Dati dettagliati mancanti nel DB, provo a recuperare da SofaScore...');
-          try {
-            const sofaResponse = await fetch(apiUrl(`/api/match/${eventId}?forceRefresh=true`));
-            const sofaData = await sofaResponse.json();
-            
-            if (sofaData.source === 'sofascore' || sofaData.tennisPowerRankings || sofaData.statistics || sofaData.pointByPoint) {
-              console.log('✅ Dati recuperati da SofaScore');
-              // Merge dei dati SofaScore con quelli DB
-              normalizedData = {
-                ...normalizedData,
-                tennisPowerRankings: sofaData.tennisPowerRankings || sofaData.powerRankings || normalizedData.tennisPowerRankings,
-                powerRankings: sofaData.tennisPowerRankings || sofaData.powerRankings || normalizedData.powerRankings,
-                statistics: sofaData.statistics || normalizedData.statistics,
-                pointByPoint: sofaData.pointByPoint || normalizedData.pointByPoint
-              };
+          console.log('⚠️ Dati dettagliati mancanti nel DB, provo a recuperare...');
+          
+          // Per match XLSX, prova a cercare su SofaScore per nome giocatori
+          if (data.data_source === 'xlsx_2025' || data.data_source === 'xlsx') {
+            console.log('🔍 Match XLSX - cerco corrispondenza su SofaScore...');
+            try {
+              const findResponse = await fetch(apiUrl(`/api/match/${eventId}/find-sofascore`), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+              });
+              const findResult = await findResponse.json();
+              
+              if (findResult.found && findResult.powerRankings?.count > 0) {
+                console.log(`✅ Match trovato su SofaScore! ${findResult.powerRankings.count} powerRankings salvati`);
+                
+                // Ricarica i dati dal DB ora che ha i powerRankings
+                const refreshResponse = await fetch(apiUrl(`/api/match/${eventId}`));
+                const refreshData = await refreshResponse.json();
+                
+                if (refreshData.powerRankings?.length > 0) {
+                  normalizedData = {
+                    ...normalizedData,
+                    tennisPowerRankings: refreshData.powerRankings,
+                    powerRankings: refreshData.powerRankings,
+                    statistics: refreshData.statistics || normalizedData.statistics,
+                    pointByPoint: refreshData.pointByPoint || normalizedData.pointByPoint
+                  };
+                }
+              } else {
+                console.log('⚠️ Match SofaScore non trovato o senza powerRankings:', findResult.message);
+              }
+            } catch (findErr) {
+              console.log('⚠️ Ricerca SofaScore fallita:', findErr.message);
             }
-          } catch (sofaErr) {
-            console.log('⚠️ Impossibile recuperare dati da SofaScore:', sofaErr.message);
+          } else {
+            // Per match SofaScore, usa forceRefresh standard
+            try {
+              const sofaResponse = await fetch(apiUrl(`/api/match/${eventId}?forceRefresh=true`));
+              const sofaData = await sofaResponse.json();
+              
+              if (sofaData.source === 'sofascore' || sofaData.tennisPowerRankings || sofaData.statistics || sofaData.pointByPoint) {
+                console.log('✅ Dati recuperati da SofaScore');
+                normalizedData = {
+                  ...normalizedData,
+                  tennisPowerRankings: sofaData.tennisPowerRankings || sofaData.powerRankings || normalizedData.tennisPowerRankings,
+                  powerRankings: sofaData.tennisPowerRankings || sofaData.powerRankings || normalizedData.powerRankings,
+                  statistics: sofaData.statistics || normalizedData.statistics,
+                  pointByPoint: sofaData.pointByPoint || normalizedData.pointByPoint
+                };
+              }
+            } catch (sofaErr) {
+              console.log('⚠️ Impossibile recuperare dati da SofaScore:', sofaErr.message);
+            }
           }
         }
         
@@ -1316,6 +1367,20 @@ export default function App() {
                   if (!powerRankings || powerRankings.length === 0) {
                     const found = deepFindAll(dataForExtraction, 'powerRankings', 5).flat().filter(Boolean);
                     if (found.length > 0) powerRankings = found;
+                  }
+                  
+                  // Cerca anche nelle chiavi API del raw_json se presenti
+                  if ((!powerRankings || powerRankings.length === 0) && dataForExtraction.raw_json?.api) {
+                    for (const [url, apiData] of Object.entries(dataForExtraction.raw_json.api)) {
+                      if (url.includes('power') && !apiData?.error) {
+                        const pr = apiData?.tennisPowerRankings || apiData?.powerRankings;
+                        if (Array.isArray(pr) && pr.length > 0) {
+                          powerRankings = pr;
+                          console.log('📊 PowerRankings trovati in raw_json.api:', url);
+                          break;
+                        }
+                      }
+                    }
                   }
                   
                   // Debug log

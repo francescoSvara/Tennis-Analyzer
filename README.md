@@ -1,6 +1,6 @@
-# 🎾 Tennis-Analyzer
+# ?? Tennis-Analyzer
 
-**Sistema di analisi partite di tennis in tempo reale**
+**Sistema di analisi partite di tennis con dati in tempo reale e storici**
 
 [![Live Demo](https://img.shields.io/badge/Live-tennis--analyzer.vercel.app-blue)](https://tennis-analyzer.vercel.app)
 [![Backend](https://img.shields.io/badge/API-Railway-green)](https://tennis-analyzer-production.up.railway.app)
@@ -8,808 +8,376 @@
 
 ---
 
-## 🆕 ULTIMA SESSIONE - 22 Dicembre 2025
+## ?? Indice
 
-### Nuove Funzionalità Implementate
+1. [Panoramica](#panoramica)
+2. [Architettura](#architettura)
+3. [Setup Rapido](#setup-rapido)
+4. [Database Schema](#database-schema)
+5. [API Reference](#api-reference)
+6. [Frontend](#frontend)
+7. [Documentazione](#documentazione)
 
-#### 🌡️ MomentumTab - Redesign Completo
-- **Design semplificato** focalizzato su: CHI ha il momentum e QUANDO sta cambiando
-- **Owner Card** grande con:
-  - Nome giocatore con momentum
-  - Barra forza (0-100%)
-  - Motivo (sta dominando, leggero controllo, equilibrio)
-  - 3 metriche: Valore Attuale, Media 3 Game, Media 5 Game
-- **Alert Cambio Momentum** (mostra SOLO se shift in corso):
-  - Direzione del cambio
-  - Confidenza percentuale
-  - **Causa dello shift**: break, errori, crescita avversario, calo rendimento
-- **Termometro Ultimi 5 Game** - Design intuitivo con:
-  - Header con nomi giocatori (🔵 Home ← EQUILIBRIO → Away 🔴)
-  - Barra bilaterale che si riempie verso il giocatore con momentum
-  - Indicatore chi serve (🎾→ o ←🎾)
-  - Badge BRK! animato per i break
-- **Grafico SVG** pulito con aree colorate home/away
-- **Riepilogo rapido**: Game totali, Break, Media match
+---
 
-#### 🎾 Point-by-Point - Legenda Punteggi
-- Aggiunta legenda sotto header "🎾 = Chi Serve"
-- Colori distintivi per game al servizio Home/Away
-- Badge "Chi Serve" per ogni game
+## ?? Panoramica
 
-#### � Manual Predictor - Confronto Unificato
-- **Statistiche unificate** in tabella confronto side-by-side
-- Header con nomi giocatori (Home vs Away)
-- **ComparisonRow** con evidenziazione vincitore:
-  - 🟢 Verde = valore migliore
-  - 🔵 Blu = Home player
-  - 🔴 Rosso = Away player
-- **H2H Enhanced**:
-  - Score grande centrale (es. 3 - 1)
-  - Barra visuale proporzionale
-  - Badge "👑 Leader" quando c'è un dominatore
-  - Empty state chiaro quando non ci sono precedenti
+Tennis-Analyzer � un sistema completo per:
 
-#### �🔧 Bug Fix
-- **ManualPredictor**: Corretto uso di `apiUrl()` come funzione (era usata come stringa)
-- Ricerca giocatori ora funziona correttamente
-- Fix endpoint `/api/player/search` per autocomplete
+- ?? **Analisi match** - Statistiche, momentum, point-by-point
+- ?? **Dati giocatori** - Ranking, H2H, statistiche carriera
+- ?? **Quote betting** - Import storico da XLSX
+- ? **Live scoring** - Aggiornamenti in tempo reale via WebSocket
 
-### Funzioni Analisi Momentum
-```javascript
-// Chi ha il momentum e perché
-analyzeMomentumOwner(powerRankings, homeName, awayName)
-// Returns: { owner, strength, reason, lastValue, avgLast3, avgLast5 }
+### Fonti Dati
 
-// Detecta se il momentum sta cambiando
-detectMomentumShift(powerRankings, homeName, awayName)
-// Returns: { isShifting, direction, cause, confidence, metrics }
+| Fonte | Dati | Uso |
+|-------|------|-----|
+| **SofaScore** | Stats, momentum, point-by-point | Real-time e match recenti |
+| **XLSX** | Quote, ranking storici | Archivio storico |
+
+> ?? Per dettagli completi: **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)**
+
+---
+
+## ??? Architettura
+
+```
++-------------------------------------------------------------+
+�                    SEZIONE 1: ACQUISIZIONE                   �
+�                                                              �
+�   +--------------+         +--------------+                 �
+�   �  SofaScore   �         �    XLSX      �                 �
+�   �   Scraper    �         �   Import     �                 �
+�   +--------------+         +--------------+                 �
+�          �                        �                          �
+�          +------------------------+                          �
+�                       ?                                      �
+�              +----------------+                              �
+�              �   Supabase DB  �                              �
+�              +----------------+                              �
++-------------------------------------------------------------+
+
++-------------------------------------------------------------+
+�                    SEZIONE 2: CONSUMO                        �
+�                                                              �
+�              +----------------+                              �
+�              �   Supabase DB  �                              �
+�              +----------------+                              �
+�                       �                                      �
+�   +-------------------+-------------------+                 �
+�   �                   ?                   �                 �
+�   �  +---------------------------------+  �                 �
+�   �  �      Backend (Node.js)          �  �                 �
+�   �  �  +-----------+ +-------------+  �  �                 �
+�   �  �  �MatchCard  � � PlayerServ  �  �  �                 �
+�   �  �  � Service   � �   ice       �  �  �                 �
+�   �  �  +-----------+ +-------------+  �  �                 �
+�   �  +---------------------------------+  �                 �
+�   +---------------------------------------+                 �
+�                       �                                      �
+�                       ?                                      �
+�              +----------------+                              �
+�              � Frontend React �                              �
+�              +----------------+                              �
++-------------------------------------------------------------+
+```
+
+### Struttura Progetto
+
+```
+React-Betfair/
++-- backend/
+�   +-- server.js                 # API Express
+�   +-- services/
+�   �   +-- matchCardService.js   # Assembla card match
+�   �   +-- playerService.js      # Gestione giocatori
+�   �   +-- playerStatsService.js # Statistiche aggregate
+�   +-- scraper/
+�   �   +-- sofascoreScraper.js   # Scraping SofaScore
+�   +-- db/
+�   �   +-- matchRepository.js    # Query database
+�   �   +-- supabase.js           # Client Supabase
+�   +-- migrations/
+�       +-- create-new-schema.sql # Schema DB
+�       +-- migrate-to-new-schema.js
++-- src/
+�   +-- App.jsx                   # App principale
+�   +-- components/               # Componenti React
++-- FILOSOFIA_DB.md               # Documentazione architettura
++-- README.md
 ```
 
 ---
 
-## 🆕 SESSIONE PRECEDENTE - 21 Dicembre 2025
+## ?? Setup Rapido
 
-### Nuove Funzionalità Implementate
+### Prerequisiti
 
-#### 📊 QuotesTab - Calcolo Probabilità Avanzato
-- Sistema multi-fattore con 7 variabili ponderate
-- Fetch automatico statistiche storiche giocatori
-- Win Rate per superficie (Hard/Clay/Grass) e formato (Bo3/Bo5)
-- Formula ELO-style per ranking
-- Indicatore affidabilità calcolo (🟢 Alto / 🟡 Medio / 🟠 Basso)
+- Node.js 18+
+- Account Supabase (gratuito)
+- (Opzionale) Account Railway per deploy
 
-#### 🎯 Strategie di Base Enhanced
-- **Lay The Winner** - Considera superficie, formato, momentum
-- **Banca Servizio** - Integra Pressure Index (0-100) con breakdown
-- **Super Break** - Volatilità, elasticità, match character
-- UI con barre colorate e badge visivi
+### 1. Clone e Installa
 
-#### 🎾 Point-by-Point Enhanced
-- Statistiche per game (Ace, DF, Winner, BP)
-- Rilevamento automatico Break con badge animato
-- Indicatore "chi serve" per ogni game
-- Barra pressione mini nel header game
-- Statistiche aggregate per set
-
-#### 🔧 Bug Fix
-- PredictorTab ora mostra nomi giocatori reali
-- Match Predictor carica statistiche storiche correttamente
-
----
-
-## ⚠️ ARCHITETTURA IMPORTANTE
-
-### 🚫 NO SCRAPING DAL SERVER CLOUD
-
-**Il backend su Railway NON può fare scraping da SofaScore** perché:
-- SofaScore blocca le richieste dai server cloud (errore 409/403)
-- Railway ha IP datacenter che vengono riconosciuti e bloccati
-
-### ✅ SOLUZIONE: Scraping LOCALE
-
-Lo scraping va fatto **esclusivamente** dal progetto locale `Tennis-Scraper-Local`:
-1. Esegui lo scraper in locale sul tuo PC
-2. I dati vengono salvati su Supabase (cloud)
-3. Il frontend/backend leggono solo dal database
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│  🖥️ LOCALE (tuo PC)                                                 │
-│  Tennis-Scraper-Local/                                               │
-│  └── Scraping SofaScore → Salva su Supabase                         │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-                          Scrive su DB
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  ☁️ CLOUD (Supabase)                                                 │
-│  Database PostgreSQL con tutti i dati match                          │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-                          Legge da DB
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  🌐 CLOUD (Railway + Vercel)                                         │
-│  Backend API + Frontend React                                        │
-│  SOLO LETTURA - nessuno scraping!                                    │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🌐 LINK PRODUZIONE
-
-| Servizio | URL | Status |
-|----------|-----|--------|
-| **Frontend** | https://tennis-analyzer.vercel.app | ✅ Live |
-| **Backend API** | https://tennis-analyzer-production.up.railway.app | ✅ Live |
-| **Health Check** | https://tennis-analyzer-production.up.railway.app/api/health | ✅ OK |
-| **Repository** | https://github.com/francescoSvara/Tennis-Analyzer | ✅ |
-
----
-
-## 📊 STATISTICHE ATTUALI (21 Dicembre 2025)
-
-- **2794 match** nel database (deduplicati da 5448)
-- **205 giocatori unici** con nomi normalizzati
-- **210 mapping giocatori** per normalizzazione automatica
-- **Nessun duplicato** - ogni match è unico
-- **15+ tornei** tracciati (ATP, ITF, Challenger, United Cup)
-- **Giocatori top**: Jannik Sinner, Carlos Alcaraz (dati completi da Sofascore)
-
----
-
-## 🔄 DATA NORMALIZATION LAYER (NUOVO!)
-
-### Problema Risolto
-I dati provenienti da fonti diverse (xlsx, Sofascore) avevano formati diversi:
-- xlsx: `"Sinner J."`, `"Alcaraz C."`  
-- Sofascore: `"Jannik Sinner"`, `"Carlos Alcaraz"`
-
-### Soluzione Implementata
-**`backend/services/dataNormalizer.js`** con 210 mapping completi:
-
-```javascript
-// Esempio utilizzo
-const { normalizePlayerName } = require('./services/dataNormalizer');
-
-normalizePlayerName("Sinner J.")     // → "Jannik Sinner"
-normalizePlayerName("Alcaraz C.")    // → "Carlos Alcaraz"
-normalizePlayerName("Djokovic N.")   // → "Novak Djokovic"
-```
-
-### Script di Migrazione
 ```bash
-# Normalizza tutti i nomi nel database esistente
+git clone https://github.com/yourusername/React-Betfair.git
+cd React-Betfair
+
+# Frontend
+npm install
+
+# Backend
 cd backend
-node scripts/normalize-player-names.js
-
-# Dry run (solo preview)
-node scripts/normalize-player-names.js --dry-run
+npm install
 ```
 
-### Unified Import Gateway
-**`backend/services/unifiedImporter.js`** - Gateway unico per qualsiasi fonte:
+### 2. Configura Variabili Ambiente
 
-```javascript
-const { importXlsx, importSofascoreJson } = require('./services/unifiedImporter');
-
-// Import da xlsx
-await importXlsx('/path/to/2025.xlsx');
-
-// Import da Sofascore JSON
-await importSofascoreJson(sofascoreData);
+**Backend** (`backend/.env`):
+```env
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_KEY=eyJxxx...
+PORT=3001
 ```
+
+**Frontend** (`.env`):
+```env
+VITE_API_URL=http://localhost:3001
+```
+
+### 3. Setup Database
+
+1. Vai su [Supabase SQL Editor](https://supabase.com/dashboard)
+2. Esegui `backend/migrations/create-new-schema.sql`
+3. (Opzionale) Migra dati esistenti:
+   ```bash
+   cd backend
+   node migrations/migrate-to-new-schema.js
+   ```
+
+### 4. Avvia
+
+```bash
+# Terminal 1 - Backend
+cd backend
+node server.js
+
+# Terminal 2 - Frontend
+npm run dev
+```
+
+?? Apri http://localhost:5173
 
 ---
 
-## 🗄️ SCHEMA DATABASE COMPLETO
+## ??? Database Schema
 
-### Tabella `matches` - Struttura Campi
+### Tabelle Principali
 
-La tabella `matches` contiene tutti i dati delle partite. I campi sono organizzati per categoria:
+| Tabella | Descrizione |
+|---------|-------------|
+| `players_new` | Anagrafica tennisti |
+| `player_aliases` | Mapping varianti nomi |
+| `player_rankings` | Storico ranking |
+| `player_career_stats` | Stats carriera |
+| `tournaments_new` | Tornei |
+| `matches_new` | Match base |
+| `match_data_sources` | Traccia fonti dati |
+| `match_statistics_new` | Stats dettagliate |
+| `match_power_rankings_new` | Momentum |
+| `match_point_by_point_new` | Ogni punto |
+| `match_odds` | Quote betting |
+| `head_to_head` | H2H giocatori |
 
-#### 📌 Campi Identificativi
-| Campo | Tipo | Descrizione |
-|-------|------|-------------|
-| `id` | BIGINT | ID univoco partita (da Sofascore o generato) |
-| `slug` | TEXT | URL-friendly identifier (es: "nadal-r-vs-federer-r") |
-| `data_source` | TEXT | Fonte dati: `sofascore`, `xlsx_import`, `manual` |
+### Diagramma Relazioni
 
-#### 🏆 Campi Torneo/Evento
-| Campo | Tipo | Descrizione | Uso per Calcoli |
-|-------|------|-------------|-----------------|
-| `tournament_id` | BIGINT | FK alla tabella tournaments | Join tornei |
-| `location` | TEXT | Città/luogo (Brisbane, Melbourne, etc.) | Analisi per location |
-| `series` | TEXT | Livello: ATP250, ATP500, ATP1000, Grand Slam | Filtri importanza |
-| `court_type` | TEXT | `Indoor` o `Outdoor` | Analisi condizioni |
-| `surface` | TEXT | `Hard`, `Clay`, `Grass`, `Carpet` | Analisi per superficie |
-| `round_name` | TEXT | Turno: 1st Round, Quarterfinal, Final, etc. | Filtri fasi torneo |
-| `best_of` | INTEGER | Formato: 3 o 5 set | Calcoli durata/strategia |
+```
+players_new ?------- matches_new -------? tournaments_new
+     �                    �
+     �                    �
+     ?                    ?
+player_aliases      match_data_sources
+player_rankings     match_statistics_new
+player_career_stats match_power_rankings_new
+                    match_point_by_point_new
+                    match_odds
+```
 
-#### 👤 Campi Giocatori
-| Campo | Tipo | Descrizione | Uso per Calcoli |
-|-------|------|-------------|-----------------|
-| `home_player_id` | BIGINT | FK giocatore casa | Join players |
-| `away_player_id` | BIGINT | FK giocatore ospite | Join players |
-| `home_seed` | INTEGER | Testa di serie home | Analisi seeding |
-| `away_seed` | INTEGER | Testa di serie away | Analisi seeding |
-| `winner_name` | TEXT | Nome vincitore (per import xlsx) | Query veloci |
-| `loser_name` | TEXT | Nome perdente (per import xlsx) | Query veloci |
-| `winner_rank` | INTEGER | Ranking vincitore al match | **Analisi ranking** |
-| `loser_rank` | INTEGER | Ranking perdente al match | **Analisi ranking** |
-| `winner_points` | INTEGER | Punti ATP/WTA vincitore | **Analisi punti** |
-| `loser_points` | INTEGER | Punti ATP/WTA perdente | **Analisi punti** |
-
-#### 📊 Campi Punteggio
-| Campo | Tipo | Descrizione | Uso per Calcoli |
-|-------|------|-------------|-----------------|
-| `winner_code` | INTEGER | 1=home vince, 2=away vince | Risultato finale |
-| `home_sets_won` | INTEGER | Set vinti da home | Score finale |
-| `away_sets_won` | INTEGER | Set vinti da away | Score finale |
-| `winner_sets` | INTEGER | Tot set vinti dal vincitore | Analisi dominanza |
-| `loser_sets` | INTEGER | Tot set vinti dal perdente | Analisi competitività |
-| `w1` | INTEGER | Games vinti winner nel SET 1 | **Analisi set** |
-| `l1` | INTEGER | Games vinti loser nel SET 1 | **Analisi set** |
-| `w2` | INTEGER | Games vinti winner nel SET 2 | **Analisi set** |
-| `l2` | INTEGER | Games vinti loser nel SET 2 | **Analisi set** |
-| `w3` | INTEGER | Games vinti winner nel SET 3 | **Analisi set** |
-| `l3` | INTEGER | Games vinti loser nel SET 3 | **Analisi set** |
-| `w4` | INTEGER | Games vinti winner nel SET 4 | **Analisi set** |
-| `l4` | INTEGER | Games vinti loser nel SET 4 | **Analisi set** |
-| `w5` | INTEGER | Games vinti winner nel SET 5 | **Analisi set** |
-| `l5` | INTEGER | Games vinti loser nel SET 5 | **Analisi set** |
-
-#### 💰 Campi Quote Bookmaker
-| Campo | Tipo | Descrizione | Uso per Calcoli |
-|-------|------|-------------|-----------------|
-| `odds_b365_winner` | DECIMAL(6,3) | Quota Bet365 vincitore | **Value betting** |
-| `odds_b365_loser` | DECIMAL(6,3) | Quota Bet365 perdente | **Value betting** |
-| `odds_ps_winner` | DECIMAL(6,3) | Quota Pinnacle vincitore | **Sharp odds** |
-| `odds_ps_loser` | DECIMAL(6,3) | Quota Pinnacle perdente | **Sharp odds** |
-| `odds_max_winner` | DECIMAL(6,3) | Quota MAX vincitore | **Best odds** |
-| `odds_max_loser` | DECIMAL(6,3) | Quota MAX perdente | **Best odds** |
-| `odds_avg_winner` | DECIMAL(6,3) | Quota MEDIA vincitore | **Market consensus** |
-| `odds_avg_loser` | DECIMAL(6,3) | Quota MEDIA perdente | **Market consensus** |
-| `odds_bfe_winner` | DECIMAL(6,3) | Quota Betfair Exchange vincitore | **Exchange odds** |
-| `odds_bfe_loser` | DECIMAL(6,3) | Quota Betfair Exchange perdente | **Exchange odds** |
-
-#### ⏰ Campi Stato/Tempo
-| Campo | Tipo | Descrizione |
-|-------|------|-------------|
-| `start_time` | TIMESTAMPTZ | Data/ora inizio match |
-| `status_code` | INTEGER | Codice stato (100=finished) |
-| `status_type` | TEXT | Tipo: `finished`, `inprogress`, `notstarted` |
-| `status_description` | TEXT | Descrizione: Ended, In Progress, etc. |
-| `comment` | TEXT | Note: Completed, Retired, Walkover, etc. |
-| `is_live` | BOOLEAN | True se partita in corso |
-| `first_to_serve` | INTEGER | Chi serve per primo (1 o 2) |
-
-#### 🔗 Campi Metadata
-| Campo | Tipo | Descrizione |
-|-------|------|-------------|
-| `sofascore_url` | TEXT | URL originale Sofascore |
-| `raw_json` | JSONB | JSON completo dati Sofascore |
-| `extracted_at` | TIMESTAMPTZ | Quando estratto |
-| `created_at` | TIMESTAMPTZ | Quando creato nel DB |
-| `updated_at` | TIMESTAMPTZ | Ultimo aggiornamento |
-| `last_updated_at` | TIMESTAMPTZ | Legacy update timestamp |
+> ?? Schema completo: **[migrations/create-new-schema.sql](backend/migrations/create-new-schema.sql)**
 
 ---
 
-### 🧮 FORMULE E CALCOLI UTILI
+## ?? API Reference
 
-#### Probabilità implicita dalle quote
-```
-prob_winner = 1 / odds_winner
-prob_loser = 1 / odds_loser
-overround = prob_winner + prob_loser - 1
-true_prob_winner = prob_winner / (prob_winner + prob_loser)
+### Match Card
+
+```http
+GET /api/match/:eventId/card
 ```
 
-#### Value Bet Detection
-```sql
--- Trova value bets dove Pinnacle dà quota migliore di Bet365
-SELECT * FROM matches 
-WHERE odds_ps_winner > odds_b365_winner * 1.05
-  AND data_source = 'xlsx_import';
-```
-
-#### Analisi Ranking vs Risultato
-```sql
--- Upset: quando il giocatore con ranking peggiore vince
-SELECT winner_name, loser_name, winner_rank, loser_rank,
-       loser_rank - winner_rank as rank_difference
-FROM matches 
-WHERE winner_rank > loser_rank  -- Ranking più alto = peggiore
-ORDER BY rank_difference DESC;
-```
-
-#### Analisi per Superficie
-```sql
--- Win rate per superficie e serie
-SELECT surface, series, 
-       COUNT(*) as total_matches,
-       AVG(winner_sets::float / (winner_sets + loser_sets)) as avg_dominance
-FROM matches 
-WHERE surface IS NOT NULL
-GROUP BY surface, series;
-```
-
-#### Tiebreak Analysis
-```sql
--- Match con tiebreak (set finiti 7-6)
-SELECT * FROM matches 
-WHERE (w1 = 7 AND l1 = 6) OR (w1 = 6 AND l1 = 7)
-   OR (w2 = 7 AND l2 = 6) OR (w2 = 6 AND l2 = 7);
-```
-
-#### Closing Line Value (CLV)
-```sql
--- Confronto quote apertura vs chiusura (richiede storico)
--- CLV positivo = value bet confermato dal mercato
-SELECT winner_name, 
-       odds_ps_winner as pinnacle_odds,
-       odds_avg_winner as market_avg,
-       (odds_ps_winner - odds_avg_winner) / odds_avg_winner * 100 as edge_pct
-FROM matches
-WHERE odds_ps_winner > odds_avg_winner;
-```
-
----
-
-## 📌 Descrizione
-
-Tennis-Analyzer è un sistema completo per:
-- 📥 **Scraping** dati partite da SofaScore (**SOLO DA LOCALE**)
-- 💾 **Salvataggio** su database Supabase cloud
-- 📊 **Analisi** strategie trading (Lay the Winner, Banca Servizio, SuperBreak)
-- 🔴 **Monitoraggio live** partite in corso
-- 📈 **Dashboard** statistiche e copertura tornei
-
----
-
-## 🏗️ ARCHITETTURA PRODUZIONE
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🖥️ LOCALE (Tennis-Scraper-Local)                  │
-│              Scraping SofaScore → Supabase                           │
-├─────────────────────────────────────────────────────────────────────┤
-│  - Puppeteer per scraping browser                                    │
-│  - Intercetta API SofaScore                                          │
-│  - Salva dati su Supabase                                            │
-│  - NO LIMITAZIONI da IP residenziale                                 │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-                          Scrive su DB
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🗄️ DATABASE (Supabase)                            │
-│              PostgreSQL cloud + Real-time subscriptions              │
-├─────────────────────────────────────────────────────────────────────┤
-│  Tabelle:                                                            │
-│  - matches (id, event_id, home_player, away_player, status, ...)     │
-│  - players (id, name, country, ranking)                              │
-│  - tournaments (id, name, category, sport)                           │
-│  - match_scores (set scores, tiebreaks)                              │
-│  - point_by_point (cronologia punti)                                 │
-│  - match_statistics (stats dettagliate)                              │
-│  - power_rankings (indicatori momentum)                              │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-                          Legge da DB
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🌐 FRONTEND (Vercel)                              │
-│              https://tennis-analyzer.vercel.app                      │
-├─────────────────────────────────────────────────────────────────────┤
-│  React 18 + Vite                                                     │
-│  - HomePage con MatchGrid raggruppato per data                       │
-│  - MatchDetail con analisi strategie                                 │
-│  - MonitoringDashboard con stats tornei (SOLO LETTURA DB)            │
-│  - SportSidebar per navigazione                                      │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-                          HTTPS API
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🚂 BACKEND (Railway)                              │
-│        https://tennis-analyzer-production.up.railway.app             │
-├─────────────────────────────────────────────────────────────────────┤
-│  Node.js + Express                                                   │
-│  - REST API per matches, tornei, statistiche                         │
-│  - SOLO LETTURA da Supabase (NO scraping!)                           │
-│  - WebSocket per aggiornamenti live                                  │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🎯 FUNZIONALITÀ
-
-### ✅ Homepage - Match Database
-- **Raggruppamento temporale**: Oggi, Ieri, Questo mese, Mese scorso
-- **Partite rilevate**: Mostra match da tornei monitorati non ancora nel DB
-- **Filtro sport**: Tennis (altri sport coming soon)
-- **Match count**: Visualizza totale match + rilevate
-
-### ✅ Scraping SofaScore
-- **One-click scrape**: Incolla URL SofaScore, ottieni tutti i dati
-- **Anti-duplicati**: Controllo automatico prima di salvare
-- **Dati completi**: Punteggi, statistiche, point-by-point, quote
-
-### ✅ Dettaglio Match
-- **Overview**: Strategie trading con indicatori
-- **Point by Point**: Cronologia completa con analisi
-- **Statistics**: Ace, doppi falli, punti vinti, etc.
-- **Momentum**: Grafici andamento partita
-- **Quote**: Analisi quote betting
-
-### ✅ Database Monitor
-- **Overview**: Totale match, tornei, completezza media
-- **Tornei**: Lista con % copertura e partite mancanti
-- **Acquisizioni**: Timeline ultimi 30 giorni
-- **Live Tracking**: Partite in monitoraggio automatico
-
-### ✅ Live Updates
-- **Auto-refresh**: Aggiornamento automatico partite in corso
-- **WebSocket**: Connessione real-time opzionale
-- **Tracking**: Monitoraggio automatico nuove partite
-
----
-
-## 🔧 API ENDPOINTS PRINCIPALI
-
-### Match & Database
-| Endpoint | Metodo | Descrizione |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check con status Supabase |
-| `/api/db/matches` | GET | Lista match dal database |
-| `/api/match/:eventId` | GET | Dettaglio singolo match |
-| `/api/scrape` | POST | Avvia scraping URL SofaScore |
-| `/api/db-stats` | GET | Statistiche complete DB |
-| `/api/tournament/:id/events` | GET | Partite torneo con copertura |
-| `/api/sync/:eventId` | POST | Sincronizza dati match |
-| `/api/tracked` | GET | Partite in monitoraggio |
-
-### Player Stats API (NUOVO!)
-| Endpoint | Metodo | Descrizione |
-|----------|--------|-------------|
-| `/api/player/search?q=xxx` | GET | Ricerca giocatori (autocomplete) |
-| `/api/player/:name/stats` | GET | Statistiche complete giocatore |
-| `/api/player/:name/matches` | GET | Lista match giocatore |
-| `/api/player/h2h?player1=xxx&player2=yyy` | GET | Head to Head |
-
-**Esempio Response `/api/player/Jannik%20Sinner/stats`:**
+**Risposta:**
 ```json
 {
-  "overall": { "total": 128, "wins": 116, "losses": 12, "winRate": 0.906 },
-  "bySurface": {
-    "Hard": { "total": 84, "wins": 78, "winRate": 0.929 },
-    "Clay": { "total": 26, "wins": 22, "winRate": 0.846 },
-    "Grass": { "total": 18, "wins": 16, "winRate": 0.889 }
+  "match": {
+    "id": 12345,
+    "date": "2025-04-12",
+    "round": "Final",
+    "surface": "clay",
+    "score": "6-4 7-5",
+    "winner": 1
   },
-  "byFormat": {
-    "BO3": { "total": 72, "wins": 64, "winRate": 0.889 },
-    "BO5": { "total": 56, "wins": 52, "winRate": 0.929 }
+  "player1": {
+    "id": 100,
+    "name": "Lorenzo Musetti",
+    "country": "IT",
+    "currentRanking": 15,
+    "stats": { "winPercentage": 68.5 },
+    "recentForm": [{"result": "W"}]
   },
-  "bySeries": {
-    "Grand Slam": { "total": 56, "wins": 52, "winRate": 0.929 },
-    "Masters 1000": { "total": 38, "wins": 32, "winRate": 0.842 }
-  }
+  "player2": { },
+  "h2h": {
+    "total": "5-3",
+    "onClay": "2-1"
+  },
+  "statistics": { },
+  "momentum": [ ],
+  "odds": {
+    "opening": { "p1": 1.85, "p2": 2.10 },
+    "closing": { "p1": 1.75, "p2": 2.20 }
+  },
+  "dataQuality": 85,
+  "dataSources": ["xlsx_2025", "sofascore"]
 }
 ```
 
----
+### Altri Endpoint
 
-## 📂 STRUTTURA SERVIZI BACKEND
-
-```
-backend/
-├── server.js                    # Express server principale
-├── db/
-│   ├── supabase.js              # Client Supabase
-│   └── matchRepository.js       # Queries database
-├── services/
-│   ├── dataNormalizer.js        # 🆕 Normalizzazione nomi/superfici
-│   ├── unifiedImporter.js       # 🆕 Gateway import xlsx/Sofascore  
-│   └── playerStatsService.js    # 🆕 Statistiche giocatori
-├── scripts/
-│   ├── normalize-player-names.js    # 🆕 Migrazione DB
-│   └── generate-player-mappings.js  # 🆕 Generatore mapping
-├── scraper/
-│   └── sofascoreScraper.js      # Scraping (SOLO LOCALE!)
-└── utils/
-    └── valueInterpreter.js      # Calcoli momentum/value
-```
-
-### File Chiave
-
-| File | Scopo | Note |
-|------|-------|------|
-| `dataNormalizer.js` | 210 mapping giocatori ATP | Converte "Sinner J." → "Jannik Sinner" |
-| `unifiedImporter.js` | Import da qualsiasi fonte | xlsx, Sofascore JSON, manual |
-| `playerStatsService.js` | API statistiche giocatori | Win rate per superficie/serie |
-| `normalize-player-names.js` | Script migrazione | Normalizza DB esistente |
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/match/:id/card` | GET | Card completa match |
+| `/api/matches/cards` | GET | Lista match recenti |
+| `/api/player/:id` | GET | Dettagli giocatore |
+| `/api/search/players?q=` | GET | Cerca giocatori |
+| `/api/player/alias` | POST | Aggiungi alias |
+| `/api/player/merge` | POST | Unisci duplicati |
+| `/api/match/:id/find-sofascore` | POST | Cerca match su SofaScore |
+| `/api/live` | GET | Match in corso |
+| `/api/live` | WebSocket | Updates real-time |
 
 ---
 
-## ⚙️ CONFIGURAZIONE PRODUZIONE
+## ??? Frontend
 
-### Vercel (Frontend)
-**Environment Variables:**
-```
-VITE_API_URL=https://tennis-analyzer-production.up.railway.app
-VITE_WS_URL=https://tennis-analyzer-production.up.railway.app
-```
+### Componenti Principali
 
-**Build Settings:**
-- Build Command: `npm run build`
-- Output Directory: `dist`
-- Install Command: `npm install`
+| Componente | Scopo |
+|------------|-------|
+| `App.jsx` | Layout e routing |
+| `MatchCard.jsx` | Card singolo match |
+| `MomentumTab.jsx` | Grafico momentum |
+| `StatsSection.jsx` | Statistiche match |
+| `H2HSection.jsx` | Head-to-head |
+| `OddsPanel.jsx` | Pannello quote |
+| `LiveIndicator.jsx` | Badge live |
 
-### Railway (Backend)
-**Environment Variables:**
-```
-PORT=3001
-NODE_ENV=production
-SUPABASE_URL=https://[your-project].supabase.co
-SUPABASE_SERVICE_KEY=[your-service-role-key]
-FRONTEND_URL=https://tennis-analyzer.vercel.app
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-```
+### Fetch Dati
 
-**Start Command:** `cd backend && node server.js`
+```jsx
+// Esempio: Fetch card match
+const [card, setCard] = useState(null);
 
-### Supabase (Database)
-**Tabelle richieste:**
-- `players` - Anagrafica giocatori
-- `tournaments` - Tornei
-- `matches` - Partite (con FK a players e tournaments)
-- `match_scores` - Punteggi set
-- `point_by_point` - Cronologia punti
-- `match_statistics` - Statistiche dettagliate
-- `power_rankings` - Indicatori momentum
-
----
-
-## 🚀 SVILUPPO LOCALE (opzionale)
-
-Se vuoi modificare il codice:
-
-```bash
-# 1. Clona repository
-git clone https://github.com/francescoSvara/Tennis-Analyzer.git
-cd Tennis-Analyzer
-
-# 2. Installa dipendenze
-npm install
-cd backend && npm install && cd ..
-
-# 3. Crea file .env
-cp .env.example .env
-cp backend/.env.example backend/.env
-# Modifica con le tue credenziali Supabase
-
-# 4. Avvia backend (terminale 1)
-cd backend && node server.js
-
-# 5. Avvia frontend (terminale 2)
-npm run dev
-
-# 6. Apri http://localhost:5173
+useEffect(() => {
+  fetch(`${API_URL}/api/match/${matchId}/card`)
+    .then(res => res.json())
+    .then(setCard);
+}, [matchId]);
 ```
 
----
+### WebSocket Live
 
-## 📂 STRUTTURA PROGETTO
-
-```
-Tennis-Analyzer/
-├── src/                        # Frontend React
-│   ├── App.jsx                 # Router principale
-│   ├── config.js               # Configurazione API URLs
-│   ├── components/
-│   │   ├── HomePage.jsx        # Homepage con MatchGrid
-│   │   ├── MatchGrid.jsx       # Griglia match raggruppata
-│   │   ├── MatchCard.jsx       # Card singolo match
-│   │   ├── MonitoringDashboard.jsx  # Dashboard statistiche
-│   │   ├── PointByPoint.jsx    # Tab cronologia punti
-│   │   ├── Statistics.jsx      # Tab statistiche
-│   │   └── ...
-│   ├── hooks/
-│   │   ├── useMatchData.jsx    # Hook polling HTTP
-│   │   └── useLiveMatch.jsx    # Hook WebSocket
-│   └── styles/
-│       └── homepage.css        # Stili homepage
-│
-├── backend/                    # Backend Node.js
-│   ├── server.js               # Server Express
-│   ├── liveManager.js          # Gestione live updates
-│   ├── db/
-│   │   ├── supabase.js         # Client Supabase
-│   │   └── matchRepository.js  # Query database
-│   ├── scraper/
-│   │   └── sofascoreScraper.js # Scraper Puppeteer
-│   └── utils/
-│       └── valueInterpreter.js # Analisi valori
-│
-├── data/                       # Dati locali (backup)
-│   ├── scrapes/                # JSON partite
-│   └── mappings/               # Mapping mercati
-│
-├── .env.production             # Env produzione frontend
-├── vite.config.js              # Config Vite
-└── README.md                   # Questo file
-```
-
----
-
-## 🗺️ ROADMAP
-
-### ✅ Completati
-- [x] Scraping SofaScore con Puppeteer
-- [x] Database Supabase cloud
-- [x] Deploy Vercel + Railway
-- [x] Sistema anti-duplicati
-- [x] Analisi strategie trading
-- [x] Database Monitor Dashboard
-- [x] Live tracking automatico
-- [x] Raggruppamento match per data
-- [x] **Import dati storici xlsx** (2641+ match ATP 2025)
-- [x] **Auto-merge Sofascore + xlsx** (quote, ranking, punteggi set)
-- [x] **Documentazione schema DB completo** (50+ campi con formule)
-- [x] **🆕 Data Normalization Layer** (210 mapping giocatori ATP)
-- [x] **🆕 Player Stats API** (statistiche per superficie/serie)
-- [x] **🆕 Unified Import Gateway** (xlsx + Sofascore)
-- [x] **🆕 PredictorTab Frontend** (confronto statistiche in-match)
-- [x] **🆕 ManualPredictor** (predictor da DB Monitor)
-
-### 🔜 Prossimi Step
-- [ ] Momentum Volatility & Elasticity Calculator
-- [ ] Dynamic Surface Thresholds
-- [ ] Pressure Index Calculator
-- [ ] Multi-Source Odds Analysis
-- [ ] Historical Comeback Rate API
-- [ ] Match Character Classifier
-
-### 📅 Futuro
-- [ ] Altri sport (Calcio, Basket)
-- [ ] Integrazione API Betfair
-- [ ] App mobile React Native
-- [ ] Predizioni ML/AI
-
----
-
-## 🔄 DATABASE MIGRATIONS
-
-### Deduplicazione Match (21/12/2025)
-**Problema:** Match duplicati tra xlsx e Sofascore (stessi giocatori, date ±1 giorno)
-
-**Soluzione:**
-```bash
-cd backend
-# Fix nomi vuoti nei record Sofascore
-node scripts/fix-sofascore-names.js
-
-# Deduplica match (mantiene quello con più dati)
-node scripts/deduplicate-matches.js
-```
-
-**Risultato:**
-- Da 5448 a **2794 match** (2654 duplicati rimossi)
-- Ogni match ora è UNICO
-- Match Sofascore preferiti (hanno point-by-point, raw_json)
-
-### Normalizzazione Nomi Giocatori (21/12/2025)
-**Problema:** Nomi duplicati (xlsx: "Sinner J." vs Sofascore: "Jannik Sinner")
-
-**Soluzione:**
-```bash
-cd backend
-node scripts/normalize-player-names.js
-```
-
-**Risultato:**
-- 210 mapping giocatori ATP
-- Tutti i nomi unificati
-
-### Import xlsx con ID Numerici
-**Problema:** Supabase richiede BIGINT per `id`, xlsx ha slug testuali
-
-**Soluzione:** Hash numerici in `unifiedImporter.js`
-```javascript
-// Genera ID numerico da data+giocatori
-function generateXlsxId(match) {
-  const hash = createHash('md5')
-    .update(`${match.Date}_${match.Winner}_${match.Loser}`)
-    .digest('hex');
-  return BigInt('0x' + hash.slice(0, 12)) % BigInt('999999999999');
-}
-```
-
----
-
-## 🐛 TROUBLESHOOTING
-
-### Frontend non mostra dati
-1. Verifica che `VITE_API_URL` sia configurato su Vercel
-2. Controlla la console browser per errori CORS
-3. Verifica che Railway sia attivo: `/api/health`
-
-### Backend non risponde
-1. Controlla logs su Railway dashboard
-2. Verifica variabili ambiente (specialmente Supabase)
-3. Redeploy se necessario
-
-### Database vuoto
-1. Verifica connessione Supabase su Railway logs
-2. Controlla che le tabelle esistano
-3. Usa `/api/scrape` per aggiungere nuovi match
-
----
-
-## 📝 NOTE TECNICHE
-
-### Stack
-- **Frontend**: React 18, Vite 5, CSS custom
-- **Backend**: Node.js 18+, Express 4, Puppeteer
-- **Database**: Supabase (PostgreSQL)
-- **Hosting**: Vercel (frontend), Railway (backend)
-- **CI/CD**: GitHub → auto-deploy su push
-
-### CORS
-Il backend accetta richieste da:
-- `https://tennis-analyzer.vercel.app`
-- `*.vercel.app` (preview deployments)
-- `localhost:5173` (sviluppo)
-
----
-
-## 👥 CONTRIBUIRE
-
-1. Fork del repository
-2. Crea branch: `git checkout -b feature/nuova-funzione`
-3. Commit: `git commit -m 'Aggiunge nuova funzione'`
-4. Push: `git push origin feature/nuova-funzione`
-5. Apri Pull Request
-
----
-
-## 📄 LICENZA
-
-Progetto privato - Tutti i diritti riservati.
-
----
-
-## 📋 CHANGELOG
-
-### 22 Dicembre 2025
-
-#### 🔧 Fix Visualizzazione Dati dal Database
-- **`src/utils.js` - `extractEventInfo()`**: Modificata per dare priorità all'oggetto `event` già presente alla radice dei dati normalizzati dal DB. Prima cercava in profondità e trovava l'evento dentro `raw_json.api` invece di quello costruito con i campi DB.
+```jsx
+useEffect(() => {
+  const ws = new WebSocket('ws://localhost:3001');
   
-- **`src/utils.js` - `extractStatistics()`**: Modificata per dare priorità all'array `statistics` già normalizzato dal DB. Ora i dati delle statistiche vengono visualizzati correttamente quando provengono dal database.
-
-#### 🔧 Fix Duplicati in Tennis-Scraper-Local
-- **`Tennis-Scraper-Local/backend/db/matchRepository.js` - `findExistingSofascoreMatch()`**: Riscritto per cercare match esistenti per **ID evento SofaScore** invece che per nomi giocatori + data. Questo previene falsi positivi quando lo stesso giocatore ha più partite (es: Alcaraz vs Fritz a Miami e Alcaraz vs Fritz alle Finals sono due match diversi).
-
-#### ✨ Nuova Funzionalità: Salvataggio Power Rankings
-- **`Tennis-Scraper-Local/backend/db/matchRepository.js` - `insertPowerRankings()`**: Nuova funzione per salvare i dati Tennis Power Rankings nel database. Calcola automaticamente le zone di servizio e le variazioni rispetto alla media.
-
-- **`insertMatch()`**: Ora estrae automaticamente i power rankings dallo scrape e li salva nel DB insieme al match.
-
-#### 📝 Note
-- I Power Rankings non sono disponibili per tutti i match su SofaScore (alcuni tornei/match restituiscono 404)
-- La logica di estrazione dati ora privilegia i campi normalizzati del DB rispetto ai dati raw annidati
-- Migliorata la coerenza tra dati scraping locale e visualizzazione frontend
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'score_update') {
+      updateScore(data.match);
+    }
+  };
+  
+  return () => ws.close();
+}, []);
+```
 
 ---
 
-*Ultimo aggiornamento: 22 Dicembre 2025*
+## Documentazione
+
+| Documento | Contenuto |
+|-----------|-----------|
+| **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)** | Architettura dati, flussi, troubleshooting |
+| **[FILOSOFIA_STATS.md](FILOSOFIA_STATS.md)** | Funzioni di calcolo, formule, metriche derivate |
+| **[migrations/new-schema-design.md](backend/migrations/new-schema-design.md)** | Design database |
+| **[create-new-schema.sql](backend/migrations/create-new-schema.sql)** | Schema SQL completo |
+
+---
+
+## Scripts Utili
+
+```bash
+# Migrazione database
+cd backend
+node migrations/migrate-to-new-schema.js
+
+# Import XLSX
+node importXlsx.js ./data/atp_2024.xlsx
+
+# Scrape match specifico
+node -e "require('./scraper/sofascoreScraper').scrapeMatch(12345).then(console.log)"
+
+# Enrichment match XLSX con dati SofaScore
+node scripts/enrich-xlsx-matches.js --limit 50
+
+# Popolare alias giocatori
+node scripts/populate-player-aliases.js
+
+# Dry run (anteprima senza modifiche)
+node scripts/enrich-xlsx-matches.js --dry-run
+node scripts/populate-player-aliases.js --dry-run
+```
+
+---
+
+## Changelog
+
+### 22 Dicembre 2025 (Sessione 2)
+- Nuovo documento FILOSOFIA_STATS.md con tutte le funzioni di calcolo
+- Hook useMatchCard.jsx per frontend
+- Script enrich-xlsx-matches.js per arricchimento automatico
+- Script populate-player-aliases.js per alias giocatori
+
+### 22 Dicembre 2025 (Sessione 1)
+- Nuovo schema database con separazione Player/Match
+- MatchCardService per card complete
+- PlayerService per gestione giocatori
+- Sistema alias per matching nomi
+- Endpoint `/api/match/:id/card`
+- Documentazione FILOSOFIA_DB.md
+
+### Versioni Precedenti
+- MomentumTab redesign
+- Live scoring WebSocket
+- Import XLSX con odds
+- Scraper SofaScore
+
+---
+
+## ?? License
+
+MIT License - Vedi [LICENSE](LICENSE) per dettagli.
+
+---
+
+**Made with ?? for tennis data analysis**

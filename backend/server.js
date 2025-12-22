@@ -41,6 +41,24 @@ try {
   console.warn('⚠️ Player Stats Service not available:', e.message);
 }
 
+// Match Card Service (assembla card match complete)
+let matchCardService = null;
+try {
+  matchCardService = require('./services/matchCardService');
+  console.log('✅ Match Card Service loaded');
+} catch (e) {
+  console.warn('⚠️ Match Card Service not available:', e.message);
+}
+
+// Player Service (gestione giocatori)
+let playerService = null;
+try {
+  playerService = require('./services/playerService');
+  console.log('✅ Player Service loaded');
+} catch (e) {
+  console.warn('⚠️ Player Service not available:', e.message);
+}
+
 // Database imports
 let matchRepository = null;
 let supabaseClient = null;
@@ -2530,6 +2548,172 @@ app.get('/api/match/:eventId/refresh', async (req, res) => {
   }
 });
 
+// ============================================================================
+// NUOVE API - Match Card Service e Player Service
+// ============================================================================
+
+/**
+ * GET /api/match/:eventId/card - Card completa del match
+ * Assembla tutti i dati: match, giocatori, H2H, stats, momentum, odds
+ */
+app.get('/api/match/:eventId/card', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId) {
+    return res.status(400).json({ error: 'Missing eventId' });
+  }
+  
+  if (!matchCardService) {
+    return res.status(503).json({ error: 'Match Card Service not available' });
+  }
+  
+  try {
+    const card = await matchCardService.getMatchCard(parseInt(eventId));
+    
+    if (!card) {
+      return res.status(404).json({ error: 'Match not found' });
+    }
+    
+    console.log(`🎾 Match card ${eventId}: quality=${card.dataQuality}%, sources=${card.dataSources.join(', ')}`);
+    res.json(card);
+  } catch (err) {
+    console.error('Error getting match card:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/matches/cards - Lista match con card minimali
+ */
+app.get('/api/matches/cards', async (req, res) => {
+  const { limit = 20, surface, tournament, playerId } = req.query;
+  
+  if (!matchCardService) {
+    return res.status(503).json({ error: 'Match Card Service not available' });
+  }
+  
+  try {
+    const matches = await matchCardService.getRecentMatches(
+      parseInt(limit),
+      { surface, tournament: tournament ? parseInt(tournament) : null, playerId: playerId ? parseInt(playerId) : null }
+    );
+    
+    res.json({ matches, count: matches.length });
+  } catch (err) {
+    console.error('Error getting match cards:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/player/:playerId - Dettagli giocatore
+ */
+app.get('/api/player/:playerId', async (req, res) => {
+  const { playerId } = req.params;
+  
+  if (!playerId) {
+    return res.status(400).json({ error: 'Missing playerId' });
+  }
+  
+  if (!playerService) {
+    return res.status(503).json({ error: 'Player Service not available' });
+  }
+  
+  try {
+    const player = await playerService.getById(parseInt(playerId));
+    
+    if (!player) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+    
+    // Aggiungi statistiche carriera
+    const careerStats = await playerService.getCareerStats(player.id);
+    const aliases = await playerService.getAliases(player.id);
+    
+    res.json({
+      ...player,
+      careerStats,
+      aliases
+    });
+  } catch (err) {
+    console.error('Error getting player:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/search/players - Cerca giocatori
+ */
+app.get('/api/search/players', async (req, res) => {
+  const { q, limit = 10 } = req.query;
+  
+  if (!q) {
+    return res.status(400).json({ error: 'Missing query parameter q' });
+  }
+  
+  if (!playerService) {
+    return res.status(503).json({ error: 'Player Service not available' });
+  }
+  
+  try {
+    const players = await playerService.search(q, parseInt(limit));
+    res.json({ players });
+  } catch (err) {
+    console.error('Error searching players:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/player/alias - Aggiungi alias per un giocatore
+ */
+app.post('/api/player/alias', async (req, res) => {
+  const { playerId, aliasName, source } = req.body;
+  
+  if (!playerId || !aliasName) {
+    return res.status(400).json({ error: 'Missing playerId or aliasName' });
+  }
+  
+  if (!playerService) {
+    return res.status(503).json({ error: 'Player Service not available' });
+  }
+  
+  try {
+    await playerService.addAlias(parseInt(playerId), aliasName, source || 'manual');
+    res.json({ success: true, message: `Alias "${aliasName}" added for player ${playerId}` });
+  } catch (err) {
+    console.error('Error adding alias:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/player/merge - Unisci due giocatori duplicati
+ */
+app.post('/api/player/merge', async (req, res) => {
+  const { keepId, mergeId } = req.body;
+  
+  if (!keepId || !mergeId) {
+    return res.status(400).json({ error: 'Missing keepId or mergeId' });
+  }
+  
+  if (!playerService) {
+    return res.status(503).json({ error: 'Player Service not available' });
+  }
+  
+  try {
+    const success = await playerService.mergePlayers(parseInt(keepId), parseInt(mergeId));
+    if (success) {
+      res.json({ success: true, message: `Player ${mergeId} merged into ${keepId}` });
+    } else {
+      res.status(400).json({ error: 'Merge failed' });
+    }
+  } catch (err) {
+    console.error('Error merging players:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Optional: serve frontend in dev if needed
 const PORT = process.env.PORT || 3001;
 // GET /api/matches/merged - Prova prima il database, fallback ai file locali
@@ -2646,6 +2830,326 @@ app.get('/api/matches/merged', async (req, res) => {
     res.json({ matches, count: matches.length, source: 'files' });
   } catch (err) {
     console.error('Error in /api/matches/merged:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/matches/enrich - Arricchisce match nel DB con dati freschi da SofaScore
+ * Body: { matchIds: [id1, id2, ...] } oppure { all: true, limit: 100 }
+ */
+app.post('/api/matches/enrich', async (req, res) => {
+  const { matchIds, all, limit = 50 } = req.body;
+  
+  if (!matchIds && !all) {
+    return res.status(400).json({ error: 'Provide matchIds array or all: true' });
+  }
+  
+  try {
+    let matches = [];
+    
+    if (all) {
+      // Prendi match senza powerRankings completi
+      const { data, error } = await supabaseClient.supabase
+        .from('matches')
+        .select('id, winner_name, loser_name, raw_json')
+        .eq('data_source', 'sofascore')
+        .limit(limit);
+      
+      if (error) throw error;
+      matches = data || [];
+    } else {
+      const { data, error } = await supabaseClient.supabase
+        .from('matches')
+        .select('id, winner_name, loser_name, raw_json')
+        .in('id', matchIds);
+      
+      if (error) throw error;
+      matches = data || [];
+    }
+    
+    console.log(`🔄 Enriching ${matches.length} matches...`);
+    
+    const results = {
+      total: matches.length,
+      enriched: 0,
+      skipped: 0,
+      errors: [],
+      details: []
+    };
+    
+    for (const match of matches) {
+      try {
+        // Fetch dati freschi da SofaScore
+        const freshData = await fetchCompleteData(match.id);
+        
+        if (freshData && (freshData.powerRankings?.length > 0 || freshData.statistics?.length > 0)) {
+          // Salva powerRankings nella tabella dedicata
+          if (freshData.powerRankings?.length > 0) {
+            // Elimina vecchi record
+            await supabaseClient.supabase
+              .from('power_rankings')
+              .delete()
+              .eq('match_id', match.id);
+            
+            // Inserisci nuovi
+            const prRecords = freshData.powerRankings.map((pr, idx) => ({
+              match_id: match.id,
+              set_number: pr.set || 1,
+              game_number: pr.game || idx + 1,
+              value: pr.value || 0,
+              break_occurred: pr.breakOccurred || false,
+              zone: pr.zone || null,
+              status: pr.status || null
+            }));
+            
+            await supabaseClient.supabase
+              .from('power_rankings')
+              .insert(prRecords);
+          }
+          
+          results.enriched++;
+          results.details.push({
+            matchId: match.id,
+            players: `${match.winner_name} vs ${match.loser_name}`,
+            powerRankings: freshData.powerRankings?.length || 0,
+            statistics: freshData.statistics?.length || 0,
+            pointByPoint: freshData.pointByPoint?.length || 0
+          });
+          
+          console.log(`✅ Enriched match ${match.id}: ${freshData.powerRankings?.length || 0} PR`);
+        } else {
+          results.skipped++;
+        }
+        
+        // Rate limiting per evitare ban da SofaScore
+        await new Promise(r => setTimeout(r, 500));
+        
+      } catch (matchErr) {
+        results.errors.push({ matchId: match.id, error: matchErr.message });
+      }
+    }
+    
+    res.json(results);
+    
+  } catch (err) {
+    console.error('Error enriching matches:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/matches/missing-data - Lista match che potrebbero avere dati mancanti
+ */
+app.get('/api/matches/missing-data', async (req, res) => {
+  try {
+    // Match SofaScore senza powerRankings
+    const { data: sofascoreMatches, error: e1 } = await supabaseClient.supabase
+      .from('matches')
+      .select('id, winner_name, loser_name, surface, tournament_id')
+      .eq('data_source', 'sofascore')
+      .limit(100);
+    
+    // Match ID con powerRankings
+    const { data: prMatches, error: e2 } = await supabaseClient.supabase
+      .from('power_rankings')
+      .select('match_id')
+      .limit(10000);
+    
+    const prMatchIds = new Set((prMatches || []).map(p => p.match_id));
+    
+    const missingData = (sofascoreMatches || []).filter(m => !prMatchIds.has(m.id));
+    
+    res.json({
+      total: missingData.length,
+      matches: missingData.slice(0, 50)
+    });
+    
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/match/:eventId/find-sofascore - Cerca match corrispondente su SofaScore
+ * Per match XLSX che non hanno ID SofaScore reale
+ */
+app.post('/api/match/:eventId/find-sofascore', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId || !matchRepository || !supabaseClient?.supabase) {
+    return res.status(400).json({ error: 'Missing eventId or database not available' });
+  }
+  
+  try {
+    // 1. Recupera match dal DB
+    const { data: match, error } = await supabaseClient.supabase
+      .from('matches')
+      .select('id, winner_name, loser_name, start_time, surface, tournament_id, data_source')
+      .eq('id', parseInt(eventId))
+      .single();
+    
+    if (error || !match) {
+      console.error('find-sofascore DB error:', error?.message || 'Match not found');
+      return res.status(404).json({ error: 'Match not found in database', details: error?.message });
+    }
+    
+    // 2. Cerca eventi su SofaScore tramite /search/all
+    const winnerName = match.winner_name;
+    const loserName = match.loser_name;
+    
+    // Cerca usando entrambi i nomi per precisione
+    const searchQuery = `${winnerName} ${loserName}`;
+    const searchUrl = `https://api.sofascore.com/api/v1/search/all?q=${encodeURIComponent(searchQuery)}`;
+    
+    console.log(`🔍 Searching SofaScore for: ${searchQuery}`);
+    
+    const searchRes = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://www.sofascore.com/'
+      }
+    });
+    
+    if (!searchRes.ok) {
+      console.error('SofaScore search failed:', searchRes.status);
+      return res.status(404).json({ error: 'SofaScore search failed' });
+    }
+    
+    const searchData = await searchRes.json();
+    const results = searchData?.results || [];
+    
+    // Filtra solo eventi di tennis
+    const tennisEvents = results.filter(r => 
+      r.type === 'event' && 
+      r.entity?.homeTeam?.sport?.slug === 'tennis'
+    );
+    
+    if (tennisEvents.length === 0) {
+      return res.status(404).json({ error: 'No tennis events found for player' });
+    }
+    
+    console.log(`🎾 Found ${tennisEvents.length} tennis events for ${searchQuery}`);
+    
+    // 3. Trova match corrispondente per data
+    let matchedEvent = null;
+    const loserFullName = loserName?.toLowerCase() || '';
+    const winnerFullName = winnerName?.toLowerCase() || '';
+    
+    for (const eventResult of tennisEvents) {
+      const event = eventResult.entity;
+      const sofaHome = event.homeTeam?.name?.toLowerCase() || '';
+      const sofaAway = event.awayTeam?.name?.toLowerCase() || '';
+      
+      // Verifica che i giocatori corrispondano
+      const hasWinner = sofaHome.includes(winnerFullName.split(' ').slice(-1)[0]) || 
+                        sofaAway.includes(winnerFullName.split(' ').slice(-1)[0]);
+      const hasLoser = sofaHome.includes(loserFullName.split(' ').slice(-1)[0]) || 
+                       sofaAway.includes(loserFullName.split(' ').slice(-1)[0]);
+      
+      if (hasWinner && hasLoser) {
+        // Verifica data se disponibile
+        if (match.start_time && event.startTimestamp) {
+          const xlsxDate = new Date(match.start_time);
+          const sofaDate = new Date(event.startTimestamp * 1000);
+          const diffDays = Math.abs((xlsxDate - sofaDate) / (1000 * 60 * 60 * 24));
+          
+          console.log(`📅 Comparing dates: XLSX=${xlsxDate.toISOString()}, SofaScore=${sofaDate.toISOString()}, Diff=${diffDays} days`);
+          
+          if (diffDays <= 2) {
+            matchedEvent = event;
+            console.log(`✅ Matched event: ${event.homeTeam?.name} vs ${event.awayTeam?.name} (ID: ${event.id})`);
+            break;
+          }
+        } else {
+          // Senza data, prendi il primo match
+          matchedEvent = event;
+          console.log(`✅ Matched event (no date): ${event.homeTeam?.name} vs ${event.awayTeam?.name}`);
+          break;
+        }
+      }
+    }
+    
+    if (!matchedEvent) {
+      return res.json({
+        found: false,
+        xlsxMatch: match,
+        eventsSearched: tennisEvents.length,
+        message: `No matching event found among ${tennisEvents.length} events for ${winnerName} vs ${loserName}`
+      });
+    }
+    
+    // 5. Recupera powerRankings dal match SofaScore
+    const prUrl = `https://api.sofascore.com/api/v1/event/${matchedEvent.id}/tennis-power-rankings`;
+    const prRes = await fetch(prUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json'
+      }
+    });
+    
+    let powerRankings = [];
+    if (prRes.ok) {
+      const prData = await prRes.json();
+      powerRankings = prData?.tennisPowerRankings || [];
+    }
+    
+    // 6. Salva powerRankings nel DB se trovati
+    if (powerRankings.length > 0) {
+      // Elimina vecchi PR
+      await supabaseClient.supabase.from('power_rankings').delete().eq('match_id', match.id);
+      
+      // Prepara nuovi record
+      const records = powerRankings.map((pr, idx) => {
+        const value = pr.value || 0;
+        let zone = 'balanced_positive';
+        let status = 'neutral';
+        
+        if (value > 60) { zone = 'strong_control'; status = 'positive'; }
+        else if (value >= 20) { zone = 'advantage'; status = 'positive'; }
+        else if (value > -20) { zone = 'balanced_positive'; status = 'neutral'; }
+        else if (value > -40) { zone = 'slight_pressure'; status = 'warning'; }
+        else { zone = 'strong_pressure'; status = 'critical'; }
+        
+        return {
+          match_id: match.id,
+          set_number: pr.set || 1,
+          game_number: pr.game || idx + 1,
+          value: value,
+          break_occurred: pr.breakOccurred || false,
+          zone,
+          status
+        };
+      });
+      
+      const { error: insertError } = await supabaseClient.supabase.from('power_rankings').insert(records);
+      
+      if (insertError) {
+        console.error('Error saving powerRankings:', insertError.message);
+      }
+    }
+    
+    res.json({
+      found: true,
+      xlsxMatchId: match.id,
+      sofascoreEventId: matchedEvent.id,
+      sofascoreMatch: {
+        homeTeam: matchedEvent.homeTeam?.name,
+        awayTeam: matchedEvent.awayTeam?.name,
+        startTimestamp: matchedEvent.startTimestamp,
+        tournament: matchedEvent.tournament?.name
+      },
+      powerRankings: {
+        found: powerRankings.length > 0,
+        count: powerRankings.length,
+        saved: powerRankings.length > 0
+      }
+    });
+    
+  } catch (err) {
+    console.error('Error finding SofaScore match:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
