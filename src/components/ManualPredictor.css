@@ -600,6 +600,75 @@
   opacity: 0.7;
 }
 
+/* H2H Matches List */
+.h2h-matches-list {
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 16px;
+}
+
+.h2h-matches-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b95a5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px 0;
+}
+
+.h2h-matches-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.h2h-match-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.h2h-match-date {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.h2h-match-winner {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.h2h-match-winner.home {
+  color: #60a5fa;
+}
+
+.h2h-match-winner.away {
+  color: #f87171;
+}
+
+.h2h-match-score {
+  color: #e4e6eb;
+  font-weight: 500;
+}
+
+.h2h-match-surface {
+  color: #8b95a5;
+  font-size: 11px;
+  text-transform: capitalize;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
 /* Legacy H2H (fallback) */
 .h2h-content {
   text-align: center;

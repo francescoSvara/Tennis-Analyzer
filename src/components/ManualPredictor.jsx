@@ -606,6 +606,31 @@ export default function ManualPredictor() {
                     </span>
                   )}
                 </div>
+
+                {/* Lista match H2H recenti */}
+                {h2hStats.matches && h2hStats.matches.length > 0 && (
+                  <div className="h2h-matches-list">
+                    <h4 className="h2h-matches-title">Ultimi incontri</h4>
+                    <div className="h2h-matches-scroll">
+                      {h2hStats.matches.slice(0, 5).map((match, idx) => (
+                        <div key={match.id || idx} className="h2h-match-item">
+                          <span className="h2h-match-date">
+                            {match.date ? new Date(match.date).toLocaleDateString('it-IT', { 
+                              day: '2-digit', month: 'short', year: 'numeric' 
+                            }) : '-'}
+                          </span>
+                          <span className={`h2h-match-winner ${
+                            match.winner === homePlayer?.name ? 'home' : 'away'
+                          }`}>
+                            {match.winner}
+                          </span>
+                          <span className="h2h-match-score">{match.score}</span>
+                          <span className="h2h-match-surface">{match.surface || '-'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="h2h-empty">

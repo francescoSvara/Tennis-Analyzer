@@ -595,29 +595,173 @@ async function searchPlayers(query, limit = 10) {
 }
 
 /**
- * Ottieni statistiche rapide per confronto (utile per pre-match)
+ * Ottieni statistiche H2H REALI cercando le partite tra due giocatori nel DB
+ * Cerca in entrambe le direzioni: player1 vs player2 e player2 vs player1
  */
 async function getHeadToHeadStats(player1, player2) {
-  const stats1 = await getPlayerStats(player1);
-  const stats2 = await getPlayerStats(player2);
+  if (!supabase) {
+    console.warn('⚠️ Supabase not available for H2H');
+    return { totalMatches: 0, player1Wins: 0, player2Wins: 0, matches: [] };
+  }
+
+  const lastName1 = extractLastName(player1);
+  const lastName2 = extractLastName(player2);
+
+  console.log(`🎾 [H2H] Searching matches: "${player1}" (${lastName1}) vs "${player2}" (${lastName2})`);
+
+  // ===== STRATEGY 1: Cerca per winner_name/loser_name (xlsx format) =====
+  // Scenario A: player1 winner, player2 loser
+  const { data: matches1wins } = await supabase
+    .from('matches')
+    .select('*')
+    .ilike('winner_name', `%${lastName1}%`)
+    .ilike('loser_name', `%${lastName2}%`);
+
+  // Scenario B: player2 winner, player1 loser  
+  const { data: matches2wins } = await supabase
+    .from('matches')
+    .select('*')
+    .ilike('winner_name', `%${lastName2}%`)
+    .ilike('loser_name', `%${lastName1}%`);
+
+  // ===== STRATEGY 2: Cerca per player_id (sofascore format) =====
+  // Prima trova gli ID dei giocatori
+  const { data: players1 } = await supabase
+    .from('players')
+    .select('id, name, full_name')
+    .or(`name.ilike.%${lastName1}%,full_name.ilike.%${lastName1}%`);
+
+  const { data: players2 } = await supabase
+    .from('players')
+    .select('id, name, full_name')
+    .or(`name.ilike.%${lastName2}%,full_name.ilike.%${lastName2}%`);
+
+  // Filtra per match effettivo
+  const matchingIds1 = (players1 || [])
+    .filter(p => playerMatches(p.name, player1) || playerMatches(p.full_name, player1))
+    .map(p => p.id);
+  
+  const matchingIds2 = (players2 || [])
+    .filter(p => playerMatches(p.name, player2) || playerMatches(p.full_name, player2))
+    .map(p => p.id);
+
+  let matchesByPlayerId = [];
+  
+  if (matchingIds1.length > 0 && matchingIds2.length > 0) {
+    // Player1 home, Player2 away
+    const { data: homeAway1 } = await supabase
+      .from('matches')
+      .select(`*, home_player:players!matches_home_player_id_fkey(id, name), away_player:players!matches_away_player_id_fkey(id, name)`)
+      .in('home_player_id', matchingIds1)
+      .in('away_player_id', matchingIds2);
+
+    // Player2 home, Player1 away
+    const { data: homeAway2 } = await supabase
+      .from('matches')
+      .select(`*, home_player:players!matches_home_player_id_fkey(id, name), away_player:players!matches_away_player_id_fkey(id, name)`)
+      .in('home_player_id', matchingIds2)
+      .in('away_player_id', matchingIds1);
+
+    matchesByPlayerId = [...(homeAway1 || []), ...(homeAway2 || [])];
+  }
+
+  // ===== COMBINE E DEDUPLICA =====
+  const allMatches = [
+    ...(matches1wins || []),
+    ...(matches2wins || []),
+    ...matchesByPlayerId
+  ];
+
+  const uniqueMatches = new Map();
+  let player1Wins = 0;
+  let player2Wins = 0;
+  const h2hMatches = [];
+
+  for (const match of allMatches) {
+    if (uniqueMatches.has(match.id)) continue;
+
+    // Verifica che ENTRAMBI i giocatori siano nel match
+    const hasPlayer1 = 
+      playerMatches(match.winner_name, player1) || 
+      playerMatches(match.loser_name, player1) ||
+      matchingIds1.includes(match.home_player_id) ||
+      matchingIds1.includes(match.away_player_id);
+
+    const hasPlayer2 = 
+      playerMatches(match.winner_name, player2) || 
+      playerMatches(match.loser_name, player2) ||
+      matchingIds2.includes(match.home_player_id) ||
+      matchingIds2.includes(match.away_player_id);
+
+    if (!hasPlayer1 || !hasPlayer2) continue;
+
+    uniqueMatches.set(match.id, match);
+
+    // Determina chi ha vinto
+    let p1Won = false;
+    let p2Won = false;
+
+    // Check by winner_name/loser_name first (xlsx format)
+    if (match.winner_name && match.loser_name) {
+      if (playerMatches(match.winner_name, player1) && playerMatches(match.loser_name, player2)) {
+        p1Won = true;
+      } else if (playerMatches(match.winner_name, player2) && playerMatches(match.loser_name, player1)) {
+        p2Won = true;
+      }
+    }
+
+    // Check by player_id + winner_code (sofascore format)
+    if (!p1Won && !p2Won && match.winner_code) {
+      const p1IsHome = matchingIds1.includes(match.home_player_id);
+      const p1IsAway = matchingIds1.includes(match.away_player_id);
+      
+      if (match.winner_code === 1 && p1IsHome) p1Won = true;
+      else if (match.winner_code === 2 && p1IsAway) p1Won = true;
+      else if (match.winner_code === 1 && !p1IsHome) p2Won = true;
+      else if (match.winner_code === 2 && !p1IsAway) p2Won = true;
+    }
+
+    // Fallback: check sets won
+    if (!p1Won && !p2Won) {
+      const homeSets = match.home_sets_won || 0;
+      const awaySets = match.away_sets_won || 0;
+      const p1IsHome = matchingIds1.includes(match.home_player_id);
+      
+      if (homeSets > awaySets) {
+        p1Won = p1IsHome;
+        p2Won = !p1IsHome;
+      } else if (awaySets > homeSets) {
+        p1Won = !p1IsHome;
+        p2Won = p1IsHome;
+      }
+    }
+
+    if (p1Won) player1Wins++;
+    if (p2Won) player2Wins++;
+
+    h2hMatches.push({
+      id: match.id,
+      date: match.start_time,
+      tournament: match.tournament_name || match.series,
+      surface: match.surface,
+      winner: p1Won ? player1 : (p2Won ? player2 : 'Unknown'),
+      score: match.score || `${match.home_sets_won || 0}-${match.away_sets_won || 0}`,
+      round: match.round
+    });
+  }
+
+  // Sort by date descending (most recent first)
+  h2hMatches.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  console.log(`   ✅ [H2H] Found ${h2hMatches.length} matches: ${player1} ${player1Wins} - ${player2Wins} ${player2}`);
 
   return {
-    player1: {
-      name: player1,
-      overall_win_rate: stats1.overall?.win_rate || 0,
-      comeback_rate: stats1.overall?.comeback_rate || 0,
-      avg_ranking: stats1.overall?.avg_ranking || null
-    },
-    player2: {
-      name: player2,
-      overall_win_rate: stats2.overall?.win_rate || 0,
-      comeback_rate: stats2.overall?.comeback_rate || 0,
-      avg_ranking: stats2.overall?.avg_ranking || null
-    },
-    comparison: {
-      win_rate_diff: (stats1.overall?.win_rate || 0) - (stats2.overall?.win_rate || 0),
-      comeback_diff: (stats1.overall?.comeback_rate || 0) - (stats2.overall?.comeback_rate || 0)
-    }
+    player1: { name: player1 },
+    player2: { name: player2 },
+    totalMatches: h2hMatches.length,
+    player1Wins,
+    player2Wins,
+    matches: h2hMatches.slice(0, 20) // Limita a 20 match più recenti
   };
 }
 
