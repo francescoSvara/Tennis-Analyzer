@@ -1706,8 +1706,12 @@
         
         missingMatches = data.missingMatches;
         
-        // NON filtriamo più - vogliamo TUTTE le partite mancanti
-        // Filosofia: acquisizione ossessiva di tutti i dati disponibili
+        // Filtra quelle non acquisibili (Retired, Walkover, Cancelled, etc.)
+        missingMatches = missingMatches.filter(m => {
+          const statusDesc = (m.status?.description || '').toLowerCase();
+          const nonAcquisibili = ['retired', 'walkover', 'cancelled', 'canceled', 'postponed', 'abandoned'];
+          return !nonAcquisibili.some(s => statusDesc.includes(s));
+        });
         
         console.log(`📋 Partite mancanti rilevate: ${missingMatches.length}`);
         
@@ -1905,11 +1909,20 @@
         // Filter missing matches
         missingMatches = tournamentEvents.filter(e => !existingIds.has(e.id));
         
-        // Filtra quelle già finite con risultato
+        // Filtra quelle già finite con risultato E quelle non acquisibili (Retired, Walkover, etc.)
         missingMatches = missingMatches.filter(m => {
-          const isEnded = m.status?.description === 'Ended' || m.status?.type === 'finished';
+          const statusDesc = (m.status?.description || '').toLowerCase();
+          const statusType = m.status?.type || '';
+          
+          // Escludi Retired, Walkover, Cancelled, Postponed, Abandoned (non acquisibili)
+          const nonAcquisibili = ['retired', 'walkover', 'cancelled', 'canceled', 'postponed', 'abandoned'];
+          if (nonAcquisibili.some(s => statusDesc.includes(s))) return false;
+          
+          // Escludi quelle già finite con risultato
+          const isEnded = statusDesc === 'ended' || statusType === 'finished';
           const hasScore = m.homeScore?.current !== undefined && m.awayScore?.current !== undefined;
           if (isEnded && hasScore) return false;
+          
           return true;
         });
         
