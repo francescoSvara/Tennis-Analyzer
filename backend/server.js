@@ -59,6 +59,42 @@ try {
   console.warn('⚠️ Player Service not available:', e.message);
 }
 
+// Player Profile Service (profili aggregati avanzati)
+let playerProfileService = null;
+try {
+  playerProfileService = require('./services/playerProfileService');
+  console.log('✅ Player Profile Service loaded');
+} catch (e) {
+  console.warn('⚠️ Player Profile Service not available:', e.message);
+}
+
+// Break Detector (rilevamento break da punteggio)
+let breakDetector = null;
+try {
+  breakDetector = require('./utils/breakDetector');
+  console.log('✅ Break Detector loaded');
+} catch (e) {
+  console.warn('⚠️ Break Detector not available:', e.message);
+}
+
+// Pressure Calculator (indice pressione live)
+let pressureCalculator = null;
+try {
+  pressureCalculator = require('./utils/pressureCalculator');
+  console.log('✅ Pressure Calculator loaded');
+} catch (e) {
+  console.warn('⚠️ Pressure Calculator not available:', e.message);
+}
+
+// Match Segmenter (segmentazione match)
+let matchSegmenter = null;
+try {
+  matchSegmenter = require('./utils/matchSegmenter');
+  console.log('✅ Match Segmenter loaded');
+} catch (e) {
+  console.warn('⚠️ Match Segmenter not available:', e.message);
+}
+
 // Database imports
 let matchRepository = null;
 let supabaseClient = null;
@@ -2713,6 +2749,189 @@ app.post('/api/player/merge', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ============================================================================
+// PLAYER PROFILE ENDPOINTS (Sessione 3 - New Analytics)
+// ============================================================================
+
+/**
+ * GET /api/player/:playerName/profile - Profilo completo aggregato giocatore
+ * Query params: surface, format, series
+ */
+app.get('/api/player/:playerName/profile', async (req, res) => {
+  const { playerName } = req.params;
+  const { surface, format, series } = req.query;
+  
+  if (!playerName) {
+    return res.status(400).json({ error: 'Missing playerName' });
+  }
+  
+  if (!playerProfileService) {
+    return res.status(503).json({ error: 'Player Profile Service not available' });
+  }
+  
+  try {
+    const profile = await playerProfileService.getPlayerProfile(
+      decodeURIComponent(playerName),
+      { surface, format, series }
+    );
+    
+    res.json(profile);
+  } catch (err) {
+    console.error('Error getting player profile:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/players/compare - Confronta due giocatori
+ * Query params: player1, player2, surface, format
+ */
+app.get('/api/players/compare', async (req, res) => {
+  const { player1, player2, surface, format } = req.query;
+  
+  if (!player1 || !player2) {
+    return res.status(400).json({ error: 'Missing player1 or player2 parameters' });
+  }
+  
+  if (!playerProfileService) {
+    return res.status(503).json({ error: 'Player Profile Service not available' });
+  }
+  
+  try {
+    const comparison = await playerProfileService.compareProfiles(
+      decodeURIComponent(player1),
+      decodeURIComponent(player2),
+      { surface, format }
+    );
+    
+    res.json(comparison);
+  } catch (err) {
+    console.error('Error comparing players:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/match/:matchId/breaks - Analisi break di un match
+ */
+app.get('/api/match/:matchId/breaks', async (req, res) => {
+  const { matchId } = req.params;
+  
+  if (!matchId) {
+    return res.status(400).json({ error: 'Missing matchId' });
+  }
+  
+  if (!breakDetector || !matchRepository) {
+    return res.status(503).json({ error: 'Break Detector or Database not available' });
+  }
+  
+  try {
+    // Fetch match from database
+    const match = await matchRepository.getMatchById(parseInt(matchId));
+    
+    if (!match) {
+      return res.status(404).json({ error: 'Match not found' });
+    }
+    
+    // Analyze breaks for each set
+    const breakAnalysis = {
+      match_id: match.id,
+      players: {
+        home: match.home_name,
+        away: match.away_name
+      },
+      sets: []
+    };
+    
+    // Analyze up to 5 sets
+    for (let setNum = 1; setNum <= 5; setNum++) {
+      const homeGames = match[`w${setNum}`];
+      const awayGames = match[`l${setNum}`];
+      
+      if (homeGames === null || awayGames === null) break;
+      
+      const setScore = { w: homeGames, l: awayGames };
+      const setBreaks = breakDetector.analyzeSetBreaks(setScore, setNum);
+      
+      breakAnalysis.sets.push({
+        set_number: setNum,
+        score: `${homeGames}-${awayGames}`,
+        ...setBreaks
+      });
+    }
+    
+    // Overall patterns
+    if (breakAnalysis.sets.length > 0) {
+      const allBreaks = breakAnalysis.sets.map(s => s.total_breaks_estimated);
+      breakAnalysis.total_breaks = allBreaks.reduce((a, b) => a + b, 0);
+      breakAnalysis.avg_breaks_per_set = breakAnalysis.total_breaks / breakAnalysis.sets.length;
+    }
+    
+    res.json(breakAnalysis);
+  } catch (err) {
+    console.error('Error analyzing breaks:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/match/pressure - Calcola indice pressione live
+ * Body: { stats, context }
+ */
+app.post('/api/match/pressure', (req, res) => {
+  const { stats, context } = req.body;
+  
+  if (!stats) {
+    return res.status(400).json({ error: 'Missing stats object' });
+  }
+  
+  if (!pressureCalculator) {
+    return res.status(503).json({ error: 'Pressure Calculator not available' });
+  }
+  
+  try {
+    const pressure = pressureCalculator.calculatePressureIndex(stats, context || {});
+    res.json(pressure);
+  } catch (err) {
+    console.error('Error calculating pressure:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/match/segment - Segmenta un match in fasi
+ * Body: { matchStats }
+ */
+app.post('/api/match/segment', (req, res) => {
+  const { matchStats } = req.body;
+  
+  if (!matchStats) {
+    return res.status(400).json({ error: 'Missing matchStats object' });
+  }
+  
+  if (!matchSegmenter) {
+    return res.status(503).json({ error: 'Match Segmenter not available' });
+  }
+  
+  try {
+    const segments = matchSegmenter.segmentMatch(matchStats);
+    const summary = matchSegmenter.getSegmentSummary(segments);
+    
+    res.json({
+      segments,
+      summary,
+      total_segments: segments.length
+    });
+  } catch (err) {
+    console.error('Error segmenting match:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================================
+// END PLAYER PROFILE ENDPOINTS
+// ============================================================================
 
 // Optional: serve frontend in dev if needed
 const PORT = process.env.PORT || 3001;
