@@ -1,9 +1,13 @@
 /**
  * Live Match Manager
  * Gestisce il polling intelligente per match live e salvataggio automatico su DB
+ * 
+ * AGGIORNATO: Ora supporta persistenza su Supabase tramite liveTrackingRepository
+ * Riferimento: FILOSOFIA_LIVE_TRACKING.md
  */
 
 const fetch = require('node-fetch');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
@@ -16,11 +20,22 @@ try {
   console.warn('⚠️ LiveManager: Database module not available:', e.message);
 }
 
-// Store per le sottoscrizioni attive
+// Live Tracking Repository (nuovo - persistenza Supabase)
+let liveTrackingRepo = null;
+let USE_DB_TRACKING = false;
+try {
+  liveTrackingRepo = require('./db/liveTrackingRepository');
+  USE_DB_TRACKING = true;
+  console.log('✅ LiveManager: Live Tracking Repository loaded (DB mode)');
+} catch (e) {
+  console.warn('⚠️ LiveManager: Live Tracking Repository not available, using in-memory mode:', e.message);
+}
+
+// Store per le sottoscrizioni attive (WebSocket)
 const subscriptions = new Map(); // eventId -> { sockets: Set, lastData: object, interval: NodeJS.Timer }
 
-// Store per il tracking delle partite monitorate (persistente)
-const trackedMatches = new Map(); // eventId -> { status, lastUpdate, startTimestamp, autoTrack: boolean }
+// Store FALLBACK per il tracking delle partite monitorate (se DB non disponibile)
+const trackedMatchesFallback = new Map(); // eventId -> { status, lastUpdate, startTimestamp, autoTrack: boolean }
 
 // Directory per i file
 const DATA_DIR = path.resolve(__dirname, '..', 'data');
@@ -28,9 +43,16 @@ const SCRAPES_DIR = path.join(DATA_DIR, 'scrapes');
 
 // Configurazione
 const CONFIG = {
-  POLL_INTERVAL: 5000, // Polling ogni 5 secondi (server-side)
+  // Intervalli di polling per priorità (in ms)
+  POLL_INTERVALS: {
+    HIGH: 3000,     // 3 secondi per match importanti (finali, live seguito)
+    MEDIUM: 10000,  // 10 secondi default
+    LOW: 30000      // 30 secondi per match meno importanti
+  },
+  DEFAULT_POLL_INTERVAL: 5000, // Fallback per WebSocket subscriptions
   MAX_RETRIES: 3,
   RETRY_DELAY: 2000,
+  MAX_FAIL_COUNT: 5,  // Dopo questo numero di errori → status ERROR
   SOFASCORE_API: 'https://api.sofascore.com/api/v1/event'
 };
 
@@ -189,18 +211,29 @@ async function fetchCompleteData(eventId) {
 }
 
 /**
- * Calcola hash semplice per confronto dati
+ * Calcola hash SHA256 per confronto dati
+ * Usato per rilevare cambiamenti e implementare polling adattivo
  */
 function computeDataHash(data) {
+  if (!data || !data.event) return null;
+  
   // Hash basato su elementi chiave che cambiano durante il match
-  const key = JSON.stringify({
-    score: data.event?.homeScore?.current + '-' + data.event?.awayScore?.current,
+  const keyData = {
+    score: `${data.event?.homeScore?.current || 0}-${data.event?.awayScore?.current || 0}`,
+    sets: data.event?.homeScore?.period1 !== undefined ? [
+      data.event?.homeScore?.period1, data.event?.awayScore?.period1,
+      data.event?.homeScore?.period2, data.event?.awayScore?.period2,
+      data.event?.homeScore?.period3, data.event?.awayScore?.period3
+    ] : [],
     status: data.event?.status?.type,
+    server: data.event?.firstToServe,
     pbpLength: data.pointByPoint?.length || 0,
     lastPbp: data.pointByPoint?.slice(-1)[0] || null,
     prLength: data.powerRankings?.length || 0
-  });
-  return key;
+  };
+  
+  const jsonStr = JSON.stringify(keyData);
+  return crypto.createHash('sha256').update(jsonStr).digest('hex').substring(0, 16);
 }
 
 /**
@@ -366,7 +399,7 @@ function startPolling(eventId, io) {
         });
         
         // Rimuovi dal tracking
-        trackedMatches.delete(String(eventId));
+        trackedMatchesFallback.delete(String(eventId));
         
         // Ferma polling
         clearInterval(sub.interval);
@@ -383,8 +416,8 @@ function startPolling(eventId, io) {
         // Salva periodicamente durante il match (ogni cambio di dati)
         await saveMatchToDatabase(eventId, newData, 'live-update');
         
-        // Aggiorna tracking
-        trackedMatches.set(String(eventId), {
+        // Aggiorna tracking (fallback in-memory)
+        trackedMatchesFallback.set(String(eventId), {
           status: newData.event?.status?.type || 'inprogress',
           lastUpdate: new Date().toISOString(),
           startTimestamp: newData.event?.startTimestamp,
@@ -412,7 +445,7 @@ function startPolling(eventId, io) {
 function getStats() {
   const stats = {
     activeSubscriptions: subscriptions.size,
-    trackedMatches: trackedMatches.size,
+    trackedMatches: trackedMatchesFallback.size,
     events: []
   };
 
@@ -564,7 +597,9 @@ async function saveMatchToFile(eventId, data, saveType) {
 // ============================================================================
 
 let schedulerInterval = null;
+let reconciliationInterval = null;
 const SCHEDULER_INTERVAL = 30000; // Controlla ogni 30 secondi
+const RECONCILIATION_INTERVAL = 5 * 60 * 1000; // Riconcilia ogni 5 minuti
 
 /**
  * Avvia lo scheduler per monitorare partite in corso
@@ -583,6 +618,9 @@ function startScheduler() {
 
   // Prima esecuzione immediata
   checkTrackedMatches();
+  
+  // Avvia anche reconciliation job
+  startReconciliationJob();
 }
 
 /**
@@ -594,23 +632,264 @@ function stopScheduler() {
     schedulerInterval = null;
     console.log('⏹️ Scheduler stopped');
   }
+  stopReconciliationJob();
+}
+
+// ============================================================================
+// RECONCILIATION JOB - Scoperta automatica match live
+// Riferimento: FILOSOFIA_LIVE_TRACKING.md sezione 6
+// ============================================================================
+
+/**
+ * Avvia il job di riconciliazione per scoprire nuovi match live
+ */
+function startReconciliationJob() {
+  if (reconciliationInterval) {
+    console.log('⚠️ Reconciliation job already running');
+    return;
+  }
+
+  console.log('🔄 Starting reconciliation job (every 5 min)...');
+  
+  reconciliationInterval = setInterval(async () => {
+    await reconcileLiveMatches();
+  }, RECONCILIATION_INTERVAL);
+
+  // Prima esecuzione dopo 30 secondi (per non sovraccaricare all'avvio)
+  setTimeout(() => reconcileLiveMatches(), 30000);
+}
+
+/**
+ * Ferma il job di riconciliazione
+ */
+function stopReconciliationJob() {
+  if (reconciliationInterval) {
+    clearInterval(reconciliationInterval);
+    reconciliationInterval = null;
+    console.log('⏹️ Reconciliation job stopped');
+  }
+}
+
+/**
+ * Riconcilia i match live da SofaScore con il tracking locale
+ * - Aggiunge nuovi match ATP live
+ * - Marca come FINISHED i match spariti dalla lista live
+ */
+async function reconcileLiveMatches() {
+  console.log('🔄 Running reconciliation job...');
+  
+  try {
+    // 1. Fetch lista match live da SofaScore
+    const liveMatches = await fetchLiveMatchesList();
+    
+    if (!liveMatches || liveMatches.length === 0) {
+      console.log('📭 No live matches found on SofaScore');
+      return { added: 0, finished: 0 };
+    }
+    
+    console.log(`📡 Found ${liveMatches.length} live matches on SofaScore`);
+    
+    // 2. Ottieni match attualmente tracciati
+    let currentlyTracked = [];
+    if (USE_DB_TRACKING && liveTrackingRepo) {
+      currentlyTracked = await liveTrackingRepo.getAllTracking({ status: 'WATCHING' });
+    } else {
+      currentlyTracked = Array.from(trackedMatchesFallback.entries()).map(([id, info]) => ({
+        source_event_id: id,
+        ...info
+      }));
+    }
+    
+    const trackedIds = new Set(currentlyTracked.map(t => String(t.source_event_id)));
+    const liveIds = new Set(liveMatches.map(m => String(m.id)));
+    
+    // 3. Aggiungi nuovi match live (non ancora tracciati)
+    let addedCount = 0;
+    for (const match of liveMatches) {
+      const eventId = String(match.id);
+      
+      if (!trackedIds.has(eventId)) {
+        // Determina priorità in base a torneo/round
+        const priority = determinePriority(match);
+        
+        const added = await trackMatch(eventId, {
+          priority,
+          status: 'inprogress',
+          player1Name: match.homeTeam?.name,
+          player2Name: match.awayTeam?.name,
+          tournamentName: match.tournament?.name
+        });
+        
+        if (added) {
+          addedCount++;
+          console.log(`➕ Auto-added: ${match.homeTeam?.name} vs ${match.awayTeam?.name} (${priority})`);
+        }
+      }
+    }
+    
+    // 4. Marca come FINISHED i match spariti dalla lista live
+    let finishedCount = 0;
+    for (const tracked of currentlyTracked) {
+      const eventId = tracked.source_event_id;
+      
+      if (!liveIds.has(eventId)) {
+        // Match non più nella lista live → probabilmente finito
+        console.log(`🏁 Match ${eventId} no longer live, checking status...`);
+        
+        try {
+          // Verifica effettivo stato
+          const data = await fetchLiveData(eventId);
+          
+          if (isMatchFinished(data)) {
+            // Fetch dati completi e salva
+            const completeData = await fetchCompleteData(eventId);
+            await saveMatchToDatabase(eventId, completeData, 'reconciliation-finished');
+            
+            if (USE_DB_TRACKING && liveTrackingRepo) {
+              await liveTrackingRepo.markFinished(eventId);
+            } else {
+              trackedMatchesFallback.delete(eventId);
+            }
+            
+            finishedCount++;
+            console.log(`✅ Match ${eventId} marked as finished`);
+          }
+        } catch (e) {
+          console.warn(`⚠️ Could not verify match ${eventId}:`, e.message);
+        }
+      }
+    }
+    
+    console.log(`🔄 Reconciliation complete: +${addedCount} added, ${finishedCount} finished`);
+    return { added: addedCount, finished: finishedCount };
+    
+  } catch (error) {
+    console.error('❌ Reconciliation error:', error.message);
+    return { error: error.message };
+  }
+}
+
+/**
+ * Fetch lista match tennis live da SofaScore
+ */
+async function fetchLiveMatchesList() {
+  try {
+    // Endpoint per match tennis live
+    const url = 'https://api.sofascore.com/api/v1/sport/tennis/events/live';
+    
+    const response = await fetch(url, { headers });
+    
+    if (!response.ok) {
+      console.warn(`⚠️ Live matches fetch failed: ${response.status}`);
+      return [];
+    }
+    
+    const data = await response.json();
+    const events = data?.events || [];
+    
+    // Filtra solo match ATP/WTA principali (opzionale)
+    const mainTourEvents = events.filter(e => {
+      const category = e.tournament?.category?.name?.toLowerCase() || '';
+      const tournamentName = e.tournament?.name?.toLowerCase() || '';
+      
+      // Include ATP, WTA, Grand Slam
+      return category.includes('atp') || 
+             category.includes('wta') ||
+             tournamentName.includes('grand slam') ||
+             tournamentName.includes('australian open') ||
+             tournamentName.includes('roland garros') ||
+             tournamentName.includes('wimbledon') ||
+             tournamentName.includes('us open');
+    });
+    
+    return mainTourEvents;
+  } catch (error) {
+    console.error('❌ Error fetching live matches:', error.message);
+    return [];
+  }
+}
+
+/**
+ * Determina la priorità di un match in base a torneo e round
+ */
+function determinePriority(match) {
+  const tournamentName = (match.tournament?.name || '').toLowerCase();
+  const roundName = (match.roundInfo?.name || '').toLowerCase();
+  const category = (match.tournament?.category?.name || '').toLowerCase();
+  
+  // Grand Slam finals/semis = HIGH
+  if (tournamentName.includes('australian open') ||
+      tournamentName.includes('roland garros') ||
+      tournamentName.includes('wimbledon') ||
+      tournamentName.includes('us open')) {
+    if (roundName.includes('final') || roundName.includes('semifinal')) {
+      return 'HIGH';
+    }
+    return 'MEDIUM';
+  }
+  
+  // ATP Masters 1000 finals = HIGH
+  if (category.includes('atp') && tournamentName.includes('1000')) {
+    if (roundName.includes('final')) {
+      return 'HIGH';
+    }
+  }
+  
+  // Qualificazioni = LOW
+  if (roundName.includes('qualification') || roundName.includes('qualifying')) {
+    return 'LOW';
+  }
+  
+  // Round 1 di tornei minori = LOW
+  if (roundName.includes('round 1') || roundName.includes('1st round')) {
+    if (!category.includes('grand slam') && !tournamentName.includes('1000')) {
+      return 'LOW';
+    }
+  }
+  
+  return 'MEDIUM';
 }
 
 /**
  * Controlla tutte le partite tracciate
+ * Versione aggiornata con supporto DB e fallback in-memory
  */
 async function checkTrackedMatches() {
-  if (trackedMatches.size === 0) return;
+  let trackedList = [];
+  
+  // Ottieni lista da DB o fallback
+  if (USE_DB_TRACKING && liveTrackingRepo) {
+    try {
+      trackedList = await liveTrackingRepo.getTrackingDue(20);
+    } catch (e) {
+      console.error('❌ Error fetching tracking from DB:', e.message);
+      // Fallback to in-memory
+      trackedList = Array.from(trackedMatchesFallback.entries()).map(([eventId, info]) => ({
+        source_event_id: eventId,
+        ...info
+      }));
+    }
+  } else {
+    trackedList = Array.from(trackedMatchesFallback.entries()).map(([eventId, info]) => ({
+      source_event_id: eventId,
+      ...info
+    }));
+  }
+  
+  if (trackedList.length === 0) return;
+  
+  console.log(`🔍 Checking ${trackedList.length} tracked matches...`);
 
-  console.log(`🔍 Checking ${trackedMatches.size} tracked matches...`);
-
-  for (const [eventId, trackInfo] of trackedMatches) {
+  for (const trackInfo of trackedList) {
+    const eventId = trackInfo.source_event_id;
+    
     try {
       // Salta se è già in polling attivo tramite WebSocket
       if (subscriptions.has(eventId)) continue;
 
       // Fetch dati aggiornati
       const data = await fetchLiveData(eventId);
+      const payloadHash = computeDataHash(data);
       
       if (isMatchFinished(data)) {
         console.log(`🏁 Tracked match ${eventId} finished, fetching complete data...`);
@@ -618,49 +897,124 @@ async function checkTrackedMatches() {
         const completeData = await fetchCompleteData(eventId);
         await saveMatchToDatabase(eventId, completeData, 'scheduler-finished');
         
-        trackedMatches.delete(eventId);
-        console.log(`✅ Match ${eventId} completed and removed from tracking`);
+        // Marca come finito
+        if (USE_DB_TRACKING && liveTrackingRepo) {
+          await liveTrackingRepo.markFinished(eventId);
+        } else {
+          trackedMatchesFallback.delete(eventId);
+        }
+        console.log(`✅ Match ${eventId} completed and marked as finished`);
       } else {
-        // Aggiorna dati periodicamente anche se non finito
-        const lastUpdate = new Date(trackInfo.lastUpdate);
-        const now = new Date();
-        const minutesSinceUpdate = (now - lastUpdate) / 60000;
-
-        // Aggiorna ogni 2 minuti per partite in corso
-        if (minutesSinceUpdate >= 2) {
-          await saveMatchToDatabase(eventId, data, 'scheduler-update');
-          trackedMatches.set(eventId, {
+        // Aggiorna tracking con nuovo hash e timestamp
+        const scoreData = {
+          currentScore: {
+            sets: extractSetsFromEvent(data.event),
+            game: `${data.event?.homeScore?.point || 0}-${data.event?.awayScore?.point || 0}`,
+            server: data.event?.firstToServe
+          },
+          matchStatus: data.event?.status?.type || 'inprogress'
+        };
+        
+        if (USE_DB_TRACKING && liveTrackingRepo) {
+          // Hash diverso = cambio nel match
+          if (payloadHash !== trackInfo.last_payload_hash) {
+            await saveMatchToDatabase(eventId, data, 'scheduler-update');
+          }
+          await liveTrackingRepo.recordPollSuccess(eventId, payloadHash, scoreData);
+        } else {
+          trackedMatchesFallback.set(eventId, {
             ...trackInfo,
             status: data.event?.status?.type || 'inprogress',
-            lastUpdate: now.toISOString()
+            lastUpdate: new Date().toISOString(),
+            last_payload_hash: payloadHash
           });
         }
       }
     } catch (error) {
       console.error(`❌ Error checking tracked match ${eventId}:`, error.message);
+      
+      // Registra errore
+      if (USE_DB_TRACKING && liveTrackingRepo) {
+        await liveTrackingRepo.recordPollError(eventId, error.message);
+      }
     }
   }
 }
 
 /**
- * Aggiungi una partita al tracking automatico
+ * Estrae i set dal formato evento SofaScore
  */
-function trackMatch(eventId, options = {}) {
+function extractSetsFromEvent(event) {
+  if (!event || !event.homeScore) return [];
+  const sets = [];
+  for (let i = 1; i <= 5; i++) {
+    const h = event.homeScore[`period${i}`];
+    const a = event.awayScore?.[`period${i}`];
+    if (h !== undefined && a !== undefined) {
+      sets.push([h, a]);
+    }
+  }
+  return sets;
+}
+
+/**
+ * Aggiungi una partita al tracking automatico
+ * Supporta priorità: HIGH, MEDIUM, LOW
+ */
+async function trackMatch(eventId, options = {}) {
   const id = String(eventId);
   
-  if (trackedMatches.has(id)) {
-    console.log(`⚠️ Match ${eventId} already tracked`);
-    return false;
+  if (USE_DB_TRACKING && liveTrackingRepo) {
+    // Verifica se già tracciato
+    const existing = await liveTrackingRepo.getTracking(id);
+    if (existing && existing.status === 'WATCHING') {
+      console.log(`⚠️ Match ${eventId} already tracked in DB`);
+      return false;
+    }
+    
+    // Fetch dati iniziali per metadati
+    let player1Name = options.player1Name;
+    let player2Name = options.player2Name;
+    let tournamentName = options.tournamentName;
+    
+    if (!player1Name || !player2Name) {
+      try {
+        const data = await fetchLiveData(id);
+        player1Name = data.event?.homeTeam?.name || player1Name;
+        player2Name = data.event?.awayTeam?.name || player2Name;
+        tournamentName = data.event?.tournament?.name || tournamentName;
+      } catch (e) { /* ignore */ }
+    }
+    
+    const result = await liveTrackingRepo.addTracking(id, {
+      priority: options.priority || 'MEDIUM',
+      matchStatus: options.status || 'inprogress',
+      player1Name,
+      player2Name,
+      tournamentName
+    });
+    
+    if (result) {
+      console.log(`📌 Match ${eventId} added to DB tracking (${options.priority || 'MEDIUM'})`);
+    }
+    return !!result;
+  } else {
+    // Fallback in-memory
+    if (trackedMatchesFallback.has(id)) {
+      console.log(`⚠️ Match ${eventId} already tracked (in-memory)`);
+      return false;
+    }
+
+    trackedMatchesFallback.set(id, {
+      status: options.status || 'pending',
+      lastUpdate: new Date().toISOString(),
+      startTimestamp: options.startTimestamp || null,
+      priority: options.priority || 'MEDIUM',
+      autoTrack: true
+    });
+
+    console.log(`📌 Match ${eventId} added to tracking (in-memory)`);
   }
-
-  trackedMatches.set(id, {
-    status: options.status || 'pending',
-    lastUpdate: new Date().toISOString(),
-    startTimestamp: options.startTimestamp || null,
-    autoTrack: true
-  });
-
-  console.log(`📌 Match ${eventId} added to tracking`);
   
   // Avvia scheduler se non attivo
   if (!schedulerInterval) {
@@ -673,22 +1027,102 @@ function trackMatch(eventId, options = {}) {
 /**
  * Rimuovi una partita dal tracking
  */
-function untrackMatch(eventId) {
-  const removed = trackedMatches.delete(String(eventId));
-  if (removed) {
-    console.log(`📍 Match ${eventId} removed from tracking`);
+async function untrackMatch(eventId) {
+  const id = String(eventId);
+  
+  if (USE_DB_TRACKING && liveTrackingRepo) {
+    const removed = await liveTrackingRepo.removeTracking(id);
+    return removed;
+  } else {
+    const removed = trackedMatchesFallback.delete(id);
+    if (removed) {
+      console.log(`📍 Match ${eventId} removed from tracking`);
+    }
+    return removed;
   }
-  return removed;
 }
 
 /**
  * Ottieni lista partite tracciate
  */
-function getTrackedMatches() {
-  return Array.from(trackedMatches.entries()).map(([eventId, info]) => ({
+async function getTrackedMatches() {
+  if (USE_DB_TRACKING && liveTrackingRepo) {
+    try {
+      const tracking = await liveTrackingRepo.getAllTracking({ status: 'WATCHING' });
+      return tracking.map(t => ({
+        eventId: t.source_event_id,
+        status: t.match_status,
+        priority: t.priority,
+        lastUpdate: t.last_polled_at,
+        player1: t.player1_name,
+        player2: t.player2_name,
+        tournament: t.tournament_name,
+        currentScore: t.current_score,
+        failCount: t.fail_count
+      }));
+    } catch (e) {
+      console.error('❌ Error fetching tracked matches from DB:', e.message);
+    }
+  }
+  
+  // Fallback
+  return Array.from(trackedMatchesFallback.entries()).map(([eventId, info]) => ({
     eventId,
     ...info
   }));
+}
+
+/**
+ * Cambia priorità di un match
+ */
+async function setMatchPriority(eventId, priority) {
+  const id = String(eventId);
+  
+  if (!['HIGH', 'MEDIUM', 'LOW'].includes(priority)) {
+    console.error(`❌ Invalid priority: ${priority}`);
+    return false;
+  }
+  
+  if (USE_DB_TRACKING && liveTrackingRepo) {
+    const result = await liveTrackingRepo.updatePriority(id, priority);
+    return !!result;
+  } else {
+    const tracking = trackedMatchesFallback.get(id);
+    if (tracking) {
+      tracking.priority = priority;
+      return true;
+    }
+    return false;
+  }
+}
+
+/**
+ * Riprende un match in errore/pausa
+ */
+async function resumeMatch(eventId) {
+  const id = String(eventId);
+  
+  if (USE_DB_TRACKING && liveTrackingRepo) {
+    const result = await liveTrackingRepo.resumeTracking(id);
+    return !!result;
+  }
+  return false;
+}
+
+/**
+ * Ottieni statistiche del sistema di tracking
+ */
+async function getTrackingStats() {
+  if (USE_DB_TRACKING && liveTrackingRepo) {
+    return await liveTrackingRepo.getTrackingStats();
+  }
+  
+  return {
+    total: trackedMatchesFallback.size,
+    byStatus: { WATCHING: trackedMatchesFallback.size },
+    byPriority: {},
+    mode: 'in-memory'
+  };
 }
 
 /**
@@ -722,12 +1156,25 @@ module.exports = {
   getStats,
   fetchLiveData,
   fetchCompleteData,
-  // Nuove funzioni
+  // Funzioni tracking
   saveMatchToDatabase,
   trackMatch,
   untrackMatch,
   getTrackedMatches,
   startScheduler,
   stopScheduler,
-  syncMatch
+  syncMatch,
+  // Nuove funzioni (FILOSOFIA_LIVE_TRACKING compliance)
+  setMatchPriority,
+  resumeMatch,
+  getTrackingStats,
+  computeDataHash,
+  // Reconciliation Job
+  reconcileLiveMatches,
+  fetchLiveMatchesList,
+  startReconciliationJob,
+  stopReconciliationJob,
+  // Constants
+  CONFIG,
+  USE_DB_TRACKING
 };

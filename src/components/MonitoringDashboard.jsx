@@ -309,6 +309,155 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
   );
 }
 
+// Formule e spiegazioni per i dati calcolati
+const CALCULATED_DATA_FORMULAS = {
+  winRate: {
+    name: 'Win Rate',
+    formula: 'wins / totalMatches',
+    description: 'Percentuale di vittorie sul totale delle partite giocate',
+    example: (data) => data ? `${data.totalWins || 0} / ${(data.totalWins || 0) + (data.totalLosses || 0)} = ${((data.winRate || 0) * 100).toFixed(1)}%` : null
+  },
+  totalWins: {
+    name: 'Vittorie Totali',
+    formula: 'COUNT(matches WHERE player_role = "winner")',
+    description: 'Numero totale di partite vinte',
+    example: null
+  },
+  totalLosses: {
+    name: 'Sconfitte Totali',
+    formula: 'COUNT(matches WHERE player_role = "loser")',
+    description: 'Numero totale di partite perse',
+    example: null
+  },
+  avgSetsPerMatch: {
+    name: 'Media Set per Match',
+    formula: 'SUM(sets_played) / totalMatches',
+    description: 'Numero medio di set giocati per partita (indica se le partite sono combattute)',
+    example: null
+  },
+  tiebreakWinRate: {
+    name: 'Tiebreak Win Rate',
+    formula: 'tiebreaks_won / tiebreaks_played',
+    description: 'Percentuale di tiebreak vinti. Indica la capacità di gestire i momenti decisivi',
+    example: null
+  },
+  comebackRate: {
+    name: 'Comeback Rate',
+    formula: 'matches_won_after_losing_first_set / matches_lost_first_set',
+    description: 'Percentuale di vittorie dopo aver perso il primo set. Misura la resilienza mentale',
+    example: null
+  },
+  firstSetWinRate: {
+    name: 'First Set Win Rate',
+    formula: 'first_sets_won / totalMatches',
+    description: 'Percentuale di primi set vinti. Indica la capacità di partire forte',
+    example: null
+  },
+  decidingSetWinRate: {
+    name: 'Deciding Set Win Rate',
+    formula: 'deciding_sets_won / deciding_sets_played',
+    description: 'Percentuale di set decisivi vinti (3° set nel best of 3, 5° nel best of 5)',
+    example: null
+  },
+  matchWinAfterFirstSet: {
+    name: 'Match Win After First Set',
+    formula: 'matches_won_after_winning_first_set / first_sets_won',
+    description: 'Probabilità di vincere il match dopo aver vinto il primo set',
+    example: null
+  },
+  recentForm: {
+    name: 'Forma Recente',
+    formula: 'wins_last_20 / 20',
+    description: 'Win rate nelle ultime 20 partite. Trend indica se sta migliorando o peggiorando rispetto alla media storica',
+    example: null
+  },
+  roi: {
+    name: 'ROI (Return on Investment)',
+    formula: '(total_return - total_stake) / total_stake * 100',
+    description: 'Rendimento se si fosse scommesso sempre su questo giocatore alle quote medie',
+    example: null
+  },
+  bySurface: {
+    name: 'Stats per Superficie',
+    formula: 'Per ogni superficie: wins / matches',
+    description: 'Win rate diviso per tipo di superficie (Hard, Clay, Grass)',
+    example: null
+  },
+  byFormat: {
+    name: 'Stats per Formato',
+    formula: 'Per ogni formato: wins / matches',
+    description: 'Win rate diviso per formato (Best of 3 vs Best of 5)',
+    example: null
+  },
+  bySeries: {
+    name: 'Stats per Torneo',
+    formula: 'Per ogni categoria: wins / matches',
+    description: 'Win rate diviso per categoria torneo (Grand Slam, Masters, ATP500, etc.)',
+    example: null
+  }
+};
+
+// Helper per renderizzare valori nell'inspector (espande oggetti)
+function renderInspectorValue(value, depth = 0) {
+  if (value === null || value === undefined || value === '') {
+    return '❌ N/A';
+  }
+  
+  if (typeof value === 'boolean') {
+    return value ? '✅ Sì' : '❌ No';
+  }
+  
+  if (typeof value === 'number') {
+    // Formatta numeri con decimali se necessario
+    if (Number.isInteger(value)) return String(value);
+    return value.toFixed(2);
+  }
+  
+  if (typeof value === 'string') {
+    if (value.length > 60) return value.substring(0, 60) + '...';
+    return value;
+  }
+  
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[] (vuoto)';
+    if (depth > 0) return `[${value.length} elementi]`;
+    // Mostra primi elementi se sono semplici
+    const preview = value.slice(0, 3).map(v => 
+      typeof v === 'object' ? '{...}' : String(v).substring(0, 20)
+    ).join(', ');
+    return `[${value.length}]: ${preview}${value.length > 3 ? '...' : ''}`;
+  }
+  
+  if (typeof value === 'object') {
+    const keys = Object.keys(value);
+    if (keys.length === 0) return '{} (vuoto)';
+    
+    // Per oggetti con proprietà specifiche, mostra valori chiave
+    if (value.value !== undefined && value.class !== undefined) {
+      return `${value.value} (${value.class})`;
+    }
+    if (value.rate !== undefined) {
+      return `${(value.rate * 100).toFixed(1)}%`;
+    }
+    if (value.win_rate !== undefined) {
+      return `WR: ${(value.win_rate * 100).toFixed(1)}%`;
+    }
+    if (value.wins !== undefined && value.losses !== undefined) {
+      return `${value.wins}W - ${value.losses}L`;
+    }
+    if (value.trend !== undefined) {
+      return `Trend: ${value.trend}`;
+    }
+    
+    // Altrimenti mostra chiavi
+    if (depth > 0) return `{${keys.length} props}`;
+    const preview = keys.slice(0, 3).join(', ');
+    return `{${keys.length}}: ${preview}${keys.length > 3 ? '...' : ''}`;
+  }
+  
+  return String(value);
+}
+
 // Componente principale
 function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect }) {
   const [stats, setStats] = useState(null);
@@ -316,6 +465,17 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const [error, setError] = useState(null);
   const [expandedTournament, setExpandedTournament] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'explore' | 'tracking' | 'predictor'
+  
+  // === DATA INSPECTOR - Stati ===
+  const [inspectorMode, setInspectorMode] = useState('player'); // 'player' | 'match'
+  const [expandedFormula, setExpandedFormula] = useState(null); // quale metrica mostra la formula
+  const [inspectorSearch, setInspectorSearch] = useState('');
+  const [inspectorData, setInspectorData] = useState(null);
+  const [inspectorLoading, setInspectorLoading] = useState(false);
+  const [matchSearchResults, setMatchSearchResults] = useState([]);
+  const [selectedMatchId, setSelectedMatchId] = useState(null);
+  const [playerSuggestions, setPlayerSuggestions] = useState([]);
+  const [showPlayerSuggestions, setShowPlayerSuggestions] = useState(false);
   
   // === ESPLORA MATCH - Stati filtri ===
   const [searchFilters, setSearchFilters] = useState({
@@ -345,6 +505,138 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
       setLoading(false);
     }
   }, []);
+  
+  // === DATA INSPECTOR - Carica dati giocatore o match ===
+  const loadInspectorData = useCallback(async () => {
+    const searchTerm = inspectorMode === 'match' ? selectedMatchId : inspectorSearch;
+    if (!searchTerm) return;
+    
+    setInspectorLoading(true);
+    setInspectorData(null);
+    
+    try {
+      if (inspectorMode === 'player') {
+        // Carica profilo giocatore con dati puri e calcolati
+        const res = await fetch(apiUrl(`/api/player/${encodeURIComponent(searchTerm)}/inspector`));
+        if (res.ok) {
+          const data = await res.json();
+          setInspectorData({ type: 'player', ...data });
+        } else {
+          // Fallback: carica dati base
+          const profileRes = await fetch(apiUrl(`/api/player/${encodeURIComponent(searchTerm)}/profile`));
+          if (profileRes.ok) {
+            const profile = await profileRes.json();
+            setInspectorData({ 
+              type: 'player', 
+              name: searchTerm,
+              rawData: profile.rawData || {},
+              calculatedData: profile.calculatedData || profile,
+              coverage: profile.coverage || { total: 0, available: 0 }
+            });
+          } else {
+            setInspectorData({ type: 'player', error: 'Giocatore non trovato' });
+          }
+        }
+      } else {
+        // Carica dati match
+        const res = await fetch(apiUrl(`/api/match/${searchTerm}/inspector`));
+        if (res.ok) {
+          const data = await res.json();
+          setInspectorData({ type: 'match', ...data });
+        } else {
+          // Fallback: carica match base
+          const matchRes = await fetch(apiUrl(`/api/match/${searchTerm}`));
+          if (matchRes.ok) {
+            const match = await matchRes.json();
+            setInspectorData({ 
+              type: 'match', 
+              eventId: searchTerm,
+              rawData: match,
+              calculatedData: {},
+              coverage: { total: 0, available: 0 }
+            });
+          } else {
+            setInspectorData({ type: 'match', error: 'Match non trovato' });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading inspector data:', e);
+      setInspectorData({ error: e.message });
+    } finally {
+      setInspectorLoading(false);
+    }
+  }, [inspectorMode, inspectorSearch, selectedMatchId]);
+  
+  // === DATA INSPECTOR - Cerca match per nome giocatore/torneo ===
+  const searchMatchesForInspector = useCallback(async (query) => {
+    if (!query || query.length < 2) {
+      setMatchSearchResults([]);
+      return;
+    }
+    
+    try {
+      const res = await fetch(apiUrl(`/api/matches/search?playerSearch=${encodeURIComponent(query)}&limit=10`));
+      if (res.ok) {
+        const data = await res.json();
+        setMatchSearchResults(data.matches || []);
+      }
+    } catch (e) {
+      console.error('Error searching matches:', e);
+    }
+  }, []);
+  
+  // === DATA INSPECTOR - Cerca giocatori per autocomplete ===
+  const searchPlayersForAutocomplete = useCallback(async (query) => {
+    if (!query || query.length < 2) {
+      setPlayerSuggestions([]);
+      setShowPlayerSuggestions(false);
+      return;
+    }
+    
+    try {
+      const res = await fetch(apiUrl(`/api/players/search?q=${encodeURIComponent(query)}&limit=8`));
+      if (res.ok) {
+        const data = await res.json();
+        setPlayerSuggestions(data.players || data || []);
+        setShowPlayerSuggestions(true);
+      }
+    } catch (e) {
+      console.error('Error searching players:', e);
+    }
+  }, []);
+  
+  // === DATA INSPECTOR - Seleziona giocatore dall'autocomplete ===
+  const selectPlayerFromSuggestions = useCallback((player) => {
+    const playerName = player.name || player.full_name || player;
+    setInspectorSearch(playerName);
+    setPlayerSuggestions([]);
+    setShowPlayerSuggestions(false);
+    // Carica subito i dati
+    setTimeout(() => {
+      loadInspectorData();
+    }, 100);
+  }, [loadInspectorData]);
+  
+  // === DATA INSPECTOR - Seleziona match dalla lista ===
+  const selectMatchForInspector = useCallback((match) => {
+    const matchId = match.event_id || match.eventId || match.id;
+    setSelectedMatchId(matchId);
+    setMatchSearchResults([]);
+    setInspectorSearch(`${match.home_player} vs ${match.away_player}`);
+    
+    // Carica subito i dati
+    setTimeout(() => {
+      loadInspectorData();
+    }, 100);
+  }, [loadInspectorData]);
+  
+  // Carica inspector data quando si seleziona un match
+  useEffect(() => {
+    if (selectedMatchId && inspectorMode === 'match') {
+      loadInspectorData();
+    }
+  }, [selectedMatchId, inspectorMode, loadInspectorData]);
   
   // === ESPLORA MATCH - Carica lista tornei per dropdown ===
   const loadTournaments = useCallback(async () => {
@@ -467,7 +759,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            📈 Overview
+            � Data Inspector
           </button>
           <button 
             className={`tab-btn ${activeTab === 'tournaments' ? 'active' : ''}`}
@@ -512,121 +804,270 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
           )}
           
           {stats && activeTab === 'overview' && (
-            <div className="tab-content overview-tab">
-              {/* Summary Cards */}
-              <div className="summary-cards">
-                <div className="summary-card total">
-                  <div className="summary-icon">📁</div>
-                  <div className="summary-info">
-                    <span className="summary-value">{stats.summary.totalMatches}</span>
-                    <span className="summary-label">Match Totali</span>
-                  </div>
-                </div>
-                
-                <div className="summary-card tournaments">
-                  <div className="summary-icon">🏆</div>
-                  <div className="summary-info">
-                    <span className="summary-value">{stats.summary.totalTournaments}</span>
-                    <span className="summary-label">Tornei</span>
-                  </div>
-                </div>
-                
-                <div className="summary-card power-score" title={stats.summary.powerDetails ? 
-                  `Match nel DB: ${stats.summary.powerDetails.dbSize?.score || 0}%\nDati Completi: ${stats.summary.powerDetails.completeness?.score || 0}%\nQualità Dati: ${stats.summary.powerDetails.quality?.score || 0}%\nMatch Finiti: ${stats.summary.powerDetails.finished?.score || 0}%` : ''}>
-                  <div className="summary-icon">⚡</div>
-                  <div className="summary-info">
-                    <span className="summary-value">{stats.summary.powerScore || 0}%</span>
-                    <span className="summary-label">Power Score</span>
-                  </div>
-                </div>
-                
-                <div className="summary-card tracking">
-                  <div className="summary-icon">📡</div>
-                  <div className="summary-info">
-                    <span className="summary-value">{stats.tracking.active}</span>
-                    <span className="summary-label">In Monitoraggio</span>
-                  </div>
-                </div>
+            <div className="tab-content overview-tab data-inspector-tab">
+              {/* Header */}
+              <div className="inspector-main-header">
+                <h3>🔬 Data Inspector</h3>
+                <p>Analizza dati puri vs calcolati per verificare affidabilità e copertura</p>
               </div>
               
-              {/* Power Score Details */}
-              {stats.summary.powerDetails && (
-                <div className="power-details-grid">
-                  {Object.entries(stats.summary.powerDetails).map(([key, data]) => (
-                    <div key={key} className="power-detail-item">
-                      <div className="power-detail-header">
-                        <span className="power-detail-label">{data.label}</span>
-                        <span className="power-detail-score">{data.score}%</span>
-                      </div>
-                      <div className="power-detail-bar">
-                        <div 
-                          className="power-detail-fill" 
-                          style={{ 
-                            width: `${data.score}%`,
-                            background: data.score >= 70 ? 'linear-gradient(90deg, #10b981, #34d399)' :
-                                       data.score >= 40 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' :
-                                       'linear-gradient(90deg, #ef4444, #f87171)'
-                          }}
-                        />
-                      </div>
-                      <span className="power-detail-info">{data.detail}</span>
+              {/* Mode Toggle */}
+              <div className="inspector-mode-toggle">
+                <button 
+                  className={`mode-btn ${inspectorMode === 'player' ? 'active' : ''}`}
+                  onClick={() => { setInspectorMode('player'); setInspectorData(null); setInspectorSearch(''); setMatchSearchResults([]); }}
+                >
+                  🧑 Giocatore
+                </button>
+                <button 
+                  className={`mode-btn ${inspectorMode === 'match' ? 'active' : ''}`}
+                  onClick={() => { setInspectorMode('match'); setInspectorData(null); setInspectorSearch(''); setMatchSearchResults([]); }}
+                >
+                  🎾 Match
+                </button>
+              </div>
+              
+              {/* Search Section */}
+              <div className="inspector-search-section">
+                {inspectorMode === 'player' ? (
+                  /* Ricerca Giocatore - con autocomplete */
+                  <div className="player-search-container">
+                    <div className="inspector-search">
+                      <input
+                        type="text"
+                        placeholder="Nome giocatore (es: Sinner, Alcaraz...)"
+                        value={inspectorSearch}
+                        onChange={(e) => {
+                          setInspectorSearch(e.target.value);
+                          if (e.target.value.length >= 2) {
+                            searchPlayersForAutocomplete(e.target.value);
+                          } else {
+                            setPlayerSuggestions([]);
+                            setShowPlayerSuggestions(false);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setShowPlayerSuggestions(false);
+                            loadInspectorData();
+                          }
+                          if (e.key === 'Escape') {
+                            setShowPlayerSuggestions(false);
+                          }
+                        }}
+                        onFocus={() => playerSuggestions.length > 0 && setShowPlayerSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowPlayerSuggestions(false), 200)}
+                      />
+                      <button 
+                        className="inspector-search-btn"
+                        onClick={loadInspectorData}
+                        disabled={inspectorLoading || !inspectorSearch.trim()}
+                      >
+                        {inspectorLoading ? '⏳' : '🔍'}
+                      </button>
                     </div>
-                  ))}
+                    
+                    {/* Player Autocomplete Dropdown */}
+                    {showPlayerSuggestions && playerSuggestions.length > 0 && (
+                      <div className="player-suggestions-dropdown">
+                        {playerSuggestions.map((player, idx) => (
+                          <div 
+                            key={idx} 
+                            className="player-suggestion-item"
+                            onClick={() => selectPlayerFromSuggestions(player)}
+                          >
+                            <span className="player-name">{player.name || player.full_name || player}</span>
+                            {player.country_name && (
+                              <span className="player-country">{player.country_alpha2 || player.country_name}</span>
+                            )}
+                            {player.current_ranking && (
+                              <span className="player-rank">#{player.current_ranking}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Ricerca Match - con ricerca per giocatore */
+                  <div className="match-search-container">
+                    <div className="inspector-search">
+                      <input
+                        type="text"
+                        placeholder="Cerca match per giocatore o torneo..."
+                        value={inspectorSearch}
+                        onChange={(e) => {
+                          setInspectorSearch(e.target.value);
+                          if (e.target.value.length >= 2) {
+                            searchMatchesForInspector(e.target.value);
+                          } else {
+                            setMatchSearchResults([]);
+                          }
+                        }}
+                      />
+                      <button 
+                        className="inspector-search-btn"
+                        onClick={() => searchMatchesForInspector(inspectorSearch)}
+                        disabled={inspectorLoading || !inspectorSearch.trim()}
+                      >
+                        {inspectorLoading ? '⏳' : '🔍'}
+                      </button>
+                    </div>
+                    
+                    {/* Match Search Results Dropdown */}
+                    {matchSearchResults.length > 0 && (
+                      <div className="match-search-dropdown">
+                        {matchSearchResults.map((match, idx) => (
+                          <div 
+                            key={idx} 
+                            className="match-search-item"
+                            onClick={() => selectMatchForInspector(match)}
+                          >
+                            <span className="match-players">{match.home_player} vs {match.away_player}</span>
+                            <span className="match-info">
+                              {match.tournament_name || match.tournament} • {match.surface || 'N/A'}
+                            </span>
+                            <span className="match-status">{match.status}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Selected Match Info */}
+                    {selectedMatchId && (
+                      <div className="selected-match-badge">
+                        ✅ Match selezionato: {selectedMatchId}
+                        <button onClick={() => { setSelectedMatchId(null); setInspectorData(null); }}>✕</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Results */}
+              {inspectorData && !inspectorData.error && (
+                <div className="inspector-results">
+                  {/* Header con nome e coverage */}
+                  <div className="inspector-results-header">
+                    <span className="inspector-entity-name">
+                      {inspectorData.type === 'player' 
+                        ? `🧑 ${inspectorData.name || inspectorSearch}` 
+                        : `🎾 ${inspectorData.matchInfo || inspectorData.eventId || selectedMatchId}`}
+                    </span>
+                    {inspectorData.coverage && (
+                      <span className="inspector-coverage">
+                        📊 Copertura: {inspectorData.coverage.available || 0}/{inspectorData.coverage.total || 0} 
+                        ({inspectorData.coverage.total > 0 ? Math.round((inspectorData.coverage.available / inspectorData.coverage.total) * 100) : 0}%)
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="inspector-data-grid">
+                    {/* Colonna Dati Puri */}
+                    <div className="inspector-column raw-data">
+                      <h4>📦 Dati Puri (DB)</h4>
+                      <div className="inspector-data-list">
+                        {inspectorData.rawData && Object.entries(inspectorData.rawData).length > 0 ? (
+                          Object.entries(inspectorData.rawData).map(([key, value]) => (
+                            <div key={key} className="inspector-data-item">
+                              <span className="data-key">{key}</span>
+                              <span className={`data-value ${value === null || value === undefined || value === '' ? 'missing' : ''}`}>
+                                {renderInspectorValue(value)}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="no-data">Nessun dato puro disponibile</div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Colonna Dati Calcolati */}
+                    <div className="inspector-column calculated-data">
+                      <h4>⚙️ Dati Calcolati <span className="click-hint">(clicca per formula)</span></h4>
+                      <div className="inspector-data-list">
+                        {inspectorData.calculatedData && Object.entries(inspectorData.calculatedData).length > 0 ? (
+                          Object.entries(inspectorData.calculatedData).map(([key, value]) => {
+                            const formulaInfo = CALCULATED_DATA_FORMULAS[key];
+                            const isExpanded = expandedFormula === key;
+                            
+                            return (
+                              <div key={key} className={`inspector-data-item clickable ${isExpanded ? 'expanded' : ''}`}>
+                                <div 
+                                  className="data-item-header"
+                                  onClick={() => setExpandedFormula(isExpanded ? null : key)}
+                                >
+                                  <span className="data-key">
+                                    {formulaInfo?.name || key}
+                                    <span className="expand-icon">{isExpanded ? '▼' : '▶'}</span>
+                                  </span>
+                                  <span className={`data-value ${value === null || value === undefined ? 'missing' : 'calculated'}`}>
+                                    {renderInspectorValue(value)}
+                                  </span>
+                                </div>
+                                
+                                {isExpanded && formulaInfo && (
+                                  <div className="formula-details">
+                                    <div className="formula-row">
+                                      <span className="formula-label">📐 Formula:</span>
+                                      <code className="formula-code">{formulaInfo.formula}</code>
+                                    </div>
+                                    <div className="formula-row">
+                                      <span className="formula-label">📝 Descrizione:</span>
+                                      <span className="formula-desc">{formulaInfo.description}</span>
+                                    </div>
+                                    {formulaInfo.example && formulaInfo.example(inspectorData.calculatedData) && (
+                                      <div className="formula-row">
+                                        <span className="formula-label">🔢 Calcolo:</span>
+                                        <code className="formula-example">{formulaInfo.example(inspectorData.calculatedData)}</code>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="no-data">Nessun dato calcolato disponibile</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Data Sources Info */}
+                  {inspectorData.sources && (
+                    <div className="inspector-sources">
+                      <h4>📡 Fonti Dati</h4>
+                      <div className="sources-list">
+                        {inspectorData.sources.map((src, i) => (
+                          <span key={i} className={`source-badge ${src.available ? 'available' : 'missing'}`}>
+                            {src.available ? '✅' : '❌'} {src.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               
-              {/* Status Distribution */}
-              <div className="status-distribution">
-                <h3>Distribuzione Status</h3>
-                <div className="status-bars">
-                  <div className="status-bar-item">
-                    <span className="status-bar-label">✅ Finite</span>
-                    <div className="status-bar-track">
-                      <div 
-                        className="status-bar-fill finished" 
-                        style={{ 
-                          width: `${(stats.summary.byStatus.finished / stats.summary.totalMatches) * 100}%` 
-                        }}
-                      />
-                    </div>
-                    <span className="status-bar-value">{stats.summary.byStatus.finished}</span>
-                  </div>
-                  <div className="status-bar-item">
-                    <span className="status-bar-label">🔴 In Corso</span>
-                    <div className="status-bar-track">
-                      <div 
-                        className="status-bar-fill inprogress" 
-                        style={{ 
-                          width: `${(stats.summary.byStatus.inprogress / stats.summary.totalMatches) * 100}%` 
-                        }}
-                      />
-                    </div>
-                    <span className="status-bar-value">{stats.summary.byStatus.inprogress}</span>
-                  </div>
-                  <div className="status-bar-item">
-                    <span className="status-bar-label">⏳ Da Iniziare</span>
-                    <div className="status-bar-track">
-                      <div 
-                        className="status-bar-fill notstarted" 
-                        style={{ 
-                          width: `${(stats.summary.byStatus.notstarted / stats.summary.totalMatches) * 100}%` 
-                        }}
-                      />
-                    </div>
-                    <span className="status-bar-value">{stats.summary.byStatus.notstarted}</span>
-                  </div>
+              {/* Error */}
+              {inspectorData?.error && (
+                <div className="inspector-error">
+                  ❌ {inspectorData.error}
                 </div>
-              </div>
+              )}
               
-              {/* Timeline */}
-              <div className="acquisition-timeline">
-                <h3>Acquisizioni Ultimi 30 Giorni</h3>
-                <MiniBarChart data={stats.timeline} height={80} />
-                <div className="timeline-labels">
-                  <span>{stats.timeline[0]?.date}</span>
-                  <span>{stats.timeline[stats.timeline.length - 1]?.date}</span>
+              {/* Hint iniziale */}
+              {!inspectorData && !inspectorLoading && (
+                <div className="inspector-hint">
+                  <span>💡</span>
+                  <p>
+                    {inspectorMode === 'player' 
+                      ? 'Inserisci il nome di un giocatore per vedere i suoi dati puri dal DB e le metriche calcolate'
+                      : 'Cerca un match per nome giocatore o torneo, poi selezionalo dalla lista'}
+                  </p>
                 </div>
-              </div>
+              )}
             </div>
           )}
           

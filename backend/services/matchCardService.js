@@ -9,6 +9,10 @@
  * - Point by Point
  * - Odds
  * - H2H
+ * 
+ * NOTA: Per performance ottimali, usare prima getMatchCardFromSnapshot()
+ * che legge dalla tabella match_card_snapshot (single query).
+ * Il metodo getMatchCard() originale è mantenuto come fallback.
  */
 
 const { supabase } = require('../db/supabase');
@@ -16,7 +20,148 @@ const { supabase } = require('../db/supabase');
 class MatchCardService {
   
   /**
-   * Ottiene la card completa di un match
+   * Ottiene la card da snapshot (FAST - single query)
+   * Se lo snapshot non esiste, costruisce e restituisce
+   */
+  async getMatchCardFromSnapshot(matchId) {
+    if (!supabase) {
+      console.warn('⚠️ Supabase not available');
+      return null;
+    }
+
+    try {
+      // Try to get from snapshot first
+      const { data: snapshot, error } = await supabase
+        .from('match_card_snapshot')
+        .select('*')
+        .eq('match_id', matchId)
+        .single();
+
+      if (snapshot) {
+        console.log(`⚡ Match ${matchId} card from snapshot (quality=${snapshot.data_quality_int}%)`);
+        return this.formatSnapshotResponse(snapshot);
+      }
+
+      // Snapshot doesn't exist, build it
+      if (error?.code === 'PGRST116') {
+        console.log(`📸 Building snapshot for match ${matchId}...`);
+        const card = await this.getMatchCard(matchId);
+        
+        if (card) {
+          // Save snapshot in background (don't block response)
+          this.saveSnapshot(matchId, card).catch(err => 
+            console.error('Error saving snapshot:', err.message)
+          );
+        }
+        
+        return card;
+      }
+
+      console.error('Error fetching snapshot:', error?.message);
+      return null;
+    } catch (error) {
+      console.error('Error in getMatchCardFromSnapshot:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Format snapshot data into API response format
+   */
+  formatSnapshotResponse(snapshot) {
+    return {
+      match: snapshot.core_json,
+      tournament: snapshot.core_json?.tournament,
+      player1: {
+        ...(snapshot.players_json?.player1 || {}),
+        stats: null, // Stats per player not in snapshot, load lazy if needed
+        recentForm: []
+      },
+      player2: {
+        ...(snapshot.players_json?.player2 || {}),
+        stats: null,
+        recentForm: []
+      },
+      h2h: snapshot.h2h_json ? {
+        total: `${snapshot.h2h_json.player1_wins}-${snapshot.h2h_json.player2_wins}`,
+        player1Wins: snapshot.h2h_json.player1_wins,
+        player2Wins: snapshot.h2h_json.player2_wins,
+        onHard: `${snapshot.h2h_json.hard_p1_wins || 0}-${snapshot.h2h_json.hard_p2_wins || 0}`,
+        onClay: `${snapshot.h2h_json.clay_p1_wins || 0}-${snapshot.h2h_json.clay_p2_wins || 0}`,
+        onGrass: `${snapshot.h2h_json.grass_p1_wins || 0}-${snapshot.h2h_json.grass_p2_wins || 0}`,
+        lastMatch: snapshot.h2h_json.last_match_date
+      } : null,
+      statistics: snapshot.stats_json,
+      momentum: snapshot.momentum_json || [],
+      pointByPoint: [], // Not in snapshot, load lazy via /api/match/:id/points
+      odds: snapshot.odds_json,
+      dataSources: (snapshot.data_sources_json || []).map(s => s.source_type),
+      dataQuality: snapshot.data_quality_int,
+      fromSnapshot: true,
+      snapshotUpdatedAt: snapshot.last_updated_at
+    };
+  }
+
+  /**
+   * Save card data as snapshot
+   */
+  async saveSnapshot(matchId, card) {
+    if (!supabase || !card) return;
+
+    const snapshot = {
+      match_id: matchId,
+      core_json: card.match,
+      players_json: {
+        player1: {
+          id: card.player1?.id,
+          name: card.player1?.name,
+          country: card.player1?.country,
+          currentRanking: card.player1?.currentRanking,
+          rankingAtMatch: card.player1?.rankingAtMatch,
+          seed: card.player1?.seed
+        },
+        player2: {
+          id: card.player2?.id,
+          name: card.player2?.name,
+          country: card.player2?.country,
+          currentRanking: card.player2?.currentRanking,
+          rankingAtMatch: card.player2?.rankingAtMatch,
+          seed: card.player2?.seed
+        }
+      },
+      h2h_json: card.h2h ? {
+        player1_wins: card.h2h.player1Wins,
+        player2_wins: card.h2h.player2Wins,
+        hard_p1_wins: parseInt(card.h2h.onHard?.split('-')[0]) || 0,
+        hard_p2_wins: parseInt(card.h2h.onHard?.split('-')[1]) || 0,
+        clay_p1_wins: parseInt(card.h2h.onClay?.split('-')[0]) || 0,
+        clay_p2_wins: parseInt(card.h2h.onClay?.split('-')[1]) || 0,
+        grass_p1_wins: parseInt(card.h2h.onGrass?.split('-')[0]) || 0,
+        grass_p2_wins: parseInt(card.h2h.onGrass?.split('-')[1]) || 0,
+        last_match_date: card.h2h.lastMatch
+      } : null,
+      stats_json: card.statistics,
+      momentum_json: card.momentum || [],
+      odds_json: card.odds,
+      data_sources_json: (card.dataSources || []).map(s => ({ source_type: s })),
+      data_quality_int: card.dataQuality || 0,
+      last_updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase
+      .from('match_card_snapshot')
+      .upsert(snapshot, { onConflict: 'match_id' });
+
+    if (error) {
+      console.error('Error saving snapshot:', error.message);
+    } else {
+      console.log(`✅ Snapshot saved for match ${matchId}`);
+    }
+  }
+
+  /**
+   * Ottiene la card completa di un match (LEGACY - multiple queries)
+   * Preferire getMatchCardFromSnapshot() per performance
    */
   async getMatchCard(matchId) {
     if (!supabase) {

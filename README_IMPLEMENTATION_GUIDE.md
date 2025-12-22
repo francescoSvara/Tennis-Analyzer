@@ -168,6 +168,103 @@ I match importati da Sofascore avevano `winner_name` e `loser_name` vuoti, causa
 
 # 🚧 TASK BACKEND DA IMPLEMENTARE
 
+---
+
+## ✅ LIVE TRACKING SYSTEM COMPLETATO (22 Dicembre 2025)
+
+> **Gap Analysis risolto:** Il sistema ora implementa pienamente la filosofia documentata in FILOSOFIA_LIVE_TRACKING.md
+
+### ✅ TODO 1: Tabella `live_tracking` su Supabase
+**Files:**
+- `backend/migrations/add-live-tracking-table.sql` - Schema completo
+- `backend/db/liveTrackingRepository.js` - Repository CRUD
+
+**Implementato:**
+- Tabella `live_tracking` con tutti i campi previsti dalla filosofia
+- Status ENUM: WATCHING, PAUSED, FINISHED, ERROR
+- Priority ENUM: LOW (30s), MEDIUM (10s), HIGH (3s)
+- Campi: source_event_id, match_id, poll_interval_sec, last_payload_hash, fail_count
+- Tabella `live_snapshots` per storico temporaneo
+- View `live_tracking_due` per query ottimizzate
+- Trigger automatici per updated_at e poll_interval_sec
+
+### ✅ TODO 2: Sistema di Priorità Polling
+**API:**
+- `POST /api/track/:eventId` - Ora accetta `priority` nel body
+- `POST /api/track/:eventId/priority` - Cambia priorità (HIGH/MEDIUM/LOW)
+
+**Intervalli:**
+- HIGH: 3 secondi (finali, match importanti)
+- MEDIUM: 10 secondi (default)
+- LOW: 30 secondi (qualificazioni, primo turno)
+
+### ✅ TODO 3: Polling Adattivo con Hash
+**File:** `backend/liveManager.js`
+
+**Implementato:**
+- `computeDataHash()` - SHA256 dei campi chiave (score, sets, status, server)
+- Backoff automatico se hash invariato
+- Broadcast diff solo quando i dati cambiano
+- Campo `last_payload_hash` salvato nel DB
+
+### ✅ TODO 4: Reconciliation Job
+**File:** `backend/liveManager.js`
+
+**Implementato:**
+- `reconcileLiveMatches()` - Job ogni 5 minuti
+- `fetchLiveMatchesList()` - Fetch da SofaScore `/sport/tennis/events/live`
+- `determinePriority()` - Auto-assegna priorità in base a torneo/round
+- Auto-add nuovi match ATP/WTA/Grand Slam
+- Auto-mark FINISHED match spariti dalla lista live
+
+**API:**
+- `POST /api/reconcile` - Esegue riconciliazione manuale
+- `GET /api/live/discover` - Mostra match live disponibili
+
+### ✅ TODO 5: Gestione Errori Avanzata
+**File:** `backend/db/liveTrackingRepository.js`
+
+**Implementato:**
+- `recordPollError()` - Incrementa fail_count
+- Dopo 5 errori → status = ERROR
+- Backoff esponenziale (max 5 min)
+- `POST /api/track/:eventId/resume` - Riprende tracking in errore
+
+### ✅ TODO 6: Status PAUSED/ERROR
+**Implementato:**
+- PAUSED: per match temporaneamente sospesi
+- ERROR: troppi errori di polling (fail_count >= 5)
+- `resumeTracking()` - Resetta fail_count e riprende
+- Auto-detection nel reconciliation job
+
+---
+
+## 📋 API Reference - Live Tracking System
+
+```
+# Tracking Management
+POST   /api/track/:eventId         - Aggiunge match (body: priority?, player1Name?, etc.)
+DELETE /api/track/:eventId         - Rimuove match dal tracking
+GET    /api/tracked                - Lista match tracciati
+POST   /api/track/:eventId/priority - Cambia priorità (body: { priority: "HIGH" })
+POST   /api/track/:eventId/resume   - Riprende match in errore
+
+# Discovery & Reconciliation  
+GET    /api/live/discover          - Lista match live su SofaScore
+POST   /api/reconcile              - Esegue reconciliation manuale
+
+# Status & Stats
+GET    /api/live/status            - Stato completo sistema live
+GET    /api/tracking/stats         - Statistiche tracking
+
+# Scheduler
+POST   /api/scheduler/start        - Avvia scheduler + reconciliation
+POST   /api/scheduler/stop         - Ferma scheduler
+POST   /api/sync/:eventId          - Sync manuale singolo match
+```
+
+---
+
 ## ⬜ TASK: Daily Match Evaluation Report
 
 ### Obiettivo

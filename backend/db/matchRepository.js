@@ -1465,6 +1465,407 @@ async function batchMergeXlsxData() {
   return { merged, notFound, deleted };
 }
 
+// ============================================================================
+// MATCH CARD SNAPSHOT (Single query per card)
+// ============================================================================
+
+/**
+ * Get match card snapshot (pre-computed, fast)
+ * @param {number} matchId - Match ID
+ * @returns {Object} Complete match card data
+ */
+async function getMatchCardSnapshot(matchId) {
+  if (!checkSupabase()) return null;
+
+  const { data, error } = await supabase
+    .from('match_card_snapshot')
+    .select('*')
+    .eq('match_id', matchId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No snapshot exists, build it on demand
+      console.log(`📸 No snapshot for match ${matchId}, building...`);
+      await buildMatchCardSnapshot(matchId);
+      return getMatchCardSnapshot(matchId);
+    }
+    console.error('Error fetching snapshot:', error.message);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Build or rebuild match card snapshot
+ * @param {number} matchId - Match ID
+ */
+async function buildMatchCardSnapshot(matchId) {
+  if (!checkSupabase()) return null;
+
+  // Try using SQL function first
+  const { error: rpcError } = await supabase.rpc('build_match_card_snapshot', {
+    p_match_id: matchId
+  });
+
+  if (rpcError) {
+    if (rpcError.code === '42883') {
+      // Function doesn't exist, build manually
+      return await buildMatchCardSnapshotManual(matchId);
+    }
+    console.error('Error building snapshot via RPC:', rpcError.message);
+    return null;
+  }
+
+  console.log(`✅ Snapshot built for match ${matchId}`);
+  return true;
+}
+
+/**
+ * Manual snapshot builder (fallback)
+ */
+async function buildMatchCardSnapshotManual(matchId) {
+  // Fetch all data in parallel
+  const [matchResult, statsResult, momentumResult, oddsResult, sourcesResult] = await Promise.all([
+    supabase.from('v_matches_with_players').select('*').eq('id', matchId).single(),
+    supabase.from('match_statistics_new').select('*').eq('match_id', matchId),
+    supabase.from('match_power_rankings_new').select('*').eq('match_id', matchId).order('set_number').order('game_number'),
+    supabase.from('match_odds').select('*').eq('match_id', matchId),
+    supabase.from('match_data_sources').select('*').eq('match_id', matchId)
+  ]);
+
+  const matchData = matchResult.data;
+  if (!matchData) return null;
+
+  // Get players
+  const [p1Result, p2Result] = await Promise.all([
+    supabase.from('players_new').select('*').eq('id', matchData.player1_id).single(),
+    supabase.from('players_new').select('*').eq('id', matchData.player2_id).single()
+  ]);
+
+  // Get H2H
+  const [minP, maxP] = matchData.player1_id < matchData.player2_id 
+    ? [matchData.player1_id, matchData.player2_id]
+    : [matchData.player2_id, matchData.player1_id];
+
+  const { data: h2h } = await supabase
+    .from('head_to_head')
+    .select('*')
+    .eq('player1_id', minP)
+    .eq('player2_id', maxP)
+    .single();
+
+  // Calculate quality
+  let quality = 0;
+  if (sourcesResult.data?.length > 0) quality += 20;
+  if (statsResult.data?.length > 0) quality += 20;
+  if (oddsResult.data?.length > 0) quality += 20;
+  if (momentumResult.data?.length > 0) quality += 20;
+  
+  const { count: pbpCount } = await supabase
+    .from('match_point_by_point_new')
+    .select('id', { count: 'exact', head: true })
+    .eq('match_id', matchId);
+  if (pbpCount > 0) quality += 20;
+
+  // Build snapshot
+  const snapshot = {
+    match_id: matchId,
+    core_json: {
+      id: matchData.id,
+      date: matchData.match_date,
+      time: matchData.match_time,
+      round: matchData.round,
+      surface: matchData.surface,
+      bestOf: matchData.best_of,
+      status: matchData.status,
+      score: matchData.score,
+      setsPlayer1: matchData.sets_player1,
+      setsPlayer2: matchData.sets_player2,
+      winnerCode: matchData.winner_code,
+      tournament: {
+        id: matchData.tournament_id,
+        name: matchData.tournament_name,
+        category: matchData.tournament_category
+      }
+    },
+    players_json: {
+      player1: {
+        id: p1Result.data?.id,
+        name: p1Result.data?.name,
+        country: p1Result.data?.country_code,
+        currentRanking: p1Result.data?.current_ranking,
+        rankingAtMatch: matchData.player1_rank,
+        seed: matchData.player1_seed
+      },
+      player2: {
+        id: p2Result.data?.id,
+        name: p2Result.data?.name,
+        country: p2Result.data?.country_code,
+        currentRanking: p2Result.data?.current_ranking,
+        rankingAtMatch: matchData.player2_rank,
+        seed: matchData.player2_seed
+      }
+    },
+    h2h_json: h2h || null,
+    stats_json: statsResult.data ? statsResult.data.reduce((acc, s) => ({ ...acc, [s.period]: s }), {}) : null,
+    momentum_json: momentumResult.data || [],
+    odds_json: {
+      opening: oddsResult.data?.find(o => o.is_opening) || oddsResult.data?.[0] || null,
+      closing: oddsResult.data?.find(o => o.is_closing) || oddsResult.data?.[oddsResult.data.length - 1] || null,
+      all: oddsResult.data || []
+    },
+    data_sources_json: sourcesResult.data || [],
+    data_quality_int: quality,
+    last_updated_at: new Date().toISOString()
+  };
+
+  // Upsert snapshot
+  const { error: upsertError } = await supabase
+    .from('match_card_snapshot')
+    .upsert(snapshot, { onConflict: 'match_id' });
+
+  if (upsertError) {
+    console.error('Error upserting snapshot:', upsertError.message);
+    return null;
+  }
+
+  return snapshot;
+}
+
+// ============================================================================
+// PLAYER RANKINGS (Temporal lookup)
+// ============================================================================
+
+/**
+ * Get player ranking at a specific date
+ * @param {number} playerId - Player ID
+ * @param {string} matchDate - Date to lookup ranking (YYYY-MM-DD)
+ * @returns {Object} Ranking info at date
+ */
+async function getRankingAtDate(playerId, matchDate) {
+  if (!checkSupabase()) return null;
+
+  const { data, error } = await supabase
+    .from('player_rankings')
+    .select('rank_int, points_int, ranking_date')
+    .eq('player_id', playerId)
+    .lte('ranking_date', matchDate)
+    .order('ranking_date', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    // May not have ranking history, return null
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Insert or update player ranking
+ */
+async function upsertPlayerRanking(playerId, rankingDate, rank, points = null, rankingType = 'ATP') {
+  if (!checkSupabase()) return null;
+
+  const { data, error } = await supabase
+    .from('player_rankings')
+    .upsert({
+      player_id: playerId,
+      ranking_date: rankingDate,
+      rank_int: rank,
+      points_int: points,
+      ranking_type: rankingType
+    }, { onConflict: 'player_id,ranking_date,ranking_type' })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error upserting ranking:', error.message);
+    return null;
+  }
+
+  return data;
+}
+
+// ============================================================================
+// LAZY DATA ENDPOINTS (Deep data, loaded on demand)
+// ============================================================================
+
+/**
+ * Get match momentum data (power rankings)
+ */
+async function getMatchMomentum(matchId) {
+  if (!checkSupabase()) return [];
+
+  const { data, error } = await supabase
+    .from('match_power_rankings_new')
+    .select('*')
+    .eq('match_id', matchId)
+    .order('set_number')
+    .order('game_number');
+
+  if (error) {
+    console.error('Error fetching momentum:', error.message);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Get match statistics
+ */
+async function getMatchStatisticsNew(matchId) {
+  if (!checkSupabase()) return null;
+
+  const { data, error } = await supabase
+    .from('match_statistics_new')
+    .select('*')
+    .eq('match_id', matchId)
+    .order('period');
+
+  if (error) {
+    console.error('Error fetching statistics:', error.message);
+    return null;
+  }
+
+  // Organize by period
+  const byPeriod = {};
+  for (const stat of data || []) {
+    byPeriod[stat.period] = stat;
+  }
+
+  return byPeriod;
+}
+
+/**
+ * Get match odds
+ */
+async function getMatchOdds(matchId) {
+  if (!checkSupabase()) return null;
+
+  const { data, error } = await supabase
+    .from('match_odds')
+    .select('*')
+    .eq('match_id', matchId)
+    .order('recorded_at');
+
+  if (error) {
+    console.error('Error fetching odds:', error.message);
+    return null;
+  }
+
+  if (!data || data.length === 0) return null;
+
+  return {
+    opening: data.find(o => o.is_opening) || data[0],
+    closing: data.find(o => o.is_closing) || data[data.length - 1],
+    all: data
+  };
+}
+
+/**
+ * Get point-by-point data (paginated for large matches)
+ */
+async function getMatchPointByPoint(matchId, options = {}) {
+  if (!checkSupabase()) return { data: [], total: 0 };
+
+  const { offset = 0, limit = 500 } = options;
+
+  // Get total count
+  const { count } = await supabase
+    .from('match_point_by_point_new')
+    .select('id', { count: 'exact', head: true })
+    .eq('match_id', matchId);
+
+  // Get data
+  const { data, error } = await supabase
+    .from('match_point_by_point_new')
+    .select('*')
+    .eq('match_id', matchId)
+    .order('set_number')
+    .order('game_number')
+    .order('point_number')
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.error('Error fetching point-by-point:', error.message);
+    return { data: [], total: 0 };
+  }
+
+  return {
+    data: data || [],
+    total: count || 0,
+    offset,
+    limit,
+    hasMore: (offset + limit) < count
+  };
+}
+
+// ============================================================================
+// CALCULATION QUEUE HELPERS
+// ============================================================================
+
+/**
+ * Enqueue a calculation task
+ */
+async function enqueueCalculation(taskType, payload, uniqueKey, priority = 5) {
+  if (!checkSupabase()) return null;
+
+  // Try SQL function
+  const { data, error } = await supabase.rpc('enqueue_calculation', {
+    p_task_type: taskType,
+    p_payload: payload,
+    p_unique_key: uniqueKey,
+    p_priority: priority
+  });
+
+  if (error && error.code === '42883') {
+    // Fallback to direct insert
+    const { data: inserted, error: insertError } = await supabase
+      .from('calculation_queue')
+      .upsert({
+        task_type: taskType,
+        payload_json: payload,
+        unique_key: uniqueKey,
+        priority,
+        status: 'PENDING'
+      }, { onConflict: 'task_type,unique_key', ignoreDuplicates: true })
+      .select('id')
+      .single();
+
+    return inserted?.id;
+  }
+
+  return data;
+}
+
+/**
+ * Get queue statistics
+ */
+async function getQueueStats() {
+  if (!checkSupabase()) return null;
+
+  const { data, error } = await supabase
+    .from('calculation_queue')
+    .select('status');
+
+  if (error) return null;
+
+  const stats = { pending: 0, running: 0, done: 0, error: 0 };
+  for (const row of data || []) {
+    const status = row.status?.toLowerCase();
+    if (stats.hasOwnProperty(status)) {
+      stats[status]++;
+    }
+  }
+
+  return stats;
+}
+
 module.exports = {
   // Write
   upsertPlayer,
@@ -1491,5 +1892,24 @@ module.exports = {
   // Detected matches (read-only)
   getDetectedMatchesByTournament,
   getDetectedMatchesStats,
-  getMissingMatches
+  getMissingMatches,
+
+  // NEW: Match Card Snapshot
+  getMatchCardSnapshot,
+  buildMatchCardSnapshot,
+  buildMatchCardSnapshotManual,
+
+  // NEW: Player Rankings
+  getRankingAtDate,
+  upsertPlayerRanking,
+
+  // NEW: Lazy Data (deep data endpoints)
+  getMatchMomentum,
+  getMatchStatisticsNew,
+  getMatchOdds,
+  getMatchPointByPoint,
+
+  // NEW: Calculation Queue
+  enqueueCalculation,
+  getQueueStats
 };

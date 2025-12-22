@@ -1,4 +1,4 @@
-# ?? Tennis-Analyzer
+# 🎾 Tennis-Analyzer
 
 **Sistema di analisi partite di tennis con dati in tempo reale e storici**
 
@@ -8,7 +8,7 @@
 
 ---
 
-## ?? Indice
+## 📋 Indice
 
 1. [Panoramica](#panoramica)
 2. [Architettura](#architettura)
@@ -20,14 +20,14 @@
 
 ---
 
-## ?? Panoramica
+## 📖 Panoramica
 
-Tennis-Analyzer � un sistema completo per:
+Tennis-Analyzer è un sistema completo per:
 
-- ?? **Analisi match** - Statistiche, momentum, point-by-point
-- ?? **Dati giocatori** - Ranking, H2H, statistiche carriera
-- ?? **Quote betting** - Import storico da XLSX
-- ? **Live scoring** - Aggiornamenti in tempo reale via WebSocket
+- 📊 **Analisi match** - Statistiche, momentum, point-by-point
+- 👤 **Dati giocatori** - Ranking, H2H, statistiche carriera
+- 💰 **Quote betting** - Import storico da XLSX
+- ⚡ **Live scoring** - Aggiornamenti in tempo reale via WebSocket
 
 ### Fonti Dati
 
@@ -36,76 +36,68 @@ Tennis-Analyzer � un sistema completo per:
 | **SofaScore** | Stats, momentum, point-by-point | Real-time e match recenti |
 | **XLSX** | Quote, ranking storici | Archivio storico |
 
-> ?? Per dettagli completi: **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)**
+> 📚 Per dettagli completi: **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)**
 
 ---
 
-## ??? Architettura
+## ⚙️ Architettura
 
 ```
-+-------------------------------------------------------------+
-�                    SEZIONE 1: ACQUISIZIONE                   �
-�                                                              �
-�   +--------------+         +--------------+                 �
-�   �  SofaScore   �         �    XLSX      �                 �
-�   �   Scraper    �         �   Import     �                 �
-�   +--------------+         +--------------+                 �
-�          �                        �                          �
-�          +------------------------+                          �
-�                       ?                                      �
-�              +----------------+                              �
-�              �   Supabase DB  �                              �
-�              +----------------+                              �
-+-------------------------------------------------------------+
-
-+-------------------------------------------------------------+
-�                    SEZIONE 2: CONSUMO                        �
-�                                                              �
-�              +----------------+                              �
-�              �   Supabase DB  �                              �
-�              +----------------+                              �
-�                       �                                      �
-�   +-------------------+-------------------+                 �
-�   �                   ?                   �                 �
-�   �  +---------------------------------+  �                 �
-�   �  �      Backend (Node.js)          �  �                 �
-�   �  �  +-----------+ +-------------+  �  �                 �
-�   �  �  �MatchCard  � � PlayerServ  �  �  �                 �
-�   �  �  � Service   � �   ice       �  �  �                 �
-�   �  �  +-----------+ +-------------+  �  �                 �
-�   �  +---------------------------------+  �                 �
-�   +---------------------------------------+                 �
-�                       �                                      �
-�                       ?                                      �
-�              +----------------+                              �
-�              � Frontend React �                              �
-�              +----------------+                              �
-+-------------------------------------------------------------+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           FLUSSO DATI COMPLETO                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  INPUT                      PROCESSING                      OUTPUT           │
+│  ┌──────────┐              ┌──────────────┐              ┌───────────────┐  │
+│  │ SofaScore│──────────────▶│  raw_events  │──────────────▶│ TABELLE       │  │
+│  │   API    │              │  (PENDING)   │              │ CANONICHE     │  │
+│  └──────────┘              └──────────────┘              └───────┬───────┘  │
+│  ┌──────────┐                     │                             │          │
+│  │   XLSX   │──────────────▶      │                             ▼          │
+│  │  Import  │                     │                      ┌─────────────┐   │
+│  └──────────┘                     ▼                      │ calculation │   │
+│                            ┌──────────────┐              │   _queue    │   │
+│                            │ RAW EVENTS   │              └──────┬──────┘   │
+│                            │   WORKER     │                     │          │
+│                            └──────────────┘                     ▼          │
+│                                                          ┌─────────────┐   │
+│                                                          │ CALCULATION │   │
+│                                                          │   WORKER    │   │
+│                                                          └──────┬──────┘   │
+│                                                                 │          │
+│  CONSUMO                                               ┌───────▼─────────┐ │
+│  ┌──────────┐     GET /api/match/:id/card              │match_card_snapshot│
+│  │ Frontend │◀─────────────────────────────────────────│  (1 query only)  ││
+│  │  React   │                                          └──────────────────┘│
+│  └──────────┘                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Struttura Progetto
 
 ```
 React-Betfair/
-+-- backend/
-�   +-- server.js                 # API Express
-�   +-- services/
-�   �   +-- matchCardService.js   # Assembla card match
-�   �   +-- playerService.js      # Gestione giocatori
-�   �   +-- playerStatsService.js # Statistiche aggregate
-�   +-- scraper/
-�   �   +-- sofascoreScraper.js   # Scraping SofaScore
-�   +-- db/
-�   �   +-- matchRepository.js    # Query database
-�   �   +-- supabase.js           # Client Supabase
-�   +-- migrations/
-�       +-- create-new-schema.sql # Schema DB
-�       +-- migrate-to-new-schema.js
-+-- src/
-�   +-- App.jsx                   # App principale
-�   +-- components/               # Componenti React
-+-- FILOSOFIA_DB.md               # Documentazione architettura
-+-- README.md
+├── backend/
+│   ├── server.js                      # API Express
+│   ├── services/
+│   │   ├── matchCardService.js        # Assembla card match
+│   │   ├── playerService.js           # Gestione giocatori
+│   │   ├── playerStatsService.js      # Statistiche aggregate
+│   │   ├── rawEventsProcessor.js      # 🆕 Pipeline raw→canonical
+│   │   └── calculationQueueWorker.js  # 🆕 Worker task asincroni
+│   ├── scraper/
+│   │   └── sofascoreScraper.js        # Scraping SofaScore
+│   ├── db/
+│   │   ├── matchRepository.js         # Query database
+│   │   └── supabase.js                # Client Supabase
+│   ├── migrations/
+│       ├── create-new-schema.sql       # Schema DB base
+│       └── add-snapshot-queue-tables.sql # 🆕 Nuove tabelle architettura
+├── src/
+│   ├── App.jsx                         # App principale
+│   └── components/                     # Componenti React
+├── FILOSOFIA_DB.md                     # Documentazione architettura
+└── README.md
 ```
 
 ---
@@ -171,7 +163,7 @@ npm run dev
 
 ---
 
-## ??? Database Schema
+## 🗃️ Database Schema
 
 ### Tabelle Principali
 
@@ -190,25 +182,35 @@ npm run dev
 | `match_odds` | Quote betting |
 | `head_to_head` | H2H giocatori |
 
+### Nuove Tabelle (Dicembre 2025) 🆕
+
+| Tabella | Descrizione |
+|---------|-------------|
+| `raw_events` | Payload originali per reprocessing |
+| `calculation_queue` | Coda task asincroni |
+| `match_card_snapshot` | Card pre-calcolate (1 query) |
+
 ### Diagramma Relazioni
 
 ```
-players_new ?------- matches_new -------? tournaments_new
-     �                    �
-     �                    �
-     ?                    ?
+players_new ◀───── matches_new ─────▶ tournaments_new
+     │                  │
+     │                  │
+     ▼                  ▼
 player_aliases      match_data_sources
 player_rankings     match_statistics_new
 player_career_stats match_power_rankings_new
                     match_point_by_point_new
                     match_odds
+                    match_card_snapshot
 ```
 
-> ?? Schema completo: **[migrations/create-new-schema.sql](backend/migrations/create-new-schema.sql)**
+> 📄 Schema completo: **[migrations/create-new-schema.sql](backend/migrations/create-new-schema.sql)**
+> 📄 Nuove tabelle: **[migrations/add-snapshot-queue-tables.sql](backend/migrations/add-snapshot-queue-tables.sql)**
 
 ---
 
-## ?? API Reference
+## 📡 API Reference
 
 ### Match Card
 
@@ -251,11 +253,16 @@ GET /api/match/:eventId/card
 }
 ```
 
-### Altri Endpoint
+### Endpoint Principali
 
 | Endpoint | Metodo | Descrizione |
 |----------|--------|-------------|
-| `/api/match/:id/card` | GET | Card completa match |
+| `/api/match/:id/card` | GET | Card completa (da snapshot) ⚡ |
+| `/api/match/:id/momentum` | GET | Solo power rankings |
+| `/api/match/:id/statistics` | GET | Solo statistiche |
+| `/api/match/:id/odds` | GET | Solo quote |
+| `/api/match/:id/points` | GET | Point-by-point (paginato) |
+| `/api/match/:id/rebuild-snapshot` | POST | 🆕 Ricostruisce snapshot |
 | `/api/matches/cards` | GET | Lista match recenti |
 | `/api/player/:id` | GET | Dettagli giocatore |
 | `/api/search/players?q=` | GET | Cerca giocatori |
@@ -264,10 +271,33 @@ GET /api/match/:eventId/card
 | `/api/match/:id/find-sofascore` | POST | Cerca match su SofaScore |
 | `/api/live` | GET | Match in corso |
 | `/api/live` | WebSocket | Updates real-time |
+| `/api/admin/queue/stats` | GET | 🆕 Statistiche coda calcoli |
 
 ---
 
-## ??? Frontend
+## 🔧 Servizi Backend
+
+### Servizi Principali
+
+| Servizio | File | Descrizione |
+|----------|------|-------------|
+| **MatchCardService** | `matchCardService.js` | Assembla card match (usa snapshot) |
+| **PlayerService** | `playerService.js` | Gestione giocatori + alias |
+| **PlayerStatsService** | `playerStatsService.js` | Statistiche aggregate |
+| **SofascoreScraper** | `sofascoreScraper.js` | Scraping dati SofaScore |
+
+### Nuovi Servizi (Dicembre 2025) 🆕
+
+| Servizio | File | Descrizione |
+|----------|------|-------------|
+| **RawEventsProcessor** | `rawEventsProcessor.js` | Pipeline raw→canonical (reprocessing) |
+| **CalculationQueueWorker** | `calculationQueueWorker.js` | Worker task asincroni (H2H, stats, snapshot) |
+
+> 📚 Dettagli architettura: **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)**
+
+---
+
+## 🖥️ Frontend
 
 ### Componenti Principali
 
@@ -313,97 +343,6 @@ useEffect(() => {
 
 ---
 
-## Documentazione
-
-| Documento | Contenuto |
-|-----------|-----------|
-| **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)** | Architettura dati, flussi, troubleshooting |
-| **[FILOSOFIA_STATS.md](FILOSOFIA_STATS.md)** | Funzioni di calcolo, formule, metriche derivate |
-| **[migrations/new-schema-design.md](backend/migrations/new-schema-design.md)** | Design database |
-| **[create-new-schema.sql](backend/migrations/create-new-schema.sql)** | Schema SQL completo |
-
----
-
-## Scripts Utili
-
-```bash
-# Migrazione database
-cd backend
-node migrations/migrate-to-new-schema.js
-
-# Import XLSX
-node importXlsx.js ./data/atp_2024.xlsx
-
-# Scrape match specifico
-node -e "require('./scraper/sofascoreScraper').scrapeMatch(12345).then(console.log)"
-
-# Enrichment match XLSX con dati SofaScore
-node scripts/enrich-xlsx-matches.js --limit 50
-
-# Popolare alias giocatori
-node scripts/populate-player-aliases.js
-
-# Dry run (anteprima senza modifiche)
-node scripts/enrich-xlsx-matches.js --dry-run
-node scripts/populate-player-aliases.js --dry-run
-```
-
----
-
-## Changelog
-
-### 22 Dicembre 2025 (Sessione 4) 🆕
-**FIX CRITICO: Statistiche Player Profile**
-
-Risolto bug che causava perdita di match nelle statistiche quando venivano aggiunti dati da Sofascore:
-
-**Problema identificato:**
-- `playerProfileService.js` e `playerStatsService.js` cercavano match SOLO tramite `winner_name`/`loser_name`
-- I match Sofascore avevano questi campi vuoti (usavano solo `home_player_id`/`away_player_id`)
-- Il merge xlsx→sofascore eliminava record xlsx ma il nuovo record poteva avere nomi vuoti
-- Risultato: match "sparivano" dalle statistiche giocatore
-
-**Correzioni applicate:**
-1. `getPlayerMatches()` ora cerca sia per nome che per player_id
-2. `insertMatch()` ora popola SEMPRE `winner_name`/`loser_name`
-3. `mergeXlsxData()` copia nomi dall'xlsx se vuoti
-4. Nuovo script `fix-empty-names.js` per correggere dati esistenti
-
-**Risultato:** Musetti 57→68 match (+11 recuperati)
-
-### 22 Dicembre 2025 (Sessione 3)
-**Moduli Data Acquisition & Aggregation:**
-- `playerProfileService.js` - Profili giocatore con metriche aggregate per superficie/formato/serie
-- `matchSegmenter.js` - Segmentazione match in fasi logiche (PRE_BREAK, CRITICAL, CLOSING)
-- `breakDetector.js` - Rilevamento break da punteggio set senza point-by-point
-- `pressureCalculator.js` - Calcolo indice pressione live (0-100) con raccomandazioni trading
-
-**Funzionalità principali:**
-- `getPlayerProfile()` - Profilo completo con comeback_rate, ROI, win_rate per superficie
-- `segmentMatch()` - Identifica game critici, momentum shifts, closing opportunities
-- `detectBreaksFromScore()` - Analizza break da score set (utile per dati XLSX)
-- `calculatePressureIndex()` - Indice pressione con breakdown DF/FirstServe/BP
-
-### 22 Dicembre 2025 (Sessione 2)
-- Nuovo documento FILOSOFIA_STATS.md con tutte le funzioni di calcolo
-- Hook useMatchCard.jsx per frontend
-- Script enrich-xlsx-matches.js per arricchimento automatico
-- Script populate-player-aliases.js per alias giocatori
-
-### 22 Dicembre 2025 (Sessione 1)
-- Nuovo schema database con separazione Player/Match
-- MatchCardService per card complete
-- PlayerService per gestione giocatori
-- Sistema alias per matching nomi
-- Endpoint `/api/match/:id/card`
-- Documentazione FILOSOFIA_DB.md
-
-### Versioni Precedenti
-- MomentumTab redesign
-- Live scoring WebSocket
-- Import XLSX con odds
-- Scraper SofaScore
-
 ---
 
 ## 📚 Documentazione
@@ -411,14 +350,56 @@ Risolto bug che causava perdita di match nelle statistiche quando venivano aggiu
 | Documento | Contenuto |
 |-----------|-----------|
 | **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)** | Architettura dati, flussi, schema DB |
-| **[FILOSOFIA_STATS.md](FILOSOFIA_STATS.md)** | Funzioni calcolo, formule, metriche derivate, TODO moduli |
+| **[FILOSOFIA_STATS.md](FILOSOFIA_STATS.md)** | Funzioni calcolo, formule, metriche derivate |
 | **[README_IMPLEMENTATION_GUIDE.md](README_IMPLEMENTATION_GUIDE.md)** | Guida implementazione task backend |
+| **[create-new-schema.sql](backend/migrations/create-new-schema.sql)** | Schema SQL base |
+| **[add-snapshot-queue-tables.sql](backend/migrations/add-snapshot-queue-tables.sql)** | 🆕 Nuove tabelle architettura |
+
+---
+
+## 🛠️ Scripts Utili
+
+```bash
+# Import XLSX
+cd backend && node importXlsx.js ./data/atp_2024.xlsx
+
+# Enrichment match con SofaScore
+node scripts/enrich-xlsx-matches.js --limit 50
+
+# Popolare alias giocatori
+node scripts/populate-player-aliases.js
+
+# Dry run (anteprima)
+node scripts/enrich-xlsx-matches.js --dry-run
+```
+
+---
+
+## 📜 Changelog
+
+### Dicembre 2025 - Architettura Avanzata 🆕
+- **Match Card Snapshot** - Single query per card complete (~5ms)
+- **Raw Events Pipeline** - Separazione raw/canonical per reprocessing
+- **Calculation Queue** - Task asincroni per H2H, career stats, snapshots
+- **Nuovi endpoint API** - `/api/match/:id/momentum`, `/statistics`, `/odds`, `/points`
+- **Nuove tabelle** - `raw_events`, `calculation_queue`, `match_card_snapshot`
+
+### Dicembre 2025 - Fix Player Profile
+- Fix bug perdita match nelle statistiche
+- Query ora cerca per nome E player_id
+- `insertMatch()` popola sempre winner_name/loser_name
+
+### Sessioni Precedenti
+- Nuovo schema database con separazione Player/Match
+- Sistema alias per matching nomi
+- MomentumTab redesign
+- Live scoring WebSocket
 
 ---
 
 ## 🔧 License
 
-MIT License - Vedi [LICENSE](LICENSE) per dettagli.
+MIT License
 
 ---
 

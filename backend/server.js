@@ -30,7 +30,7 @@ const {
   getValueZone,
   DEFAULT_THRESHOLDS
 } = require('./utils/valueInterpreter');
-const { initLiveManager, getStats: getLiveStats, fetchCompleteData, trackMatch, untrackMatch, getTrackedMatches, startScheduler, stopScheduler, syncMatch } = require('./liveManager');
+const { initLiveManager, getStats: getLiveStats, fetchCompleteData, trackMatch, untrackMatch, getTrackedMatches, startScheduler, stopScheduler, syncMatch, setMatchPriority, resumeMatch, getTrackingStats, reconcileLiveMatches, fetchLiveMatchesList, USE_DB_TRACKING } = require('./liveManager');
 
 // Player Stats Service (statistiche aggregate giocatori)
 let playerStatsService = null;
@@ -2402,50 +2402,198 @@ app.get('/api/db/logs', async (req, res) => {
 
 /**
  * POST /api/track/:eventId - Aggiunge una partita al monitoraggio automatico
+ * Body: { status?, startTimestamp?, priority?: "HIGH" | "MEDIUM" | "LOW" }
  */
-app.post('/api/track/:eventId', (req, res) => {
+app.post('/api/track/:eventId', async (req, res) => {
   const { eventId } = req.params;
-  const { status, startTimestamp } = req.body;
+  const { status, startTimestamp, priority, player1Name, player2Name, tournamentName } = req.body;
   
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
   
-  const tracked = trackMatch(eventId, { status, startTimestamp });
-  res.json({ 
-    success: tracked, 
-    eventId,
-    message: tracked ? 'Match added to tracking' : 'Match already tracked'
-  });
+  try {
+    const tracked = await trackMatch(eventId, { 
+      status, 
+      startTimestamp, 
+      priority: priority || 'MEDIUM',
+      player1Name,
+      player2Name,
+      tournamentName
+    });
+    res.json({ 
+      success: tracked, 
+      eventId,
+      priority: priority || 'MEDIUM',
+      dbMode: USE_DB_TRACKING,
+      message: tracked ? 'Match added to tracking' : 'Match already tracked'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, success: false });
+  }
 });
 
 /**
  * DELETE /api/track/:eventId - Rimuove una partita dal monitoraggio
  */
-app.delete('/api/track/:eventId', (req, res) => {
+app.delete('/api/track/:eventId', async (req, res) => {
   const { eventId } = req.params;
   
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
   
-  const removed = untrackMatch(eventId);
-  res.json({ 
-    success: removed, 
-    eventId,
-    message: removed ? 'Match removed from tracking' : 'Match was not tracked'
-  });
+  try {
+    const removed = await untrackMatch(eventId);
+    res.json({ 
+      success: removed, 
+      eventId,
+      message: removed ? 'Match removed from tracking' : 'Match was not tracked'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, success: false });
+  }
 });
 
 /**
  * GET /api/tracked - Lista tutte le partite monitorate
  */
-app.get('/api/tracked', (req, res) => {
-  const tracked = getTrackedMatches();
-  res.json({ 
-    matches: tracked, 
-    count: tracked.length 
-  });
+app.get('/api/tracked', async (req, res) => {
+  try {
+    const tracked = await getTrackedMatches();
+    res.json({ 
+      matches: tracked, 
+      count: tracked.length,
+      dbMode: USE_DB_TRACKING
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/track/:eventId/priority - Cambia priorità di un match
+ * Body: { priority: "HIGH" | "MEDIUM" | "LOW" }
+ */
+app.post('/api/track/:eventId/priority', async (req, res) => {
+  const { eventId } = req.params;
+  const { priority } = req.body;
+  
+  if (!eventId) {
+    return res.status(400).json({ error: 'Missing eventId' });
+  }
+  
+  if (!priority || !['HIGH', 'MEDIUM', 'LOW'].includes(priority)) {
+    return res.status(400).json({ 
+      error: 'Invalid priority. Must be HIGH, MEDIUM, or LOW',
+      valid: ['HIGH', 'MEDIUM', 'LOW']
+    });
+  }
+  
+  try {
+    const success = await setMatchPriority(eventId, priority);
+    res.json({ 
+      success, 
+      eventId,
+      priority,
+      message: success ? `Priority set to ${priority}` : 'Match not found in tracking'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, success: false });
+  }
+});
+
+/**
+ * POST /api/track/:eventId/resume - Riprende un match in errore/pausa
+ */
+app.post('/api/track/:eventId/resume', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId) {
+    return res.status(400).json({ error: 'Missing eventId' });
+  }
+  
+  try {
+    const success = await resumeMatch(eventId);
+    res.json({ 
+      success, 
+      eventId,
+      message: success ? 'Match tracking resumed' : 'Match not found or resume not available'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, success: false });
+  }
+});
+
+/**
+ * GET /api/tracking/stats - Statistiche del sistema di tracking
+ */
+app.get('/api/tracking/stats', async (req, res) => {
+  try {
+    const stats = await getTrackingStats();
+    res.json({
+      ...stats,
+      dbMode: USE_DB_TRACKING,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/reconcile - Esegue manualmente il job di riconciliazione
+ * Scopre nuovi match live e marca come finiti quelli spariti
+ */
+app.post('/api/reconcile', async (req, res) => {
+  try {
+    console.log('🔄 Manual reconciliation requested...');
+    const result = await reconcileLiveMatches();
+    res.json({
+      success: true,
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, success: false });
+  }
+});
+
+/**
+ * GET /api/live/discover - Mostra match tennis live su SofaScore (senza aggiungerli)
+ * Utile per vedere cosa c'è disponibile
+ */
+app.get('/api/live/discover', async (req, res) => {
+  try {
+    const liveMatches = await fetchLiveMatchesList();
+    
+    // Ottieni match già tracciati per marcarli
+    const tracked = await getTrackedMatches();
+    const trackedIds = new Set(tracked.map(t => t.eventId));
+    
+    const matchesWithStatus = liveMatches.map(m => ({
+      id: m.id,
+      homeTeam: m.homeTeam?.name,
+      awayTeam: m.awayTeam?.name,
+      tournament: m.tournament?.name,
+      round: m.roundInfo?.name,
+      score: {
+        home: m.homeScore?.current,
+        away: m.awayScore?.current
+      },
+      status: m.status?.type,
+      isTracked: trackedIds.has(String(m.id))
+    }));
+    
+    res.json({
+      count: matchesWithStatus.length,
+      trackedCount: matchesWithStatus.filter(m => m.isTracked).length,
+      matches: matchesWithStatus,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /**
@@ -2485,18 +2633,25 @@ app.post('/api/scheduler/stop', (req, res) => {
 /**
  * GET /api/live/status - Stato completo del sistema live (ws + scheduler + tracking)
  */
-app.get('/api/live/status', (req, res) => {
-  const wsStats = getLiveStats();
-  const tracked = getTrackedMatches();
-  
-  res.json({
-    websocket: wsStats,
-    tracking: {
-      matches: tracked,
-      count: tracked.length
-    },
-    timestamp: new Date().toISOString()
-  });
+app.get('/api/live/status', async (req, res) => {
+  try {
+    const wsStats = getLiveStats();
+    const tracked = await getTrackedMatches();
+    const trackingStats = await getTrackingStats();
+    
+    res.json({
+      websocket: wsStats,
+      tracking: {
+        matches: tracked,
+        count: tracked.length,
+        stats: trackingStats
+      },
+      dbMode: USE_DB_TRACKING,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ============================================================================
@@ -2615,31 +2770,224 @@ app.get('/api/match/:eventId/refresh', async (req, res) => {
 // ============================================================================
 
 /**
- * GET /api/match/:eventId/card - Card completa del match
- * Assembla tutti i dati: match, giocatori, H2H, stats, momentum, odds
+ * GET /api/match/:eventId/card - Card completa del match (FAST - from snapshot)
+ * Prima verifica snapshot, se non esiste usa il service tradizionale
  */
 app.get('/api/match/:eventId/card', async (req, res) => {
   const { eventId } = req.params;
+  const { useSnapshot = 'true' } = req.query;
   
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
   
-  if (!matchCardService) {
-    return res.status(503).json({ error: 'Match Card Service not available' });
-  }
-  
   try {
+    // Try snapshot first (fast path)
+    if (useSnapshot === 'true' && matchRepository) {
+      const snapshot = await matchRepository.getMatchCardSnapshot(parseInt(eventId));
+      
+      if (snapshot) {
+        console.log(`⚡ Match card ${eventId} from snapshot (quality=${snapshot.data_quality_int}%)`);
+        
+        // Format snapshot for API response
+        return res.json({
+          match: snapshot.core_json,
+          tournament: snapshot.core_json?.tournament,
+          player1: snapshot.players_json?.player1,
+          player2: snapshot.players_json?.player2,
+          h2h: snapshot.h2h_json,
+          statistics: snapshot.stats_json,
+          momentum: snapshot.momentum_json,
+          odds: snapshot.odds_json,
+          dataSources: snapshot.data_sources_json?.map(s => s.source_type) || [],
+          dataQuality: snapshot.data_quality_int,
+          fromSnapshot: true,
+          snapshotUpdatedAt: snapshot.last_updated_at
+        });
+      }
+    }
+    
+    // Fallback to traditional service
+    if (!matchCardService) {
+      return res.status(503).json({ error: 'Match Card Service not available' });
+    }
+    
     const card = await matchCardService.getMatchCard(parseInt(eventId));
     
     if (!card) {
       return res.status(404).json({ error: 'Match not found' });
     }
     
-    console.log(`🎾 Match card ${eventId}: quality=${card.dataQuality}%, sources=${card.dataSources.join(', ')}`);
-    res.json(card);
+    console.log(`🎾 Match card ${eventId}: quality=${card.dataQuality}%, sources=${card.dataSources?.join(', ')}`);
+    res.json({ ...card, fromSnapshot: false });
   } catch (err) {
     console.error('Error getting match card:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/match/:eventId/momentum - Solo power rankings (lazy load)
+ */
+app.get('/api/match/:eventId/momentum', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+  
+  try {
+    const momentum = await matchRepository.getMatchMomentum(parseInt(eventId));
+    res.json({ matchId: eventId, momentum, count: momentum.length });
+  } catch (err) {
+    console.error('Error getting momentum:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/match/:eventId/statistics - Solo statistiche match (lazy load)
+ */
+app.get('/api/match/:eventId/statistics', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+  
+  try {
+    const statistics = await matchRepository.getMatchStatisticsNew(parseInt(eventId));
+    res.json({ matchId: eventId, statistics });
+  } catch (err) {
+    console.error('Error getting statistics:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/match/:eventId/odds - Solo quote (lazy load)
+ */
+app.get('/api/match/:eventId/odds', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+  
+  try {
+    const odds = await matchRepository.getMatchOdds(parseInt(eventId));
+    res.json({ matchId: eventId, odds });
+  } catch (err) {
+    console.error('Error getting odds:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/match/:eventId/points - Point-by-point (lazy load, paginated)
+ */
+app.get('/api/match/:eventId/points', async (req, res) => {
+  const { eventId } = req.params;
+  const { offset = 0, limit = 500 } = req.query;
+  
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+  
+  try {
+    const result = await matchRepository.getMatchPointByPoint(parseInt(eventId), {
+      offset: parseInt(offset),
+      limit: parseInt(limit)
+    });
+    res.json({ matchId: eventId, ...result });
+  } catch (err) {
+    console.error('Error getting point-by-point:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/match/:eventId/rebuild-snapshot - Forza rebuild snapshot
+ */
+app.post('/api/match/:eventId/rebuild-snapshot', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+  
+  try {
+    await matchRepository.buildMatchCardSnapshot(parseInt(eventId));
+    const snapshot = await matchRepository.getMatchCardSnapshot(parseInt(eventId));
+    res.json({ success: true, matchId: eventId, snapshot });
+  } catch (err) {
+    console.error('Error rebuilding snapshot:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================================
+// CALCULATION QUEUE & RAW EVENTS API
+// ============================================================================
+
+/**
+ * GET /api/admin/queue/stats - Queue statistics
+ */
+app.get('/api/admin/queue/stats', async (req, res) => {
+  if (!matchRepository) {
+    return res.status(503).json({ error: 'Repository not available' });
+  }
+  
+  try {
+    const stats = await matchRepository.getQueueStats();
+    res.json({ stats });
+  } catch (err) {
+    console.error('Error getting queue stats:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/admin/queue/enqueue - Manually enqueue a task
+ */
+app.post('/api/admin/queue/enqueue', async (req, res) => {
+  const { taskType, payload, uniqueKey, priority } = req.body;
+  
+  if (!taskType || !payload || !uniqueKey || !matchRepository) {
+    return res.status(400).json({ error: 'Missing required fields or repository not available' });
+  }
+  
+  try {
+    const taskId = await matchRepository.enqueueCalculation(taskType, payload, uniqueKey, priority || 5);
+    res.json({ success: true, taskId });
+  } catch (err) {
+    console.error('Error enqueueing task:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/player/:playerId/ranking-history - Player ranking at specific dates
+ */
+app.get('/api/player/:playerId/ranking-history', async (req, res) => {
+  const { playerId } = req.params;
+  const { date } = req.query;
+  
+  if (!playerId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing playerId or repository not available' });
+  }
+  
+  try {
+    if (date) {
+      // Get ranking at specific date
+      const ranking = await matchRepository.getRankingAtDate(parseInt(playerId), date);
+      res.json({ playerId, date, ranking });
+    } else {
+      // TODO: Get full history
+      res.json({ playerId, message: 'Full history not implemented yet' });
+    }
+  } catch (err) {
+    console.error('Error getting ranking history:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -2805,6 +3153,310 @@ app.get('/api/player/:playerName/profile', async (req, res) => {
     res.json(profile);
   } catch (err) {
     console.error('Error getting player profile:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/player/:playerName/inspector - Data Inspector per giocatore
+ * Restituisce dati puri vs calcolati con info sulla copertura
+ */
+app.get('/api/player/:playerName/inspector', async (req, res) => {
+  const { playerName } = req.params;
+  
+  if (!playerName) {
+    return res.status(400).json({ error: 'Missing playerName' });
+  }
+  
+  try {
+    const decodedName = decodeURIComponent(playerName);
+    console.log(`🔬 Inspector: Loading data for "${decodedName}"`);
+    
+    // Dati puri dal database - usa playerProfileService.getPlayerMatches() per fuzzy matching
+    const rawData = {};
+    let playerMatches = [];
+    
+    // Carica match del giocatore usando il servizio che ha fuzzy matching
+    if (playerProfileService && playerProfileService.getPlayerMatches) {
+      playerMatches = await playerProfileService.getPlayerMatches(decodedName);
+      console.log(`   Found ${playerMatches.length} matches via playerProfileService`);
+    } else if (matchRepository && matchRepository.getMatches) {
+      // Fallback: cerca per nome giocatore
+      const allMatches = await matchRepository.getMatches({ limit: 5000, playerSearch: decodedName });
+      playerMatches = allMatches || [];
+      console.log(`   Found ${playerMatches.length} matches via matchRepository`);
+    }
+    
+    if (playerMatches.length > 0) {
+      // Conteggi base
+      rawData.totalMatches = playerMatches.length;
+      
+      // Vittorie/sconfitte
+      rawData.wins = playerMatches.filter(m => m.player_role === 'winner').length;
+      rawData.losses = playerMatches.filter(m => m.player_role === 'loser').length;
+      
+      // Superfici (dati puri dal DB)
+      const surfaces = playerMatches.map(m => m.surface || m.surface_normalized).filter(Boolean);
+      rawData.surfaces = {
+        hard: surfaces.filter(s => s.toLowerCase().includes('hard')).length,
+        clay: surfaces.filter(s => s.toLowerCase().includes('clay')).length,
+        grass: surfaces.filter(s => s.toLowerCase().includes('grass')).length,
+        indoor: surfaces.filter(s => s.toLowerCase().includes('indoor')).length
+      };
+      
+      // Tornei (dati puri dal DB)
+      const series = playerMatches.map(m => m.series || m.series_normalized).filter(Boolean);
+      rawData.series = {
+        grandSlam: series.filter(s => s.includes('Grand Slam')).length,
+        masters: series.filter(s => s.includes('Masters')).length,
+        atp250: series.filter(s => s.includes('ATP250') || s.includes('250')).length,
+        atp500: series.filter(s => s.includes('ATP500') || s.includes('500')).length,
+        challenger: series.filter(s => s.toLowerCase().includes('challenger')).length
+      };
+      
+      // Quote disponibili (dati puri dal DB)
+      const matchesWithOdds = playerMatches.filter(m => m.avgw || m.maxw || m.avgl || m.maxl);
+      rawData.matchesWithOdds = matchesWithOdds.length;
+      if (matchesWithOdds.length > 0) {
+        const avgOdds = matchesWithOdds.reduce((sum, m) => sum + (parseFloat(m.avgw) || parseFloat(m.avgl) || 0), 0) / matchesWithOdds.length;
+        rawData.avgOddsValue = avgOdds.toFixed(2);
+      }
+      
+      // Punteggi disponibili (dati puri: w1, l1, w2, l2, etc.)
+      const matchesWithScore = playerMatches.filter(m => m.w1 !== null && m.l1 !== null);
+      rawData.matchesWithScore = matchesWithScore.length;
+      
+      // Set breakdown per ogni match (campione dei primi 10)
+      rawData.sampleMatches = playerMatches.slice(0, 5).map(m => ({
+        opponent: m.player_role === 'winner' ? m.loser_name : m.winner_name,
+        result: m.player_role,
+        surface: m.surface,
+        sets: [
+          m.w1 !== null ? `${m.w1}-${m.l1}` : null,
+          m.w2 !== null ? `${m.w2}-${m.l2}` : null,
+          m.w3 !== null ? `${m.w3}-${m.l3}` : null,
+          m.w4 !== null ? `${m.w4}-${m.l4}` : null,
+          m.w5 !== null ? `${m.w5}-${m.l5}` : null
+        ].filter(Boolean).join(', '),
+        odds: m.avgw || m.avgl || 'N/A'
+      }));
+      
+      // Tornei unici
+      rawData.uniqueTournaments = [...new Set(playerMatches.map(m => m.tournament_name || m.tournament).filter(Boolean))].length;
+      
+      // Range date
+      const dates = playerMatches.map(m => m.dateTimestamp || m.date || m.start_time).filter(Boolean).sort();
+      rawData.earliestMatch = dates[0] || 'N/A';
+      rawData.latestMatch = dates[dates.length - 1] || 'N/A';
+    }
+    
+    // Dati calcolati
+    const calculatedData = {};
+    
+    if (playerProfileService && rawData.totalMatches > 0) {
+      try {
+        const profile = await playerProfileService.getPlayerProfile(decodedName, {});
+        // I dati sono in profile.global, profile.by_surface, etc.
+        if (profile.global) {
+          calculatedData.winRate = profile.global.win_rate;
+          calculatedData.totalWins = profile.global.wins;
+          calculatedData.totalLosses = profile.global.losses;
+          calculatedData.avgSetsPerMatch = profile.global.avg_sets_per_match;
+          calculatedData.tiebreakWinRate = profile.global.tiebreak_win_rate;
+        }
+        if (profile.special_metrics) {
+          calculatedData.comebackRate = profile.special_metrics.comeback_rate;
+          calculatedData.firstSetWinRate = profile.special_metrics.first_set_win_rate;
+          calculatedData.decidingSetWinRate = profile.special_metrics.deciding_set_win_rate;
+          calculatedData.matchWinAfterFirstSet = profile.special_metrics.match_win_after_first_set;
+        }
+        if (profile.recent_form) {
+          calculatedData.recentForm = profile.recent_form;
+        }
+        if (profile.roi) {
+          calculatedData.roi = profile.roi;
+        }
+        if (profile.by_surface) {
+          calculatedData.bySurface = profile.by_surface;
+        }
+        if (profile.by_format) {
+          calculatedData.byFormat = profile.by_format;
+        }
+        if (profile.by_series) {
+          calculatedData.bySeries = profile.by_series;
+        }
+      } catch (e) {
+        console.warn('Could not calculate profile:', e.message);
+      }
+    }
+    
+    // Coverage info
+    const totalPossibleFields = 15;
+    let availableFields = 0;
+    if (rawData.totalMatches > 0) availableFields += 3;
+    if (rawData.matchesWithOdds > 0) availableFields += 2;
+    if (rawData.matchesWithStats > 0) availableFields += 3;
+    if (rawData.matchesWithPowerRankings > 0) availableFields += 2;
+    if (calculatedData.winRate !== undefined) availableFields += 2;
+    if (calculatedData.comebackRate !== undefined) availableFields += 3;
+    
+    // Fonti dati
+    const sources = [
+      { name: 'Match History', available: rawData.totalMatches > 0 },
+      { name: 'Odds Data', available: rawData.matchesWithOdds > 0 },
+      { name: 'Statistics', available: rawData.matchesWithStats > 0 },
+      { name: 'Power Rankings', available: rawData.matchesWithPowerRankings > 0 },
+      { name: 'Profile Service', available: Object.keys(calculatedData).length > 0 }
+    ];
+    
+    res.json({
+      name: decodedName,
+      rawData,
+      calculatedData,
+      coverage: {
+        total: totalPossibleFields,
+        available: availableFields
+      },
+      sources
+    });
+    
+  } catch (err) {
+    console.error('Error in player inspector:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/match/:matchId/inspector - Data Inspector per match
+ * Restituisce dati puri vs calcolati con info sulla copertura
+ */
+app.get('/api/match/:matchId/inspector', async (req, res) => {
+  const { matchId } = req.params;
+  
+  if (!matchId) {
+    return res.status(400).json({ error: 'Missing matchId' });
+  }
+  
+  try {
+    // Dati puri dal database
+    let rawData = {};
+    let match = null;
+    let matchInfo = '';
+    
+    if (matchRepository) {
+      // Prova prima per eventId (stringa)
+      const matches = await matchRepository.getAllMatches();
+      match = matches.find(m => 
+        String(m.event_id) === String(matchId) || 
+        String(m.id) === String(matchId) ||
+        String(m.eventId) === String(matchId)
+      );
+      
+      if (match) {
+        matchInfo = `${match.home_player} vs ${match.away_player}`;
+        
+        rawData = {
+          homePlayer: match.home_player || 'N/A',
+          awayPlayer: match.away_player || 'N/A',
+          tournament: match.tournament_name || match.tournament || 'N/A',
+          surface: match.surface || 'N/A',
+          status: match.status || 'N/A',
+          score: match.score || 'N/A',
+          winner: match.winner || 'N/A',
+          loser: match.loser || 'N/A',
+          set1: match.w1 && match.l1 ? `${match.w1}-${match.l1}` : 'N/A',
+          set2: match.w2 && match.l2 ? `${match.w2}-${match.l2}` : 'N/A',
+          set3: match.w3 && match.l3 ? `${match.w3}-${match.l3}` : 'N/A',
+          oddsWinner: match.avgw || match.avg_odds_winner || 'N/A',
+          oddsLoser: match.avgl || match.avg_odds_loser || 'N/A',
+          statsCount: match.statistics ? Object.keys(match.statistics).length : 0,
+          powerRankingsCount: match.power_rankings?.length || 0,
+          pointByPointCount: match.point_by_point?.length || 0,
+          bestOf: match.best_of || 'N/A',
+          series: match.series || 'N/A'
+        };
+      }
+    }
+    
+    // Dati calcolati
+    const calculatedData = {};
+    
+    if (match && match.power_rankings && match.power_rankings.length > 0) {
+      try {
+        const analysis = analyzePowerRankings(match.power_rankings, {
+          surface: match.surface,
+          bestOf: match.best_of || 3
+        });
+        calculatedData.volatility = analysis?.volatility;
+        calculatedData.elasticity = analysis?.elasticity;
+        calculatedData.matchCharacter = analysis?.character;
+        calculatedData.trend = analysis?.trend;
+        calculatedData.tradingIndicators = analysis?.tradingIndicators;
+      } catch (e) {
+        console.warn('Could not analyze power rankings:', e.message);
+      }
+    }
+    
+    if (match && breakDetector) {
+      try {
+        const breakAnalysis = breakDetector.analyzeSetBreaks({ 
+          score: match.score,
+          w1: match.w1, l1: match.l1,
+          w2: match.w2, l2: match.l2,
+          w3: match.w3, l3: match.l3,
+          w4: match.w4, l4: match.l4,
+          w5: match.w5, l5: match.l5
+        });
+        calculatedData.breakAnalysis = breakAnalysis;
+      } catch (e) {
+        console.warn('Could not analyze breaks:', e.message);
+      }
+    }
+    
+    if (match && matchSegmenter) {
+      try {
+        const segments = matchSegmenter.getSegmentSummary({
+          power_rankings: match.power_rankings,
+          score: match.score
+        });
+        calculatedData.segments = segments;
+      } catch (e) {
+        console.warn('Could not segment match:', e.message);
+      }
+    }
+    
+    // Coverage info
+    const totalPossibleFields = 10;
+    let availableFields = 0;
+    if (match) availableFields += 3;
+    if (rawData.oddsWinner !== 'N/A') availableFields += 1;
+    if (rawData.statsCount > 0) availableFields += 2;
+    if (rawData.powerRankingsCount > 0) availableFields += 2;
+    if (rawData.pointByPointCount > 0) availableFields += 2;
+    
+    // Fonti dati
+    const sources = [
+      { name: 'Match Base', available: !!match },
+      { name: 'Odds', available: rawData.oddsWinner !== 'N/A' },
+      { name: 'Statistics', available: rawData.statsCount > 0 },
+      { name: 'Power Rankings', available: rawData.powerRankingsCount > 0 },
+      { name: 'Point by Point', available: rawData.pointByPointCount > 0 }
+    ];
+    
+    res.json({
+      eventId: matchId,
+      matchInfo,
+      rawData,
+      calculatedData,
+      coverage: {
+        total: totalPossibleFields,
+        available: availableFields
+      },
+      sources
+    });
+    
+  } catch (err) {
+    console.error('Error in match inspector:', err);
     res.status(500).json({ error: err.message });
   }
 });

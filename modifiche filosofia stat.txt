@@ -1,0 +1,235 @@
+📘 DOCUMENTO PER GITHUB COPILOT
+Guida per Aggiornare e Implementare FILOSOFIA_STATS.md
+
+Audience: GitHub Copilot (agente di codice interno al repository)
+Scopo: aggiornare, ristrutturare e mantenere coerente il documento FILOSOFIA_STATS.md
+Vincolo: NON introdurre nuove logiche arbitrarie. Applicare SOLO quanto definito qui.
+
+1️⃣ SCOPO DI QUESTO DOCUMENTO
+
+Questo documento definisce le regole architetturali per:
+
+classificare correttamente i dati
+
+distinguere tra dati puri, derivati e dinamici
+
+strutturare le funzioni di calcolo
+
+evitare incongruenze concettuali nel progetto
+
+⚠️ Copilot NON deve prendere decisioni architetturali autonome.
+⚠️ Deve SOLO applicare le regole qui sotto.
+
+2️⃣ PRINCIPI FONDAMENTALI (NON VIOLABILI)
+REGOLA 1 – Separazione dei dati
+
+Ogni dato del progetto DEVE appartenere a UNA sola categoria:
+
+DATI PURI (RAW)
+
+DATI DERIVATI (CALCOLATI, STABILI)
+
+DATI DINAMICI (RUNTIME / LIVE)
+
+Se un dato non è chiaramente classificabile → NON va aggiunto.
+
+REGOLA 2 – Fonte di verità
+
+I DATI PURI sono la fonte di verità
+
+I DATI DERIVATI dipendono SOLO dai dati puri
+
+I DATI DINAMICI dipendono dal contesto runtime
+
+⚠️ I dati dinamici non devono mai essere persistiti come verità storica.
+
+REGOLA 3 – Backend vs Frontend
+
+Tutte le logiche che influenzano decisioni, probabilità o segnali
+→ DEVONO stare in backend o in librerie condivise
+
+Il frontend può:
+
+aggregare per visualizzazione
+
+normalizzare valori grafici
+
+MA NON ridefinire logiche core
+
+3️⃣ STRUTTURA OBBLIGATORIA DEL DOCUMENTO FILOSOFIA_STATS.md
+
+Copilot deve ristrutturare il documento seguendo ESATTAMENTE questo ordine:
+
+1. Scopo del documento
+2. Filosofia generale del sistema di calcolo
+3. DATI PURI
+4. DATI DERIVATI
+5. DATI DINAMICI
+6. FUNZIONI DI CALCOLO (catalogo)
+7. Incongruenze note e correzioni
+8. Future implementazioni
+9. Regole per aggiungere nuove funzioni
+
+
+⚠️ Se una sezione non esiste, deve essere creata.
+⚠️ Se contenuti sono duplicati, devono essere spostati, non copiati.
+
+4️⃣ DEFINIZIONE DELLE CATEGORIE DATI
+🧱 DATI PURI (RAW DATA)
+
+Definizione:
+
+dati provenienti direttamente da DB o API
+
+non interpretati
+
+non arricchiti
+
+Esempi:
+
+matches_new
+
+match_statistics_new
+
+match_power_rankings_new
+
+match_point_by_point_new
+
+match_odds
+
+players_new
+
+player_rankings
+
+⚠️ Copilot NON deve aggiungere interpretazioni in questa sezione.
+
+🧮 DATI DERIVATI (CALCOLATI, STABILI)
+
+Definizione:
+
+dipendono SOLO da dati puri
+
+non cambiano dopo il match
+
+DEVONO essere persistibili
+
+Esempi:
+
+volatility
+
+elasticity
+
+match_character
+
+data_quality
+
+comeback_rate
+
+ROI storico
+
+win_rate per superficie
+
+⚠️ Se una funzione calcola questi valori runtime → segnalarlo come incongruenza.
+
+⚡ DATI DINAMICI (RUNTIME / LIVE)
+
+Definizione:
+
+dipendono dal contesto live
+
+cambiano punto per punto
+
+non sono persistiti come verità
+
+Esempi:
+
+pressure_index
+
+detectMomentumShift
+
+tradingIndicators
+
+recommendedStrategy
+
+live value signals
+
+5️⃣ REGOLA PER DOCUMENTARE LE FUNZIONI
+
+OGNI funzione importante DEVE essere documentata così:
+
+### functionName()
+
+Tipo: RAW | DERIVED | DYNAMIC
+Livello: MATCH | PLAYER | COMBINED
+Input: (dati richiesti)
+Output: (valore restituito)
+Persistenza: SÌ | NO
+
+Dipende da:
+- elenco dati o funzioni
+
+Usata da:
+- servizi / componenti
+
+Rischi:
+- dati incompleti
+- edge case
+
+
+⚠️ Copilot NON deve documentare funzioni senza specificare il tipo.
+
+6️⃣ INCONGRUENZE DA CORREGGERE (OBBLIGATORIE)
+
+Copilot deve segnalare e correggere nel documento:
+
+Logiche duplicate frontend/backend
+
+Data Quality calcolata runtime invece che derivata
+
+Metriche stabili ricalcolate ad ogni richiesta
+
+Funzioni senza chiara classificazione (raw/derived/dynamic)
+
+Le correzioni vanno documentate in una sezione:
+
+## Incongruenze note e correzioni
+
+7️⃣ FUTURE IMPLEMENTAZIONI
+
+Ogni nuova funzione futura DEVE dichiarare:
+
+Nome funzione
+Livello: Player / Match / Combined
+Tipo dato prodotto: Derived / Dynamic
+Persistenza: SÌ / NO
+Nuovi dati richiesti: elenco
+Uso previsto: prediction / trading / analytics / ML
+
+
+⚠️ Se mancano questi campi → la funzione NON è valida.
+
+8️⃣ COSA COPILOT NON DEVE FARE
+
+❌ Non deve cambiare formule
+❌ Non deve inventare pesi
+❌ Non deve “migliorare” logiche
+❌ Non deve semplificare concetti architetturali
+❌ Non deve spostare logica senza segnalarlo
+
+9️⃣ OBIETTIVO FINALE
+
+Dopo l’aggiornamento:
+
+un nuovo sviluppatore capisce come funziona il sistema
+
+un’AI futura può lavorare sul progetto senza romperlo
+
+le metriche sono coerenti, classificabili e manutenibili
+
+✅ CONCLUSIONE (risposta alla tua domanda)
+
+👉 Sì, puoi usare GitHub Copilot
+👉 MA solo dopo avergli dato questo documento
+
+Questo testo è il contratto architetturale.
+Copilot esegue, non decide.

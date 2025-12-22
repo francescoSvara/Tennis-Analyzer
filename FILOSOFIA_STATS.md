@@ -69,6 +69,223 @@
 
 ---
 
+## 🎯 DISTINZIONE FONDAMENTALE: Player-Level vs Match-Level
+
+> ⚠️ **IMPORTANTE**: Questa distinzione è CRITICA per non fare confusione quando si aggiungono dati o funzioni.
+
+### Due Livelli di Analisi Completamente Diversi
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│   🧑 PLAYER-LEVEL ANALYSIS               🎾 MATCH-LEVEL ANALYSIS            │
+│   (Profilo Tennista)                     (Singolo Match)                     │
+│                                                                              │
+│   "Chi è questo giocatore?"              "Cosa sta succedendo ORA?"          │
+│   "Come performa storicamente?"          "Come si sta sviluppando?"          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🧑 PLAYER-LEVEL: Profilo e Storico Giocatore
+
+**Scopo**: Costruire il profilo completo di un tennista basato su TUTTI i suoi match storici.
+
+#### Dati Puri (Input)
+| Dato | Tabella DB | Descrizione |
+|------|------------|-------------|
+| Lista match giocati | `matches` | Tutti i match del giocatore |
+| Risultati (W/L) | `matches.winner` | Vittorie/sconfitte |
+| Score set | `matches.w1, l1, w2, l2...` | Risultati per set |
+| Superficie | `matches.surface` | Hard, Clay, Grass |
+| Torneo/Serie | `matches.series` | Grand Slam, M1000, etc |
+| Quote storiche | `matches.avgw, maxw` | Quote pre-match |
+| Avversari | `matches.winner/loser` | Chi ha affrontato |
+
+#### Funzioni di Trasformazione
+| Funzione | File | Output |
+|----------|------|--------|
+| `getPlayerProfile()` | playerProfileService.js | Profilo completo aggregato |
+| `aggregateBySurface()` | playerStatsService.js | Win rate per superficie |
+| `aggregateByFormat()` | playerStatsService.js | Win rate Bo3 vs Bo5 |
+| `aggregateBySeries()` | playerStatsService.js | Win rate per livello torneo |
+| `calculateComebackRate()` | playerStatsService.js | % rimonte dopo set perso |
+| `calculateROI()` | playerStatsService.js | ROI storico betting |
+| `analyzeRecentForm()` | playerProfileService.js | Form ultime N partite |
+| `analyzeBreakPatterns()` | breakDetector.js | Pattern break storici |
+
+#### Metriche Derivate (Output)
+```javascript
+// PLAYER-LEVEL OUTPUT EXAMPLE
+{
+  name: "Jannik Sinner",
+  
+  // Statistiche globali
+  total_matches: 234,
+  win_rate: 0.72,
+  
+  // Per superficie
+  by_surface: {
+    Hard: { win_rate: 0.78, matches: 142 },
+    Clay: { win_rate: 0.65, matches: 67 },
+    Grass: { win_rate: 0.68, matches: 25 }
+  },
+  
+  // Metriche speciali
+  comeback_rate: 0.45,        // Rimonte dopo set perso
+  first_set_win_rate: 0.76,   // % primo set vinto
+  deciding_set_rate: 0.58,    // % vittoria set decisivo
+  
+  // ROI betting
+  roi: 12.3,
+  
+  // Form recente
+  recent_form: {
+    last_5: { wins: 4, losses: 1 },
+    trend: 'UP'
+  }
+}
+```
+
+---
+
+### 🎾 MATCH-LEVEL: Analisi Singolo Match
+
+**Scopo**: Analizzare cosa sta succedendo IN UN SINGOLO MATCH (live o post-match).
+
+#### Dati Puri (Input)
+| Dato | Tabella/Campo DB | Descrizione |
+|------|------------------|-------------|
+| Power Rankings | `power_rankings` | Momentum game-by-game |
+| Point-by-Point | `point_by_point` | Ogni punto del match |
+| Statistics | `statistics` | Aces, DF, BP, etc del match |
+| Live Score | `matches` | Score attuale |
+| Quote live | - | Odds in-play |
+
+#### Funzioni di Trasformazione
+| Funzione | File | Output |
+|----------|------|--------|
+| `calculateVolatility()` | valueInterpreter.js | Volatilità match |
+| `calculateElasticity()` | valueInterpreter.js | Capacità recupero |
+| `classifyMatchCharacter()` | valueInterpreter.js | Tipo di match |
+| `detectTrendShift()` | valueInterpreter.js | Cambio momentum |
+| `analyzePowerRankingsEnhanced()` | valueInterpreter.js | Analisi completa |
+| `segmentMatch()` | matchSegmenter.js | Fasi del match |
+| `detectBreaksFromScore()` | breakDetector.js | Break nel match |
+| `calculatePressureIndex()` | pressureCalculator.js | Pressione live |
+| `generateTradingIndicators()` | valueInterpreter.js | Segnali trading |
+
+#### Metriche Derivate (Output)
+```javascript
+// MATCH-LEVEL OUTPUT EXAMPLE
+{
+  match_id: "mjd1h492pgab5n",
+  
+  // Analisi momentum
+  volatility: { value: 42, class: 'VOLATILE' },
+  elasticity: { value: 65, class: 'RESILIENTE' },
+  character: 'ALTALENA',
+  
+  // Trend attuale
+  trend: {
+    direction: 'home',
+    magnitude: 25,
+    isShifting: true
+  },
+  
+  // Breaks
+  breaks: {
+    home: 3,
+    away: 2,
+    break_activity: 'HIGH'
+  },
+  
+  // Segmenti
+  segments: {
+    critical_games: 8,
+    momentum_shifts: 3
+  },
+  
+  // Live trading
+  pressure_index: 58,
+  trading: {
+    riskLevel: 'MEDIUM',
+    strategy: 'MONITOR',
+    layConfidence: 62
+  }
+}
+```
+
+---
+
+### 📊 Tabella Riepilogativa
+
+| Aspetto | 🧑 PLAYER-LEVEL | 🎾 MATCH-LEVEL |
+|---------|-----------------|----------------|
+| **Domanda** | "Chi è questo giocatore?" | "Cosa succede nel match?" |
+| **Scope** | Tutti i match storici | Singolo match |
+| **Tempo** | Storico/aggregato | Live/post-match |
+| **Input principale** | matches table | power_rankings, pbp, stats |
+| **Output tipo** | Percentuali, trend, profilo | Indici, segnali, fasi |
+| **Uso** | Pre-match analysis | In-play trading |
+| **File principali** | playerProfileService, playerStatsService | valueInterpreter, pressureCalculator |
+
+---
+
+### 🔗 Come si Collegano
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                      PRE-MATCH ANALYSIS                          │
+│                                                                   │
+│   PLAYER A Profile ──┐                                           │
+│   (Player-Level)     │     ┌─────────────────────────────┐       │
+│                      ├────►│  MATCH PREDICTION           │       │
+│   PLAYER B Profile ──┘     │  (combinazione profili)     │       │
+│   (Player-Level)           └─────────────────────────────┘       │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼ Match inizia
+┌──────────────────────────────────────────────────────────────────┐
+│                       LIVE ANALYSIS                              │
+│                                                                   │
+│   ┌─────────────────┐     ┌─────────────────────────────┐        │
+│   │ Match-Level     │────►│  TRADING DECISIONS          │        │
+│   │ (momentum,      │     │  (combinazione live +       │        │
+│   │  pressure, etc) │     │   profili storici)          │        │
+│   └─────────────────┘     └─────────────────────────────┘        │
+│           │                                                       │
+│           └── Arricchito da Player-Level                         │
+│               (es: "Sinner ha comeback_rate 45% su Hard")        │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 📝 Regole per Aggiungere Nuovi Dati/Funzioni
+
+**Quando aggiungi qualcosa, chiediti:**
+
+1. **Questo dato/funzione riguarda UN SINGOLO MATCH?**
+   - ✅ Sì → Va in **Match-Level** (valueInterpreter, pressureCalculator, matchSegmenter)
+   
+2. **Questo dato/funzione riguarda LO STORICO DI UN GIOCATORE?**
+   - ✅ Sì → Va in **Player-Level** (playerProfileService, playerStatsService)
+   
+3. **Questo dato/funzione COMBINA entrambi?**
+   - ✅ Sì → Crea funzione che ACCETTA entrambi come input (es: predittore match)
+
+**Esempi:**
+- "Ace percentage di Sinner in questo match" → **Match-Level**
+- "Media ace di Sinner su erba" → **Player-Level**
+- "Sinner sta servendo sotto la sua media storica?" → **Combinazione** (usa entrambi)
+
+---
+
 ## 🖥️ Backend - Funzioni di Calcolo
 
 ### valueInterpreter.js - Interpretazione Momentum
