@@ -67,47 +67,6 @@
   background: #2563eb;
 }
 
-/* Surface Filters */
-.surface-filters {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  padding: 8px 16px;
-  background: #2d3748;
-  color: #8b95a5;
-  border: 1px solid transparent;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  background: #3d4858;
-  color: #ffffff;
-}
-
-.filter-btn.active {
-  background: #3b82f6;
-  color: #ffffff;
-  border-color: #3b82f6;
-}
-
-.filter-btn.hard.active {
-  background: #3b82f6;
-}
-
-.filter-btn.clay.active {
-  background: #f97316;
-}
-
-.filter-btn.grass.active {
-  background: #22c55e;
-}
-
 /* ============================================================================
    LOADING & STATES
    ============================================================================ */

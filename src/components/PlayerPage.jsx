@@ -234,34 +234,6 @@ export default function PlayerPage() {
             🔍 Cerca
           </button>
         </form>
-        
-        {/* Surface filter */}
-        <div className="surface-filters">
-          <button 
-            className={`filter-btn ${surfaceFilter === '' ? 'active' : ''}`}
-            onClick={() => handleSurfaceChange('')}
-          >
-            All
-          </button>
-          <button 
-            className={`filter-btn hard ${surfaceFilter === 'Hard' ? 'active' : ''}`}
-            onClick={() => handleSurfaceChange('Hard')}
-          >
-            🔵 Hard
-          </button>
-          <button 
-            className={`filter-btn clay ${surfaceFilter === 'Clay' ? 'active' : ''}`}
-            onClick={() => handleSurfaceChange('Clay')}
-          >
-            🟤 Clay
-          </button>
-          <button 
-            className={`filter-btn grass ${surfaceFilter === 'Grass' ? 'active' : ''}`}
-            onClick={() => handleSurfaceChange('Grass')}
-          >
-            🟢 Grass
-          </button>
-        </div>
       </div>
       
       {/* Loading state */}
