@@ -1645,21 +1645,32 @@
         allMatchesFromDb = fetchedMatches;
         
         // Filtra partite per la visualizzazione:
-        // - Se completezza >= 100% → nascondi
-        // - Se status = "Ended" o "Retired" → nascondi (partita conclusa)
-        // - Se status = "Walkover", "Cancelled", "Postponed" → nascondi
+        // - Se completezza >= 100% → nascondi (già complete)
+        // - Se status = "Retired", "Walkover", "Cancelled", etc. → nascondi (non acquisibili)
+        // - Se "Ended" + vecchia di 3+ giorni + completeness < 50% → nascondi (dati non più ottenibili)
+        // - Tutto il resto rimane visibile
         allMatches = fetchedMatches.filter(m => {
-          const isComplete = (m.completeness || 0) >= 100;
+          const completeness = m.completeness || 0;
           const statusDesc = (m.status_description || '').toLowerCase();
           
-          // Status che indicano partita conclusa o non più rilevante
-          const finishedStatuses = ['ended', 'retired', 'walkover', 'cancelled', 'canceled', 'postponed', 'abandoned'];
-          const isFinished = finishedStatuses.some(s => statusDesc.includes(s));
+          // Status non acquisibili (partite senza dati utili)
+          const nonAcquisibili = ['retired', 'walkover', 'cancelled', 'canceled', 'postponed', 'abandoned'];
+          const isNonAcquisibile = nonAcquisibili.some(s => statusDesc.includes(s));
           
           // Se completa al 100%, nascondi
-          if (isComplete) return false;
-          // Se partita conclusa (ended, retired, etc.), nascondi
-          if (isFinished) return false;
+          if (completeness >= 100) return false;
+          // Se non acquisibile (retired, walkover, etc.), nascondi
+          if (isNonAcquisibile) return false;
+          
+          // Se "Ended" e vecchia di 3+ giorni con pochi dati, considera finita
+          if (statusDesc === 'ended' && completeness < 50) {
+            const matchDate = new Date(m.start_time || m.extracted_at);
+            const daysDiff = (Date.now() - matchDate.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysDiff > 3) {
+              console.log(`⏰ Match ${m.id} nascosto: Ended + vecchio ${daysDiff.toFixed(1)} giorni + ${completeness}% completeness`);
+              return false;
+            }
+          }
           
           return true;
         });
