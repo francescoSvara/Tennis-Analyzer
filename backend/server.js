@@ -368,21 +368,29 @@ function extractRelatedMatches(apiData, currentEventId) {
 app.get('/api/db-stats', async (req, res) => {
   try {
     let dbMatches = [];
-    let dbTournaments = [];
+    let tournamentStats = [];
     
-    // Prova a caricare dal database
+    // 🚀 OTTIMIZZATO: Carica tornei dalla tabella tournaments (filosofia corretta)
+    if (matchRepository && matchRepository.getTournamentsWithStats) {
+      try {
+        tournamentStats = await matchRepository.getTournamentsWithStats() || [];
+        console.log(`📊 DB Stats: Found ${tournamentStats.length} tournaments from DB`);
+      } catch (err) {
+        console.log('⚠️ getTournamentsWithStats failed:', err.message);
+      }
+    }
+    
+    // Carica match per statistiche generali
     if (matchRepository) {
       try {
-        // Carica TUTTI i match per avere statistiche complete sui tornei
         dbMatches = await matchRepository.getMatches({ limit: 10000 }) || [];
-        dbTournaments = await matchRepository.getTournaments() || [];
         console.log(`📊 DB Stats: Found ${dbMatches.length} matches in database`);
       } catch (dbErr) {
         console.log('⚠️ Database query failed, falling back to files:', dbErr.message);
       }
     }
     
-    // Fallback o integrazione con file locali se DB vuoto o non disponibile
+    // Fallback a file locali se DB vuoto
     if (dbMatches.length === 0) {
       console.log('📂 DB Stats: Loading from local files...');
       const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
@@ -405,35 +413,15 @@ app.get('/api/db-stats', async (req, res) => {
             const sportSlug = eventData.tournament?.category?.sport?.slug || 'tennis';
             const statusType = eventData.status?.type || 'unknown';
             
-            // Estrai uniqueTournament ID (potrebbe essere oggetto o id diretto)
-            let uniqueTournamentId = null;
-            let uniqueTournamentName = null;
-            const ut = eventData.tournament?.uniqueTournament;
-            if (ut) {
-              if (typeof ut === 'object') {
-                uniqueTournamentId = ut.id;
-                uniqueTournamentName = ut.name;
-              } else if (typeof ut === 'number') {
-                uniqueTournamentId = ut;
-              }
-            }
-            
-            // Usa season ID come fallback per raggruppamento, ma salva uniqueTournamentId separatamente
-            const seasonId = eventData.tournament?.id || eventData.season?.id;
-            
             dbMatches.push({
               id: eventData.id,
               status_type: statusType,
               start_time: eventData.startTimestamp ? new Date(eventData.startTimestamp * 1000).toISOString() : null,
               created_at: new Date().toISOString(),
-              tournament_id: seasonId,
-              unique_tournament_id: uniqueTournamentId,
-              tournament_name: uniqueTournamentName || eventData.tournament?.name || 'Unknown',
-              tournament_category: eventData.tournament?.category?.name || '',
+              tournament_id: eventData.tournament?.id || eventData.season?.id,
               home_name: eventData.homeTeam?.name || '',
               away_name: eventData.awayTeam?.name || '',
-              sport: sportSlug,
-              data_completeness: calculateDataCompleteness(content.api, eventData.id, sportSlug)
+              sport: sportSlug
             });
           }
         } catch (e) { /* skip */ }
@@ -441,12 +429,11 @@ app.get('/api/db-stats', async (req, res) => {
       console.log(`📂 DB Stats: Loaded ${dbMatches.length} matches from files`);
     }
     
-    // Strutture per le statistiche
+    // Statistiche generali match
     const matchesByStatus = { finished: 0, inprogress: 0, notstarted: 0, other: 0 };
     const matchesByDay = new Map();
-    const tournamentMap = new Map();
     
-    // Processa ogni match
+    // Processa ogni match per statistiche generali (NON per tornei - quelli vengono da getTournamentsWithStats)
     for (const match of dbMatches || []) {
       // Status
       const statusType = (match.status_type || 'other').toLowerCase();
@@ -462,122 +449,7 @@ app.get('/api/db-stats', async (req, res) => {
         const day = new Date(acquiredDate).toISOString().split('T')[0];
         matchesByDay.set(day, (matchesByDay.get(day) || 0) + 1);
       }
-      
-      // Raggruppa per torneo
-      const tournamentId = match.tournament_id || 'unknown';
-      const tournamentName = match.tournament_name || 'Sconosciuto';
-      
-      // Estrai uniqueTournamentId - può venire da unique_tournament_id (file) o raw_json (DB)
-      let uniqueTournamentId = match.unique_tournament_id;
-      if (!uniqueTournamentId && match.raw_json) {
-        try {
-          const rawData = typeof match.raw_json === 'string' ? JSON.parse(match.raw_json) : match.raw_json;
-          uniqueTournamentId = rawData?.tournament?.uniqueTournament?.id;
-        } catch (e) { /* ignore parse errors */ }
-      }
-      
-      if (!tournamentMap.has(tournamentId)) {
-        tournamentMap.set(tournamentId, {
-          id: tournamentId,
-          uniqueTournamentId: uniqueTournamentId,
-          name: tournamentName,
-          category: match.tournament_category || '',
-          sport: 'tennis',
-          matches: [],
-          completeness: [],
-          latestDate: null,
-          earliestDate: null
-        });
-      } else if (uniqueTournamentId && !tournamentMap.get(tournamentId).uniqueTournamentId) {
-        // Aggiorna se non avevamo l'uniqueTournamentId
-        tournamentMap.get(tournamentId).uniqueTournamentId = uniqueTournamentId;
-      }
-      
-      const tData = tournamentMap.get(tournamentId);
-      const completeness = 50; // Default, può essere calcolato se serve
-      const matchStartTimestamp = match.start_time ? Math.floor(new Date(match.start_time).getTime() / 1000) : null;
-      
-      tData.matches.push({
-        eventId: match.id,
-        status: statusType,
-        completeness,
-        homeTeam: match.home_name || '',
-        awayTeam: match.away_name || '',
-        startTimestamp: matchStartTimestamp
-      });
-      tData.completeness.push(completeness);
-      
-      if (matchStartTimestamp) {
-        if (!tData.latestDate || matchStartTimestamp > tData.latestDate) {
-          tData.latestDate = matchStartTimestamp;
-        }
-        if (!tData.earliestDate || matchStartTimestamp < tData.earliestDate) {
-          tData.earliestDate = matchStartTimestamp;
-        }
-      }
     }
-    
-    // Recupera statistiche detected_matches per calcolare copertura reale
-    let detectedStats = {};
-    if (matchRepository && matchRepository.getDetectedMatchesStats) {
-      try {
-        detectedStats = await matchRepository.getDetectedMatchesStats();
-        console.log(`📊 DB Stats: Found detected_matches for ${Object.keys(detectedStats).length} tournaments`);
-      } catch (err) {
-        console.log('⚠️ Could not load detected_matches stats:', err.message);
-      }
-    }
-    
-    // Calcola statistiche per torneo
-    const tournamentStats = Array.from(tournamentMap.values()).map(t => {
-      // Dati dalla tabella detected_matches
-      const detected = detectedStats[t.id] || null;
-      const totalDetected = detected?.total || 0;
-      const acquiredFromDetected = detected?.acquired || 0;
-      const missingMatches = detected?.missingMatches || [];
-      
-      // Calcola percentuale reale di copertura
-      // Se abbiamo detected_matches, usiamo quella - altrimenti consideriamo 100% (solo DB)
-      const coveragePercentage = totalDetected > 0 
-        ? Math.round((t.matches.length / totalDetected) * 100)
-        : 100; // Se non abbiamo detected_matches, non possiamo calcolare
-      
-      return {
-        id: t.id,
-        uniqueTournamentId: t.uniqueTournamentId || null,
-        name: t.name,
-        category: t.category,
-        sport: t.sport,
-        matchCount: t.matches.length,
-        avgCompleteness: t.completeness.length > 0 
-          ? Math.round(t.completeness.reduce((a, b) => a + b, 0) / t.completeness.length)
-          : 0,
-        byStatus: {
-          finished: t.matches.filter(m => m.status === 'finished').length,
-          inprogress: t.matches.filter(m => m.status === 'inprogress').length,
-          notstarted: t.matches.filter(m => m.status === 'notstarted').length
-        },
-        matches: t.matches,
-        latestDate: t.latestDate,
-        earliestDate: t.earliestDate,
-        // NUOVI CAMPI per copertura reale
-        coverage: {
-          totalDetected,
-          acquired: t.matches.length,
-          missing: totalDetected - t.matches.length,
-          percentage: coveragePercentage
-        },
-        missingMatches: missingMatches.slice(0, 50) // Max 50 partite mancanti per non appesantire
-      };
-    });
-    
-    // Ordina tornei per data più recente
-    tournamentStats.sort((a, b) => {
-      if (!a.latestDate && !b.latestDate) return b.matchCount - a.matchCount;
-      if (!a.latestDate) return 1;
-      if (!b.latestDate) return -1;
-      return b.latestDate - a.latestDate;
-    });
     
     // Timeline per giorno (ultimi 30 giorni)
     const timeline = [];
@@ -599,9 +471,9 @@ app.get('/api/db-stats', async (req, res) => {
       .map(m => ({
         eventId: m.id,
         acquiredAt: m.created_at,
-        tournament: m.tournament_name || '',
-        homeTeam: m.home_name || '',
-        awayTeam: m.away_name || '',
+        tournament: m.tournament?.name || '',
+        homeTeam: m.home_player?.name || m.home_name || '',
+        awayTeam: m.away_player?.name || m.away_name || '',
         status: m.status_type || 'unknown',
         completeness: 50
       }));
@@ -752,13 +624,13 @@ app.get('/api/db-stats', async (req, res) => {
     res.json({
       summary: {
         totalMatches: totalMatches,
-        totalTournaments: tournamentMap.size,
+        totalTournaments: tournamentStats.length,
         powerScore: powerScore,
         powerDetails: {
           dbSize: { 
             score: dbSizeScore, 
             label: 'Match nel DB', 
-            detail: `${totalMatches} totali · ${dbTournaments.length || tournamentMap.size} tornei` 
+            detail: `${totalMatches} totali · ${tournamentStats.length} tornei` 
           },
           completeness: { 
             score: completenessScore, 
@@ -768,7 +640,7 @@ app.get('/api/db-stats', async (req, res) => {
           quality: { 
             score: qualityScore, 
             label: 'Qualità Dati', 
-            detail: `${totalFilledFields}/${totalPossibleFields} campi (${Math.round(totalFilledFields/totalMatches)} per match)` 
+            detail: `${totalFilledFields}/${totalPossibleFields} campi (${totalMatches > 0 ? Math.round(totalFilledFields/totalMatches) : 0} per match)` 
           },
           finished: { 
             score: finishedScore, 

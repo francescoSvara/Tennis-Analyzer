@@ -868,6 +868,179 @@ async function getTournaments() {
 }
 
 /**
+ * 🚀 OTTIMIZZATO: Recupera tornei dalla tabella tournaments con statistiche match
+ * Usa la tabella tournaments come fonte primaria (filosofia DB corretta)
+ * invece di raggruppare dai match
+ */
+async function getTournamentsWithStats() {
+  if (!checkSupabase()) return [];
+  
+  try {
+    // 1. Carica tutti i tornei dalla tabella tournaments
+    const { data: tournaments, error: tournamentsError } = await supabase
+      .from('tournaments')
+      .select('*')
+      .order('name');
+    
+    if (tournamentsError) {
+      console.log('getTournamentsWithStats tournaments error:', tournamentsError.message);
+      return [];
+    }
+    
+    if (!tournaments || tournaments.length === 0) {
+      return [];
+    }
+    
+    // 2. Carica tutti i match con info base (per aggregazione e preview)
+    const { data: allMatches, error: matchError } = await supabase
+      .from('matches')
+      .select(`
+        id,
+        tournament_id, 
+        status_type, 
+        start_time,
+        home_player:players!matches_home_player_id_fkey(name),
+        away_player:players!matches_away_player_id_fkey(name)
+      `)
+      .order('start_time', { ascending: false });
+    
+    if (matchError) {
+      console.log('getTournamentsWithStats matches error:', matchError.message);
+      // Ritorna tornei senza statistiche match
+      return tournaments.map(t => ({
+        id: t.id,
+        name: t.name || 'Unknown',
+        category: t.category || '',
+        surface: t.ground_type || '',
+        country: t.country || '',
+        matchCount: 0,
+        byStatus: { finished: 0, inprogress: 0, notstarted: 0 },
+        earliestDate: null,
+        latestDate: null,
+        matches: []
+      }));
+    }
+    
+    // 3. Raggruppa match per torneo con preview
+    const matchesByTournament = {};
+    for (const m of (allMatches || [])) {
+      const tid = m.tournament_id;
+      if (!tid) continue;
+      
+      if (!matchesByTournament[tid]) {
+        matchesByTournament[tid] = {
+          total: 0,
+          finished: 0,
+          inprogress: 0,
+          notstarted: 0,
+          earliestDate: null,
+          latestDate: null,
+          previewMatches: [] // Primi 10 match per preview
+        };
+      }
+      
+      const stats = matchesByTournament[tid];
+      stats.total++;
+      
+      const status = (m.status_type || 'other').toLowerCase();
+      if (status === 'finished') stats.finished++;
+      else if (status === 'inprogress') stats.inprogress++;
+      else if (status === 'notstarted') stats.notstarted++;
+      
+      if (m.start_time) {
+        const ts = Math.floor(new Date(m.start_time).getTime() / 1000);
+        if (!stats.earliestDate || ts < stats.earliestDate) stats.earliestDate = ts;
+        if (!stats.latestDate || ts > stats.latestDate) stats.latestDate = ts;
+      }
+      
+      // Aggiungi ai match preview (max 10 per torneo)
+      if (stats.previewMatches.length < 10) {
+        stats.previewMatches.push({
+          eventId: m.id,
+          status: status,
+          completeness: 50,
+          homeTeam: m.home_player?.name || '',
+          awayTeam: m.away_player?.name || '',
+          startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null
+        });
+      }
+    }
+    
+    // 4. Carica detected_matches stats se disponibile
+    let detectedStats = {};
+    try {
+      const { data: detected } = await supabase
+        .from('detected_matches')
+        .select('tournament_id, is_acquired');
+      
+      for (const d of (detected || [])) {
+        if (!d.tournament_id) continue;
+        if (!detectedStats[d.tournament_id]) {
+          detectedStats[d.tournament_id] = { total: 0, acquired: 0 };
+        }
+        detectedStats[d.tournament_id].total++;
+        if (d.is_acquired) detectedStats[d.tournament_id].acquired++;
+      }
+    } catch (e) {
+      // detected_matches potrebbe non esistere
+    }
+    
+    // 5. Costruisci risultato finale
+    const result = tournaments.map(t => {
+      const mStats = matchesByTournament[t.id] || { total: 0, finished: 0, inprogress: 0, notstarted: 0, previewMatches: [] };
+      const dStats = detectedStats[t.id] || null;
+      
+      // Calcola coverage
+      const totalDetected = dStats?.total || 0;
+      const coveragePercentage = totalDetected > 0 
+        ? Math.round((mStats.total / totalDetected) * 100)
+        : 100; // Se non abbiamo detected, consideriamo 100%
+      
+      return {
+        id: t.id,
+        uniqueTournamentId: t.unique_tournament_id || null,
+        name: t.name || 'Unknown',
+        category: t.category || '',
+        surface: t.ground_type || '',
+        country: t.country || '',
+        sport: 'tennis',
+        matchCount: mStats.total,
+        avgCompleteness: 50, // Default, può essere calcolato se serve
+        byStatus: {
+          finished: mStats.finished,
+          inprogress: mStats.inprogress,
+          notstarted: mStats.notstarted
+        },
+        matches: mStats.previewMatches || [], // Primi 10 match per preview
+        latestDate: mStats.latestDate,
+        earliestDate: mStats.earliestDate,
+        coverage: {
+          totalDetected: totalDetected,
+          acquired: mStats.total,
+          missing: Math.max(0, totalDetected - mStats.total),
+          percentage: coveragePercentage
+        },
+        missingMatches: [] // Sarà caricato on-demand se necessario
+      };
+    });
+    
+    // 6. Ordina per data più recente, poi per numero match
+    result.sort((a, b) => {
+      // Prima i tornei con match recenti
+      if (!a.latestDate && !b.latestDate) return b.matchCount - a.matchCount;
+      if (!a.latestDate) return 1;
+      if (!b.latestDate) return -1;
+      return b.latestDate - a.latestDate;
+    });
+    
+    return result;
+  } catch (err) {
+    console.error('getTournamentsWithStats exception:', err.message);
+    return [];
+  }
+}
+
+/**
  * Recupera log estrazioni recenti
  */
 async function getExtractionLogs(limit = 20) {
@@ -1983,6 +2156,7 @@ module.exports = {
   getStatistics,
   searchPlayers,
   getTournaments,
+  getTournamentsWithStats,
   getExtractionLogs,
   countMatches,
   getDistinctTournaments,
