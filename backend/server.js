@@ -724,26 +724,29 @@ app.get('/api/db-stats', async (req, res) => {
     
     const totalMatches = (dbMatches || []).length;
     
-    // Calcola punteggi parziali (0-100)
-    // Copertura: quanti match abbiamo rispetto ai rilevati (detected_matches)
-    const coverageScore = detectedCount > 0 ? Math.min(100, Math.round((totalMatches / detectedCount) * 100)) : 100;
+    // === METRICHE UTILI PER CAPIRE LO STATO DEL DB ===
     
-    // Completezza: quanti match hanno tutti i campi richiesti
+    // 1. MATCH NEL DB - Quanti match abbiamo salvato in totale
+    //    Score: basato su una soglia target (es. 1000 match = 100%)
+    const targetMatches = 1000; // Obiettivo
+    const dbSizeScore = Math.min(100, Math.round((totalMatches / targetMatches) * 100));
+    
+    // 2. DATI COMPLETI - % di match con TUTTI i campi richiesti compilati
     const completenessScore = totalMatches > 0 ? Math.round((matchesWith100Percent / totalMatches) * 100) : 0;
     
-    // Campi: percentuale media di campi pieni
-    const fieldsScore = totalPossibleFields > 0 ? Math.round((totalFilledFields / totalPossibleFields) * 100) : 0;
+    // 3. QUALITÀ DATI - % media di campi pieni per match
+    const qualityScore = totalPossibleFields > 0 ? Math.round((totalFilledFields / totalPossibleFields) * 100) : 0;
     
-    // Fonti: percentuale di match con fonte nota (Sofascore + XLSX + Merged vs unknown)
-    const knownSources = dataSources.sofascore + dataSources.xlsx + dataSources.merged;
-    const sourcesScore = totalMatches > 0 ? Math.round((knownSources / totalMatches) * 100) : 0;
+    // 4. MATCH FINITI - % di match con risultato finale (più utili per analisi)
+    const finishedMatches = matchesByStatus.finished || 0;
+    const finishedScore = totalMatches > 0 ? Math.round((finishedMatches / totalMatches) * 100) : 0;
     
-    // Power Score finale (media pesata)
+    // Power Score finale (media pesata delle metriche)
     const powerScore = Math.round(
-      (coverageScore * 0.30) +      // 30% peso copertura
-      (completenessScore * 0.25) +  // 25% peso completezza 100%
-      (fieldsScore * 0.30) +        // 30% peso campi pieni
-      (sourcesScore * 0.15)         // 15% peso diversità fonti
+      (dbSizeScore * 0.25) +        // 25% dimensione DB
+      (completenessScore * 0.30) +  // 30% match completi
+      (qualityScore * 0.30) +       // 30% qualità campi
+      (finishedScore * 0.15)        // 15% match finiti
     );
     
     res.json({
@@ -752,27 +755,35 @@ app.get('/api/db-stats', async (req, res) => {
         totalTournaments: tournamentMap.size,
         powerScore: powerScore,
         powerDetails: {
-          coverage: { 
-            score: coverageScore, 
-            label: 'Copertura', 
-            detail: `${totalMatches} acquisiti su ${detectedCount} rilevati` 
+          dbSize: { 
+            score: dbSizeScore, 
+            label: 'Match nel DB', 
+            detail: `${totalMatches} totali · ${dbTournaments.length || tournamentMap.size} tornei` 
           },
           completeness: { 
             score: completenessScore, 
-            label: 'Match Completi', 
-            detail: `${matchesWith100Percent} al 100% · ${matchesIncomplete} incompleti` 
+            label: 'Dati Completi', 
+            detail: `${matchesWith100Percent} completi · ${matchesIncomplete} parziali` 
           },
-          fields: { 
-            score: fieldsScore, 
-            label: 'Campi Dati', 
-            detail: `${totalFilledFields}/${totalPossibleFields} pieni` 
+          quality: { 
+            score: qualityScore, 
+            label: 'Qualità Dati', 
+            detail: `${totalFilledFields}/${totalPossibleFields} campi (${Math.round(totalFilledFields/totalMatches)} per match)` 
           },
-          sources: { 
-            score: sourcesScore, 
-            label: 'Fonti Dati', 
-            detail: `Sofascore: ${dataSources.sofascore} · XLSX: ${dataSources.xlsx}${dataSources.merged > 0 ? ` · Merged: ${dataSources.merged}` : ''}${dataSources.unknown > 0 ? ` · N/D: ${dataSources.unknown}` : ''}` 
+          finished: { 
+            score: finishedScore, 
+            label: 'Match Finiti', 
+            detail: `${finishedMatches} finiti · ${matchesByStatus.inprogress || 0} live · ${matchesByStatus.notstarted || 0} da giocare` 
           }
         },
+        // Extra info per debug
+        sources: {
+          sofascore: dataSources.sofascore,
+          xlsx: dataSources.xlsx,
+          merged: dataSources.merged,
+          unknown: dataSources.unknown
+        },
+        detected: detectedCount,
         byStatus: matchesByStatus
       },
       tournaments: tournamentStats,
