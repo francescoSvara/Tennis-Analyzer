@@ -2810,6 +2810,29 @@ app.get('/api/player/:playerName/profile', async (req, res) => {
 });
 
 /**
+ * GET /api/players/search - Ricerca giocatori per autocompletamento
+ * Query params: q (query string), limit (default 10)
+ */
+app.get('/api/players/search', async (req, res) => {
+  const { q, limit = 10 } = req.query;
+  
+  if (!q || q.length < 2) {
+    return res.json([]);
+  }
+  
+  try {
+    const players = await playerStatsService.searchPlayers(q, parseInt(limit));
+    res.json(players.map(p => ({
+      name: p.name,
+      matchCount: p.matchCount
+    })));
+  } catch (error) {
+    console.error('Error searching players:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * GET /api/players/compare - Confronta due giocatori
  * Query params: player1, player2, surface, format
  */

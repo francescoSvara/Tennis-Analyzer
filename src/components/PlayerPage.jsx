@@ -152,6 +152,53 @@ export default function PlayerPage() {
   const [error, setError] = useState(null);
   const [surfaceFilter, setSurfaceFilter] = useState('');
   
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  
+  // Fetch suggestions for autocomplete
+  const fetchSuggestions = useCallback(async (query) => {
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    
+    setSuggestionLoading(true);
+    try {
+      const url = apiUrl(`/api/players/search?q=${encodeURIComponent(query)}&limit=8`);
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      setSuggestions(data || []);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.error('Error fetching suggestions:', err);
+      setSuggestions([]);
+    } finally {
+      setSuggestionLoading(false);
+    }
+  }, []);
+  
+  // Handle input change with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchSuggestions(searchInput);
+    }, 300);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchInput, fetchSuggestions]);
+  
+  // Select suggestion
+  const selectSuggestion = (playerName) => {
+    setSearchInput(playerName);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setPlayerName(playerName);
+    fetchProfile(playerName, surfaceFilter);
+  };
+  
   // Fetch profile
   const fetchProfile = useCallback(async (name, surface = '') => {
     if (!name) return;
@@ -223,13 +270,46 @@ export default function PlayerPage() {
         <h1>🎾 Player Profile</h1>
         
         <form onSubmit={handleSearch} className="player-search-form">
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Cerca giocatore (es. Sinner, Alcaraz)..."
-            className="player-search-input"
-          />
+          <div className="search-container">
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onFocus={() => setShowSuggestions(suggestions.length > 0)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              placeholder="Cerca giocatore (es. Sinner, Alcaraz)..."
+              className="player-search-input"
+              autoComplete="off"
+            />
+            
+            {/* Suggestions dropdown */}
+            {showSuggestions && (
+              <div className="suggestions-dropdown">
+                {suggestionLoading && (
+                  <div className="suggestion-item loading">
+                    <span className="suggestion-spinner"></span>
+                    Caricamento...
+                  </div>
+                )}
+                {!suggestionLoading && suggestions.map((player, idx) => (
+                  <div
+                    key={idx}
+                    className="suggestion-item"
+                    onClick={() => selectSuggestion(player.name)}
+                  >
+                    <span className="suggestion-name">{player.name}</span>
+                    <span className="suggestion-matches">{player.matchCount} match</span>
+                  </div>
+                ))}
+                {!suggestionLoading && suggestions.length === 0 && searchInput.length >= 2 && (
+                  <div className="suggestion-item no-results">
+                    Nessun giocatore trovato
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
           <button type="submit" className="player-search-btn">
             🔍 Cerca
           </button>
