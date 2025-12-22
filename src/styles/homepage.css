@@ -96,17 +96,37 @@
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--home-transition);
+  transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.player-btn:hover,
+/* Player Button - Accent Green */
+.player-btn {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.player-btn:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--home-success);
+  color: #fff;
+}
+
+.player-btn .icon {
+  display: flex;
+  align-items: center;
+  color: var(--home-success);
+}
+
+/* Monitor Button - Primary Blue */
+.monitor-btn {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
 .monitor-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(59, 130, 246, 0.15);
   border-color: var(--home-accent);
   color: #fff;
 }
 
-.player-btn .icon,
 .monitor-btn .icon {
   display: flex;
   align-items: center;
@@ -392,12 +412,34 @@
 
 .error-icon {
   font-size: 1.2rem;
+  color: var(--home-danger);
 }
 
 .error-text {
   flex: 1;
   font-size: 0.9rem;
   color: #fca5a5;
+}
+
+.retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  color: #fca5a5;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.retry-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: var(--home-danger);
+  color: #fff;
 }
 
 .retry-btn {

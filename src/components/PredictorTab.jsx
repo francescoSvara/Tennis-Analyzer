@@ -7,6 +7,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiUrl } from '../config';
 import './PredictorTab.css';
+import { 
+  ChartBar, 
+  TennisBall, 
+  Clipboard, 
+  Target, 
+  Circle, 
+  WarningCircle,
+  Trophy,
+  Scales
+} from '@phosphor-icons/react';
 
 // Componente per la card statistiche di un singolo giocatore
 function PlayerStatCard({ playerName, stats, side, isLoading }) {
@@ -27,7 +37,7 @@ function PlayerStatCard({ playerName, stats, side, isLoading }) {
       <div className={`player-stat-card ${side}`}>
         <div className="player-name">{playerName}</div>
         <div className="stats-empty">
-          <span>📊</span>
+          <span><ChartBar size={24} weight="duotone" /></span>
           <p>Statistiche non disponibili</p>
           <small>{stats?.error || 'Nessun dato storico trovato'}</small>
         </div>
@@ -44,7 +54,7 @@ function PlayerStatCard({ playerName, stats, side, isLoading }) {
       
       {/* Overall Stats */}
       <div className="stats-section">
-        <div className="section-label">📊 Overall ({stats.total_matches} match)</div>
+        <div className="section-label"><ChartBar size={14} weight="duotone" style={{ marginRight: 4 }} /> Overall ({stats.total_matches} match)</div>
         <div className="stats-grid">
           <div className="stat-item">
             <span className="stat-label">Win Rate</span>
@@ -73,7 +83,7 @@ function PlayerStatCard({ playerName, stats, side, isLoading }) {
 
       {/* Surface Stats */}
       <div className="stats-section">
-        <div className="section-label">🎾 Per Superficie</div>
+        <div className="section-label"><TennisBall size={14} weight="duotone" style={{ marginRight: 4 }} /> Per Superficie</div>
         <div className="surface-stats">
           {['Hard', 'Clay', 'Grass'].map(surface => {
             const surfaceData = surfaces[surface];
@@ -82,7 +92,7 @@ function PlayerStatCard({ playerName, stats, side, isLoading }) {
             return (
               <div key={surface} className="surface-row">
                 <span className="surface-name">
-                  {surface === 'Hard' ? '🔵' : surface === 'Clay' ? '🟤' : '🟢'} {surface}
+                  <Circle size={10} weight="fill" style={{ color: surface === 'Hard' ? '#3b82f6' : surface === 'Clay' ? '#b45309' : '#10b981', marginRight: 4 }} /> {surface}
                 </span>
                 <span className="surface-matches">{surfaceData.matches}m</span>
                 <span className={`surface-wr ${surfaceData.win_rate >= 0.6 ? 'highlight' : ''}`}>
@@ -97,7 +107,7 @@ function PlayerStatCard({ playerName, stats, side, isLoading }) {
       {/* Format Stats */}
       {stats.formats && (
         <div className="stats-section">
-          <div className="section-label">📋 Per Formato</div>
+          <div className="section-label"><Clipboard size={14} weight="duotone" style={{ marginRight: 4 }} /> Per Formato</div>
           <div className="format-stats">
             {stats.formats.best_of_3 && (
               <div className="format-row">
@@ -149,7 +159,7 @@ function ComparisonSection({ homeStats, awayStats, homeName, awayName }) {
   return (
     <div className="comparison-section">
       <div className="section-title">
-        <span className="section-icon">⚖️</span>
+        <span className="section-icon"><Scales size={16} weight="duotone" /></span>
         Confronto Diretto
       </div>
       
@@ -222,7 +232,7 @@ function PredictionSummary({ homeStats, awayStats, homeName, awayName }) {
   if (!prediction) {
     return (
       <div className="prediction-summary empty">
-        <span className="prediction-icon">🎯</span>
+        <span className="prediction-icon"><Target size={24} weight="duotone" /></span>
         <p>Dati insufficienti per generare una predizione</p>
       </div>
     );
@@ -230,7 +240,7 @@ function PredictionSummary({ homeStats, awayStats, homeName, awayName }) {
 
   return (
     <div className={`prediction-summary ${prediction.confidenceLevel}`}>
-      <div className="prediction-title">🎯 Analisi Predittiva</div>
+      <div className="prediction-title"><Target size={18} weight="duotone" style={{ marginRight: 6 }} /> Analisi Predittiva</div>
       
       <div className="prediction-bars">
         <div className="prediction-player home">
@@ -261,13 +271,13 @@ function PredictionSummary({ homeStats, awayStats, homeName, awayName }) {
           Favorito: <strong>{prediction.favoriteName}</strong>
         </div>
         <div className={`prediction-confidence ${prediction.confidenceLevel}`}>
-          Confidenza: {prediction.confidenceLevel === 'high' ? '🟢 Alta' : 
-                       prediction.confidenceLevel === 'medium' ? '🟡 Media' : '🟠 Bassa'}
+          Confidenza: {prediction.confidenceLevel === 'high' ? <><Circle size={10} weight="fill" style={{ color: '#10b981' }} /> Alta</> : 
+                       prediction.confidenceLevel === 'medium' ? <><Circle size={10} weight="fill" style={{ color: '#fbbf24' }} /> Media</> : <><Circle size={10} weight="fill" style={{ color: '#f59e0b' }} /> Bassa</>}
         </div>
       </div>
 
       <div className="prediction-disclaimer">
-        ⚠️ Basato su statistiche storiche. Non costituisce consiglio di scommessa.
+        <WarningCircle size={14} weight="duotone" style={{ marginRight: 4 }} /> Basato su statistiche storiche. Non costituisce consiglio di scommessa.
       </div>
     </div>
   );
@@ -328,7 +338,7 @@ function PredictorTab({ homePlayer, awayPlayer, matchContext }) {
       {/* Header */}
       <div className="predictor-header">
         <h2>
-          <span className="predictor-icon">🎯</span>
+          <span className="predictor-icon"><Target size={22} weight="duotone" /></span>
           Match Predictor
         </h2>
         <p className="predictor-subtitle">
@@ -337,12 +347,11 @@ function PredictorTab({ homePlayer, awayPlayer, matchContext }) {
         {matchContext?.surface && (
           <div className="match-context">
             <span className="context-badge">
-              {matchContext.surface === 'Hard' ? '🔵' : 
-               matchContext.surface === 'Clay' ? '🟤' : '🟢'} 
+              <Circle size={10} weight="fill" style={{ color: matchContext.surface === 'Hard' ? '#3b82f6' : matchContext.surface === 'Clay' ? '#b45309' : '#10b981', marginRight: 4 }} /> 
               {matchContext.surface}
             </span>
             {matchContext.tournament && (
-              <span className="context-badge">🏆 {matchContext.tournament}</span>
+              <span className="context-badge"><Trophy size={14} weight="duotone" style={{ marginRight: 4, color: '#f59e0b' }} /> {matchContext.tournament}</span>
             )}
           </div>
         )}

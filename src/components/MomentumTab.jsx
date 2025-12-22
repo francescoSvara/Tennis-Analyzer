@@ -1,5 +1,22 @@
 import React, { memo, useMemo } from 'react';
 import './MomentumTab.css';
+import {
+  TennisBall,
+  ChartLineUp,
+  ChartLineDown,
+  ChartBar,
+  ArrowsClockwise,
+  WarningCircle,
+  Fire,
+  CheckCircle,
+  Barbell,
+  Thermometer,
+  Flask,
+  Atom,
+  Circle,
+  TrendUp,
+  Scales
+} from '@phosphor-icons/react';
 
 // ============================================================================
 // NUOVE FUNZIONI: Volatility, Elasticity, Match Character
@@ -115,27 +132,27 @@ function classifyMatchCharacter(volatility, elasticity, breakCount = 0) {
   if (v === 'MOLTO_VOLATILE' && breakCount >= 4) {
     character = 'BATTAGLIA_EMOTIVA';
     description = 'Match con grandi oscillazioni e molti break';
-    emoji = '⚔️';
+    emoji = 'swords'; // ⚔️
     color = '#f59e0b';
   } else if (v === 'STABILE' && e === 'RESILIENTE') {
     character = 'DOMINIO';
     description = 'Un giocatore controlla il match';
-    emoji = '👑';
+    emoji = 'crown'; // 👑
     color = '#10b981';
   } else if (e === 'RESILIENTE' && breakCount >= 2) {
     character = 'RIMONTE';
     description = 'Frequenti recuperi dopo momenti difficili';
-    emoji = '🔄';
+    emoji = 'arrows'; // 🔄
     color = '#3b82f6';
   } else if (v === 'VOLATILE') {
     character = 'ALTALENA';
     description = 'Continui cambi di momentum';
-    emoji = '🎢';
+    emoji = 'coaster'; // 🎢
     color = '#8b5cf6';
   } else {
     character = 'STANDARD';
     description = 'Andamento regolare';
-    emoji = '📊';
+    emoji = 'chart'; // 📊
     color = '#6b7280';
   }
 
@@ -307,7 +324,7 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
     return (
       <div className="momentum-tab">
         <div className="momentum-empty">
-          <div className="momentum-empty-icon">📊</div>
+          <div className="momentum-empty-icon"><ChartBar size={48} weight="duotone" color="#6b7280" /></div>
           <div className="momentum-empty-title">Dati momentum non disponibili</div>
           <div className="momentum-empty-subtitle">
             I dati appariranno quando il match sarà in corso
@@ -324,8 +341,8 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
         <div className={`momentum-owner-card owner-${momentumOwner.owner}`}>
           <div className="owner-header">
             <span className="owner-icon">
-              {momentumOwner.owner === 'home' ? '🔵' : 
-               momentumOwner.owner === 'away' ? '🔴' : '⚖️'}
+              {momentumOwner.owner === 'home' ? <Circle size={16} weight="fill" style={{ color: '#3b82f6' }} /> : 
+               momentumOwner.owner === 'away' ? <Circle size={16} weight="fill" style={{ color: '#ef4444' }} /> : <Scales size={18} weight="duotone" style={{ color: '#6b7280' }} />}
             </span>
             <h2 className="owner-title">
               {momentumOwner.owner === 'home' ? homeName : 
@@ -374,9 +391,9 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
           <div className={`shift-alert shift-${momentumShift.direction}`}>
             <div className="shift-header">
               <span className="shift-icon">
-                {momentumShift.direction === 'to_home' ? '📈' : '📉'}
+                {momentumShift.direction === 'to_home' ? <ChartLineUp size={24} weight="duotone" color="#10b981" /> : <ChartLineDown size={24} weight="duotone" color="#ef4444" />}
               </span>
-              <h3 className="shift-title">⚠️ Cambio Momentum in Corso</h3>
+              <h3 className="shift-title"><WarningCircle size={18} weight="duotone" color="#f59e0b" /> Cambio Momentum in Corso</h3>
             </div>
             
             <div className="shift-direction">
@@ -404,7 +421,7 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
               </span>
               {momentumShift.metrics.recentBreaks > 0 && (
                 <span className="shift-metric break">
-                  🔴 {momentumShift.metrics.recentBreaks} break recenti
+                  <Circle size={10} weight="fill" color="#ef4444" /> {momentumShift.metrics.recentBreaks} break recenti
                 </span>
               )}
             </div>
@@ -415,7 +432,7 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
       {/* === SEZIONE 2.5: ANALISI AVANZATA (VOLATILITÀ, ELASTICITÀ, CHARACTER) === */}
       <section className="momentum-section advanced-analysis-section">
         <h3 className="section-title">
-          <span className="section-icon">🔬</span>
+          <span className="section-icon"><Flask size={18} weight="duotone" /></span>
           Analisi Avanzata
         </h3>
         
@@ -437,7 +454,7 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
           {/* Volatilità */}
           <div className={`metric-card volatility-card vol-${volatility.class.toLowerCase()}`}>
             <div className="metric-header">
-              <span className="metric-icon">📊</span>
+              <span className="metric-icon"><ChartBar size={18} weight="duotone" /></span>
               <span className="metric-title">Volatilità</span>
               <span className={`metric-badge badge-${volatility.class.toLowerCase()}`}>
                 {volatility.class.replace('_', ' ')}
@@ -463,17 +480,17 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
             </div>
             
             <div className="metric-explanation">
-              {volatility.class === 'STABILE' && '✅ Match controllato, poche oscillazioni'}
-              {volatility.class === 'MODERATO' && '📈 Normale alternanza di momenti'}
-              {volatility.class === 'VOLATILE' && '⚠️ Frequenti cambi di momentum'}
-              {volatility.class === 'MOLTO_VOLATILE' && '🔥 Match imprevedibile e caotico'}
+              {volatility.class === 'STABILE' && <><CheckCircle size={14} weight="duotone" color="#10b981" /> Match controllato, poche oscillazioni</>}
+              {volatility.class === 'MODERATO' && <><ChartLineUp size={14} weight="duotone" color="#3b82f6" /> Normale alternanza di momenti</>}
+              {volatility.class === 'VOLATILE' && <><WarningCircle size={14} weight="duotone" color="#f59e0b" /> Frequenti cambi di momentum</>}
+              {volatility.class === 'MOLTO_VOLATILE' && <><Fire size={14} weight="duotone" color="#ef4444" /> Match imprevedibile e caotico</>}
             </div>
           </div>
           
           {/* Elasticità */}
           <div className={`metric-card elasticity-card elas-${elasticity.class.toLowerCase()}`}>
             <div className="metric-header">
-              <span className="metric-icon">🔄</span>
+              <span className="metric-icon"><ArrowsClockwise size={18} weight="duotone" /></span>
               <span className="metric-title">Elasticità</span>
               <span className={`metric-badge badge-${elasticity.class.toLowerCase()}`}>
                 {elasticity.class}
@@ -499,9 +516,9 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
             </div>
             
             <div className="metric-explanation">
-              {elasticity.class === 'RESILIENTE' && '💪 Recupera rapidamente dai momenti difficili'}
-              {elasticity.class === 'NORMALE' && '📊 Capacità di recupero nella media'}
-              {elasticity.class === 'FRAGILE' && '⚠️ Fatica a recuperare dopo cali'}
+              {elasticity.class === 'RESILIENTE' && <><Barbell size={14} weight="duotone" color="#10b981" /> Recupera rapidamente dai momenti difficili</>}
+              {elasticity.class === 'NORMALE' && <><ChartBar size={14} weight="duotone" color="#3b82f6" /> Capacità di recupero nella media</>}
+              {elasticity.class === 'FRAGILE' && <><WarningCircle size={14} weight="duotone" color="#f59e0b" /> Fatica a recuperare dopo cali</>}
             </div>
           </div>
         </div>
@@ -510,7 +527,7 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
       {/* === SEZIONE 3: GRAFICO MOMENTUM === */}
       <section className="momentum-section chart-section">
         <h3 className="section-title">
-          <span className="section-icon">📈</span>
+          <span className="section-icon"><TrendUp size={18} weight="duotone" /></span>
           Andamento Partita
         </h3>
         
@@ -535,20 +552,20 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
       {/* === SEZIONE 4: TERMOMETRO ULTIMI GAME === */}
       <section className="momentum-section recent-section">
         <h3 className="section-title">
-          <span className="section-icon">🌡️</span>
+          <span className="section-icon"><Thermometer size={18} weight="duotone" /></span>
           Termometro Ultimi 5 Game
         </h3>
         
         {/* Header con nomi giocatori */}
         <div className="thermometer-header">
           <div className="thermo-player home">
-            <span className="thermo-icon">🔵</span>
+            <span className="thermo-icon"><Circle size={12} weight="fill" color="#3b82f6" /></span>
             <span className="thermo-name">{homeName}</span>
           </div>
           <div className="thermo-center">EQUILIBRIO</div>
           <div className="thermo-player away">
             <span className="thermo-name">{awayName}</span>
-            <span className="thermo-icon">🔴</span>
+            <span className="thermo-icon"><Circle size={12} weight="fill" color="#ef4444" /></span>
           </div>
         </div>
         
@@ -570,7 +587,7 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
                 <div className="thermo-game-info">
                   <span className="thermo-game-label">S{game.set} G{game.game}</span>
                   <span className={`thermo-serve ${homeServes ? 'home' : 'away'}`}>
-                    {homeServes ? '🎾→' : '←🎾'}
+                    {homeServes ? <><TennisBall size={12} weight="duotone" />→</> : <>←<TennisBall size={12} weight="duotone" /></>}
                   </span>
                 </div>
                 
@@ -612,7 +629,7 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
         
         {/* Legenda */}
         <div className="thermo-legend">
-          <span className="legend-serve">🎾 = Chi Serve</span>
+          <span className="legend-serve"><TennisBall size={14} weight="duotone" /> = Chi Serve</span>
           <span className="legend-break">BRK = Break</span>
         </div>
       </section>
@@ -621,17 +638,17 @@ function MomentumTabComponent({ powerRankings = [], eventInfo = {}, isLive = fal
       <section className="momentum-section summary-section">
         <div className="quick-summary">
           <div className="summary-item">
-            <span className="summary-icon">🎾</span>
+            <span className="summary-icon"><TennisBall size={18} weight="duotone" color="#3b82f6" /></span>
             <span className="summary-label">Game Totali</span>
             <span className="summary-value">{powerRankings.length}</span>
           </div>
           <div className="summary-item">
-            <span className="summary-icon">🔴</span>
+            <span className="summary-icon"><Circle size={14} weight="fill" color="#ef4444" /></span>
             <span className="summary-label">Break</span>
             <span className="summary-value">{powerRankings.filter(g => g.breakOccurred).length}</span>
           </div>
           <div className="summary-item">
-            <span className="summary-icon">📊</span>
+            <span className="summary-icon"><ChartBar size={18} weight="duotone" color="#8b5cf6" /></span>
             <span className="summary-label">Media Match</span>
             <span className={`summary-value ${powerRankings.reduce((a, g) => a + (g.value || 0), 0) / powerRankings.length > 0 ? 'positive' : 'negative'}`}>
               {Math.round(powerRankings.reduce((a, g) => a + (g.value || 0), 0) / powerRankings.length)}

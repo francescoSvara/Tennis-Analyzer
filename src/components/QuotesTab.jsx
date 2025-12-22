@@ -1,6 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { apiUrl } from '../config';
 import './QuotesTab.css';
+import { 
+  ChartBar, 
+  Trophy, 
+  Lightning, 
+  ChartLineUp, 
+  TennisBall,
+  CurrencyDollar,
+  Hourglass,
+  Target,
+  Circle,
+  Lightbulb
+} from '@phosphor-icons/react';
 
 /**
  * QuotesTab - Sezione AVANZATA per analisi quote e value betting
@@ -132,7 +144,7 @@ export default function QuotesTab({
       
       const diff = ((homeWR - awayWR) * 100).toFixed(1);
       factors.push({
-        name: '📊 Win Rate Storico',
+        name: 'Win Rate Storico',
         homeValue: `${(homeWR * 100).toFixed(1)}%`,
         awayValue: `${(awayWR * 100).toFixed(1)}%`,
         homeMatches: homeHistoricalStats?.total_matches || 0,
@@ -160,9 +172,8 @@ export default function QuotesTab({
         totalWeight += weight;
         
         const diff = ((homeSurfaceWR - awaySurfaceWR) * 100).toFixed(1);
-        const surfaceEmoji = matchSurface === 'Hard' ? '🔵' : matchSurface === 'Clay' ? '🟤' : '🟢';
         factors.push({
-          name: `${surfaceEmoji} Win Rate ${matchSurface}`,
+          name: `Win Rate ${matchSurface}`,
           homeValue: `${(homeSurfaceWR * 100).toFixed(0)}% (${homeSurfaceMatches}m)`,
           awayValue: `${(awaySurfaceWR * 100).toFixed(0)}% (${awaySurfaceMatches}m)`,
           impact: diff > 0 ? `+${diff}% Home` : diff < 0 ? `${diff}% Home` : 'Pari',
@@ -187,7 +198,7 @@ export default function QuotesTab({
       const diff = ((homeFormatWR - awayFormatWR) * 100).toFixed(1);
       const formatLabel = matchFormat === 'best_of_5' ? 'Best of 5' : 'Best of 3';
       factors.push({
-        name: `📋 Win Rate ${formatLabel}`,
+        name: `Win Rate ${formatLabel}`,
         homeValue: `${(homeFormatWR * 100).toFixed(0)}%`,
         awayValue: `${(awayFormatWR * 100).toFixed(0)}%`,
         impact: diff > 0 ? `+${diff}% Home` : diff < 0 ? `${diff}% Home` : 'Pari',
@@ -212,7 +223,7 @@ export default function QuotesTab({
       else if (rankDiff < -50) impactText = `${(rankProb * 100 - 50).toFixed(0)}% Home`;
       
       factors.push({
-        name: '🏆 Ranking ATP/WTA',
+        name: 'Ranking ATP/WTA',
         homeValue: `#${homeRanking}`,
         awayValue: `#${awayRanking}`,
         impact: impactText,
@@ -236,7 +247,7 @@ export default function QuotesTab({
       totalWeight += weight;
       
       factors.push({
-        name: '⚡ Momentum Live',
+        name: 'Momentum Live',
         homeValue: avgMomentum > 0 ? `+${avgMomentum.toFixed(0)}` : avgMomentum.toFixed(0),
         awayValue: avgMomentum < 0 ? `+${Math.abs(avgMomentum).toFixed(0)}` : `-${avgMomentum.toFixed(0)}`,
         impact: avgMomentum > 15 ? `+${(normalizedMomentum * 100 - 50).toFixed(0)}% Home` : 
@@ -251,7 +262,7 @@ export default function QuotesTab({
       
       if (homeBreaks > 0 || awayBreaks > 0) {
         factors.push({
-          name: '🎯 Break Effettuati',
+          name: 'Break Effettuati',
           homeValue: homeBreaks.toString(),
           awayValue: awayBreaks.toString(),
           impact: homeBreaks > awayBreaks ? `+${(homeBreaks - awayBreaks) * 3}% Home` : 
@@ -276,7 +287,7 @@ export default function QuotesTab({
       
       const diff = ((homeComebackRate - awayComebackRate) * 100).toFixed(1);
       factors.push({
-        name: '🔄 Comeback Rate',
+        name: 'Comeback Rate',
         homeValue: `${(homeComebackRate * 100).toFixed(0)}%`,
         awayValue: `${(awayComebackRate * 100).toFixed(0)}%`,
         impact: Math.abs(parseFloat(diff)) > 10 ? 
@@ -300,7 +311,7 @@ export default function QuotesTab({
       totalWeight += weight;
       
       factors.push({
-        name: '📈 Esperienza (DB)',
+        name: 'Esperienza (DB)',
         homeValue: `${homeMatches} match`,
         awayValue: `${awayMatches} match`,
         impact: homeMatches > awayMatches * 1.5 ? '+Exp Home' : 
@@ -323,7 +334,7 @@ export default function QuotesTab({
         awayScore += setBonus < 0 ? Math.abs(setBonus) : 0;
         
         factors.push({
-          name: '🎾 Set Vinti (live)',
+          name: 'Set Vinti (live)',
           homeValue: homeSets.toString(),
           awayValue: awaySets.toString(),
           impact: `${setBonus > 0 ? '+' : ''}${(setBonus * 100).toFixed(0)}% Home`,
@@ -466,15 +477,15 @@ export default function QuotesTab({
   const getSignalStyle = (signal) => {
     switch (signal) {
       case 'buy':
-        return { bg: 'rgba(16, 185, 129, 0.15)', border: '#10b981', color: '#34d399', icon: '🟢', label: 'COMPRA' };
+        return { bg: 'rgba(16, 185, 129, 0.15)', border: '#10b981', color: '#34d399', icon: <Circle size={14} weight="fill" style={{ color: '#22c55e' }} />, label: 'COMPRA' };
       case 'watch':
-        return { bg: 'rgba(245, 158, 11, 0.15)', border: '#f59e0b', color: '#fbbf24', icon: '🟡', label: 'MONITORA' };
+        return { bg: 'rgba(245, 158, 11, 0.15)', border: '#f59e0b', color: '#fbbf24', icon: <Circle size={14} weight="fill" style={{ color: '#eab308' }} />, label: 'MONITORA' };
       case 'sell':
-        return { bg: 'rgba(239, 68, 68, 0.15)', border: '#ef4444', color: '#f87171', icon: '🔴', label: 'VENDI/LAY' };
+        return { bg: 'rgba(239, 68, 68, 0.15)', border: '#ef4444', color: '#f87171', icon: <Circle size={14} weight="fill" style={{ color: '#ef4444' }} />, label: 'VENDI/LAY' };
       case 'caution':
-        return { bg: 'rgba(249, 115, 22, 0.15)', border: '#f97316', color: '#fb923c', icon: '🟠', label: 'CAUTELA' };
+        return { bg: 'rgba(249, 115, 22, 0.15)', border: '#f97316', color: '#fb923c', icon: <Circle size={14} weight="fill" style={{ color: '#f97316' }} />, label: 'CAUTELA' };
       default:
-        return { bg: 'rgba(30, 41, 59, 0.9)', border: 'rgba(255, 255, 255, 0.15)', color: '#8b95a5', icon: '⚪', label: 'ATTENDI' };
+        return { bg: 'rgba(30, 41, 59, 0.9)', border: 'rgba(255, 255, 255, 0.15)', color: '#8b95a5', icon: <Circle size={14} weight="fill" style={{ color: '#94a3b8' }} />, label: 'ATTENDI' };
     }
   };
 
@@ -483,7 +494,7 @@ export default function QuotesTab({
       {/* Header */}
       <div className="quotes-header">
         <h2 className="quotes-title">
-          <span className="quotes-icon">💰</span>
+          <span className="quotes-icon"><CurrencyDollar size={20} weight="duotone" /></span>
           Analisi Quote & Value Betting
         </h2>
         <p className="quotes-subtitle">
@@ -492,17 +503,16 @@ export default function QuotesTab({
         {/* Data Quality Badge */}
         <div className="data-quality-badge">
           {loadingStats.home || loadingStats.away ? (
-            <span className="quality-loading">⏳ Caricamento dati storici...</span>
+            <span className="quality-loading"><Hourglass size={14} weight="duotone" /> Caricamento dati storici...</span>
           ) : (
             <>
               <span className={`quality-indicator ${estimatedProbabilities.dataQuality}`}>
-                {estimatedProbabilities.dataQuality === 'high' ? '🟢' : 
-                 estimatedProbabilities.dataQuality === 'medium' ? '🟡' : '🟠'}
+                <Circle size={10} weight="fill" style={{ color: estimatedProbabilities.dataQuality === 'high' ? '#22c55e' : estimatedProbabilities.dataQuality === 'medium' ? '#eab308' : '#f97316' }} />
                 Affidabilità: {estimatedProbabilities.confidence}%
               </span>
-              {matchSurface && <span className="surface-badge">📍 {matchSurface}</span>}
+              {matchSurface && <span className="surface-badge"><TennisBall size={12} weight="duotone" style={{ marginRight: 4 }} /> {matchSurface}</span>}
               {estimatedProbabilities.hasHistoricalData && (
-                <span className="historical-badge">📚 Dati storici caricati</span>
+                <span className="historical-badge"><ChartBar size={12} weight="duotone" style={{ marginRight: 4 }} /> Dati storici caricati</span>
               )}
             </>
           )}
@@ -512,7 +522,7 @@ export default function QuotesTab({
       {/* Probabilità Stimate */}
       <section className="quotes-section">
         <h3 className="section-title">
-          <span className="section-icon">📊</span>
+          <span className="section-icon"><ChartBar size={18} weight="duotone" /></span>
           Probabilità Stimate (Modello Avanzato)
         </h3>
         
@@ -551,7 +561,7 @@ export default function QuotesTab({
           {/* Storico */}
           {estimatedProbabilities.factors.filter(f => f.category === 'historical').length > 0 && (
             <div className="factors-category">
-              <span className="category-label">📚 Dati Storici</span>
+              <span className="category-label"><ChartBar size={14} weight="duotone" style={{ marginRight: 4 }} /> Dati Storici</span>
               {estimatedProbabilities.factors.filter(f => f.category === 'historical').map((factor, idx) => (
                 <div key={`hist-${idx}`} className="factor-row">
                   <span className="factor-name">{factor.name}</span>
@@ -571,7 +581,7 @@ export default function QuotesTab({
           {/* Superficie e Formato */}
           {estimatedProbabilities.factors.filter(f => f.category === 'surface' || f.category === 'format').length > 0 && (
             <div className="factors-category">
-              <span className="category-label">🎾 Superficie & Formato</span>
+              <span className="category-label"><TennisBall size={14} weight="duotone" style={{ marginRight: 4 }} /> Superficie & Formato</span>
               {estimatedProbabilities.factors.filter(f => f.category === 'surface' || f.category === 'format').map((factor, idx) => (
                 <div key={`surf-${idx}`} className="factor-row">
                   <span className="factor-name">{factor.name}</span>
@@ -606,7 +616,7 @@ export default function QuotesTab({
           {/* Live */}
           {estimatedProbabilities.factors.filter(f => f.category === 'live').length > 0 && (
             <div className="factors-category live">
-              <span className="category-label">⚡ Dati Live Match</span>
+              <span className="category-label"><Lightning size={14} weight="duotone" style={{ marginRight: 4 }} /> Dati Live Match</span>
               {estimatedProbabilities.factors.filter(f => f.category === 'live').map((factor, idx) => (
                 <div key={`live-${idx}`} className="factor-row">
                   <span className="factor-name">{factor.name}</span>
@@ -641,7 +651,7 @@ export default function QuotesTab({
       {/* Input Quote Betfair */}
       <section className="quotes-section">
         <h3 className="section-title">
-          <span className="section-icon">🎯</span>
+          <span className="section-icon"><Target size={18} weight="duotone" /></span>
           Quote Betfair (inserisci manualmente)
         </h3>
         
@@ -675,7 +685,7 @@ export default function QuotesTab({
       {/* Semaforo VALUE */}
       <section className="quotes-section signals-section">
         <h3 className="section-title">
-          <span className="section-icon">🚦</span>
+          <span className="section-icon"><ChartLineUp size={18} weight="duotone" /></span>
           Segnali VALUE
         </h3>
         
@@ -701,7 +711,7 @@ export default function QuotesTab({
             <div className="signal-message">{valueAnalysis.home.message}</div>
             {valueAnalysis.home.recommendation && (
               <div className="signal-recommendation">
-                💡 {valueAnalysis.home.recommendation}
+                <Lightbulb size={14} weight="duotone" style={{ marginRight: 4 }} /> {valueAnalysis.home.recommendation}
               </div>
             )}
             {betfairHomeOdds && (
@@ -734,7 +744,7 @@ export default function QuotesTab({
             <div className="signal-message">{valueAnalysis.away.message}</div>
             {valueAnalysis.away.recommendation && (
               <div className="signal-recommendation">
-                💡 {valueAnalysis.away.recommendation}
+                <Lightbulb size={14} weight="duotone" style={{ marginRight: 4 }} /> {valueAnalysis.away.recommendation}
               </div>
             )}
             {betfairAwayOdds && (
@@ -753,23 +763,23 @@ export default function QuotesTab({
         <h4>Legenda Segnali:</h4>
         <div className="legend-items">
           <div className="legend-item">
-            <span className="legend-icon">🟢</span>
+            <span className="legend-icon"><Circle size={12} weight="fill" style={{ color: '#22c55e' }} /></span>
             <span><strong>COMPRA</strong> - Value &gt; 8%: quota sottovalutata, BACK consigliato</span>
           </div>
           <div className="legend-item">
-            <span className="legend-icon">🟡</span>
+            <span className="legend-icon"><Circle size={12} weight="fill" style={{ color: '#eab308' }} /></span>
             <span><strong>MONITORA</strong> - Value 3-8%: possibile opportunità, osservare</span>
           </div>
           <div className="legend-item">
-            <span className="legend-icon">🟠</span>
+            <span className="legend-icon"><Circle size={12} weight="fill" style={{ color: '#f97316' }} /></span>
             <span><strong>CAUTELA</strong> - Value negativo lieve: evita BACK</span>
           </div>
           <div className="legend-item">
-            <span className="legend-icon">🔴</span>
+            <span className="legend-icon"><Circle size={12} weight="fill" style={{ color: '#ef4444' }} /></span>
             <span><strong>VENDI/LAY</strong> - Overpriced &gt; 8%: considera LAY</span>
           </div>
           <div className="legend-item">
-            <span className="legend-icon">⚪</span>
+            <span className="legend-icon"><Circle size={12} weight="fill" style={{ color: '#94a3b8' }} /></span>
             <span><strong>ATTENDI</strong> - Fair value: nessuna azione raccomandata</span>
           </div>
         </div>

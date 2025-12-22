@@ -9,7 +9,10 @@ import {
   Basketball,
   WarningCircle,
   ArrowClockwise,
-  Database
+  Database,
+  CheckCircle,
+  XCircle,
+  Warning
 } from '@phosphor-icons/react';
 import SportSidebar from './SportSidebar';
 import MatchGrid from './MatchGrid';
@@ -114,17 +117,17 @@ function AddMatchModal({ onClose, onSuccess }) {
             )}
             {status === 'success' && (
               <div className="modal-status success">
-                ✅ Match aggiunto con successo!
+                <CheckCircle size={16} weight="duotone" color="#10b981" /> Match aggiunto con successo!
               </div>
             )}
             {status === 'duplicate' && (
               <div className="modal-status warning">
-                ⚠️ {error}
+                <Warning size={16} weight="duotone" color="#f59e0b" /> {error}
               </div>
             )}
             {error && status !== 'duplicate' && (
               <div className="modal-status error">
-                ❌ {error}
+                <XCircle size={16} weight="duotone" color="#ef4444" /> {error}
               </div>
             )}
           </div>

@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './ManualPredictor.css';
 import { apiUrl } from '../config';
+import {
+  TennisBall,
+  Target,
+  ChartBar,
+  XCircle,
+  WarningCircle,
+  Crown,
+  Handshake,
+  Hourglass,
+  Scales,
+  MagnifyingGlass,
+  Sparkle
+} from '@phosphor-icons/react';
 
 /**
  * ManualPredictor - Componente standalone per predizioni manuali
@@ -144,7 +157,7 @@ function DebugInfo({ label, data }) {
         className="debug-toggle"
         onClick={() => setExpanded(!expanded)}
       >
-        🔍 {label} {expanded ? '▼' : '▶'}
+        <MagnifyingGlass size={14} weight="duotone" style={{ marginRight: 4 }} /> {label} {expanded ? '▼' : '▶'}
       </button>
       {expanded && (
         <pre className="debug-content">
@@ -398,7 +411,7 @@ export default function ManualPredictor() {
   return (
     <div className="manual-predictor">
       <div className="predictor-header">
-        <h2><span className="predictor-icon">🔮</span> Manual Predictor</h2>
+        <h2><span className="predictor-icon"><Sparkle size={22} weight="duotone" /></span> Manual Predictor</h2>
         <p className="predictor-subtitle">
           Seleziona due giocatori e clicca "Calcola" per confrontare le statistiche
         </p>
@@ -461,14 +474,14 @@ export default function ManualPredictor() {
             </>
           ) : (
             <>
-              🎯 CALCOLA PREVISIONE
+              <Target size={18} weight="duotone" /> CALCOLA PREVISIONE
             </>
           )}
         </button>
         
         {apiError && (
           <div className="api-error">
-            ❌ {apiError}
+            <XCircle size={16} weight="duotone" /> {apiError}
           </div>
         )}
       </div>
@@ -479,7 +492,7 @@ export default function ManualPredictor() {
           {/* Stats Comparison - UNIFIED */}
           <div className="stats-comparison">
             <h3 className="section-title">
-              <span className="section-icon">📊</span>
+              <span className="section-icon"><ChartBar size={18} weight="duotone" /></span>
               Confronto Statistiche
             </h3>
             
@@ -539,7 +552,7 @@ export default function ManualPredictor() {
           {/* H2H Section - Enhanced */}
           <div className="h2h-section">
             <h3 className="section-title">
-              <span className="section-icon">⚔️</span>
+              <span className="section-icon"><Scales size={18} weight="duotone" /></span>
               Head to Head
             </h3>
             
@@ -583,11 +596,11 @@ export default function ManualPredictor() {
                 {/* Info aggiuntive */}
                 <div className="h2h-meta">
                   <span className="h2h-total-matches">
-                    📊 {h2hStats.totalMatches} incontri totali
+                    <ChartBar size={14} weight="duotone" /> {h2hStats.totalMatches} incontri totali
                   </span>
                   {h2hStats.player1Wins !== h2hStats.player2Wins && (
                     <span className="h2h-leader">
-                      👑 Leader: <strong>
+                      <Crown size={14} weight="duotone" color="#fbbf24" /> Leader: <strong>
                         {h2hStats.player1Wins > h2hStats.player2Wins ? homePlayer?.name : awayPlayer?.name}
                       </strong>
                     </span>
@@ -596,7 +609,7 @@ export default function ManualPredictor() {
               </div>
             ) : (
               <div className="h2h-empty">
-                <span className="h2h-empty-icon">🤝</span>
+                <span className="h2h-empty-icon"><Handshake size={32} weight="duotone" color="#6b7280" /></span>
                 <p>Nessun precedente H2H nel database</p>
                 <small>Questi giocatori non si sono mai affrontati (nei dati disponibili)</small>
               </div>
@@ -611,7 +624,7 @@ export default function ManualPredictor() {
             ) : ''
           }`}>
             <h3 className="section-title">
-              <span className="section-icon">🎯</span>
+              <span className="section-icon"><Target size={18} weight="duotone" /></span>
               Previsione
             </h3>
             
@@ -655,13 +668,13 @@ export default function ManualPredictor() {
               </>
             ) : (
               <div className="prediction-empty">
-                <p>⚠️ Impossibile calcolare previsione</p>
+                <p><WarningCircle size={16} weight="duotone" /> Impossibile calcolare previsione</p>
                 <small>Dati insufficienti per uno o entrambi i giocatori</small>
               </div>
             )}
             
             <p className="prediction-disclaimer">
-              ⚠️ Previsione basata su dati storici. Non costituisce consiglio di scommessa.
+              <WarningCircle size={14} weight="duotone" /> Previsione basata su dati storici. Non costituisce consiglio di scommessa.
             </p>
           </div>
         </>
@@ -670,7 +683,7 @@ export default function ManualPredictor() {
       {/* Empty State */}
       {!homePlayer && !awayPlayer && !calculated && (
         <div className="empty-state">
-          <span className="empty-icon">🎾</span>
+          <span className="empty-icon"><TennisBall size={40} weight="duotone" color="#6b7280" /></span>
           <p>Seleziona due giocatori per iniziare l'analisi</p>
           <small>Cerca per nome usando i campi sopra, poi clicca "Calcola"</small>
         </div>
@@ -679,7 +692,7 @@ export default function ManualPredictor() {
       {/* Waiting state - players selected but not calculated */}
       {bothPlayersSelected && !calculated && !loading.calc && (
         <div className="waiting-state">
-          <span className="waiting-icon">⏳</span>
+          <span className="waiting-icon"><Hourglass size={32} weight="duotone" color="#f59e0b" /></span>
           <p>Giocatori selezionati</p>
           <small>Clicca "CALCOLA PREVISIONE" per vedere i risultati</small>
         </div>

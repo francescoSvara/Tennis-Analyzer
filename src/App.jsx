@@ -12,7 +12,21 @@ import {
   CurrencyDollar,
   Lightning,
   Broadcast,
-  ArrowClockwise
+  ArrowClockwise,
+  Star,
+  Sparkle,
+  Fire,
+  Crown,
+  Scales,
+  Lightbulb,
+  Info,
+  Clipboard,
+  Circle,
+  Hourglass,
+  FlagCheckered,
+  Pause,
+  Drop,
+  FirstAid
 } from '@phosphor-icons/react';
 import PointByPoint from './components/PointByPoint';
 import PointByPointWidget from './components/PointByPointWidget';
@@ -100,10 +114,10 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
     none: 'rgba(107, 114, 128, 0.15)'
   };
   const signalIcons = {
-    strong: '🟢',
-    medium: '🟡',
-    weak: '⚪',
-    none: '⏳'
+    strong: <Circle size={12} weight="fill" style={{ color: '#10b981' }} />,
+    medium: <Circle size={12} weight="fill" style={{ color: '#f59e0b' }} />,
+    weak: <Circle size={12} weight="fill" style={{ color: '#9ca3af' }} />,
+    none: <Hourglass size={12} weight="duotone" style={{ color: '#6b7280' }} />
   };
 
   // Calcola mini statistiche dal momentum
@@ -169,7 +183,7 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
                 fontWeight: 600,
                 fontSize: 11
               }}>
-                {signalIcons[analysis?.signal] || '⏳'} {(analysis?.signal || 'none').toUpperCase()}
+                {signalIcons[analysis?.signal] || <Hourglass size={12} weight="duotone" />} {(analysis?.signal || 'none').toUpperCase()}
               </span>
             </div>
           </div>
@@ -189,38 +203,38 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
         {analysis?.details && Object.keys(analysis.details).length > 0 && (
           <div style={{ marginTop: 8, fontSize: 12, color: '#8b95a5', display: 'flex', flexDirection: 'column', gap: 2 }}>
             {analysis.details.firstSetWinnerName && (
-              <div>🏆 1° set: <strong style={{ color: '#e4e6eb' }}>{analysis.details.firstSetWinnerName}</strong></div>
+              <div><Trophy size={14} weight="duotone" style={{ color: '#f59e0b', marginRight: 4, verticalAlign: 'middle' }} /> 1° set: <strong style={{ color: '#e4e6eb' }}>{analysis.details.firstSetWinnerName}</strong></div>
             )}
             {analysis.details.secondSetScore && (
-              <div>📋 2° set: <strong style={{ color: '#e4e6eb' }}>{analysis.details.secondSetScore}</strong></div>
+              <div><Clipboard size={14} weight="duotone" style={{ color: '#3b82f6', marginRight: 4, verticalAlign: 'middle' }} /> 2° set: <strong style={{ color: '#e4e6eb' }}>{analysis.details.secondSetScore}</strong></div>
             )}
             {analysis.details.serverName && (
-              <div>🎾 Servizio: <strong style={{ color: '#e4e6eb' }}>{analysis.details.serverName}</strong></div>
+              <div><TennisBall size={14} weight="duotone" style={{ color: '#10b981', marginRight: 4, verticalAlign: 'middle' }} /> Servizio: <strong style={{ color: '#e4e6eb' }}>{analysis.details.serverName}</strong></div>
             )}
             {analysis.details.currentGameScore && (
-              <div>⚡ Game: <strong style={{ color: '#e4e6eb' }}>{analysis.details.currentGameScore}</strong></div>
+              <div><Lightning size={14} weight="duotone" style={{ color: '#f59e0b', marginRight: 4, verticalAlign: 'middle' }} /> Game: <strong style={{ color: '#e4e6eb' }}>{analysis.details.currentGameScore}</strong></div>
             )}
             {analysis.details.favorito && (
-              <div>⭐ Favorito: <strong style={{ color: '#e4e6eb' }}>{analysis.details.favorito.name}</strong> (#{analysis.details.favorito.ranking})</div>
+              <div><Star size={14} weight="duotone" style={{ color: '#f59e0b', marginRight: 4, verticalAlign: 'middle' }} /> Favorito: <strong style={{ color: '#e4e6eb' }}>{analysis.details.favorito.name}</strong> (#{analysis.details.favorito.ranking})</div>
             )}
             {analysis.details.homeBreaks !== undefined && (
-              <div>💥 Break: {analysis.details.homeName} {analysis.details.homeBreaks} - {analysis.details.awayBreaks} {analysis.details.awayName}</div>
+              <div><Sparkle size={14} weight="duotone" style={{ color: '#ef4444', marginRight: 4, verticalAlign: 'middle' }} /> Break: {analysis.details.homeName} {analysis.details.homeBreaks} - {analysis.details.awayBreaks} {analysis.details.awayName}</div>
             )}
             {/* NUOVI DATI POTENZIATI */}
             {analysis.details.surface && (
-              <div>🎾 Superficie: <strong style={{ color: '#e4e6eb' }}>{analysis.details.surface}</strong> {analysis.details.bestOf === 5 ? '(Bo5)' : '(Bo3)'}</div>
+              <div><TennisBall size={14} weight="duotone" style={{ color: '#10b981', marginRight: 4, verticalAlign: 'middle' }} /> Superficie: <strong style={{ color: '#e4e6eb' }}>{analysis.details.surface}</strong> {analysis.details.bestOf === 5 ? '(Bo5)' : '(Bo3)'}</div>
             )}
             {analysis.details.comebackRate && (
-              <div>📊 Comeback rate: <strong style={{ color: '#10b981' }}>{analysis.details.comebackRate}%</strong></div>
+              <div><ChartBar size={14} weight="duotone" style={{ color: '#3b82f6', marginRight: 4, verticalAlign: 'middle' }} /> Comeback rate: <strong style={{ color: '#10b981' }}>{analysis.details.comebackRate}%</strong></div>
             )}
             {analysis.details.rankingGap && (
-              <div>📈 Gap ranking: <strong style={{ color: '#e4e6eb' }}>{analysis.details.rankingGap}</strong> posizioni</div>
+              <div><ChartLineUp size={14} weight="duotone" style={{ color: '#3b82f6', marginRight: 4, verticalAlign: 'middle' }} /> Gap ranking: <strong style={{ color: '#e4e6eb' }}>{analysis.details.rankingGap}</strong> posizioni</div>
             )}
             {analysis.details.volatility && (
-              <div>⚡ Volatilità: <strong style={{ color: analysis.details.volatility === 'MOLTO_VOLATILE' ? '#ef4444' : '#f59e0b' }}>{analysis.details.volatility}</strong></div>
+              <div><Lightning size={14} weight="duotone" style={{ color: analysis.details.volatility === 'MOLTO_VOLATILE' ? '#ef4444' : '#f59e0b', marginRight: 4, verticalAlign: 'middle' }} /> Volatilità: <strong style={{ color: analysis.details.volatility === 'MOLTO_VOLATILE' ? '#ef4444' : '#f59e0b' }}>{analysis.details.volatility}</strong></div>
             )}
             {analysis.dominanceScore !== undefined && analysis.dominanceScore > 0 && (
-              <div>💪 Dominance: <strong style={{ color: analysis.dominanceScore >= 65 ? '#10b981' : '#f59e0b' }}>{analysis.dominanceScore}/100</strong></div>
+              <div><Fire size={14} weight="duotone" style={{ color: analysis.dominanceScore >= 65 ? '#10b981' : '#f59e0b', marginRight: 4, verticalAlign: 'middle' }} /> Dominance: <strong style={{ color: analysis.dominanceScore >= 65 ? '#10b981' : '#f59e0b' }}>{analysis.dominanceScore}/100</strong></div>
             )}
           </div>
         )}
@@ -235,7 +249,7 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
           border: '1px solid rgba(255, 255, 255, 0.08)'
         }}>
           <div style={{ fontSize: 11, color: '#8b95a5', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
-            <span>🔥 Pressure Index</span>
+            <span><Fire size={14} weight="duotone" style={{ color: '#ef4444', marginRight: 4, verticalAlign: 'middle' }} /> Pressure Index</span>
             <span style={{ 
               color: analysis.pressureIndex.level === 'CRITICAL' ? '#ef4444' : 
                      analysis.pressureIndex.level === 'HIGH' ? '#f59e0b' : '#8b95a5',
@@ -285,7 +299,7 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
           border: '1px solid rgba(255, 255, 255, 0.08)'
         }}>
           <div style={{ fontSize: 11, color: '#8b95a5', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
-            <span>📊 Confidence</span>
+            <span><ChartBar size={14} weight="duotone" style={{ color: '#3b82f6', marginRight: 4, verticalAlign: 'middle' }} /> Confidence</span>
             <span style={{ 
               color: analysis.confidence >= 70 ? '#10b981' : 
                      analysis.confidence >= 50 ? '#f59e0b' : '#8b95a5',
@@ -340,9 +354,9 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
           color: analysis.matchCharacter.character === 'DOMINIO' ? '#10b981' :
                 analysis.matchCharacter.character === 'BATTAGLIA_EMOTIVA' ? '#ef4444' : '#3b82f6'
         }}>
-          {analysis.matchCharacter.character === 'DOMINIO' ? '👑' :
-           analysis.matchCharacter.character === 'BATTAGLIA_EMOTIVA' ? '⚔️' :
-           analysis.matchCharacter.character === 'RIMONTE_FREQUENTI' ? '🔄' : '🎾'} 
+          {analysis.matchCharacter.character === 'DOMINIO' ? <Crown size={16} weight="duotone" /> :
+           analysis.matchCharacter.character === 'BATTAGLIA_EMOTIVA' ? <Scales size={16} weight="duotone" /> :
+           analysis.matchCharacter.character === 'RIMONTE_FREQUENTI' ? <ArrowClockwise size={16} weight="duotone" /> : <TennisBall size={16} weight="duotone" />} 
           <span>{analysis.matchCharacter.description}</span>
         </div>
       )}
@@ -361,7 +375,7 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
           gap: 6,
           border: `1px solid ${signalColors[analysis.signal] || signalColors.none}30`
         }}>
-          💡 {analysis.recommendation}
+          <Lightbulb size={16} weight="duotone" /> {analysis.recommendation}
         </div>
       )}
       
@@ -377,7 +391,7 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
           color: '#8b95a5',
           border: '1px solid rgba(255, 255, 255, 0.08)'
         }}>
-          ℹ️ {infoText}
+          <Info size={14} weight="duotone" /> {infoText}
         </div>
       )}
     </div>
@@ -915,22 +929,22 @@ export default function App() {
       const type = (status?.type ?? '').toString().toLowerCase();
 
       // Prioritize explicit types
-      if (type === 'inprogress') return { icon: '🔴', className: 'inprogress', label: status?.description || 'Live' };
-      if (type === 'finished') return { icon: '🏁', className: 'finished', label: status?.description || 'Terminato' };
-      if (type === 'notstarted') return { icon: '⏳', className: 'upcoming', label: status?.description || 'Pre-match' };
-      if (type === 'paused') return { icon: '⏸', className: 'paused', label: status?.description || 'Sospeso' };
+      if (type === 'inprogress') return { icon: <Circle size={12} weight="fill" style={{ color: '#ef4444' }} />, className: 'inprogress', label: status?.description || 'Live' };
+      if (type === 'finished') return { icon: <FlagCheckered size={14} weight="duotone" style={{ color: '#10b981' }} />, className: 'finished', label: status?.description || 'Terminato' };
+      if (type === 'notstarted') return { icon: <Hourglass size={14} weight="duotone" style={{ color: '#6b7280' }} />, className: 'upcoming', label: status?.description || 'Pre-match' };
+      if (type === 'paused') return { icon: <Pause size={14} weight="duotone" style={{ color: '#f59e0b' }} />, className: 'paused', label: status?.description || 'Sospeso' };
 
       // Fallback by description keywords (Italian/English)
-      if (/piogg|rain/.test(desc)) return { icon: '☔', className: 'paused', label: status?.description || 'Sospeso (pioggia)' };
-      if (/medical|medical timeout|timeout medical|medicaltimeout/.test(desc)) return { icon: '⚕️', className: 'medical', label: status?.description || 'Medical timeout' };
-      if (/paused|sospeso|pause/.test(desc)) return { icon: '⏸', className: 'paused', label: status?.description || 'Sospeso' };
-      if (/live|in progress|inprogress/.test(desc)) return { icon: '🔴', className: 'inprogress', label: status?.description || 'Live' };
+      if (/piogg|rain/.test(desc)) return { icon: <Drop size={14} weight="duotone" style={{ color: '#3b82f6' }} />, className: 'paused', label: status?.description || 'Sospeso (pioggia)' };
+      if (/medical|medical timeout|timeout medical|medicaltimeout/.test(desc)) return { icon: <FirstAid size={14} weight="duotone" style={{ color: '#ef4444' }} />, className: 'medical', label: status?.description || 'Medical timeout' };
+      if (/paused|sospeso|pause/.test(desc)) return { icon: <Pause size={14} weight="duotone" style={{ color: '#f59e0b' }} />, className: 'paused', label: status?.description || 'Sospeso' };
+      if (/live|in progress|inprogress/.test(desc)) return { icon: <Circle size={12} weight="fill" style={{ color: '#ef4444' }} />, className: 'inprogress', label: status?.description || 'Live' };
 
       // Default
-      return { icon: '○', className: 'unknown', label: status?.description || 'Stato sconosciuto' };
+      return { icon: <Circle size={12} weight="regular" style={{ color: '#6b7280' }} />, className: 'unknown', label: status?.description || 'Stato sconosciuto' };
     } catch (e) {
       // Fallback to unknown on any unexpected error
-      return { icon: '○', className: 'unknown', label: 'Stato sconosciuto' };
+      return { icon: <Circle size={12} weight="regular" style={{ color: '#6b7280' }} />, className: 'unknown', label: 'Stato sconosciuto' };
     }
   }
 
@@ -1476,7 +1490,7 @@ export default function App() {
                         
                         <StrategyCard 
                           title="Lay the Winner"
-                          icon="🏆"
+                          icon={<Trophy size={20} weight="duotone" />}
                           analysis={analyzeLayTheWinner(dataForExtraction)}
                           infoText="Banca chi vince il 1° set aspettando recupero nel 2°"
                           momentumData={powerRankings}
@@ -1485,7 +1499,7 @@ export default function App() {
 
                         <StrategyCard 
                           title="Banca Servizio"
-                          icon="🎾"
+                          icon={<TennisBall size={20} weight="duotone" />}
                           analysis={analyzeBancaServizio(dataForExtraction)}
                           infoText="Banca chi serve quando sotto pressione (0-30, 15-40, ecc.)"
                           momentumData={powerRankings}
@@ -1494,7 +1508,7 @@ export default function App() {
 
                         <StrategyCard 
                           title="Super Break"
-                          icon="⚡"
+                          icon={<Lightning size={20} weight="duotone" />}
                           analysis={analyzeSuperBreak(dataForExtraction)}
                           infoText="Punta favorito dominante, banca al break point per free bet"
                           momentumData={powerRankings}
@@ -1632,7 +1646,7 @@ export default function App() {
                       }
                     }}
                   >
-                    📋 Copia JSON
+                    <Clipboard size={16} weight="duotone" style={{ marginRight: 4 }} /> Copia JSON
                   </button>
 
                   {/* Download JSON */}
@@ -1715,7 +1729,7 @@ export default function App() {
                       fontSize: 13
                     }}
                   >
-                    📊 Esporta Stats CSV
+                    <ChartBar size={16} weight="duotone" style={{ marginRight: 4 }} /> Esporta Stats CSV
                   </button>
 
                   {/* Download CSV - Point by Point */}
@@ -1759,7 +1773,7 @@ export default function App() {
                       fontSize: 13
                     }}
                   >
-                    🎾 Esporta PbP CSV
+                    <TennisBall size={16} weight="duotone" style={{ marginRight: 4 }} /> Esporta PbP CSV
                   </button>
                 </div>
               </div>

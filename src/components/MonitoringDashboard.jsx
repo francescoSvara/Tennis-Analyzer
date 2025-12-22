@@ -20,7 +20,12 @@ import {
   SoccerBall,
   ArrowLeft,
   ArrowRight,
-  X
+  X,
+  Circle,
+  Hourglass,
+  MathOperations,
+  TextAlignLeft,
+  Hash
 } from '@phosphor-icons/react';
 import { apiUrl } from '../config';
 import ManualPredictor from './ManualPredictor';
@@ -1032,16 +1037,16 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                                 {isExpanded && formulaInfo && (
                                   <div className="formula-details">
                                     <div className="formula-row">
-                                      <span className="formula-label">📐 Formula:</span>
+                                      <span className="formula-label"><MathOperations size={14} weight="duotone" style={{ marginRight: 4 }} /> Formula:</span>
                                       <code className="formula-code">{formulaInfo.formula}</code>
                                     </div>
                                     <div className="formula-row">
-                                      <span className="formula-label">📝 Descrizione:</span>
+                                      <span className="formula-label"><TextAlignLeft size={14} weight="duotone" style={{ marginRight: 4 }} /> Descrizione:</span>
                                       <span className="formula-desc">{formulaInfo.description}</span>
                                     </div>
                                     {formulaInfo.example && formulaInfo.example(inspectorData.calculatedData) && (
                                       <div className="formula-row">
-                                        <span className="formula-label">🔢 Calcolo:</span>
+                                        <span className="formula-label"><Hash size={14} weight="duotone" style={{ marginRight: 4 }} /> Calcolo:</span>
                                         <code className="formula-example">{formulaInfo.example(inspectorData.calculatedData)}</code>
                                       </div>
                                     )}
@@ -1244,9 +1249,9 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                             </div>
                             <div className="result-meta">
                               <span className={`result-status ${match.status}`}>
-                                {match.status === 'finished' ? '✓ Finita' : 
-                                 match.status === 'inprogress' ? '● Live' : 
-                                 '○ Da iniziare'}
+                                {match.status === 'finished' ? <><CheckCircle size={12} weight="duotone" /> Finita</> : 
+                                 match.status === 'inprogress' ? <><Circle size={10} weight="fill" style={{ color: '#ef4444' }} /> Live</> : 
+                                 <><Hourglass size={12} weight="duotone" /> Da iniziare</>}
                               </span>
                               {match.startTime && (
                                 <span className="result-date">

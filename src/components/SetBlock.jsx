@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import GameBlock from './GameBlock';
+import { Fire, X, Circle } from '@phosphor-icons/react';
 
 // Calcola statistiche aggregate per il set
 const calculateSetStats = (games) => {
@@ -80,7 +81,7 @@ export default function SetBlock({ set, getValueForSetGame, defaultExpanded = fa
           <h2>Set {set.set}</h2>
           {setWinner && (
             <span className={`set-winner-badge ${setWinner}`}>
-              {setWinner === 'home' ? '🔵 H' : '🔴 A'}
+              <Circle size={12} weight="fill" style={{ color: setWinner === 'home' ? '#3b82f6' : '#ef4444' }} /> {setWinner === 'home' ? 'H' : 'A'}
             </span>
           )}
         </div>
@@ -88,8 +89,8 @@ export default function SetBlock({ set, getValueForSetGame, defaultExpanded = fa
           {/* Mini stats del set */}
           {setStats && (setStats.totalAces > 0 || setStats.breakGames > 0) && (
             <div className="set-stats-mini">
-              {setStats.totalAces > 0 && <span className="set-stat ace">🔥{setStats.totalAces}</span>}
-              {setStats.breakGames > 0 && <span className="set-stat break">🔴{setStats.breakGames}</span>}
+              {setStats.totalAces > 0 && <span className="set-stat ace"><Fire size={12} weight="duotone" />{setStats.totalAces}</span>}
+              {setStats.breakGames > 0 && <span className="set-stat break"><Circle size={12} weight="fill" style={{ color: '#ef4444' }} />{setStats.breakGames}</span>}
             </div>
           )}
           
@@ -111,17 +112,17 @@ export default function SetBlock({ set, getValueForSetGame, defaultExpanded = fa
         {isExpanded && setStats && (setStats.totalAces > 0 || setStats.totalDF > 0 || setStats.breakGames > 0) && (
           <div className="set-stats-expanded">
             <div className="set-stat-item">
-              <span className="stat-icon">🔥</span>
+              <span className="stat-icon"><Fire size={14} weight="duotone" /></span>
               <span className="stat-label">Ace</span>
               <span className="stat-value">{setStats.totalAces}</span>
             </div>
             <div className="set-stat-item">
-              <span className="stat-icon">❌</span>
+              <span className="stat-icon"><X size={14} weight="bold" /></span>
               <span className="stat-label">DF</span>
               <span className="stat-value">{setStats.totalDF}</span>
             </div>
             <div className="set-stat-item">
-              <span className="stat-icon">🔴</span>
+              <span className="stat-icon"><Circle size={14} weight="fill" style={{ color: '#ef4444' }} /></span>
               <span className="stat-label">Break</span>
               <span className="stat-value">{setStats.breakGames}</span>
             </div>

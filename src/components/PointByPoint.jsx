@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import SetBlock from './SetBlock';
 import '../styles/pointbypoint.css';
 import { extractMatchSummary, fetchPointByPoint, fetchPowerRankings, extractEventId } from '../utils';
+import { Hourglass, XCircle, TennisBall } from '@phosphor-icons/react';
 
 export default function PointByPoint({ 
   data: propData = null, 
@@ -111,7 +112,7 @@ export default function PointByPoint({
     return (
       <div className="pbp-root">
         <div className="pbp-loading">
-          <span>⏳ Caricamento dati point-by-point...</span>
+          <span><Hourglass size={16} weight="duotone" style={{ marginRight: 6 }} /> Caricamento dati point-by-point...</span>
         </div>
       </div>
     );
@@ -121,7 +122,7 @@ export default function PointByPoint({
     return (
       <div className="pbp-root">
         <div className="pbp-error">
-          <span>❌ Errore nel caricamento: {error.message}</span>
+          <span><XCircle size={16} weight="duotone" style={{ marginRight: 6, color: '#ef4444' }} /> Errore nel caricamento: {error.message}</span>
         </div>
       </div>
     );
@@ -191,7 +192,7 @@ export default function PointByPoint({
         ))
       ) : (
         <div className="pbp-no-data" style={liveMode ? { background: '#fff6f6', border: '1px solid #f5cfcf', color: '#c97676', padding: '12px' } : {}}>
-          <div className="pbp-no-data-icon">🎾</div>
+          <div className="pbp-no-data-icon"><TennisBall size={32} weight="duotone" style={{ color: '#10b981' }} /></div>
           <div>Nessun dato point-by-point disponibile</div>
           <div style={{ fontSize: '13px', marginTop: '8px', opacity: 0.7 }}>
             {liveMode ? 'In Live Mode i dati point-by-point dovrebbero arrivare in tempo reale; al momento sono assenti.' : 'I dati appariranno quando il match sarà in corso'}

@@ -9,7 +9,9 @@ import {
   Calendar,
   Trophy,
   User,
-  ArrowRight
+  ArrowRight,
+  Circle,
+  FlagBanner
 } from '@phosphor-icons/react';
 import { getTournamentLogo, getSuggestedFileName } from '../utils/tournamentLogos';
 import { durations, easings } from '../motion/tokens';
@@ -59,7 +61,7 @@ function getStatusBadge(status) {
   
   const statusMap = {
     'notstarted': { label: 'Scheduled', color: '#6b7280', pulse: false },
-    'inprogress': { label: '● LIVE', color: '#ef4444', pulse: true },
+    'inprogress': { label: <><Circle size={8} weight="fill" style={{ color: '#ef4444', marginRight: 4 }} /> LIVE</>, color: '#ef4444', pulse: true },
     'finished': { label: 'Finished', color: '#10b981', pulse: false },
     'canceled': { label: 'Canceled', color: '#f59e0b', pulse: false },
     'postponed': { label: 'Postponed', color: '#f59e0b', pulse: false },
@@ -68,9 +70,9 @@ function getStatusBadge(status) {
   return statusMap[statusStr] || { label: statusType || 'Unknown', color: '#6b7280', pulse: false };
 }
 
-// Codice paese a emoji bandiera
+// Codice paese a emoji bandiera - mantengo emoji per le bandiere (standard Unicode)
 function countryToFlag(countryCode) {
-  if (!countryCode || countryCode.length !== 2) return '🏳️';
+  if (!countryCode || countryCode.length !== 2) return <FlagBanner size={14} weight="duotone" />;
   const codePoints = countryCode
     .toUpperCase()
     .split('')

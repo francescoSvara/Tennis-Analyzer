@@ -1,5 +1,14 @@
 import React, { useMemo } from 'react';
 import { interpretGameValue } from '../utils';
+import {
+  ChartBar,
+  TennisBall,
+  Barbell,
+  Lightning,
+  ChartLineUp,
+  Hourglass,
+  Circle
+} from '@phosphor-icons/react';
 
 /**
  * IndicatorsChart - Grafico indicatori match basato su powerRankings
@@ -126,13 +135,13 @@ export default function IndicatorsChart({ powerRankings = [], homeName = 'Home',
     if (!powerRankings || powerRankings.length === 0) return [];
     
     const zones = {
-      'danger-away': { count: 0, label: 'Pericolo Away', color: '#c97676', icon: '🔴' },
-      'away': { count: 0, label: 'Vantaggio Away', color: '#d4a84b', icon: '🟠' },
-      'slight-away': { count: 0, label: 'Leggero Away', color: '#e8c36a', icon: '🟡' },
-      'neutral': { count: 0, label: 'Equilibrio', color: '#9e9e9e', icon: '⚪' },
-      'slight-home': { count: 0, label: 'Leggero Home', color: '#7eb5d6', icon: '🔵' },
-      'home': { count: 0, label: 'Vantaggio Home', color: '#5b8fb9', icon: '🟢' },
-      'danger-home': { count: 0, label: 'Dominio Home', color: '#6aba7f', icon: '💚' }
+      'danger-away': { count: 0, label: 'Pericolo Away', color: '#c97676', icon: <Circle size={12} weight="fill" style={{ color: '#ef4444' }} /> },
+      'away': { count: 0, label: 'Vantaggio Away', color: '#d4a84b', icon: <Circle size={12} weight="fill" style={{ color: '#f59e0b' }} /> },
+      'slight-away': { count: 0, label: 'Leggero Away', color: '#e8c36a', icon: <Circle size={12} weight="fill" style={{ color: '#fbbf24' }} /> },
+      'neutral': { count: 0, label: 'Equilibrio', color: '#9e9e9e', icon: <Circle size={12} weight="fill" style={{ color: '#9ca3af' }} /> },
+      'slight-home': { count: 0, label: 'Leggero Home', color: '#7eb5d6', icon: <Circle size={12} weight="fill" style={{ color: '#60a5fa' }} /> },
+      'home': { count: 0, label: 'Vantaggio Home', color: '#5b8fb9', icon: <Circle size={12} weight="fill" style={{ color: '#10b981' }} /> },
+      'danger-home': { count: 0, label: 'Dominio Home', color: '#6aba7f', icon: <Circle size={12} weight="fill" style={{ color: '#22c55e' }} /> }
     };
     
     powerRankings.forEach(item => {
@@ -150,27 +159,27 @@ export default function IndicatorsChart({ powerRankings = [], homeName = 'Home',
     return (
       <div className="indicators-chart">
         <div className="chart-header">
-          <span className="chart-icon">📊</span>
+          <span className="chart-icon"><ChartBar size={20} weight="duotone" /></span>
           <h3 className="chart-title">Indicatori Match</h3>
         </div>
         <div className="chart-no-data">
-          <span>⏳ Nessun dato disponibile</span>
+          <span><Hourglass size={16} weight="duotone" /> Nessun dato disponibile</span>
         </div>
       </div>
     );
   }
 
   const indicators = [
-    { label: 'Game Totali', icon: '🎾', home: stats.homeGames, away: stats.awayGames, homeColor: '#5b8fb9', awayColor: '#c97676' },
-    { label: 'Dominio', icon: '💪', home: stats.homeDominant, away: stats.awayDominant, homeColor: '#6aba7f', awayColor: '#c97676' },
-    { label: 'Break', icon: '⚡', home: Math.ceil(stats.breaks/2), away: Math.floor(stats.breaks/2), homeColor: '#d4a84b', awayColor: '#d4a84b' },
-    { label: 'Max Momentum', icon: '📈', home: stats.maxValue, away: stats.minValue, homeColor: '#6c9a8b', awayColor: '#6c9a8b' },
+    { label: 'Game Totali', icon: <TennisBall size={16} weight="duotone" />, home: stats.homeGames, away: stats.awayGames, homeColor: '#5b8fb9', awayColor: '#c97676' },
+    { label: 'Dominio', icon: <Barbell size={16} weight="duotone" />, home: stats.homeDominant, away: stats.awayDominant, homeColor: '#6aba7f', awayColor: '#c97676' },
+    { label: 'Break', icon: <Lightning size={16} weight="duotone" />, home: Math.ceil(stats.breaks/2), away: Math.floor(stats.breaks/2), homeColor: '#d4a84b', awayColor: '#d4a84b' },
+    { label: 'Max Momentum', icon: <ChartLineUp size={16} weight="duotone" />, home: stats.maxValue, away: stats.minValue, homeColor: '#6c9a8b', awayColor: '#6c9a8b' },
   ];
 
   return (
     <div className="indicators-chart">
       <div className="chart-header">
-        <span className="chart-icon">📊</span>
+        <span className="chart-icon"><ChartBar size={20} weight="duotone" /></span>
         <h3 className="chart-title">Indicatori Match</h3>
       </div>
       
@@ -235,11 +244,11 @@ export default function IndicatorsChart({ powerRankings = [], homeName = 'Home',
       <div className="zone-distribution">
         <div className="zone-title">Distribuzione Momentum</div>
         
-        {/* 🔥 MINI TERMOMETRO - Ultimi 3 Game (Trend Recente) */}
+        {/* MINI TERMOMETRO - Ultimi 3 Game (Trend Recente) */}
         {recentStats && (
           <div className="momentum-thermometer mini-thermometer">
             <div className="thermometer-header-mini">
-              <span className="mini-label">⚡ Ultimi {recentStats.gamesAnalyzed} Game</span>
+              <span className="mini-label"><Lightning size={14} weight="duotone" /> Ultimi {recentStats.gamesAnalyzed} Game</span>
             </div>
             <div className="thermometer-track mini-track">
               {/* Lato Home (sinistra) */}
@@ -279,10 +288,10 @@ export default function IndicatorsChart({ powerRankings = [], homeName = 'Home',
           </div>
         )}
         
-        {/* 🔥 TERMOMETRO MOMENTUM COMPLETO - Tutta la partita */}
+        {/* TERMOMETRO MOMENTUM COMPLETO - Tutta la partita */}
         <div className="momentum-thermometer full-thermometer">
           <div className="thermometer-header-mini">
-            <span className="full-label">🎾 Partita Completa</span>
+            <span className="full-label"><TennisBall size={14} weight="duotone" /> Partita Completa</span>
           </div>
           <div className="thermometer-labels">
             <span className="thermometer-label home-label">{homeName}</span>

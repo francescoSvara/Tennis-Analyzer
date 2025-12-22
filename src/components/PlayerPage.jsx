@@ -26,7 +26,7 @@ import {
   Medal,
   ArrowUp,
   ArrowDown,
-  CircleWavyCheck,
+  Snowflake,
   Circle,
   Star,
   Crown,
@@ -38,7 +38,10 @@ import {
   Percent,
   SoccerBall,
   CalendarBlank,
-  Lightning
+  Lightning,
+  GlobeSimple,
+  Ruler,
+  Wrench
 } from '@phosphor-icons/react';
 import { apiUrl } from '../config';
 import { durations, easings } from '../motion/tokens';
@@ -52,8 +55,19 @@ function StatCard({ title, value, subtitle, trend, icon }) {
   const prefersReducedMotion = useReducedMotion();
   const trendColor = trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#8b95a5';
   
-  // Mappa emoji a icone Phosphor
+  // Mappa dei tipi icona a componenti Phosphor
   const iconMap = {
+    'trophy': Trophy,
+    'tennis': TennisBall,
+    'chart': ChartLineUp,
+    'target': Target,
+    'fire': Fire,
+    'medal': Medal,
+    'snowflake': Snowflake,
+    'coins': Coins,
+    'percent': Percent,
+    'lightning': Lightning,
+    // Mantengo anche le emoji come fallback per retrocompatibilità
     '🏆': Trophy,
     '🎾': TennisBall,
     '📊': ChartLineUp,
@@ -63,7 +77,7 @@ function StatCard({ title, value, subtitle, trend, icon }) {
     '📈': ChartLineUp,
     '🔥': Fire,
     '📅': ChartLineUp,
-    '❄️': CircleWavyCheck,
+    '❄️': Snowflake,
   };
   
   const IconComponent = iconMap[icon] || ChartLineUp;
@@ -234,12 +248,19 @@ export default function PlayerPage() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false); // Flag per evitare ri-fetch dopo selezione
   
   // Fetch suggestions for autocomplete
   const fetchSuggestions = useCallback(async (query) => {
     if (!query || query.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
+      return;
+    }
+    
+    // Non cercare se abbiamo appena selezionato un giocatore
+    if (isSelecting) {
+      setIsSelecting(false);
       return;
     }
     
@@ -250,14 +271,19 @@ export default function PlayerPage() {
       const data = await response.json();
       
       setSuggestions(data || []);
-      setShowSuggestions(true);
+      // Non mostrare se c'è solo 1 risultato che corrisponde esattamente
+      if (data.length === 1 && data[0].name.toLowerCase() === query.toLowerCase()) {
+        setShowSuggestions(false);
+      } else {
+        setShowSuggestions(true);
+      }
     } catch (err) {
       console.error('Error fetching suggestions:', err);
       setSuggestions([]);
     } finally {
       setSuggestionLoading(false);
     }
-  }, []);
+  }, [isSelecting]);
   
   // Handle input change with debounce
   useEffect(() => {
@@ -269,12 +295,13 @@ export default function PlayerPage() {
   }, [searchInput, fetchSuggestions]);
   
   // Select suggestion
-  const selectSuggestion = (playerName) => {
-    setSearchInput(playerName);
+  const selectSuggestion = (selectedName) => {
+    setIsSelecting(true); // Previene ri-fetch
+    setSearchInput(selectedName);
     setSuggestions([]);
     setShowSuggestions(false);
-    setPlayerName(playerName);
-    fetchProfile(playerName, surfaceFilter);
+    setPlayerName(selectedName);
+    fetchProfile(selectedName, surfaceFilter);
   };
   
   // Fetch profile
@@ -355,17 +382,30 @@ export default function PlayerPage() {
             <input
               type="text"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onFocus={() => setShowSuggestions(suggestions.length > 0)}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                // Solo mostra dropdown se stiamo digitando e ci sono caratteri
+                if (e.target.value.length >= 2) {
+                  setShowSuggestions(true);
+                } else {
+                  setShowSuggestions(false);
+                }
+              }}
+              onFocus={() => {
+                // Mostra suggerimenti solo se ci sono e l'input ha >= 2 caratteri
+                if (suggestions.length > 0 && searchInput.length >= 2 && !profile) {
+                  setShowSuggestions(true);
+                }
+              }}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               placeholder="Cerca giocatore (es. Sinner, Alcaraz)..."
               className="player-search-input"
               autoComplete="off"
             />
             
-            {/* Suggestions dropdown */}
+            {/* Suggestions dropdown - mostra solo quando stiamo cercando, non quando abbiamo già un profilo */}
             <AnimatePresence>
-              {showSuggestions && (
+              {showSuggestions && !loading && (suggestions.length > 0 || suggestionLoading || searchInput.length >= 2) && (
                 <motion.div 
                   className="suggestions-dropdown"
                   initial={{ opacity: 0, y: -8 }}
@@ -375,16 +415,18 @@ export default function PlayerPage() {
                 >
                   {suggestionLoading && (
                     <div className="suggestion-item loading">
-                      <SpinnerGap size={16} className="suggestion-spinner" />
-                      Caricamento...
+                      <SpinnerGap size={16} weight="bold" className="suggestion-spinner" />
+                      Ricerca in corso...
                     </div>
                   )}
-                  {!suggestionLoading && suggestions.map((player, idx) => (
+                  {!suggestionLoading && suggestions.length > 0 && suggestions.map((player, idx) => (
                     <motion.div
-                      key={idx}
+                      key={player.name || idx}
                       className="suggestion-item"
                       onClick={() => selectSuggestion(player.name)}
-                      whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.03, duration: durations.fast }}
                     >
                       <span className="suggestion-name">{player.name}</span>
                       <span className="suggestion-matches">{player.matchCount} match</span>
@@ -455,9 +497,9 @@ export default function PlayerPage() {
         <div className="profile-content">
           {/* Player header */}
           <div className="player-header-card">
-            <h2>🎾 {playerName}</h2>
+            <h2><TennisBall size={24} weight="duotone" style={{ marginRight: 8, color: '#10b981' }} /> {playerName}</h2>
             <p className="matches-analyzed">
-              📊 {profile.player?.matches_analyzed || profile.statistics?.totalMatches || 0} partite analizzate
+              <ChartLineUp size={14} weight="duotone" style={{ marginRight: 4 }} /> {profile.player?.matches_analyzed || profile.statistics?.totalMatches || 0} partite analizzate
             </p>
             {surfaceFilter && (
               <span className="surface-badge">{surfaceFilter}</span>
@@ -466,28 +508,28 @@ export default function PlayerPage() {
           
           {/* Global Stats Grid */}
           <section className="profile-section">
-            <h3>📈 Statistiche Globali</h3>
+            <h3><ChartLineUp size={18} weight="duotone" style={{ marginRight: 6 }} /> Statistiche Globali</h3>
             <div className="stats-grid">
               <StatCard 
                 title="Win Rate"
                 value={formatPercent(profile.global?.win_rate)}
                 subtitle={`${profile.global?.wins}W - ${profile.global?.losses}L`}
-                icon="🏆"
+                icon="trophy"
               />
               <StatCard 
                 title="Total Matches"
                 value={profile.global?.total_matches || 0}
-                icon="🎾"
+                icon="tennis"
               />
               <StatCard 
                 title="Avg Sets/Match"
                 value={(profile.global?.avg_sets_per_match || 0).toFixed(2)}
-                icon="📊"
+                icon="chart"
               />
               <StatCard 
                 title="Tiebreak Win"
                 value={formatPercent(profile.global?.tiebreak_win_rate)}
-                icon="🎯"
+                icon="target"
               />
             </div>
           </section>
@@ -495,7 +537,7 @@ export default function PlayerPage() {
           {/* Surface Breakdown */}
           {profile.by_surface && Object.keys(profile.by_surface).length > 0 && (
             <section className="profile-section">
-              <h3>🌍 Per Superficie</h3>
+              <h3><GlobeSimple size={18} weight="duotone" style={{ marginRight: 6 }} /> Per Superficie</h3>
               <div className="surface-grid">
                 {Object.entries(profile.by_surface)
                   .filter(([_, stats]) => stats.matches > 0)
@@ -511,7 +553,7 @@ export default function PlayerPage() {
           {/* Format Breakdown */}
           {profile.by_format && (
             <section className="profile-section">
-              <h3>📏 Per Formato</h3>
+              <h3><Ruler size={18} weight="duotone" style={{ marginRight: 6 }} /> Per Formato</h3>
               <div className="format-grid">
                 {profile.by_format.best_of_3 && (
                   <div className="format-card">
@@ -540,7 +582,7 @@ export default function PlayerPage() {
           {/* Series Breakdown */}
           {profile.by_series && Object.keys(profile.by_series).length > 0 && (
             <section className="profile-section">
-              <h3>🏅 Per Livello Torneo</h3>
+              <h3><Medal size={18} weight="duotone" style={{ marginRight: 6 }} /> Per Livello Torneo</h3>
               <div className="series-grid">
                 {Object.entries(profile.by_series)
                   .filter(([_, stats]) => stats.matches > 0)
@@ -555,30 +597,30 @@ export default function PlayerPage() {
           {/* Special Metrics */}
           {profile.special_metrics && (
             <section className="profile-section">
-              <h3>🎯 Metriche Speciali</h3>
+              <h3><Target size={18} weight="duotone" style={{ marginRight: 6 }} /> Metriche Speciali</h3>
               <div className="stats-grid">
                 <StatCard 
                   title="Comeback Rate"
                   value={formatPercent(profile.special_metrics.comeback_rate)}
                   subtitle="Vittorie dopo aver perso il 1° set"
-                  icon="💪"
+                  icon="fire"
                 />
                 <StatCard 
                   title="1st Set Win Rate"
                   value={formatPercent(profile.special_metrics.first_set_win_rate)}
-                  icon="1️⃣"
+                  icon="medal"
                 />
                 <StatCard 
                   title="Match Win After 1st Set"
                   value={formatPercent(profile.special_metrics.match_win_after_first_set)}
                   subtitle="Se vince il 1° set"
-                  icon="📈"
+                  icon="chart"
                 />
                 <StatCard 
                   title="Deciding Set Win"
                   value={formatPercent(profile.special_metrics.deciding_set_win_rate)}
                   subtitle={`${profile.special_metrics.deciding_set_wins || 0}/${profile.special_metrics.deciding_set_matches || 0}`}
-                  icon="🔥"
+                  icon="fire"
                 />
               </div>
             </section>
@@ -587,7 +629,7 @@ export default function PlayerPage() {
           {/* Recent Form */}
           {profile.recent_form && (
             <section className="profile-section">
-              <h3>📅 Form Recente (ultime {profile.recent_form.matches_count || 20} partite)</h3>
+              <h3><CalendarBlank size={18} weight="duotone" style={{ marginRight: 6 }} /> Form Recente (ultime {profile.recent_form.matches_count || 20} partite)</h3>
               <div className="recent-form-container">
                 <div className="form-stats">
                   <StatCard 
@@ -595,18 +637,18 @@ export default function PlayerPage() {
                     value={formatPercent(profile.recent_form.win_rate)}
                     trend={profile.recent_form.trend === 'improving' ? 'up' : 
                            profile.recent_form.trend === 'declining' ? 'down' : null}
-                    icon="📊"
+                    icon="chart"
                   />
                   <StatCard 
                     title="Trend"
                     value={profile.recent_form.trend || 'stable'}
-                    icon="📈"
+                    icon="chart"
                   />
                   {profile.recent_form.current_streak && (
                     <StatCard 
                       title="Streak Attuale"
                       value={`${profile.recent_form.current_streak.count}${profile.recent_form.current_streak.type}`}
-                      icon={profile.recent_form.current_streak.type === 'W' ? '🔥' : '❄️'}
+                      icon={profile.recent_form.current_streak.type === 'W' ? 'fire' : 'snowflake'}
                     />
                   )}
                 </div>
@@ -622,7 +664,7 @@ export default function PlayerPage() {
           {/* ROI Section */}
           {profile.roi && (
             <section className="profile-section roi-section">
-              <h3>💰 ROI Analysis (Flat Stake)</h3>
+              <h3><Coins size={18} weight="duotone" style={{ marginRight: 6, color: '#f59e0b' }} /> ROI Analysis (Flat Stake)</h3>
               <div className="roi-container">
                 <div className={`roi-value ${profile.roi.roi >= 0 ? 'positive' : 'negative'}`}>
                   {formatROI(profile.roi.roi_percent)}
@@ -641,7 +683,7 @@ export default function PlayerPage() {
           
           {/* Raw Data Debug (collapsible) */}
           <details className="raw-data-section">
-            <summary>🔧 Raw Data (Debug)</summary>
+            <summary><Wrench size={14} weight="duotone" style={{ marginRight: 6 }} /> Raw Data (Debug)</summary>
             <pre>{JSON.stringify(profile, null, 2)}</pre>
           </details>
           
@@ -658,7 +700,7 @@ export default function PlayerPage() {
       {/* Profile error */}
       {profile && profile.error && (
         <div className="error-container">
-          <p>⚠️ {profile.error}</p>
+          <p><WarningCircle size={18} weight="duotone" style={{ marginRight: 6, color: '#f59e0b' }} /> {profile.error}</p>
         </div>
       )}
     </div>

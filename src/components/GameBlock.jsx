@@ -1,6 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import PointRow from './PointRow';
 import { countPointDescriptions, interpretGameValue, getStatusColor, getZoneIcon } from '../utils';
+import { 
+  TennisBall, 
+  Fire, 
+  X, 
+  Target,
+  Lightning,
+  Barbell,
+  CaretRight,
+  Circle
+} from '@phosphor-icons/react';
 
 // Calcola statistiche avanzate del game
 const calculateGameStats = (points) => {
@@ -145,7 +155,7 @@ export default function GameBlock({ game, setNumber, getValueForSetGame, default
             Game {game.game}
             {servingPlayer && (
               <span className={`serving-indicator ${servingPlayer}`} title={`${servingPlayer === 'home' ? 'Home' : 'Away'} al servizio`}>
-                🎾
+                <TennisBall size={14} weight="duotone" />
               </span>
             )}
           </div>
@@ -155,17 +165,17 @@ export default function GameBlock({ game, setNumber, getValueForSetGame, default
           {/* Badge speciali del game */}
           {isBreak && (
             <span className="game-badge break-badge" title="Break!">
-              🔴 BREAK
+              <Circle size={10} weight="fill" style={{ color: '#ef4444', marginRight: 4 }} /> BREAK
             </span>
           )}
           {gameStats?.aces > 0 && (
             <span className="game-badge ace-badge" title={`${gameStats.aces} Ace`}>
-              🔥 {gameStats.aces}
+              <Fire size={14} weight="duotone" color="#f59e0b" /> {gameStats.aces}
             </span>
           )}
           {gameStats?.doubleFaults > 0 && (
             <span className="game-badge df-badge" title={`${gameStats.doubleFaults} Doppi Falli`}>
-              ❌ {gameStats.doubleFaults}
+              <X size={14} weight="bold" color="#ef4444" /> {gameStats.doubleFaults}
             </span>
           )}
         </div>
@@ -178,7 +188,11 @@ export default function GameBlock({ game, setNumber, getValueForSetGame, default
                 width: `${pressure}%`,
                 backgroundColor: pressure > 70 ? '#ef4444' : pressure > 40 ? '#f59e0b' : '#3b82f6'
               }} />
-              <span className="pressure-mini-label">{pressure > 70 ? '🔥' : pressure > 40 ? '⚡' : '💪'}</span>
+              <span className="pressure-mini-label">
+                {pressure > 70 ? <Fire size={12} weight="fill" color="#ef4444" /> : 
+                 pressure > 40 ? <Lightning size={12} weight="fill" color="#f59e0b" /> : 
+                 <Barbell size={12} weight="fill" color="#3b82f6" />}
+              </span>
             </div>
           )}
           
@@ -211,10 +225,10 @@ export default function GameBlock({ game, setNumber, getValueForSetGame, default
         {/* Stats mini del game */}
         {gameStats && (gameStats.aces > 0 || gameStats.doubleFaults > 0 || gameStats.winners > 0 || gameStats.breakPoints > 0) && (
           <div className="game-stats-mini">
-            {gameStats.aces > 0 && <span className="stat-item ace">🔥 {gameStats.aces} Ace</span>}
-            {gameStats.doubleFaults > 0 && <span className="stat-item df">❌ {gameStats.doubleFaults} DF</span>}
-            {gameStats.winners > 0 && <span className="stat-item winner">💥 {gameStats.winners} Winner</span>}
-            {gameStats.breakPoints > 0 && <span className="stat-item bp">🎯 {gameStats.breakPoints} BP</span>}
+            {gameStats.aces > 0 && <span className="stat-item ace"><Fire size={14} weight="duotone" /> {gameStats.aces} Ace</span>}
+            {gameStats.doubleFaults > 0 && <span className="stat-item df"><X size={14} weight="bold" /> {gameStats.doubleFaults} DF</span>}
+            {gameStats.winners > 0 && <span className="stat-item winner"><Lightning size={14} weight="duotone" /> {gameStats.winners} Winner</span>}
+            {gameStats.breakPoints > 0 && <span className="stat-item bp"><Target size={14} weight="duotone" /> {gameStats.breakPoints} BP</span>}
           </div>
         )}
         

@@ -1,24 +1,39 @@
 import React from 'react';
+import {
+  Fire,
+  X,
+  Sparkle,
+  WarningCircle,
+  Barbell,
+  Lightning,
+  Target,
+  PersonSimpleRun,
+  Circle,
+  Trophy,
+  CheckCircle,
+  TennisBall,
+  Scales
+} from '@phosphor-icons/react';
 
 // Mappa dei tipi di punto con icone e descrizioni
 const POINT_TYPE_INFO = {
-  'ace': { icon: '🔥', label: 'Ace', color: '#4caf50', isSpecial: true },
-  'double_fault': { icon: '❌', label: 'Doppio Fallo', color: '#f44336', isSpecial: true },
-  'doubleFault': { icon: '❌', label: 'Doppio Fallo', color: '#f44336', isSpecial: true },
-  'winner': { icon: '💥', label: 'Vincente', color: '#2196f3', isSpecial: true },
-  'unforced': { icon: '😰', label: 'Errore non forzato', color: '#ff9800', isSpecial: true },
-  'unforced_error': { icon: '😰', label: 'Errore non forzato', color: '#ff9800', isSpecial: true },
-  'forced_error': { icon: '💪', label: 'Errore forzato', color: '#9c27b0', isSpecial: false },
-  'service_winner': { icon: '⚡', label: 'Servizio vincente', color: '#4caf50', isSpecial: true },
-  'return_winner': { icon: '🎯', label: 'Risposta vincente', color: '#00bcd4', isSpecial: true },
-  'net_point': { icon: '🏃', label: 'Punto a rete', color: '#673ab7', isSpecial: false },
-  'break_point': { icon: '🔴', label: 'Palla Break', color: '#e91e63', isSpecial: true },
-  'set_point': { icon: '🟠', label: 'Set Point', color: '#ff5722', isSpecial: true },
-  'match_point': { icon: '🏆', label: 'Match Point', color: '#ffd700', isSpecial: true },
+  'ace': { icon: <Fire size={14} weight="duotone" style={{ color: '#4caf50' }} />, label: 'Ace', color: '#4caf50', isSpecial: true },
+  'double_fault': { icon: <X size={14} weight="bold" style={{ color: '#f44336' }} />, label: 'Doppio Fallo', color: '#f44336', isSpecial: true },
+  'doubleFault': { icon: <X size={14} weight="bold" style={{ color: '#f44336' }} />, label: 'Doppio Fallo', color: '#f44336', isSpecial: true },
+  'winner': { icon: <Sparkle size={14} weight="duotone" style={{ color: '#2196f3' }} />, label: 'Vincente', color: '#2196f3', isSpecial: true },
+  'unforced': { icon: <WarningCircle size={14} weight="duotone" style={{ color: '#ff9800' }} />, label: 'Errore non forzato', color: '#ff9800', isSpecial: true },
+  'unforced_error': { icon: <WarningCircle size={14} weight="duotone" style={{ color: '#ff9800' }} />, label: 'Errore non forzato', color: '#ff9800', isSpecial: true },
+  'forced_error': { icon: <Barbell size={14} weight="duotone" style={{ color: '#9c27b0' }} />, label: 'Errore forzato', color: '#9c27b0', isSpecial: false },
+  'service_winner': { icon: <Lightning size={14} weight="duotone" style={{ color: '#4caf50' }} />, label: 'Servizio vincente', color: '#4caf50', isSpecial: true },
+  'return_winner': { icon: <Target size={14} weight="duotone" style={{ color: '#00bcd4' }} />, label: 'Risposta vincente', color: '#00bcd4', isSpecial: true },
+  'net_point': { icon: <PersonSimpleRun size={14} weight="duotone" style={{ color: '#673ab7' }} />, label: 'Punto a rete', color: '#673ab7', isSpecial: false },
+  'break_point': { icon: <Circle size={12} weight="fill" style={{ color: '#e91e63' }} />, label: 'Palla Break', color: '#e91e63', isSpecial: true },
+  'set_point': { icon: <Circle size={12} weight="fill" style={{ color: '#ff5722' }} />, label: 'Set Point', color: '#ff5722', isSpecial: true },
+  'match_point': { icon: <Trophy size={14} weight="duotone" style={{ color: '#ffd700' }} />, label: 'Match Point', color: '#ffd700', isSpecial: true },
   // SofaScore numeric types
-  1: { icon: '✅', label: 'Punto vinto', color: '#4caf50', isSpecial: false },
-  3: { icon: '✅', label: 'Punto vinto', color: '#4caf50', isSpecial: false },
-  5: { icon: '❌', label: 'Punto perso', color: '#f44336', isSpecial: false },
+  1: { icon: <CheckCircle size={14} weight="duotone" style={{ color: '#4caf50' }} />, label: 'Punto vinto', color: '#4caf50', isSpecial: false },
+  3: { icon: <CheckCircle size={14} weight="duotone" style={{ color: '#4caf50' }} />, label: 'Punto vinto', color: '#4caf50', isSpecial: false },
+  5: { icon: <X size={14} weight="bold" style={{ color: '#f44336' }} />, label: 'Punto perso', color: '#f44336', isSpecial: false },
 };
 
 // Determina il momentum del punto basato sul punteggio
@@ -29,22 +44,22 @@ const getMomentumIndicator = (homePoint, awayPoint) => {
   
   const diff = hScore - aScore;
   
-  if (diff >= 2) return { icon: '🟢', label: 'Home domina', class: 'momentum-home-strong' };
-  if (diff === 1) return { icon: '🔵', label: 'Vantaggio Home', class: 'momentum-home' };
-  if (diff === 0) return { icon: '⚪', label: 'Equilibrio', class: 'momentum-balanced' };
-  if (diff === -1) return { icon: '🟡', label: 'Vantaggio Away', class: 'momentum-away' };
-  if (diff <= -2) return { icon: '🔴', label: 'Away domina', class: 'momentum-away-strong' };
+  if (diff >= 2) return { icon: <Circle size={10} weight="fill" style={{ color: '#10b981' }} />, label: 'Home domina', class: 'momentum-home-strong' };
+  if (diff === 1) return { icon: <Circle size={10} weight="fill" style={{ color: '#3b82f6' }} />, label: 'Vantaggio Home', class: 'momentum-home' };
+  if (diff === 0) return { icon: <Circle size={10} weight="fill" style={{ color: '#9ca3af' }} />, label: 'Equilibrio', class: 'momentum-balanced' };
+  if (diff === -1) return { icon: <Circle size={10} weight="fill" style={{ color: '#fbbf24' }} />, label: 'Vantaggio Away', class: 'momentum-away' };
+  if (diff <= -2) return { icon: <Circle size={10} weight="fill" style={{ color: '#ef4444' }} />, label: 'Away domina', class: 'momentum-away-strong' };
   
-  return { icon: '⚪', label: 'Neutro', class: 'momentum-balanced' };
+  return { icon: <Circle size={10} weight="fill" style={{ color: '#9ca3af' }} />, label: 'Neutro', class: 'momentum-balanced' };
 };
 
 // Controlla se è un momento critico del game
 const getCriticalMoment = (homePoint, awayPoint) => {
   // Palla break, game point, deuce, vantaggio
-  if (homePoint === '40' && awayPoint === '40') return { icon: '⚔️', label: 'Deuce', class: 'critical-deuce' };
-  if (homePoint === 'A' || awayPoint === 'A') return { icon: '⚡', label: 'Vantaggio', class: 'critical-advantage' };
-  if (homePoint === '40' && awayPoint !== '40') return { icon: '🎾', label: 'Game Point Home', class: 'critical-gamepoint' };
-  if (awayPoint === '40' && homePoint !== '40') return { icon: '🎾', label: 'Game Point Away', class: 'critical-gamepoint' };
+  if (homePoint === '40' && awayPoint === '40') return { icon: <Scales size={14} weight="duotone" />, label: 'Deuce', class: 'critical-deuce' };
+  if (homePoint === 'A' || awayPoint === 'A') return { icon: <Lightning size={14} weight="duotone" />, label: 'Vantaggio', class: 'critical-advantage' };
+  if (homePoint === '40' && awayPoint !== '40') return { icon: <TennisBall size={14} weight="duotone" />, label: 'Game Point Home', class: 'critical-gamepoint' };
+  if (awayPoint === '40' && homePoint !== '40') return { icon: <TennisBall size={14} weight="duotone" />, label: 'Game Point Away', class: 'critical-gamepoint' };
   return null;
 };
 
@@ -83,8 +98,8 @@ export default function PointRow({ point, index }) {
         
         {/* Badge speciali */}
         <div className="point-badges">
-          {isAce && <span className="badge badge-ace" title="Ace">🔥 ACE</span>}
-          {isDoubleFault && <span className="badge badge-df" title="Doppio Fallo">❌ DF</span>}
+          {isAce && <span className="badge badge-ace" title="Ace"><Fire size={12} weight="duotone" /> ACE</span>}
+          {isDoubleFault && <span className="badge badge-df" title="Doppio Fallo"><X size={12} weight="bold" /> DF</span>}
         </div>
       </div>
       

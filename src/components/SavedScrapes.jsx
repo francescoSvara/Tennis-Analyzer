@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../config';
+import { 
+  ArrowsClockwise, 
+  XCircle, 
+  TennisBall, 
+  File, 
+  Trophy, 
+  Calendar, 
+  FloppyDisk, 
+  Hourglass, 
+  FolderOpen 
+} from '@phosphor-icons/react';
 
 /**
  * SavedScrapes - Component to list and load saved scrapes
@@ -89,7 +100,7 @@ export default function SavedScrapes({ onLoad, collapsed = true }) {
           fontWeight: 'bold'
         }}
       >
-        <span>📁 Scrapes Salvati ({scrapes.length})</span>
+        <span><FolderOpen size={16} weight="duotone" style={{ marginRight: 6 }} />Scrapes Salvati ({scrapes.length})</span>
         <span>{isOpen ? '▼' : '▶'}</span>
       </button>
 
@@ -111,14 +122,14 @@ export default function SavedScrapes({ onLoad, collapsed = true }) {
                 opacity: loading ? 0.6 : 1
               }}
             >
-              🔄 Aggiorna lista
+              <ArrowsClockwise size={14} weight="duotone" style={{ marginRight: 4 }} /> Aggiorna lista
             </button>
           </div>
 
           {/* Error message */}
           {error && (
             <div style={{ color: '#f44336', marginBottom: 12, padding: 8, background: '#2d1a1a', borderRadius: 4 }}>
-              ❌ {error}
+              <XCircle size={14} weight="duotone" style={{ marginRight: 4 }} /> {error}
             </div>
           )}
 
@@ -153,24 +164,24 @@ export default function SavedScrapes({ onLoad, collapsed = true }) {
                     {/* Match info if available */}
                     {scrape.home && scrape.away ? (
                       <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                        🎾 {scrape.home} vs {scrape.away}
+                        <TennisBall size={14} weight="duotone" style={{ marginRight: 4, color: '#10b981' }} /> {scrape.home} vs {scrape.away}
                       </div>
                     ) : (
                       <div style={{ fontWeight: 'bold', marginBottom: 4, color: '#888' }}>
-                        📄 {scrape.id}
+                        <File size={14} weight="duotone" style={{ marginRight: 4 }} /> {scrape.id}
                       </div>
                     )}
                     
                     {/* Tournament */}
                     {scrape.tournament && (
                       <div style={{ fontSize: 12, color: '#888', marginBottom: 2 }}>
-                        🏆 {scrape.tournament}
+                        <Trophy size={12} weight="duotone" style={{ marginRight: 4, color: '#f59e0b' }} /> {scrape.tournament}
                       </div>
                     )}
                     
                     {/* Meta info */}
                     <div style={{ fontSize: 11, color: '#666' }}>
-                      📅 {formatDate(scrape.createdAt)} • 💾 {formatSize(scrape.size)}
+                      <Calendar size={11} weight="duotone" style={{ marginRight: 2 }} /> {formatDate(scrape.createdAt)} • <FloppyDisk size={11} weight="duotone" style={{ marginRight: 2 }} /> {formatSize(scrape.size)}
                     </div>
                   </div>
 
@@ -187,7 +198,7 @@ export default function SavedScrapes({ onLoad, collapsed = true }) {
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    {loadingId === scrape.id ? '⏳...' : '📂 Carica'}
+                    {loadingId === scrape.id ? <><Hourglass size={14} weight="duotone" />...</> : <><FolderOpen size={14} weight="duotone" style={{ marginRight: 4 }} /> Carica</>}
                   </button>
                 </div>
               ))}

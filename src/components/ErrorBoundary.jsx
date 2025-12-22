@@ -1,4 +1,5 @@
 import React from 'react';
+import { WarningCircle, ArrowClockwise } from '@phosphor-icons/react';
 
 /**
  * ErrorBoundary - Catches errors in child components and displays fallback UI
@@ -42,7 +43,7 @@ export default class ErrorBoundary extends React.Component {
           margin: '12px 0'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span style={{ fontSize: 24 }}>⚠️</span>
+            <WarningCircle size={24} weight="duotone" color="#ef5350" />
             <h3 style={{ margin: 0, color: '#ef5350' }}>
               Errore in {componentName}
             </h3>
@@ -80,10 +81,13 @@ export default class ErrorBoundary extends React.Component {
               border: 'none',
               borderRadius: 4,
               color: 'white',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6
             }}
           >
-            🔄 Riprova
+            <ArrowClockwise size={16} weight="bold" /> Riprova
           </button>
         </div>
       );

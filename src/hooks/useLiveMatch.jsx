@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { WS_URL } from '../config';
+import { Circle } from '@phosphor-icons/react';
 
 // Stati della connessione
 export const ConnectionState = {
@@ -194,11 +195,11 @@ export function useLiveMatch(eventId, options = {}) {
  */
 export function ConnectionIndicator({ state, className = '' }) {
   const stateConfig = {
-    [ConnectionState.DISCONNECTED]: { color: '#8a9bab', icon: '⚪', label: 'Disconnesso' },
-    [ConnectionState.CONNECTING]: { color: '#d4a84b', icon: '🟡', label: 'Connessione...' },
-    [ConnectionState.CONNECTED]: { color: '#5b8fb9', icon: '🔵', label: 'Connesso' },
-    [ConnectionState.SUBSCRIBED]: { color: '#6aba7f', icon: '🟢', label: 'Live' },
-    [ConnectionState.ERROR]: { color: '#c97676', icon: '🔴', label: 'Errore' }
+    [ConnectionState.DISCONNECTED]: { color: '#8a9bab', icon: <Circle size={10} weight="fill" style={{ color: '#9ca3af' }} />, label: 'Disconnesso' },
+    [ConnectionState.CONNECTING]: { color: '#d4a84b', icon: <Circle size={10} weight="fill" style={{ color: '#fbbf24' }} />, label: 'Connessione...' },
+    [ConnectionState.CONNECTED]: { color: '#5b8fb9', icon: <Circle size={10} weight="fill" style={{ color: '#3b82f6' }} />, label: 'Connesso' },
+    [ConnectionState.SUBSCRIBED]: { color: '#6aba7f', icon: <Circle size={10} weight="fill" style={{ color: '#10b981' }} />, label: 'Live' },
+    [ConnectionState.ERROR]: { color: '#c97676', icon: <Circle size={10} weight="fill" style={{ color: '#ef4444' }} />, label: 'Errore' }
   };
 
   const config = stateConfig[state] || stateConfig[ConnectionState.DISCONNECTED];

@@ -2554,7 +2554,7 @@
                 "shortNameTranslation": {}
               }
             },
-            "userCount": 2716,
+            "userCount": 2721,
             "groundType": "Hardcourt outdoor",
             "hasRounds": true,
             "hasPerformanceGraphFeature": false,
@@ -2634,7 +2634,7 @@
             "slug": "tennis",
             "id": 5
           },
-          "userCount": 78140,
+          "userCount": 78069,
           "playerTeamInfo": {
             "residence": "Monte Carlo, Monaco",
             "birthplace": "Hamburg, Germany",
@@ -2698,7 +2698,7 @@
             "slug": "tennis",
             "id": 5
           },
-          "userCount": 28317,
+          "userCount": 28287,
           "playerTeamInfo": {
             "residence": "Wroclaw, Poland",
             "birthplace": "Wroclaw, Poland",
@@ -3745,11 +3745,11 @@
       "detectedFrom": "tournament"
     }
   ],
-  "lastSync": "2025-12-19T20:59:57.280Z",
-  "syncType": "manual-sync",
+  "lastSync": "2025-12-22T21:42:35.556Z",
+  "syncType": "api-fetch",
   "liveData": {
     "eventId": "15141988",
-    "timestamp": "2025-12-19T20:59:56.539Z",
+    "timestamp": "2025-12-22T21:42:34.452Z",
     "syncType": "complete",
     "event": {
       "tournament": {
@@ -3794,7 +3794,7 @@
               "shortNameTranslation": {}
             }
           },
-          "userCount": 2716,
+          "userCount": 2721,
           "groundType": "Hardcourt outdoor",
           "hasRounds": true,
           "hasPerformanceGraphFeature": false,
@@ -3874,7 +3874,7 @@
           "slug": "tennis",
           "id": 5
         },
-        "userCount": 78140,
+        "userCount": 78069,
         "playerTeamInfo": {
           "residence": "Monte Carlo, Monaco",
           "birthplace": "Hamburg, Germany",
@@ -3938,7 +3938,7 @@
           "slug": "tennis",
           "id": 5
         },
-        "userCount": 28317,
+        "userCount": 28287,
         "playerTeamInfo": {
           "residence": "Wroclaw, Poland",
           "birthplace": "Wroclaw, Poland",
@@ -4038,14 +4038,14 @@
     "graph": null,
     "errors": [],
     "dataCompleteness": {
-      "event": true,
-      "statistics": false,
-      "lineups": false,
       "incidents": false,
-      "pointByPoint": false,
-      "h2h": true,
       "graph": false,
       "powerRankings": false,
+      "lineups": false,
+      "statistics": false,
+      "pointByPoint": false,
+      "event": true,
+      "h2h": true,
       "total": 25
     }
   }

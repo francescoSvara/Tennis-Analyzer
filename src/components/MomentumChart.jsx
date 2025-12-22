@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { interpretGameValue, getZoneIcon } from '../utils';
+import { ChartLineUp, Hourglass } from '@phosphor-icons/react';
 
 /**
  * MomentumChart - Grafico momentum match basato su powerRankings
@@ -81,11 +82,11 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
     return (
       <div className="momentum-chart">
         <div className="chart-header">
-          <span className="chart-icon">📈</span>
+          <span className="chart-icon"><ChartLineUp size={20} weight="duotone" /></span>
           <h3 className="chart-title">Momentum Match</h3>
         </div>
         <div className="chart-no-data">
-          <span>⏳ Nessun dato momentum disponibile</span>
+          <span><Hourglass size={16} weight="duotone" /> Nessun dato momentum disponibile</span>
         </div>
       </div>
     );
@@ -132,7 +133,7 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
   return (
     <div className="momentum-chart">
       <div className="chart-header">
-        <span className="chart-icon">📈</span>
+        <span className="chart-icon"><ChartLineUp size={18} weight="duotone" /></span>
         <h3 className="chart-title">Momentum Match</h3>
       </div>
       
