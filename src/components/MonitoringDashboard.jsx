@@ -492,7 +492,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedTournament, setExpandedTournament] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'explore' | 'tracking' | 'predictor'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'tournaments' | 'explore' | 'predictor'
   
   // === DATA INSPECTOR - Stati ===
   const [inspectorMode, setInspectorMode] = useState('player'); // 'player' | 'match'
@@ -825,12 +825,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             onClick={() => setActiveTab('explore')}
           >
             <MagnifyingGlass size={18} weight="duotone" style={{ marginRight: 6 }} />Esplora Match
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'tracking' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tracking')}
-          >
-            <Broadcast size={18} weight="duotone" style={{ marginRight: 6 }} />Live Tracking
           </button>
           <button 
             className={`tab-btn ${activeTab === 'predictor' ? 'active' : ''}`}
@@ -1330,42 +1324,6 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   <Lightbulb size={24} weight="duotone" style={{ marginRight: 8, color: '#f59e0b' }} />
                   <p>Usa i filtri sopra per cercare match nel database</p>
                   <small>Puoi filtrare per giocatore, torneo, status o data</small>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {stats && activeTab === 'tracking' && (
-            <div className="tab-content tracking-tab">
-              <div className="tracking-header">
-                <h3><Broadcast size={22} weight="duotone" style={{ marginRight: 8 }} />Partite in Monitoraggio Automatico</h3>
-                <p className="tracking-info">
-                  Queste partite vengono aggiornate automaticamente ogni 30 secondi
-                </p>
-              </div>
-              
-              {stats.tracking.matches.length === 0 ? (
-                <div className="no-tracking">
-                  <Broadcast size={40} weight="duotone" style={{ marginBottom: 12, opacity: 0.5 }} />
-                  <p>Nessuna partita in monitoraggio attivo</p>
-                  <span className="no-tracking-hint">
-                    Le partite live vengono tracciate automaticamente
-                  </span>
-                </div>
-              ) : (
-                <div className="tracking-list">
-                  {stats.tracking.matches.map(match => (
-                    <div key={match.eventId} className="tracking-item">
-                      <div className="tracking-dot pulse"></div>
-                      <div className="tracking-details">
-                        <span className="tracking-id">Event #{match.eventId}</span>
-                        <span className="tracking-status">{match.status}</span>
-                      </div>
-                      <span className="tracking-time">
-                        Ultimo update: {new Date(match.lastUpdate).toLocaleTimeString('it-IT')}
-                      </span>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
