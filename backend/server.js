@@ -373,7 +373,8 @@ app.get('/api/db-stats', async (req, res) => {
     // Prova a caricare dal database
     if (matchRepository) {
       try {
-        dbMatches = await matchRepository.getMatches({ limit: 500 }) || [];
+        // Carica TUTTI i match per avere statistiche complete sui tornei
+        dbMatches = await matchRepository.getMatches({ limit: 10000 }) || [];
         dbTournaments = await matchRepository.getTournaments() || [];
         console.log(`📊 DB Stats: Found ${dbMatches.length} matches in database`);
       } catch (dbErr) {
