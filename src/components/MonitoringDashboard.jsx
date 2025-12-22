@@ -537,7 +537,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
   // === DATA INSPECTOR - Carica dati giocatore o match ===
   const loadInspectorData = useCallback(async () => {
     const searchTerm = inspectorMode === 'match' ? selectedMatchId : inspectorSearch;
-    if (!searchTerm) return;
+    if (!searchTerm || !searchTerm.toString().trim()) return;
     
     setInspectorLoading(true);
     setInspectorData(null);
@@ -545,13 +545,23 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
     try {
       if (inspectorMode === 'player') {
         // Carica profilo giocatore con dati puri e calcolati
-        const res = await fetch(apiUrl(`/api/player/${encodeURIComponent(searchTerm)}/inspector`));
-        if (res.ok) {
-          const data = await res.json();
-          setInspectorData({ type: 'player', ...data });
-        } else {
-          // Fallback: carica dati base
-          const profileRes = await fetch(apiUrl(`/api/player/${encodeURIComponent(searchTerm)}/profile`));
+        let data = null;
+        try {
+          const res = await fetch(apiUrl(`/api/player/${encodeURIComponent(searchTerm.trim())}/inspector`));
+          if (res.ok) {
+            data = await res.json();
+            if (data && !data.error) {
+              setInspectorData({ type: 'player', ...data });
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Inspector endpoint failed, trying fallback:', e.message);
+        }
+        
+        // Fallback: carica dati base
+        try {
+          const profileRes = await fetch(apiUrl(`/api/player/${encodeURIComponent(searchTerm.trim())}/profile`));
           if (profileRes.ok) {
             const profile = await profileRes.json();
             setInspectorData({ 
@@ -562,17 +572,29 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
               coverage: profile.coverage || { total: 0, available: 0 }
             });
           } else {
-            setInspectorData({ type: 'player', error: 'Giocatore non trovato' });
+            setInspectorData({ type: 'player', error: 'Giocatore non trovato nel database' });
           }
+        } catch (e) {
+          console.error('Profile fallback also failed:', e.message);
+          setInspectorData({ type: 'player', error: 'Errore di connessione al server' });
         }
       } else {
         // Carica dati match
-        const res = await fetch(apiUrl(`/api/match/${searchTerm}/inspector`));
-        if (res.ok) {
-          const data = await res.json();
-          setInspectorData({ type: 'match', ...data });
-        } else {
-          // Fallback: carica match base
+        try {
+          const res = await fetch(apiUrl(`/api/match/${searchTerm}/inspector`));
+          if (res.ok) {
+            const data = await res.json();
+            if (data && !data.error) {
+              setInspectorData({ type: 'match', ...data });
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Match inspector endpoint failed, trying fallback:', e.message);
+        }
+        
+        // Fallback: carica match base
+        try {
           const matchRes = await fetch(apiUrl(`/api/match/${searchTerm}`));
           if (matchRes.ok) {
             const match = await matchRes.json();
@@ -584,13 +606,16 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
               coverage: { total: 0, available: 0 }
             });
           } else {
-            setInspectorData({ type: 'match', error: 'Match non trovato' });
+            setInspectorData({ type: 'match', error: 'Match non trovato nel database' });
           }
+        } catch (e) {
+          console.error('Match fallback also failed:', e.message);
+          setInspectorData({ type: 'match', error: 'Errore di connessione al server' });
         }
       }
     } catch (e) {
       console.error('Error loading inspector data:', e);
-      setInspectorData({ error: e.message });
+      setInspectorData({ type: inspectorMode, error: `Errore: ${e.message}` });
     } finally {
       setInspectorLoading(false);
     }
@@ -979,10 +1004,10 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                   <div className="inspector-results-header">
                     <span className="inspector-entity-name">
                       {inspectorData.type === 'player' 
-                        ? <><User size={18} weight="duotone" style={{ marginRight: 6 }} />{inspectorData.name || inspectorSearch}</> 
-                        : <><TennisBall size={18} weight="duotone" style={{ marginRight: 6 }} />{inspectorData.matchInfo || inspectorData.eventId || selectedMatchId}</>}
+                        ? <><User size={18} weight="duotone" style={{ marginRight: 6 }} />{inspectorData.name || inspectorSearch || 'Giocatore'}</> 
+                        : <><TennisBall size={18} weight="duotone" style={{ marginRight: 6 }} />{inspectorData.matchInfo || inspectorData.eventId || selectedMatchId || 'Match'}</>}
                     </span>
-                    {inspectorData.coverage && (
+                    {inspectorData.coverage && typeof inspectorData.coverage === 'object' && (
                       <span className="inspector-coverage">
                         <ChartBar size={16} weight="duotone" style={{ marginRight: 4 }} />Copertura: {inspectorData.coverage.available || 0}/{inspectorData.coverage.total || 0} 
                         ({inspectorData.coverage.total > 0 ? Math.round((inspectorData.coverage.available / inspectorData.coverage.total) * 100) : 0}%)
