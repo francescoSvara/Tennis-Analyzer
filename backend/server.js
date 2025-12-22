@@ -2824,7 +2824,7 @@ app.get('/api/players/search', async (req, res) => {
     const players = await playerStatsService.searchPlayers(q, parseInt(limit));
     res.json(players.map(p => ({
       name: p.name,
-      matchCount: p.matchCount
+      matchCount: p.totalMatches
     })));
   } catch (error) {
     console.error('Error searching players:', error);

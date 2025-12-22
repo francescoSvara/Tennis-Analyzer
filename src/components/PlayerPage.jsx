@@ -344,9 +344,9 @@ export default function PlayerPage() {
         <div className="profile-content">
           {/* Player header */}
           <div className="player-header-card">
-            <h2>{profile.player?.name}</h2>
+            <h2>🎾 {playerName}</h2>
             <p className="matches-analyzed">
-              📊 {profile.player?.matches_analyzed || 0} partite analizzate
+              📊 {profile.player?.matches_analyzed || profile.statistics?.totalMatches || 0} partite analizzate
             </p>
             {surfaceFilter && (
               <span className="surface-badge">{surfaceFilter}</span>

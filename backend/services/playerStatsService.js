@@ -448,7 +448,14 @@ async function searchPlayers(query, limit = 10) {
 
   // Converti in array con statistiche
   const players = Object.entries(playerCounts)
-    .filter(([name]) => name.toLowerCase().includes(query.toLowerCase()))
+    .filter(([name]) => {
+      const nameLower = name.toLowerCase();
+      const queryLower = query.toLowerCase();
+      
+      // Ricerca più intelligente: nome completo, nome, cognome
+      return nameLower.includes(queryLower) || 
+             nameLower.split(' ').some(part => part.startsWith(queryLower));
+    })
     .map(([name, counts]) => {
       const totalMatches = counts.wins + counts.losses;
       const winRate = totalMatches > 0 ? counts.wins / totalMatches : 0;
@@ -465,9 +472,21 @@ async function searchPlayers(query, limit = 10) {
       const bLower = b.name.toLowerCase();
       const qLower = query.toLowerCase();
       
-      // Priorità a chi inizia con la query
+      // Priorità 1: Match esatto del nome/cognome
+      const aExactMatch = aLower.split(' ').some(part => part === qLower);
+      const bExactMatch = bLower.split(' ').some(part => part === qLower);
+      if (aExactMatch && !bExactMatch) return -1;
+      if (!aExactMatch && bExactMatch) return 1;
+      
+      // Priorità 2: Chi inizia con la query
       if (aLower.startsWith(qLower) && !bLower.startsWith(qLower)) return -1;
       if (!aLower.startsWith(qLower) && bLower.startsWith(qLower)) return 1;
+      
+      // Priorità 3: Cognome che inizia con la query
+      const aLastNameMatch = aLower.split(' ').pop().startsWith(qLower);
+      const bLastNameMatch = bLower.split(' ').pop().startsWith(qLower);
+      if (aLastNameMatch && !bLastNameMatch) return -1;
+      if (!aLastNameMatch && bLastNameMatch) return 1;
       
       // Poi per numero di match (più dati = più rilevante)
       return b.totalMatches - a.totalMatches;
