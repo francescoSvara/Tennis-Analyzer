@@ -2056,6 +2056,87 @@ app.get('/api/db/test', async (req, res) => {
   }
 });
 
+// 🚀 OPTIMIZED: Summary endpoint - solo conteggi per anno/mese (HomePage lightweight)
+// Filosofia: "1 query only", evita caricare tutti i match al primo render
+app.get('/api/db/matches/summary', async (req, res) => {
+  if (!matchRepository) {
+    return res.status(503).json({ error: 'Database not configured' });
+  }
+  try {
+    const summary = await matchRepository.getMatchesSummary();
+    res.json(summary);
+  } catch (err) {
+    console.error('Error fetching matches summary:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 🚀 OPTIMIZED: By-month endpoint - lazy load match di un mese specifico
+// Chiamato solo quando l'utente espande un mese nella UI
+app.get('/api/db/matches/by-month/:yearMonth', async (req, res) => {
+  if (!matchRepository) {
+    return res.status(503).json({ error: 'Database not configured' });
+  }
+  try {
+    const { yearMonth } = req.params;
+    const dbMatches = await matchRepository.getMatchesByMonth(yearMonth);
+    
+    // Trasforma in formato frontend (stessa logica di /api/db/matches)
+    const matches = (dbMatches || []).map(m => {
+      const raw = m.raw_json || {};
+      const homeName = m.home_name || m.home_player?.name || raw.homeTeam?.name || raw.mapping?.home?.name || m.winner_name || '';
+      const awayName = m.away_name || m.away_player?.name || raw.awayTeam?.name || raw.mapping?.away?.name || m.loser_name || '';
+      const homeCountry = m.home_country || m.home_player?.country_alpha2 || raw.homeTeam?.country?.alpha2 || '';
+      const awayCountry = m.away_country || m.away_player?.country_alpha2 || raw.awayTeam?.country?.alpha2 || '';
+      const homeRanking = m.home_ranking || m.home_player?.current_ranking || raw.homeTeam?.ranking || m.winner_rank || null;
+      const awayRanking = m.away_ranking || m.away_player?.current_ranking || raw.awayTeam?.ranking || m.loser_rank || null;
+      const tournamentName = m.tournament_name || m.tournament?.name || raw.tournament?.uniqueTournament?.name || raw.tournament?.name || m.series || '';
+      const tournamentCategory = m.tournament_category || m.tournament?.category || raw.tournament?.category?.name || m.surface || '';
+      
+      return {
+        id: m.id,
+        eventId: m.id,
+        sport: 'tennis',
+        sportName: 'Tennis',
+        tournament: tournamentName,
+        category: tournamentCategory,
+        surface: m.tournament_ground || m.tournament?.ground_type || m.surface || m.court_type || '',
+        homeTeam: {
+          id: m.home_player_id,
+          name: homeName,
+          shortName: homeName,
+          country: homeCountry,
+          ranking: homeRanking
+        },
+        awayTeam: {
+          id: m.away_player_id,
+          name: awayName,
+          shortName: awayName,
+          country: awayCountry,
+          ranking: awayRanking
+        },
+        homeScore: m.home_sets_won ? { current: m.home_sets_won } : null,
+        awayScore: m.away_sets_won ? { current: m.away_sets_won } : null,
+        status: {
+          code: m.status_code,
+          type: m.status_type,
+          description: m.status_description
+        },
+        startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
+        winnerCode: m.winner_code,
+        dataCompleteness: m.data_completeness || 50,
+        dataSource: m.data_source || 'sofascore',
+        source: 'database'
+      };
+    });
+    
+    res.json({ matches, count: matches.length, yearMonth });
+  } catch (err) {
+    console.error('Error fetching matches by month:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get all matches with optional filters (trasforma in formato frontend)
 app.get('/api/db/matches', async (req, res) => {
   if (!matchRepository) {

@@ -713,6 +713,26 @@
   padding: 12px 16px 16px;
 }
 
+/* Loading state per lazy load */
+.month-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: var(--home-text-muted);
+  font-size: 0.85rem;
+}
+
+.month-loading .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Day Group (dentro Month Group) */
 .day-group {
   margin-bottom: 8px;

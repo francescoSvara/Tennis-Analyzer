@@ -153,93 +153,35 @@ function AddMatchModal({ onClose, onSuccess }) {
 
 function HomePage({ onMatchSelect, onNavigateToPlayer }) {
   const [selectedSport, setSelectedSport] = useState('tennis');
-  const [matches, setMatches] = useState([]);
-  const [suggestedMatches, setSuggestedMatches] = useState([]);
-  const [detectedMatches, setDetectedMatches] = useState([]);
-  const [totalMatchCount, setTotalMatchCount] = useState(0);
-  const [totalDetectedCount, setTotalDetectedCount] = useState(0);
+  const [summary, setSummary] = useState({ total: 0, byYearMonth: [] }); // Solo conteggi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
 
-  // Funzione per caricare i match
-  const loadMatches = useCallback(async () => {
+  // 🚀 OTTIMIZZATO: Carica SOLO il summary (conteggi), niente match all'avvio
+  const loadSummary = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // Carica TUTTI i match dal database con paginazione
-      let allMatches = [];
-      let offset = 0;
-      const pageSize = 1000; // Supabase ha limite di ~1000 per query
-      let hasMore = true;
-      
-      while (hasMore) {
-        const matchesRes = await fetch(apiUrl(`/api/db/matches?limit=${pageSize}&offset=${offset}`));
-        if (!matchesRes.ok) {
-          throw new Error(`Errore HTTP: ${matchesRes.status}`);
-        }
-        const matchesData = await matchesRes.json();
-        const pageMatches = matchesData.matches || [];
-        allMatches = [...allMatches, ...pageMatches];
-        
-        // Se abbiamo ricevuto meno del pageSize, abbiamo finito
-        if (pageMatches.length < pageSize) {
-          hasMore = false;
-        } else {
-          offset += pageSize;
-        }
-        
-        // Aggiorna totalCount dalla prima risposta
-        if (offset === pageSize) {
-          setTotalMatchCount(matchesData.totalCount || allMatches.length);
-        }
-      }
-      
-      setMatches(allMatches);
-      setTotalMatchCount(allMatches.length);
-      console.log(`📁 Loaded ${allMatches.length} matches from database (all pages)`);
-      
-      // Carica suggeriti e rilevati in parallelo
-      const [suggestedRes, detectedRes, trackedRes] = await Promise.all([
-        fetch(apiUrl(`/api/suggested-matches?sport=${selectedSport}`)).catch(() => null),
-        fetch(apiUrl(`/api/detected-matches`)).catch(() => null),
-        fetch(apiUrl(`/api/tracked`)).catch(() => null)
-      ]);
-      
-      // Suggeriti sono opzionali, non fallire se non funziona
-      if (suggestedRes?.ok) {
-        const suggestedData = await suggestedRes.json();
-        setSuggestedMatches(suggestedData.matches || []);
-      }
-      
-      // Partite rilevate (dal torneo) - mostra le mancanti
-      if (detectedRes?.ok) {
-        const detectedData = await detectedRes.json();
-        setDetectedMatches(detectedData.matches || []);
-        setTotalDetectedCount(detectedData.totalCount || detectedData.count || 0);
-      }
-      
-      // Log partite tracciate
-      if (trackedRes?.ok) {
-        const trackedData = await trackedRes.json();
-        if (trackedData.count > 0) {
-          console.log(`📌 ${trackedData.count} partite in monitoraggio automatico`);
-        }
-      }
+      const res = await fetch(apiUrl('/api/db/matches/summary'));
+      if (!res.ok) throw new Error(`Errore HTTP: ${res.status}`);
+      const data = await res.json();
+      setSummary(data);
+      console.log(`📊 Summary loaded: ${data.total} matches totali`);
     } catch (err) {
-      console.error('Errore caricamento match:', err);
+      console.error('Errore caricamento summary:', err);
       setError('Impossibile caricare i match. Verifica che il backend sia attivo su porta 3001.');
-      setMatches([]);
+      setSummary({ total: 0, byYearMonth: [] });
     } finally {
       setLoading(false);
     }
-  }, [selectedSport]);
+  }, []);
 
-  // Carica i match quando cambia lo sport
+  // Carica il summary all'avvio
   useEffect(() => {
-    loadMatches();
-  }, [loadMatches]);
+    loadSummary();
+  }, [loadSummary]);
 
   const handleMatchClick = (match) => {
     if (onMatchSelect) {
@@ -247,28 +189,9 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
     }
   };
 
-  // Handler per aggiungere match suggerito al DB
-  const handleAddSuggested = async (match) => {
-    try {
-      const sofaUrl = `https://www.sofascore.com/event/${match.eventId}`;
-      const response = await fetch(apiUrl('/api/scrape'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: sofaUrl })
-      });
-      
-      if (response.ok) {
-        // Ricarica lista dopo aggiunta
-        loadMatches();
-      }
-    } catch (err) {
-      console.error('Errore aggiunta match:', err);
-    }
-  };
-
   const handleAddMatchSuccess = () => {
     setShowAddModal(false);
-    loadMatches(); // Ricarica la lista
+    loadSummary(); // Ricarica solo il summary
   };
 
   return (
@@ -322,10 +245,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
             
             <span className="match-count">
               <Database size={14} weight="bold" style={{ marginRight: 4, opacity: 0.7 }} />
-              {loading ? '...' : `${totalMatchCount} salvate`}
-              {totalDetectedCount > 0 && !loading && (
-                <span className="detected-count"> · {totalDetectedCount} mancanti</span>
-              )}
+              {loading ? '...' : `${summary.total} salvate`}
             </span>
           </div>
 
@@ -341,7 +261,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
               <span className="error-text">{error}</span>
               <motion.button 
                 className="retry-btn" 
-                onClick={loadMatches}
+                onClick={loadSummary}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -351,14 +271,11 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
             </motion.div>
           )}
           
-          {/* Match Grid */}
+          {/* Match Grid - ora usa summary con lazy load */}
           <MatchGrid 
-            matches={matches}
-            suggestedMatches={suggestedMatches}
-            detectedMatches={detectedMatches}
+            summary={summary}
             loading={loading}
             onMatchClick={handleMatchClick}
-            onAddSuggested={handleAddSuggested}
           />
         </main>
       </div>
@@ -375,7 +292,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
       <MonitoringDashboard 
         isOpen={showMonitoring}
         onClose={() => setShowMonitoring(false)}
-        onMatchesUpdated={loadMatches}
+        onMatchesUpdated={loadSummary}
         onMatchSelect={onMatchSelect}
       />
     </div>

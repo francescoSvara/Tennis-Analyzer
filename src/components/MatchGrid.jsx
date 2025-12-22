@@ -1,94 +1,17 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { 
-  TennisBall, 
   CalendarBlank, 
   CaretDown, 
-  CaretRight,
   FolderOpen,
-  Calendar
+  Calendar,
+  Spinner
 } from '@phosphor-icons/react';
 import MatchCard from './MatchCard';
 import { MatchGridSkeleton } from './motion/Skeleton';
 import EmptyState from './motion/EmptyState';
 import { durations, easings, staggerContainer, staggerItem } from '../motion/tokens';
-
-// Hook per aggiornare le date a mezzanotte
-function useMidnightRefresh(callback) {
-  useEffect(() => {
-    const now = new Date();
-    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const msUntilMidnight = tomorrow.getTime() - now.getTime();
-    
-    // Timer per la prossima mezzanotte
-    const midnightTimer = setTimeout(() => {
-      callback();
-      // Dopo la prima mezzanotte, imposta intervallo giornaliero
-      const dailyInterval = setInterval(callback, 24 * 60 * 60 * 1000);
-      return () => clearInterval(dailyInterval);
-    }, msUntilMidnight);
-    
-    return () => clearTimeout(midnightTimer);
-  }, [callback]);
-}
-
-// Funzione per ottenere la label dell'anno
-function getYearLabel(timestamp) {
-  if (!timestamp) return 'Data sconosciuta';
-  const date = new Date(timestamp * 1000);
-  const now = new Date();
-  const year = date.getFullYear();
-  
-  if (year === now.getFullYear()) return 'Quest\'anno';
-  if (year === now.getFullYear() - 1) return 'Anno scorso';
-  if (year === now.getFullYear() + 1) return 'Prossimo anno';
-  return String(year);
-}
-
-// Funzione per ottenere la chiave dell'anno (per ordinamento)
-function getYearKey(timestamp) {
-  if (!timestamp) return '9999';
-  const date = new Date(timestamp * 1000);
-  return String(date.getFullYear());
-}
-
-// Funzione per ottenere la label del mese
-function getMonthLabel(timestamp) {
-  if (!timestamp) return 'Data sconosciuta';
-  
-  const date = new Date(timestamp * 1000);
-  const now = new Date();
-  
-  // Controlla se è il mese corrente
-  if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
-    return 'Questo mese';
-  }
-  
-  // Controlla se è il mese scorso
-  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  if (date.getFullYear() === lastMonth.getFullYear() && date.getMonth() === lastMonth.getMonth()) {
-    return 'Mese scorso';
-  }
-  
-  // Controlla se è il prossimo mese
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  if (date.getFullYear() === nextMonth.getFullYear() && date.getMonth() === nextMonth.getMonth()) {
-    return 'Prossimo mese';
-  }
-  
-  // Per altri mesi, mostra nome mese e anno
-  return date.toLocaleDateString('it-IT', { 
-    month: 'long',
-    year: 'numeric'
-  });
-}
-
-// Funzione per ottenere la chiave del mese (per ordinamento)
-function getMonthKey(timestamp) {
-  if (!timestamp) return '9999-99'; // Date sconosciute alla fine
-  const date = new Date(timestamp * 1000);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-}
+import { apiUrl } from '../config';
 
 // Funzione per ottenere la label della data (per sotto-raggruppamento)
 function getDateLabel(timestamp) {
@@ -126,13 +49,20 @@ function getDateKey(timestamp) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-// Componente per gruppo di anni collassabile
-function YearGroup({ yearLabel, yearKey, monthGroups, onMatchClick, onAddSuggested, defaultExpanded = false }) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+// 🚀 OTTIMIZZATO: YearGroup - inizia CHIUSO, non carica dati finché non espanso
+function YearGroup({ year, months, onMatchClick }) {
+  const [isExpanded, setIsExpanded] = useState(false); // SEMPRE chiuso di default
   const prefersReducedMotion = useReducedMotion();
   
-  // Conta totale partite nell'anno
-  const totalCount = monthGroups.reduce((sum, mg) => sum + mg.matches.length, 0);
+  // Conta totale partite nell'anno (dai conteggi, non dai match)
+  const totalCount = months.reduce((sum, m) => sum + m.count, 0);
+  
+  // Label anno user-friendly
+  const now = new Date();
+  const yearNum = parseInt(year);
+  let yearLabel = year;
+  if (yearNum === now.getFullYear()) yearLabel = "Quest'anno";
+  else if (yearNum === now.getFullYear() - 1) yearLabel = 'Anno scorso';
   
   return (
     <motion.div 
@@ -172,15 +102,12 @@ function YearGroup({ yearLabel, yearKey, monthGroups, onMatchClick, onAddSuggest
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: durations.normal, ease: easings.premium }}
           >
-            {monthGroups.map((monthGroup) => (
-              <MonthGroup
-                key={monthGroup.monthKey}
-                monthLabel={monthGroup.monthLabel}
-                monthKey={monthGroup.monthKey}
-                matches={monthGroup.matches}
+            {months.map((month) => (
+              <MonthGroupLazy
+                key={month.monthKey}
+                monthKey={month.monthKey}
+                count={month.count}
                 onMatchClick={onMatchClick}
-                onAddSuggested={onAddSuggested}
-                defaultExpanded={monthGroup.monthKey === getMonthKey(Date.now() / 1000)}
               />
             ))}
           </motion.div>
@@ -190,18 +117,55 @@ function YearGroup({ yearLabel, yearKey, monthGroups, onMatchClick, onAddSuggest
   );
 }
 
-// Componente per gruppo di mesi collassabile
-function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggested, defaultExpanded = false }) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+// 🚀 LAZY: MonthGroup - carica i match SOLO quando espanso
+function MonthGroupLazy({ monthKey, count, onMatchClick }) {
+  const [isExpanded, setIsExpanded] = useState(false); // SEMPRE chiuso
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   
-  // Conta match nel DB vs suggeriti vs rilevati
-  const dbCount = matches.filter(m => !m.isSuggested && !m.isDetected).length;
-  const suggestedCount = matches.filter(m => m.isSuggested).length;
-  const detectedCount = matches.filter(m => m.isDetected).length;
+  // Label mese user-friendly
+  const [year, month] = monthKey.split('-').map(Number);
+  const monthDate = new Date(year, month - 1, 1);
+  const now = new Date();
   
-  // Raggruppa i match per giorno all'interno del mese
+  let monthLabel;
+  if (year === now.getFullYear() && month === now.getMonth() + 1) {
+    monthLabel = 'Questo mese';
+  } else if (year === now.getFullYear() && month === now.getMonth()) {
+    monthLabel = 'Mese scorso';
+  } else {
+    monthLabel = monthDate.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  }
+  
+  // 🚀 LAZY LOAD: Carica i match solo quando l'utente espande il mese
+  const handleExpand = async () => {
+    const newExpanded = !isExpanded;
+    setIsExpanded(newExpanded);
+    
+    // Carica i match solo alla prima espansione
+    if (newExpanded && !loaded && !loading) {
+      setLoading(true);
+      try {
+        const res = await fetch(apiUrl(`/api/db/matches/by-month/${monthKey}`));
+        if (res.ok) {
+          const data = await res.json();
+          setMatches(data.matches || []);
+          setLoaded(true);
+          console.log(`📂 Lazy loaded ${data.matches?.length || 0} matches for ${monthKey}`);
+        }
+      } catch (err) {
+        console.error('Error loading month matches:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+  
+  // Raggruppa i match per giorno (solo se caricati)
   const dayGroups = useMemo(() => {
+    if (!matches.length) return [];
     const groups = {};
     matches.forEach(match => {
       const dateKey = getDateKey(match.startTimestamp);
@@ -223,7 +187,7 @@ function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggeste
     >
       <motion.button 
         className={`month-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={handleExpand}
         whileHover={!prefersReducedMotion ? { backgroundColor: 'rgba(255, 255, 255, 0.04)' } : {}}
         whileTap={{ scale: 0.99 }}
       >
@@ -233,18 +197,12 @@ function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggeste
             animate={{ rotate: isExpanded ? 0 : -90 }}
             transition={{ duration: durations.fast, ease: easings.premium }}
           >
-            <CaretDown size={12} weight="bold" />
+            {loading ? <Spinner size={12} className="spin" /> : <CaretDown size={12} weight="bold" />}
           </motion.span>
           <FolderOpen size={14} weight="duotone" style={{ marginRight: 6, opacity: 0.7 }} />
           <span className="month-group-label">{monthLabel}</span>
           <span className="month-group-count">
-            {dbCount} {dbCount === 1 ? 'partita' : 'partite'}
-            {suggestedCount > 0 && (
-              <span className="suggested-count"> (+{suggestedCount} da aggiungere)</span>
-            )}
-            {detectedCount > 0 && (
-              <span className="detected-count"> (+{detectedCount} rilevate)</span>
-            )}
+            {count} {count === 1 ? 'partita' : 'partite'}
           </span>
         </div>
       </motion.button>
@@ -258,15 +216,21 @@ function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggeste
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: durations.normal, ease: easings.premium }}
           >
-            {dayGroups.map((dayGroup) => (
-              <DayGroup
-                key={dayGroup.dateKey}
-                dateLabel={dayGroup.dateLabel}
-                matches={dayGroup.matches}
-                onMatchClick={onMatchClick}
-                onAddSuggested={onAddSuggested}
-              />
-            ))}
+            {loading ? (
+              <div className="month-loading">
+                <Spinner size={20} className="spin" />
+                <span>Caricamento partite...</span>
+              </div>
+            ) : (
+              dayGroups.map((dayGroup) => (
+                <DayGroup
+                  key={dayGroup.dateKey}
+                  dateLabel={dayGroup.dateLabel}
+                  matches={dayGroup.matches}
+                  onMatchClick={onMatchClick}
+                />
+              ))
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -274,12 +238,10 @@ function MonthGroup({ monthLabel, monthKey, matches, onMatchClick, onAddSuggeste
   );
 }
 
-// Componente per sotto-gruppo giornaliero
-function DayGroup({ dateLabel, matches, onMatchClick, onAddSuggested }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+// 🚀 SEMPLIFICATO: DayGroup - mostra le card solo quando espanso
+function DayGroup({ dateLabel, matches, onMatchClick }) {
+  const [isExpanded, setIsExpanded] = useState(false); // SEMPRE chiuso
   const prefersReducedMotion = useReducedMotion();
-  
-  const dbCount = matches.filter(m => !m.isSuggested && !m.isDetected).length;
   
   return (
     <div className="day-group">
@@ -298,7 +260,7 @@ function DayGroup({ dateLabel, matches, onMatchClick, onAddSuggested }) {
         </motion.span>
         <CalendarBlank size={12} weight="duotone" style={{ marginRight: 6, opacity: 0.6 }} />
         <span className="day-group-label">{dateLabel}</span>
-        <span className="day-group-count">{dbCount}</span>
+        <span className="day-group-count">{matches.length}</span>
       </motion.button>
       
       <AnimatePresence>
@@ -326,10 +288,7 @@ function DayGroup({ dateLabel, matches, onMatchClick, onAddSuggested }) {
               >
                 <MatchCard 
                   match={match} 
-                  onClick={(match.isSuggested || match.isDetected) ? null : onMatchClick}
-                  isSuggested={match.isSuggested}
-                  isDetected={match.isDetected}
-                  onAddToDb={(match.isSuggested || match.isDetected) && onAddSuggested ? () => onAddSuggested(match) : null}
+                  onClick={onMatchClick}
                   dataSources={match.dataSources}
                 />
               </motion.div>
@@ -341,104 +300,15 @@ function DayGroup({ dateLabel, matches, onMatchClick, onAddSuggested }) {
   );
 }
 
-function MatchGrid({ matches, loading, onMatchClick, suggestedMatches = [], detectedMatches = [], onAddSuggested }) {
-  // State per forzare re-render a mezzanotte
-  const [, setMidnightTick] = useState(0);
-  
-  // Callback per refresh a mezzanotte
-  const handleMidnight = useCallback(() => {
-    console.log('🕛 Mezzanotte! Aggiornamento date...');
-    setMidnightTick(tick => tick + 1);
-  }, []);
-  
-  // Hook per aggiornare le date a mezzanotte
-  useMidnightRefresh(handleMidnight);
-  
-  // Raggruppa le partite per ANNO > MESE (inclusi suggeriti e rilevati)
-  const groupedByYear = useMemo(() => {
-    // Raccogli tutti gli eventId già nel database per evitare duplicati
-    const existingEventIds = new Set((matches || []).map(m => String(m.eventId)));
-    
-    const yearGroups = {};
-    
-    // Funzione helper per aggiungere un match al gruppo corretto
-    const addMatchToGroup = (match, isSuggested, isDetected) => {
-      const yearKey = getYearKey(match.startTimestamp);
-      const yearLabel = getYearLabel(match.startTimestamp);
-      const monthKey = getMonthKey(match.startTimestamp);
-      const monthLabel = getMonthLabel(match.startTimestamp);
-      
-      if (!yearGroups[yearKey]) {
-        yearGroups[yearKey] = {
-          yearKey,
-          yearLabel,
-          monthGroups: {}
-        };
-      }
-      
-      if (!yearGroups[yearKey].monthGroups[monthKey]) {
-        yearGroups[yearKey].monthGroups[monthKey] = {
-          monthKey,
-          monthLabel,
-          matches: []
-        };
-      }
-      
-      yearGroups[yearKey].monthGroups[monthKey].matches.push({ 
-        ...match, 
-        isSuggested, 
-        isDetected 
-      });
-    };
-    
-    // Aggiungi match esistenti
-    (matches || []).forEach(match => {
-      addMatchToGroup(match, false, false);
-    });
-    
-    // Aggiungi match suggeriti (da API, non nel DB)
-    (suggestedMatches || []).forEach(match => {
-      if (!existingEventIds.has(String(match.eventId))) {
-        addMatchToGroup(match, true, false);
-      }
-    });
-    
-    // Aggiungi match rilevati (dal torneo, non nel DB)
-    (detectedMatches || []).forEach(match => {
-      if (!existingEventIds.has(String(match.eventId))) {
-        addMatchToGroup(match, false, true);
-      }
-    });
-    
-    // Se non ci sono gruppi, ritorna array vuoto
-    if (Object.keys(yearGroups).length === 0) return [];
-    
-    // Converti e ordina
-    return Object.values(yearGroups)
-      .sort((a, b) => b.yearKey.localeCompare(a.yearKey)) // Anni più recenti prima
-      .map(yearGroup => ({
-        ...yearGroup,
-        monthGroups: Object.values(yearGroup.monthGroups)
-          .sort((a, b) => b.monthKey.localeCompare(a.monthKey)) // Mesi più recenti prima
-          .map(monthGroup => ({
-            ...monthGroup,
-            matches: monthGroup.matches.sort((a, b) => {
-              const timeA = a.startTimestamp || 0;
-              const timeB = b.startTimestamp || 0;
-              if (timeA !== timeB) return timeB - timeA;
-              return (a.tournament || '').localeCompare(b.tournament || '');
-            })
-          }))
-      }));
-  }, [matches, suggestedMatches, detectedMatches]);
-  
-  // Skeleton loading con nuovo componente
+// 🚀 OTTIMIZZATO: MatchGrid - riceve solo summary (conteggi), lazy load on demand
+function MatchGrid({ summary, loading, onMatchClick }) {
+  // Skeleton loading
   if (loading) {
     return <MatchGridSkeleton count={6} />;
   }
 
-  // Empty state con nuovo componente
-  if (!matches || matches.length === 0) {
+  // Empty state
+  if (!summary?.byYearMonth?.length) {
     return (
       <EmptyState
         type="noMatches"
@@ -449,6 +319,7 @@ function MatchGrid({ matches, loading, onMatchClick, suggestedMatches = [], dete
   }
 
   // Match grid con gruppi per ANNO > MESE > GIORNO
+  // TUTTI I GRUPPI INIZIANO CHIUSI - lazy load quando espansi
   return (
     <motion.div 
       className="match-grid-grouped"
@@ -456,15 +327,12 @@ function MatchGrid({ matches, loading, onMatchClick, suggestedMatches = [], dete
       initial="initial"
       animate="animate"
     >
-      {groupedByYear.map((yearGroup) => (
+      {summary.byYearMonth.map((yearGroup) => (
         <YearGroup
-          key={yearGroup.yearKey}
-          yearLabel={yearGroup.yearLabel}
-          yearKey={yearGroup.yearKey}
-          monthGroups={yearGroup.monthGroups}
+          key={yearGroup.year}
+          year={yearGroup.year}
+          months={yearGroup.months}
           onMatchClick={onMatchClick}
-          onAddSuggested={onAddSuggested}
-          defaultExpanded={yearGroup.yearKey === getYearKey(Date.now() / 1000)}
         />
       ))}
     </motion.div>

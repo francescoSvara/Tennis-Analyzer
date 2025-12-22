@@ -984,6 +984,84 @@ async function getMissingMatches(limit = 500) {
 }
 
 /**
+ * 🚀 OTTIMIZZATO: Ritorna solo i conteggi raggruppati per anno/mese
+ * Usato dalla HomePage per rendering iniziale SENZA caricare tutti i match
+ * Filosofia: "1 query only" - leggero e veloce
+ */
+async function getMatchesSummary() {
+  if (!checkSupabase()) return { total: 0, byYearMonth: [] };
+  
+  // Query aggregata: conta match raggruppati per anno-mese
+  const { data, error } = await supabase
+    .from('matches')
+    .select('start_time');
+  
+  if (error) {
+    console.log('getMatchesSummary error:', error.message);
+    return { total: 0, byYearMonth: [] };
+  }
+  
+  // Raggruppa lato JS (più flessibile di SQL per formattazione)
+  const groups = {};
+  for (const match of (data || [])) {
+    if (!match.start_time) continue;
+    const date = new Date(match.start_time);
+    const yearKey = String(date.getFullYear());
+    const monthKey = `${yearKey}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (!groups[yearKey]) groups[yearKey] = { year: yearKey, months: {} };
+    if (!groups[yearKey].months[monthKey]) groups[yearKey].months[monthKey] = 0;
+    groups[yearKey].months[monthKey]++;
+  }
+  
+  // Converti in array ordinato (anni e mesi più recenti prima)
+  const byYearMonth = Object.values(groups)
+    .sort((a, b) => b.year.localeCompare(a.year))
+    .map(yearGroup => ({
+      year: yearGroup.year,
+      months: Object.entries(yearGroup.months)
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .map(([monthKey, count]) => ({ monthKey, count }))
+    }));
+  
+  return { 
+    total: data?.length || 0, 
+    byYearMonth 
+  };
+}
+
+/**
+ * 🚀 OTTIMIZZATO: Ritorna match di un mese specifico (lazy load)
+ * Chiamato solo quando l'utente espande un mese
+ * Filosofia: carica solo quello che serve, quando serve
+ */
+async function getMatchesByMonth(yearMonth) {
+  if (!checkSupabase()) return [];
+  
+  // Parse yearMonth (es. "2024-12")
+  const [year, month] = yearMonth.split('-').map(Number);
+  if (!year || !month) return [];
+  
+  // Range del mese
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59); // Ultimo giorno del mese
+  
+  const { data, error } = await supabase
+    .from('v_matches_full')
+    .select('*')
+    .gte('start_time', startDate.toISOString())
+    .lte('start_time', endDate.toISOString())
+    .order('start_time', { ascending: false });
+  
+  if (error) {
+    console.log('getMatchesByMonth error:', error.message);
+    return [];
+  }
+  
+  return data || [];
+}
+
+/**
  * Conta i match con filtri (per paginazione)
  */
 async function countMatches(options = {}) {
@@ -1911,5 +1989,9 @@ module.exports = {
 
   // NEW: Calculation Queue
   enqueueCalculation,
-  getQueueStats
+  getQueueStats,
+
+  // 🚀 OPTIMIZED: Lightweight home page endpoints
+  getMatchesSummary,
+  getMatchesByMonth
 };
