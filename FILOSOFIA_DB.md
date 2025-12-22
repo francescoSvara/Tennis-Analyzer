@@ -4,6 +4,22 @@
 
 ---
 
+## ✅ STATO IMPLEMENTAZIONE
+
+| Sezione | Status | File Riferimento |
+|---------|--------|------------------|
+| Schema Database | ✅ | `backend/migrations/create-new-schema.sql` |
+| Snapshot + Queue | ✅ | `backend/migrations/add-snapshot-queue-tables.sql` |
+| Live Tracking | ✅ | `backend/migrations/add-live-tracking-table.sql` |
+| Match Repository | ✅ | `backend/db/matchRepository.js` |
+| Match Card Service | ✅ | `backend/services/matchCardService.js` |
+| Raw Events Processor | ✅ | `backend/services/rawEventsProcessor.js` |
+| Calculation Queue Worker | ✅ | `backend/services/calculationQueueWorker.js` |
+| SofaScore Scraper | ✅ | `backend/scraper/sofascoreScraper.js` |
+| XLSX Import | ✅ | `backend/importXlsx.js` |
+
+---
+
 ## 📋 Indice
 
 1. [Architettura Generale](#architettura-generale)
@@ -424,18 +440,21 @@ curl -X POST http://localhost:3001/api/match/123/rebuild-snapshot
 
 ## 🚀 Sviluppi Futuri
 
-### Priorità Alta
-- [x] Match Card Snapshot (single query)
-- [x] Raw Events Pipeline (reprocessable)
-- [x] Calculation Queue (async H2H/stats)
+### ✅ Completati (Dicembre 2025)
+- [x] Match Card Snapshot (single query) → `backend/services/matchCardService.js`
+- [x] Raw Events Pipeline (reprocessable) → `backend/services/rawEventsProcessor.js`
+- [x] Calculation Queue (async H2H/stats) → `backend/services/calculationQueueWorker.js`
+- [x] Live Tracking System → `backend/liveManager.js`, `backend/db/liveTrackingRepository.js`
+
+### 🔜 Priorità Alta
 - [ ] Calcolo ELO per superficie
 - [ ] Cache Redis per dati live
 
-### Priorità Media
+### 🔜 Priorità Media
 - [ ] Previsioni ML vincitore
 - [ ] Alerts match interessanti
 - [ ] Import automatico XLSX (watcher)
 
 ---
 
-*Ultimo aggiornamento: Dicembre 2025*
+*Ultimo aggiornamento: 22 Dicembre 2025*
