@@ -60,6 +60,9 @@ function playerMatches(playerName, searchName) {
 
 /**
  * Recupera tutti i match di un giocatore
+ * Searches BOTH by winner_name/loser_name (xlsx) AND by player_id (sofascore)
+ * This ensures all matches are found regardless of data source
+ * 
  * @param {string} playerName - Nome del giocatore da cercare
  * @returns {Array} Lista dei match
  */
@@ -72,7 +75,9 @@ async function getPlayerMatches(playerName) {
   const searchName = normalizePlayerName(playerName);
   const lastName = extractLastName(playerName);
 
-  // Query ampia per prendere candidati (il DB non supporta ILIKE complesso)
+  console.log(`🔍 [Stats] Searching matches for "${playerName}" (lastName: ${lastName})`);
+
+  // ===== STRATEGY 1: Search by winner_name/loser_name (xlsx format) =====
   const { data: matchesWinner, error: err1 } = await supabase
     .from('matches')
     .select('*')
@@ -86,17 +91,107 @@ async function getPlayerMatches(playerName) {
   if (err1) console.error('Error fetching winner matches:', err1.message);
   if (err2) console.error('Error fetching loser matches:', err2.message);
 
-  // Combina e filtra con matching preciso
-  const allMatches = [...(matchesWinner || []), ...(matchesLoser || [])];
+  // ===== STRATEGY 2: Search by player_id (sofascore format with empty names) =====
+  const { data: players, error: playerErr } = await supabase
+    .from('players')
+    .select('id, name, full_name')
+    .or(`name.ilike.%${lastName}%,full_name.ilike.%${lastName}%`);
   
-  // Rimuovi duplicati e filtra per match reale
+  if (playerErr) console.error('Error fetching players:', playerErr.message);
+  
+  // Filter to actual matching players
+  const matchingPlayerIds = (players || [])
+    .filter(p => playerMatches(p.name, playerName) || playerMatches(p.full_name, playerName))
+    .map(p => p.id);
+  
+  // Query by player_id
+  let matchesByPlayerId = [];
+  if (matchingPlayerIds.length > 0) {
+    const { data: homeMatches, error: homeErr } = await supabase
+      .from('matches')
+      .select(`
+        *,
+        home_player:players!matches_home_player_id_fkey(id, name, full_name),
+        away_player:players!matches_away_player_id_fkey(id, name, full_name)
+      `)
+      .in('home_player_id', matchingPlayerIds);
+    
+    const { data: awayMatches, error: awayErr } = await supabase
+      .from('matches')
+      .select(`
+        *,
+        home_player:players!matches_home_player_id_fkey(id, name, full_name),
+        away_player:players!matches_away_player_id_fkey(id, name, full_name)
+      `)
+      .in('away_player_id', matchingPlayerIds);
+    
+    if (homeErr) console.error('Error fetching home matches by ID:', homeErr.message);
+    if (awayErr) console.error('Error fetching away matches by ID:', awayErr.message);
+    
+    matchesByPlayerId = [...(homeMatches || []), ...(awayMatches || [])];
+  }
+
+  // ===== COMBINE ALL MATCHES =====
+  const allMatches = [
+    ...(matchesWinner || []), 
+    ...(matchesLoser || []),
+    ...matchesByPlayerId
+  ];
+  
   const uniqueMatches = new Map();
   
   for (const match of allMatches) {
     if (uniqueMatches.has(match.id)) continue;
     
-    const isWinner = playerMatches(match.winner_name, playerName);
-    const isLoser = playerMatches(match.loser_name, playerName);
+    // Determine player role
+    let isWinner = false;
+    let isLoser = false;
+    
+    // Check winner_name/loser_name first (xlsx format)
+    if (match.winner_name && playerMatches(match.winner_name, playerName)) {
+      isWinner = true;
+    } else if (match.loser_name && playerMatches(match.loser_name, playerName)) {
+      isLoser = true;
+    }
+    
+    // Check by player_id if not found by name (sofascore format)
+    if (!isWinner && !isLoser && matchingPlayerIds.length > 0) {
+      const isHome = matchingPlayerIds.includes(match.home_player_id);
+      const isAway = matchingPlayerIds.includes(match.away_player_id);
+      
+      if (isHome || isAway) {
+        const winnerCode = match.winner_code;
+        if (winnerCode === 1 && isHome) isWinner = true;
+        else if (winnerCode === 2 && isAway) isWinner = true;
+        else if (winnerCode === 1 && isAway) isLoser = true;
+        else if (winnerCode === 2 && isHome) isLoser = true;
+        else {
+          // Fallback: check sets
+          const homeSets = match.home_sets_won || 0;
+          const awaySets = match.away_sets_won || 0;
+          if (homeSets > awaySets && isHome) isWinner = true;
+          else if (awaySets > homeSets && isAway) isWinner = true;
+          else if (homeSets > awaySets && isAway) isLoser = true;
+          else if (awaySets > homeSets && isHome) isLoser = true;
+        }
+      }
+    }
+    
+    // Check home_player/away_player objects from join
+    if (!isWinner && !isLoser) {
+      const homeName = match.home_player?.name || match.home_player?.full_name;
+      const awayName = match.away_player?.name || match.away_player?.full_name;
+      
+      if (homeName && playerMatches(homeName, playerName)) {
+        const winnerCode = match.winner_code;
+        isWinner = winnerCode === 1;
+        isLoser = winnerCode === 2;
+      } else if (awayName && playerMatches(awayName, playerName)) {
+        const winnerCode = match.winner_code;
+        isWinner = winnerCode === 2;
+        isLoser = winnerCode === 1;
+      }
+    }
     
     if (isWinner || isLoser) {
       uniqueMatches.set(match.id, {
@@ -106,7 +201,10 @@ async function getPlayerMatches(playerName) {
     }
   }
 
-  return Array.from(uniqueMatches.values());
+  const result = Array.from(uniqueMatches.values());
+  console.log(`   ✅ [Stats] Total matches: ${result.length} (${result.filter(m => m.player_role === 'winner').length}W - ${result.filter(m => m.player_role === 'loser').length}L)`);
+  
+  return result;
 }
 
 /**

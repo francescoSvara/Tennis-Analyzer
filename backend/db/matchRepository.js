@@ -125,6 +125,35 @@ async function insertMatch(matchData, sourceUrl = null) {
       throw new Error('Missing event ID');
     }
 
+    // Determina winner/loser names based on winnerCode
+    const winnerCode = matchData.winnerCode;
+    let winnerName = null;
+    let loserName = null;
+    
+    const homeName = homePlayer?.name || homePlayer?.fullName || homePlayer?.shortName || null;
+    const awayName = awayPlayer?.name || awayPlayer?.fullName || awayPlayer?.shortName || null;
+    
+    if (winnerCode === 1) {
+      winnerName = homeName;
+      loserName = awayName;
+    } else if (winnerCode === 2) {
+      winnerName = awayName;
+      loserName = homeName;
+    }
+    
+    // Fallback: if no winnerCode, check scores
+    if (!winnerName && !loserName) {
+      const homeSets = calculateSetsWon(matchData.homeScore, matchData.awayScore, 'home');
+      const awaySets = calculateSetsWon(matchData.homeScore, matchData.awayScore, 'away');
+      if (homeSets > awaySets) {
+        winnerName = homeName;
+        loserName = awayName;
+      } else if (awaySets > homeSets) {
+        winnerName = awayName;
+        loserName = homeName;
+      }
+    }
+
     const match = {
       id: eventId,
       slug: matchData.slug || null,
@@ -141,6 +170,9 @@ async function insertMatch(matchData, sourceUrl = null) {
       status_type: matchData.status?.type || null,
       status_description: matchData.status?.description || null,
       winner_code: matchData.winnerCode || null,
+      // IMPORTANT: Always populate winner_name/loser_name for statistics queries
+      winner_name: winnerName,
+      loser_name: loserName,
       home_sets_won: calculateSetsWon(matchData.homeScore, matchData.awayScore, 'home'),
       away_sets_won: calculateSetsWon(matchData.homeScore, matchData.awayScore, 'away'),
       first_to_serve: matchData.firstToServe || null,
@@ -148,6 +180,7 @@ async function insertMatch(matchData, sourceUrl = null) {
       extracted_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       is_live: matchData.status?.type === 'inprogress',
+      data_source: 'sofascore',
       raw_json: matchData // Salva JSON completo come backup
     };
 
@@ -1237,7 +1270,22 @@ async function findMatchingXlsxMatch(sofascoreMatch) {
 async function mergeXlsxData(sofascoreMatchId, xlsxMatch) {
   if (!checkSupabase()) return null;
   
+  // First, get the current match to check if winner_name/loser_name need to be filled
+  const { data: currentMatch } = await supabase
+    .from('matches')
+    .select('winner_name, loser_name')
+    .eq('id', sofascoreMatchId)
+    .single();
+  
   const updateData = {};
+  
+  // IMPORTANT: Copy winner_name/loser_name if empty (for statistics queries)
+  if ((!currentMatch?.winner_name || currentMatch.winner_name === '') && xlsxMatch.winner_name) {
+    updateData.winner_name = xlsxMatch.winner_name;
+  }
+  if ((!currentMatch?.loser_name || currentMatch.loser_name === '') && xlsxMatch.loser_name) {
+    updateData.loser_name = xlsxMatch.loser_name;
+  }
   
   // Aggiungi solo i campi che xlsx ha e sofascore non ha (o sono più completi)
   if (xlsxMatch.location) updateData.location = xlsxMatch.location;

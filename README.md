@@ -352,7 +352,26 @@ node scripts/populate-player-aliases.js --dry-run
 
 ## Changelog
 
-### 22 Dicembre 2025 (Sessione 3) 🆕
+### 22 Dicembre 2025 (Sessione 4) 🆕
+**FIX CRITICO: Statistiche Player Profile**
+
+Risolto bug che causava perdita di match nelle statistiche quando venivano aggiunti dati da Sofascore:
+
+**Problema identificato:**
+- `playerProfileService.js` e `playerStatsService.js` cercavano match SOLO tramite `winner_name`/`loser_name`
+- I match Sofascore avevano questi campi vuoti (usavano solo `home_player_id`/`away_player_id`)
+- Il merge xlsx→sofascore eliminava record xlsx ma il nuovo record poteva avere nomi vuoti
+- Risultato: match "sparivano" dalle statistiche giocatore
+
+**Correzioni applicate:**
+1. `getPlayerMatches()` ora cerca sia per nome che per player_id
+2. `insertMatch()` ora popola SEMPRE `winner_name`/`loser_name`
+3. `mergeXlsxData()` copia nomi dall'xlsx se vuoti
+4. Nuovo script `fix-empty-names.js` per correggere dati esistenti
+
+**Risultato:** Musetti 57→68 match (+11 recuperati)
+
+### 22 Dicembre 2025 (Sessione 3)
 **Moduli Data Acquisition & Aggregation:**
 - `playerProfileService.js` - Profili giocatore con metriche aggregate per superficie/formato/serie
 - `matchSegmenter.js` - Segmentazione match in fasi logiche (PRE_BREAK, CRITICAL, CLOSING)
