@@ -966,29 +966,51 @@ async function getTournamentsWithStats() {
       }
     }
     
-    // 4. Carica detected_matches stats se disponibile
-    let detectedStats = {};
+    // 4. Carica detected_matches con dettagli completi per coverage e missing
+    let detectedByTournament = {};
     try {
       const { data: detected } = await supabase
         .from('detected_matches')
-        .select('tournament_id, is_acquired');
+        .select('*')
+        .order('start_time', { ascending: false });
       
       for (const d of (detected || [])) {
         if (!d.tournament_id) continue;
-        if (!detectedStats[d.tournament_id]) {
-          detectedStats[d.tournament_id] = { total: 0, acquired: 0 };
+        if (!detectedByTournament[d.tournament_id]) {
+          detectedByTournament[d.tournament_id] = { 
+            total: 0, 
+            acquired: 0,
+            missingMatches: []
+          };
         }
-        detectedStats[d.tournament_id].total++;
-        if (d.is_acquired) detectedStats[d.tournament_id].acquired++;
+        const stats = detectedByTournament[d.tournament_id];
+        stats.total++;
+        
+        if (d.is_acquired) {
+          stats.acquired++;
+        } else {
+          // Aggiungi ai missing (max 50 per non appesantire)
+          if (stats.missingMatches.length < 50) {
+            stats.missingMatches.push({
+              eventId: d.event_id || d.id,
+              homeTeam: d.home_team_name || 'TBD',
+              awayTeam: d.away_team_name || 'TBD',
+              status: d.status_type || d.status || 'unknown',
+              startTimestamp: d.start_time,
+              isAcquired: false
+            });
+          }
+        }
       }
     } catch (e) {
+      console.log('detected_matches load error:', e.message);
       // detected_matches potrebbe non esistere
     }
     
     // 5. Costruisci risultato finale
     const result = tournaments.map(t => {
       const mStats = matchesByTournament[t.id] || { total: 0, finished: 0, inprogress: 0, notstarted: 0, previewMatches: [] };
-      const dStats = detectedStats[t.id] || null;
+      const dStats = detectedByTournament[t.id] || null;
       
       // Calcola coverage
       const totalDetected = dStats?.total || 0;
@@ -1020,7 +1042,7 @@ async function getTournamentsWithStats() {
           missing: Math.max(0, totalDetected - mStats.total),
           percentage: coveragePercentage
         },
-        missingMatches: [] // Sarà caricato on-demand se necessario
+        missingMatches: dStats?.missingMatches || [] // Partite rilevate ma non acquisite
       };
     });
     
