@@ -991,43 +991,63 @@ async function getMissingMatches(limit = 500) {
 async function getMatchesSummary() {
   if (!checkSupabase()) return { total: 0, byYearMonth: [] };
   
-  // Query aggregata: conta match raggruppati per anno-mese
-  const { data, error } = await supabase
-    .from('matches')
-    .select('start_time');
-  
-  if (error) {
-    console.log('getMatchesSummary error:', error.message);
+  try {
+    // Prima otteniamo il count totale (leggero)
+    const { count: total, error: countError } = await supabase
+      .from('matches')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      console.log('getMatchesSummary count error:', countError.message);
+      return { total: 0, byYearMonth: [] };
+    }
+    
+    // Query ottimizzata: prendi solo start_time con limit ragionevole
+    // Se ci sono troppi match, usa paginazione
+    const { data, error } = await supabase
+      .from('matches')
+      .select('start_time')
+      .not('start_time', 'is', null)
+      .order('start_time', { ascending: false })
+      .limit(10000); // Limite ragionevole per evitare timeout
+    
+    if (error) {
+      console.log('getMatchesSummary error:', error.message);
+      return { total: total || 0, byYearMonth: [] };
+    }
+    
+    // Raggruppa lato JS (più flessibile di SQL per formattazione)
+    const groups = {};
+    for (const match of (data || [])) {
+      if (!match.start_time) continue;
+      const date = new Date(match.start_time);
+      if (isNaN(date.getTime())) continue; // Skip invalid dates
+      const yearKey = String(date.getFullYear());
+      const monthKey = `${yearKey}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!groups[yearKey]) groups[yearKey] = { year: yearKey, months: {} };
+      if (!groups[yearKey].months[monthKey]) groups[yearKey].months[monthKey] = 0;
+      groups[yearKey].months[monthKey]++;
+    }
+    
+    // Converti in array ordinato (anni e mesi più recenti prima)
+    const byYearMonth = Object.values(groups)
+      .sort((a, b) => b.year.localeCompare(a.year))
+      .map(yearGroup => ({
+        year: yearGroup.year,
+        months: Object.entries(yearGroup.months)
+          .sort((a, b) => b[0].localeCompare(a[0]))
+          .map(([monthKey, count]) => ({ monthKey, count }))
+      }));
+    
+    return { 
+      total: total || data?.length || 0, 
+      byYearMonth 
+    };
+  } catch (err) {
+    console.error('getMatchesSummary exception:', err.message);
     return { total: 0, byYearMonth: [] };
   }
-  
-  // Raggruppa lato JS (più flessibile di SQL per formattazione)
-  const groups = {};
-  for (const match of (data || [])) {
-    if (!match.start_time) continue;
-    const date = new Date(match.start_time);
-    const yearKey = String(date.getFullYear());
-    const monthKey = `${yearKey}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    
-    if (!groups[yearKey]) groups[yearKey] = { year: yearKey, months: {} };
-    if (!groups[yearKey].months[monthKey]) groups[yearKey].months[monthKey] = 0;
-    groups[yearKey].months[monthKey]++;
-  }
-  
-  // Converti in array ordinato (anni e mesi più recenti prima)
-  const byYearMonth = Object.values(groups)
-    .sort((a, b) => b.year.localeCompare(a.year))
-    .map(yearGroup => ({
-      year: yearGroup.year,
-      months: Object.entries(yearGroup.months)
-        .sort((a, b) => b[0].localeCompare(a[0]))
-        .map(([monthKey, count]) => ({ monthKey, count }))
-    }));
-  
-  return { 
-    total: data?.length || 0, 
-    byYearMonth 
-  };
 }
 
 /**

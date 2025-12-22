@@ -2060,13 +2060,16 @@ app.get('/api/db/test', async (req, res) => {
 // Filosofia: "1 query only", evita caricare tutti i match al primo render
 app.get('/api/db/matches/summary', async (req, res) => {
   if (!matchRepository) {
+    console.log('❌ /api/db/matches/summary: matchRepository not available');
     return res.status(503).json({ error: 'Database not configured' });
   }
   try {
+    console.log('📊 Fetching matches summary...');
     const summary = await matchRepository.getMatchesSummary();
+    console.log(`✅ Summary: ${summary.total} total matches, ${summary.byYearMonth?.length || 0} years`);
     res.json(summary);
   } catch (err) {
-    console.error('Error fetching matches summary:', err.message);
+    console.error('❌ Error fetching matches summary:', err.message, err.stack);
     res.status(500).json({ error: err.message });
   }
 });
