@@ -2,7 +2,7 @@
 
 ## 📋 Guida Operativa per AI Coding Agent
 
-**Versione:** 2.5  
+**Versione:** 2.6  
 **Data:** 22 Dicembre 2025  
 **Scopo:** Documento operativo per implementare le funzionalità BACKEND rimanenti
 
@@ -12,7 +12,85 @@
 
 ---
 
-# ✅ TASK COMPLETATI (22 Dicembre 2025)
+# ✅ TASK COMPLETATI (22 Dicembre 2025 - Sessione 3)
+
+## ✅ Player Profile Aggregator
+**File:** `backend/services/playerProfileService.js`
+
+**Funzioni implementate:**
+- `getPlayerProfile(playerName, options)` - Profilo completo con tutte le metriche
+- `compareProfiles(player1, player2, options)` - Confronto tra due giocatori
+- `getSurfaceProfile(playerName, surface)` - Profilo specifico per superficie
+- `calculateGlobalStats(matches)` - Statistiche globali
+- `calculateComebackRate(matches)` - Calcola comeback rate
+- `calculateROI(matches)` - ROI con stake fisso
+- `calculateFirstSetWinRate(matches)` - % vittoria primo set
+- `calculateDecidingSetWinRate(matches)` - % vittoria set decisivo
+- `calculateSpecialMetrics(matches)` - Metriche speciali aggregate
+- `analyzeRecentForm(matches, count)` - Trend recenti con streak
+- `aggregateBySurface/Format/Series(matches)` - Aggregazioni per categoria
+
+---
+
+## ✅ Match Segmentation Engine
+**File:** `backend/utils/matchSegmenter.js`
+
+**Funzioni implementate:**
+- `segmentMatch(matchData)` - Segmentazione completa in fasi logiche
+- `isCriticalGame(homeGames, awayGames)` - Identifica game 4-4, 5-5, TB
+- `isSetClosingGame(homeGames, awayGames, server)` - Game che può chiudere set
+- `isMatchClosingGame(...)` - Game che può chiudere match
+- `detectMomentumShift(prevValue, currValue)` - Rileva shift > 25 punti
+- `getServerForGame(set, game, firstServer)` - Chi serve in un game
+- `getSegmentSummary(matchData)` - Summary con trading insights
+- `analyzeCriticalGames(matchData)` - Focus su game critici
+- `analyzeMomentumShifts(matchData)` - Pattern momentum shifts
+
+**Segmenti supportati:**
+- PRE_FIRST_BREAK, POST_FIRST_BREAK, CRITICAL_GAMES
+- SET_CLOSING, MATCH_CLOSING, MOMENTUM_SHIFT
+- SERVE_PRESSURE, BREAK_OPPORTUNITY
+
+---
+
+## ✅ Break Detector
+**File:** `backend/utils/breakDetector.js`
+
+**Funzioni implementate:**
+- `detectBreaksFromScore(setScore, firstServer)` - Rileva break da punteggio set
+- `analyzeSetBreaks(matchData)` - Analisi completa break per match
+- `estimateFirstServer(matchData)` - Stima primo servitore da ranking
+- `analyzeBreakPatterns(matches, playerName)` - Pattern storici break
+- `classifySet(setAnalysis)` - Classifica set (TIGHT, BALANCED, CHAOTIC)
+- `generateBreakInsights(sets, ...)` - Genera insights break
+- `isValidSetScore(home, away)` - Valida score tennis
+
+---
+
+## ✅ Pressure Index Calculator
+**File:** `backend/utils/pressureCalculator.js`
+
+**Funzioni implementate:**
+- `calculatePressureIndex(liveStats, matchContext)` - Indice pressione 0-100
+- `calculateContextMultiplier(matchContext)` - Moltiplicatore contesto
+- `classifyPressure(index)` - MINIMAL/LOW/MODERATE/HIGH/CRITICAL
+- `generateRecommendation(...)` - Raccomandazione trading
+- `comparePressure(p1Stats, p2Stats, context)` - Confronto pressione
+- `calculateDFContribution(doubleFaults)` - Contributo doppi falli
+- `calculateFirstServeContribution(pct)` - Contributo first serve won
+- `calculateSecondServeContribution(pct)` - Contributo second serve won
+- `calculateBPContribution(saved, faced)` - Contributo break points
+
+**Livelli pressione:**
+- CRITICAL (70+): Consider Lay
+- HIGH (50-69): Alert
+- MODERATE (30-49): Watch
+- LOW (15-29): Stable
+- MINIMAL (0-14): In Control
+
+---
+
+# ✅ TASK COMPLETATI (22 Dicembre 2025 - Precedenti)
 
 ## ✅ Momentum Volatility & Elasticity Calculator
 **Files:** `backend/utils/valueInterpreter.js`, `src/components/MomentumTab.jsx`
@@ -29,21 +107,6 @@
 - Match Character Badge con emoji e colori
 - Card Volatilità con barra visuale e statistiche
 - Card Elasticità con indicatore resilienza
-
----
-
-# 🚧 TASK BACKEND DA IMPLEMENTARE
-
-## ⬜ TASK: Daily Match Evaluation Report
-
-### Obiettivo
-Generare report giornaliero automatico con valutazione match e opportunità trading.
-
-### 📝 Funzionalità
-- Fetch automatico match del giorno da API
-- Valutazione basata su fattori: superficie, ranking, H2H, momentum patterns
-- Output JSON con confidence score per ogni match
-- Integrazione con sistema notifiche
 
 ---
 
@@ -75,6 +138,21 @@ Generare report giornaliero automatico con valutazione match e opportunità trad
 - `analyzePlayerMomentum(powerRankings, matchContext)`
 - `getFormatAdjustment(bestOf)`
 - `calculateTradingIndicators(...)`
+
+---
+
+# 🚧 TASK BACKEND DA IMPLEMENTARE
+
+## ⬜ TASK: Daily Match Evaluation Report
+
+### Obiettivo
+Generare report giornaliero automatico con valutazione match e opportunità trading.
+
+### 📝 Funzionalità
+- Fetch automatico match del giorno da API
+- Valutazione basata su fattori: superficie, ranking, H2H, momentum patterns
+- Output JSON con confidence score per ogni match
+- Integrazione con sistema notifiche
 
 ---
 

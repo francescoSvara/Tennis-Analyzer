@@ -1280,4 +1280,729 @@ backtestStrategy(strategyFn, matches, bankroll) {
 
 ---
 
+# 🚀 TODO - NUOVE FUNZIONI DA IMPLEMENTARE
+
+## 📋 Overview Task
+
+| # | Task | File | Stato | Priorità |
+|---|------|------|-------|----------|
+| 1 | Player Profile Aggregator | `playerProfileService.js` | ⬜ TODO | 🔴 ALTA |
+| 2 | Match Segmentation Engine | `matchSegmenter.js` | ⬜ TODO | 🔴 ALTA |
+| 3 | Break Detection | `breakDetector.js` | ⬜ TODO | 🔴 ALTA |
+| 4 | Pressure Index Calculator | `pressureCalculator.js` | ⬜ TODO | 🔴 ALTA |
+
+---
+
+## 1️⃣ PLAYER PROFILE AGGREGATOR
+
+📁 **File Target**: `backend/services/playerProfileService.js`
+
+### Scopo
+Aggregare dati storici di un giocatore per generare un profilo completo con metriche derivate per superficie, formato e serie tornei.
+
+### Input
+- `playerName`: string (nome normalizzato)
+- `options`: { surface?, format?, series?, dateRange? }
+
+### Output Atteso
+```javascript
+PlayerProfile {
+  player: {
+    id: number,
+    name: string,
+    current_ranking: number
+  },
+  
+  // Statistiche globali
+  global: {
+    total_matches: number,
+    wins: number,
+    losses: number,
+    win_rate: number,           // 0-1
+    avg_sets_per_match: number,
+    tiebreak_win_rate: number
+  },
+  
+  // Per superficie
+  by_surface: {
+    Hard: {
+      matches: number,
+      win_rate: number,
+      comeback_rate: number,    // % vittorie dopo perdita set 1
+      break_rate: number,       // % game dove brekka
+      hold_rate: number,        // % game al servizio tenuti
+      roi: number               // ROI se puntato sempre
+    },
+    Clay: { ... },
+    Grass: { ... }
+  },
+  
+  // Per formato
+  by_format: {
+    best_of_3: {
+      matches: number,
+      win_rate: number,
+      avg_sets: number,
+      tiebreak_rate: number
+    },
+    best_of_5: { ... }
+  },
+  
+  // Per serie torneo
+  by_series: {
+    'Grand Slam': { matches, win_rate, finals_reached },
+    'Masters 1000': { ... },
+    'ATP500': { ... },
+    'ATP250': { ... }
+  },
+  
+  // Metriche speciali
+  special_metrics: {
+    first_set_win_rate: number,        // % vittorie quando vince set 1
+    comeback_rate: number,             // % vittorie dopo perdita set 1
+    deciding_set_win_rate: number,     // % vittorie nei set decisivi
+    serving_for_set_won: number,       // % set chiusi quando serve per set
+    break_back_rate: number,           // % volte che restituisce break
+    get_first_break_rate: number,      // % volte che brekka per primo
+    tiebreak_win_rate: number
+  },
+  
+  // Trend recenti (ultimi 20 match)
+  recent_form: {
+    win_rate: number,
+    avg_momentum: number,
+    trend: 'IMPROVING' | 'STABLE' | 'DECLINING'
+  },
+  
+  // Timestamp
+  calculated_at: Date,
+  matches_analyzed: number
+}
+```
+
+### Formule
+
+#### Comeback Rate
+```javascript
+comeback_rate = matches_won_after_losing_set1 / matches_lost_set1
+// Es: 15 vittorie dopo perdita set 1 su 60 match dove ha perso set 1 = 25%
+```
+
+#### Hold Rate
+```javascript
+hold_rate = service_games_won / total_service_games
+// Richiede point-by-point o stima da statistiche
+```
+
+#### Break Rate
+```javascript
+break_rate = return_games_won / total_return_games
+// Alternativa: break_points_converted_total / break_points_total
+```
+
+#### ROI
+```javascript
+// Per ogni match vinto
+total_return += odds_at_start
+// Per ogni match
+total_stake += 1
+
+roi = (total_return - total_stake) / total_stake * 100
+```
+
+#### Trend Recenti
+```javascript
+recent_win_rate = wins_last_20 / 20
+historical_win_rate = total_wins / total_matches
+
+if (recent_win_rate > historical_win_rate + 0.05) trend = 'IMPROVING'
+else if (recent_win_rate < historical_win_rate - 0.05) trend = 'DECLINING'
+else trend = 'STABLE'
+```
+
+### Dipendenze
+- `matchRepository.js` - Query match storici
+- `dataNormalizer.js` - Normalizzazione nomi
+- `playerStatsService.js` - Alcune funzioni esistenti
+
+---
+
+## 2️⃣ MATCH SEGMENTATION ENGINE
+
+📁 **File Target**: `backend/utils/matchSegmenter.js`
+
+### Scopo
+Dividere un match in segmenti logici per analisi mirate. Ogni punto/game appartiene a uno o più segmenti.
+
+### Segmenti Definiti
+
+| Segmento | Codice | Definizione | Importanza Trading |
+|----------|--------|-------------|-------------------|
+| Pre-First Break | `PRE_FIRST_BREAK` | Dal primo punto fino al primo break | Media - stabilire pattern |
+| Post-First Break | `POST_FIRST_BREAK` | Dal game dopo il primo break | Alta - reazione al break |
+| Critical Games | `CRITICAL_GAMES` | Score 4-4, 5-5, 6-6 o tiebreak | Molto Alta - momenti decisivi |
+| Set Closing | `SET_CLOSING` | Game che può assegnare il set | Alta - conversione set point |
+| Match Closing | `MATCH_CLOSING` | Game che può assegnare il match | Molto Alta - chiusura |
+| Momentum Shift | `MOMENTUM_SHIFT` | Game dove momentum cambia > 25 punti | Alta - inversioni |
+| Serve Under Pressure | `SERVE_PRESSURE` | Game al servizio con BP contro | Alta - tenuta mentale |
+| Break Opportunity | `BREAK_OPPORTUNITY` | Game in risposta con BP | Media - conversione |
+
+### Input
+```javascript
+segmentMatch(matchData) {
+  // matchData include:
+  // - scores: { period1: {home, away}, period2: {...} }
+  // - powerRankings: [{ set, game, value }]
+  // - pointByPoint: [{ set, game, point, server, winner }] (opzionale)
+  // - statistics: { breaks: [...] }
+}
+```
+
+### Output Atteso
+```javascript
+MatchSegmentation {
+  match_id: number,
+  
+  segments: {
+    PRE_FIRST_BREAK: {
+      start_game: { set: 1, game: 1 },
+      end_game: { set: 1, game: 4 },   // Esempio: break al game 5
+      total_games: 4,
+      total_points: number,
+      player_with_break: 'home' | 'away' | null
+    },
+    
+    POST_FIRST_BREAK: {
+      start_game: { set: 1, game: 5 },
+      end_game: { set: 1, game: 12 },
+      break_holder_performance: 'HELD' | 'BROKEN_BACK' | 'EXTENDED'
+    },
+    
+    CRITICAL_GAMES: [
+      { set: 1, game: 9, score: '4-4', momentum_avg: number },
+      { set: 1, game: 11, score: '5-5', momentum_avg: number },
+      { set: 1, game: 13, score: '6-6', is_tiebreak: true }
+    ],
+    
+    SET_CLOSING: [
+      { set: 1, game: 10, score: '5-4', server: 'home', held: true },
+      { set: 2, game: 8, score: '5-2', server: 'away', held: false }
+    ],
+    
+    MATCH_CLOSING: [
+      { set: 3, game: 10, score: '5-4', server: 'home', won: true }
+    ],
+    
+    MOMENTUM_SHIFTS: [
+      { 
+        game: { set: 2, game: 3 }, 
+        delta: -35, 
+        from: 'home', 
+        to: 'away',
+        cause: 'break_subito'
+      }
+    ],
+    
+    SERVE_PRESSURE: [
+      { set: 1, game: 7, server: 'home', break_points_faced: 2, saved: 2 }
+    ],
+    
+    BREAK_OPPORTUNITY: [
+      { set: 1, game: 6, returner: 'away', break_points_had: 3, converted: 1 }
+    ]
+  },
+  
+  // Summary
+  summary: {
+    total_critical_games: number,
+    home_critical_games_won: number,
+    away_critical_games_won: number,
+    momentum_shifts_count: number,
+    avg_break_response_games: number,  // Quanto ci vuole per reagire a un break
+    set_closing_efficiency: number     // % set point convertiti
+  }
+}
+```
+
+### Logica Chiave
+
+#### Detect Critical Games
+```javascript
+function isCriticalGame(setScore, isInTiebreak) {
+  if (isInTiebreak) return true;
+  
+  const { home, away } = setScore;
+  
+  // 4-4, 5-5, 6-6
+  if (home === away && home >= 4) return true;
+  
+  // 5-4 o 4-5 (serve per il set)
+  if (Math.max(home, away) === 5 && Math.min(home, away) === 4) return true;
+  
+  return false;
+}
+```
+
+#### Detect Set Closing
+```javascript
+function isSetClosingGame(setScore, server) {
+  const { home, away } = setScore;
+  
+  // Server può chiudere il set
+  if (server === 'home' && home >= 5 && home > away) return true;
+  if (server === 'away' && away >= 5 && away > home) return true;
+  
+  return false;
+}
+```
+
+#### Detect Momentum Shift
+```javascript
+function detectMomentumShift(prevValue, currValue, threshold = 25) {
+  const delta = currValue - prevValue;
+  
+  if (Math.abs(delta) < threshold) return null;
+  
+  return {
+    delta,
+    direction: delta > 0 ? 'to_home' : 'to_away',
+    magnitude: Math.abs(delta) > 40 ? 'MAJOR' : 'SIGNIFICANT'
+  };
+}
+```
+
+---
+
+## 3️⃣ BREAK DETECTION
+
+📁 **File Target**: `backend/utils/breakDetector.js`
+
+### Scopo
+Rilevare break dal punteggio del set SENZA avere point-by-point. Utile per dati XLSX dove abbiamo solo W1/L1, W2/L2.
+
+### Problema
+Da un punteggio come "6-4" non sappiamo QUANDO sono avvenuti i break, ma sappiamo QUANTI.
+
+### Logica Break Detection
+
+#### Principio Base
+```
+In un set:
+- Il primo a servire serve i game dispari (1, 3, 5, 7...)
+- Il secondo serve i game pari (2, 4, 6, 8...)
+- Chi ha più game di quelli serviti = ha ottenuto break
+```
+
+#### Formula
+```javascript
+function detectBreaksFromScore(setScore, firstServer) {
+  const { home, away } = setScore;
+  const totalGames = home + away;
+  
+  // Chi ha servito quanti game?
+  const homeServeGames = firstServer === 'home' 
+    ? Math.ceil(totalGames / 2) 
+    : Math.floor(totalGames / 2);
+  
+  const awayServeGames = totalGames - homeServeGames;
+  
+  // Game vinti in risposta = break
+  const homeBreaks = Math.max(0, home - homeServeGames);
+  const awayBreaks = Math.max(0, away - awayServeGames);
+  
+  // Correzione per tiebreak (chi vince il TB non per forza ha break in più)
+  const isTiebreak = home === 7 && away === 6 || home === 6 && away === 7;
+  
+  return {
+    home_breaks: homeBreaks,
+    away_breaks: awayBreaks,
+    total_breaks: homeBreaks + awayBreaks,
+    break_advantage: homeBreaks - awayBreaks,
+    is_tiebreak: isTiebreak,
+    first_server: firstServer
+  };
+}
+```
+
+### Input
+```javascript
+analyzeSetBreaks(matchData) {
+  // matchData:
+  // - w1, l1: Score set 1 (es: 6, 4)
+  // - w2, l2: Score set 2
+  // - w3, l3: Score set 3 (se esiste)
+  // - firstServer: 'home' | 'away' (se noto, altrimenti stimare)
+}
+```
+
+### Output Atteso
+```javascript
+BreakAnalysis {
+  match_id: number,
+  
+  sets: [
+    {
+      set_number: 1,
+      score: { home: 6, away: 4 },
+      home_breaks: 2,
+      away_breaks: 1,
+      break_differential: 1,
+      was_tiebreak: false,
+      estimated_first_server: 'home'
+    },
+    {
+      set_number: 2,
+      score: { home: 4, away: 6 },
+      home_breaks: 1,
+      away_breaks: 2,
+      break_differential: -1,
+      was_tiebreak: false,
+      estimated_first_server: 'away'  // Alterna
+    }
+  ],
+  
+  match_summary: {
+    total_home_breaks: number,
+    total_away_breaks: number,
+    total_breaks: number,
+    avg_breaks_per_set: number,
+    break_efficiency_home: number,  // Break effettuati / BP avuti (se noto)
+    break_efficiency_away: number,
+    match_was_close: boolean        // Pochi break = match più combattuto
+  },
+  
+  insights: {
+    dominant_server: 'home' | 'away' | null,  // Chi ha tenuto meglio
+    break_back_rate_home: number,   // Stimato da pattern set
+    break_back_rate_away: number,
+    decisive_break_set: number      // Set dove break ha deciso
+  }
+}
+```
+
+### Stima First Server
+```javascript
+// Se non abbiamo l'info, possiamo stimare statisticamente
+function estimateFirstServer(matchData) {
+  // Il favorito (ranking migliore) tende a scegliere di servire first
+  // In media, ~60% dei favoriti servono per primi
+  
+  const { homeRanking, awayRanking } = matchData;
+  
+  if (homeRanking < awayRanking) return 'home';  // Ranking basso = migliore
+  if (awayRanking < homeRanking) return 'away';
+  
+  return 'home';  // Default
+}
+```
+
+### Pattern Analysis
+```javascript
+// Analizza pattern di break nel match
+function analyzeBreakPatterns(breakAnalysis) {
+  const { sets } = breakAnalysis;
+  
+  return {
+    // Chi ha brekkato per primo più spesso?
+    first_break_tendency: calculateFirstBreakTendency(sets),
+    
+    // Break-back tendency
+    break_back_rate: calculateBreakBackRate(sets),
+    
+    // Set decisivi
+    deciding_set_break_pattern: sets.length === 3 
+      ? analyzeDecidingSet(sets[2]) 
+      : null
+  };
+}
+```
+
+---
+
+## 4️⃣ PRESSURE INDEX CALCULATOR
+
+📁 **File Target**: `backend/utils/pressureCalculator.js`
+
+### Scopo
+Calcolare un indice di pressione live per ogni giocatore basato su statistiche real-time. Usato per decisioni trading in-play.
+
+### Input
+```javascript
+calculatePressureIndex(liveStats, matchContext) {
+  // liveStats: {
+  //   aces: number,
+  //   doubleFaults: number,
+  //   firstServeIn: number,
+  //   firstServeTotal: number,
+  //   firstServeWon: number,
+  //   secondServeWon: number,
+  //   breakPointsFaced: number,
+  //   breakPointsSaved: number,
+  //   totalPointsWon: number,
+  //   totalPoints: number
+  // }
+  //
+  // matchContext: {
+  //   currentSet: number,
+  //   currentGame: string,  // "4-3"
+  //   isServingForSet: boolean,
+  //   isBreakPoint: boolean,
+  //   momentum: number
+  // }
+}
+```
+
+### Output Atteso
+```javascript
+PressureIndex {
+  player_id: number,
+  
+  index: number,        // 0-100 (100 = massima pressione)
+  level: 'MINIMAL' | 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL',
+  
+  // Breakdown per fattore
+  breakdown: {
+    double_faults: {
+      value: number,          // Numero DF
+      expected: number,       // DF attesi per questo punto del match
+      contribution: number,   // 0-25 (peso 25%)
+      assessment: 'NORMAL' | 'WARNING' | 'CRITICAL'
+    },
+    first_serve: {
+      percentage: number,     // First serve %
+      won_percentage: number, // First serve won %
+      contribution: number,   // 0-30 (peso 30%)
+      assessment: string
+    },
+    second_serve: {
+      won_percentage: number,
+      contribution: number,   // 0-25 (peso 25%)
+      assessment: string
+    },
+    break_points: {
+      faced: number,
+      saved: number,
+      save_rate: number,
+      contribution: number,   // 0-20 (peso 20%)
+      assessment: string
+    }
+  },
+  
+  // Context multiplier
+  context_adjustment: {
+    set_importance: number,     // 1.0 - 1.5 (set decisivo = 1.5)
+    game_importance: number,    // 1.0 - 1.3 (5-5 = 1.3)
+    momentum_factor: number,    // 0.8 - 1.2
+    total_multiplier: number
+  },
+  
+  // Interpretazione
+  interpretation: {
+    main_pressure_source: string,  // "Double faults" | "Break point defense" | etc.
+    risk_of_break: 'LOW' | 'MEDIUM' | 'HIGH',
+    recommended_action: string     // "Monitor" | "Consider lay" | "Potential back"
+  },
+  
+  timestamp: Date
+}
+```
+
+### Formule e Soglie
+
+#### Soglie per Categoria
+```javascript
+const PRESSURE_THRESHOLDS = {
+  double_faults: {
+    normal: 2,      // < 2 per set
+    warning: 4,     // 3-4
+    critical: 6     // > 5
+  },
+  first_serve_won_pct: {
+    excellent: 75,  // > 75%
+    good: 65,       // 65-75%
+    warning: 55,    // 55-65%
+    critical: 45    // < 45%
+  },
+  second_serve_won_pct: {
+    excellent: 55,
+    good: 45,
+    warning: 35,
+    critical: 25
+  },
+  break_points_saved_pct: {
+    excellent: 70,
+    good: 55,
+    warning: 40,
+    critical: 30
+  }
+};
+```
+
+#### Calcolo Contributi
+```javascript
+function calculatePressureContributions(stats) {
+  let pressureIndex = 0;
+  const breakdown = {};
+  
+  // 1. Double Faults (peso: 25%)
+  const dfContrib = calculateDFContribution(stats.doubleFaults);
+  pressureIndex += dfContrib;
+  breakdown.double_faults = { 
+    value: stats.doubleFaults, 
+    contribution: dfContrib,
+    assessment: classifyDF(stats.doubleFaults)
+  };
+  
+  // 2. First Serve Won % (peso: 30%)
+  const firstServePct = (stats.firstServeWon / stats.firstServeIn) * 100;
+  const fswContrib = calculateFirstServeContribution(firstServePct);
+  pressureIndex += fswContrib;
+  
+  // 3. Second Serve Won % (peso: 25%)
+  const secondServePct = (stats.secondServeWon / stats.secondServeTotal) * 100;
+  const sswContrib = calculateSecondServeContribution(secondServePct);
+  pressureIndex += sswContrib;
+  
+  // 4. Break Points Saved % (peso: 20%)
+  const bpSavedPct = stats.breakPointsFaced > 0 
+    ? (stats.breakPointsSaved / stats.breakPointsFaced) * 100 
+    : 100;
+  const bpContrib = calculateBPContribution(bpSavedPct);
+  pressureIndex += bpContrib;
+  
+  return { pressureIndex, breakdown };
+}
+```
+
+#### Context Multiplier
+```javascript
+function calculateContextMultiplier(matchContext) {
+  let multiplier = 1.0;
+  
+  // Set importance (set 3 o set 5 decisivo)
+  if (matchContext.isDecidingSet) {
+    multiplier *= 1.3;
+  } else if (matchContext.currentSet >= 2) {
+    multiplier *= 1.1;
+  }
+  
+  // Game importance (score critico)
+  const [home, away] = matchContext.currentGame.split('-').map(Number);
+  if (home >= 4 && away >= 4) {  // 4-4, 5-5, etc.
+    multiplier *= 1.2;
+  }
+  
+  // Momentum negativo amplifica pressione
+  if (matchContext.momentum < -20) {
+    multiplier *= 1.15;
+  }
+  
+  // Break point situation
+  if (matchContext.isBreakPoint) {
+    multiplier *= 1.25;
+  }
+  
+  return Math.min(multiplier, 1.8);  // Cap a 1.8x
+}
+```
+
+#### Classificazione Finale
+```javascript
+function classifyPressure(index) {
+  if (index >= 70) return { level: 'CRITICAL', risk: 'HIGH', action: 'Consider lay' };
+  if (index >= 50) return { level: 'HIGH', risk: 'HIGH', action: 'Monitor closely' };
+  if (index >= 30) return { level: 'MODERATE', risk: 'MEDIUM', action: 'Watch trends' };
+  if (index >= 15) return { level: 'LOW', risk: 'LOW', action: 'Stable' };
+  return { level: 'MINIMAL', risk: 'LOW', action: 'In control' };
+}
+```
+
+---
+
+## 📊 Schema Relazioni tra Moduli
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     MODULI DA IMPLEMENTARE                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌──────────────────┐        ┌──────────────────────┐          │
+│   │ playerProfile    │◄──────►│  matchRepository     │          │
+│   │ Service.js       │        │  (query storici)     │          │
+│   └────────┬─────────┘        └──────────────────────┘          │
+│            │                                                     │
+│            ▼                                                     │
+│   ┌──────────────────┐        ┌──────────────────────┐          │
+│   │ breakDetector.js │◄──────►│  matchSegmenter.js   │          │
+│   │ (analisi break)  │        │  (fasi match)        │          │
+│   └────────┬─────────┘        └──────────┬───────────┘          │
+│            │                              │                      │
+│            └──────────────┬───────────────┘                      │
+│                           ▼                                      │
+│                  ┌──────────────────┐                            │
+│                  │pressureCalculator│                            │
+│                  │    .js (live)    │                            │
+│                  └────────┬─────────┘                            │
+│                           │                                      │
+│                           ▼                                      │
+│                  ┌──────────────────┐                            │
+│                  │  Trading Engine  │                            │
+│                  │   (futuro)       │                            │
+│                  └──────────────────┘                            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ✅ Checklist Implementazione
+
+### Task 1: playerProfileService.js ✅ COMPLETATO
+- [x] Funzione `getPlayerProfile(playerName, options)` - Profilo completo con tutte le metriche
+- [x] Funzione `calculateSpecialMetrics(matches, playerName)` - Metriche speciali (comeback, first set, deciding set)
+- [x] Funzione `analyzeRecentForm(matches, count)` - Analisi form recente con trend
+- [x] Funzione `aggregateBySurface(matches)` - Statistiche per superficie
+- [x] Funzione `aggregateByFormat(matches)` - Statistiche per formato Bo3/Bo5
+- [x] Funzione `aggregateBySeries(matches)` - Statistiche per serie torneo
+- [x] Funzione `compareProfiles(player1, player2, options)` - Confronto profili
+- [x] Funzione `calculateROI(matches)` - Calcolo ROI con stake fisso
+
+### Task 2: matchSegmenter.js ✅ COMPLETATO
+- [x] Funzione `segmentMatch(matchData)` - Segmentazione completa match
+- [x] Funzione `isCriticalGame(homeGames, awayGames)` - Identifica game critici
+- [x] Funzione `isSetClosingGame(homeGames, awayGames, server)` - Game chiusura set
+- [x] Funzione `isMatchClosingGame(...)` - Game chiusura match
+- [x] Funzione `detectMomentumShift(prevValue, currValue)` - Rileva shift momentum
+- [x] Funzione `getSegmentSummary(matchData)` - Summary con trading insights
+- [x] Funzione `analyzeCriticalGames(matchData)` - Analisi specifica game critici
+- [x] Funzione `analyzeMomentumShifts(matchData)` - Pattern momentum shifts
+
+### Task 3: breakDetector.js ✅ COMPLETATO
+- [x] Funzione `detectBreaksFromScore(setScore, firstServer)` - Rileva break da score
+- [x] Funzione `analyzeSetBreaks(matchData)` - Analisi completa break per set
+- [x] Funzione `estimateFirstServer(matchData)` - Stima primo servitore
+- [x] Funzione `analyzeBreakPatterns(matches, playerName)` - Pattern break storici
+- [x] Funzione `classifySet(setAnalysis)` - Classifica set per break activity
+- [x] Funzione `generateBreakInsights(sets, ...)` - Genera insights
+
+### Task 4: pressureCalculator.js ✅ COMPLETATO
+- [x] Funzione `calculatePressureIndex(liveStats, context)` - Indice pressione completo
+- [x] Funzione `calculateContextMultiplier(matchContext)` - Moltiplicatore contesto
+- [x] Funzione `classifyPressure(index)` - Classifica livello pressione
+- [x] Funzione `generateRecommendation(...)` - Raccomandazione trading
+- [x] Funzione `comparePressure(p1Stats, p2Stats, context)` - Confronto pressione
+- [x] Funzioni contributo: `calculateDFContribution`, `calculateFirstServeContribution`, etc.
+
+---
+
+## 📁 File Creati (22 Dicembre 2025)
+
+| File | Percorso | Funzioni Principali |
+|------|----------|---------------------|
+| **playerProfileService.js** | `backend/services/` | `getPlayerProfile`, `compareProfiles`, aggregazioni |
+| **matchSegmenter.js** | `backend/utils/` | `segmentMatch`, `getSegmentSummary`, critical games |
+| **breakDetector.js** | `backend/utils/` | `detectBreaksFromScore`, `analyzeSetBreaks`, patterns |
+| **pressureCalculator.js** | `backend/utils/` | `calculatePressureIndex`, `comparePressure`, recommendations |
+
+---
+
 **Ultimo aggiornamento**: 22 Dicembre 2025

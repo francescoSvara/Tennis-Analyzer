@@ -1,0 +1,560 @@
+/**
+ * PLAYER PAGE STYLES
+ * 
+ * Stili per la pagina profilo giocatore
+ */
+
+.player-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+}
+
+/* ============================================================================
+   HEADER & SEARCH
+   ============================================================================ */
+
+.player-page-header {
+  margin-bottom: 30px;
+}
+
+.player-page-header h1 {
+  color: #ffffff;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.player-search-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.player-search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #2d3748;
+  border-radius: 8px;
+  background: #1a1f2e;
+  color: #ffffff;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.player-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.player-search-input::placeholder {
+  color: #8b95a5;
+}
+
+.player-search-btn {
+  padding: 12px 24px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.player-search-btn:hover {
+  background: #2563eb;
+}
+
+/* Surface Filters */
+.surface-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background: #2d3748;
+  color: #8b95a5;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background: #3d4858;
+  color: #ffffff;
+}
+
+.filter-btn.active {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.filter-btn.hard.active {
+  background: #3b82f6;
+}
+
+.filter-btn.clay.active {
+  background: #f97316;
+}
+
+.filter-btn.grass.active {
+  background: #22c55e;
+}
+
+/* ============================================================================
+   LOADING & STATES
+   ============================================================================ */
+
+.loading-container,
+.error-container,
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8b95a5;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #2d3748;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-container {
+  color: #ef4444;
+}
+
+.empty-state .hint {
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* ============================================================================
+   PLAYER HEADER
+   ============================================================================ */
+
+.player-header-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #2d3748;
+}
+
+.player-header-card h2 {
+  color: #ffffff;
+  font-size: 1.8rem;
+  margin: 0 0 8px;
+}
+
+.matches-analyzed {
+  color: #8b95a5;
+  margin: 0;
+}
+
+.surface-badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 12px;
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+/* ============================================================================
+   SECTIONS
+   ============================================================================ */
+
+.profile-section {
+  background: #1a1f2e;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #2d3748;
+}
+
+.profile-section h3 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2d3748;
+}
+
+/* ============================================================================
+   STAT CARDS
+   ============================================================================ */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: #0f1419;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #2d3748;
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.stat-icon {
+  font-size: 1.2rem;
+}
+
+.stat-title {
+  color: #8b95a5;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-trend {
+  font-size: 1.2rem;
+}
+
+.stat-subtitle {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* ============================================================================
+   PERCENT BAR
+   ============================================================================ */
+
+.percent-bar-container {
+  margin-bottom: 12px;
+}
+
+.percent-bar-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.percent-bar-label {
+  color: #8b95a5;
+  font-size: 0.85rem;
+}
+
+.percent-bar-value {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.percent-bar-track {
+  height: 8px;
+  background: #2d3748;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.percent-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* ============================================================================
+   SURFACE CARDS
+   ============================================================================ */
+
+.surface-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.surface-card {
+  background: #0f1419;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #2d3748;
+  border-left-width: 4px;
+}
+
+.surface-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.surface-icon {
+  font-size: 1.2rem;
+}
+
+.surface-name {
+  color: #ffffff;
+  font-weight: 600;
+  flex: 1;
+}
+
+.surface-matches {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.surface-record {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.surface-record .wins {
+  color: #10b981;
+}
+
+.surface-record .losses {
+  color: #ef4444;
+}
+
+/* ============================================================================
+   FORMAT CARDS
+   ============================================================================ */
+
+.format-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.format-card {
+  background: #0f1419;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #2d3748;
+}
+
+.format-card h4 {
+  color: #ffffff;
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+/* ============================================================================
+   SERIES CARDS
+   ============================================================================ */
+
+.series-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.series-card {
+  background: #0f1419;
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid #2d3748;
+}
+
+.series-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.series-name {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.series-matches {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+/* ============================================================================
+   RECENT FORM
+   ============================================================================ */
+
+.recent-form-container {
+  display: grid;
+  gap: 20px;
+}
+
+.form-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.form-visual {
+  padding: 16px;
+  background: #0f1419;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+}
+
+.form-streak {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.form-result {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.form-result.win {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.form-result.loss {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+/* ============================================================================
+   ROI SECTION
+   ============================================================================ */
+
+.roi-section {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.roi-container {
+  text-align: center;
+}
+
+.roi-value {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.roi-value.positive {
+  color: #10b981;
+}
+
+.roi-value.negative {
+  color: #ef4444;
+}
+
+.roi-details {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  color: #8b95a5;
+  font-size: 0.9rem;
+}
+
+.roi-details .profit {
+  color: #10b981;
+}
+
+.roi-details .loss {
+  color: #ef4444;
+}
+
+/* ============================================================================
+   RAW DATA & METADATA
+   ============================================================================ */
+
+.raw-data-section {
+  margin-top: 20px;
+  background: #0f1419;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+}
+
+.raw-data-section summary {
+  padding: 12px 16px;
+  color: #8b95a5;
+  cursor: pointer;
+}
+
+.raw-data-section pre {
+  padding: 16px;
+  margin: 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+  overflow-x: auto;
+  max-height: 400px;
+  background: #0a0c10;
+  border-radius: 0 0 8px 8px;
+}
+
+.profile-metadata {
+  text-align: center;
+  margin-top: 20px;
+  color: #6b7280;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .player-page {
+    padding: 12px;
+  }
+  
+  .player-page-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .player-search-form {
+    flex-direction: column;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .roi-value {
+    font-size: 2.5rem;
+  }
+  
+  .roi-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

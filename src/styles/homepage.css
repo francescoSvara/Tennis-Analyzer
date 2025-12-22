@@ -3473,6 +3473,32 @@
   color: var(--home-text-muted);
 }
 
+/* Player Button */
+.player-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: var(--home-radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--home-transition);
+}
+
+.player-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.player-btn .icon {
+  font-size: 1.1rem;
+}
+
 /* Monitor Button */
 .monitor-btn {
   display: flex;

@@ -129,6 +129,22 @@ body {
   flex-shrink: 0;
 }
 
+/* Player View Container */
+.player-view-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+}
+
+.player-view-header {
+  padding: 16px 24px;
+  background: rgba(26, 35, 50, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
 .top-bar h1 {
   margin: 0;
   font-size: 20px;

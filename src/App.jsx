@@ -11,6 +11,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import IndicatorsChart from './components/IndicatorsChart';
 import MomentumChart from './components/MomentumChart';
 import HomePage from './components/HomePage';
+import PlayerPage from './components/PlayerPage';
 import { apiUrl } from './config';
 
 import './styles/overviewcharts.css';
@@ -1274,7 +1275,23 @@ export default function App() {
       {currentView === 'home' && (
         <HomePage 
           onMatchSelect={handleMatchSelect}
+          onNavigateToPlayer={() => setCurrentView('player')}
         />
+      )}
+
+      {/* Player Profile View */}
+      {currentView === 'player' && (
+        <div className="player-view-container">
+          <header className="player-view-header">
+            <button className="back-btn" onClick={() => setCurrentView('home')}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Torna alla Home</span>
+            </button>
+          </header>
+          <PlayerPage />
+        </div>
       )}
 
       {/* Match Detail View */}

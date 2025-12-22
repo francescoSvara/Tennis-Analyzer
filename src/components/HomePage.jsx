@@ -135,7 +135,7 @@ function AddMatchModal({ onClose, onSuccess }) {
 }
 
 
-function HomePage({ onMatchSelect }) {
+function HomePage({ onMatchSelect, onNavigateToPlayer }) {
   const [selectedSport, setSelectedSport] = useState('tennis');
   const [matches, setMatches] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([]);
@@ -266,6 +266,9 @@ function HomePage({ onMatchSelect }) {
           </h1>
         </div>
         <div className="home-header-right">
+          <button className="player-btn" onClick={onNavigateToPlayer}>
+            <span className="icon">👤</span> Player Profiles
+          </button>
           <button className="monitor-btn" onClick={() => setShowMonitoring(true)}>
             <span className="icon">📊</span> Database Monitor
           </button>

@@ -352,6 +352,19 @@ node scripts/populate-player-aliases.js --dry-run
 
 ## Changelog
 
+### 22 Dicembre 2025 (Sessione 3) 🆕
+**Moduli Data Acquisition & Aggregation:**
+- `playerProfileService.js` - Profili giocatore con metriche aggregate per superficie/formato/serie
+- `matchSegmenter.js` - Segmentazione match in fasi logiche (PRE_BREAK, CRITICAL, CLOSING)
+- `breakDetector.js` - Rilevamento break da punteggio set senza point-by-point
+- `pressureCalculator.js` - Calcolo indice pressione live (0-100) con raccomandazioni trading
+
+**Funzionalità principali:**
+- `getPlayerProfile()` - Profilo completo con comeback_rate, ROI, win_rate per superficie
+- `segmentMatch()` - Identifica game critici, momentum shifts, closing opportunities
+- `detectBreaksFromScore()` - Analizza break da score set (utile per dati XLSX)
+- `calculatePressureIndex()` - Indice pressione con breakdown DF/FirstServe/BP
+
 ### 22 Dicembre 2025 (Sessione 2)
 - Nuovo documento FILOSOFIA_STATS.md con tutte le funzioni di calcolo
 - Hook useMatchCard.jsx per frontend
@@ -374,10 +387,20 @@ node scripts/populate-player-aliases.js --dry-run
 
 ---
 
-## ?? License
+## 📚 Documentazione
+
+| Documento | Contenuto |
+|-----------|-----------|
+| **[FILOSOFIA_DB.md](FILOSOFIA_DB.md)** | Architettura dati, flussi, schema DB |
+| **[FILOSOFIA_STATS.md](FILOSOFIA_STATS.md)** | Funzioni calcolo, formule, metriche derivate, TODO moduli |
+| **[README_IMPLEMENTATION_GUIDE.md](README_IMPLEMENTATION_GUIDE.md)** | Guida implementazione task backend |
+
+---
+
+## 🔧 License
 
 MIT License - Vedi [LICENSE](LICENSE) per dettagli.
 
 ---
 
-**Made with ?? for tennis data analysis**
+**Made with ❤️ for tennis data analysis**
