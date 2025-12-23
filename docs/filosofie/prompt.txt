@@ -1,30 +1,31 @@
-[dotenv@17.2.3] injecting env (5) from .env -- tip: �️ backup and recover secrets: https://dotenvx.com/ops
-[dotenv@17.2.3] injecting env (0) from .env -- tip: �️ backup and recover secrets: https://dotenvx.com/ops
-✅ LiveManager: Database module loaded
-✅ LiveManager: Live Tracking Repository loaded (DB mode)
-✅ Player Stats Service loaded
-✅ Match Card Service loaded
-✅ Player Service loaded
-✅ Player Profile Service loaded
-✅ Break Detector loaded
-✅ Pressure Calculator loaded
-✅ Match Segmenter loaded
-✅ Database modules loaded
-� LiveManager initialized
-� Scraper backend listening on port 3001 (HTTP + WebSocket)
-� Starting match monitoring scheduler...
-� Starting match monitoring scheduler...
-� Starting reconciliation job (every 5 min)...
-� Match 14896634 served from database
-   PowerRankings: 13, Breaks: 0, Statistics: 3, PBP: 0
-� Match 14896634 served from database
-   PowerRankings: 13, Breaks: 0, Statistics: 3, PBP: 0
-� Match 14896634 served from database
-   PowerRankings: 13, Breaks: 0, Statistics: 3, PBP: 0
-� Running reconciliation job...
+ Running reconciliation job...
 � No live matches found on SofaScore
+� Fetching matches summary...
+� Fetching matches summary...
+✅ Summary: 2794 total matches, 7 years
+� Fetching matches summary...
+✅ Summary: 2794 total matches, 7 years
+� Fetching matches summary...
+✅ Summary: 2794 total matches, 7 years
+✅ Summary: 2794 total matches, 7 years
 � Match 14896634 served from database
    PowerRankings: 13, Breaks: 0, Statistics: 3, PBP: 0
-
+� Fetching matches summary...
+✅ Summary: 2794 total matches, 7 years
+� Fetching matches summary...
+✅ Summary: 2794 total matches, 7 years
+� Fetching matches summary...
+✅ Summary: 2794 total matches, 7 years
+� Fetching matches summary...
+� Match 15108295 served from database
+   PowerRankings: 0, Breaks: 0, Statistics: 3, PBP: 0
+� Match 15108295 served from database
+   PowerRankings: 0, Breaks: 0, Statistics: 3, PBP: 0
+✅ Summary: 2794 total matches, 7 years
+⚠️ Join query failed for match, trying simple: TypeError: fetch failed
+� Match 15108295 served from database
+   PowerRankings: 0, Breaks: 0, Statistics: 3, PBP: 0
+� Match 15108295 served from database
+   PowerRankings: 0, Breaks: 0, Statistics: 3, PBP: 0
 
 cosa sono tutte queste richieste? se rileggi le filosofie a partire da madre noterai che io non homai detto che voglio chiamate fetch o chissa cosa è se è db perche le richiama in continuazione? solo una volta... poi le strategie di base non devono essere influenzate da dati passi... a sinistra devi dire cosa fare la car di ogni strategia cosa farebbe sui dati di quella singola partita, a destra una scheda uguale ma sulla base di tutte le partite nel db calcolando landamento dei due player ... se sno task troppo lunghe aggiungile nel todo cosi iniziamo a fare queste poi altri fix segnalati nel todolist... ora fai una bella lista di tutto quello che devi fare e procediamo, vai cha abbiamo finito
