@@ -555,6 +555,12 @@ export default function App() {
         console.log('   extractedPowerRankings:', extractedPowerRankings?.length || 0);
         console.log('   extractedStatistics:', extractedStatistics?.length || 0);
         console.log('   extractedPointByPoint:', extractedPointByPoint?.length || 0);
+        // Debug breakOccurred
+        if (extractedPowerRankings?.length > 0) {
+          const withBreak = extractedPowerRankings.filter(p => p.breakOccurred === true);
+          console.log('   🎾 PowerRankings con breakOccurred=true:', withBreak.length);
+          console.log('   🎾 Sample PR:', JSON.stringify(extractedPowerRankings[0]));
+        }
         if (rawJson?.api) {
           console.log('   API keys disponibili:', Object.keys(rawJson.api).filter(k => k.includes('power') || k.includes('statistic')));
         }

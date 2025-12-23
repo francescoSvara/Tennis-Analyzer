@@ -3,7 +3,7 @@
 > **Scopo**: documento di navigazione rapida per AI/sviluppatore.
 > Contiene tutti i riferimenti verificati tra filosofie, file, funzioni e linee di codice.
 >
-> **Ultimo aggiornamento**: 23 Dicembre 2025
+> **Ultimo aggiornamento**: 03 Gennaio 2025
 
 ---
 
@@ -302,6 +302,20 @@ docs/
 | `segmentMatch()` | matchSegmenter.js | - |
 | `calculatePressureIndex()` | pressureCalculator.js | - |
 
+### 6.1.1 Break & Momentum (server.js)
+
+| Funzione | File | Linea | Descrizione |
+|----------|------|-------|-------------|
+| `calculateBreaksFromPbp()` | server.js | 170-225 | Calcola break da pbp usando convenzione SofaScore |
+| `generatePowerRankingsFromPbp()` | server.js | 227-310 | Running score per set + normalizzazione -100..+100 |
+
+**Convenzione SofaScore**:
+- `serving=1` = HOME serve, `serving=2` = AWAY serve
+- `scoring=1` = HOME wins, `scoring=2` = AWAY wins
+- **BREAK** = `serving !== scoring`
+
+**Fonte dati**: `raw_json.pointByPoint` (NON dbMatch.pointByPoint!)
+
 ### 6.2 SVG Momentum (Fallback)
 
 | Funzione | File | Linea |
@@ -410,6 +424,8 @@ GET /api/match/:id/card
 |----------|----------|------|
 | Volatility match | `calculateVolatility` | backend/utils/valueInterpreter.js |
 | Break detection | `detectBreaksFromScore` | backend/utils/breakDetector.js |
+| Break from PbP | `calculateBreaksFromPbp` | backend/server.js (L170-225) |
+| Momentum from PbP | `generatePowerRankingsFromPbp` | backend/server.js (L227-310) |
 | Player stats | `getPlayerStats` | backend/services/playerStatsService.js |
 | Match card | `getMatchCard` | backend/services/matchCardService.js |
 | Scraping | `getMatchData` | backend/scraper/sofascoreScraper.js |
@@ -417,6 +433,7 @@ GET /api/match/:id/card
 | SVG extraction | `extractMomentumFromSvgHtml` | backend/utils/svgMomentumExtractor.js |
 | SVG insert | `insertPowerRankingsSvg` | backend/db/matchRepository.js |
 | SVG process | `processSvgMomentum` | backend/utils/svgMomentumExtractor.js |
+| **Break Frontend** | `homeBreaks/awayBreaks calc` | src/components/IndicatorsChart.jsx (L140-220) |
 
 ### 8.2 Cerco una tabella
 

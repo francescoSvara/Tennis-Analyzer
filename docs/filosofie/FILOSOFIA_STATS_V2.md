@@ -232,6 +232,38 @@ Questo documento NON descrive:
 | `segmentMatch` | `backend/utils/matchSegmenter.js` | - |
 | `detectBreaksFromScore` | `backend/utils/breakDetector.js` | - |
 | `calculatePressureIndex` | `backend/utils/pressureCalculator.js` | - |
+| `calculateBreaksFromPbp` | `backend/server.js` | 170-225 |
+| `generatePowerRankingsFromPbp` | `backend/server.js` | 227-310 |
+
+### Convenzione SofaScore serving/scoring
+
+**IMPORTANTE**: Convenzione ufficiale SofaScore per point-by-point:
+- `serving = 1` → HOME serve
+- `serving = 2` → AWAY serve
+- `scoring = 1` → HOME vince il game
+- `scoring = 2` → AWAY vince il game
+- `scoring = -1` → game ancora in corso
+
+**Calcolo BREAK**: Un break si verifica quando `serving !== scoring` (chi serve perde il game)
+
+**Note sui dati**:
+- `raw_json.pointByPoint` contiene `game.score.serving/scoring` (usare questo!)
+- `dbMatch.pointByPoint` (tabelle DB) NON ha questi campi
+- Riferimento: `backend/server.js` endpoint `/api/match/:eventId`
+
+### Algoritmo Momentum (Running Score)
+
+L'algoritmo `generatePowerRankingsFromPbp()` calcola il momentum con:
+
+1. **Running Score per Set**: Per ogni game, accumula +1 (HOME) o -1 (AWAY)
+2. **Reset ad ogni Set**: Il running score riparte da 0
+3. **Normalizzazione finale**: Scala il valore su range -100..+100
+
+```
+Esempio: Set 3, score finale 6-4 per HOME
+Games: H H A H A H A H A H → running: +1,+2,+1,+2,+1,+2,+1,+2,+1,+2
+Max=+2, Min=-0 → Normalizzato: valore=100 (max HOME advantage)
+```
 
 ### Backend - Normalization
 

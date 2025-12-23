@@ -327,6 +327,17 @@ node scripts/checkConceptualMap.js
 
 ## 📜 Changelog
 
+### v4.1 (Gennaio 2025) - Fix Break/Momentum Calculation
+- **Break Detection Fix** - Corretta convenzione serving/scoring SofaScore
+  - `serving=1` = HOME serve, `serving=2` = AWAY serve
+  - `scoring=1` = HOME wins, `scoring=2` = AWAY wins
+  - Break = il giocatore che vince NON è quello che serve
+- **Break Frontend** - Separazione `homeBreaks` e `awayBreaks` in IndicatorsChart
+- **Momentum Normalization** - Algoritmo running score con reset per set
+  - Accumulo +1/-1 per ogni game vinto (HOME/AWAY)
+  - Normalizzazione finale su scala -100..+100
+- **Raw JSON Usage** - Uso `raw_json.pointByPoint` per break (contiene serving/scoring)
+
 ### v4.0 (Dicembre 2025) - Documentazione Strutturata
 - **Mappa Rete Concettuale** - Riferimenti completi file/funzioni/tabelle
 - **Sistema Check Automatico** - Verifica integrità documentazione

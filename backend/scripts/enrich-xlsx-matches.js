@@ -183,6 +183,45 @@ async function findSofaScoreMatch(homeName, awayName, matchDate) {
 }
 
 /**
+ * Calcola break_occurred per ogni game analizzando point-by-point
+ * Un break avviene quando chi vince il game (scoring) è diverso da chi serve (serving)
+ * 
+ * @param {Array} pointByPoint - Dati point-by-point da SofaScore
+ * @returns {Map} Mappa (set,game) -> boolean (true se break)
+ */
+function calculateBreaksFromPointByPoint(pointByPoint) {
+  const breakMap = new Map();
+  
+  if (!pointByPoint || !Array.isArray(pointByPoint)) {
+    return breakMap;
+  }
+  
+  for (const setData of pointByPoint) {
+    const setNumber = setData.set || 1;
+    
+    for (const gameData of (setData.games || [])) {
+      const gameNumber = gameData.game || 1;
+      const score = gameData.score;
+      
+      if (score && score.serving !== undefined && score.scoring !== undefined) {
+        // scoring = chi ha vinto il game (1 = home, 2 = away)
+        // serving = chi stava servendo (1 = home, 2 = away)
+        // Break = quando scoring != serving
+        const isBreak = score.serving !== score.scoring;
+        const key = `${setNumber}-${gameNumber}`;
+        breakMap.set(key, isBreak);
+        
+        if (isBreak) {
+          console.log(`   🎾 Break rilevato: Set ${setNumber} Game ${gameNumber} (serving: ${score.serving}, scoring: ${score.scoring})`);
+        }
+      }
+    }
+  }
+  
+  return breakMap;
+}
+
+/**
  * Fetch dati completi da SofaScore
  */
 async function fetchSofaScoreData(eventId) {
@@ -229,7 +268,7 @@ async function fetchSofaScoreData(eventId) {
  * Salva dati nel nuovo schema
  */
 async function saveEnrichedData(matchId, sofascoreEventId, data) {
-  let saved = { powerRankings: 0, statistics: 0, pointByPoint: 0 };
+  let saved = { powerRankings: 0, statistics: 0, pointByPoint: 0, breaksCalculated: 0 };
   
   // Aggiorna o crea match_data_sources
   const { error: sourceError } = await supabase
@@ -250,24 +289,42 @@ async function saveEnrichedData(matchId, sofascoreEventId, data) {
     console.error(`   ❌ Errore salvataggio source: ${sourceError.message}`);
   }
 
-  // Salva Power Rankings
+  // Calcola break dal point-by-point PRIMA di salvare i power rankings
+  const breakMap = calculateBreaksFromPointByPoint(data.pointByPoint);
+  const totalBreaks = Array.from(breakMap.values()).filter(Boolean).length;
+  if (totalBreaks > 0) {
+    console.log(`   🎾 Break totali calcolati: ${totalBreaks}`);
+  }
+
+  // Salva Power Rankings (con break calcolati dal point-by-point)
   if (data.powerRankings.length > 0) {
     // Elimina vecchi
     await supabase.from('match_power_rankings_new').delete().eq('match_id', matchId);
     
-    const records = data.powerRankings.map((pr, idx) => ({
-      match_id: matchId,
-      set_number: pr.set || 1,
-      game_number: pr.game || idx + 1,
-      value: pr.value || 0,
-      home_score: pr.homeScore || null,
-      away_score: pr.awayScore || null,
-      server: pr.server === 1 ? 'home' : (pr.server === 2 ? 'away' : null),
-      break_occurred: pr.breakOccurred || false
-    }));
+    const records = data.powerRankings.map((pr, idx) => {
+      const setNum = pr.set || 1;
+      const gameNum = pr.game || idx + 1;
+      const key = `${setNum}-${gameNum}`;
+      // Usa break calcolato da point-by-point, fallback al valore originale
+      const breakOccurred = breakMap.has(key) ? breakMap.get(key) : (pr.breakOccurred || false);
+      
+      return {
+        match_id: matchId,
+        set_number: setNum,
+        game_number: gameNum,
+        value: pr.value || 0,
+        home_score: pr.homeScore || null,
+        away_score: pr.awayScore || null,
+        server: pr.server === 1 ? 'home' : (pr.server === 2 ? 'away' : null),
+        break_occurred: breakOccurred
+      };
+    });
     
     const { error } = await supabase.from('match_power_rankings_new').insert(records);
-    if (!error) saved.powerRankings = records.length;
+    if (!error) {
+      saved.powerRankings = records.length;
+      saved.breaksCalculated = totalBreaks;
+    }
   }
 
   // Salva Statistics
@@ -430,7 +487,7 @@ async function main() {
       
       // Salva
       const saved = await saveEnrichedData(match.id, sofaMatch.id, data);
-      console.log(`   💾 Salvati: PR=${saved.powerRankings}, Stats=${saved.statistics}, PBP=${saved.pointByPoint}`);
+      console.log(`   💾 Salvati: PR=${saved.powerRankings} (${saved.breaksCalculated} break), Stats=${saved.statistics}, PBP=${saved.pointByPoint}`);
       
       if (saved.powerRankings > 0 || saved.statistics > 0) {
         results.enriched++;
@@ -486,20 +543,31 @@ async function processOldSchema(matches) {
       console.log(`   📥 Scarico dati...`);
       const data = await fetchSofaScoreData(sofaMatch.id);
       
+      // Calcola break dal point-by-point
+      const breakMap = calculateBreaksFromPointByPoint(data.pointByPoint);
+      const totalBreaks = Array.from(breakMap.values()).filter(Boolean).length;
+      
       // Salva nel vecchio schema
       if (data.powerRankings.length > 0) {
         await supabase.from('power_rankings').delete().eq('match_id', match.id);
         
-        const records = data.powerRankings.map((pr, idx) => ({
-          match_id: match.id,
-          set_number: pr.set || 1,
-          game_number: pr.game || idx + 1,
-          value: pr.value || 0,
-          break_occurred: pr.breakOccurred || false
-        }));
+        const records = data.powerRankings.map((pr, idx) => {
+          const setNum = pr.set || 1;
+          const gameNum = pr.game || idx + 1;
+          const key = `${setNum}-${gameNum}`;
+          const breakOccurred = breakMap.has(key) ? breakMap.get(key) : (pr.breakOccurred || false);
+          
+          return {
+            match_id: match.id,
+            set_number: setNum,
+            game_number: gameNum,
+            value: pr.value || 0,
+            break_occurred: breakOccurred
+          };
+        });
         
         await supabase.from('power_rankings').insert(records);
-        console.log(`   ✅ Salvati ${records.length} powerRankings`);
+        console.log(`   ✅ Salvati ${records.length} powerRankings (${totalBreaks} break)`);
         results.enriched++;
       }
 

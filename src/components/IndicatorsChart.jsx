@@ -149,6 +149,8 @@ export default function IndicatorsChart({
     let awayDominant = 0;
     let balanced = 0;
     let breaks = 0;
+    let homeBreaks = 0;  // Break fatti da Home (Away serviva, Home ha vinto)
+    let awayBreaks = 0;  // Break fatti da Away (Home serviva, Away ha vinto)
     let totalValue = 0;
     let maxValue = 0;
     let minValue = 0;
@@ -185,7 +187,18 @@ export default function IndicatorsChart({
         balanced++;
       }
       
-      if (item.breakOccurred) breaks++;
+      // Conta break per lato
+      // Break avviene quando chi vince NON è chi serviva:
+      // - value > 0 && breakOccurred = Home ha vinto un game dove Away serviva = break per Home
+      // - value < 0 && breakOccurred = Away ha vinto un game dove Home serviva = break per Away
+      if (item.breakOccurred) {
+        breaks++;
+        if (value > 0) {
+          homeBreaks++;
+        } else if (value < 0) {
+          awayBreaks++;
+        }
+      }
     });
     
     const avgValue = Math.round(totalValue / powerRankings.length);
@@ -203,6 +216,8 @@ export default function IndicatorsChart({
       awayDominant,
       balanced,
       breaks,
+      homeBreaks,  // Break fatti da Home
+      awayBreaks,  // Break fatti da Away
       avgValue,
       maxValue,
       minValue: Math.abs(minValue),
@@ -414,7 +429,7 @@ export default function IndicatorsChart({
   const indicators = [
     { label: 'Game Totali', icon: <TennisBall size={16} weight="duotone" />, home: stats.homeGames, away: stats.awayGames, homeColor: '#5b8fb9', awayColor: '#c97676' },
     { label: 'Dominio', icon: <Barbell size={16} weight="duotone" />, home: stats.homeDominant, away: stats.awayDominant, homeColor: '#6aba7f', awayColor: '#c97676' },
-    { label: 'Break', icon: <Lightning size={16} weight="duotone" />, home: Math.ceil(stats.breaks/2), away: Math.floor(stats.breaks/2), homeColor: '#d4a84b', awayColor: '#d4a84b' },
+    { label: 'Break', icon: <Lightning size={16} weight="duotone" />, home: stats.homeBreaks, away: stats.awayBreaks, homeColor: '#d4a84b', awayColor: '#d4a84b' },
     { label: 'Max Momentum', icon: <ChartLineUp size={16} weight="duotone" />, home: stats.maxValue, away: stats.minValue, homeColor: '#6c9a8b', awayColor: '#6c9a8b' },
   ];
 

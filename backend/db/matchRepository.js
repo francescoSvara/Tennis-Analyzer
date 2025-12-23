@@ -15,6 +15,78 @@ function checkSupabase() {
 }
 
 // ============================================================================
+// BREAK CALCULATION FROM POINT-BY-POINT
+// ============================================================================
+
+/**
+ * Calcola break_occurred per ogni game analizzando point-by-point
+ * Un break avviene quando chi vince il game (scoring) è diverso da chi serve (serving)
+ * 
+ * Questa funzione viene chiamata quando si leggono i powerRankings per arricchirli
+ * con l'informazione sui break calcolata dinamicamente dai dati point-by-point.
+ * 
+ * @param {Array} pointByPoint - Dati point-by-point già strutturati (output di getPointByPoint)
+ * @returns {Map} Mappa (set-game) -> boolean (true se break)
+ */
+function calculateBreaksFromPointByPoint(pointByPoint) {
+  const breakMap = new Map();
+  
+  if (!pointByPoint || !Array.isArray(pointByPoint)) {
+    return breakMap;
+  }
+  
+  for (const setData of pointByPoint) {
+    const setNumber = setData.set || 1;
+    
+    for (const gameData of (setData.games || [])) {
+      const gameNumber = gameData.game || 1;
+      
+      // Cerca informazioni sul serving/scoring nei punti del game
+      // Il primo punto del game contiene spesso l'info sul server
+      // Oppure cerchiamo score.serving e score.scoring
+      const points = gameData.points || [];
+      
+      if (points.length > 0) {
+        // Metodo 1: Cerca score.serving e score.scoring
+        const lastPoint = points[points.length - 1];
+        let serving = null;
+        let scoring = null;
+        
+        // Cerca nelle proprietà del game
+        if (gameData.score) {
+          serving = gameData.score.serving;
+          scoring = gameData.score.scoring;
+        }
+        
+        // Oppure cerca nei punti
+        if (serving === null || scoring === null) {
+          // Cerca serving dal primo punto
+          const firstPoint = points[0];
+          if (firstPoint.server) {
+            serving = firstPoint.server;
+          }
+          
+          // scoring = chi ha vinto il game (l'ultimo punto)
+          if (lastPoint.winner) {
+            scoring = lastPoint.winner;
+          }
+        }
+        
+        // Se abbiamo entrambi i valori, determina se è un break
+        if (serving !== null && scoring !== null && serving !== undefined && scoring !== undefined) {
+          // Break = quando scoring != serving
+          const isBreak = serving !== scoring;
+          const key = `${setNumber}-${gameNumber}`;
+          breakMap.set(key, isBreak);
+        }
+      }
+    }
+  }
+  
+  return breakMap;
+}
+
+// ============================================================================
 // PLAYERS
 // ============================================================================
 
@@ -777,18 +849,30 @@ async function getMatchById(matchId) {
     .order('set_number')
     .order('game_number');
 
+  // Point-by-point (fetched first to calculate breaks)
+  const pointByPoint = await getPointByPoint(matchId);
+  
+  // Calcola break map dal point-by-point
+  const breakMap = calculateBreaksFromPointByPoint(pointByPoint);
+
   // Trasforma in formato compatibile con frontend con fallback logic
-  const powerRankings = (powerRankingsRaw || []).map(pr => ({
-    set: pr.set_number,
-    game: pr.game_number,
-    value: pr.value ?? pr.value_svg ?? 0,  // Fallback: API -> SVG -> 0
-    valueApi: pr.value,
-    valueSvg: pr.value_svg,
-    breakOccurred: pr.break_occurred,
-    zone: pr.zone,
-    status: pr.status,
-    source: pr.value ? 'api' : (pr.value_svg ? 'svg' : 'none')
-  }));
+  const powerRankings = (powerRankingsRaw || []).map(pr => {
+    const key = `${pr.set_number}-${pr.game_number}`;
+    // Usa break calcolato da point-by-point se disponibile, altrimenti usa valore DB
+    const breakOccurred = breakMap.has(key) ? breakMap.get(key) : (pr.break_occurred || false);
+    
+    return {
+      set: pr.set_number,
+      game: pr.game_number,
+      value: pr.value ?? pr.value_svg ?? 0,  // Fallback: API -> SVG -> 0
+      valueApi: pr.value,
+      valueSvg: pr.value_svg,
+      breakOccurred: breakOccurred,
+      zone: pr.zone,
+      status: pr.status,
+      source: pr.value ? 'api' : (pr.value_svg ? 'svg' : 'none')
+    };
+  });
 
   // Statistiche raw dal DB
   const { data: statsRaw } = await supabase
@@ -840,8 +924,7 @@ async function getMatchById(matchId) {
     console.log('⚠️ v_momentum_summary not available:', e.message);
   }
 
-  // Point-by-point
-  const pointByPoint = await getPointByPoint(matchId);
+  // pointByPoint già calcolato sopra per il calcolo dei break
 
   return {
     ...mappedMatch,

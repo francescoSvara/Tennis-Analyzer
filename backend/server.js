@@ -106,6 +106,257 @@ try {
   console.warn('⚠️ Database modules not available:', e.message);
 }
 
+// ============================================================================
+// HELPER: CALCOLO BREAK DA POINT-BY-POINT
+// ============================================================================
+
+/**
+ * Determina il vincitore di un game dai punti
+ * Un game è vinto quando un giocatore raggiunge score finale (game, 40-AD, o tiebreak)
+ * 
+ * @param {Array} points - Array di punti del game
+ * @returns {string|null} "home", "away" o null se game non finito
+ */
+function determineGameWinner(points) {
+  if (!points || points.length === 0) return null;
+  
+  const lastPoint = points[points.length - 1];
+  const homeP = lastPoint.home_point;
+  const awayP = lastPoint.away_point;
+  
+  // Converti i punti in numeri per confronto
+  const parsePoint = (p) => {
+    if (p === 'AD') return 50;
+    if (p === '40') return 40;
+    if (p === '30') return 30;
+    if (p === '15') return 15;
+    if (p === '0') return 0;
+    return parseInt(p) || 0;
+  };
+  
+  const homeScore = parsePoint(homeP);
+  const awayScore = parsePoint(awayP);
+  
+  // Game normale: vince chi arriva a 4+ punti (40 dopo vantaggio o direttamente)
+  // Il punteggio finale tipico è quando uno ha vinto e l'altro no
+  
+  // Controlla se è un game finito guardando il pattern dell'ultimo punto
+  // Se uno ha vinto il punto e porta il punteggio a situazione di vittoria
+  const winner = lastPoint.point_winner;
+  
+  // In un game normale, il gioco finisce quando:
+  // - Qualcuno vince da 40-qualcosa (non deuce) 
+  // - O vince da AD
+  
+  // Approccio: conta i punti vinti per lato
+  let homeWins = 0;
+  let awayWins = 0;
+  for (const pt of points) {
+    if (pt.point_winner === 'home') homeWins++;
+    else if (pt.point_winner === 'away') awayWins++;
+  }
+  
+  // Chi ha vinto più punti ha probabilmente vinto il game
+  // (questo è una approssimazione, funziona per game completati)
+  if (homeWins >= 4 && homeWins >= awayWins + 2) return 'home';
+  if (awayWins >= 4 && awayWins >= homeWins + 2) return 'away';
+  
+  // Tiebreak: servono almeno 7 punti con 2 di vantaggio
+  if (homeWins >= 7 && homeWins >= awayWins + 2) return 'home';
+  if (awayWins >= 7 && awayWins >= homeWins + 2) return 'away';
+  
+  // Se non possiamo determinare, usa l'ultimo punto vincente
+  // (assumendo che il game sia finito)
+  return winner || null;
+}
+
+/**
+ * Calcola breakOccurred per ogni game analizzando i dati point-by-point
+ * Un break avviene quando chi vince il game (scoring) è diverso da chi serve (serving)
+ * 
+ * Convenzione SofaScore (da enrich-xlsx-matches.js):
+ * - serving=1 = HOME serve
+ * - serving=2 = AWAY serve
+ * - scoring=1 = HOME wins
+ * - scoring=2 = AWAY wins
+ * - scoring=-1 = game incompleto
+ * 
+ * BREAK = serving !== scoring (chi serve perde)
+ * HOLD = serving === scoring (chi serve vince)
+ * 
+ * @param {Array} pointByPoint - Array di set con games e points
+ * @returns {Map} Mappa "set-game" -> boolean
+ */
+function calculateBreaksFromPbp(pointByPoint) {
+  const breakMap = new Map();
+  
+  if (!pointByPoint || !Array.isArray(pointByPoint)) {
+    return breakMap;
+  }
+  
+  for (const setData of pointByPoint) {
+    const setNumber = setData.set || 1;
+    
+    for (const gameData of (setData.games || [])) {
+      const gameNumber = gameData.game || 1;
+      const key = `${setNumber}-${gameNumber}`;
+      
+      // game.score contiene {serving, scoring, homeScore, awayScore}
+      const score = gameData.score;
+      if (score && score.serving !== undefined && score.scoring !== undefined) {
+        // scoring=-1 significa game non completato, non è un break
+        if (score.scoring === -1) {
+          breakMap.set(key, false);
+          continue;
+        }
+        
+        // BREAK = serving !== scoring (chi serve perde il game)
+        // serving=1 (home) + scoring=2 (away wins) = BREAK per away
+        // serving=2 (away) + scoring=1 (home wins) = BREAK per home
+        // serving=1 (home) + scoring=1 (home wins) = HOLD
+        // serving=2 (away) + scoring=2 (away wins) = HOLD
+        const isBreak = score.serving !== score.scoring;
+        breakMap.set(key, isBreak);
+      }
+    }
+  }
+  
+  return breakMap;
+}
+
+/**
+ * Genera powerRankings simulati dai pointByPoint se non disponibili da SofaScore
+ * Usa la stessa logica di break detection di GameBlock.jsx
+ * 
+ * Convenzione SofaScore:
+ * - serving=1 = HOME serve
+ * - serving=2 = AWAY serve  
+ * - scoring=1 = HOME wins
+ * - scoring=2 = AWAY wins
+ * 
+ * Il momentum viene calcolato come differenza running score:
+ * - Home vince: +1 punto per set running
+ * - Away vince: -1 punto per set running
+ * - Break bonus: ±0.5 punti extra
+ * Alla fine normalizzato -100..+100 in base al max/min del match
+ * 
+ * @param {Array} pointByPoint - Array di set con games e points
+ * @returns {Array} PowerRankings generati con value e breakOccurred
+ */
+function generatePowerRankingsFromPbp(pointByPoint) {
+  if (!pointByPoint || !Array.isArray(pointByPoint) || pointByPoint.length === 0) {
+    return [];
+  }
+  
+  const rawData = [];
+  let runningScore = 0; // Running score (positivo = home avanti, negativo = away avanti)
+  
+  // Prima passa: calcola raw values
+  for (const setData of pointByPoint) {
+    const setNumber = setData.set || 1;
+    
+    // Reset running score ad ogni set (come fa SofaScore)
+    runningScore = 0;
+    
+    for (const gameData of (setData.games || [])) {
+      const gameNumber = gameData.game || 1;
+      const score = gameData.score;
+      
+      // Salta game senza score o incompleti
+      if (!score || score.scoring === undefined || score.scoring === -1) {
+        continue;
+      }
+      
+      // Determina chi ha vinto il game e se è break
+      // scoring=1 = home wins, scoring=2 = away wins
+      const homeWins = score.scoring === 1;
+      
+      // serving=1 = home serves, serving=2 = away serves
+      const homeServes = score.serving === 1;
+      
+      // Break = chi vince NON è chi serve
+      // homeServes && !homeWins = home serve, away wins = BREAK per away
+      // !homeServes && homeWins = away serve, home wins = BREAK per home
+      const isBreak = (homeServes && !homeWins) || (!homeServes && homeWins);
+      
+      // Calcola momentum come running score
+      // Game vinto = 1 punto, Break = 0.5 punti bonus
+      const basePoints = 1;
+      const breakBonus = 0.5;
+      
+      if (homeWins) {
+        runningScore += basePoints + (isBreak ? breakBonus : 0);
+      } else {
+        runningScore -= basePoints + (isBreak ? breakBonus : 0);
+      }
+      
+      rawData.push({
+        set: setNumber,
+        game: gameNumber,
+        rawValue: runningScore,
+        breakOccurred: isBreak,
+        generated: true
+      });
+    }
+  }
+  
+  if (rawData.length === 0) {
+    return [];
+  }
+  
+  // Seconda passa: normalizza a -100..+100 basandosi sul max/min del match
+  const values = rawData.map(d => d.rawValue);
+  const maxAbs = Math.max(Math.abs(Math.max(...values)), Math.abs(Math.min(...values)), 1);
+  
+  return rawData.map(d => ({
+    ...d,
+    value: Math.round((d.rawValue / maxAbs) * 100)
+  }));
+}
+
+/**
+ * Arricchisce i powerRankings con breakOccurred calcolato dai pointByPoint
+ * Se powerRankings è vuoto ma abbiamo pointByPoint, genera powerRankings simulati
+ * 
+ * @param {Array} powerRankings - Array di power rankings 
+ * @param {Array} pointByPoint - Array di point by point data
+ * @returns {Array} PowerRankings arricchiti con breakOccurred
+ */
+function enrichPowerRankingsWithBreaks(powerRankings, pointByPoint) {
+  // Se non abbiamo powerRankings ma abbiamo pointByPoint, genera powerRankings
+  if ((!powerRankings || powerRankings.length === 0) && pointByPoint?.length > 0) {
+    const generated = generatePowerRankingsFromPbp(pointByPoint);
+    if (generated.length > 0) {
+      console.log(`   📊 Generated ${generated.length} powerRankings from pointByPoint`);
+      return generated;
+    }
+    return [];
+  }
+  
+  if (!powerRankings || powerRankings.length === 0) {
+    return powerRankings || [];
+  }
+  
+  const breakMap = calculateBreaksFromPbp(pointByPoint);
+  
+  // Se non abbiamo dati point-by-point, restituisci come sono
+  if (breakMap.size === 0) {
+    return powerRankings;
+  }
+  
+  // Arricchisci ogni power ranking con breakOccurred
+  return powerRankings.map(pr => {
+    const setNum = pr.set || 1;
+    const gameNum = pr.game || 1;
+    const key = `${setNum}-${gameNum}`;
+    
+    return {
+      ...pr,
+      breakOccurred: breakMap.has(key) ? breakMap.get(key) : (pr.breakOccurred || false)
+    };
+  });
+}
+
 // Funzione per determinare lo status realistico di una partita
 // Se una partita risulta "inprogress" ma è iniziata più di 6 ore fa, probabilmente è finita
 function getRealisticStatus(status, startTimestamp, winnerCode) {
@@ -2633,13 +2884,27 @@ app.get('/api/match/:eventId', async (req, res) => {
         const dbMatch = await matchRepository.getMatchById(parseInt(eventId));
         if (dbMatch && !forceRefresh) {
           console.log(`📦 Match ${eventId} served from database`);
-          console.log(`   PowerRankings: ${dbMatch.powerRankings?.length || 0}, Statistics: ${dbMatch.statistics?.length || 0}, PBP: ${dbMatch.pointByPoint?.length || 0}`);
+          
+          // Usa raw_json.pointByPoint che ha score.serving e score.scoring
+          // per calcolare i break correttamente (come fa GameBlock.jsx)
+          const pbpForBreaks = dbMatch.raw_json?.pointByPoint || dbMatch.pointByPoint || [];
+          
+          // Arricchisci powerRankings con breakOccurred calcolato da pointByPoint
+          const enrichedPR = enrichPowerRankingsWithBreaks(
+            dbMatch.powerRankings || [],
+            pbpForBreaks
+          );
+          
+          const breaksCount = enrichedPR.filter(pr => pr.breakOccurred).length;
+          console.log(`   PowerRankings: ${enrichedPR.length}, Breaks: ${breaksCount}, Statistics: ${dbMatch.statistics?.length || 0}, PBP: ${dbMatch.pointByPoint?.length || 0}`);
+          
           return res.json({
             source: 'database',
             eventId,
             ...dbMatch,
+            powerRankings: enrichedPR,
             // Aggiungi alias per compatibilità frontend
-            tennisPowerRankings: dbMatch.powerRankings || [],
+            tennisPowerRankings: enrichedPR,
             timestamp: new Date().toISOString()
           });
         }
@@ -2658,12 +2923,22 @@ app.get('/api/match/:eventId', async (req, res) => {
             for (const [url, data] of Object.entries(content.api)) {
               if (url.includes(`/event/${eventId}`) || data?.event?.id === parseInt(eventId)) {
                 console.log(`📁 Match ${eventId} served from file ${file}`);
+                
+                // Estrai powerRankings e pointByPoint da liveData se disponibili
+                const rawPowerRankings = content.liveData?.powerRankings || [];
+                const rawPointByPoint = content.liveData?.pointByPoint || [];
+                const enrichedPR = enrichPowerRankingsWithBreaks(rawPowerRankings, rawPointByPoint);
+                
                 return res.json({
                   source: 'file',
                   eventId,
                   fileName: file,
                   api: content.api,
-                  liveData: content.liveData,
+                  liveData: {
+                    ...content.liveData,
+                    powerRankings: enrichedPR,
+                    tennisPowerRankings: enrichedPR
+                  },
                   lastSync: content.lastSync,
                   timestamp: new Date().toISOString()
                 });
@@ -2677,6 +2952,18 @@ app.get('/api/match/:eventId', async (req, res) => {
     // 3. Se richiesto refresh o non trovato, fetch da SofaScore
     console.log(`🌐 Match ${eventId} fetching from SofaScore...`);
     const liveData = await fetchCompleteData(eventId);
+    
+    // Arricchisci powerRankings con breakOccurred calcolato da pointByPoint
+    const enrichedPowerRankings = enrichPowerRankingsWithBreaks(
+      liveData.powerRankings || [],
+      liveData.pointByPoint || []
+    );
+    
+    // Conta break calcolati per logging
+    const breaksCount = enrichedPowerRankings.filter(pr => pr.breakOccurred).length;
+    if (breaksCount > 0) {
+      console.log(`   🎾 Break calcolati da PBP: ${breaksCount}`);
+    }
     
     // Salva su DB se disponibile
     if (matchRepository && liveData.event) {
@@ -2693,7 +2980,8 @@ app.get('/api/match/:eventId', async (req, res) => {
       source: 'sofascore',
       eventId,
       ...liveData,
-      tennisPowerRankings: liveData.powerRankings || [],
+      powerRankings: enrichedPowerRankings,
+      tennisPowerRankings: enrichedPowerRankings,
       timestamp: new Date().toISOString()
     });
     
