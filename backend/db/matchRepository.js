@@ -1182,6 +1182,9 @@ async function getMissingMatches(limit = 500) {
  * 🚀 OTTIMIZZATO: Ritorna solo i conteggi raggruppati per anno/mese
  * Usato dalla HomePage per rendering iniziale SENZA caricare tutti i match
  * Filosofia: "1 query only" - leggero e veloce
+ * 
+ * ⚠️ FIX: Supabase ha un limite di default di 1000 righe!
+ * Usare paginazione per assicurarsi di recuperare TUTTI i match.
  */
 async function getMatchesSummary() {
   if (!checkSupabase()) return { total: 0, byYearMonth: [] };
@@ -1197,23 +1200,35 @@ async function getMatchesSummary() {
       return { total: 0, byYearMonth: [] };
     }
     
-    // Query ottimizzata: prendi solo start_time con limit ragionevole
-    // Se ci sono troppi match, usa paginazione
-    const { data, error } = await supabase
-      .from('matches')
-      .select('start_time')
-      .not('start_time', 'is', null)
-      .order('start_time', { ascending: false })
-      .limit(10000); // Limite ragionevole per evitare timeout
+    // 🔧 FIX: Supabase ritorna max 1000 righe di default - usiamo paginazione!
+    let allData = [];
+    const pageSize = 1000;
+    let offset = 0;
     
-    if (error) {
-      console.log('getMatchesSummary error:', error.message);
-      return { total: total || 0, byYearMonth: [] };
+    while (true) {
+      const { data: page, error } = await supabase
+        .from('matches')
+        .select('start_time')
+        .not('start_time', 'is', null)
+        .order('start_time', { ascending: false })
+        .range(offset, offset + pageSize - 1);
+      
+      if (error) {
+        console.log('getMatchesSummary pagination error:', error.message);
+        break;
+      }
+      
+      if (!page || page.length === 0) break;
+      allData = allData.concat(page);
+      offset += pageSize;
+      
+      // Se abbiamo ricevuto meno di pageSize, siamo all'ultima pagina
+      if (page.length < pageSize) break;
     }
     
     // Raggruppa lato JS (più flessibile di SQL per formattazione)
     const groups = {};
-    for (const match of (data || [])) {
+    for (const match of allData) {
       if (!match.start_time) continue;
       const date = new Date(match.start_time);
       if (isNaN(date.getTime())) continue; // Skip invalid dates
@@ -1236,7 +1251,7 @@ async function getMatchesSummary() {
       }));
     
     return { 
-      total: total || data?.length || 0, 
+      total: total || allData.length || 0, 
       byYearMonth 
     };
   } catch (err) {
