@@ -3,7 +3,7 @@
 > **Scopo**: documento di navigazione rapida per AI/sviluppatore.
 > Contiene tutti i riferimenti verificati tra filosofie, file, funzioni e linee di codice.
 >
-> **Ultimo aggiornamento**: 22 Dicembre 2025
+> **Ultimo aggiornamento**: 23 Dicembre 2025
 
 ---
 
@@ -36,6 +36,7 @@ docs/
 │   ├── FILOSOFIA_FRONTEND_UI_UX.md  <- Dominio: UI principi
 │   ├── FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md <- Dominio: Frontend data
 │   ├── FILOSOFIA_CONCEPT_CHECKS.md  <- Dominio: Guardrail docs-code
+│   ├── filosofia_value_svg.md       <- SVG Momentum Fallback (NEW)
 │   └── FILOSOFIA_STATS.md           <- DEPRECATO
 │
 ├── specs/
@@ -85,6 +86,12 @@ docs/
 | Match Card Service | `backend/services/matchCardService.js` | Assembla card |
 | Raw Events Processor | `backend/services/rawEventsProcessor.js` | Pipeline |
 | Calculation Queue Worker | `backend/services/calculationQueueWorker.js` | Task async |
+| SVG Momentum Extractor | `backend/utils/svgMomentumExtractor.js` | Estrazione momentum da DOM |
+
+**SVG Momentum Fallback (Dicembre 2025):**
+- **Filosofia**: [docs/filosofie/filosofia_value_svg.md](filosofie/filosofia_value_svg.md)
+- **Colonne DB**: `value` (API prioritario), `value_svg` (fallback DOM)
+- **Funzioni**: `insertPowerRankingsSvg()` L400, `processSvgMomentum()` L302
 
 ### 2.2 Dominio STATS
 **Responsabilita**: RAW vs DERIVED vs DYNAMIC, livelli Player/Match/Combined
@@ -171,6 +178,7 @@ docs/
 | `breakDetector.js` | Analisi break | detectBreaksFromScore() |
 | `matchSegmenter.js` | Fasi match | segmentMatch() |
 | `pressureCalculator.js` | Pressure live | calculatePressureIndex() |
+| `svgMomentumExtractor.js` | Estrazione momentum SVG | extractMomentumFromSvgHtml() L152, processSvgMomentum() L302 |
 
 ### 3.3 DB Layer (`backend/db/`)
 
@@ -294,7 +302,18 @@ docs/
 | `segmentMatch()` | matchSegmenter.js | - |
 | `calculatePressureIndex()` | pressureCalculator.js | - |
 
-### 6.2 Player Stats
+### 6.2 SVG Momentum (Fallback)
+
+| Funzione | File | Linea |
+|----------|------|-------|
+| `extractMomentumFromSvgHtml()` | svgMomentumExtractor.js | 152 |
+| `processSvgMomentum()` | svgMomentumExtractor.js | 302 |
+| `normalizeMomentumPerSet()` | svgMomentumExtractor.js | 262 |
+| `toPowerRankingsFormat()` | svgMomentumExtractor.js | 272 |
+| `insertPowerRankingsSvg()` | matchRepository.js | 400 |
+| `getPowerRankings()` (con fallback) | matchRepository.js | 770 |
+
+### 6.3 Player Stats
 
 | Funzione | File | Linea |
 |----------|------|-------|
@@ -302,14 +321,14 @@ docs/
 | `calculateComebackRate()` | playerStatsService.js | 214 |
 | `calculateROI()` | playerStatsService.js | 252 |
 
-### 6.3 Normalizzazione
+### 6.4 Normalizzazione
 
 | Funzione | File | Linea |
 |----------|------|-------|
 | `normalizePlayerName()` | dataNormalizer.js | 315 |
 | `generateMatchFingerprint()` | dataNormalizer.js | 481 |
 
-### 6.4 Frontend Utils
+### 6.5 Frontend Utils
 
 | Funzione | File | Linea |
 |----------|------|-------|
@@ -364,6 +383,23 @@ GET /api/match/:id/card
     -> return card
 ```
 
+### 7.5 SVG Momentum Fallback (Tennis-Scraper-Local)
+
+```
+1. User copia SVG da SofaScore DevTools
+2. Incolla in Modal (Tennis-Scraper-Local)
+3. POST localhost:3002/api/match/:eventId/momentum-svg
+   -> processSvgMomentum(svgHtml)
+      -> extractMomentumFromSvgHtml()
+      -> normalizeMomentumPerSet()
+      -> toPowerRankingsFormat()
+   -> insertPowerRankingsSvg(eventId, rankings)
+      -> UPDATE power_rankings SET value_svg = ... (NON tocca value!)
+4. Lettura: getPowerRankings() usa COALESCE(value, value_svg)
+```
+
+**Principio**: API data (`value`) ha SEMPRE priorità. SVG (`value_svg`) è solo fallback.
+
 ---
 
 ## 8. CROSS-REFERENCE RAPIDO
@@ -378,6 +414,9 @@ GET /api/match/:id/card
 | Match card | `getMatchCard` | backend/services/matchCardService.js |
 | Scraping | `getMatchData` | backend/scraper/sofascoreScraper.js |
 | Live tracking | `initLiveTracking` | backend/liveManager.js |
+| SVG extraction | `extractMomentumFromSvgHtml` | backend/utils/svgMomentumExtractor.js |
+| SVG insert | `insertPowerRankingsSvg` | backend/db/matchRepository.js |
+| SVG process | `processSvgMomentum` | backend/utils/svgMomentumExtractor.js |
 
 ### 8.2 Cerco una tabella
 
@@ -404,6 +443,7 @@ GET /api/match/:id/card
 | Fetch dati frontend | FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md |
 | Guardrail code | FILOSOFIA_CONCEPT_CHECKS.md |
 | Animazioni | SPEC_FRONTEND_MOTION_UI.md |
+| **SVG Momentum Fallback** | **filosofia_value_svg.md** |
 
 ---
 

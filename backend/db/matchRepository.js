@@ -396,6 +396,87 @@ async function insertPowerRankings(matchId, powerRankings) {
 }
 
 /**
+ * Inserisce power rankings estratti da SVG DOM (fallback quando API non disponibile)
+ * Salva i valori nella colonna value_svg, non sovrascrive value esistenti
+ * @param {number} matchId - ID del match
+ * @param {Array} powerRankings - Array di { set, game, value, side, source }
+ * @returns {number} Numero di record inseriti/aggiornati
+ */
+async function insertPowerRankingsSvg(matchId, powerRankings) {
+  if (!checkSupabase()) return 0;
+  if (!Array.isArray(powerRankings) || powerRankings.length === 0) return 0;
+
+  let inserted = 0;
+  
+  for (const pr of powerRankings) {
+    const setNum = pr.set || 1;
+    const gameNum = pr.game || 1;
+    const valueSvg = pr.value || pr.value_svg || 0;
+    
+    // Calcola zone e status
+    let zone = 'balanced_positive';
+    let status = 'neutral';
+    
+    if (valueSvg > 60) { zone = 'strong_control'; status = 'positive'; }
+    else if (valueSvg >= 20) { zone = 'advantage'; status = 'positive'; }
+    else if (valueSvg > -20) { zone = 'balanced_positive'; status = 'neutral'; }
+    else if (valueSvg > -40) { zone = 'slight_pressure'; status = 'warning'; }
+    else { zone = 'strong_pressure'; status = 'critical'; }
+    
+    // Prova upsert: se esiste già un record, aggiorna solo value_svg
+    const { data: existing } = await supabase
+      .from('power_rankings')
+      .select('id, value')
+      .eq('match_id', matchId)
+      .eq('set_number', setNum)
+      .eq('game_number', gameNum)
+      .single();
+    
+    if (existing) {
+      // Aggiorna solo value_svg se value API non esiste
+      const updateData = { 
+        value_svg: valueSvg,
+        source: existing.value ? 'api' : 'svg_dom'
+      };
+      
+      // Se non c'è value API, usa anche value_svg come value principale
+      if (!existing.value) {
+        updateData.value = valueSvg;
+        updateData.zone = zone;
+        updateData.status = status;
+      }
+      
+      const { error } = await supabase
+        .from('power_rankings')
+        .update(updateData)
+        .eq('id', existing.id);
+        
+      if (!error) inserted++;
+    } else {
+      // Insert nuovo record
+      const { error } = await supabase
+        .from('power_rankings')
+        .insert({
+          match_id: matchId,
+          set_number: setNum,
+          game_number: gameNum,
+          value: valueSvg,
+          value_svg: valueSvg,
+          break_occurred: pr.breakOccurred || false,
+          zone,
+          status,
+          source: 'svg_dom'
+        });
+        
+      if (!error) inserted++;
+    }
+  }
+  
+  console.log(`📊 SVG Momentum: ${inserted}/${powerRankings.length} records per match ${matchId}`);
+  return inserted;
+}
+
+/**
  * Inserisce le statistiche del match
  */
 async function insertStatistics(matchId, statistics) {
@@ -688,21 +769,25 @@ async function getMatchById(matchId) {
     .order('set_number');
 
   // Power rankings - mappa i campi DB al formato originale SofaScore
+  // Usa COALESCE per fallback: value (API) prioritario, value_svg se manca
   const { data: powerRankingsRaw } = await supabase
     .from('power_rankings')
-    .select('*')
+    .select('*, value, value_svg')
     .eq('match_id', matchId)
     .order('set_number')
     .order('game_number');
 
-  // Trasforma in formato compatibile con frontend
+  // Trasforma in formato compatibile con frontend con fallback logic
   const powerRankings = (powerRankingsRaw || []).map(pr => ({
     set: pr.set_number,
     game: pr.game_number,
-    value: pr.value,
+    value: pr.value ?? pr.value_svg ?? 0,  // Fallback: API -> SVG -> 0
+    valueApi: pr.value,
+    valueSvg: pr.value_svg,
     breakOccurred: pr.break_occurred,
     zone: pr.zone,
-    status: pr.status
+    status: pr.status,
+    source: pr.value ? 'api' : (pr.value_svg ? 'svg' : 'none')
   }));
 
   // Statistiche raw dal DB
@@ -2180,6 +2265,7 @@ module.exports = {
   upsertTournament,
   insertMatch,
   insertMatchWithXlsxMerge,
+  insertPowerRankingsSvg,  // NEW: Insert momentum from SVG DOM
   
   // Merge
   findMatchingXlsxMatch,

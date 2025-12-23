@@ -24,15 +24,18 @@ import {
   getUniqueTournaments,
   // Funzioni per refresh count
   updateRefreshCount,
-  markMatchAsForceComplete
+  markMatchAsForceComplete,
+  // SVG Momentum
+  insertPowerRankingsSvg
 } from './db/matchRepository.js';
+import { processSvgMomentum } from './utils/svgMomentumExtractor.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Aumenta limite per SVG grandi
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -882,6 +885,61 @@ app.post('/api/mass-scan', async (req, res) => {
     
   } catch (err) {
     console.error('❌ Errore mass scan:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/match/:eventId/momentum-svg
+ * Inserisce momentum estratto da SVG DOM di SofaScore
+ * Usato come fallback quando l'API non restituisce tennisPowerRankings
+ */
+app.post('/api/match/:eventId/momentum-svg', async (req, res) => {
+  const { eventId } = req.params;
+  const { svgHtml, dryRun } = req.body;
+  
+  console.log(`📊 [SVG MOMENTUM] Richiesta per match ${eventId}, dryRun=${!!dryRun}`);
+  
+  if (!svgHtml) {
+    return res.status(400).json({ error: 'svgHtml è richiesto' });
+  }
+  
+  try {
+    // Estrai e normalizza i dati SVG
+    const result = processSvgMomentum(svgHtml);
+    
+    if (!result.ok) {
+      console.log(`❌ [SVG MOMENTUM] Errore estrazione: ${result.error}`);
+      return res.status(400).json({ error: result.error });
+    }
+    
+    console.log(`✅ [SVG MOMENTUM] Estratti ${result.gamesCount} games da ${result.setsCount} set`);
+    
+    // Se dryRun, restituisci solo l'anteprima senza salvare
+    if (dryRun) {
+      return res.json({
+        ok: true,
+        gamesCount: result.gamesCount,
+        setsCount: result.setsCount,
+        preview: result.powerRankings.slice(0, 5) // Solo primi 5 per preview
+      });
+    }
+    
+    // Salva nel database
+    const insertedCount = await insertPowerRankingsSvg(eventId, result.powerRankings);
+    
+    console.log(`✅ [SVG MOMENTUM] Salvati ${insertedCount} power rankings per match ${eventId}`);
+    
+    res.json({
+      ok: true,
+      insertedCount,
+      gamesCount: result.gamesCount,
+      setsCount: result.setsCount,
+      message: `Salvati ${insertedCount} punti momentum SVG`
+    });
+    
+  } catch (err) {
+    console.error(`❌ [SVG MOMENTUM] Errore:`, err);
     res.status(500).json({ error: err.message });
   }
 });

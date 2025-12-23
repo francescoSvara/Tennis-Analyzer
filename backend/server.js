@@ -2802,6 +2802,58 @@ app.get('/api/match/:eventId/momentum', async (req, res) => {
 });
 
 /**
+ * POST /api/match/:eventId/momentum-svg - Inserisce momentum estratto da SVG DOM
+ * Body: { svgHtml: string } oppure { powerRankings: Array }
+ */
+app.post('/api/match/:eventId/momentum-svg', async (req, res) => {
+  const { eventId } = req.params;
+  const { svgHtml, powerRankings } = req.body;
+  
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+  
+  if (!svgHtml && !powerRankings) {
+    return res.status(400).json({ error: 'Missing svgHtml or powerRankings in body' });
+  }
+  
+  try {
+    let rankings = powerRankings;
+    
+    // Se è passato svgHtml, estrailo
+    if (svgHtml && !powerRankings) {
+      const { processSvgMomentum } = require('./utils/svgMomentumExtractor');
+      const result = processSvgMomentum(svgHtml);
+      
+      if (!result.ok) {
+        return res.status(400).json({ error: result.error });
+      }
+      
+      rankings = result.powerRankings;
+    }
+    
+    if (!rankings || rankings.length === 0) {
+      return res.status(400).json({ error: 'No power rankings extracted' });
+    }
+    
+    // Inserisci nel DB con source = 'svg_dom'
+    const inserted = await matchRepository.insertPowerRankingsSvg(parseInt(eventId), rankings);
+    
+    console.log(`📊 SVG Momentum inserito per match ${eventId}: ${inserted} game`);
+    
+    res.json({ 
+      success: true, 
+      matchId: eventId, 
+      inserted,
+      gamesCount: rankings.length 
+    });
+  } catch (err) {
+    console.error('Error inserting SVG momentum:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/match/:eventId/statistics - Solo statistiche match (lazy load)
  */
 app.get('/api/match/:eventId/statistics', async (req, res) => {

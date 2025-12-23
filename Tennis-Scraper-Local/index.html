@@ -441,23 +441,70 @@
     .match-item:hover {
       background: rgba(76, 175, 80, 0.12);
     }
-    
+
     .match-item.syncing {
       pointer-events: none;
       opacity: 0.7;
     }
-    
+
     .match-item.complete {
       cursor: default;
       opacity: 0.7;
       border: 1px solid rgba(76, 175, 80, 0.3);
     }
-    
+
     .match-item.complete:hover {
       background: rgba(0, 0, 0, 0.2);
       box-shadow: none;
     }
-    
+
+    /* Match action buttons */
+    .match-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      justify-content: flex-end;
+    }
+
+    .match-action-btn {
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 24px;
+    }
+
+    .match-action-btn.refresh-api-btn {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.4);
+      color: #4caf50;
+    }
+
+    .match-action-btn.refresh-api-btn:hover {
+      background: rgba(76, 175, 80, 0.4);
+      color: #fff;
+    }
+
+    .match-action-btn.svg-momentum-btn {
+      background: rgba(156, 39, 176, 0.2);
+      border: 1px solid rgba(156, 39, 176, 0.4);
+      color: #ce93d8;
+    }
+
+    .match-action-btn.svg-momentum-btn:hover {
+      background: rgba(156, 39, 176, 0.4);
+      color: #fff;
+    }
+
+    .match-action-btn .icon {
+      margin: 0;
+    }
+
     .completeness-badge {
       font-size: 0.7rem;
       padding: 2px 6px;
@@ -1037,6 +1084,10 @@
     }
     
     /* Modal styles */
+    body.modal-open {
+      overflow: hidden !important;
+    }
+
     .modal {
       position: fixed;
       top: 0;
@@ -1050,6 +1101,7 @@
       z-index: 1000;
       padding: 20px;
       backdrop-filter: blur(4px);
+      overflow-y: auto;
     }
     
     .modal-content {
@@ -1058,9 +1110,11 @@
       width: 100%;
       max-width: 480px;
       border: 1px solid rgba(76, 175, 80, 0.3);
-      overflow: hidden;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(76, 175, 80, 0.1);
       animation: modalSlideIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
     }
     
     @keyframes modalSlideIn {
@@ -1636,6 +1690,172 @@
         font-size: 1rem;
       }
     }
+
+    /* SVG Momentum Modal Styles */
+    .svg-momentum-modal .svg-modal-content {
+      max-width: 600px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .svg-momentum-modal .svg-modal-body {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .svg-momentum-modal .svg-modal-footer {
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-top: 1px solid rgba(156, 39, 176, 0.3);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .svg-modal-header {
+      background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(103, 58, 183, 0.2)) !important;
+      border-bottom-color: rgba(156, 39, 176, 0.3) !important;
+      flex-shrink: 0;
+    }
+
+    .svg-modal-header h3 {
+      color: #ce93d8 !important;
+    }
+
+    .svg-instructions {
+      background: rgba(156, 39, 176, 0.1);
+      border: 1px solid rgba(156, 39, 176, 0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+    }
+
+    .svg-instructions strong {
+      color: #ce93d8;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .svg-instructions ol {
+      margin: 0;
+      padding-left: 20px;
+      color: #aaa;
+    }
+
+    .svg-instructions li {
+      margin-bottom: 4px;
+    }
+
+    .svg-instructions code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #ce93d8;
+      font-size: 0.8rem;
+    }
+
+    #svgMomentumInput {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid rgba(156, 39, 176, 0.3);
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+      min-height: 120px;
+      margin-bottom: 12px;
+    }
+
+    #svgMomentumInput:focus {
+      outline: none;
+      border-color: #9c27b0;
+      box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+    }
+
+    #svgMomentumInput::placeholder {
+      color: #666;
+    }
+
+    .svg-preview {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .svg-preview:empty {
+      display: none;
+    }
+
+    .svg-preview .preview-header {
+      color: #ce93d8;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .svg-preview .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .svg-preview .preview-stat {
+      background: rgba(156, 39, 176, 0.1);
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .svg-preview .preview-stat-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ce93d8;
+    }
+
+    .svg-preview .preview-stat-label {
+      font-size: 0.7rem;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .svg-modal-footer .svg-submit-btn {
+      background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
+    }
+
+    .svg-modal-footer .svg-submit-btn:hover:not(:disabled) {
+      box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4) !important;
+    }
+
+    .svg-momentum-btn {
+      background: rgba(156, 39, 176, 0.3);
+      border: 1px solid rgba(156, 39, 176, 0.5);
+      color: #ce93d8;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s ease;
+      margin-left: 8px;
+    }
+
+    .svg-momentum-btn:hover {
+      background: rgba(156, 39, 176, 0.5);
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -1763,6 +1983,38 @@
       <div class="modal-footer">
         <button onclick="closeModal()" class="btn-cancel">Annulla</button>
         <button onclick="submitModalLink()" id="modalSubmitBtn" disabled>Acquisisci</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal per inserimento SVG Momentum -->
+  <div id="svgMomentumModal" class="modal svg-momentum-modal" style="display: none;">
+    <div class="modal-content svg-modal-content">
+      <div class="modal-header svg-modal-header">
+        <h3>📊 Inserisci SVG Momentum</h3>
+        <span class="modal-close" onclick="closeSvgMomentumModal()">&times;</span>
+      </div>
+      <div class="modal-body svg-modal-body">
+        <p id="svgModalMatchInfo"></p>
+        <div class="svg-instructions">
+          <strong>Istruzioni:</strong>
+          <ol>
+            <li>Vai su SofaScore alla pagina del match</li>
+            <li>Apri DevTools (F12) → Elements</li>
+            <li>Trova il div con classe <code>momentum-graph</code></li>
+            <li>Copia l'HTML completo (tutti i &lt;path&gt; con le classi fill)</li>
+            <li>Incolla qui sotto</li>
+          </ol>
+        </div>
+        <textarea id="svgMomentumInput" placeholder="Incolla qui l'HTML SVG del momentum graph..." rows="8"></textarea>
+        <div id="svgMomentumValidation" class="modal-validation"></div>
+        <div id="svgMomentumPreview" class="svg-preview"></div>
+      </div>
+      <div class="modal-footer svg-modal-footer">
+        <button onclick="closeSvgMomentumModal()" class="btn-cancel">Annulla</button>
+        <button onclick="submitSvgMomentum()" id="svgMomentumSubmitBtn" disabled class="svg-submit-btn">
+          Salva Momentum
+        </button>
       </div>
     </div>
   </div>
@@ -1952,6 +2204,9 @@
             <div class="stats">
               <span class="days-old">${daysOld}gg</span>
               <span class="refresh-count">${refreshCount}/3</span>
+              <button class="svg-momentum-btn" onclick="openSvgMomentumModal('${sofascoreId}')" title="Inserisci momentum da SVG">
+                📊 SVG
+              </button>
               <button class="refresh-btn" onclick="refreshProblematicMatch(this, '${sofascoreId}')" title="Refresh (al 3° tentativo verrà marcata non completabile)">
                 <svg class="icon icon-sm"><use href="#icon-refresh"/></svg>
               </button>
@@ -2151,7 +2406,7 @@
       return tournament.name || 'N/A';
     }
     
-    // Render match item - clickable to refresh (disabled if 100%)
+    // Render match item - with action buttons
     function renderMatch(m, index) {
       const homeName = getPlayerName(m.home_player);
       const awayName = getPlayerName(m.away_player);
@@ -2190,9 +2445,7 @@
       return `
         <div class="match-item ${isComplete ? 'complete' : ''}" 
              data-match-id="${m.id}" 
-             data-sofascore-id="${sofascoreId}" 
-             ${!isComplete ? `onclick="refreshSingleMatch(this, '${sofascoreId}')"` : ''} 
-             title="${isComplete ? 'Match completo' : 'Clicca per aggiornare'}">
+             data-sofascore-id="${sofascoreId}">
           <div class="match-left">
             <div class="match-players">
               ${homeName} vs ${awayName}
@@ -2210,6 +2463,14 @@
             <div class="match-date">${dateStr}</div>
             ${statusText ? `<span class="match-status ${statusClass}">${statusText}</span>` : ''}
             <span class="completeness-badge" style="background: ${completenessColor}">${completeness}%</span>
+            <div class="match-actions">
+              <button class="match-action-btn refresh-api-btn" onclick="event.stopPropagation(); refreshSingleMatch(this.closest('.match-item'), '${sofascoreId}')" title="Aggiorna via API">
+                <svg class="icon icon-sm"><use href="#icon-refresh"/></svg>
+              </button>
+              <button class="match-action-btn svg-momentum-btn" onclick="event.stopPropagation(); openSvgMomentumModal('${sofascoreId}')" title="Inserisci Momentum SVG">
+                📊
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -2953,14 +3214,186 @@
       validation.className = 'modal-validation';
       submitBtn.disabled = true;
       
+      document.body.classList.add('modal-open');
       modal.style.display = 'flex';
     }
     
     // Close modal
     function closeModal() {
       document.getElementById('linkModal').style.display = 'none';
+      document.body.classList.remove('modal-open');
       selectedMissingMatch = null;
     }
+    
+    // ======== SVG MOMENTUM MODAL ========
+    let selectedSvgMatch = null;
+    
+    // Open SVG Momentum modal for a problematic match
+    function openSvgMomentumModal(matchId) {
+      const match = allMatchesFromDb.find(m => String(m.id) === String(matchId));
+      if (!match) {
+        showToast('Match non trovato');
+        return;
+      }
+      
+      selectedSvgMatch = match;
+      
+      const modal = document.getElementById('svgMomentumModal');
+      const matchInfo = document.getElementById('svgModalMatchInfo');
+      const input = document.getElementById('svgMomentumInput');
+      const validation = document.getElementById('svgMomentumValidation');
+      const preview = document.getElementById('svgMomentumPreview');
+      const submitBtn = document.getElementById('svgMomentumSubmitBtn');
+      
+      const homeName = getPlayerName(match.home_player);
+      const awayName = getPlayerName(match.away_player);
+      
+      matchInfo.innerHTML = `
+        <strong>📊 Inserisci Momentum SVG per:</strong><br>
+        ${homeName} vs ${awayName}<br>
+        <small>Event ID: ${match.id}</small>
+      `;
+      
+      input.value = '';
+      validation.innerHTML = '';
+      validation.className = 'modal-validation';
+      preview.innerHTML = '';
+      submitBtn.disabled = true;
+      
+      // Prevent body scroll
+      document.body.classList.add('modal-open');
+      modal.style.display = 'flex';
+      
+      // Focus on textarea
+      setTimeout(() => input.focus(), 100);
+    }
+    
+    // Close SVG Momentum modal
+    function closeSvgMomentumModal() {
+      document.getElementById('svgMomentumModal').style.display = 'none';
+      document.body.classList.remove('modal-open');
+      selectedSvgMatch = null;
+    }
+    
+    // Validate SVG input and show preview
+    function validateSvgMomentum() {
+      const input = document.getElementById('svgMomentumInput');
+      const validation = document.getElementById('svgMomentumValidation');
+      const preview = document.getElementById('svgMomentumPreview');
+      const submitBtn = document.getElementById('svgMomentumSubmitBtn');
+      const svgHtml = input.value.trim();
+      
+      if (!svgHtml) {
+        validation.innerHTML = '';
+        validation.className = 'modal-validation';
+        preview.innerHTML = '';
+        submitBtn.disabled = true;
+        return;
+      }
+      
+      // Count path elements with fill containing home-away
+      const pathMatches = svgHtml.match(/<path[^>]*fill="[^"]*home-away[^"]*"[^>]*>/gi) || [];
+      const pathCount = pathMatches.length;
+      
+      if (pathCount === 0) {
+        validation.innerHTML = '❌ Nessun path SVG valido trovato. Assicurati di copiare i path con fill "home-away-..."';
+        validation.className = 'modal-validation error';
+        preview.innerHTML = '';
+        submitBtn.disabled = true;
+        return;
+      }
+      
+      // Count home vs away sides
+      let homeCount = 0;
+      let awayCount = 0;
+      
+      pathMatches.forEach(path => {
+        // away-primary must be checked first (more specific)
+        if (path.includes('away-primary')) {
+          awayCount++;
+        } else if (path.includes('home-primary')) {
+          homeCount++;
+        }
+      });
+      
+      // Show preview
+      preview.innerHTML = `
+        <div class="preview-header">📊 Anteprima Estrazione</div>
+        <div class="preview-stats">
+          <div class="preview-stat">
+            <div class="preview-stat-value">${pathCount}</div>
+            <div class="preview-stat-label">Games</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-value" style="color: #4caf50;">${homeCount}</div>
+            <div class="preview-stat-label">Home</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-value" style="color: #f44336;">${awayCount}</div>
+            <div class="preview-stat-label">Away</div>
+          </div>
+        </div>
+      `;
+      
+      // Validate game count
+      if (pathCount < 6) {
+        validation.innerHTML = `⚠️ Solo ${pathCount} games rilevati - potrebbero essere insufficienti`;
+        validation.className = 'modal-validation warning';
+        submitBtn.disabled = false;
+      } else {
+        validation.innerHTML = `✅ ${pathCount} games rilevati (${homeCount} home, ${awayCount} away)`;
+        validation.className = 'modal-validation success';
+        submitBtn.disabled = false;
+      }
+    }
+    
+    // Submit SVG Momentum
+    async function submitSvgMomentum() {
+      const input = document.getElementById('svgMomentumInput');
+      const submitBtn = document.getElementById('svgMomentumSubmitBtn');
+      const validation = document.getElementById('svgMomentumValidation');
+      const svgHtml = input.value.trim();
+      
+      if (!svgHtml || !selectedSvgMatch) return;
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Elaborando...';
+      
+      try {
+        const res = await fetch(`${API_BASE}/match/${selectedSvgMatch.id}/momentum-svg`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ svgHtml })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          closeSvgMomentumModal();
+          showToast(`✅ Momentum salvato: ${data.insertedCount || 0} punti`);
+          
+          // Refresh matches to update completeness
+          await loadMatches(true);
+          renderProblematicMatches();
+        } else {
+          validation.innerHTML = `❌ ${data.error || 'Errore nel salvataggio'}`;
+          validation.className = 'modal-validation error';
+        }
+      } catch (e) {
+        validation.innerHTML = `❌ Errore: ${e.message}`;
+        validation.className = 'modal-validation error';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Salva Momentum';
+      }
+    }
+    
+    // Event listeners for SVG modal
+    document.getElementById('svgMomentumInput').addEventListener('input', validateSvgMomentum);
+    document.getElementById('svgMomentumModal').addEventListener('click', (e) => {
+      if (e.target.id === 'svgMomentumModal') closeSvgMomentumModal();
+    });
+    // ======== END SVG MOMENTUM MODAL ========
     
     // Extract event ID from various URL formats
     function extractEventIdFromUrl(url) {

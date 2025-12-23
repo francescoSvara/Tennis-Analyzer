@@ -1165,3 +1165,72 @@ export async function markMatchAsForceComplete(eventId, refreshCount) {
     return false;
   }
 }
+
+/**
+ * Inserisce power rankings estratti da SVG DOM
+ * IMPORTANTE: Aggiorna SOLO value_svg e source, NON tocca value (API)
+ * Se il record non esiste, lo crea con value_svg (value resta NULL per API)
+ * @param {number} matchId - ID del match
+ * @param {Array} powerRankings - Array di rankings con set, game, value_svg, source
+ * @returns {number} Numero di righe inserite/aggiornate
+ */
+export async function insertPowerRankingsSvg(matchId, powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length === 0) {
+    console.log(`⚠️ [SVG] Nessun power ranking da inserire per match ${matchId}`);
+    return 0;
+  }
+  
+  const matchIdInt = parseInt(matchId);
+  console.log(`📊 [SVG] Aggiornamento SOLO value_svg per ${powerRankings.length} games, match ${matchIdInt}`);
+  
+  let updatedCount = 0;
+  let insertedCount = 0;
+  
+  for (const pr of powerRankings) {
+    const setNum = pr.set || 1;
+    const gameNum = pr.game || 1;
+    const valueSvg = pr.value_svg ?? pr.value ?? 0;
+    
+    // Prima controlla se esiste già un record per questo game
+    const { data: existing } = await supabase
+      .from('power_rankings')
+      .select('id, value')
+      .eq('match_id', matchIdInt)
+      .eq('set_number', setNum)
+      .eq('game_number', gameNum)
+      .single();
+    
+    if (existing) {
+      // Record esiste: aggiorna SOLO value_svg e source, NON toccare value!
+      const { error } = await supabase
+        .from('power_rankings')
+        .update({
+          value_svg: valueSvg,
+          source: existing.value ? 'api+svg' : 'svg_dom'  // Se ha value API, marca come combinato
+        })
+        .eq('id', existing.id);
+      
+      if (!error) updatedCount++;
+    } else {
+      // Record non esiste: crea nuovo con SOLO value_svg (value resta NULL)
+      const { error } = await supabase
+        .from('power_rankings')
+        .insert({
+          match_id: matchIdInt,
+          set_number: setNum,
+          game_number: gameNum,
+          value: null,           // NON impostare value! Resta NULL per API
+          value_svg: valueSvg,   // Solo SVG
+          source: 'svg_dom',
+          break_occurred: false,
+          zone: 'balanced_positive',
+          status: 'neutral'
+        });
+      
+      if (!error) insertedCount++;
+    }
+  }
+  
+  console.log(`✅ [SVG] Match ${matchIdInt}: ${updatedCount} aggiornati, ${insertedCount} nuovi (solo value_svg)`);
+  return updatedCount + insertedCount;
+}

@@ -25,7 +25,10 @@ import {
   Hourglass,
   MathOperations,
   TextAlignLeft,
-  Hash
+  Hash,
+  ChartLineUp,
+  Code,
+  Upload
 } from '@phosphor-icons/react';
 import { apiUrl } from '../config';
 import ManualPredictor from './ManualPredictor';

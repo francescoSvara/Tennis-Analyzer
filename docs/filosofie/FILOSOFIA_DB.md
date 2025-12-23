@@ -84,7 +84,7 @@ Riferimento: [FILOSOFIA_MADRE.md](FILOSOFIA_MADRE.md) (sezione Mappa documenti)
 | Ranking match | ⚠️ | ✅ | Usa XLSX |
 | Quote betting | ❌ | ✅ | Solo da XLSX |
 | Statistiche | ✅ | ❌ | Solo da SofaScore |
-| Momentum | ⚠️ | ❌ | Cerca su SofaScore |
+| Momentum | ⚠️ | ❌ | API first, **SVG DOM fallback** ([filosofia_value_svg.md](filosofia_value_svg.md)) |
 | Point-by-point | ⚠️ | ❌ | Cerca su SofaScore |
 | H2H | ❌ | ❌ | **Calcolato** (calculation_queue) |
 | Stats carriera | ❌ | ❌ | **Calcolato** (calculation_queue) |
@@ -213,6 +213,25 @@ POST /api/match/:id/rebuild-snapshot
 | `match_point_by_point_new` | Ogni punto (SofaScore) |
 | `match_odds` | Quote betting (XLSX) |
 | `head_to_head` | H2H giocatori (calcolato) |
+
+### Colonne SVG Momentum (Dicembre 2025)
+
+La tabella `power_rankings` ha due colonne per il momentum:
+
+| Colonna | Tipo | Descrizione |
+|---------|------|-------------|
+| `value` | INTEGER | Valore API SofaScore (**PRIORITARIO**) |
+| `value_svg` | INTEGER | Valore estratto da SVG DOM (**FALLBACK**) |
+| `source` | VARCHAR(20) | 'api' o 'svg_dom' |
+
+**Logica Fallback:**
+```javascript
+// Backend: matchRepository.js L784
+value: pr.value ?? pr.value_svg ?? 0  // API -> SVG -> 0
+```
+
+📄 Documentazione dettagliata: **[filosofia_value_svg.md](filosofia_value_svg.md)**
+📄 Migration: **[migrations/add-svg-momentum-columns.sql](../backend/migrations/add-svg-momentum-columns.sql)**
 
 ### Nuove Tabelle Architettura (Dicembre 2025)
 
