@@ -438,6 +438,42 @@ app.post('/api/increment-refresh/:eventId', async (req, res) => {
 });
 
 /**
+ * POST /api/mark-complete/:eventId
+ * Marca un match come completato (max info ottenute)
+ * Usato quando l'utente conferma che non può ottenere più dati
+ */
+app.post('/api/mark-complete/:eventId', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId) {
+    return res.status(400).json({ error: 'Event ID richiesto' });
+  }
+  
+  try {
+    // Recupera il match esistente
+    const existingMatch = await checkDuplicate(eventId);
+    
+    if (!existingMatch) {
+      return res.status(404).json({ error: 'Match non trovato' });
+    }
+    
+    // Marca come force completed
+    await markMatchAsForceComplete(eventId, 0); // 0 = completato manualmente
+    console.log(`✅ Match ${eventId} marcato manualmente come completato`);
+    
+    return res.json({
+      success: true,
+      eventId,
+      message: 'Match marcato come completato'
+    });
+    
+  } catch (err) {
+    console.error('Error marking match complete:', err);
+    return res.status(500).json({ error: 'Errore interno' });
+  }
+});
+
+/**
  * GET /api/health
  * Health check
  */

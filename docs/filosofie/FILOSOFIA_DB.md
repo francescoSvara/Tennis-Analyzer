@@ -84,7 +84,7 @@ Riferimento: [FILOSOFIA_MADRE.md](FILOSOFIA_MADRE.md) (sezione Mappa documenti)
 | Ranking match | ⚠️ | ✅ | Usa XLSX |
 | Quote betting | ❌ | ✅ | Solo da XLSX |
 | Statistiche | ✅ | ❌ | Solo da SofaScore |
-| Momentum | ⚠️ | ❌ | API first, **SVG DOM fallback** ([filosofia_value_svg.md](filosofia_value_svg.md)) |
+| Momentum | ⚠️ | ❌ | API first, **SVG DOM fallback** ([SPEC_VALUE_SVG.md](../specs/SPEC_VALUE_SVG.md)) |
 | Point-by-point | ⚠️ | ❌ | Cerca su SofaScore |
 | H2H | ❌ | ❌ | **Calcolato** (calculation_queue) |
 | Stats carriera | ❌ | ❌ | **Calcolato** (calculation_queue) |
@@ -230,7 +230,7 @@ La tabella `power_rankings` ha due colonne per il momentum:
 value: pr.value ?? pr.value_svg ?? 0  // API -> SVG -> 0
 ```
 
-📄 Documentazione dettagliata: **[filosofia_value_svg.md](filosofia_value_svg.md)**
+📄 Documentazione dettagliata: **[SPEC_VALUE_SVG.md](../specs/SPEC_VALUE_SVG.md)**
 📄 Migration: **[migrations/add-svg-momentum-columns.sql](../backend/migrations/add-svg-momentum-columns.sql)**
 
 ### Nuove Tabelle Architettura (Dicembre 2025)

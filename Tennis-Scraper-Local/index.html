@@ -1649,6 +1649,22 @@
       color: #888;
     }
 
+    .problematic-match .mark-complete-btn {
+      background: rgba(76, 175, 80, 0.3);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      color: #4caf50;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s ease;
+    }
+
+    .problematic-match .mark-complete-btn:hover {
+      background: rgba(76, 175, 80, 0.5);
+      color: #fff;
+    }
+
     .problematic-match .refresh-btn {
       background: rgba(244, 67, 54, 0.3);
       border: 1px solid rgba(244, 67, 54, 0.5);
@@ -1840,6 +1856,18 @@
       box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4) !important;
     }
 
+    .svg-modal-footer .btn-no-data {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid rgba(244, 67, 54, 0.5);
+      color: #f44336;
+      margin-right: auto;
+    }
+
+    .svg-modal-footer .btn-no-data:hover {
+      background: rgba(244, 67, 54, 0.4);
+      color: #fff;
+    }
+
     .svg-momentum-btn {
       background: rgba(156, 39, 176, 0.3);
       border: 1px solid rgba(156, 39, 176, 0.5);
@@ -1962,7 +1990,7 @@
       
       <!-- Tab Partite Problematiche -->
       <div id="problematicTab" class="tab-content">
-        <p class="problematic-info-text">Partite ended 3+ giorni fa non ancora al 100%. Dopo 3 refresh verranno marcate come non completabili.</p>
+        <p class="problematic-info-text">Partite ended 3+ giorni fa non ancora al 100%. Usa il bottone SVG per aggiungere momentum manualmente o marca come completate.</p>
         <div id="problematicList" class="problematic-list"></div>
       </div>
     </div>
@@ -2011,6 +2039,9 @@
         <div id="svgMomentumPreview" class="svg-preview"></div>
       </div>
       <div class="modal-footer svg-modal-footer">
+        <button onclick="markMatchCompleteFromModal()" class="btn-no-data" title="Marca il match come completato con le info attuali">
+          ❌ Non ho i dati
+        </button>
         <button onclick="closeSvgMomentumModal()" class="btn-cancel">Annulla</button>
         <button onclick="submitSvgMomentum()" id="svgMomentumSubmitBtn" disabled class="svg-submit-btn">
           Salva Momentum
@@ -2192,7 +2223,6 @@
         const awayName = getPlayerName(m.away_player);
         const tournamentName = getTournamentName(m.tournament);
         const daysOld = m._daysOld || 0;
-        const refreshCount = m.refresh_count || 0;
         const sofascoreId = m.id || '';
         
         return `
@@ -2203,12 +2233,11 @@
             </div>
             <div class="stats">
               <span class="days-old">${daysOld}gg</span>
-              <span class="refresh-count">${refreshCount}/3</span>
               <button class="svg-momentum-btn" onclick="openSvgMomentumModal('${sofascoreId}')" title="Inserisci momentum da SVG">
                 📊 SVG
               </button>
-              <button class="refresh-btn" onclick="refreshProblematicMatch(this, '${sofascoreId}')" title="Refresh (al 3° tentativo verrà marcata non completabile)">
-                <svg class="icon icon-sm"><use href="#icon-refresh"/></svg>
+              <button class="mark-complete-btn" onclick="markMatchComplete('${sofascoreId}')" title="Marca come completato (max info ottenute)">
+                ✓ Completa
               </button>
             </div>
           </div>
@@ -2244,7 +2273,8 @@
       return stats;
     }
     
-    // Trova partite problematiche: ended 3+ giorni fa, < 100%, link SofaScore valido, meno di 3 refresh
+    // Trova partite problematiche: ended 3+ giorni fa, < 100%, link SofaScore valido
+    // NON più limitato da refresh count - sempre visibili per intervento manuale
     function findProblematicMatches() {
       const now = Date.now();
       
@@ -2258,13 +2288,12 @@
         const statusDesc = (m.status_description || '').toLowerCase();
         const isEnded = statusDesc === 'ended' || statusDesc.includes('finished');
         const completeness = m.completeness || 0;
-        const refreshCount = m.refresh_count || 0;
         const matchDate = new Date(m.start_time || m.extracted_at);
         const daysDiff = (now - matchDate.getTime()) / (1000 * 60 * 60 * 24);
         
-        // Criterio: ended, 3+ giorni fa, non ancora 100%, meno di 3 refresh
-        // Dopo 3 refresh viene considerata "non completabile" e non appare più
-        if (isEnded && daysDiff >= 3 && completeness < 100 && refreshCount < 3) {
+        // Criterio: ended, 3+ giorni fa, non ancora 100%
+        // SEMPRE visibili per permettere intervento manuale (SVG o mark complete)
+        if (isEnded && daysDiff >= 3 && completeness < 100) {
           m._daysOld = Math.floor(daysDiff);
           return true;
         }
@@ -2315,6 +2344,51 @@
         btn.classList.remove('loading');
         btn.innerHTML = '<svg class="icon icon-sm"><use href="#icon-refresh"/></svg>';
       }
+    }
+    
+    // Marca un match come completato (max info ottenute)
+    async function markMatchComplete(sofascoreId) {
+      if (!sofascoreId) return;
+      
+      if (!confirm('Sei sicuro di voler marcare questo match come completato?\nQuesto indica che hai ottenuto il massimo delle informazioni disponibili.')) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`${API_BASE}/mark-complete/${sofascoreId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          showToast(`✅ Match ${sofascoreId} marcato come completato`);
+          
+          // Rimuovi dalla lista problematiche
+          const matchEl = document.querySelector(`.problematic-match[data-sofascore-id="${sofascoreId}"]`);
+          if (matchEl) matchEl.remove();
+          
+          // Ricarica match dal DB per sync
+          await loadMatches(true);
+          renderProblematicMatches();
+          updateStatsDisplay(true);
+        } else {
+          showToast(`❌ Errore: ${data.error || 'Impossibile completare'}`);
+        }
+      } catch (e) {
+        console.error('Error marking match complete:', e);
+        showToast(`❌ Errore di connessione`);
+      }
+    }
+    
+    // Marca match come completato dalla modale SVG (quando non si hanno i dati)
+    async function markMatchCompleteFromModal() {
+      if (!selectedSvgMatch) return;
+      
+      const sofascoreId = selectedSvgMatch.id;
+      closeSvgMomentumModal();
+      await markMatchComplete(sofascoreId);
     }
     
     // Check server status

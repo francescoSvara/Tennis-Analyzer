@@ -89,7 +89,7 @@ docs/
 | SVG Momentum Extractor | `backend/utils/svgMomentumExtractor.js` | Estrazione momentum da DOM |
 
 **SVG Momentum Fallback (Dicembre 2025):**
-- **Filosofia**: [docs/filosofie/filosofia_value_svg.md](filosofie/filosofia_value_svg.md)
+- **Specifica**: [docs/specs/SPEC_VALUE_SVG.md](specs/SPEC_VALUE_SVG.md)
 - **Colonne DB**: `value` (API prioritario), `value_svg` (fallback DOM)
 - **Funzioni**: `insertPowerRankingsSvg()` L400, `processSvgMomentum()` L302
 
@@ -443,7 +443,7 @@ GET /api/match/:id/card
 | Fetch dati frontend | FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md |
 | Guardrail code | FILOSOFIA_CONCEPT_CHECKS.md |
 | Animazioni | SPEC_FRONTEND_MOTION_UI.md |
-| **SVG Momentum Fallback** | **filosofia_value_svg.md** |
+| **SVG Momentum Fallback** | **specs/SPEC_VALUE_SVG.md** |
 
 ---
 
