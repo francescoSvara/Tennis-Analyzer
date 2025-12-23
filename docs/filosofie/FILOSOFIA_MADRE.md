@@ -2,7 +2,7 @@
 
 > **Scopo**: indice unico (source of truth) della documentazione del progetto.
 
-*Ultimo aggiornamento: 22 Dicembre 2025*
+*Ultimo aggiornamento: 23 Dicembre 2025*
 
 ---
 
@@ -25,8 +25,8 @@
 | **Stats** | [FILOSOFIA_STATS_V2.md](FILOSOFIA_STATS_V2.md) | RAW vs DERIVED vs DYNAMIC, livelli Player/Match/Combined |
 | **Live** | [FILOSOFIA_LIVE_TRACKING.md](FILOSOFIA_LIVE_TRACKING.md) | Polling, tracking, websocket, consolidamento |
 | **Odds** | [FILOSOFIA_ODDS.md](FILOSOFIA_ODDS.md) | Quote mercato vs fair odds, value, margin |
-| **Frontend UI** | [FILOSOFIA_FRONTEND_UI_UX.md](FILOSOFIA_FRONTEND_UI_UX.md) | Ruolo UI, confini responsabilità, principi motion/design |
-| **Frontend Data** | [FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md](FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Fetch, loading, error, snapshot vs live |
+| **Frontend** | [FILOSOFIA_FRONTEND.md](FILOSOFIA_FRONTEND.md) | **DOCUMENTO UNIFICATO**: Visual design, wireframe, backend allacci, JSON schema, motion/icons, strategie UI |
+| **Frontend Data** | [FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md](FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Pattern data consumption: snapshot vs live, loading, error |
 | **Concept Checks** | [FILOSOFIA_CONCEPT_CHECKS.md](FILOSOFIA_CONCEPT_CHECKS.md) | Guardrail docs↔code, regole domini, CI |
 
 ### 📋 Spec operative
@@ -40,6 +40,8 @@
 | File | Stato | Note |
 |------|-------|------|
 | `FILOSOFIA_STATS.md` | ⚠️ DEPRECATO | Sostituito da V2. Contiene dettagli implementativi da mantenere nel codice. |
+| `FILOSOFIA_FRONTEND_UI_UX.md` | ⚠️ DEPRECATO | Sostituito da FILOSOFIA_FRONTEND.md (principi UI ora integrati). |
+| `SPEC_FRONTEND_MOTION_UI.md` | ⚠️ DEPRECATO | Integrato in FILOSOFIA_FRONTEND.md (sezione Motion finale). |
 
 ---
 
@@ -48,8 +50,9 @@
 | Dominio | File proposto | Contenuti chiave |
 |---------|---------------|------------------|
 | **AI/ML** | `FILOSOFIA_AI.md` | Feature engineering, training, model registry |
-| **Strategies** | `FILOSOFIA_STRATEGIES.md` | Backtest, ROI/drawdown/sharpe, anti-leakage |
 | **Observability** | `FILOSOFIA_OBSERVABILITY.md` | Logging, data quality, alerting |
+
+> ℹ️ **Strategies** è ora integrato in [FILOSOFIA_FRONTEND.md](FILOSOFIA_FRONTEND.md) (sezione Strategie Live + Strategy Engine backend)
 
 ---
 
@@ -68,9 +71,15 @@
     │         │         │
     └─────────┼─────────┘
               ▼
-    ┌─────────────────┐
-    │   AI/Strategies │
-    └─────────────────┘
+    ┌─────────────────────┐
+    │  Strategy Engine    │ ◀── backend/strategies/
+    └─────────────────────┘
+              │
+              ▼
+    ┌─────────────────────┐
+    │    Frontend         │ ◀── FILOSOFIA_FRONTEND.md
+    │  (Visual + Motion)  │
+    └─────────────────────┘
               │
               ▼
     ┌─────────────────┐

@@ -2,7 +2,7 @@
 
 > Sistema avanzato di analisi match tennistici con dati real-time, storico quote e analytics predittivi.
 
-[![Version](https://img.shields.io/badge/Version-4.0-blue)](https://github.com/yourusername/React-Betfair)
+[![Version](https://img.shields.io/badge/Version-4.5-blue)](https://github.com/yourusername/React-Betfair)
 [![Backend](https://img.shields.io/badge/API-Railway-green)](https://tennis-analyzer-production.up.railway.app)
 [![Database](https://img.shields.io/badge/DB-Supabase-orange)](https://supabase.com)
 
@@ -102,14 +102,16 @@ React-Betfair/
 │   ├── services/              # Business logic
 │   ├── utils/                 # Calculation utilities
 │   ├── scraper/               # SofaScore scraper
+│   ├── strategies/            # Strategy Engine (DA CREARE)
 │   └── migrations/            # SQL schemas
 ├── src/
 │   ├── App.jsx               # Main React app
 │   ├── components/           # UI components (24)
 │   ├── hooks/                # Custom hooks (3)
+│   ├── motion/               # Animation tokens & wrappers
 │   └── utils/                # Frontend utilities
 ├── docs/
-│   ├── filosofie/            # Philosophy docs (7)
+│   ├── filosofie/            # Philosophy docs (8)
 │   ├── specs/                # Technical specs
 │   ├── MAPPA_RETE_CONCETTUALE.md
 │   └── TODO_LIST.md
@@ -235,14 +237,16 @@ GET /api/match/12345/card
 
 | Documento | Focus |
 |-----------|-------|
-| [FILOSOFIA_MADRE.md](docs/filosofie/FILOSOFIA_MADRE.md) | Visione complessiva progetto |
+| [FILOSOFIA_MADRE.md](docs/filosofie/FILOSOFIA_MADRE.md) | **Entry point** - Indice documentazione |
 | [FILOSOFIA_DB.md](docs/filosofie/FILOSOFIA_DB.md) | Schema database, flussi dati |
 | [FILOSOFIA_STATS_V2.md](docs/filosofie/FILOSOFIA_STATS_V2.md) | Metriche e calcoli statistici |
 | [FILOSOFIA_LIVE_TRACKING.md](docs/filosofie/FILOSOFIA_LIVE_TRACKING.md) | Sistema tracking real-time |
-| [FILOSOFIA_FRONTEND_UI_UX.md](docs/filosofie/FILOSOFIA_FRONTEND_UI_UX.md) | Design patterns UI/UX |
-| [FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md](docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Consumo dati frontend |
+| [FILOSOFIA_ODDS.md](docs/filosofie/FILOSOFIA_ODDS.md) | Quote mercato, fair odds, value |
+| [**FILOSOFIA_FRONTEND.md**](docs/filosofie/FILOSOFIA_FRONTEND.md) | **✨ NUOVO** - Visual design, wireframe, backend allacci, JSON schema, motion/icons, strategie UI |
+| [FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md](docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Pattern data consumption (snapshot vs live) |
 | [FILOSOFIA_CONCEPT_CHECKS.md](docs/filosofie/FILOSOFIA_CONCEPT_CHECKS.md) | Guardrail Docs ↔ Code |
-| [SPEC_FRONTEND_MOTION_UI.md](docs/specs/SPEC_FRONTEND_MOTION_UI.md) | Specifiche animazioni |
+
+> ⚠️ **Deprecati**: `FILOSOFIA_FRONTEND_UI_UX.md`, `SPEC_FRONTEND_MOTION_UI.md` → ora integrati in **FILOSOFIA_FRONTEND.md**
 
 ### Verifica Documentazione
 
@@ -326,6 +330,42 @@ node scripts/checkConceptualMap.js
 ---
 
 ## 📜 Changelog
+
+### v4.5 (23 Dicembre 2025) - FILOSOFIA_FRONTEND Unificato
+- **Documento Unificato Frontend** - `FILOSOFIA_FRONTEND.md`
+  - Visual design con wireframe ASCII per HOME e MATCH PAGE
+  - Backend allacci per ogni TAB (funzioni + endpoint)
+  - Sistema strategie trading (🟢🟡🔴) con 3 strategie specifiche
+  - JSON Schema completo (`match-bundle.v1`)
+  - Motion/Icons spec (Framer Motion + Phosphor)
+- **Strategy Engine** (backend) - File da creare:
+  - `backend/strategies/strategyEngine.js`
+  - `backend/services/oddsService.js`
+  - `backend/services/momentumService.js`
+  - `backend/services/predictorService.js`
+- **Motion System** (frontend) - File da creare:
+  - `src/motion/tokens.ts`
+  - Wrapper components: MotionCard, MotionButton, MotionTab, MotionRow
+- **Documentazione**
+  - FILOSOFIA_MADRE.md aggiornato
+  - MAPPA_RETE_CONCETTUALE.md con nuovi domini
+  - TODO_LIST.md con file da creare
+- **Deprecati**: `FILOSOFIA_FRONTEND_UI_UX.md`, `SPEC_FRONTEND_MOTION_UI.md`
+
+### v4.4 (22-23 Dicembre 2025) - Frontend UI Premium
+- **Phosphor Icons** - Sistema icone coerente (duotone)
+- **Framer Motion** - Animazioni premium
+  - Motion tokens: durations, easings, variants
+  - Componenti: MotionCard, MotionButton, MotionList
+  - Skeleton loading, EmptyState animato
+- **prefers-reduced-motion** - Accessibilità
+- **UI Components Enhanced**
+  - HomePage: hover animations, bottoni animati
+  - SportSidebar: hover indicator, icone sport
+  - MatchCard: lift effect, shadow soft
+  - MatchGrid: stagger animation
+  - PlayerPage: form streak animato
+  - MonitoringDashboard: 30+ emoji → Phosphor icons
 
 ### v4.3 (Dicembre 2025) - Dual Source Logic (API vs SVG)
 - **Data Source Detection** - Rilevamento automatico origine dati

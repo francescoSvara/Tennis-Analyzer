@@ -3,7 +3,7 @@
 > **Scopo**: documento di navigazione rapida per AI/sviluppatore.
 > Contiene tutti i riferimenti verificati tra filosofie, file, funzioni e linee di codice.
 >
-> **Ultimo aggiornamento**: 03 Gennaio 2025
+> **Ultimo aggiornamento**: 23 Dicembre 2025
 
 ---
 
@@ -33,14 +33,15 @@ docs/
 │   ├── FILOSOFIA_STATS_V2.md        <- Dominio: Calcoli + Metriche
 │   ├── FILOSOFIA_LIVE_TRACKING.md   <- Dominio: Live + Polling
 │   ├── FILOSOFIA_ODDS.md            <- Dominio: Quote + Value
-│   ├── FILOSOFIA_FRONTEND_UI_UX.md  <- Dominio: UI principi
-│   ├── FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md <- Dominio: Frontend data
+│   ├── FILOSOFIA_FRONTEND.md        <- **NUOVO** Documento Unificato (visual, allacci, JSON, motion)
+│   ├── FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md <- Pattern data consumption (snapshot vs live)
 │   ├── FILOSOFIA_CONCEPT_CHECKS.md  <- Dominio: Guardrail docs-code
-│   ├── filosofia_value_svg.md       <- SVG Momentum Fallback (NEW)
+│   ├── filosofia_value_svg.md       <- SVG Momentum Fallback
+│   ├── FILOSOFIA_FRONTEND_UI_UX.md  <- DEPRECATO (integrato in FILOSOFIA_FRONTEND.md)
 │   └── FILOSOFIA_STATS.md           <- DEPRECATO
 │
 ├── specs/
-│   └── SPEC_FRONTEND_MOTION_UI.md   <- Spec operativa UI/motion
+│   └── SPEC_FRONTEND_MOTION_UI.md   <- DEPRECATO (integrato in FILOSOFIA_FRONTEND.md)
 │
 ├── concept/
 │   └── rules.v1.json                <- Regole confini domini
@@ -53,20 +54,22 @@ docs/
 ├── CHECK_MAPPA_CONCETTUALE.md       <- Verifica esistenza file (auto)
 └── TODO_LIST.md                     <- Task + problemi (semi-auto)
 ```
+```
 
 ### Dipendenze tra Documenti
 
 | Da | A | Tipo |
 |----|---|------|
-| MADRE | DB, STATS_V2, LIVE, ODDS, FRONTEND_*, CONCEPT_CHECKS | indice |
+| MADRE | DB, STATS_V2, LIVE, ODDS, FRONTEND, CONCEPT_CHECKS | indice |
 | DB | STATS_V2 | ref: DATI DERIVATI |
 | LIVE | DB | ref: Raw Events Pipeline |
 | LIVE | STATS_V2 | ref: DATI DINAMICI |
 | ODDS | STATS_V2 | ref: calcolo fair odds |
 | ODDS | LIVE | ref: quote live |
-| FRONTEND_UI_UX | SPEC_MOTION | dettagli implementativi |
-| FRONTEND_UI_UX | FRONTEND_DATA | consumo dati |
-| FRONTEND_DATA | LIVE | dati runtime |
+| FRONTEND | LIVE | dati runtime |
+| FRONTEND | ODDS | market data |
+| FRONTEND | STATS_V2 | metriche |
+| FRONTEND_DATA | LIVE | dati runtime (snapshot vs live) |
 | CONCEPT_CHECKS | rules.v1.json | definizione regole |
 | MAPPA_RETE | checkConceptualMap.js | verifica esistenza |
 
@@ -139,7 +142,9 @@ docs/
 - Pre-match vs Live
 
 ### 2.5 Dominio FRONTEND
-**Responsabilita**: Visualizzazione, data consumption, motion
+**Responsabilita**: Visualizzazione, data consumption, motion, strategie UI
+
+**Riferimento principale**: [FILOSOFIA_FRONTEND.md](filosofie/FILOSOFIA_FRONTEND.md)
 
 | Concetto | File Riferimento | Linee |
 |----------|-----------------|-------|
@@ -152,6 +157,21 @@ docs/
 | Momentum Shift | `src/components/MomentumTab.jsx` | L196 |
 | Manual Prediction | `src/components/ManualPredictor.jsx` | L340 |
 | Ranking Probability | `src/components/QuotesTab.jsx` | L46 |
+
+### 2.6 Dominio STRATEGIES (NUOVO da creare)
+**Responsabilita**: Strategy Engine backend, segnali trading
+
+**Riferimento principale**: [FILOSOFIA_FRONTEND.md](filosofie/FILOSOFIA_FRONTEND.md) (sezione Strategie)
+
+| Concetto | File Riferimento | Status |
+|----------|-----------------|--------|
+| Strategy Engine | `backend/strategies/strategyEngine.js` | DA CREARE |
+| Lay Winner Eval | `strategyEngine.evaluateLayWinner()` | DA CREARE |
+| Banca Servizio Eval | `strategyEngine.evaluateBancaServizio()` | DA CREARE |
+| Super Break Eval | `strategyEngine.evaluateSuperBreak()` | DA CREARE |
+| Odds Service | `backend/services/oddsService.js` | DA CREARE |
+| Momentum Service | `backend/services/momentumService.js` | DA CREARE |
+| Predictor Service | `backend/services/predictorService.js` | DA CREARE |
 
 ---
 
@@ -169,6 +189,9 @@ docs/
 | `calculationQueueWorker.js` | Worker task async | processQueue() |
 | `dataNormalizer.js` | Normalizzazione dati | normalizePlayerName() L315, generateMatchFingerprint() L481 |
 | `unifiedImporter.js` | Import unificato | - |
+| `oddsService.js` | **DA CREARE** Odds + Edge | calculateImpliedProbability(), calculateFairOdds(), detectValueEdge() |
+| `momentumService.js` | **DA CREARE** Momentum analysis | analyzeMomentumOwner(), detectMomentumShift() |
+| `predictorService.js` | **DA CREARE** Win probability | computeWinProbability(), computeBreakNextGameProbability() |
 
 ### 3.2 Utils (`backend/utils/`)
 
@@ -194,7 +217,28 @@ docs/
 |------|-------|------------------------|
 | `sofascoreScraper.js` | Scraping SofaScore | `/api/v1/event/{id}`, `/statistics`, `/tennis-power-rankings`, `/point-by-point` |
 
-### 3.5 Migrations (`backend/migrations/`)
+### 3.5 Strategies (`backend/strategies/`) **DA CREARE**
+
+| File | Scopo | Funzioni Chiave |
+|------|-------|-----------------|
+| `strategyEngine.js` | Engine strategie trading | evaluateAll(), evaluateLayWinner(), evaluateBancaServizio(), evaluateSuperBreak(), getSummary() |
+
+**Schema output strategia**:
+```js
+{
+  id,
+  status: "OFF" | "WATCH" | "READY",
+  action: "BACK" | "LAY" | null,
+  target,
+  confidence,
+  entryRule,
+  exitRule,
+  reasons: [],
+  risk: { stakeSuggested, liabilityCap }
+}
+```
+
+### 3.6 Migrations (`backend/migrations/`)
 
 | File | Tabelle Create |
 |------|----------------|
@@ -234,6 +278,18 @@ docs/
 | `SportSidebar.jsx` | Sidebar sport | - |
 | `StatGroup.jsx` | Gruppo statistiche | - |
 | `StatRow.jsx` | Riga statistica | - |
+
+### 4.2 Motion (`src/motion/`) **DA CREARE**
+
+| File | Scopo | Exports |
+|------|-------|---------|
+| `tokens.ts` | Motion tokens | durations, easings, variants (fadeUp, cardHover, staggerContainer, tableRow) |
+
+**Wrapper Components DA CREARE**:
+- `<MotionCard>` - Card con hover animation
+- `<MotionButton>` - Button con tap/hover feedback
+- `<MotionTab>` - Tab con underline animata
+- `<MotionRow>` - Row tabella con fade slide
 
 ### 4.2 Hooks (`src/hooks/`)
 
@@ -434,6 +490,10 @@ GET /api/match/:id/card
 | SVG insert | `insertPowerRankingsSvg` | backend/db/matchRepository.js |
 | SVG process | `processSvgMomentum` | backend/utils/svgMomentumExtractor.js |
 | **Break Frontend** | `homeBreaks/awayBreaks calc` | src/components/IndicatorsChart.jsx (L140-220) |
+| **Strategy Engine** | `evaluateAll()` | backend/strategies/strategyEngine.js (DA CREARE) |
+| **Odds Edge** | `detectValueEdge()` | backend/services/oddsService.js (DA CREARE) |
+| **Momentum Owner** | `analyzeMomentumOwner()` | backend/services/momentumService.js (DA CREARE) |
+| **Win Probability** | `computeWinProbability()` | backend/services/predictorService.js (DA CREARE) |
 
 ### 8.2 Cerco una tabella
 
@@ -456,11 +516,12 @@ GET /api/match/:id/card
 | Metriche, calcoli | FILOSOFIA_STATS_V2.md |
 | Live, polling | FILOSOFIA_LIVE_TRACKING.md |
 | Quote, value | FILOSOFIA_ODDS.md |
-| UI/UX | FILOSOFIA_FRONTEND_UI_UX.md |
-| Fetch dati frontend | FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md |
+| **Frontend completo** | **FILOSOFIA_FRONTEND.md** ✨ |
+| Frontend data consumption | FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md |
 | Guardrail code | FILOSOFIA_CONCEPT_CHECKS.md |
-| Animazioni | SPEC_FRONTEND_MOTION_UI.md |
 | **SVG Momentum Fallback** | **specs/SPEC_VALUE_SVG.md** |
+
+> ⚠️ **DEPRECATI**: `FILOSOFIA_FRONTEND_UI_UX.md`, `SPEC_FRONTEND_MOTION_UI.md` → ora integrati in **FILOSOFIA_FRONTEND.md**
 
 ---
 
@@ -529,7 +590,7 @@ node scripts/runConceptChecks.js --mode diff
 3. **Per capire tipi di dati (RAW/DERIVED/DYNAMIC)** - FILOSOFIA_STATS_V2.md
 4. **Per live/polling** - FILOSOFIA_LIVE_TRACKING.md
 5. **Per quote e value** - FILOSOFIA_ODDS.md
-6. **Per UI/motion** - SPEC_FRONTEND_MOTION_UI.md
+6. **Per Frontend completo (visual + motion + backend allacci + JSON)** - **FILOSOFIA_FRONTEND.md** ✨
 7. **Per confini domini** - FILOSOFIA_CONCEPT_CHECKS.md + rules.v1.json
 8. **Per query rapide file/linea** - Sezione 8 di questo documento
 
@@ -551,6 +612,21 @@ node scripts/runConceptChecks.js --mode diff
 - Logiche duplicate backend/frontend - pressureCalculator vs calculatePressureIndex
 - Funzioni senza livello (player/match) - da documentare
 
+### Da FILOSOFIA_FRONTEND.md (NUOVO)
+
+**Spostamenti obbligati**:
+- ❌ FE scraping → ✅ Solo backend
+- ❌ Duplicazione pressure calcs → ✅ Pressure calcolato backend, FE solo render
+- ❌ Strategie in FE utils → ✅ Strategy engine backend, FE consuma segnali
+- ❌ Data completeness in FE → ✅ Backend calcola completeness e manda badge
+
+**File da creare**:
+- `backend/strategies/strategyEngine.js`
+- `backend/services/oddsService.js`
+- `backend/services/momentumService.js`
+- `backend/services/predictorService.js`
+- `src/motion/tokens.ts`
+
 ---
 
-*Documento aggiornato: 22 Dicembre 2025*
+*Documento aggiornato: 23 Dicembre 2025*

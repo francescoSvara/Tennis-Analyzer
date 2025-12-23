@@ -94,6 +94,35 @@ La mappa concettuale è allineata con il codice.
 | 23 | prefers-reduced-motion support | 22/12/2025 | Frontend |
 | 24 | **Tennis-Scraper API Optimization** | 23/12/2025 | Backend |
 | 25 | Tennis-Scraper SVG Icon System | 23/12/2025 | Frontend |
+| 26 | **FILOSOFIA_FRONTEND.md unificato** | 23/12/2025 | Docs |
+| 27 | FILOSOFIA_MADRE.md aggiornamento | 23/12/2025 | Docs |
+| 28 | MAPPA_RETE_CONCETTUALE.md aggiornamento | 23/12/2025 | Docs |
+
+### Dettagli FILOSOFIA_FRONTEND.md (completato 23/12/2025)
+
+Documento unificato che include:
+- Visual design (wireframe ASCII) per HOME e MATCH PAGE
+- Backend allacci per ogni TAB (funzioni + endpoint)
+- Sistema strategie (🟢🟡🔴) + 3 strategie specifiche
+- JSON Schema completo (match-bundle.v1)
+- Motion/Icons spec (Framer Motion + Phosphor)
+- Checklist finale
+
+| Sezione | Contenuto |
+|---------|-----------|
+| HOME | Wireframe + `liveManager`, `matchCardService` |
+| MATCH PAGE | Layout 3 zone + endpoint REST/WS |
+| OVERVIEW | Quick Signals + `pressureCalculator`, `valueInterpreter` |
+| STRATEGIE | Card standard + Strategy Engine (DA CREARE) |
+| ODDS | Trading UI + `oddsService` (DA CREARE) |
+| POINT-BY-POINT | Filtri + `breakDetector` |
+| STATS | Standard + Trading-oriented |
+| MOMENTUM | Trend + `momentumService` (DA CREARE) |
+| PREDICTOR | Edge vs market + `predictorService` (DA CREARE) |
+| JOURNAL | Trade log |
+| RIGHT RAIL | Quick trades sempre visibile |
+
+**Fonte**: Unificazione di 5 documenti txt forniti dall'utente
 
 ### Dettagli Dual Source Logic (completato 23/12/2025)
 
@@ -158,10 +187,58 @@ La mappa concettuale è allineata con il codice.
 - [ ] Redis Streams / Kafka
 
 ### 📚 Documentazione
-- [ ] FILOSOFIA_ODDS.md
 - [ ] FILOSOFIA_AI.md
-- [ ] FILOSOFIA_STRATEGIES.md
 - [ ] FILOSOFIA_OBSERVABILITY.md
+- [x] ~~FILOSOFIA_STRATEGIES.md~~ → Integrato in FILOSOFIA_FRONTEND.md (sezione Strategie)
+- [x] ~~FILOSOFIA_ODDS.md~~ → Esiste già
+
+### ⚠️ Deprecato (concettualmente superato)
+- [x] `FILOSOFIA_FRONTEND_UI_UX.md` → Principi UI ora in FILOSOFIA_FRONTEND.md (sezione Motion/Icons)
+- [ ] `FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md` → **DA VALUTARE**: contiene pattern data consumption (snapshot vs live, loading, error) - potrebbe restare separato
+- [x] `SPEC_FRONTEND_MOTION_UI.md` → Integrato in FILOSOFIA_FRONTEND.md (sezione Motion finale)
+- [x] `FILOSOFIA_STATS.md` → Sostituito da V2
+
+---
+
+## 🆕 Nuovi File da Creare (da FILOSOFIA_FRONTEND.md)
+
+> File backend e frontend identificati nel documento unificato
+
+### Backend - Strategie (`backend/strategies/`)
+
+| File | Funzioni | Priorità | Status |
+|------|----------|----------|--------|
+| `strategyEngine.js` | `evaluateAll()`, `evaluateLayWinner()`, `evaluateBancaServizio()`, `evaluateSuperBreak()`, `getSummary()` | 🔴 Alta | ⏳ TODO |
+
+### Backend - Services (`backend/services/`)
+
+| File | Funzioni | Priorità | Status |
+|------|----------|----------|--------|
+| `oddsService.js` | `calculateImpliedProbability()`, `calculateFairOdds()`, `detectValueEdge()` | 🔴 Alta | ⏳ TODO |
+| `momentumService.js` | `analyzeMomentumOwner()`, `detectMomentumShift()` | 🟡 Media | ⏳ TODO |
+| `predictorService.js` | `computeWinProbability()`, `computeBreakNextGameProbability()`, `computeEdgeVsMarket()` | 🟡 Media | ⏳ TODO |
+
+### Frontend - Motion (`src/motion/`)
+
+| File | Exports | Priorità | Status |
+|------|---------|----------|--------|
+| `tokens.ts` | `durations`, `easings`, `variants` (fadeUp, cardHover, stagger, tableRow) | 🟡 Media | ⏳ TODO |
+| `MotionCard.tsx` | Wrapper card con hover lift | 🟢 Bassa | ⏳ TODO |
+| `MotionButton.tsx` | Button con tap/hover feedback | 🟢 Bassa | ⏳ TODO |
+| `MotionTab.tsx` | Tab con underline animata | 🟢 Bassa | ⏳ TODO |
+| `MotionRow.tsx` | Row tabella con fade slide | 🟢 Bassa | ⏳ TODO |
+
+### Backend - Endpoint REST
+
+| Endpoint | Payload | Priorità |
+|----------|---------|----------|
+| `GET /api/home/live` | Lista match + mini card + count strategie 🟢/🟡 | 🔴 Alta |
+| `GET /api/match/:id/overview` | Scoreboard, odds, quick signals, strategy summary | 🔴 Alta |
+| `GET /api/match/:id/strategies` | Strategy signals array | 🔴 Alta |
+| `GET /api/match/:id/bundle?tabs=...` | Payload unificato per tab | 🟡 Media |
+| `WS /ws/match/:id` | Push: scoreboard, odds, pbp, strategy signals | 🟡 Media |
+| `POST /api/match/:id/trade` | Salva trade | 🟢 Bassa |
+| `GET /api/match/:id/journal` | Trade log | 🟢 Bassa |
 
 ---
 
