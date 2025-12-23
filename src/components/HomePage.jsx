@@ -158,9 +158,17 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
+  const summaryLoadedRef = React.useRef(false);
 
   // 🚀 OTTIMIZZATO: Carica SOLO il summary (conteggi), niente match all'avvio
-  const loadSummary = useCallback(async () => {
+  // ⚠️ FIX: Evita chiamate multiple usando ref per tracking
+  const loadSummary = useCallback(async (force = false) => {
+    // Skip se già caricato e non è forzato
+    if (summaryLoadedRef.current && !force) {
+      console.log('📊 Summary già caricato, skip fetch');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
@@ -168,6 +176,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
       if (!res.ok) throw new Error(`Errore HTTP: ${res.status}`);
       const data = await res.json();
       setSummary(data);
+      summaryLoadedRef.current = true;
       console.log(`📊 Summary loaded: ${data.total} matches totali`);
     } catch (err) {
       console.error('Errore caricamento summary:', err);
@@ -178,10 +187,10 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
     }
   }, []);
 
-  // Carica il summary all'avvio
+  // Carica il summary all'avvio (una sola volta)
   useEffect(() => {
     loadSummary();
-  }, [loadSummary]);
+  }, []); // ⚠️ FIX: Rimosso loadSummary dalla dipendenza per evitare loop
 
   const handleMatchClick = (match) => {
     if (onMatchSelect) {
@@ -191,7 +200,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
 
   const handleAddMatchSuccess = () => {
     setShowAddModal(false);
-    loadSummary(); // Ricarica solo il summary
+    loadSummary(true); // Ricarica forzatamente dopo aggiunta match
   };
 
   return (
@@ -292,7 +301,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
       <MonitoringDashboard 
         isOpen={showMonitoring}
         onClose={() => setShowMonitoring(false)}
-        onMatchesUpdated={loadSummary}
+        onMatchesUpdated={() => loadSummary(true)}
         onMatchSelect={onMatchSelect}
       />
     </div>

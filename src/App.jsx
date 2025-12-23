@@ -39,6 +39,7 @@ import SavedScrapes from './components/SavedScrapes';
 import ErrorBoundary from './components/ErrorBoundary';
 import IndicatorsChart from './components/IndicatorsChart';
 import MomentumChart from './components/MomentumChart';
+import StrategiesPanel from './components/StrategiesPanel';
 import HomePage from './components/HomePage';
 import PlayerPage from './components/PlayerPage';
 import { apiUrl } from './config';
