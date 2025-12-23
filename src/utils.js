@@ -1928,6 +1928,37 @@ export function analyzeLayTheWinner(data) {
     result.factors.surface = surface;
     result.factors.format = bestOf === 5 ? 'Grand Slam (Bo5)' : 'Standard (Bo3)';
     result.factors.baseComeback = `${Math.round(comebackBaseRate * 100)}%`;
+    
+    // POTENZIAMENTO HPI + RESILIENCE: Analizza capacità di recupero del perdente
+    try {
+      const loserHPI = calculateHPI(data, loserFirstSet);
+      const loserResilience = calculateBreakResilience(data, loserFirstSet);
+      const winnerHPI = calculateHPI(data, firstSetWinner);
+      
+      // Se il perdente è resiliente e tiene bene sotto pressione
+      if (loserResilience.level === 'RESILIENT' || loserResilience.level === 'SOLID') {
+        result.confidence = Math.min(95, result.confidence + 10);
+        result.factors.loserResilience = loserResilience.level;
+        result.details.loserResilienceValue = loserResilience.value;
+      }
+      
+      // Se il perdente ha buon HPI (tiene servizio sotto pressione)
+      if (loserHPI.level === 'ELITE' || loserHPI.level === 'STRONG') {
+        result.confidence = Math.min(95, result.confidence + 8);
+        result.factors.loserHPI = loserHPI.level;
+        result.details.loserHPIValue = loserHPI.value;
+      }
+      
+      // Se il vincitore ha basso HPI (fragile sotto pressione) → più probabile il comeback
+      if (winnerHPI.level === 'VULNERABLE' || winnerHPI.level === 'WEAK') {
+        result.confidence = Math.min(95, result.confidence + 12);
+        result.factors.winnerHPI = winnerHPI.level;
+        result.details.winnerHPIValue = winnerHPI.value;
+        result.message += ' | ⚠️ Winner fragile sotto pressione';
+      }
+    } catch (e) {
+      // HPI/Resilience non disponibili - continua senza
+    }
   }
   
   return result;
@@ -2094,6 +2125,35 @@ export function analyzeBancaServizio(data) {
       result.details.momentum = val;
       result.message += ` | Momentum: ${val > 0 ? '+' : ''}${val}`;
     }
+  }
+
+  // POTENZIAMENTO HPI: Analizza Hold Pressure Index del server
+  try {
+    const serverSide = serving === 1 ? 'home' : 'away';
+    const serverHPI = calculateHPI(data, serverSide);
+    const serverResilience = calculateBreakResilience(data, serverSide);
+    
+    result.details.serverHPI = serverHPI.value;
+    result.details.serverHPILevel = serverHPI.level;
+    
+    // Se il server ha HPI basso → più probabile che ceda
+    if (serverHPI.level === 'VULNERABLE' || serverHPI.level === 'WEAK') {
+      result.signal = result.signal === 'weak' ? 'medium' : 
+                      result.signal === 'medium' ? 'strong' : result.signal;
+      result.confidence = Math.min(95, result.confidence + 15);
+      result.factors = result.factors || {};
+      result.factors.serverHPI = serverHPI.level;
+      result.message += ` | 🎯 HPI Basso: ${serverHPI.value}%`;
+    }
+    
+    // Se il server ha bassa resilienza → fragile mentalmente
+    if (serverResilience.level === 'FRAGILE' || serverResilience.level === 'BRITTLE') {
+      result.confidence = Math.min(95, result.confidence + 10);
+      result.factors = result.factors || {};
+      result.factors.serverResilience = serverResilience.level;
+    }
+  } catch (e) {
+    // HPI non disponibile - continua senza
   }
 
   return result;
@@ -2344,6 +2404,40 @@ export function analyzeSuperBreak(data) {
     }
   }
   
+  // POTENZIAMENTO HPI + RESILIENCE: Analizza fragilità underdog
+  try {
+    const favoritoHPI = calculateHPI(data, favorito.side);
+    const sfavoritoHPI = calculateHPI(data, sfavorito.side);
+    const sfavoritoResilience = calculateBreakResilience(data, sfavorito.side);
+    
+    // Se il favorito ha alto HPI → conferma dominio
+    if (favoritoHPI.level === 'ELITE' || favoritoHPI.level === 'STRONG') {
+      result.confidence = Math.min(95, result.confidence + 10);
+      result.factors = result.factors || {};
+      result.factors.favoritoHPI = favoritoHPI.level;
+      result.details.favoritoHPIValue = favoritoHPI.value;
+    }
+    
+    // Se lo sfavorito ha basso HPI → break più facile
+    if (sfavoritoHPI.level === 'VULNERABLE' || sfavoritoHPI.level === 'WEAK') {
+      result.confidence = Math.min(95, result.confidence + 8);
+      result.factors = result.factors || {};
+      result.factors.sfavoritoHPI = sfavoritoHPI.level;
+      result.details.sfavoritoHPIValue = sfavoritoHPI.value;
+      result.message += ' | 🎯 Underdog fragile al servizio';
+    }
+    
+    // Se lo sfavorito ha bassa resilienza → tende a cedere
+    if (sfavoritoResilience.level === 'FRAGILE' || sfavoritoResilience.level === 'BRITTLE') {
+      result.confidence = Math.min(95, result.confidence + 12);
+      result.factors = result.factors || {};
+      result.factors.sfavoritoResilience = sfavoritoResilience.level;
+      result.details.sfavoritoResilienceValue = sfavoritoResilience.value;
+    }
+  } catch (e) {
+    // HPI/Resilience non disponibili - continua senza
+  }
+  
   // Calcola confidence finale basata su tutti i fattori
   if (result.signal === 'strong') {
     result.confidence = Math.max(70, result.confidence);
@@ -2355,6 +2449,399 @@ export function analyzeSuperBreak(data) {
   
   return result;
 }
+// ============================================================================
+// HPI - HOLD PRESSURE INDEX
+// Misura quanto un giocatore tiene il servizio sotto pressione
+// ============================================================================
+
+/**
+ * Soglie per situazioni di pressione al servizio
+ */
+export const HPI_PRESSURE_SITUATIONS = {
+  // Punteggi critici dal punto di vista del server
+  deuce: ['40-40', 'DEUCE', '40-AD', 'AD-40'],
+  thirtyAll: ['30-30'],
+  breakPoint: ['30-40', '15-40', '0-40', '40-AD'], // Server perde prossimo punto = break
+  serverDanger: ['0-30', '15-30', '0-15'], // Server in difficoltà
+};
+
+/**
+ * Calcola l'Hold Pressure Index (HPI) di un giocatore
+ * 
+ * HPI = (game tenuti sotto pressione / game totali al servizio sotto pressione) * 100
+ * 
+ * Situazioni di pressione considerate:
+ * - 30-30 (parità critica)
+ * - Deuce (40-40)
+ * - Break Point salvati (30-40, 15-40, 0-40)
+ * 
+ * Tipo: DERIVED (calcolato da dati puri)
+ * Livello: GAME/MATCH
+ * 
+ * @param {Object} data - Dati del match (con point-by-point)
+ * @param {string} playerSide - 'home' o 'away'
+ * @returns {Object} { value, level, breakdown }
+ */
+export function calculateHPI(data, playerSide = 'home') {
+  const normalizedPbp = normalizeTennisPointByPoint(data);
+  const keyStats = extractKeyStats(data);
+  
+  const result = {
+    value: 0,
+    level: 'N/A',
+    breakdown: {
+      deuceHeld: 0,
+      deuceTotal: 0,
+      thirtyAllHeld: 0,
+      thirtyAllTotal: 0,
+      breakPointsSaved: 0,
+      breakPointsTotal: 0,
+      pressureGamesHeld: 0,
+      pressureGamesTotal: 0
+    },
+    confidence: 0,
+    message: ''
+  };
+  
+  // Prova prima dalle statistiche match
+  if (keyStats) {
+    const stats = playerSide === 'home' ? keyStats.home : keyStats.away;
+    
+    // Break points saved dalla statistiche
+    if (stats.breakPointsSavedPct !== null && stats.breakPointsSavedPct !== undefined) {
+      result.breakdown.breakPointsSaved = stats.breakPointsSaved || 0;
+      result.breakdown.breakPointsTotal = stats.breakPointsTotal || 0;
+      
+      // Se abbiamo solo la % e non il conteggio, usiamo la %
+      if (result.breakdown.breakPointsTotal === 0 && stats.breakPointsSavedPct > 0) {
+        // Stima conservativa
+        result.value = stats.breakPointsSavedPct;
+        result.confidence = 60; // Bassa confidence senza dati granulari
+      }
+    }
+    
+    // First serve won % contribuisce alla pressione
+    if (stats.firstServeWonPct) {
+      result.breakdown.firstServeWonPct = stats.firstServeWonPct;
+    }
+    
+    // Second serve won % (più importante per HPI)
+    if (stats.secondServeWonPct) {
+      result.breakdown.secondServeWonPct = stats.secondServeWonPct;
+    }
+  }
+  
+  // Analizza point-by-point per dati granulari
+  if (normalizedPbp && normalizedPbp.points && normalizedPbp.points.length > 0) {
+    let pressureGamesHeld = 0;
+    let pressureGamesTotal = 0;
+    let deuceHeld = 0;
+    let deuceTotal = 0;
+    let thirtyAllHeld = 0;
+    let thirtyAllTotal = 0;
+    
+    // Raggruppa punti per game
+    const games = {};
+    for (const point of normalizedPbp.points) {
+      const gameKey = `${point.set}-${point.game}`;
+      if (!games[gameKey]) {
+        games[gameKey] = {
+          points: [],
+          serving: point.serving,
+          set: point.set,
+          game: point.game,
+          hadPressure: false,
+          held: false
+        };
+      }
+      games[gameKey].points.push(point);
+      
+      // Controlla se c'è stata pressione
+      const score = point.scoreBefore || point.scoreAfter || '';
+      if (HPI_PRESSURE_SITUATIONS.deuce.some(s => score.includes(s))) {
+        games[gameKey].hadPressure = true;
+        games[gameKey].hadDeuce = true;
+      }
+      if (HPI_PRESSURE_SITUATIONS.thirtyAll.some(s => score.includes(s))) {
+        games[gameKey].hadPressure = true;
+        games[gameKey].hadThirtyAll = true;
+      }
+      if (HPI_PRESSURE_SITUATIONS.breakPoint.some(s => score.includes(s))) {
+        games[gameKey].hadPressure = true;
+        games[gameKey].hadBreakPoint = true;
+      }
+    }
+    
+    // Analizza ogni game
+    for (const gameKey of Object.keys(games)) {
+      const game = games[gameKey];
+      
+      // Solo game dove il player stava servendo
+      const isPlayerServing = (playerSide === 'home' && game.serving === 1) ||
+                              (playerSide === 'away' && game.serving === 2);
+      
+      if (!isPlayerServing) continue;
+      
+      // Determina se il game è stato tenuto (il server ha vinto)
+      const lastPoint = game.points[game.points.length - 1];
+      const gameWinner = lastPoint?.gameWinner || lastPoint?.scoring;
+      const held = (playerSide === 'home' && gameWinner === 1) ||
+                   (playerSide === 'away' && gameWinner === 2);
+      
+      if (game.hadPressure) {
+        pressureGamesTotal++;
+        if (held) pressureGamesHeld++;
+      }
+      
+      if (game.hadDeuce) {
+        deuceTotal++;
+        if (held) deuceHeld++;
+      }
+      
+      if (game.hadThirtyAll) {
+        thirtyAllTotal++;
+        if (held) thirtyAllHeld++;
+      }
+    }
+    
+    result.breakdown.pressureGamesHeld = pressureGamesHeld;
+    result.breakdown.pressureGamesTotal = pressureGamesTotal;
+    result.breakdown.deuceHeld = deuceHeld;
+    result.breakdown.deuceTotal = deuceTotal;
+    result.breakdown.thirtyAllHeld = thirtyAllHeld;
+    result.breakdown.thirtyAllTotal = thirtyAllTotal;
+    
+    // Calcola HPI
+    if (pressureGamesTotal > 0) {
+      result.value = Math.round((pressureGamesHeld / pressureGamesTotal) * 100);
+      result.confidence = Math.min(95, 50 + pressureGamesTotal * 10);
+    }
+  }
+  
+  // Determina livello
+  if (result.value >= 80) {
+    result.level = 'ELITE';
+    result.message = 'Eccezionale sotto pressione';
+  } else if (result.value >= 65) {
+    result.level = 'STRONG';
+    result.message = 'Solido nei momenti chiave';
+  } else if (result.value >= 50) {
+    result.level = 'AVERAGE';
+    result.message = 'Normale gestione pressione';
+  } else if (result.value >= 35) {
+    result.level = 'VULNERABLE';
+    result.message = 'Fragile sotto pressione';
+  } else if (result.value > 0) {
+    result.level = 'WEAK';
+    result.message = 'Crolla nei momenti decisivi';
+  }
+  
+  return result;
+}
+
+// ============================================================================
+// BREAK RESILIENCE SCORE
+// Misura la capacità di salvare break point + recuperare da momentum negativo
+// ============================================================================
+
+/**
+ * Calcola il Break Resilience Score di un giocatore
+ * 
+ * Formula: (BP Saved % * 0.6) + (Recovery Rate * 0.4)
+ * 
+ * Componenti:
+ * - Break Point Saved % (peso 60%): % palle break salvate
+ * - Recovery Rate (peso 40%): capacità di recuperare da momentum negativo
+ * 
+ * Tipo: DERIVED (calcolato da dati puri)
+ * Livello: GAME/MATCH
+ * 
+ * @param {Object} data - Dati del match
+ * @param {string} playerSide - 'home' o 'away'
+ * @returns {Object} { value, level, breakdown }
+ */
+export function calculateBreakResilience(data, playerSide = 'home') {
+  const keyStats = extractKeyStats(data);
+  // Cerca sia tennisPowerRankings che powerRankings (per dati SVG)
+  let powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  if (!powerRankings || powerRankings.length === 0) {
+    powerRankings = deepFindAll(data, 'powerRankings', 5).flat().filter(Boolean);
+  }
+  
+  const result = {
+    value: 0,
+    level: 'N/A',
+    breakdown: {
+      breakPointsSavedPct: 0,
+      breakPointsSaved: 0,
+      breakPointsTotal: 0,
+      recoveryRate: 0,
+      negativePhases: 0,
+      recoveredPhases: 0,
+      avgRecoveryGames: 0
+    },
+    confidence: 0,
+    message: ''
+  };
+  
+  let hasBreakPointData = false;
+  let hasRecoveryData = false;
+  
+  // 1. Break Points Saved % (peso 60%)
+  if (keyStats) {
+    const stats = playerSide === 'home' ? keyStats.home : keyStats.away;
+    
+    if (stats.breakPointsSavedPct !== null && stats.breakPointsSavedPct !== undefined) {
+      result.breakdown.breakPointsSavedPct = stats.breakPointsSavedPct;
+      result.breakdown.breakPointsSaved = stats.breakPointsSaved || 0;
+      result.breakdown.breakPointsTotal = stats.breakPointsTotal || 0;
+      hasBreakPointData = true;
+    }
+  }
+  
+  // 2. Recovery Rate dal momentum (peso 40%)
+  if (powerRankings && powerRankings.length >= 5) {
+    // Calcola elasticità (capacità di recupero da fasi negative)
+    const elasticityData = calculateElasticity(powerRankings);
+    
+    // Conta fasi di momentum negativo e recuperi per il player specifico
+    let negativePhases = 0;
+    let recoveredPhases = 0;
+    let recoveryGames = [];
+    let inNegativePhase = false;
+    let negativeStart = -1;
+    
+    for (let i = 0; i < powerRankings.length; i++) {
+      const pr = powerRankings[i];
+      // Usa raw_v se disponibile, altrimenti value
+      let value = pr.value || 0;
+      if (pr.raw_v !== undefined) {
+        value = pr.value >= 0 ? pr.raw_v : -pr.raw_v;
+      }
+      
+      // Per home, momentum positivo è buono; per away, negativo è buono
+      const isPlayerNegative = (playerSide === 'home' && value < -15) ||
+                               (playerSide === 'away' && value > 15);
+      const isPlayerPositive = (playerSide === 'home' && value > 5) ||
+                               (playerSide === 'away' && value < -5);
+      
+      if (isPlayerNegative && !inNegativePhase) {
+        inNegativePhase = true;
+        negativeStart = i;
+        negativePhases++;
+      } else if (isPlayerPositive && inNegativePhase) {
+        inNegativePhase = false;
+        recoveredPhases++;
+        recoveryGames.push(i - negativeStart);
+      }
+    }
+    
+    const avgRecovery = recoveryGames.length > 0 
+      ? recoveryGames.reduce((a, b) => a + b, 0) / recoveryGames.length 
+      : 0;
+    
+    // Recovery rate: % fasi negative da cui si è recuperato
+    const recoveryRate = negativePhases > 0 
+      ? Math.round((recoveredPhases / negativePhases) * 100) 
+      : 50; // Default neutro se nessuna fase negativa
+    
+    result.breakdown.recoveryRate = recoveryRate;
+    result.breakdown.negativePhases = negativePhases;
+    result.breakdown.recoveredPhases = recoveredPhases;
+    result.breakdown.avgRecoveryGames = Math.round(avgRecovery * 10) / 10;
+    
+    hasRecoveryData = negativePhases > 0;
+  }
+  
+  // Calcola score finale
+  if (hasBreakPointData || hasRecoveryData) {
+    const bpComponent = hasBreakPointData ? result.breakdown.breakPointsSavedPct * 0.6 : 0;
+    const recoveryComponent = hasRecoveryData ? result.breakdown.recoveryRate * 0.4 : 0;
+    
+    if (hasBreakPointData && hasRecoveryData) {
+      result.value = Math.round(bpComponent + recoveryComponent);
+      result.confidence = 85;
+    } else if (hasBreakPointData) {
+      result.value = Math.round(result.breakdown.breakPointsSavedPct);
+      result.confidence = 60;
+    } else {
+      result.value = Math.round(result.breakdown.recoveryRate);
+      result.confidence = 50;
+    }
+  }
+  
+  // Determina livello
+  if (result.value >= 75) {
+    result.level = 'RESILIENT';
+    result.message = 'Alta capacità di recupero';
+  } else if (result.value >= 60) {
+    result.level = 'SOLID';
+    result.message = 'Buona resistenza mentale';
+  } else if (result.value >= 45) {
+    result.level = 'AVERAGE';
+    result.message = 'Resilienza nella media';
+  } else if (result.value >= 30) {
+    result.level = 'FRAGILE';
+    result.message = 'Difficoltà a recuperare';
+  } else if (result.value > 0) {
+    result.level = 'BRITTLE';
+    result.message = 'Crolla dopo momenti negativi';
+  }
+  
+  return result;
+}
+
+/**
+ * Combina HPI e Break Resilience in un Pressure Performance Score
+ * 
+ * @param {Object} data - Dati del match
+ * @param {string} playerSide - 'home' o 'away'
+ * @returns {Object} Score combinato
+ */
+export function calculatePressurePerformance(data, playerSide = 'home') {
+  const hpi = calculateHPI(data, playerSide);
+  const resilience = calculateBreakResilience(data, playerSide);
+  
+  const result = {
+    hpi,
+    resilience,
+    combined: 0,
+    level: 'N/A',
+    message: ''
+  };
+  
+  // Combina i due score con pesi uguali
+  if (hpi.value > 0 || resilience.value > 0) {
+    const hpiWeight = hpi.confidence > 30 ? 0.5 : 0.3;
+    const resWeight = resilience.confidence > 30 ? 0.5 : 0.3;
+    
+    const totalWeight = hpiWeight + resWeight;
+    result.combined = Math.round(
+      (hpi.value * hpiWeight + resilience.value * resWeight) / totalWeight
+    );
+    
+    // Livello combinato
+    if (result.combined >= 75) {
+      result.level = 'CLUTCH';
+      result.message = 'Giocatore decisivo nei momenti chiave';
+    } else if (result.combined >= 60) {
+      result.level = 'RELIABLE';
+      result.message = 'Affidabile sotto pressione';
+    } else if (result.combined >= 45) {
+      result.level = 'STANDARD';
+      result.message = 'Performance nella norma';
+    } else if (result.combined >= 30) {
+      result.level = 'INCONSISTENT';
+      result.message = 'Alti e bassi sotto pressione';
+    } else {
+      result.level = 'CHOKER';
+      result.message = 'Tende a cedere nei momenti decisivi';
+    }
+  }
+  
+  return result;
+}
+
 // ============================================================================
 // CALCOLO COMPLETEZZA DATI - Per barra di avanzamento nelle card
 // ============================================================================

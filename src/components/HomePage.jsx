@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { 
   Trophy, 
@@ -151,37 +151,15 @@ function AddMatchModal({ onClose, onSuccess }) {
 }
 
 
-function HomePage({ onMatchSelect, onNavigateToPlayer }) {
+function HomePage({ onMatchSelect, onNavigateToPlayer, summaryCache, summaryLoading, onRefreshSummary }) {
   const [selectedSport, setSelectedSport] = useState('tennis');
-  const [summary, setSummary] = useState({ total: 0, byYearMonth: [] }); // Solo conteggi
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
 
-  // 🚀 OTTIMIZZATO: Carica SOLO il summary (conteggi), niente match all'avvio
-  const loadSummary = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(apiUrl('/api/db/matches/summary'));
-      if (!res.ok) throw new Error(`Errore HTTP: ${res.status}`);
-      const data = await res.json();
-      setSummary(data);
-      console.log(`📊 Summary loaded: ${data.total} matches totali`);
-    } catch (err) {
-      console.error('Errore caricamento summary:', err);
-      setError('Impossibile caricare i match. Verifica che il backend sia attivo su porta 3001.');
-      setSummary({ total: 0, byYearMonth: [] });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Carica il summary all'avvio
-  useEffect(() => {
-    loadSummary();
-  }, [loadSummary]);
+  // 🚀 OTTIMIZZATO: Usa summary dalla cache di App (niente fetch qui)
+  const summary = summaryCache || { total: 0, byYearMonth: [] };
+  const loading = summaryLoading;
 
   const handleMatchClick = (match) => {
     if (onMatchSelect) {
@@ -191,7 +169,8 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
 
   const handleAddMatchSuccess = () => {
     setShowAddModal(false);
-    loadSummary(); // Ricarica solo il summary
+    // Ricarica il summary forzando refresh
+    if (onRefreshSummary) onRefreshSummary();
   };
 
   return (
@@ -261,7 +240,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
               <span className="error-text">{error}</span>
               <motion.button 
                 className="retry-btn" 
-                onClick={loadSummary}
+                onClick={onRefreshSummary}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -292,7 +271,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer }) {
       <MonitoringDashboard 
         isOpen={showMonitoring}
         onClose={() => setShowMonitoring(false)}
-        onMatchesUpdated={loadSummary}
+        onMatchesUpdated={onRefreshSummary}
         onMatchSelect={onMatchSelect}
       />
     </div>

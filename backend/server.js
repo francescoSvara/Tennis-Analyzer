@@ -68,6 +68,15 @@ try {
   console.warn('⚠️ Player Profile Service not available:', e.message);
 }
 
+// Strategy Stats Service (statistiche storiche strategie trading)
+let strategyStatsService = null;
+try {
+  strategyStatsService = require('./services/strategyStatsService');
+  console.log('✅ Strategy Stats Service loaded');
+} catch (e) {
+  console.warn('⚠️ Strategy Stats Service not available:', e.message);
+}
+
 // Break Detector (rilevamento break da punteggio)
 let breakDetector = null;
 try {
@@ -2562,6 +2571,88 @@ app.get('/api/player/h2h', async (req, res) => {
     res.json(h2h);
   } catch (err) {
     console.error('Error fetching H2H stats:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/match/strategy-context/:home/:away - Dati storici per strategie (entrambi i giocatori)
+ * Usato dalla UI per la colonna destra "Storico Strategie"
+ * Ritorna:
+ * - Stats per giocatore (comeback, win rate)
+ * - Stats globali delle strategie (% successo Lay the Winner, Banca Servizio, Super Break)
+ * - Head to Head
+ */
+app.get('/api/match/strategy-context/:home/:away', async (req, res) => {
+  if (!playerStatsService) {
+    return res.status(503).json({ error: 'Player Stats Service not available' });
+  }
+  try {
+    const homeName = decodeURIComponent(req.params.home);
+    const awayName = decodeURIComponent(req.params.away);
+    const surface = req.query.surface || null;
+    
+    console.log(`📊 [Strategy Context] Fetching for ${homeName} vs ${awayName} (surface: ${surface || 'all'})`);
+    
+    // Fetch stats in parallelo
+    const fetchPromises = [
+      playerStatsService.getPlayerStats(homeName),
+      playerStatsService.getPlayerStats(awayName),
+      playerStatsService.getHeadToHeadStats(homeName, awayName)
+    ];
+    
+    // Aggiungi strategy stats se il servizio è disponibile
+    if (strategyStatsService) {
+      fetchPromises.push(strategyStatsService.getStrategyStats(homeName, awayName, surface));
+    }
+    
+    const results = await Promise.all(fetchPromises);
+    const [homeStats, awayStats, h2h, strategyStats] = results;
+    
+    // Estrai le metriche per giocatore
+    const extractStrategyMetrics = (stats, surface) => {
+      if (!stats || stats.error) {
+        return { error: 'Player not found', metrics: null };
+      }
+      
+      const surfaceStats = surface && stats.by_surface?.[surface] 
+        ? stats.by_surface[surface]
+        : null;
+      
+      return {
+        name: stats.player_name,
+        totalMatches: stats.total_matches || 0,
+        comeback: {
+          rate: surfaceStats?.comeback_rate ?? stats.overall?.comeback_rate ?? 0,
+          total: surfaceStats?.comebacks ?? stats.overall?.comebacks ?? 0,
+          lostSet1Total: surfaceStats?.lost_set1_total ?? stats.overall?.lost_set1_total ?? 0
+        },
+        winRate: {
+          overall: stats.overall?.win_rate ?? 0,
+          surface: surfaceStats?.win_rate ?? null,
+          bySurface: stats.by_surface || {}
+        },
+        roi: stats.overall?.roi || null
+      };
+    };
+    
+    const result = {
+      home: extractStrategyMetrics(homeStats, surface),
+      away: extractStrategyMetrics(awayStats, surface),
+      h2h: h2h || { matches: 0 },
+      // NUOVO: Statistiche globali delle strategie
+      strategyStats: strategyStats || {
+        layTheWinner: { success_rate: 0, total_matches: 0 },
+        bancaServizio: { success_rate: 0, total_matches: 0 },
+        superBreak: { success_rate: 0, total_matches: 0 }
+      },
+      surface: surface,
+      fetchedAt: new Date().toISOString()
+    };
+    
+    res.json(result);
+  } catch (err) {
+    console.error('Error fetching strategy context:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

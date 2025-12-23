@@ -437,3 +437,149 @@ return {
 - **Frontend**: `src/components/IndicatorsChart.jsx`
 - **Extractor**: `backend/utils/svgMomentumExtractor.js`
 - **Endpoint**: `POST /api/match/:eventId/momentum-svg`
+
+---
+
+## 1️⃣1️⃣ Strategie di Trading - Statistiche Storiche
+
+### Nuovo Servizio: strategyStatsService.js
+
+| Funzione | File | Linee | Tipo |
+|----------|------|-------|------|
+| `calculateLayTheWinnerStats` | `backend/services/strategyStatsService.js` | 23-93 | DERIVED |
+| `calculateBancaServizioStats` | `backend/services/strategyStatsService.js` | 95-166 | DERIVED |
+| `calculateSuperBreakStats` | `backend/services/strategyStatsService.js` | 168-230 | DERIVED |
+| `getStrategyStats` | `backend/services/strategyStatsService.js` | 232-252 | DERIVED |
+
+### Logica Calcolo
+
+| Strategia | Calcolo | Formula |
+|-----------|---------|---------|
+| **Lay the Winner** | % match dove chi perde 1° set vince match | `successi / (match dove l1 > w1 o w1 > l1)` |
+| **Banca Servizio** | % break point convertiti | `breaks_converted / total_break_points` |
+| **Super Break** | % match vinti dal favorito (ranking) | `winner_rank < loser_rank / total` |
+
+### Endpoint API
+
+```
+GET /api/match/strategy-context/:home/:away?surface=Hard
+```
+
+**Response:**
+```json
+{
+  "home": { "name", "winRate", "comeback" },
+  "away": { "name", "winRate", "comeback" },
+  "h2h": { "matches", "player1_wins", "player2_wins" },
+  "strategyStats": {
+    "layTheWinner": { "success_rate", "applicable", "success" },
+    "bancaServizio": { "break_conversion_rate", "total_break_points" },
+    "superBreak": { "favorite_win_rate", "total_matches" }
+  }
+}
+```
+
+### Frontend Component
+
+| Componente | File | Responsabilità |
+|------------|------|----------------|
+| `StrategyHistoricalPanel` | `src/components/StrategyHistoricalPanel.jsx` | Mostra % successo storico strategie |
+| `StrategyStatsCard` | `src/components/StrategyHistoricalPanel.jsx:25-117` | Card singola strategia |
+| `PlayerMiniCard` | `src/components/StrategyHistoricalPanel.jsx:119-167` | Info compatta player |
+
+### Layout UI Strategie
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    STRATEGIE DI BASE TENNIS                      │
+├─────────────────────────────────┬───────────────────────────────┤
+│       SINISTRA (Match Live)     │   DESTRA (Storico DB)         │
+├─────────────────────────────────┼───────────────────────────────┤
+│ ┌─────────────────────────────┐ │ ┌───────────────────────────┐ │
+│ │ Lay the Winner              │ │ │ Lay the Winner: 24.5%     │ │
+│ │ Signal: STRONG              │ │ │ 312/1274 match            │ │
+│ │ "Perdente set1 recupera..." │ │ │ ████████░░░░░░░░░         │ │
+│ └─────────────────────────────┘ │ └───────────────────────────┘ │
+│ ┌─────────────────────────────┐ │ ┌───────────────────────────┐ │
+│ │ Banca Servizio              │ │ │ Banca Servizio: 42.1%     │ │
+│ │ Signal: MEDIUM              │ │ │ 8432 BP convertiti        │ │
+│ │ "Pressure Index: 45..."     │ │ │ ████████████░░░░░░        │ │
+│ └─────────────────────────────┘ │ └───────────────────────────┘ │
+│ ┌─────────────────────────────┐ │ ┌───────────────────────────┐ │
+│ │ Super Break                 │ │ │ Super Break: 67.8%        │ │
+│ │ Signal: WEAK                │ │ │ Favorito vince            │ │
+│ │ "Ranking gap: 45 pos..."    │ │ │ ██████████████████░░      │ │
+│ └─────────────────────────────┘ │ └───────────────────────────┘ │
+└─────────────────────────────────┴───────────────────────────────┘
+```
+
+---
+
+## 12. Indicatori di Pressione: HPI e Break Resilience
+
+### HPI - Hold Pressure Index
+
+Misura quanto un giocatore tiene il servizio in situazioni di pressione.
+
+| Situazione | Punteggio | Peso |
+|------------|-----------|------|
+| **Deuce** | 40-40, AD-40, 40-AD | Alto |
+| **30-30** | Parita critica | Medio |
+| **Break Point** | 30-40, 15-40, 0-40 | Altissimo |
+| **Server in Danger** | 0-30, 15-30 | Medio |
+
+**Formula:** `HPI = (game tenuti sotto pressione / game totali al servizio sotto pressione) * 100`
+
+**Livelli:**
+| Range | Livello | Significato |
+|-------|---------|-------------|
+| >=80% | ELITE | Eccezionale sotto pressione |
+| >=65% | STRONG | Solido nei momenti chiave |
+| >=50% | AVERAGE | Normale gestione pressione |
+| >=35% | VULNERABLE | Fragile sotto pressione |
+| <35% | WEAK | Crolla nei momenti decisivi |
+
+### Break Resilience Score
+
+Combina capacita di salvare BP e recupero da momentum negativo.
+
+**Formula:** `Resilience = (BP Saved % * 0.6) + (Recovery Rate * 0.4)`
+
+Componenti:
+- **BP Saved %** (peso 60%): % break point salvati
+- **Recovery Rate** (peso 40%): % fasi negative da cui si e recuperato
+
+**Livelli:**
+| Range | Livello | Significato |
+|-------|---------|-------------|
+| >=75% | RESILIENT | Alta capacita di recupero |
+| >=60% | SOLID | Buona resistenza mentale |
+| >=45% | AVERAGE | Resilienza nella media |
+| >=30% | FRAGILE | Difficolta a recuperare |
+| <30% | BRITTLE | Crolla dopo momenti negativi |
+
+### Funzioni Frontend
+
+| Funzione | File | Tipo |
+|----------|------|------|
+| `calculateHPI` | `src/utils.js` | DERIVED |
+| `calculateBreakResilience` | `src/utils.js` | DERIVED |
+| `calculatePressurePerformance` | `src/utils.js` | DERIVED |
+
+### Funzioni Backend (Statistiche Storiche)
+
+| Funzione | File | Tipo |
+|----------|------|------|
+| `calculateHPIStats` | `backend/services/strategyStatsService.js` | DERIVED |
+| `calculateBreakResilienceStats` | `backend/services/strategyStatsService.js` | DERIVED |
+
+### Utilizzo nelle Strategie
+
+HPI e Resilience potenziano le 3 strategie base:
+
+| Strategia | Come usa HPI | Come usa Resilience |
+|-----------|--------------|---------------------|
+| **Lay the Winner** | HPI basso del leader = piu probabile comeback | Resilience alto del perdente = piu chance di recupero |
+| **Banca Servizio** | HPI basso del server = segnale piu forte | Resilience basso = probabile cedimento |
+| **Super Break** | HPI alto del favorito = conferma dominio | Resilience basso underdog = break piu facile |
+

@@ -41,6 +41,8 @@ import IndicatorsChart from './components/IndicatorsChart';
 import MomentumChart from './components/MomentumChart';
 import HomePage from './components/HomePage';
 import PlayerPage from './components/PlayerPage';
+import StrategyHistoricalPanel from './components/StrategyHistoricalPanel';
+import StrategiesLivePanel from './components/StrategiesLivePanel';
 import { apiUrl } from './config';
 import { durations, easings } from './motion/tokens';
 
@@ -438,6 +440,49 @@ export default function App() {
   
   // Data source preference: 'db' | 'websocket' | 'polling'
   const [dataSource, setDataSource] = useState('db');
+
+  // 🚀 CACHE: Summary centralizzato a livello App (evita fetch ripetuti su HomePage remount)
+  const [summaryCache, setSummaryCache] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const summaryFetchedRef = useRef(false); // Flag per evitare fetch multipli
+
+  // Funzione per caricare il summary (chiamata UNA sola volta)
+  const loadSummaryOnce = useCallback(async (force = false) => {
+    // Se già caricato e non forzato, skip
+    if (summaryFetchedRef.current && !force) {
+      console.log('📊 Summary già in cache, skip fetch');
+      return summaryCache;
+    }
+    
+    // Se già in loading, skip
+    if (summaryLoading) {
+      console.log('📊 Summary già in caricamento, skip');
+      return null;
+    }
+
+    setSummaryLoading(true);
+    try {
+      const res = await fetch(apiUrl('/api/db/matches/summary'));
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setSummaryCache(data);
+      summaryFetchedRef.current = true;
+      console.log(`📊 Summary caricato e cachato: ${data.total} matches`);
+      return data;
+    } catch (err) {
+      console.error('❌ Errore caricamento summary:', err);
+      return null;
+    } finally {
+      setSummaryLoading(false);
+    }
+  }, [summaryCache, summaryLoading]);
+
+  // Carica summary al primo mount dell'app (UNA volta)
+  useEffect(() => {
+    if (!summaryFetchedRef.current) {
+      loadSummaryOnce();
+    }
+  }, [loadSummaryOnce]);
 
   // Handler per selezionare un match dalla HomePage
   const handleMatchSelect = async (match) => {
@@ -1265,7 +1310,8 @@ export default function App() {
   // Sidebar navigation items con icone Phosphor
   const sidebarTabs = [
     { id: 'overview', label: 'Overview', icon: ChartLineUp },
-    { id: 'predictor', label: 'Predictor', icon: Target },
+    { id: 'strategies', label: 'Strategie Live', icon: Target },
+    { id: 'predictor', label: 'Predictor', icon: Lightbulb },
     { id: 'quotes', label: 'Quote', icon: CurrencyDollar },
     { id: 'pbp', label: 'Point by Point', icon: ListBullets },
     { id: 'stats', label: 'Statistiche', icon: ChartBar },
@@ -1323,6 +1369,9 @@ export default function App() {
         <HomePage 
           onMatchSelect={handleMatchSelect}
           onNavigateToPlayer={() => setCurrentView('player')}
+          summaryCache={summaryCache}
+          summaryLoading={summaryLoading}
+          onRefreshSummary={() => loadSummaryOnce(true)}
         />
       )}
 
@@ -1516,54 +1565,22 @@ export default function App() {
                           awayName={eventInfo?.away?.name || 'Away'}
                         />
                       </div>
-
-                      {/* Strategie di Trading - Stack verticale */}
-                      <h2 style={{ 
-                        margin: '0 0 20px 0', 
-                        fontSize: 20, 
-                        fontWeight: 600, 
-                        color: '#e4e6eb',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10
-                      }}>
-                        <Target size={24} weight="duotone" style={{ color: '#3b82f6' }} />
-                        Strategie di Base Tennis
-                      </h2>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        
-                        <StrategyCard 
-                          title="Lay the Winner"
-                          icon={<Trophy size={20} weight="duotone" />}
-                          analysis={analyzeLayTheWinner(dataForExtraction)}
-                          infoText="Banca chi vince il 1° set aspettando recupero nel 2°"
-                          momentumData={powerRankings}
-                          dataKey={dataKey}
-                        />
-
-                        <StrategyCard 
-                          title="Banca Servizio"
-                          icon={<TennisBall size={20} weight="duotone" />}
-                          analysis={analyzeBancaServizio(dataForExtraction)}
-                          infoText="Banca chi serve quando sotto pressione (0-30, 15-40, ecc.)"
-                          momentumData={powerRankings}
-                          dataKey={dataKey}
-                        />
-
-                        <StrategyCard 
-                          title="Super Break"
-                          icon={<Lightning size={20} weight="duotone" />}
-                          analysis={analyzeSuperBreak(dataForExtraction)}
-                          infoText="Punta favorito dominante, banca al break point per free bet"
-                          momentumData={powerRankings}
-                          dataKey={dataKey}
-                        />
-
-                      </div>
                     </>
                   );
                 })()}
+              </div>
+            )}
+
+            {/* Strategies Live Tab */}
+            {activeTab === 'strategies' && (
+              <div className="strategies-content">
+                <ErrorBoundary componentName="Strategie Live">
+                  <StrategiesLivePanel 
+                    data={dataForExtraction} 
+                    eventInfo={eventInfo} 
+                    refreshKey={dataKey}
+                  />
+                </ErrorBoundary>
               </div>
             )}
 
