@@ -2,7 +2,7 @@
 
 > Documento centrale per tracciare attività, problemi e sviluppi futuri.
 >
-> **Ultimo aggiornamento**: 22 Dicembre 2025
+> **Ultimo aggiornamento**: 23 Dicembre 2025
 
 ---
 
@@ -19,7 +19,7 @@
 ## 🔍 Problemi Rilevati dal Check
 
 > Sezione auto-popolata da `node scripts/checkConceptualMap.js`
-> Ultimo check: 22 dicembre 2025
+> Ultimo check: 23 dicembre 2025
 
 ### Stato Attuale: ✅ Nessun problema
 
@@ -88,6 +88,19 @@ La mappa concettuale è allineata con il codice.
 | 17 | Framer Motion animations | 22/12/2025 | Frontend |
 | 18 | Motion tokens system | 22/12/2025 | Frontend |
 | 19 | prefers-reduced-motion support | 22/12/2025 | Frontend |
+| 20 | **Tennis-Scraper API Optimization** | 23/12/2025 | Backend |
+| 21 | Tennis-Scraper SVG Icon System | 23/12/2025 | Frontend |
+| 22 | Tennis-Scraper CSS Design Tokens | 23/12/2025 | Frontend |
+
+### Dettagli Tennis-Scraper Local (completato 23/12/2025)
+
+| Componente | Modifiche | File |
+|------------|-----------|------|
+| API Refactor | `/api/missing-matches` ora legge solo da DB (zero API calls) | `Tennis-Scraper-Local/backend/server.js:312-358` |
+| Campo fix | Corretto mapping `home_team_name`/`away_team_name` (era `home_player_name`) | `Tennis-Scraper-Local/backend/server.js:341-349` |
+| SVG Icons | Sistema icone Phosphor-style con `<symbol>` e `<use>` | `Tennis-Scraper-Local/index.html:7-80` |
+| CSS Tokens | `--duration-fast`, `--ease-premium`, colori, radius | `Tennis-Scraper-Local/index.html:85-115` |
+| README | Aggiunto changelog v2.1.0 | `Tennis-Scraper-Local/README.md:9-32` |
 
 ### Dettagli Frontend UI (completato 22/12/2025)
 
@@ -168,51 +181,10 @@ La mappa concettuale è allineata con il codice.
 
 ## 🏗️ Problemi Architetturali (Auto-generato)
 
-> Ultimo check: 2025-12-22
+> Ultimo check: 2025-12-23
 > Esegui: `node scripts/runConceptChecks.js`
 
-### 🔴 Errori (1)
-
-- [ ] **INV-002** - `src/hooks/useMatchData.jsx:124` - Frontend non deve fare scraping diretto
-
-### 🟡 Warning (36)
-
-- [ ] **INV-010** - `backend/services/rawEventsProcessor.js:1113` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/services/unifiedImporter.js:450` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/services/unifiedImporter.js:486` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:19` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:20` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:21` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:22` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:36` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:37` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:90` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:93` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:96` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:126` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:129` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:132` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:162` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:165` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:168` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:211` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:214` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:217` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:226` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:616` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:19` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:20` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:21` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:281` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:282` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:317` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:372` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:375` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:452` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:453` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:488` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:565` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:569` - Magic numbers in calcoli
+✅ **Nessun problema architetturale rilevato**
 
 
 ## 🏗️ Problemi Architetturali (Auto-generato)

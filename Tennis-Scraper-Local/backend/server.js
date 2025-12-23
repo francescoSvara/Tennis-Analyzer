@@ -21,7 +21,10 @@ import {
   getDetectedMatchesByTournament,
   // Nuove funzioni per sync e mass scan
   syncAcquiredMatches,
-  getUniqueTournaments
+  getUniqueTournaments,
+  // Funzioni per refresh count
+  updateRefreshCount,
+  markMatchAsForceComplete
 } from './db/matchRepository.js';
 
 const app = express();
@@ -48,7 +51,7 @@ app.use((req, res, next) => {
  * - MAI ritorna "duplicato" - ogni richiesta = aggiornamento dati
  */
 app.post('/api/scrape', async (req, res) => {
-  const { url } = req.body;
+  const { url, incrementRefreshCount } = req.body;
   
   if (!url) {
     return res.status(400).json({ error: 'URL richiesto' });
@@ -66,7 +69,27 @@ app.post('/api/scrape', async (req, res) => {
       isUpdate = !!existingMatch;
     }
     
+    // Se è un refresh per match problematico, incrementa il contatore
+    let newRefreshCount = 0;
+    if (incrementRefreshCount && existingMatch) {
+      newRefreshCount = (existingMatch.refresh_count || 0) + 1;
+      
+      // Se siamo al 3° refresh, marca come completo e ritorna subito
+      if (newRefreshCount >= 3) {
+        await markMatchAsForceComplete(eventId, newRefreshCount);
+        console.log(`✅ Match ${eventId} marcato come completo dopo ${newRefreshCount} refresh`);
+        return res.json({
+          success: true,
+          isUpdate: true,
+          refreshCount: newRefreshCount,
+          forcedComplete: true,
+          message: `Match marcato come completo dopo ${newRefreshCount} tentativi`
+        });
+      }
+    }
+    
     console.log(`🎾 ${isUpdate ? '♻️ AGGIORNAMENTO' : '🆕 NUOVO'} scraping per: ${url}`);
+
     
     // SEMPRE avvia lo scraping completo
     const id = await scrapeEvent(url);
@@ -127,6 +150,11 @@ app.post('/api/scrape', async (req, res) => {
       return res.status(500).json({ error: 'Errore durante il salvataggio nel database' });
     }
     
+    // Se è un refresh per problematico, aggiorna il contatore
+    if (incrementRefreshCount && newRefreshCount > 0) {
+      await updateRefreshCount(match.id, newRefreshCount);
+    }
+    
     // Estrai nomi per la risposta
     let homeTeam = 'Unknown';
     let awayTeam = 'Unknown';
@@ -139,6 +167,7 @@ app.post('/api/scrape', async (req, res) => {
       success: true,
       id,
       isUpdate,
+      refreshCount: newRefreshCount,
       match: {
         homeTeam,
         awayTeam,
@@ -275,81 +304,59 @@ app.get('/api/recent-tournaments', async (req, res) => {
 
 /**
  * GET /api/missing-matches
- * Partite mancanti dai tornei recenti
+ * Partite mancanti - LEGGE SOLO DA DB (detected_matches)
+ * 
+ * FILOSOFIA DB: Mai chiamare API per visualizzazione!
+ * Per aggiornare i dati usare POST /api/mass-scan o POST /api/scan-tournament/:id
  */
 app.get('/api/missing-matches', async (req, res) => {
   try {
-    // Ottieni tornei recenti
-    const tournaments = await getRecentTournaments();
+    // Legge SOLO da detected_matches (nessuna chiamata API)
+    const result = await getMissingMatches();
     
-    console.log('📋 Tornei recenti trovati:', tournaments.length);
-    
-    if (tournaments.length === 0) {
-      return res.json({ tournaments: [], missingMatches: [] });
+    if (result.error === 'table_not_exists') {
+      // Tabella non esiste, ritorna vuoto (l'utente deve fare mass-scan)
+      return res.json({ 
+        tournaments: [], 
+        missingMatches: [],
+        message: 'Tabella detected_matches non esiste. Eseguire mass-scan per popolare.'
+      });
     }
     
-    const allMissingMatches = [];
-    const tournamentsWithMissing = [];
+    const missingMatches = result.matches || [];
     
-    for (const tournament of tournaments) {
-      // Ottieni ID match esistenti per questo torneo
-      const existingIds = await getMatchIdsByTournament(tournament.id);
-      
-      console.log(`🎾 Torneo ${tournament.name} (${tournament.id}): ${existingIds.size} match già acquisiti`);
-      console.log(`   → IDs acquisiti:`, Array.from(existingIds).slice(0, 20)); // Mostra primi 20
-      
-      // Fetch eventi dal torneo da SofaScore
-      try {
-        const seasonsUrl = `https://www.sofascore.com/api/v1/unique-tournament/${tournament.id}/seasons`;
-        const seasonsData = await directFetch(seasonsUrl);
-        
-        if (seasonsData.seasons && seasonsData.seasons.length > 0) {
-          const currentSeason = seasonsData.seasons[0];
-          
-          // Prova last e next events
-          const lastEventsUrl = `https://www.sofascore.com/api/v1/unique-tournament/${tournament.id}/season/${currentSeason.id}/events/last/0`;
-          const lastData = await directFetch(lastEventsUrl);
-          
-          if (lastData.events) {
-            console.log(`  → Eventi da SofaScore: ${lastData.events.length}`);
-            
-            for (const event of lastData.events) {
-              const isAcquired = existingIds.has(event.id);
-              const homeName = event.homeTeam?.name || 'TBD';
-              const awayName = event.awayTeam?.name || 'TBD';
-              
-              // Log specifico per Langmo/Sach
-              if (homeName.includes('Langmo') || awayName.includes('Langmo') || 
-                  homeName.includes('Sach') || awayName.includes('Sach')) {
-                console.log(`   🔍 MATCH TROVATO: ${event.id} - ${homeName} vs ${awayName} - Acquisito: ${isAcquired}`);
-              }
-              
-              if (!isAcquired) {
-                allMissingMatches.push({
-                  ...event,
-                  tournamentId: tournament.id,
-                  tournamentName: tournament.name
-                });
-              }
-            }
-          }
-        }
-        
-        if (allMissingMatches.some(m => m.tournamentId === tournament.id)) {
-          tournamentsWithMissing.push(tournament);
-        }
-      } catch (e) {
-        console.error(`Errore fetch eventi torneo ${tournament.id}:`, e.message);
+    // Raggruppa per torneo per compatibilità con frontend
+    const tournamentMap = new Map();
+    for (const m of missingMatches) {
+      if (m.tournament_id && !tournamentMap.has(m.tournament_id)) {
+        tournamentMap.set(m.tournament_id, {
+          id: m.tournament_id,
+          name: m.tournament_name || `Torneo ${m.tournament_id}`
+        });
       }
     }
     
-    console.log(`📊 Totale partite mancanti: ${allMissingMatches.length}`);
+    // Trasforma in formato compatibile con frontend
+    const formattedMatches = missingMatches.map(m => ({
+      id: m.id,
+      homeTeam: { name: m.home_team_name || 'TBD' },
+      awayTeam: { name: m.away_team_name || 'TBD' },
+      status: { description: m.status || 'Unknown' },
+      startTimestamp: m.start_time ? new Date(m.start_time).getTime() / 1000 : null,
+      tournamentId: m.tournament_id,
+      tournamentName: m.tournament_name,
+      roundInfo: m.round_name ? { name: m.round_name } : null
+    }));
+    
+    console.log(`📊 Partite mancanti da DB: ${formattedMatches.length} (zero chiamate API)`);
     
     res.json({ 
-      tournaments: tournamentsWithMissing, 
-      missingMatches: allMissingMatches 
+      tournaments: Array.from(tournamentMap.values()), 
+      missingMatches: formattedMatches,
+      source: 'database'
     });
   } catch (err) {
+    console.error('❌ Errore missing-matches:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -368,6 +375,66 @@ app.get('/api/stats', async (req, res) => {
 });
 
 /**
+ * POST /api/increment-refresh/:eventId
+ * Incrementa SOLO il contatore refresh di un match problematico
+ * NON fa scraping - operazione leggera solo DB
+ * Al 3° tentativo marca come force_completed
+ */
+app.post('/api/increment-refresh/:eventId', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId) {
+    return res.status(400).json({ error: 'Event ID richiesto' });
+  }
+  
+  try {
+    // Recupera il match esistente
+    const existingMatch = await checkDuplicate(eventId);
+    
+    if (!existingMatch) {
+      return res.status(404).json({ error: 'Match non trovato' });
+    }
+    
+    // DEBUG: mostra cosa legge dal DB
+    console.log(`   → checkDuplicate returned:`, JSON.stringify(existingMatch));
+    
+    const currentCount = existingMatch.refresh_count ?? 0;
+    const newRefreshCount = currentCount + 1;
+    
+    // Se al 3° tentativo, marca come force completed
+    if (newRefreshCount >= 3) {
+      await markMatchAsForceComplete(eventId, newRefreshCount);
+      console.log(`✅ Match ${eventId} marcato force_completed dopo ${newRefreshCount} refresh`);
+      return res.json({
+        success: true,
+        eventId,
+        refreshCount: newRefreshCount,
+        forceCompleted: true,
+        message: `Match marcato come completo dopo ${newRefreshCount} tentativi`
+      });
+    }
+    
+    // Altrimenti incrementa solo il contatore
+    const updated = await updateRefreshCount(eventId, newRefreshCount);
+    if (!updated) {
+      console.error(`❌ Fallito update refresh_count per ${eventId}`);
+    }
+    console.log(`🔄 Match ${eventId} refresh count: ${newRefreshCount}/3 (saved: ${updated})`);
+    
+    return res.json({
+      success: true,
+      eventId,
+      refreshCount: newRefreshCount,
+      forceCompleted: false
+    });
+    
+  } catch (err) {
+    console.error('Error incrementing refresh count:', err);
+    return res.status(500).json({ error: 'Errore interno' });
+  }
+});
+
+/**
  * GET /api/health
  * Health check
  */
@@ -377,6 +444,93 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     message: 'Tennis Scraper Local attivo'
   });
+});
+
+/**
+ * POST /api/scan-all-tournaments
+ * Scansiona SOLO i tornei dei match già nel DB e aggiorna detected_matches
+ * Usa questo per aggiornare il DB prima di vedere i missing
+ * 
+ * FILOSOFIA: Le chiamate API vanno fatte SOLO quando l'utente lo richiede esplicitamente
+ */
+app.post('/api/scan-all-tournaments', async (req, res) => {
+  try {
+    console.log('🔄 [SCAN] Scansione tornei dai match esistenti...');
+    
+    // Ottieni tornei unici dalla tabella matches
+    const tournaments = await getUniqueTournaments();
+    console.log(`   [SCAN] Trovati ${tournaments.length} tornei unici`);
+    
+    if (tournaments.length === 0) {
+      return res.json({ 
+        success: true, 
+        tournamentsScanned: 0, 
+        message: 'Nessun torneo da scansionare' 
+      });
+    }
+    
+    let scanned = 0;
+    let totalEvents = 0;
+    
+    for (const tournament of tournaments) {
+      try {
+        const seasonsUrl = `https://www.sofascore.com/api/v1/unique-tournament/${tournament.id}/seasons`;
+        const seasonsData = await directFetch(seasonsUrl);
+        
+        if (!seasonsData.seasons || seasonsData.seasons.length === 0) continue;
+        
+        const currentSeason = seasonsData.seasons[0];
+        let allEvents = [];
+        
+        const lastUrl = `https://www.sofascore.com/api/v1/unique-tournament/${tournament.id}/season/${currentSeason.id}/events/last/0`;
+        const nextUrl = `https://www.sofascore.com/api/v1/unique-tournament/${tournament.id}/season/${currentSeason.id}/events/next/0`;
+        
+        const [lastData, nextData] = await Promise.all([
+          directFetch(lastUrl).catch(() => ({ events: [] })),
+          directFetch(nextUrl).catch(() => ({ events: [] }))
+        ]);
+        
+        if (lastData.events) allEvents.push(...lastData.events);
+        if (nextData.events) allEvents.push(...nextData.events);
+        
+        // Deduplica
+        const uniqueEvents = [];
+        const seenIds = new Set();
+        for (const event of allEvents) {
+          if (!seenIds.has(event.id)) {
+            seenIds.add(event.id);
+            uniqueEvents.push(event);
+          }
+        }
+        
+        await upsertDetectedMatches(uniqueEvents, tournament.id, tournament.name);
+        scanned++;
+        totalEvents += uniqueEvents.length;
+        
+        console.log(`   [SCAN] ${tournament.name}: ${uniqueEvents.length} eventi`);
+        
+        // Pausa per non sovraccaricare SofaScore
+        await new Promise(r => setTimeout(r, 200));
+        
+      } catch (err) {
+        console.error(`   [SCAN] Errore ${tournament.name}:`, err.message);
+      }
+    }
+    
+    // Sincronizza acquired
+    await syncAcquiredMatches();
+    
+    console.log(`✅ [SCAN] Completato: ${scanned} tornei, ${totalEvents} eventi`);
+    res.json({ 
+      success: true, 
+      tournamentsScanned: scanned, 
+      totalEventsDetected: totalEvents 
+    });
+    
+  } catch (err) {
+    console.error('❌ Errore scan-all-tournaments:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /**

@@ -8,7 +8,7 @@ export async function checkDuplicate(eventId) {
   
   const { data, error } = await supabase
     .from('matches')
-    .select('id, home_player_id, away_player_id')
+    .select('id, home_player_id, away_player_id, refresh_count')
     .eq('id', parseInt(eventId))
     .limit(1);
   
@@ -34,7 +34,8 @@ export async function checkDuplicate(eventId) {
     return {
       id: match.id,
       home_player: homeName?.name || 'Unknown',
-      away_player: awayName?.name || 'Unknown'
+      away_player: awayName?.name || 'Unknown',
+      refresh_count: match.refresh_count || 0
     };
   }
   
@@ -333,6 +334,8 @@ export async function getMatches(limit = 50) {
       home_sets_won,
       away_sets_won,
       extracted_at,
+      refresh_count,
+      force_completed,
       home_player:players!matches_home_player_id_fkey(id, name, country_alpha2),
       away_player:players!matches_away_player_id_fkey(id, name, country_alpha2),
       tournament:tournaments(id, name, category, ground_type)
@@ -1111,4 +1114,54 @@ export async function insertMatchWithXlsxMerge(scrapeData) {
   }
   
   return insertedMatch;
+}
+
+/**
+ * Aggiorna il refresh_count di un match tramite event_id (SofaScore ID)
+ */
+export async function updateRefreshCount(eventId, count) {
+  try {
+    console.log(`   → DB update refresh_count=${count} for id=${eventId}`);
+    const { data, error } = await supabase
+      .from('matches')
+      .update({ refresh_count: count })
+      .eq('id', parseInt(eventId))
+      .select();
+    
+    if (error) {
+      console.error('Error updating refresh_count:', error);
+      return false;
+    }
+    console.log(`   → DB result:`, data?.length ? 'updated' : 'no rows affected');
+    return true;
+  } catch (err) {
+    console.error('Error in updateRefreshCount:', err);
+    return false;
+  }
+}
+
+/**
+ * Marca un match come "force complete" dopo 3 tentativi di refresh
+ * Imposta refresh_count e force_completed
+ */
+export async function markMatchAsForceComplete(eventId, refreshCount) {
+  try {
+    const { error } = await supabase
+      .from('matches')
+      .update({ 
+        refresh_count: refreshCount,
+        force_completed: true
+      })
+      .eq('id', parseInt(eventId));
+    
+    if (error) {
+      console.error('Error marking match as force complete:', error);
+      return false;
+    }
+    console.log(`✅ Match ${eventId} force completed after ${refreshCount} refreshes`);
+    return true;
+  } catch (err) {
+    console.error('Error in markMatchAsForceComplete:', err);
+    return false;
+  }
 }

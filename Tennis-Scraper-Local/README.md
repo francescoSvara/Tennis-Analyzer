@@ -2,7 +2,24 @@
 
 **Tool locale per acquisire dati da SofaScore bypassando i blocchi IP dei server cloud.**
 
-**Ultimo aggiornamento:** 20 Dicembre 2025
+**Ultimo aggiornamento:** 23 Dicembre 2025
+
+---
+
+## 📝 Changelog
+
+### v2.1.0 - 23 Dicembre 2025
+
+**Ottimizzazione API e UI Standardizzata**
+
+- **Zero chiamate API durante la visualizzazione**: L'endpoint `/api/missing-matches` ora legge esclusivamente dalla tabella `detected_matches` del database. Nessuna chiamata a SofaScore viene effettuata durante il caricamento della pagina.
+- **Nuova logica di acquisizione esplicita**: Aggiunto endpoint `POST /api/scan-all-tournaments` che scansiona tutti i tornei con partite attive. Questo endpoint viene chiamato solo su richiesta esplicita dell'utente.
+- **Bottone "Aggiorna Tornei"**: Nella tab "Mancanti" è stato aggiunto un pulsante per scatenare manualmente la scansione dei tornei (con indicatore di caricamento).
+- **Sistema Icone SVG (Phosphor-style)**: Sostituiti emoji/caratteri speciali con icone SVG inline coerenti, definite come `<symbol>` e referenziate con `<use href="#icon-*">`.
+- **Design Tokens CSS**: Introdotte variabili CSS per animazioni (`--duration-fast`, `--duration-normal`, `--ease-premium`), colori e spacing conformi alle filosofie del progetto.
+- **Motion sottile su hover**: Bottoni e card ora hanno animazioni di hover premium (`translateY(-1px)`, `box-shadow` transizione).
+
+**Principio rispettato**: *"Visualizzazione = sempre da DB (zero chiamate API). Acquisizione = solo su richiesta esplicita."*
 
 ---
 
