@@ -158,9 +158,42 @@ function HomePage({ onMatchSelect, onNavigateToPlayer, summaryCache, summaryLoad
   const [showMonitoring, setShowMonitoring] = useState(false);
   const summaryLoadedRef = React.useRef(false);
 
+<<<<<<< HEAD
   // 🚀 OTTIMIZZATO: Usa summary dalla cache di App (niente fetch qui)
   const summary = summaryCache || { total: 0, byYearMonth: [] };
   const loading = summaryLoading;
+  // 🚀 OTTIMIZZATO: Carica SOLO il summary (conteggi), niente match all'avvio
+  // ⚠️ FIX: Evita chiamate multiple usando ref per tracking
+  const loadSummary = useCallback(async (force = false) => {
+    // Skip se già caricato e non è forzato
+    if (summaryLoadedRef.current && !force) {
+      console.log('📊 Summary già caricato, skip fetch');
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl('/api/db/matches/summary'));
+      if (!res.ok) throw new Error(`Errore HTTP: ${res.status}`);
+      const data = await res.json();
+      setSummary(data);
+      summaryLoadedRef.current = true;
+      console.log(`📊 Summary loaded: ${data.total} matches totali`);
+    } catch (err) {
+      console.error('Errore caricamento summary:', err);
+      setError('Impossibile caricare i match. Verifica che il backend sia attivo su porta 3001.');
+      setSummary({ total: 0, byYearMonth: [] });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Carica il summary all'avvio (una sola volta)
+  useEffect(() => {
+    loadSummary();
+  }, []); // ⚠️ FIX: Rimosso loadSummary dalla dipendenza per evitare loop
+>>>>>>> 8a360029c58aedf3c69814fa6cf90fb8ac77371f
 
   const handleMatchClick = (match) => {
     if (onMatchSelect) {
@@ -170,8 +203,12 @@ function HomePage({ onMatchSelect, onNavigateToPlayer, summaryCache, summaryLoad
 
   const handleAddMatchSuccess = () => {
     setShowAddModal(false);
+<<<<<<< HEAD
     // Ricarica il summary forzando refresh
     if (onRefreshSummary) onRefreshSummary();
+=======
+    loadSummary(true); // Ricarica forzatamente dopo aggiunta match
+>>>>>>> 8a360029c58aedf3c69814fa6cf90fb8ac77371f
   };
 
   return (
@@ -272,7 +309,11 @@ function HomePage({ onMatchSelect, onNavigateToPlayer, summaryCache, summaryLoad
       <MonitoringDashboard 
         isOpen={showMonitoring}
         onClose={() => setShowMonitoring(false)}
+<<<<<<< HEAD
         onMatchesUpdated={onRefreshSummary}
+=======
+        onMatchesUpdated={() => loadSummary(true)}
+>>>>>>> 8a360029c58aedf3c69814fa6cf90fb8ac77371f
         onMatchSelect={onMatchSelect}
       />
     </div>
