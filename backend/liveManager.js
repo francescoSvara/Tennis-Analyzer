@@ -516,8 +516,9 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
       }
     }
 
-    // 3. Salva/aggiorna anche il file JSON per retrocompatibilità
-    await saveMatchToFile(eventId, data, saveType);
+    // ⚠️ DEPRECATO: Non salvare più su file JSON (filosofia: solo DB)
+    // I file JSON in data/scrapes/ possono essere eliminati con cleanup-scrapes.js
+    // await saveMatchToFile(eventId, data, saveType);
 
     return true;
   } catch (error) {

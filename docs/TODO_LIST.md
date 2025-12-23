@@ -91,6 +91,8 @@ La mappa concettuale è allineata con il codice.
 | 20 | **Tennis-Scraper API Optimization** | 23/12/2025 | Backend |
 | 21 | Tennis-Scraper SVG Icon System | 23/12/2025 | Frontend |
 | 22 | Tennis-Scraper CSS Design Tokens | 23/12/2025 | Frontend |
+| 23 | **Cleanup file JSON ridondanti** | 23/12/2025 | Backend |
+| 24 | Fix liveManager (solo DB, no file) | 23/12/2025 | Backend |
 
 ### Dettagli Tennis-Scraper Local (completato 23/12/2025)
 
@@ -186,52 +188,21 @@ La mappa concettuale è allineata con il codice.
 
 ✅ **Nessun problema architetturale rilevato**
 
+---
 
-## 🏗️ Problemi Architetturali (Auto-generato)
+## 🧹 Pulizia File Temporanei
 
-> Ultimo check: 2025-12-22
-> Esegui: `node scripts/runConceptChecks.js`
+> I seguenti file in `data/` sono **ridondanti** - i dati sono già nel database.
+> Possono essere eliminati con gli script appositi.
 
-### 🔴 Errori (1)
+| Cartella | File | Scopo Originale | Azione |
+|----------|------|-----------------|--------|
+| `data/scrapes/` | ~~97 files~~ | Cache JSON partite | ✅ Eliminati (14.59 MB) |
+| `data/mappings/` | ~1074 files | Mapping normalizzati per debug | ⏳ Da eliminare |
+| `data/detected/` | ~33 files | Match rilevati da torneo | ⏳ Da eliminare |
 
-- [ ] **INV-002** - `src/hooks/useMatchData.jsx:124` - Frontend non deve fare scraping diretto
+**Script di pulizia**: `node backend/scripts/cleanup-scrapes.js --all`
 
-### 🟡 Warning (36)
-
-- [ ] **INV-010** - `backend/services/rawEventsProcessor.js:1113` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/services/unifiedImporter.js:450` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/services/unifiedImporter.js:486` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:19` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:20` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:21` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:22` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:36` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:37` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:90` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:93` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:96` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:126` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:129` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:132` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:162` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:165` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:168` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:211` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:214` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:217` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:226` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/pressureCalculator.js:616` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:19` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:20` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:21` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:281` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:282` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:317` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:372` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:375` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:452` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:453` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:488` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:565` - Magic numbers in calcoli
-- [ ] **INV-010** - `backend/utils/valueInterpreter.js:569` - Magic numbers in calcoli
+**Nota**: Il salvataggio su file JSON è stato **disabilitato** in `liveManager.js` (linea ~520).
+D'ora in poi i nuovi match vanno **SOLO** nel database, come da filosofia.
 
