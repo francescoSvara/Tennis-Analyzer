@@ -398,7 +398,7 @@ const StrategyCard = React.memo(function StrategyCard({ title, icon, analysis, i
   );
 });
 
-const AUTO_REFRESH_SECONDS = 10; // Intervallo auto-refresh in secondi (fallback polling)
+const AUTO_REFRESH_SECONDS = 30; // Intervallo auto-refresh in secondi (solo per match LIVE)
 
 export default function App() {
   // Navigation state: 'home' or 'match-detail'
@@ -1119,6 +1119,7 @@ export default function App() {
   }, [jobId]);
 
   // Auto-refresh automatico con countdown (usa polling HTTP al DB)
+  // SOLO per match LIVE (inprogress) - NON per match finished
   useEffect(() => {
     // Clear any existing intervals
     if (autoRefreshRef.current) {
@@ -1137,6 +1138,15 @@ export default function App() {
 
     // Solo se abbiamo dati e non stiamo già facendo scrape
     if (!dataForExtraction || checking || status === 'pending') {
+      return;
+    }
+    
+    // ⚠️ STOP polling per match FINISHED - carica una sola volta!
+    const matchStatus = dataForExtraction?.event?.status?.type || 
+                       dataForExtraction?.status_type ||
+                       rawData?.status_type || '';
+    if (matchStatus === 'finished') {
+      console.log('📋 Match finished - no polling needed (data loaded once)');
       return;
     }
 
@@ -1247,7 +1257,7 @@ export default function App() {
         countdownRef.current = null;
       }
     };
-  }, [dataForExtraction, liveEventId, checking, status, liveMode]);
+  }, [dataForExtraction, liveEventId, checking, status, liveMode, rawData]);
 
   // gestionale removed — render main UI as usual
   const prefersReducedMotion = useReducedMotion();
@@ -1463,23 +1473,31 @@ export default function App() {
                   console.log('📊 PowerRankings trovati:', powerRankings?.length || 0, powerRankings?.slice(0,3));
                   
                   // Prepara matchData per fallback (se no powerRankings)
-                  // Usa dati dal DB o dall'estrazione
-                  const matchDataForFallback = dataForExtraction.dbMatch || dataForExtraction.match || {
-                    // Estrai punteggi set se disponibili
-                    w1: dataForExtraction.homeScore?.period1,
-                    l1: dataForExtraction.awayScore?.period1,
-                    w2: dataForExtraction.homeScore?.period2,
-                    l2: dataForExtraction.awayScore?.period2,
-                    w3: dataForExtraction.homeScore?.period3,
-                    l3: dataForExtraction.awayScore?.period3,
-                    w4: dataForExtraction.homeScore?.period4,
-                    l4: dataForExtraction.awayScore?.period4,
-                    w5: dataForExtraction.homeScore?.period5,
-                    l5: dataForExtraction.awayScore?.period5,
+                  // Usa dataForExtraction che contiene TUTTO incluso statistics
+                  // NOTA: homeScore/awayScore sono in event.homeScore o a livello root
+                  const homeScoreObj = dataForExtraction.event?.homeScore || dataForExtraction.homeScore || {};
+                  const awayScoreObj = dataForExtraction.event?.awayScore || dataForExtraction.awayScore || {};
+                  
+                  const matchDataForFallback = {
+                    // Dati dal DB o dal match
+                    ...(dataForExtraction.dbMatch || dataForExtraction.match || {}),
+                    // Statistics per fallback break (IMPORTANTE!)
+                    statistics: dataForExtraction.statistics,
+                    // Estrai punteggi set - prova entrambi i percorsi
+                    w1: homeScoreObj.period1,
+                    l1: awayScoreObj.period1,
+                    w2: homeScoreObj.period2,
+                    l2: awayScoreObj.period2,
+                    w3: homeScoreObj.period3,
+                    l3: awayScoreObj.period3,
+                    w4: homeScoreObj.period4,
+                    l4: awayScoreObj.period4,
+                    w5: homeScoreObj.period5,
+                    l5: awayScoreObj.period5,
                     winner_name: eventInfo?.home?.name,
                     loser_name: eventInfo?.away?.name,
-                    homeScore: dataForExtraction.homeScore,
-                    awayScore: dataForExtraction.awayScore
+                    homeScore: homeScoreObj,
+                    awayScore: awayScoreObj
                   };
                   
                   return (

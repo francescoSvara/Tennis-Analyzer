@@ -16,22 +16,51 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
       set: item.set,
       game: item.game,
       value: item.value || 0,
-      breakOccurred: item.breakOccurred || false
+      raw_v: item.raw_v,  // Valore raw non normalizzato (più significativo)
+      breakOccurred: item.breakOccurred || false,
+      source: item.source  // 'api' o 'svg_dom'
     }));
   }, [powerRankings]);
   
   // Statistiche momentum
   const stats = useMemo(() => {
-    if (!chartData.length) return { maxHome: 0, maxAway: 0, current: 0, recentAvg: 0, swings: 0 };
+    if (!chartData.length) return { maxHome: 0, maxAway: 0, current: 0, recentAvg: 0, swings: 0, rawMaxHome: 0, rawMaxAway: 0 };
     
     let maxHome = 0;
     let maxAway = 0;
     let swings = 0;
     let lastSign = 0;
     
+    // Per valori raw (più significativi)
+    let rawMaxHome = 0;
+    let rawMaxAway = 0;
+    let hasRawValues = false;
+    
+    // Somma momentum per calcolo media totale
+    let homeMomentumSum = 0;
+    let awayMomentumSum = 0;
+    let homeGames = 0;
+    let awayGames = 0;
+    
     chartData.forEach(p => {
       if (p.value > maxHome) maxHome = p.value;
       if (p.value < maxAway) maxAway = p.value;
+      
+      // Accumula per media
+      if (p.value > 0) {
+        homeMomentumSum += p.value;
+        homeGames++;
+      } else if (p.value < 0) {
+        awayMomentumSum += Math.abs(p.value);
+        awayGames++;
+      }
+      
+      // Cerca raw_v se disponibile (più significativo)
+      if (p.raw_v !== undefined && p.raw_v !== null) {
+        hasRawValues = true;
+        if (p.value > 0 && p.raw_v > rawMaxHome) rawMaxHome = p.raw_v;
+        if (p.value < 0 && p.raw_v > rawMaxAway) rawMaxAway = p.raw_v;
+      }
       
       const sign = Math.sign(p.value);
       if (sign !== 0 && sign !== lastSign && lastSign !== 0) swings++;
@@ -43,12 +72,32 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
     const lastVals = chartData.slice(-recentCount).map(p => p.value);
     const recentAvg = Math.round(lastVals.reduce((a, b) => a + b, 0) / (lastVals.length || 1));
     
+    // Per Max: usa media momentum se i valori sono normalizzati (~100)
+    // Questo è più significativo del valore max che è sempre ~100
+    const avgHomePerGame = homeGames > 0 ? Math.round(homeMomentumSum / homeGames) : 0;
+    const avgAwayPerGame = awayGames > 0 ? Math.round(awayMomentumSum / awayGames) : 0;
+    
+    // Se abbiamo raw_v usalo, altrimenti usa la media per game
+    const displayMaxHome = hasRawValues ? rawMaxHome : avgHomePerGame;
+    const displayMaxAway = hasRawValues ? rawMaxAway : avgAwayPerGame;
+    
     return {
       maxHome,
       maxAway: Math.abs(maxAway),
+      // Valori "display" più significativi
+      displayMaxHome,
+      displayMaxAway,
+      hasRawValues,
       current: chartData[chartData.length - 1]?.value || 0,
       recentAvg,
-      swings
+      swings,
+      // Extra info per modali
+      homeMomentumSum: Math.round(homeMomentumSum),
+      awayMomentumSum: Math.round(awayMomentumSum),
+      homeGames,
+      awayGames,
+      avgHomePerGame,
+      avgAwayPerGame
     };
   }, [chartData]);
 
@@ -147,8 +196,8 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenModal('maxHome'); } }}
           title={`Spiegazione Max ${homeName}`}
         >
-          <span className="stat-label">Max {homeName}</span>
-          <span className="stat-value">+{stats.maxHome}</span>
+          <span className="stat-label">Media {homeName}</span>
+          <span className="stat-value" style={{ color: '#5b8fb9' }}>{stats.avgHomePerGame}</span>
         </div>
         <div
           className="momentum-stat-card away"
@@ -158,8 +207,8 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenModal('maxAway'); } }}
           title={`Spiegazione Max ${awayName}`}
         >
-          <span className="stat-label">Max {awayName}</span>
-          <span className="stat-value">+{stats.maxAway}</span>
+          <span className="stat-label">Media {awayName}</span>
+          <span className="stat-value" style={{ color: '#c97676' }}>{stats.avgAwayPerGame}</span>
         </div>
         <div
           className="momentum-stat-card current"
@@ -169,9 +218,9 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenModal('recent'); } }}
           title="Clicca per informazioni"
         >
-          <span className="stat-label">Media ultimi 3 game</span>
+          <span className="stat-label">Trend (ultimi 3)</span>
           <span className="stat-value" style={{ color: stats.recentAvg > 0 ? '#5b8fb9' : stats.recentAvg < 0 ? '#c97676' : '#a0aec0' }}>
-            {stats.recentAvg > 0 ? '+' : ''}{stats.recentAvg}
+            {Math.abs(stats.recentAvg)}
           </span>
         </div>
         <div
@@ -187,7 +236,7 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
         </div>
       </div>
 
-      {/* Modal info for stats (generic) */}
+      {/* Modal info for stats (detailed) */}
       {openModal && (
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={`Informazioni ${openModal}`} onClick={() => setOpenModal(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -195,41 +244,137 @@ export default function MomentumChart({ powerRankings = [], homeName = 'Home', a
 
             {openModal === 'recent' && (
               <>
-                <div className="modal-header">Media ultimi 3 game — Spiegazione</div>
+                <div className="modal-header">📊 Trend Ultimi 3 Game</div>
                 <div className="modal-body">
-                  <p>La <strong>Media ultimi 3 game</strong> è la media aritmetica dei valori di momentum degli ultimi 3 game (o meno, se non ci sono ancora 3 game).</p>
-                  <p><strong>Esempio:</strong> ({recentVals.length ? recentVals.join(' + ') : '0'}) / {recentVals.length || 1} = <strong>{stats.recentAvg > 0 ? '+' : ''}{stats.recentAvg}</strong></p>
-                  <p>Valore positivo = vantaggio per <strong>{homeName}</strong>; valore negativo = vantaggio per <strong>{awayName}</strong>. I dati si aggiornano automaticamente quando cambiano le API.</p>
+                  <div className="modal-section">
+                    <h4>📐 Definizione</h4>
+                    <p>Media aritmetica dei valori di momentum degli ultimi 3 game disputati.</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>🧮 Formula</h4>
+                    <p className="formula">Trend = Σ(ultimi 3 valori) / n</p>
+                    <p><strong>Calcolo attuale:</strong> ({recentVals.length ? recentVals.join(' + ') : '0'}) / {recentVals.length || 1} = <strong style={{ color: stats.recentAvg > 0 ? '#4ade80' : stats.recentAvg < 0 ? '#f87171' : '#a0aec0' }}>{Math.abs(stats.recentAvg)}</strong></p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>🎨 Interpretazione Colori</h4>
+                    <p><span style={{ color: '#5b8fb9', fontWeight: 'bold' }}>● BLU</span> = Dominio <strong>{homeName}</strong></p>
+                    <p><span style={{ color: '#c97676', fontWeight: 'bold' }}>● ROSSO</span> = Dominio <strong>{awayName}</strong></p>
+                    <p><span style={{ color: '#a0aec0', fontWeight: 'bold' }}>● GRIGIO</span> = Equilibrio</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>💡 Utilizzo</h4>
+                    <p>Indica chi sta dominando il momento recente della partita, utile per capire il trend attuale indipendentemente dal punteggio.</p>
+                  </div>
                 </div>
               </>
             )}
 
             {openModal === 'maxHome' && (
               <>
-                <div className="modal-header">Max {homeName} — Spiegazione</div>
+                <div className="modal-header">📈 Media Momentum {homeName}</div>
                 <div className="modal-body">
-                  <p>Mostra il valore massimo di momentum raggiunto da <strong>{homeName}</strong> nel match (valore positivo massimo registrato nella serie di momentum).</p>
-                  <p><strong>Valore:</strong> +{stats.maxHome}</p>
+                  <div className="modal-section">
+                    <h4>📐 Definizione</h4>
+                    <p>Media del momentum per game quando <strong>{homeName}</strong> era in vantaggio (valori positivi).</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>🧮 Formula</h4>
+                    <p className="formula">Media = Σ(valori positivi) / n_game_home</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>📊 Dati Dettagliati</h4>
+                    <table className="modal-table">
+                      <tbody>
+                        <tr><td>Somma totale momentum</td><td style={{ color: '#4ade80' }}>{stats.homeMomentumSum}</td></tr>
+                        <tr><td>Game con momentum positivo</td><td>{stats.homeGames}</td></tr>
+                        <tr><td>Media per game</td><td style={{ color: '#4ade80', fontWeight: 'bold' }}>{stats.avgHomePerGame}</td></tr>
+                        <tr><td>Picco massimo raggiunto</td><td>+{stats.maxHome}</td></tr>
+                        <tr><td>Fonte dati</td><td>{stats.hasRawValues ? '🎯 SVG Raw Values' : '📊 API Normalizzate'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>💡 Interpretazione</h4>
+                    <p>Valori più alti indicano maggiore intensità quando {homeName} domina. La media è più significativa del picco massimo per valutare la costanza.</p>
+                  </div>
                 </div>
               </>
             )}
 
             {openModal === 'maxAway' && (
               <>
-                <div className="modal-header">Max {awayName} — Spiegazione</div>
+                <div className="modal-header">📉 Media Momentum {awayName}</div>
                 <div className="modal-body">
-                  <p>Mostra il valore massimo di momentum raggiunto da <strong>{awayName}</strong> (valore negativo massimo in modulo nella serie di momentum).</p>
-                  <p><strong>Valore:</strong> +{stats.maxAway}</p>
+                  <div className="modal-section">
+                    <h4>📐 Definizione</h4>
+                    <p>Media del momentum per game quando <strong>{awayName}</strong> era in vantaggio (valori negativi convertiti in positivo).</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>🧮 Formula</h4>
+                    <p className="formula">Media = |Σ(valori negativi)| / n_game_away</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>📊 Dati Dettagliati</h4>
+                    <table className="modal-table">
+                      <tbody>
+                        <tr><td>Somma totale momentum</td><td style={{ color: '#f87171' }}>{stats.awayMomentumSum}</td></tr>
+                        <tr><td>Game con momentum negativo</td><td>{stats.awayGames}</td></tr>
+                        <tr><td>Media per game</td><td style={{ color: '#f87171', fontWeight: 'bold' }}>{stats.avgAwayPerGame}</td></tr>
+                        <tr><td>Picco massimo raggiunto</td><td>+{stats.maxAway}</td></tr>
+                        <tr><td>Fonte dati</td><td>{stats.hasRawValues ? '🎯 SVG Raw Values' : '📊 API Normalizzate'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>💡 Interpretazione</h4>
+                    <p>Valori più alti indicano maggiore intensità quando {awayName} domina. La media è più significativa del picco massimo per valutare la costanza.</p>
+                  </div>
                 </div>
               </>
             )}
 
             {openModal === 'swings' && (
               <>
-                <div className="modal-header">Cambi Momentum — Spiegazione</div>
+                <div className="modal-header">🔄 Cambi Momentum</div>
                 <div className="modal-body">
-                  <p>I <strong>Cambi Momentum</strong> contano il numero di volte in cui il segno del momentum è cambiato (da positivo a negativo o viceversa), ignorando gli zero. Indica quante inversioni di tendenza sono avvenute nel match.</p>
-                  <p><strong>Valore:</strong> {stats.swings}</p>
+                  <div className="modal-section">
+                    <h4>📐 Definizione</h4>
+                    <p>Numero di volte in cui il momentum è passato da positivo a negativo o viceversa durante il match.</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>🧮 Metodo di Calcolo</h4>
+                    <p className="formula">Swing = cambio segno (+ → -) oppure (- → +)</p>
+                    <p>Gli zeri vengono ignorati nel conteggio.</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>📊 Valore Attuale</h4>
+                    <p style={{ fontSize: '1.5em', fontWeight: 'bold', color: stats.swings > 5 ? '#f87171' : stats.swings > 2 ? '#fbbf24' : '#4ade80' }}>
+                      {stats.swings} cambi
+                    </p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>🎨 Interpretazione</h4>
+                    <p><span style={{ color: '#4ade80' }}>● 0-2</span> = Match dominato da un giocatore</p>
+                    <p><span style={{ color: '#fbbf24' }}>● 3-5</span> = Match equilibrato</p>
+                    <p><span style={{ color: '#f87171' }}>● 6+</span> = Match molto combattuto</p>
+                  </div>
+                  
+                  <div className="modal-section">
+                    <h4>💡 Utilizzo</h4>
+                    <p>Un alto numero di swing indica una partita con molti ribaltamenti, utile per valutare l'intensità e l'incertezza del match.</p>
+                  </div>
                 </div>
               </>
             )}

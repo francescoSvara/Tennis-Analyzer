@@ -442,6 +442,28 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
+/* Badge colorati in base a chi domina */
+.indicator-value-badge.badge-home {
+  background: #3b82f6;
+}
+.indicator-value-badge.badge-home::after {
+  border-top-color: #3b82f6;
+}
+
+.indicator-value-badge.badge-away {
+  background: #ef4444;
+}
+.indicator-value-badge.badge-away::after {
+  border-top-color: #ef4444;
+}
+
+.indicator-value-badge.badge-neutral {
+  background: #6b7280;
+}
+.indicator-value-badge.badge-neutral::after {
+  border-top-color: #6b7280;
+}
+
 .indicator-value-badge::after {
   content: '';
   position: absolute;
@@ -701,15 +723,80 @@
 
 .modal-header {
   font-weight: 800;
-  font-size: 16px;
-  margin-bottom: 8px;
+  font-size: 18px;
+  margin-bottom: 16px;
   color: #e4e6eb;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-body {
   color: #8b95a5;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.6;
+}
+
+/* Modal sections for detailed info */
+.modal-section {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.modal-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e4e6eb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-section p {
+  margin: 4px 0;
+}
+
+.modal-section .formula {
+  font-family: 'Monaco', 'Consolas', monospace;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #60a5fa;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+/* Modal table for data display */
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.modal-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-table td:first-child {
+  color: #8b95a5;
+  font-size: 13px;
+}
+
+.modal-table td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: #e4e6eb;
+}
+
+.modal-table tr:last-child td {
+  border-bottom: none;
 }
 
 .modal-close {

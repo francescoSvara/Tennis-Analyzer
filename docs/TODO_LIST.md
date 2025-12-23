@@ -65,34 +65,44 @@ La mappa concettuale è allineata con il codice.
 
 ## ✅ Completati
 
-> Attività completate (ultime 20).
+> Attività completate (ultime 25).
 
 | # | Task | Completato | Dominio |
 |---|------|------------|---------|
-| 1 | Sistema Check Mappa Concettuale | 22/12/2025 | Docs |
-| 2 | Mappa Rete Concettuale | 22/12/2025 | Docs |
-| 3 | Live Tracking System | 22/12/2025 | Backend |
-| 4 | Match Card Snapshot | 22/12/2025 | Backend |
-| 5 | Raw Events Pipeline | 22/12/2025 | Backend |
-| 6 | Calculation Queue Worker | 22/12/2025 | Backend |
-| 7 | Player Profile Aggregator | 23/12/2025 | Backend |
-| 8 | Match Segmentation Engine | 22/12/2025 | Stats |
-| 9 | Break Detector | 22/12/2025 | Stats |
-| 10 | Pressure Index Calculator | 22/12/2025 | Stats |
-| 11 | Momentum Volatility & Elasticity | 22/12/2025 | Stats |
-| 12 | Dynamic Surface Thresholds | 22/12/2025 | Stats |
-| 13 | Enhanced analyzePowerRankings | 22/12/2025 | Stats |
-| 14 | Bug Fix Player Stats + Sofascore | 23/12/2025 | Backend |
-| 15 | **Frontend UI/Motion Premium** | 22/12/2025 | Frontend |
-| 16 | Phosphor Icons integration | 22/12/2025 | Frontend |
-| 17 | Framer Motion animations | 22/12/2025 | Frontend |
-| 18 | Motion tokens system | 22/12/2025 | Frontend |
-| 19 | prefers-reduced-motion support | 22/12/2025 | Frontend |
-| 20 | **Tennis-Scraper API Optimization** | 23/12/2025 | Backend |
-| 21 | Tennis-Scraper SVG Icon System | 23/12/2025 | Frontend |
-| 22 | Tennis-Scraper CSS Design Tokens | 23/12/2025 | Frontend |
-| 23 | **Cleanup file JSON ridondanti** | 23/12/2025 | Backend |
-| 24 | Fix liveManager (solo DB, no file) | 23/12/2025 | Backend |
+| 1 | **Dual Source Logic (API vs SVG)** | 23/12/2025 | Frontend |
+| 2 | IndicatorsChart - Game Totali fix | 23/12/2025 | Frontend |
+| 3 | IndicatorsChart - Break source tracking | 23/12/2025 | Frontend |
+| 4 | FILOSOFIA_STATS_V2 - Sezione 9 API vs SVG | 23/12/2025 | Docs |
+| 5 | Sistema Check Mappa Concettuale | 22/12/2025 | Docs |
+| 6 | Mappa Rete Concettuale | 22/12/2025 | Docs |
+| 7 | Live Tracking System | 22/12/2025 | Backend |
+| 8 | Match Card Snapshot | 22/12/2025 | Backend |
+| 9 | Raw Events Pipeline | 22/12/2025 | Backend |
+| 10 | Calculation Queue Worker | 22/12/2025 | Backend |
+| 11 | Player Profile Aggregator | 23/12/2025 | Backend |
+| 12 | Match Segmentation Engine | 22/12/2025 | Stats |
+| 13 | Break Detector | 22/12/2025 | Stats |
+| 14 | Pressure Index Calculator | 22/12/2025 | Stats |
+| 15 | Momentum Volatility & Elasticity | 22/12/2025 | Stats |
+| 16 | Dynamic Surface Thresholds | 22/12/2025 | Stats |
+| 17 | Enhanced analyzePowerRankings | 22/12/2025 | Stats |
+| 18 | Bug Fix Player Stats + Sofascore | 23/12/2025 | Backend |
+| 19 | **Frontend UI/Motion Premium** | 22/12/2025 | Frontend |
+| 20 | Phosphor Icons integration | 22/12/2025 | Frontend |
+| 21 | Framer Motion animations | 22/12/2025 | Frontend |
+| 22 | Motion tokens system | 22/12/2025 | Frontend |
+| 23 | prefers-reduced-motion support | 22/12/2025 | Frontend |
+| 24 | **Tennis-Scraper API Optimization** | 23/12/2025 | Backend |
+| 25 | Tennis-Scraper SVG Icon System | 23/12/2025 | Frontend |
+
+### Dettagli Dual Source Logic (completato 23/12/2025)
+
+| Componente | Modifiche | File |
+|------------|-----------|------|
+| Data Detection | `isSvgSource`, `hasBreakOccurred` flags | `IndicatorsChart.jsx:189-190` |
+| Game Totali | Logica separata API vs SVG | `IndicatorsChart.jsx:195-230` |
+| Break Source | Campo `breakSource` nel return | `IndicatorsChart.jsx:335` |
+| Documentation | Sezione 9 - Gestione Data Source | `FILOSOFIA_STATS_V2.md` |
 
 ### Dettagli Tennis-Scraper Local (completato 23/12/2025)
 

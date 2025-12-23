@@ -1745,7 +1745,11 @@ export function analyzeLayTheWinner(data) {
   const eventInfo = extractEventInfo(data);
   const pbp = loadPointByPoint(data);
   const keyStats = extractKeyStats(data);
-  const powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  // Cerca sia tennisPowerRankings che powerRankings (per dati SVG)
+  let powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  if (!powerRankings || powerRankings.length === 0) {
+    powerRankings = deepFindAll(data, 'powerRankings', 5).flat().filter(Boolean);
+  }
   
   const result = {
     applicable: false,
@@ -1868,11 +1872,21 @@ export function analyzeLayTheWinner(data) {
     // POTENZIAMENTO: Analizza momentum per conferma
     if (powerRankings && powerRankings.length > 0) {
       const recentMomentum = powerRankings.slice(-5);
-      const avgRecent = recentMomentum.reduce((a, b) => a + (b.value || 0), 0) / recentMomentum.length;
+      const avgRecent = recentMomentum.reduce((a, b) => {
+        // Usa raw_v se disponibile (dati SVG), altrimenti value (API)
+        // raw_v è solitamente assoluto, quindi applichiamo il segno di value
+        const val = (b.raw_v !== undefined) 
+          ? (b.value >= 0 ? b.raw_v : -b.raw_v) 
+          : (b.value || 0);
+        return a + val;
+      }, 0) / recentMomentum.length;
       
       // Se il loser del primo set ha momentum positivo, aumenta confidence
-      const loserMomentumPositive = (loserFirstSet === 'home' && avgRecent > 10) || 
-                                    (loserFirstSet === 'away' && avgRecent < -10);
+      // Soglia ridotta a 5 per raw_v che potrebbe avere scala diversa
+      const threshold = recentMomentum.some(r => r.raw_v !== undefined) ? 5 : 10;
+      
+      const loserMomentumPositive = (loserFirstSet === 'home' && avgRecent > threshold) || 
+                                    (loserFirstSet === 'away' && avgRecent < -threshold);
       
       if (loserMomentumPositive) {
         result.confidence = Math.min(95, result.confidence + 15);
@@ -1928,7 +1942,11 @@ export function analyzeLayTheWinner(data) {
  */
 export function analyzeBancaServizio(data) {
   const eventInfo = extractEventInfo(data);
-  const powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  // Cerca sia tennisPowerRankings che powerRankings (per dati SVG)
+  let powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  if (!powerRankings || powerRankings.length === 0) {
+    powerRankings = deepFindAll(data, 'powerRankings', 5).flat().filter(Boolean);
+  }
   const keyStats = extractKeyStats(data);
   
   const result = {
@@ -2056,16 +2074,25 @@ export function analyzeBancaServizio(data) {
   // Analizza momentum se disponibile
   if (powerRankings.length > 0) {
     const lastMomentum = powerRankings[powerRankings.length - 1];
-    if (lastMomentum?.value) {
+    // Usa raw_v se disponibile, altrimenti value
+    const val = (lastMomentum.raw_v !== undefined) 
+      ? (lastMomentum.value >= 0 ? lastMomentum.raw_v : -lastMomentum.raw_v) 
+      : (lastMomentum.value || 0);
+      
+    if (val !== 0) {
       // Se il server ha momentum negativo, aumenta il segnale
-      const serverMomentumBad = (serving === 1 && lastMomentum.value < -15) ||
-                                (serving === 2 && lastMomentum.value > 15);
+      // Soglia 15 per value (scala 100), ridotta a 5 per raw_v
+      const threshold = lastMomentum.raw_v !== undefined ? 5 : 15;
+      
+      const serverMomentumBad = (serving === 1 && val < -threshold) ||
+                                (serving === 2 && val > threshold);
+                                
       if (serverMomentumBad) {
         result.signal = result.signal === 'weak' ? 'medium' : result.signal;
         result.confidence = Math.min(95, result.confidence + 10);
       }
-      result.details.momentum = lastMomentum.value;
-      result.message += ` | Momentum: ${lastMomentum.value > 0 ? '+' : ''}${lastMomentum.value}`;
+      result.details.momentum = val;
+      result.message += ` | Momentum: ${val > 0 ? '+' : ''}${val}`;
     }
   }
 
@@ -2082,7 +2109,11 @@ export function analyzeBancaServizio(data) {
 export function analyzeSuperBreak(data) {
   const eventInfo = extractEventInfo(data);
   const pbp = loadPointByPoint(data);
-  const powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  // Cerca sia tennisPowerRankings che powerRankings (per dati SVG)
+  let powerRankings = deepFindAll(data, 'tennisPowerRankings', 5).flat().filter(Boolean);
+  if (!powerRankings || powerRankings.length === 0) {
+    powerRankings = deepFindAll(data, 'powerRankings', 5).flat().filter(Boolean);
+  }
   const keyStats = extractKeyStats(data);
   
   const result = {
@@ -2172,9 +2203,21 @@ export function analyzeSuperBreak(data) {
   let dominantGames = 0;
   
   if (powerRankings.length > 0) {
-    const sum = powerRankings.reduce((a, b) => a + (b.value || 0), 0);
+    const sum = powerRankings.reduce((a, b) => {
+      const val = (b.raw_v !== undefined) 
+        ? (b.value >= 0 ? b.raw_v : -b.raw_v) 
+        : (b.value || 0);
+      return a + val;
+    }, 0);
     avgMomentum = Math.round(sum / powerRankings.length);
-    dominantGames = powerRankings.filter(p => p.value > 60).length;
+    
+    // Per dominantGames, se abbiamo raw_v usiamo soglia più bassa (es. 15)
+    // altrimenti usiamo value > 60 (scala 0-100)
+    dominantGames = powerRankings.filter(p => {
+      if (p.raw_v !== undefined) return p.raw_v > 15;
+      return (p.value || 0) > 60;
+    }).length;
+    
     result.details.avgMomentum = avgMomentum;
     result.details.dominantGames = dominantGames;
   }

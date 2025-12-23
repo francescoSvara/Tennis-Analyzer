@@ -1,0 +1,804 @@
+App.jsx:1463 📊 PowerRankings trovati: 13 (3) [{…}, {…}, {…}]
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+App.jsx:1463 📊 PowerRankings trovati: 13 (3) [{…}, {…}, {…}]
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+IndicatorsChart.jsx:216 🔍 DEBUG matchData: {
+  "statistics": [
+    {
+      "period": "2ND",
+      "groups": [
+        {
+          "groupName": "Miscellaneous",
+          "statisticsItems": [
+            {
+              "name": "Tiebreaks",
+              "key": null,
+              "home": "0",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Return",
+          "statisticsItems": [
+            {
+              "name": "First serve return points",
+              "key": null,
+              "home": "5/19 (26%)",
+              "away": "4/17 (23%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points converted",
+              "key": null,
+              "home": "0",
+              "away": "1",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Return games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve return points",
+              "key": null,
+              "home": "6/14 (42%)",
+              "away": "6/10 (60%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Service",
+          "statisticsItems": [
+            {
+              "name": "Double faults",
+              "key": null,
+              "home": "2",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Service games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve points",
+              "key": null,
+              "home": "4/10 (40%)",
+              "away": "8/14 (57%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve points",
+              "key": null,
+              "home": "13/17 (76%)",
+              "away": "14/19 (74%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve",
+              "key": null,
+              "home": "17/27 (63%)",
+              "away": "19/33 (58%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points saved",
+              "key": null,
+              "home": "0/1 (0%)",
+              "away": "1/1 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Aces",
+              "key": null,
+              "home": "0",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve",
+              "key": null,
+              "home": "8/10 (80%)",
+              "away": "14/14 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Games",
+          "statisticsItems": [
+            {
+              "name": "Max games in a row",
+              "key": null,
+              "home": "1",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Points",
+          "statisticsItems": [
+            {
+              "name": "Max points in a row",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+      
+IndicatorsChart.jsx:217 🔍 DEBUG powerRankings[0]: {
+  "set": 1,
+  "game": 1,
+  "value": -43,
+  "valueApi": -43,
+  "valueSvg": -43,
+  "breakOccurred": false,
+  "zone": "strong_pressure",
+  "status": "critical",
+  "source": "api"
+}
+IndicatorsChart.jsx:218 🔍 DEBUG powerRankings.length: 13
+IndicatorsChart.jsx:347 🔍 DEBUG statsBreaks from statistics: {homeBreaks: 0, awayBreaks: 2}
+IndicatorsChart.jsx:355 🔍 DEBUG FINAL: {realHomeGames: 5, realAwayGames: 8, homeBreaks: 0, awayBreaks: 2, hasBreakOccurred: false}
+IndicatorsChart.jsx:216 🔍 DEBUG matchData: {
+  "statistics": [
+    {
+      "period": "2ND",
+      "groups": [
+        {
+          "groupName": "Miscellaneous",
+          "statisticsItems": [
+            {
+              "name": "Tiebreaks",
+              "key": null,
+              "home": "0",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Return",
+          "statisticsItems": [
+            {
+              "name": "First serve return points",
+              "key": null,
+              "home": "5/19 (26%)",
+              "away": "4/17 (23%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points converted",
+              "key": null,
+              "home": "0",
+              "away": "1",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Return games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve return points",
+              "key": null,
+              "home": "6/14 (42%)",
+              "away": "6/10 (60%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Service",
+          "statisticsItems": [
+            {
+              "name": "Double faults",
+              "key": null,
+              "home": "2",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Service games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve points",
+              "key": null,
+              "home": "4/10 (40%)",
+              "away": "8/14 (57%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve points",
+              "key": null,
+              "home": "13/17 (76%)",
+              "away": "14/19 (74%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve",
+              "key": null,
+              "home": "17/27 (63%)",
+              "away": "19/33 (58%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points saved",
+              "key": null,
+              "home": "0/1 (0%)",
+              "away": "1/1 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Aces",
+              "key": null,
+              "home": "0",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve",
+              "key": null,
+              "home": "8/10 (80%)",
+              "away": "14/14 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Games",
+          "statisticsItems": [
+            {
+              "name": "Max games in a row",
+              "key": null,
+              "home": "1",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Points",
+          "statisticsItems": [
+            {
+              "name": "Max points in a row",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+      
+IndicatorsChart.jsx:217 🔍 DEBUG powerRankings[0]: {
+  "set": 1,
+  "game": 1,
+  "value": -43,
+  "valueApi": -43,
+  "valueSvg": -43,
+  "breakOccurred": false,
+  "zone": "strong_pressure",
+  "status": "critical",
+  "source": "api"
+}
+IndicatorsChart.jsx:218 🔍 DEBUG powerRankings.length: 13
+IndicatorsChart.jsx:347 🔍 DEBUG statsBreaks from statistics: {homeBreaks: 0, awayBreaks: 2}
+IndicatorsChart.jsx:355 🔍 DEBUG FINAL: {realHomeGames: 5, realAwayGames: 8, homeBreaks: 0, awayBreaks: 2, hasBreakOccurred: false}
+App.jsx:1463 📊 PowerRankings trovati: 13 (3) [{…}, {…}, {…}]
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+App.jsx:1463 📊 PowerRankings trovati: 13 (3) [{…}, {…}, {…}]
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+utils.js:786 🎯 extractEventInfo: usando raw.event esistente Corentin Moutet
+utils.js:970 🎯 extractStatistics: usando raw.statistics esistente, periodo: ALL
+IndicatorsChart.jsx:216 🔍 DEBUG matchData: {
+  "statistics": [
+    {
+      "period": "2ND",
+      "groups": [
+        {
+          "groupName": "Miscellaneous",
+          "statisticsItems": [
+            {
+              "name": "Tiebreaks",
+              "key": null,
+              "home": "0",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Return",
+          "statisticsItems": [
+            {
+              "name": "First serve return points",
+              "key": null,
+              "home": "5/19 (26%)",
+              "away": "4/17 (23%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points converted",
+              "key": null,
+              "home": "0",
+              "away": "1",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Return games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve return points",
+              "key": null,
+              "home": "6/14 (42%)",
+              "away": "6/10 (60%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Service",
+          "statisticsItems": [
+            {
+              "name": "Double faults",
+              "key": null,
+              "home": "2",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Service games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve points",
+              "key": null,
+              "home": "4/10 (40%)",
+              "away": "8/14 (57%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve points",
+              "key": null,
+              "home": "13/17 (76%)",
+              "away": "14/19 (74%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve",
+              "key": null,
+              "home": "17/27 (63%)",
+              "away": "19/33 (58%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points saved",
+              "key": null,
+              "home": "0/1 (0%)",
+              "away": "1/1 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Aces",
+              "key": null,
+              "home": "0",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve",
+              "key": null,
+              "home": "8/10 (80%)",
+              "away": "14/14 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Games",
+          "statisticsItems": [
+            {
+              "name": "Max games in a row",
+              "key": null,
+              "home": "1",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Points",
+          "statisticsItems": [
+            {
+              "name": "Max points in a row",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+      
+IndicatorsChart.jsx:217 🔍 DEBUG powerRankings[0]: {
+  "set": 1,
+  "game": 1,
+  "value": -43,
+  "valueApi": -43,
+  "valueSvg": -43,
+  "breakOccurred": false,
+  "zone": "strong_pressure",
+  "status": "critical",
+  "source": "api"
+}
+IndicatorsChart.jsx:218 🔍 DEBUG powerRankings.length: 13
+IndicatorsChart.jsx:347 🔍 DEBUG statsBreaks from statistics: {homeBreaks: 0, awayBreaks: 2}
+IndicatorsChart.jsx:355 🔍 DEBUG FINAL: {realHomeGames: 5, realAwayGames: 8, homeBreaks: 0, awayBreaks: 2, hasBreakOccurred: false}
+IndicatorsChart.jsx:216 🔍 DEBUG matchData: {
+  "statistics": [
+    {
+      "period": "2ND",
+      "groups": [
+        {
+          "groupName": "Miscellaneous",
+          "statisticsItems": [
+            {
+              "name": "Tiebreaks",
+              "key": null,
+              "home": "0",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Return",
+          "statisticsItems": [
+            {
+              "name": "First serve return points",
+              "key": null,
+              "home": "5/19 (26%)",
+              "away": "4/17 (23%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points converted",
+              "key": null,
+              "home": "0",
+              "away": "1",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Return games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve return points",
+              "key": null,
+              "home": "6/14 (42%)",
+              "away": "6/10 (60%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Service",
+          "statisticsItems": [
+            {
+              "name": "Double faults",
+              "key": null,
+              "home": "2",
+              "away": "0",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Service games played",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve points",
+              "key": null,
+              "home": "4/10 (40%)",
+              "away": "8/14 (57%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve points",
+              "key": null,
+              "home": "13/17 (76%)",
+              "away": "14/19 (74%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "First serve",
+              "key": null,
+              "home": "17/27 (63%)",
+              "away": "19/33 (58%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 1,
+              "statisticsType": null
+            },
+            {
+              "name": "Break points saved",
+              "key": null,
+              "home": "0/1 (0%)",
+              "away": "1/1 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Aces",
+              "key": null,
+              "home": "0",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            },
+            {
+              "name": "Second serve",
+              "key": null,
+              "home": "8/10 (80%)",
+              "away": "14/14 (100%)",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Games",
+          "statisticsItems": [
+            {
+              "name": "Max games in a row",
+              "key": null,
+              "home": "1",
+              "away": "3",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 2,
+              "statisticsType": null
+            }
+          ]
+        },
+        {
+          "groupName": "Points",
+          "statisticsItems": [
+            {
+              "name": "Max points in a row",
+              "key": null,
+              "home": "5",
+              "away": "5",
+              "homeValue": null,
+              "awayValue": null,
+              "compareCode": 3,
+              "statisticsType": null
+            },
+            {
+      
+IndicatorsChart.jsx:217 🔍 DEBUG powerRankings[0]: {
+  "set": 1,
+  "game": 1,
+  "value": -43,
+  "valueApi": -43,
+  "valueSvg": -43,
+  "breakOccurred": false,
+  "zone": "strong_pressure",
+  "status": "critical",
+  "source": "api"
+}
+IndicatorsChart.jsx:218 🔍 DEBUG powerRankings.length: 13
+IndicatorsChart.jsx:347 🔍 DEBUG statsBreaks from statistics: {homeBreaks: 0, awayBreaks: 2}
+IndicatorsChart.jsx:355 🔍 DEBUG FINAL: {realHomeGames: 5, realAwayGames: 8, homeBreaks: 0, awayBreaks: 2, hasBreakOccurred: false}

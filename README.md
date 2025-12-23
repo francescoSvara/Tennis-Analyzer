@@ -327,6 +327,39 @@ node scripts/checkConceptualMap.js
 
 ## 📜 Changelog
 
+### v4.3 (Dicembre 2025) - Dual Source Logic (API vs SVG)
+- **Data Source Detection** - Rilevamento automatico origine dati
+  - `isSvgSource`: controlla `source === 'svg_dom'`
+  - `hasBreakOccurred`: verifica presenza campo `breakOccurred`
+- **Game Totali Logic** - Calcolo adattivo
+  - **API**: Usa punteggi set reali (`w1+l1`, `w2+l2`, etc.)
+  - **SVG**: Conta dal campo `side` o segno di `value`
+- **Break Source Tracking** - Campo `breakSource` nel return
+  - `'api'`: da `powerRankings.breakOccurred`
+  - `'statistics'`: da `statistics.breakPointsScored`  
+  - `'unavailable'`: nessuna fonte disponibile
+- **IndicatorsChart Enhanced**
+  - Logica separata per `isSvgSource`
+  - `dataSource` field per debug/UI
+  - Documentato in `FILOSOFIA_STATS_V2.md` sezione 9
+
+### v4.2 (Gennaio 2025) - SVG Momentum & Break Fallback
+- **SVG Momentum Extractor** - Estrazione momentum da DOM SVG SofaScore
+  - Funzione `extractMomentumFromSvgHtml()` per parsing SVG paths
+  - Normalizzazione valori per set o per match
+  - Output: `{ set, game, value, raw_v, side, source: 'svg_dom' }`
+- **Break Fallback System** - Triple source per dati break:
+  1. `powerRankings.breakOccurred` (da point-by-point)
+  2. `matchData.statistics.breakPointsScored` (da API statistics)
+  3. Fallback a 0 se nessuna fonte disponibile
+- **Max Momentum Fix** - Non più sempre 100
+  - Usa `raw_v` (valori originali) se disponibile dal SVG
+  - Altrimenti calcola momentum medio per giocatore
+  - I valori normalizzati (-100..+100) erano sempre ~100 max
+- **IndicatorsChart Enhanced**
+  - `extractBreaksFromStatistics()` per fallback break da statistics
+  - Supporto `raw_v` nel calcolo Max Momentum
+
 ### v4.1 (Gennaio 2025) - Fix Break/Momentum Calculation
 - **Break Detection Fix** - Corretta convenzione serving/scoring SofaScore
   - `serving=1` = HOME serve, `serving=2` = AWAY serve

@@ -340,4 +340,100 @@ Se stai scrivendo una funzione e non sai:
 ➡️ **fermati**: il problema è architetturale, non di codice.
 
 Questo documento viene prima dell’implementazione.
+---
 
+## 9️⃣ Gestione Data Source: API vs SVG
+
+### Problema
+
+I dati di momentum possono provenire da due fonti con strutture diverse:
+
+| Campo | API SofaScore | SVG DOM |
+|-------|---------------|---------|
+| `value` | ✅ -100 a +100 | ✅ -100 a +100 (normalizzato) |
+| `breakOccurred` | ✅ Presente | ❌ **NON disponibile** |
+| `statistics` | ✅ Presente | ❌ Non estratto |
+| `raw_v` | ❌ | ✅ Valore originale SVG |
+| `side` | ❌ | ✅ "home" o "away" |
+| `source` | Implicito 'api' | `'svg_dom'` |
+
+### Rilevamento Source
+
+```javascript
+const isSvgSource = powerRankings.some(pr => pr.source === 'svg_dom');
+const hasBreakOccurred = powerRankings.some(pr => pr.breakOccurred !== undefined);
+```
+
+### Logica Calcolo per Indicatore
+
+#### Game Totali
+
+| Source | Metodo |
+|--------|--------|
+| **API** | Punteggi set reali (`w1+w2+...+w5`, `l1+l2+...+l5`) |
+| **SVG** | Conteggio da `side` o segno di `value` |
+
+```javascript
+if (isSvgSource) {
+  // SVG: Conta dal campo 'side' o dal segno di 'value'
+  powerRankings.forEach(pr => {
+    if (pr.side === 'home' || pr.value > 0) realHomeGames++;
+    else if (pr.side === 'away' || pr.value < 0) realAwayGames++;
+  });
+} else {
+  // API: Usa punteggi set
+  for (let i = 1; i <= 5; i++) {
+    realHomeGames += parseInt(matchData[`w${i}`]) || 0;
+    realAwayGames += parseInt(matchData[`l${i}`]) || 0;
+  }
+}
+```
+
+#### Break
+
+| Source | Metodo | Affidabilità |
+|--------|--------|--------------|
+| **API** | `breakOccurred` nei powerRankings | ✅ Alta |
+| **SVG** | Fallback da `statistics.breakPointsScored` | 🟡 Media |
+| **Nessuno** | `breakSource: 'unavailable'` | ⚠️ N/D |
+
+#### Dominio
+
+Identico per entrambi: conta game con `|value| > 20`
+
+#### Max Momentum
+
+| Source | Metodo |
+|--------|--------|
+| **SVG** | `raw_v` (valore originale dalla path SVG) |
+| **API** | Momentum medio (`homeMomentumTotal / homeGames`) |
+
+### 🔄 Integrazione Strategie (LayTheWinner, BancaServizio, SuperBreak)
+
+Le strategie di trading sono state aggiornate per supportare nativamente i dati SVG:
+
+1.  **Fallback**: Se `tennisPowerRankings` (API) manca, cerca `powerRankings` (SVG).
+2.  **Priorità Valore**:
+    *   Se `raw_v` è presente (SVG), viene usato come valore di magnitudine reale.
+    *   Il segno viene derivato da `value` (normalizzato +/- 100).
+    *   Se solo `value` è presente (API), viene usato direttamente.
+3.  **Soglie Adattive**:
+    *   Per `raw_v`: soglie ridotte (es. > 5) poiché la scala è diversa.
+    *   Per `value`: soglie standard (es. > 10 o > 60 su scala 100).
+
+### Return Object Enhanced
+
+```javascript
+return {
+  // ... altri campi
+  breakSource: hasBreakOccurred ? 'api' : (breaks > 0 ? 'statistics' : 'unavailable'),
+  dataSource: isSvgSource ? 'svg' : 'api',
+  hasRawValues
+};
+```
+
+### File Implementazione
+
+- **Frontend**: `src/components/IndicatorsChart.jsx`
+- **Extractor**: `backend/utils/svgMomentumExtractor.js`
+- **Endpoint**: `POST /api/match/:eventId/momentum-svg`

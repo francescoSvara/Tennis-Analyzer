@@ -124,40 +124,169 @@ function calculateDerivedStats(matchData) {
 // function estimateDomination(sets, gameDiff) { ... }
 
 /**
+ * Estrae break points converted dalle statistics
+ * Somma i break di TUTTI i periodi (1ST, 2ND, 3RD, 4TH, 5TH)
+ * @param {Object} matchData - Dati match con statistics
+ * @returns {Object} { homeBreaks, awayBreaks } o null
+ */
+function extractBreaksFromStatistics(matchData) {
+  if (!matchData?.statistics) return null;
+  
+  // Statistics può essere array o oggetto con chiave
+  let statisticsArr = matchData.statistics;
+  if (!Array.isArray(statisticsArr)) {
+    // Se è oggetto, prova a estrarre l'array
+    if (statisticsArr.statistics) {
+      statisticsArr = statisticsArr.statistics;
+    } else {
+      return null;
+    }
+  }
+  
+  let totalHomeBreaks = 0;
+  let totalAwayBreaks = 0;
+  let foundAny = false;
+  
+  // Prima cerca nel periodo ALL (se esiste)
+  const allPeriod = statisticsArr.find(s => s.period === 'ALL');
+  if (allPeriod?.groups) {
+    const returnGroup = allPeriod.groups.find(g => g.groupName === 'Return');
+    if (returnGroup?.statisticsItems) {
+      const breakStat = returnGroup.statisticsItems.find(
+        item => item.key === 'breakPointsScored' || item.name === 'Break points converted'
+      );
+      if (breakStat) {
+        totalHomeBreaks = parseInt(breakStat.homeValue || breakStat.home) || 0;
+        totalAwayBreaks = parseInt(breakStat.awayValue || breakStat.away) || 0;
+        foundAny = true;
+      }
+    }
+  }
+  
+  // Se non c'è ALL, somma da tutti i set (1ST, 2ND, 3RD, 4TH, 5TH)
+  if (!foundAny) {
+    statisticsArr.forEach(stat => {
+      if (['1ST', '2ND', '3RD', '4TH', '5TH'].includes(stat.period)) {
+        const returnGroup = stat.groups?.find(g => g.groupName === 'Return');
+        if (returnGroup?.statisticsItems) {
+          const breakStat = returnGroup.statisticsItems.find(
+            item => item.key === 'breakPointsScored' || item.name === 'Break points converted'
+          );
+          if (breakStat) {
+            totalHomeBreaks += parseInt(breakStat.homeValue || breakStat.home) || 0;
+            totalAwayBreaks += parseInt(breakStat.awayValue || breakStat.away) || 0;
+            foundAny = true;
+          }
+        }
+      }
+    });
+  }
+  
+  if (!foundAny) return null;
+  
+  return {
+    homeBreaks: totalHomeBreaks,
+    awayBreaks: totalAwayBreaks
+  };
+}
+
+/**
  * IndicatorsChart - Grafico indicatori match basato su powerRankings
  * Mostra statistiche aggregate e distribuzione momentum
  * 
- * FALLBACK: Se powerRankings non disponibili ma matchData presente,
- * mostra statistiche derivate dai punteggi set (100% accurate)
+ * GAME TOTALI: Usa punteggi set reali (w1+w2+...+w5) per dati accurati
+ * DOMINIO: Game con momentum dominante (|value| > 20) dai powerRankings
+ * BREAK: Da statistics.breakPointsScored o powerRankings.breakOccurred
+ * MAX MOMENTUM: raw_v originale o momentum medio se raw non disponibile
  */
 export default function IndicatorsChart({ 
   powerRankings = [], 
   homeName = 'Home', 
   awayName = 'Away',
-  matchData = null  // NEW: Dati match per fallback (w1/l1, w2/l2, etc.)
+  matchData = null  // Dati match per punteggi set e statistics
 }) {
   
-  // Calcola statistiche dai powerRankings
+  // Calcola statistiche dai powerRankings + matchData per dati reali
   const stats = useMemo(() => {
     if (!powerRankings || powerRankings.length === 0) {
       return null;
     }
     
-    let homeGames = 0;
-    let awayGames = 0;
+    // ============================================================
+    // DETECT DATA SOURCE: API vs SVG
+    // ============================================================
+    const isSvgSource = powerRankings.some(pr => pr.source === 'svg_dom');
+    const hasBreakOccurred = powerRankings.some(pr => pr.breakOccurred === true);
+    
+    // ============================================================
+    // GAME TOTALI: Calcola dai punteggi set o dai powerRankings
+    // ============================================================
+    let realHomeGames = 0;
+    let realAwayGames = 0;
+    
+    // Prima prova matchData (w1/l1, w2/l2, etc.)
+    if (matchData) {
+      for (let i = 1; i <= 5; i++) {
+        const homeSet = parseInt(matchData[`w${i}`]) || 0;
+        const awaySet = parseInt(matchData[`l${i}`]) || 0;
+        realHomeGames += homeSet;
+        realAwayGames += awaySet;
+      }
+      // Fallback: prova anche homeScore/awayScore
+      if (realHomeGames === 0 && realAwayGames === 0) {
+        const hs = matchData.homeScore || {};
+        const as = matchData.awayScore || {};
+        for (let i = 1; i <= 5; i++) {
+          realHomeGames += parseInt(hs[`period${i}`]) || 0;
+          realAwayGames += parseInt(as[`period${i}`]) || 0;
+        }
+      }
+    }
+    
+    // Se non abbiamo dati dai punteggi set, calcola dai powerRankings
+    // Analizzando il max game per ogni set e il segno del value
+    if (realHomeGames === 0 && realAwayGames === 0 && powerRankings.length > 0) {
+      // Raggruppa per set e conta chi ha vinto ogni game
+      const gamesBySet = {};
+      powerRankings.forEach(pr => {
+        const setNum = pr.set || 1;
+        if (!gamesBySet[setNum]) {
+          gamesBySet[setNum] = { home: 0, away: 0 };
+        }
+        // Il segno del value indica chi ha vinto il game
+        // value > 0 = home ha vinto, value < 0 = away ha vinto
+        if (pr.value > 0) {
+          gamesBySet[setNum].home++;
+        } else if (pr.value < 0) {
+          gamesBySet[setNum].away++;
+        }
+      });
+      
+      // Somma i game di tutti i set
+      Object.values(gamesBySet).forEach(setData => {
+        realHomeGames += setData.home;
+        realAwayGames += setData.away;
+      });
+    }
+    
     let homeDominant = 0;
     let awayDominant = 0;
     let balanced = 0;
     let breaks = 0;
-    let homeBreaks = 0;  // Break fatti da Home (Away serviva, Home ha vinto)
-    let awayBreaks = 0;  // Break fatti da Away (Home serviva, Away ha vinto)
+    let homeBreaks = 0;
+    let awayBreaks = 0;
     let totalValue = 0;
     let maxValue = 0;
     let minValue = 0;
     
-    // Nuovi contatori per momentum totale
-    let homeMomentumTotal = 0;  // Somma di tutti i valori positivi
-    let awayMomentumTotal = 0;  // Somma di tutti i valori negativi (in valore assoluto)
+    // Contatori per momentum totale
+    let homeMomentumTotal = 0;
+    let awayMomentumTotal = 0;
+    
+    // Valori raw per Max Momentum (più significativi dei normalizzati)
+    let maxRawValue = 0;
+    let minRawValue = 0;
+    let hasRawValues = false;
     
     powerRankings.forEach(item => {
       const value = item.value || 0;
@@ -173,17 +302,22 @@ export default function IndicatorsChart({
       if (value > maxValue) maxValue = value;
       if (value < minValue) minValue = value;
       
+      // Traccia i valori raw se presenti (più significativi)
+      if (item.raw_v !== undefined && item.raw_v !== null) {
+        hasRawValues = true;
+        if (value > 0 && item.raw_v > maxRawValue) {
+          maxRawValue = item.raw_v;
+        } else if (value < 0 && item.raw_v > Math.abs(minRawValue)) {
+          minRawValue = -item.raw_v;
+        }
+      }
+      
+      // Dominio: conta solo i game con momentum dominante (|value| > 20)
       if (value > 20) {
         homeDominant++;
-        homeGames++;
       } else if (value < -20) {
         awayDominant++;
-        awayGames++;
-      } else if (value > 0) {
-        homeGames++;
-      } else if (value < 0) {
-        awayGames++;
-      } else {
+      } else if (value === 0) {
         balanced++;
       }
       
@@ -201,6 +335,17 @@ export default function IndicatorsChart({
       }
     });
     
+    // FALLBACK: Se nessun breakOccurred=true nei powerRankings,
+    // usa le statistics dal matchData
+    if (breaks === 0 && matchData) {
+      const statsBreaks = extractBreaksFromStatistics(matchData);
+      if (statsBreaks) {
+        homeBreaks = statsBreaks.homeBreaks;
+        awayBreaks = statsBreaks.awayBreaks;
+        breaks = homeBreaks + awayBreaks;
+      }
+    }
+    
     const avgValue = Math.round(totalValue / powerRankings.length);
     
     // Calcola il totale combinato e la percentuale
@@ -208,20 +353,32 @@ export default function IndicatorsChart({
     const homePercent = combinedMomentum > 0 ? (homeMomentumTotal / combinedMomentum) * 100 : 50;
     const awayPercent = combinedMomentum > 0 ? (awayMomentumTotal / combinedMomentum) * 100 : 50;
     
+    // Per Max Momentum: usa raw_v se disponibile (più significativo), altrimenti usa momentum medio
+    // I valori normalizzati (maxValue/minValue) sono sempre ~100 e non informativi
+    const displayMaxHome = hasRawValues ? Math.round(maxRawValue) : Math.round(homeMomentumTotal / Math.max(1, realHomeGames));
+    const displayMaxAway = hasRawValues ? Math.round(Math.abs(minRawValue)) : Math.round(awayMomentumTotal / Math.max(1, realAwayGames));
+    
     return {
       totalGames: powerRankings.length,
-      homeGames,
-      awayGames,
+      // Game Totali: conta corretta per tipo source
+      homeGames: realHomeGames,
+      awayGames: realAwayGames,
+      // Dominio: game con momentum dominante (|value| > 20)
       homeDominant,
       awayDominant,
       balanced,
       breaks,
-      homeBreaks,  // Break fatti da Home
-      awayBreaks,  // Break fatti da Away
+      homeBreaks,
+      awayBreaks,
+      // Flag per UI - indica se break è disponibile o stimato
+      breakSource: hasBreakOccurred ? 'api' : (breaks > 0 ? 'statistics' : 'unavailable'),
       avgValue,
-      maxValue,
-      minValue: Math.abs(minValue),
-      // Nuovi valori per il termometro
+      maxValue: displayMaxHome,
+      minValue: displayMaxAway,
+      // Info source per debug/UI
+      dataSource: isSvgSource ? 'svg' : 'api',
+      hasRawValues,
+      // Valori per il termometro momentum
       homeMomentumTotal: Math.round(homeMomentumTotal),
       awayMomentumTotal: Math.round(awayMomentumTotal),
       combinedMomentum: Math.round(combinedMomentum),
@@ -229,7 +386,7 @@ export default function IndicatorsChart({
       awayPercent: Math.round(awayPercent),
       momentumDiff: Math.round(homeMomentumTotal - awayMomentumTotal)
     };
-  }, [powerRankings]);
+  }, [powerRankings, matchData]);
 
   // Calcola statistiche per gli ULTIMI 3 GAME (trend recente)
   const recentStats = useMemo(() => {
@@ -459,6 +616,12 @@ export default function IndicatorsChart({
           const homePercent = (ind.home / total) * 100;
           const awayPercent = (ind.away / total) * 100;
           const diff = ind.home - ind.away;
+          
+          // Logica imparziale: valore sempre positivo, colore indica chi domina
+          const absDiff = Math.abs(diff);
+          const isDominantHome = diff > 0;
+          const isDominantAway = diff < 0;
+          const badgeColor = isDominantHome ? 'home' : (isDominantAway ? 'away' : 'neutral');
 
           return (
             <div key={ind.label} className="indicator-row">
@@ -482,8 +645,8 @@ export default function IndicatorsChart({
                       }}
                     >
                       <div className="indicator-needle"></div>
-                      <div className="indicator-value-badge">
-                        {diff > 0 ? '+' : ''}{Number.isInteger(diff) ? diff : diff.toFixed(2)}
+                      <div className={`indicator-value-badge badge-${badgeColor}`}>
+                        {absDiff === 0 ? '=' : absDiff}
                       </div>
                     </div>
                     <div className="thermometer-center-line"></div>
@@ -527,8 +690,8 @@ export default function IndicatorsChart({
                 }}
               >
                 <div className="indicator-needle mini-needle"></div>
-                <div className="indicator-value-badge mini-badge">
-                  {recentStats.momentumDiff > 0 ? '+' : ''}{Number.isInteger(recentStats.momentumDiff) ? recentStats.momentumDiff : recentStats.momentumDiff.toFixed(2)}
+                <div className={`indicator-value-badge mini-badge badge-${recentStats.momentumDiff > 0 ? 'home' : (recentStats.momentumDiff < 0 ? 'away' : 'neutral')}`}>
+                  {Math.abs(recentStats.momentumDiff) === 0 ? '=' : Math.abs(recentStats.momentumDiff)}
                 </div>
               </div>
               {/* Linea centrale di riferimento */}
@@ -574,8 +737,8 @@ export default function IndicatorsChart({
               }}
             >
               <div className="indicator-needle"></div>
-              <div className="indicator-value-badge">
-                {stats.momentumDiff > 0 ? '+' : ''}{Number.isInteger(stats.momentumDiff) ? stats.momentumDiff : stats.momentumDiff.toFixed(2)}
+              <div className={`indicator-value-badge badge-${stats.momentumDiff > 0 ? 'home' : (stats.momentumDiff < 0 ? 'away' : 'neutral')}`}>
+                {Math.abs(stats.momentumDiff) === 0 ? '=' : Math.abs(stats.momentumDiff)}
               </div>
             </div>
             {/* Linea centrale di riferimento */}
