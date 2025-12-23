@@ -1,0 +1,364 @@
+1) Wireframe completo Match Page (ASCII)
+1.1 Layout generale (Header sticky + Sidebar + Main Tabs + Right Rail)
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ 🎾 MATCH: Djokovic vs Zverev                          🔔 Alerts(1)   ⚙️        │
+│ Set: 1–0 | Game: 2–3 | Serve: Zverev | Surface: Hard | Tournament: ATP 500     │
+│ Odds: D 2.10  (↘)   | Z 1.78 (↗)   | Volatility: HIGH | Liquidity: MED         │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────┐  ┌───────────────────────────────────────────────┐  ┌─────────┐
+│ Sidebar       │  │ MAIN (TAB)                                     │  │ RIGHT   │
+│               │  │                                               │  │ RAIL    │
+│ ▶ Overview    │  │ [ tab bar ]                                   │  │         │
+│   Strategie   │  │ Overview | Strategie | Odds | P-by-P | Stats   │  │ Quick   │
+│   Odds        │  │ Momentum | Predictor | Journal                 │  │ Trades  │
+│   Point-by-pt │  │                                               │  │         │
+│   Stats       │  │ (contenuto tab)                                │  │ Odds +  │
+│   Momentum    │  │                                               │  │ CTA     │
+│   Predictor   │  │                                               │  │         │
+│   Journal ⭐   │  │                                               │  │ Risk    │
+└───────────────┘  └───────────────────────────────────────────────┘  └─────────┘
+
+
+Perché così: l’utente vede sempre score + odds + volatilità (header) e può eseguire senza cambiare tab (right-rail).
+
+1.2 Tab: OVERVIEW (operativa “da live”)
+┌────────────────────────────── OVERVIEW ──────────────────────────────┐
+│ ┌────────────── Scoreboard ──────────────┐   ┌────── Quick Signals ─┐ │
+│ │ Set1: D 6  Z 4                          │   │ Serve diff: +0.18    │ │
+│ │ Set2: D 2  Z 3   (Serve: Z)             │   │ Hold diff:  -0.05    │ │
+│ │ Point: 0–40                             │   │ Pressure: HIGH (Z)   │ │
+│ └─────────────────────────────────────────┘   │ Break next game: 22% │ │
+│                                               └──────────────────────┘ │
+│ ┌──────────────────────── Strategy Mini Panel ───────────────────────┐ │
+│ │ 🟢 Banca Servizio  | READY | target: Zverev | entry: LAY | exit: break/hold │
+│ │ 🟡 Lay the Winner  | WATCH | wait: BP in 2° set                         │
+│ │ 🔴 Super Break     | OFF   | dominance < 60% or nextToServe mismatch     │
+│ └─────────────────────────────────────────────────────────────────────┘ │
+│ ┌────────────── Mini Momentum (last 10 points) ──────────────────────┐ │
+│ │ D: ● ○ ● ● ○ ● ○ ● ○ ●    Z: ○ ● ○ ○ ● ○ ● ○ ● ○                    │
+│ └─────────────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────┘
+
+1.3 Tab: STRATEGIE LIVE (hub trading)
+┌──────────────────────────── STRATEGIE LIVE ───────────────────────────┐
+│ Filtro: [Tutte] [🟢 READY] [🟡 WATCH] [Solo preferite ⭐]               │
+│ Auto-Refresh: ON  |  Anti-spam: ON  |  Cooldown segnali: 30s           │
+│                                                                        │
+│ ┌─────────────────────────── Card 1 ────────────────────────────────┐  │
+│ │ 🟢 BANCA SERVIZIO        Confidence: 0.78     Risk: MED            │  │
+│ │ Target: Zverev  | Score: 0–40 | HoldDifficulty: HIGH               │  │
+│ │ Conditions:  ✔ holdDifficulty HIGH  ✔ score in {0-30,0-40,15-40}    │  │
+│ │ Action:  [ LAY ZVEREV ]  Stake: 10€  Liability cap: 30€            │  │
+│ │ Exit: break point convertito OR hold (fine game)                   │  │
+│ │ Why: "Servizio sotto pressione, probabile break point imminente."  │  │
+│ └───────────────────────────────────────────────────────────────────┘  │
+│                                                                        │
+│ ┌─────────────────────────── Card 2 ────────────────────────────────┐  │
+│ │ 🟡 LAY THE WINNER        Confidence: 0.61     Risk: HIGH            │  │
+│ │ Target: Winner 1° set (Zverev) | Odds: 1.58 | Favorito: Djokovic    │  │
+│ │ Waiting for: break point nel 2° set                                 │  │
+│ │ Action:  (disabled finché non READY)                                │  │
+│ │ Exit: al BP / al break del favorito / fine game                      │  │
+│ └───────────────────────────────────────────────────────────────────┘  │
+│                                                                        │
+│ ┌─────────────────────────── Card 3 ────────────────────────────────┐  │
+│ │ 🔴 SUPER BREAK           Confidence: --        Risk: MED            │  │
+│ │ Req: dominance>60 + dominant=server + nextToServe != dominant + ATP │  │
+│ │ Missing: dominance=54 (serve dominance troppo bassa)                │  │
+│ └───────────────────────────────────────────────────────────────────┘  │
+│                                                                        │
+│ ┌────────────────────────── Strategy Event Log ──────────────────────┐  │
+│ │ 12:31 🟢 Banca Servizio READY (0–40)                                │  │
+│ │ 12:30 🟡 Lay Winner WATCH (odds 1.58, set2)                         │  │
+│ └───────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────┘
+
+
+Nota dev/gambler: in questa pagina metti anche cooldown (anti-trigger ripetuti) e anti-spam (se i dati oscillano).
+
+1.4 Tab: ODDS (mercato + esecuzione)
+┌───────────────────────────────── ODDS ─────────────────────────────────┐
+│ Market: Match Odds  | (toggle) Set Winner | Next Game Winner            │
+│                                                                         │
+│ Djokovic: 2.10 (↘)   Implied: 47.6%    |   Zverev: 1.78 (↗)  56.2%      │
+│ [mini chart 5m]                                                         │
+│                                                                         │
+│ Stake Presets: [5] [10] [25] [50]   Custom: [  ]  Liability cap: [30]  │
+│                                                                         │
+│ ┌────────────── Quick Tickets ──────────────┐  ┌──── Market Context ─┐ │
+│ │ BACK Djokovic   [ 2.10 ]  [ PLACE ]       │  │ 🟢 Strategy READY:   │ │
+│ │ LAY  Djokovic   [ 2.12 ]  [ PLACE ]       │  │ Banca Servizio       │ │
+│ │ BACK Zverev     [ 1.78 ]  [ PLACE ]       │  │ Entry recommended:   │ │
+│ │ LAY  Zverev     [ 1.80 ]  [ PLACE ]       │  │ LAY Zverev now       │ │
+│ └───────────────────────────────────────────┘  └──────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1.5 Tab: POINT-BY-POINT (log trigger + filtri)
+┌──────────────────────────── POINT BY POINT ────────────────────────────┐
+│ Filters: [All] [Break points] [Double faults] [Long rallies] [Key pts]  │
+│                                                                          │
+│ 12:31  Set2 G6  Z serve  0–40   DF ❗  (Pressure spike)                   │
+│ 12:31  Set2 G6  Z serve  0–30   2nd serve won by D                        │
+│ 12:30  Set2 G6  Z serve  0–15   Rally 18 shots (Return winner D)          │
+│ ...                                                                      │
+└──────────────────────────────────────────────────────────────────────────┘
+
+1.6 Tab: STATS (standard + “trading stats”)
+┌────────────────────────────── STATS ───────────────────────────────────┐
+│ Standard                    | Trading-Oriented                           │
+│ 1st in: 62% vs 58%          | HoldDifficulty (last service): HIGH (Z)    │
+│ 1st won: 74% vs 69%         | Pressure points won: 31% vs 55%            │
+│ 2nd won: 48% vs 52%         | Break chance next game: 22%                │
+│ BP saved: 2/4 vs 3/3        | Clutch index (last 10): -0.6 vs +0.4        │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1.7 Tab: MOMENTUM (trend comprensibile)
+┌──────────────────────────── MOMENTUM ───────────────────────────────────┐
+│ Last 10 points:   D 6  |  Z 4                                             │
+│ Runs:             D (4/5)  Z (2/3)                                        │
+│ Quality:          Winners D: 3  | UE D: 1  | UE Z: 3                      │
+│ Serve dominance:  D 68%  |  Z 54%                                         │
+└──────────────────────────────────────────────────────────────────────────┘
+
+1.8 Tab: PREDICTOR (probabilità + edge vs mercato)
+┌──────────────────────────── PREDICTOR ──────────────────────────────────┐
+│ Win Prob (model):   D 49% | Z 51%        Confidence band: MED             │
+│ Market implied:     D 47.6% | Z 56.2%                                     │
+│ Edge:               +1.4% su D   (WARNING: liquidity MED)                 │
+│ Drivers: return points ↑, pressure points ↑, serve dominance ↑            │
+└──────────────────────────────────────────────────────────────────────────┘
+
+1.9 Tab: JOURNAL (la macchina che migliora l’utente)
+┌────────────────────────────── JOURNAL ──────────────────────────────────┐
+│ [ + New Trade ]  Auto-log: ON (when strategy CTA used)                    │
+│                                                                          │
+│ 12:31  Strategy: Banca Servizio | LAY Zverev | stake 10€ | exit: break ✅  │
+│ P/L: +6.2€ | Notes: "DF sul 0-40, entry perfetta"                         │
+│                                                                          │
+│ Export: [CSV]  | Filters: [strategy] [match] [date]                       │
+└──────────────────────────────────────────────────────────────────────────┘
+
+1.10 Right Rail (sempre presente: esecuzione + rischio + stato)
+
+Questa parte aumenta tantissimo l’usabilità.
+
+┌──────────────────────── RIGHT RAIL ────────────────────────┐
+│ 🟢 NOW READY: BANCA SERVIZIO                                 │
+│ Target: Zverev | Score: 0–40 | Confidence: 0.78             │
+│ [ LAY ZVEREV ]   Stake: 10€   Liability cap: 30€            │
+│ Exit rule: break OR hold (fine game)                        │
+│─────────────────────────────────────────────────────────────│
+│ Odds Quick View                                              │
+│ Zverev: 1.78 (↗)   Djokovic: 2.10 (↘)                        │
+│─────────────────────────────────────────────────────────────│
+│ Risk Controls                                                 │
+│ Exposure this match: 20€ / Max 60€                            │
+│ Daily stop: -50€  (current: -12€)                             │
+│ Toggle: [Auto-cashout OFF] [Notifications ON]                 │
+└─────────────────────────────────────────────────────────────┘
+
+2) Dati minimi per tab (per far girare bene le 3 strategie)
+
+Qui ti do una lista “minima ma sufficiente”: se hai questi campi, le 3 strategie funzionano bene e la UI resta pulita.
+
+2.1 Match State (base globale, usato ovunque)
+
+Obbligatori
+
+matchId
+
+matchType (ATP/WTA/male/female) ← serve per Super Break
+
+players: {A,B} + favoritePlayer (anche da seeding/odds pre-match)
+
+currentSet (numero set in corso)
+
+setScore (es: 1–0)
+
+gameScore (es: 2–3)
+
+servingPlayer
+
+pointScore (0/15/30/40/AD) per server/returner
+
+timestamp / sequenceId (per evitare duplicati e fare cooldown)
+
+tieBreakFlag + tieBreakScore (per exit Super Break)
+
+Utili
+
+superficie, torneo, round (solo contesto UI)
+
+2.2 Odds / Market Data (necessari per Lay Winner + UX trading)
+
+Obbligatori
+
+marketOdds.matchWinner[player] (live)
+
+marketOdds.setWinner[player] (se la userai più avanti)
+
+lastOddsUpdateTime
+
+(opzionale ma consigliato) oddsTrend (delta ultimi N secondi)
+
+Per far “tradare” bene
+
+liquidityEstimate o marketDepth (anche stimata)
+
+spread (best back/lay) se disponibile
+
+2.3 Point-by-point (per trigger e “spiegabilità”)
+
+Obbligatori
+
+lista eventi punti con:
+
+set, game, point
+
+server
+
+risultato punto (vinto da chi)
+
+tag “keyPoint”: break point / set point / match point
+
+double fault / ace / unforced error / winner (se li hai)
+
+Per UI
+
+ultimi 10 punti compressi (per momentum mini)
+
+2.4 Feature Engineering minimo per le 3 strategie (il cuore)
+A) Lay the Winner (dai tuoi criteri)
+
+Serve:
+
+currentSet
+
+winnerFirstSet
+
+favoritePlayer
+
+marketOdds[winnerFirstSet]
+
+(per renderla “più vera” lato UX) breakPointsSecondSet o almeno isBreakPointNow
+
+Extra consigliato
+
+favoriteComebackRating (storico rimonte / resilienza) → anche un semplice LOW/MED/HIGH
+
+B) Banca Servizio
+
+Serve:
+
+servingPlayer
+
+pointScore (e mapping scoreKey: "0-30", "0-40", "15-40")
+
+lastGameData[servingPlayer].holdDifficulty (HIGH/MED/LOW)
+
+Come calcolare holdDifficulty (minimo)
+
+numero di deuce nel game precedente
+
+numero di break point affrontati
+
+% prime e doppi falli nel game precedente
+→ poi lo trasformi in high/medium/low
+
+C) Super Break
+
+Serve:
+
+dominantPlayer
+
+dominanceValue (0–100) sul servizio (o “serve dominance”)
+
+servingPlayer
+
+nextToServe
+
+matchType (ATP/male)
+
+Exit logic dati
+
+tieBreakFlag
+
+evento “break del non favorito”
+
+evento “break point” per fare free bet (se implementi step avanzato)
+
+2.5 Dati minimi per ogni TAB (in pratica)
+Overview
+
+match state base
+
+odds base (2-way)
+
+mini momentum (last 10)
+
+stato strategie (READY/WATCH/OFF)
+
+Strategie Live
+
+output strategy engine (standardizzato)
+
+reasons + conditions check ✅/❌
+
+stake/risk (anche semplice)
+
+Odds
+
+odds live + trend
+
+stake presets
+
+exposure attuale
+
+Point-by-point
+
+eventi ultimi N punti
+
+tag key points
+
+Stats
+
+stats standard
+
+pressure/holdDifficulty/serveDominance (anche semplificati)
+
+Momentum
+
+last 10/20 points
+
+runs
+
+winners vs errors (se li hai)
+
+serve dominance
+
+Predictor
+
+win probability
+
+implied market probability
+
+edge (delta)
+
+drivers top 3
+
+Journal
+
+trade records + auto-log strategy actions
+
+export/filter
+
+Extra “da gambler” che ti farà fare il salto (senza complicare)
+
+Aggiungi 3 meccaniche globali (anche solo UI + logica semplice):
+
+Cooldown segnali (es: 30s) per evitare flapping
+
+Risk guardrail: max exposure per match + daily stop
+
+Confidence + Risk tag per ogni strategia (anche euristica)

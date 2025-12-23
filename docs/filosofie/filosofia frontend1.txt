@@ -1,0 +1,309 @@
+1) IA del sito (mappa semplice e utile)
+HOME (Lobby)
+ ├─ Live Matches (selezione)
+ ├─ Watchlist ⭐
+ ├─ Alerts 🔔
+ └─ Settings / Bankroll / Risk
+
+MATCH (layout con sidebar)
+ ├─ Overview (operativa)
+ ├─ Strategie Live (hub trading)
+ ├─ Odds (mercato + ladder)
+ ├─ Point-by-point (log eventi)
+ ├─ Stats (standard + avanzate)
+ ├─ Momentum (trend + run)
+ ├─ Predictor (probabilità + edge)
+ └─ Journal (facoltativo ma fortissimo)
+
+
+Consiglio extra: aggiungi Journal/Trade Log: è quello che fa “performare” davvero l’utente nel lungo periodo.
+
+2) HOME (Lobby) — cosa deve contenere (con disegno)
+
+Obiettivo: in 20 secondi l’utente deve scegliere quale match è “tradabile”.
+
+┌────────────────────────────────────────────────────────┐
+│ 🎾 HOME – LIVE TRADING HUB                              │
+│ Bankroll: €2,500  | Exposure: €120 | Alerts: 3 🔔       │
+└────────────────────────────────────────────────────────┘
+
+┌───────────────┐  ┌─────────────────────────────────────┐
+│ ⭐ WATCHLIST   │  │ 🔥 LIVE MATCHES (ORDINA PER EDGE)    │
+│               │  │                                     │
+│ 1) Match A    │  │ ┌─────────────────────────────────┐ │
+│ 2) Match B    │  │ │ Djokovic vs Zverev              │ │
+│ 3) Match C    │  │ │ Set 1–0 | 2°set 2–3 | Serve: Z  │ │
+│               │  │ │ Odds: D 2.10 | Z 1.78            │ │
+│               │  │ │ 🟢 Strategy READY: Banca Servizio │ │
+│               │  │ │ Edge: +3.4% | Volatility: HIGH   │ │
+│               │  │ └─────────────────────────────────┘ │
+│               │  │  ... altri match                    │
+└───────────────┘  └─────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────┐
+│ 🧭 ALERTS / SIGNALS (ultimi 10)                         │
+│ 12:31 🟢 LAY THE WINNER READY su Match X (quota 1.58)   │
+│ 12:29 🟡 SUPER BREAK WATCH su Match Y (dom 66%)         │
+└────────────────────────────────────────────────────────┘
+
+Cosa deve avere ogni “match row” in HOME
+
+stato match (set/game/serve)
+
+odds principali (2-way)
+
+semaforo strategie: quante sono 🟢/🟡
+
+Edge stimato (anche semplice)
+
+volatilità/velocità (per capire se è “tradabile”)
+
+bottone: Apri Match
+
+3) MATCH PAGE — layout consigliato (da pro)
+
+Tu hai già sidebar + pagine. Io farei così:
+
+Struttura a 3 zone
+
+Header sticky (sempre visibile)
+
+Main area (tab/pagine)
+
+Right rail (opzionale) per esecuzione rapida (strategia + odds)
+
+┌────────────────────────────────────────────────────────┐
+│ Djokovic vs Zverev | Set 1–0 | Game 2–3 | Serve: Z      │
+│ Odds: D 2.10 | Z 1.78 | Volatility: HIGH | Alerts: 1 🔔 │
+└────────────────────────────────────────────────────────┘
+
+┌──────────────┐ ┌───────────────────────────────┐ ┌─────┐
+│ Sidebar      │ │ MAIN (tab attivo)             │ │RAIL │
+│ Overview     │ │                               │ │     │
+│ Strategie    │ │ contenuto pagina              │ │Odds │
+│ Odds         │ │                               │ │+CTA │
+│ P-by-P       │ └───────────────────────────────┘ └─────┘
+│ Stats        │
+│ Momentum     │
+│ Predictor    │
+│ Journal ⭐    │
+└──────────────┘
+
+
+Perché right rail?
+Da gambler vuoi eseguire senza cambiare tab: vedere odds + bottone strategia sempre a portata.
+
+4) Cosa deve contenere ogni finestra (e come renderla leggibile)
+A) Overview (pagina “operativa”, non descrittiva)
+
+È la pagina che l’utente tiene aperta mentre guarda il match.
+
+Contenuti:
+
+scoreboard completo
+
+indicatori rapidi (fatigue, break chances, clutch)
+
+mini momentum
+
+stato strategie (riassunto)
+
+OVERVIEW
+┌────────────────────────────────────────────┐
+│ Scoreboard + Serve + Timer                 │
+├────────────────────────────────────────────┤
+│ Quick Signals:                             │
+│ • Hold difficulty (server): HIGH           │
+│ • Break chance next game: 22%              │
+│ • Clutch index (last 5 points): -0.6       │
+├────────────────────────────────────────────┤
+│ Strategie (mini):                          │
+│ 🟢 Banca Servizio: READY (0–40)            │
+│ 🟡 Lay Winner: WATCH                       │
+│ 🔴 Super Break: OFF                        │
+└────────────────────────────────────────────┘
+
+
+Regola: overview = sintesi + decisione.
+
+B) Strategie Live (hub trading) — la tua sezione principale
+
+Qui devono esserci:
+
+le 3 card (come hai già)
+
+log “perché si è attivata”
+
+condizioni checkate ✅/❌
+
+entry/exit suggerite
+
+gestione rischio (stake consigliata / max liability)
+
+Extra consigliato:
+
+“Strategy Queue” se più strategie sono 🟡 ma non ancora 🟢
+
+C) Odds (esecuzione mercato)
+
+Deve sembrare una piattaforma trading, non un box quote.
+
+Contenuti:
+
+odds attuali + mini chart ultimi 2–5 minuti
+
+ladder (se la supporti)
+
+spread / liquidità (anche stimata)
+
+pulsanti rapidi (BACK / LAY) con stake predefinita
+
+overlay con “strategy context” (es: questa quota è <1.60 → Lay Winner ok)
+
+ODDS
+┌────────────────────────────────────────────┐
+│ Player A 2.10  (trend ↘) | Player B 1.78 ↗ │
+│ Mini-chart 5m                               │
+├────────────────────────────────────────────┤
+│ Stake: [5] [10] [25] [50]  Liability cap:  │
+│ BACK A  | LAY A  || BACK B | LAY B          │
+└────────────────────────────────────────────┘
+
+D) Point-by-point (verifica e trigger)
+
+È il “log eventi” che alimenta strategie.
+
+Contenuti:
+
+feed punti con timestamp
+
+highlight momenti: break point, double fault, medical, challenge
+
+filtri: “solo punti chiave”
+
+P-by-P
+12:31  0–40  DF by Server ❗ (Pressure spike)
+12:30  0–30  Rally 18 shots (Winner return)
+...
+
+E) Stats (standard + “gambler stats”)
+
+Non basta aces/DF. Servono anche indicatori per decisione.
+
+Contenuti standard:
+
+1st in, 1st won, 2nd won, BP saved/converted
+
+Contenuti “trading-oriented”:
+
+hold% live stimata
+
+break conversion trend (ultimi 3 turni)
+
+pressure points won% (30–30 / deuce / BP)
+
+error rate sotto pressione
+
+F) Momentum (trend + run)
+
+Attenzione: momentum deve essere leggero e “spiegabile”.
+
+Contenuti:
+
+punti ultimi 10 / 20
+
+run (es: 6 su 7)
+
+quality: winners vs errors
+
+“serve dominance” (utile per Super Break)
+
+G) Predictor (probabilità + edge)
+
+Qui devi evitare la trappola: “numeri finti”. Serve trasparenza.
+
+Contenuti:
+
+win probability live (con banda confidenza)
+
+break next game probability
+
+edge vs mercato (implied probability)
+
+motivazione breve (feature top)
+
+PREDICTOR
+Win Prob: A 46% | B 54%
+Mercato: A 43% | B 57%
+Edge: +3% su A
+Drivers: return points ↑, break chances ↑
+
+H) Journal (super consigliata)
+
+Per far “performare” il sito davvero: log di trade e risultati.
+
+Contenuti:
+
+entry/exit
+
+strategia usata
+
+motivo (auto-compilato dalla strategia)
+
+outcome
+
+note utente
+
+esportazione CSV
+
+5) Conviene aggiungere altre finestre?
+
+Sì, 2 che alzano tantissimo la qualità:
+
+1) Risk / Bankroll
+
+stake sizing
+
+max exposure per match
+
+stop giornaliero
+
+regole di disciplina
+
+2) Alerts Center
+
+storico segnali
+
+filtri per strategia
+
+notifiche (web/push) solo quando 🟢
+
+6) Struttura progetto (dev) per reggere “tutte le strategie”
+
+Se vuoi implementare tante strategie senza casino:
+
+Modello a 3 livelli
+
+Data Layer (match state normalizzato)
+
+Strategy Engine (valuta condizioni e produce segnali)
+
+UI Layer (render cards / CTA / stati)
+
+Concetto: ogni strategia deve restituire sempre lo stesso schema:
+
+{
+  id,
+  status: OFF|WATCH|READY,
+  action: BACK|LAY|null,
+  target,
+  confidence,
+  entryRule,
+  exitRule,
+  reasons: [ ... ],
+  requiredData: [ ... ],
+  risk: { stakeSuggested, liabilityCap }
+}
+
+
+Così la UI non cambia mai, anche se aggiungi 50 strategie.

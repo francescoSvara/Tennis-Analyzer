@@ -156,6 +156,7 @@ function HomePage({ onMatchSelect, onNavigateToPlayer, summaryCache, summaryLoad
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
+  const summaryLoadedRef = React.useRef(false);
 
   // 🚀 OTTIMIZZATO: Usa summary dalla cache di App (niente fetch qui)
   const summary = summaryCache || { total: 0, byYearMonth: [] };
