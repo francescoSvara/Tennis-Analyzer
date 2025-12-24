@@ -14,6 +14,9 @@
  */
 
 const { supabase } = require('../db/supabase');
+const { createLogger } = require('../utils/logger');
+
+const logger = createLogger('QueueWorker');
 
 class CalculationQueueWorker {
   constructor(options = {}) {
@@ -34,13 +37,13 @@ class CalculationQueueWorker {
    */
   async start() {
     if (this.isRunning) {
-      console.log('⚠️ Worker already running');
+      logger.warn('Worker already running');
       return;
     }
 
     this.isRunning = true;
     this.stats.startedAt = new Date();
-    console.log('🚀 Calculation Queue Worker started');
+    logger.info('Calculation Queue Worker started');
     
     this.poll();
   }
@@ -54,8 +57,8 @@ class CalculationQueueWorker {
       clearTimeout(this.pollTimer);
       this.pollTimer = null;
     }
-    console.log('🛑 Calculation Queue Worker stopped');
-    console.log(`📊 Stats: Processed=${this.stats.processed}, Errors=${this.stats.errors}`);
+    logger.info('Calculation Queue Worker stopped');
+    logger.info(`Stats: Processed=${this.stats.processed}, Errors=${this.stats.errors}`);
   }
 
   /**

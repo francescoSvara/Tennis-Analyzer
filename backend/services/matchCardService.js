@@ -16,6 +16,9 @@
  */
 
 const { supabase } = require('../db/supabase');
+const { createLogger } = require('../utils/logger');
+
+const logger = createLogger('MatchCardService');
 
 class MatchCardService {
   
@@ -25,7 +28,7 @@ class MatchCardService {
    */
   async getMatchCardFromSnapshot(matchId) {
     if (!supabase) {
-      console.warn('⚠️ Supabase not available');
+      logger.warn('Supabase not available');
       return null;
     }
 
@@ -38,13 +41,13 @@ class MatchCardService {
         .single();
 
       if (snapshot) {
-        console.log(`⚡ Match ${matchId} card from snapshot (quality=${snapshot.data_quality_int}%)`);
+        logger.debug(`Match ${matchId} card from snapshot (quality=${snapshot.data_quality_int}%)`);
         return this.formatSnapshotResponse(snapshot);
       }
 
       // Snapshot doesn't exist, build it
       if (error?.code === 'PGRST116') {
-        console.log(`📸 Building snapshot for match ${matchId}...`);
+        logger.info(`Building snapshot for match ${matchId}...`);
         const card = await this.getMatchCard(matchId);
         
         if (card) {
@@ -57,10 +60,10 @@ class MatchCardService {
         return card;
       }
 
-      console.error('Error fetching snapshot:', error?.message);
+      logger.error('Error fetching snapshot:', error?.message);
       return null;
     } catch (error) {
-      console.error('Error in getMatchCardFromSnapshot:', error);
+      logger.error('Error in getMatchCardFromSnapshot:', error);
       return null;
     }
   }
@@ -153,9 +156,9 @@ class MatchCardService {
       .upsert(snapshot, { onConflict: 'match_id' });
 
     if (error) {
-      console.error('Error saving snapshot:', error.message);
+      logger.error('Error saving snapshot:', error.message);
     } else {
-      console.log(`✅ Snapshot saved for match ${matchId}`);
+      logger.info(`Snapshot saved for match ${matchId}`);
     }
   }
 
@@ -165,7 +168,7 @@ class MatchCardService {
    */
   async getMatchCard(matchId) {
     if (!supabase) {
-      console.warn('⚠️ Supabase not available');
+      logger.warn('Supabase not available');
       return null;
     }
 

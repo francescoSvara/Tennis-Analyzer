@@ -14,6 +14,13 @@
 |---------|-----------|----------------|
 | [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Market APIs | [STATS_V3](FILOSOFIA_STATS_V3.md) (market features) |
 
+### 📁 File Codice Principali
+| File | Descrizione | Linee chiave |
+|------|-------------|---------------|
+| [`backend/server.js`](../../backend/server.js) | `normalizeOddsForBundle()` | L3507-3590 |
+| [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Fetch odds da SofaScore | `/api/v1/event/:id/odds` |
+| [`src/components/match/tabs/OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) | UI display odds | - |
+
 ---
 
 ## 0️⃣ PRINCIPIO FONDANTE

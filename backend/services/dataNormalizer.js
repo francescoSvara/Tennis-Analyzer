@@ -12,6 +12,9 @@
 
 const path = require('path');
 const fs = require('fs');
+const { createLogger } = require('../utils/logger');
+
+const logger = createLogger('DataNormalizer');
 
 // ============================================
 // PLAYER NAME MAPPINGS

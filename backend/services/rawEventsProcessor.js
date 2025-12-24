@@ -17,6 +17,9 @@
 
 const { supabase } = require('../db/supabase');
 const { enqueueTask } = require('./calculationQueueWorker');
+const { createLogger } = require('../utils/logger');
+
+const logger = createLogger('RawEventsProcessor');
 
 class RawEventsProcessor {
   constructor(options = {}) {
@@ -46,7 +49,7 @@ class RawEventsProcessor {
    */
   async ingest(sourceType, sourceEntity, sourceKey, payload) {
     if (!supabase) {
-      console.warn('⚠️ Supabase not available');
+      logger.warn('Supabase not available');
       return null;
     }
 
@@ -70,7 +73,7 @@ class RawEventsProcessor {
       .single();
 
     if (error) {
-      console.error(`❌ Ingest error (${sourceType}/${sourceEntity}):`, error.message);
+      logger.error(`Ingest error (${sourceType}/${sourceEntity}):`, error.message);
       return null;
     }
 
@@ -119,13 +122,13 @@ class RawEventsProcessor {
    */
   start() {
     if (this.isRunning) {
-      console.log('⚠️ Raw Events Processor already running');
+      logger.warn('Raw Events Processor already running');
       return;
     }
 
     this.isRunning = true;
     this.stats.startedAt = new Date();
-    console.log('🚀 Raw Events Processor started');
+    logger.info('Raw Events Processor started');
     
     this.poll();
   }
@@ -139,8 +142,8 @@ class RawEventsProcessor {
       clearTimeout(this.pollTimer);
       this.pollTimer = null;
     }
-    console.log('🛑 Raw Events Processor stopped');
-    console.log(`📊 Stats: Ingested=${this.stats.ingested}, Processed=${this.stats.processed}, Errors=${this.stats.errors}`);
+    logger.info('Raw Events Processor stopped');
+    logger.info(`Stats: Ingested=${this.stats.ingested}, Processed=${this.stats.processed}, Errors=${this.stats.errors}`);
   }
 
   /**
@@ -158,7 +161,7 @@ class RawEventsProcessor {
         return;
       }
     } catch (error) {
-      console.error('❌ Poll error:', error.message);
+      logger.error('Poll error:', error.message);
     }
 
     this.pollTimer = setTimeout(() => this.poll(), this.pollIntervalMs);

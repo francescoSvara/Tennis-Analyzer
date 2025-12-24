@@ -1,5 +1,5 @@
 # 🗺️ MAPPA RETE CONCETTUALE  
-## Versione V2.1 – MatchBundle-Centric Architecture
+## Versione V2.3 – MatchBundle-Centric Architecture + Full Code References
 
 > **Scopo**: fornire una visione unificata e navigabile dell'architettura concettuale del progetto.  
 > **Stato**: ATTIVA  
@@ -13,6 +13,71 @@
 | 📚 Index | 🏛️ Costituzione |
 |----------|-----------------|
 | [INDEX_FILOSOFIE](filosofie/INDEX_FILOSOFIE.md) | [FILOSOFIA_MADRE](filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) |
+
+### 🎯 Quick Access - File Codice Chiave
+| Area | File | Entry Point |
+|------|------|-------------|
+| **Feature Engine** | [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) | `computeFeatures()` L44 |
+| **Strategy Engine** | [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js) | `evaluateAll()` L39 |
+| **Bundle Endpoint** | [`backend/server.js`](../backend/server.js) | L3219-3430 `/api/match/:id/bundle` |
+| **Frontend Hook** | [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` L44 |
+| **Concept Checks** | [`scripts/runConceptChecks.js`](../scripts/runConceptChecks.js) | Validazione architettura |
+
+---
+
+## 📁 STRUTTURA CODICE COMPLETA
+
+```
+React-Betfair/
+├── backend/
+│   ├── server.js                      # 🌐 Express API principale (~5400 righe)
+│   ├── liveManager.js                 # ⚡ Gestione match live
+│   ├── importXlsx.js                  # 📥 Import dati XLSX
+│   ├── db/
+│   │   ├── supabase.js                # 🔌 Client Supabase
+│   │   ├── matchRepository.js         # 📦 CRUD matches_new
+│   │   └── liveTrackingRepository.js  # 📦 CRUD live tracking
+│   ├── services/
+│   │   ├── matchCardService.js        # 🎴 MatchBundle snapshot
+│   │   ├── playerStatsService.js      # 👤 Stats giocatori
+│   │   ├── playerProfileService.js    # 👤 Profili giocatori
+│   │   ├── dataNormalizer.js          # 🔄 Normalizzazione dati
+│   │   └── unifiedImporter.js         # 📥 Import unificato
+│   ├── strategies/
+│   │   └── strategyEngine.js          # 🎯 Strategy Engine
+│   ├── utils/
+│   │   ├── featureEngine.js           # 🧮 Feature Engine
+│   │   ├── pressureCalculator.js      # 📊 Calcolo pressure
+│   │   ├── breakDetector.js           # 🔍 Rilevamento break
+│   │   ├── matchSegmenter.js          # 📐 Segmentazione match
+│   │   └── svgMomentumExtractor.js    # 📈 Estrazione SVG momentum
+│   └── scraper/
+│       └── sofascoreScraper.js        # 🕷️ Scraper SofaScore
+├── src/
+│   ├── hooks/
+│   │   ├── useMatchBundle.jsx         # 🎣 Hook principale bundle
+│   │   ├── useLiveMatch.jsx           # ⚡ Hook match live
+│   │   └── useMatchCard.jsx           # 🎴 Hook card match
+│   └── components/
+│       ├── home/
+│       │   └── HomePage.jsx           # 🏠 Lista match
+│       ├── match/
+│       │   ├── MatchPage.jsx          # 📄 Container match
+│       │   └── tabs/
+│       │       ├── OverviewTab.jsx    # 📊 Tab overview
+│       │       ├── StatsTab.jsx       # 📈 Tab statistiche
+│       │       ├── MomentumTab.jsx    # 📉 Tab momentum
+│       │       ├── StrategiesTab.jsx  # 🎯 Tab strategie
+│       │       ├── OddsTab.jsx        # 💹 Tab odds
+│       │       ├── PredictorTab.jsx   # 🔮 Tab predictor
+│       │       ├── PointByPointTab.jsx# 🎾 Tab punto per punto
+│       │       └── JournalTab.jsx     # 📝 Tab journal
+│       └── StrategiesPanel.jsx        # 🎯 Panel strategie
+└── docs/
+    ├── filosofie/                     # 📚 Documenti architetturali
+    ├── specs/                         # 📋 Specifiche tecniche
+    └── MAPPA_RETE_CONCETTUALE_V2.md  # 🗺️ SEI QUI
+```
 
 ---
 
@@ -105,25 +170,24 @@ Match dalla tabella legacy (`matches` - import XLSX) non erano visualizzabili pe
 
 ### Core Architecture (docs/filosofie/)
 
-| Documento | Link | Ruolo |
-|-----------|------|-------|
-| FILOSOFIA_MADRE | [📄](filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Costituzione tecnica |
-| FILOSOFIA_DB_V2 | [📄](filosofie/FILOSOFIA_DB_V2.md) | DBA / Data Engineer - **FONTI + PIPELINE** |
-| FILOSOFIA_STATS_V3 | [📄](filosofie/FILOSOFIA_STATS_V3.md) | Feature & Strategy Engine |
-| FILOSOFIA_LIVE_TRACKING_V2 | [📄](filosofie/FILOSOFIA_LIVE_TRACKING_V2.md) | Real-time Engineer |
-| FILOSOFIA_ODDS_V2 | [📄](filosofie/FILOSOFIA_ODDS_V2.md) | Quant / Market Data |
-| FILOSOFIA_FRONTEND | [📄](filosofie/FILOSOFIA_FRONTEND.md) | Frontend UI/UX |
-| FILOSOFIA_FRONTEND_DATA_V2 | [📄](filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | FE Data Consumer |
-| FILOSOFIA_CONCEPT_CHECKS_V2 | [📄](filosofie/FILOSOFIA_CONCEPT_CHECKS_V2.md) | Architecture Guardrail |
-| INDEX_FILOSOFIE | [📄](filosofie/INDEX_FILOSOFIE.md) | Mappa navigazione |
+| Documento | Link | Ruolo | 📁 File Codice Correlati |
+|-----------|------|-------|--------------------------|
+| FILOSOFIA_MADRE | [📄](filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Costituzione tecnica | - |
+| FILOSOFIA_DB_V2 | [📄](filosofie/FILOSOFIA_DB_V2.md) | DBA / Data Engineer | [`backend/db/`](../backend/db/), [`backend/importXlsx.js`](../backend/importXlsx.js) |
+| FILOSOFIA_STATS_V3 | [📄](filosofie/FILOSOFIA_STATS_V3.md) | Feature & Strategy Engine | [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js), [`backend/strategies/`](../backend/strategies/) || FILOSOFIA_CALCOLI_V1 | [📄](filosofie/FILOSOFIA_CALCOLI_V1.md) | Feature Library & Calculation Standards | [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js), [`backend/utils/pressureCalculator.js`](../backend/utils/pressureCalculator.js) || FILOSOFIA_LIVE_TRACKING_V2 | [📄](filosofie/FILOSOFIA_LIVE_TRACKING_V2.md) | Real-time Engineer | [`backend/liveManager.js`](../backend/liveManager.js), [`backend/db/liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js) |
+| FILOSOFIA_ODDS_V2 | [📄](filosofie/FILOSOFIA_ODDS_V2.md) | Quant / Market Data | [`backend/server.js`](../backend/server.js) (endpoints odds) |
+| FILOSOFIA_FRONTEND | [📄](filosofie/FILOSOFIA_FRONTEND.md) | Frontend UI/UX | [`src/components/`](../src/components/) |
+| FILOSOFIA_FRONTEND_DATA_V2 | [📄](filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | FE Data Consumer | [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx) |
+| FILOSOFIA_CONCEPT_CHECKS_V2 | [📄](filosofie/FILOSOFIA_CONCEPT_CHECKS_V2.md) | Architecture Guardrail | [`scripts/runConceptChecks.js`](../scripts/runConceptChecks.js) |
+| INDEX_FILOSOFIE | [📄](filosofie/INDEX_FILOSOFIE.md) | Mappa navigazione | - |
 
 ### Specifications (docs/specs/)
 
-| Documento | Link | Scopo |
-|-----------|------|-------|
-| HPI_RESILIENCE | [📄](specs/HPI_RESILIENCE.md) | Feature pressione/resilienza |
-| SPEC_FRONTEND_MOTION_UI | [📄](specs/SPEC_FRONTEND_MOTION_UI.md) | Animazioni e motion |
-| SPEC_VALUE_SVG | [📄](specs/SPEC_VALUE_SVG.md) | Visualizzazioni SVG |
+| Documento | Link | Scopo | 📁 File Codice Correlati |
+|-----------|------|-------|--------------------------|
+| HPI_RESILIENCE | [📄](specs/HPI_RESILIENCE.md) | Feature pressione/resilienza | [`backend/utils/pressureCalculator.js`](../backend/utils/pressureCalculator.js), [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) |
+| SPEC_FRONTEND_MOTION_UI | [📄](specs/SPEC_FRONTEND_MOTION_UI.md) | Animazioni e motion | [`src/motion/`](../src/motion/) |
+| SPEC_VALUE_SVG | [📄](specs/SPEC_VALUE_SVG.md) | Visualizzazioni SVG | [`backend/utils/svgMomentumExtractor.js`](../backend/utils/svgMomentumExtractor.js) |
 
 ### Documenti DEPRECATED
 - tutte le versioni V1 precedenti non elencate sopra
@@ -207,62 +271,104 @@ Match dalla tabella legacy (`matches` - import XLSX) non erano visualizzabili pe
 
 ---
 
-## 3️⃣ RIFERIMENTI CODICE
+## 3️⃣ RIFERIMENTI CODICE DETTAGLIATI
 
-### Backend - Server
+### 🔌 Backend - Server Principale
 
-| File | Linee | Funzione |
-|------|-------|----------|
-| `backend/server.js` | L1131-1230 | `/api/matches/db` - Lista match con ricerca |
-| `backend/server.js` | L3219-3430 | `/api/match/:id/bundle` - Bundle completo |
-| `backend/server.js` | L3431-3505 | `transformLegacyMatchToBundle()` - Trasforma legacy |
-| `backend/server.js` | L3591-3620 | `extractScore()` - Estrae score (nuovo + legacy) |
+| File | Righe | Funzione | Endpoint |
+|------|-------|----------|----------|
+| [`backend/server.js`](../backend/server.js) | ~5400 | Server Express principale | - |
+| [`backend/server.js`](../backend/server.js) | L1131-1230 | Lista match con ricerca | `GET /api/matches/db` |
+| [`backend/server.js`](../backend/server.js) | L3219-3430 | Bundle completo | `GET /api/match/:id/bundle` |
+| [`backend/server.js`](../backend/server.js) | L3431-3505 | Trasforma legacy | `transformLegacyMatchToBundle()` |
+| [`backend/server.js`](../backend/server.js) | L3591-3620 | Estrae score | `extractScore()` |
 
-### Backend - Feature Engine ⚡ NUOVO
+### 🧮 Backend - Feature Engine
 
-| File | Funzione | Descrizione |
-|------|----------|-------------|
-| [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) | `computeFeatures()` | Calcola TUTTE le features |
-| | `calculateVolatility()` | Da powerRankings |
-| | `calculateVolatilityFromScore()` | Fallback da score |
-| | `calculateDominance()` | Da powerRankings |
-| | `calculateDominanceFromScore()` | Fallback da score |
-| | `calculateDominanceFromOdds()` | Fallback da odds |
-| | `calculateServeDominance()` | Da statistics |
-| | `calculateServeDominanceFromRankings()` | Fallback da rankings |
-| | `calculateBreakProbability()` | Da statistics |
-| | `calculateBreakProbabilityFromOddsRankings()` | Fallback |
-| | `calculatePressureFromScore()` | Fallback da score |
-| | `calculateMomentumFromScore()` | Fallback da score |
+| File | Funzione | Linea | Descrizione |
+|------|----------|-------|-------------|
+| [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) | `calculateVolatility()` | L44 | Da powerRankings |
+| | `calculateDominance()` | L92 | Da powerRankings |
+| | `calculateServeDominance()` | L126 | Da statistics |
+| | `calculateBreakProbability()` | L191 | Da statistics |
+| | `calculateRecentMomentum()` | L277 | Da powerRankings |
+| | `computeFeatures()` | L331 | Entry point - Calcola TUTTE le features |
+| | `calculateVolatilityFromScore()` | L476 | Fallback da score |
+| | `calculateDominanceFromScore()` | L507 | Fallback da score |
+| | `calculateDominanceFromOdds()` | L540 | Fallback da odds |
+| | `calculateServeDominanceFromRankings()` | L573 | Fallback da rankings |
+| | `calculateBreakProbabilityFromOddsRankings()` | L598 | Fallback |
 
-> **PRINCIPIO**: Ogni feature ha SEMPRE un valore.  
-> Se non ci sono powerRankings, usa score. Se non c'è score, usa odds. Etc.
+### 🎯 Backend - Strategy Engine
 
-### Backend - Repository & Services
+| File | Funzione | Linea | Descrizione |
+|------|----------|-------|-------------|
+| [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js) | `evaluateAll()` | L39 | Entry point - Valuta tutte le strategie |
+| | `evaluateLayWinner()` | L63 | Strategia Lay the Winner |
+| | `evaluateBancaServizio()` | L148 | Strategia Banca Servizio |
+| | `evaluateSuperBreak()` | L222 | Strategia Super Break |
+| | `evaluateTiebreakSpecialist()` | L307 | Strategia Tiebreak Specialist |
+| | `evaluateMomentumSwing()` | L378 | Strategia Momentum Swing |
+| | `getSummary()` | L443 | Riassunto segnali |
 
-| File | Funzione |
-|------|----------|
-| `backend/db/matchRepository.js` | CRUD matches_new, statistics, pbp |
-| `backend/services/matchCardService.js` | Snapshot cache + build card |
-| `backend/scraper/sofascoreScraper.js` | Scraper SofaScore |
-| `backend/importXlsx.js` | Import XLSX → matches (legacy) |
+### 📦 Backend - Repository & Services
 
-### Frontend
+| File | Descrizione |
+|------|-------------|
+| [`backend/db/matchRepository.js`](../backend/db/matchRepository.js) | CRUD matches_new, statistics, pbp |
+| [`backend/db/liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js) | CRUD live tracking |
+| [`backend/db/supabase.js`](../backend/db/supabase.js) | Client Supabase |
+| [`backend/services/matchCardService.js`](../backend/services/matchCardService.js) | Snapshot cache + build card |
+| [`backend/services/playerStatsService.js`](../backend/services/playerStatsService.js) | Statistiche giocatori |
+| [`backend/services/playerProfileService.js`](../backend/services/playerProfileService.js) | Profili giocatori |
+| [`backend/services/dataNormalizer.js`](../backend/services/dataNormalizer.js) | Normalizzazione dati |
+| [`backend/scraper/sofascoreScraper.js`](../backend/scraper/sofascoreScraper.js) | Scraper SofaScore |
+| [`backend/importXlsx.js`](../backend/importXlsx.js) | Import XLSX → matches (legacy) |
 
-| File | Funzione |
-|------|----------|
-| `src/hooks/useMatchBundle.jsx` | Hook fetch + WS + polling |
-| `src/components/home/HomePage.jsx` | Lista match, ricerca |
-| `src/components/match/MatchPage.jsx` | Container tabs |
-| `src/components/match/tabs/*.jsx` | Singole tab (consumano bundle.tabs.*) |
-| [`src/components/match/tabs/OverviewTab.jsx`](../src/components/match/tabs/OverviewTab.jsx) | QuickSignals, MiniMomentum |
+### 🧮 Backend - Utils Aggiuntive
+
+| File | Descrizione |
+|------|-------------|
+| [`backend/utils/pressureCalculator.js`](../backend/utils/pressureCalculator.js) | Calcoli HPI e pressure |
+| [`backend/utils/breakDetector.js`](../backend/utils/breakDetector.js) | Rilevamento break/hold |
+| [`backend/utils/matchSegmenter.js`](../backend/utils/matchSegmenter.js) | Segmentazione temporale match |
+| [`backend/utils/svgMomentumExtractor.js`](../backend/utils/svgMomentumExtractor.js) | Estrazione dati da SVG momentum |
+| [`backend/utils/valueInterpreter.js`](../backend/utils/valueInterpreter.js) | Interpretazione valori |
+
+### 🎣 Frontend - Hooks
+
+| File | Export | Linea | Descrizione |
+|------|--------|-------|-------------|
+| [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` | L44 | Hook principale fetch + WS + polling |
+| | `useTabData()` | L354 | Estrae dati tab specifico |
+| | `useHeaderData()` | L364 | Estrae header dal bundle |
+| | `useDataQuality()` | L371 | Estrae dataQuality |
+| | `BundleState` | L19 | Enum stati bundle |
+| [`src/hooks/useLiveMatch.jsx`](../src/hooks/useLiveMatch.jsx) | `useLiveMatch()` | - | Hook match live |
+| [`src/hooks/useMatchCard.jsx`](../src/hooks/useMatchCard.jsx) | `useMatchCard()` | - | Hook card match |
+
+### 🖥️ Frontend - Componenti
+
+| File | Descrizione | Bundle Data Consumati |
+|------|-------------|----------------------|
+| [`src/components/HomePage.jsx`](../src/components/HomePage.jsx) | Lista match, ricerca | Lista matches |
+| [`src/components/match/MatchPage.jsx`](../src/components/match/MatchPage.jsx) | Container tabs | bundle (intero) |
+| [`src/components/match/tabs/OverviewTab.jsx`](../src/components/match/tabs/OverviewTab.jsx) | QuickSignals, MiniMomentum | header, tabs.overview, tabs.strategies |
+| [`src/components/match/tabs/StatsTab.jsx`](../src/components/match/tabs/StatsTab.jsx) | Statistiche partita | tabs.stats |
+| [`src/components/match/tabs/MomentumTab.jsx`](../src/components/match/tabs/MomentumTab.jsx) | Grafico momentum | tabs.momentum |
+| [`src/components/match/tabs/StrategiesTab.jsx`](../src/components/match/tabs/StrategiesTab.jsx) | Panel strategie | tabs.strategies |
+| [`src/components/match/tabs/OddsTab.jsx`](../src/components/match/tabs/OddsTab.jsx) | Quote mercato | tabs.odds |
+| [`src/components/match/tabs/PredictorTab.jsx`](../src/components/match/tabs/PredictorTab.jsx) | Predizioni | tabs.predictor |
+| [`src/components/match/tabs/PointByPointTab.jsx`](../src/components/match/tabs/PointByPointTab.jsx) | Punto per punto | tabs.pointByPoint |
+| [`src/components/match/tabs/JournalTab.jsx`](../src/components/match/tabs/JournalTab.jsx) | Journal trading | tabs.journal |
 
 ---
 
 ## 4️⃣ DOMINI CONCETTUALI E RESPONSABILITÀ
 
 ### 🗄️ Database & Data Sources
-**Documento**: [FILOSOFIA_DB_V2.md](filosofie/FILOSOFIA_DB_V2.md)
+**Documento**: [FILOSOFIA_DB_V2.md](filosofie/FILOSOFIA_DB_V2.md)  
+**📁 Codice**: [`backend/db/`](../backend/db/), [`backend/importXlsx.js`](../backend/importXlsx.js), [`backend/services/matchCardService.js`](../backend/services/matchCardService.js)
 
 Responsabilità:
 - **Acquisizione dati** da fonti esterne (XLSX, SofaScore, SVG)
@@ -277,7 +383,8 @@ Output:
 ---
 
 ### ⚡ Live Tracking
-**Documento**: [FILOSOFIA_LIVE_TRACKING_V2.md](filosofie/FILOSOFIA_LIVE_TRACKING_V2.md)
+**Documento**: [FILOSOFIA_LIVE_TRACKING_V2.md](filosofie/FILOSOFIA_LIVE_TRACKING_V2.md)  
+**📁 Codice**: [`backend/liveManager.js`](../backend/liveManager.js), [`backend/db/liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js)
 
 Responsabilità:
 - Aggiornare stato live
@@ -292,16 +399,15 @@ Output:
 
 ### 📊 Feature & Strategy Engine
 **Documento**: [FILOSOFIA_STATS_V3.md](filosofie/FILOSOFIA_STATS_V3.md)  
-**Spec**: [HPI_RESILIENCE.md](specs/HPI_RESILIENCE.md)
+**Feature Library**: [FILOSOFIA_CALCOLI_V1.md](filosofie/FILOSOFIA_CALCOLI_V1.md)  
+**Spec**: [HPI_RESILIENCE.md](specs/HPI_RESILIENCE.md)  
+**📁 Codice**: [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js), [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js), [`backend/utils/pressureCalculator.js`](../backend/utils/pressureCalculator.js)
 
 Responsabilità:
 - Feature Engine (volatility, pressure, dominance, ecc.)
+- Feature Library (tassonomia, standard, fallback, schede operative)
 - Strategy Engine (READY / WATCH / OFF)
 - Confidence, entry/exit rules
-
-Codice:
-- `backend/utils/featureEngine.js`
-- `backend/strategies/strategyEngine.js`
 
 Output:
 - Segnali strategia
@@ -310,7 +416,8 @@ Output:
 ---
 
 ### 💹 Odds & Market Data
-**Documento**: [FILOSOFIA_ODDS_V2.md](filosofie/FILOSOFIA_ODDS_V2.md)
+**Documento**: [FILOSOFIA_ODDS_V2.md](filosofie/FILOSOFIA_ODDS_V2.md)  
+**📁 Codice**: [`backend/server.js`](../backend/server.js) (endpoints odds)
 
 Responsabilità:
 - Normalizzazione odds
@@ -325,7 +432,8 @@ Output:
 
 ### 🖥️ Frontend Data Consumption
 **Documento**: [FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md](filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md)  
-**UI/UX**: [FILOSOFIA_FRONTEND.md](filosofie/FILOSOFIA_FRONTEND.md)
+**UI/UX**: [FILOSOFIA_FRONTEND.md](filosofie/FILOSOFIA_FRONTEND.md)  
+**📁 Codice**: [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx), [`src/components/match/`](../src/components/match/)
 
 Responsabilità:
 - Consumo del MatchBundle
@@ -341,7 +449,8 @@ Vincoli:
 ---
 
 ### 🧪 Concept Checks
-**Documento**: [FILOSOFIA_CONCEPT_CHECKS_V2.md](filosofie/FILOSOFIA_CONCEPT_CHECKS_V2.md)
+**Documento**: [FILOSOFIA_CONCEPT_CHECKS_V2.md](filosofie/FILOSOFIA_CONCEPT_CHECKS_V2.md)  
+**📁 Codice**: [`scripts/runConceptChecks.js`](../scripts/runConceptChecks.js), [`scripts/checkConceptualMap.js`](../scripts/checkConceptualMap.js)
 
 Responsabilità:
 - Enforce invarianti architetturali
@@ -358,31 +467,31 @@ Output:
 ```
 FONTI ESTERNE
  ┌─────────────────────────────┐
- │ • XLSX (storici)            │
- │ • SofaScore API (live/det.) │
- │ • SVG Momentum              │
+ │ • XLSX (storici)            │  📁 backend/importXlsx.js
+ │ • SofaScore API (live/det.) │  📁 backend/scraper/sofascoreScraper.js
+ │ • SVG Momentum              │  📁 backend/utils/svgMomentumExtractor.js
  │ • Future...                 │
  └─────────────┬───────────────┘
                │
                ▼
         ┌──────────────┐
-        │   SUPABASE   │
-        │      DB      │
+        │   SUPABASE   │          📁 backend/db/supabase.js
+        │      DB      │          📁 backend/db/matchRepository.js
         └──────┬───────┘
                │
                ▼
       ┌────────────────┐
-      │ FEATURE ENGINE │
+      │ FEATURE ENGINE │          📁 backend/utils/featureEngine.js
       └────────┬───────┘
                │
                ▼
       ┌────────────────┐
-      │STRATEGY ENGINE │
+      │STRATEGY ENGINE │          📁 backend/strategies/strategyEngine.js
       └────────┬───────┘
                │
                ▼
       ┌────────────────┐
-      │  MATCH BUNDLE  │
+      │  MATCH BUNDLE  │          📁 backend/services/matchCardService.js
       │   SNAPSHOT     │
       └────────┬───────┘
                │
@@ -390,14 +499,14 @@ FONTI ESTERNE
        │               │
        ▼               ▼
    REST API        WS PATCH
-  (load init)       (live)
-       │               │
+  (load init)       (live)      📁 backend/server.js (L3219 /api/match/:id/bundle)
+       │               │        📁 backend/liveManager.js
        └───────┬───────┘
                │
                ▼
         ┌──────────────┐
-        │   FRONTEND   │
-        │      UI      │
+        │   FRONTEND   │          📁 src/hooks/useMatchBundle.jsx
+        │      UI      │          📁 src/components/match/tabs/*.jsx
         └──────────────┘
 ```
 
@@ -405,17 +514,17 @@ FONTI ESTERNE
 
 ## 6️⃣ INVARIANTI GLOBALI (RIASSUNTO)
 
-- ❗ Frontend consuma **solo MatchBundle** (1 chiamata)
+- ❗ Frontend consuma **solo MatchBundle** (1 chiamata) → [`useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx)
 - ❗ Fonti dati (XLSX, SofaScore, SVG) → popolano DB, mai chiamate da FE
-- ❗ Le strategie vivono **solo nel backend**
-- ❗ Le feature non decidono
+- ❗ Le strategie vivono **solo nel backend** → [`strategyEngine.js`](../backend/strategies/strategyEngine.js)
+- ❗ Le feature non decidono → [`featureEngine.js`](../backend/utils/featureEngine.js)
 - ❗ I segnali non sono metriche
 - ❗ Odds ≠ Predictor
-- ❗ Live aggiorna lo stato, non lo interpreta
+- ❗ Live aggiorna lo stato, non lo interpreta → [`liveManager.js`](../backend/liveManager.js)
 - ❗ DataQuality è backend-only
 - ❗ Fallback legacy trasparente al frontend
 
-Questi invarianti sono **verificati automaticamente** dai Concept Checks.
+Questi invarianti sono **verificati automaticamente** dai Concept Checks → [`runConceptChecks.js`](../scripts/runConceptChecks.js)
 
 ---
 
@@ -423,53 +532,78 @@ Questi invarianti sono **verificati automaticamente** dai Concept Checks.
 
 ### Schema Corrente
 
-| Tabella | Tipo | Fonte | Note |
-|---------|------|-------|------|
-| `matches` | Legacy | XLSX Import | ~2600 match, schema (winner_name, loser_name) |
-| `matches_new` | Nuovo | SofaScore | Schema normalizzato (home_player_id, away_player_id) |
-| `match_card_snapshot` | Cache | Bundle Engine | Cache pre-calcolata del bundle |
-| `players` | Lookup | SofaScore | Dati giocatori |
-| `tournaments` | Lookup | SofaScore | Dati tornei |
-| `match_statistics_new` | Detail | SofaScore | Statistiche match |
-| `match_power_rankings_new` | Detail | SofaScore/SVG | Momentum per game |
-| `match_odds_new` | Detail | SofaScore | Odds storiche |
+| Tabella | Tipo | Fonte | Repository | Note |
+|---------|------|-------|------------|------|
+| `matches` | Legacy | XLSX Import | [`matchRepository.js`](../backend/db/matchRepository.js) | ~2600 match, schema (winner_name, loser_name) |
+| `matches_new` | Nuovo | SofaScore | [`matchRepository.js`](../backend/db/matchRepository.js) | Schema normalizzato (home_player_id, away_player_id) |
+| `match_card_snapshot` | Cache | Bundle Engine | [`matchCardService.js`](../backend/services/matchCardService.js) | Cache pre-calcolata del bundle |
+| `players` | Lookup | SofaScore | [`playerService.js`](../backend/services/playerService.js) | Dati giocatori |
+| `tournaments` | Lookup | SofaScore | - | Dati tornei |
+| `match_statistics_new` | Detail | SofaScore | [`matchRepository.js`](../backend/db/matchRepository.js) | Statistiche match |
+| `match_power_rankings_new` | Detail | SofaScore/SVG | [`matchRepository.js`](../backend/db/matchRepository.js) | Momentum per game |
+| `match_odds_new` | Detail | SofaScore | [`matchRepository.js`](../backend/db/matchRepository.js) | Odds storiche |
 
 ### Fallback Order (Bundle Endpoint)
 
-1. `match_card_snapshot` (più veloce, cache)
-2. `v_matches_with_players` (matches_new + join)
-3. `matches` (legacy) + transform
+1. `match_card_snapshot` (più veloce, cache) → [`matchCardService.js`](../backend/services/matchCardService.js)
+2. `v_matches_with_players` (matches_new + join) → [`matchRepository.js`](../backend/db/matchRepository.js)
+3. `matches` (legacy) + transform → [`server.js`](../backend/server.js) L3431 `transformLegacyMatchToBundle()`
 
 ---
 
 ## 8️⃣ GUIDA ALL'ESTENSIONE DEL SISTEMA
 
 ### Aggiungere una nuova fonte dati
-1. Creare script/service di import
-2. Popolare tabelle DB appropriate
+1. Creare script/service in [`backend/services/`](../backend/services/)
+2. Popolare tabelle DB via [`backend/db/matchRepository.js`](../backend/db/matchRepository.js)
 3. **NON** creare endpoint frontend separato
-4. Integrare nel flow del bundle
+4. Integrare nel flow del bundle in [`backend/services/matchCardService.js`](../backend/services/matchCardService.js)
 
 ### Aggiungere una nuova feature
-1. Dichiararla in Feature Engine
+1. Dichiararla in [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js)
 2. Classificarla (Player / Match / Combined)
 3. Documentarla in `FILOSOFIA_STATS_V3.md`
-4. Usarla in Predictor o Strategy
+4. Usarla in [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js)
 
 ### Aggiungere una nuova strategia
-1. Usare solo feature esistenti
-2. Implementarla nello Strategy Engine
-3. Produrre `StrategySignal`
-4. Verificare Concept Checks
+1. Usare solo feature da featureEngine
+2. Implementarla in [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js)
+3. Produrre `StrategySignal` con status READY/WATCH/OFF
+4. Aggiungere alla funzione `evaluateAll()`
 
 ### Aggiungere una nuova tab frontend
-1. Leggere solo `MatchBundle.tabs.*`
-2. Non introdurre nuovi fetch
-3. Rispettare dataQuality
+1. Creare file in [`src/components/match/tabs/`](../src/components/match/tabs/)
+2. Leggere solo `MatchBundle.tabs.*` via [`useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx)
+3. Non introdurre nuovi fetch
+4. Rispettare dataQuality
+5. Esportare da [`src/components/match/tabs/index.js`](../src/components/match/tabs/index.js)
 
 ---
 
-## 9️⃣ STATO DEL DOCUMENTO
+## 9️⃣ API ENDPOINTS PRINCIPALI
+
+### Match Bundle (Core)
+| Metodo | Endpoint | File | Linea |
+|--------|----------|------|-------|
+| GET | `/api/match/:id/bundle` | [`server.js`](../backend/server.js) | L3219 |
+| GET | `/api/matches/db` | [`server.js`](../backend/server.js) | L1131 |
+
+### Statistiche & Momentum
+| Metodo | Endpoint | Descrizione |
+|--------|----------|-------------|
+| GET | `/api/match/:id/stats` | Statistiche match |
+| GET | `/api/match/:id/momentum` | Dati momentum |
+| GET | `/api/match/:id/odds` | Quote match |
+
+### Giocatori
+| Metodo | Endpoint | Descrizione |
+|--------|----------|-------------|
+| GET | `/api/player/:id` | Profilo giocatore |
+| GET | `/api/player/:id/stats` | Statistiche giocatore |
+
+---
+
+## 🔟 STATO DEL DOCUMENTO
 
 Questa mappa è:
 - il punto di ingresso architetturale
@@ -481,4 +615,18 @@ Se un cambiamento **non è riflesso qui**,
 
 ---
 
-**Fine documento – MAPPA_RETE_CONCETTUALE_V2.1**
+## 1️⃣1️⃣ FILOSOFIE - RIEPILOGO COLLEGAMENTI CODICE
+
+| Filosofia | File Codice Principali |
+|-----------|------------------------|
+| [DB_V2](filosofie/FILOSOFIA_DB_V2.md) | [`matchRepository.js`](../backend/db/matchRepository.js), [`importXlsx.js`](../backend/importXlsx.js), [`sofascoreScraper.js`](../backend/scraper/sofascoreScraper.js) |
+| [STATS_V3](filosofie/FILOSOFIA_STATS_V3.md) | [`featureEngine.js`](../backend/utils/featureEngine.js), [`strategyEngine.js`](../backend/strategies/strategyEngine.js), [`pressureCalculator.js`](../backend/utils/pressureCalculator.js) |
+| [LIVE_V2](filosofie/FILOSOFIA_LIVE_TRACKING_V2.md) | [`liveManager.js`](../backend/liveManager.js), [`liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js) |
+| [ODDS_V2](filosofie/FILOSOFIA_ODDS_V2.md) | [`server.js`](../backend/server.js) L3507-3590, [`OddsTab.jsx`](../src/components/match/tabs/OddsTab.jsx) |
+| [FRONTEND](filosofie/FILOSOFIA_FRONTEND.md) | [`src/components/match/tabs/`](../src/components/match/tabs/), [`src/motion/`](../src/motion/) |
+| [FRONTEND_DATA_V2](filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | [`useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx), [`MatchPage.jsx`](../src/components/match/MatchPage.jsx) |
+| [CONCEPT_CHECKS_V2](filosofie/FILOSOFIA_CONCEPT_CHECKS_V2.md) | [`runConceptChecks.js`](../scripts/runConceptChecks.js), [`checkConceptualMap.js`](../scripts/checkConceptualMap.js) |
+
+---
+
+**Fine documento – MAPPA_RETE_CONCETTUALE_V2.3**

@@ -86,30 +86,32 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ```
 +-- backend/
-¦   +-- server.js              # API + bundle
-¦   +-- services/              # Business logic
-¦   +-- strategies/            # 5 strategie trading
-¦   +-- utils/featureEngine.js # Feature calculations
+ï¿½   +-- server.js              # API + bundle
+ï¿½   +-- services/              # Business logic
+ï¿½   +-- strategies/            # 5 strategie trading
+ï¿½   +-- utils/featureEngine.js # Feature calculations
 +-- src/
-¦   +-- components/            # React UI
-¦   +-- hooks/useMatchBundle.jsx
-¦   +-- motion/                # Animations
+ï¿½   +-- components/            # React UI
+ï¿½   +-- hooks/useMatchBundle.jsx
+ï¿½   +-- motion/                # Animations
 +-- docs/filosofie/            # Architecture docs
 ```
 
 ---
 
-## ? Completato v3.0 (Dicembre 2025)
+## âœ… Completato v3.0 (Dicembre 2025)
 
 ### Core
 - **MatchBundle endpoint** - Single API per match data
 - **Feature Engine** - Calcolo con fallback completo
-- **Strategy Engine** - 5 strategie (LayTheWinner, BancaServizio, SuperBreak, ValueBetting, MomentumShift)
+- **Strategy Engine** - 5 strategie backend (LayTheWinner, BancaServizio, SuperBreak, ValueBetting, MomentumShift)
 - **Dual Source** - SofaScore + XLSX unificati
 - **dataQuality scoring** per ogni match
+- **Logger utility** - Logging strutturato backend
 
 ### Frontend
 - useMatchBundle hook
+- StrategiesPanel consuma `bundle.tabs.strategies` (no calcoli locali)
 - Tabs: Overview, Strategies, Stats, Momentum, Predictor, PointByPoint
 - QuickSignals con features reali
 - Motion System (Framer Motion)
@@ -123,6 +125,13 @@ Calcola features da dati disponibili (score, odds, rankings):
 - 9 documenti filosofia
 - Mappa concettuale
 - Check scripts automatici
+
+### Metriche (24 Dic 2025)
+| Check | Valore |
+|-------|--------|
+| Errori arch | 20 |
+| Warning | 25 |
+| Check mappa | 112 âœ“ |
 
 ---
 

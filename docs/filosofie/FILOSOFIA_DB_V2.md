@@ -14,6 +14,15 @@
 |---------|-----------|----------------|
 | [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Fonti Esterne (SofaScore, XLSX) | [STATS_V3](FILOSOFIA_STATS_V3.md) |
 
+### 📁 File Codice Principali
+| File | Descrizione | Linee chiave |
+|------|-------------|---------------|
+| [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js) | CRUD matches_new | L617-720 `getMatches()` |
+| [`backend/db/supabase.js`](../../backend/db/supabase.js) | Client Supabase | - |
+| [`backend/importXlsx.js`](../../backend/importXlsx.js) | Import XLSX → matches | - |
+| [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Scraper SofaScore | - |
+| [`backend/server.js`](../../backend/server.js) | Bundle endpoint | L3219-3423 |
+
 ---
 
 ## 0️⃣ PRINCIPIO FONDANTE
@@ -97,11 +106,11 @@ Esistono **due tabelle match** per ragioni storiche:
 
 ### Riferimenti Codice
 
-```
-backend/db/matchRepository.js     → Gestisce matches_new + view v_matches_with_players
-backend/importXlsx.js             → Popola tabella matches (legacy)
-backend/merge-xlsx-sofascore.js   → Merge tra le due fonti
-```
+| File | Descrizione |
+|------|-------------|
+| [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js) | Gestisce matches_new + view v_matches_with_players |
+| [`backend/importXlsx.js`](../../backend/importXlsx.js) | Popola tabella matches (legacy) |
+| [`backend/merge-xlsx-sofascore.js`](../../backend/merge-xlsx-sofascore.js) | Merge tra le due fonti |
 
 ### Fallback Implementato
 
@@ -130,7 +139,7 @@ if (!matchData && supabaseClient?.supabase) {
 ## 3️⃣ FONTI DATI (POPOLAMENTO DB)
 
 ### 3.1 XLSX Import
-**File**: `backend/importXlsx.js`
+**File**: [`backend/importXlsx.js`](../../backend/importXlsx.js)
 
 Importa dati storici da file Excel:
 - Nomi giocatori (winner_name, loser_name)
@@ -140,7 +149,7 @@ Importa dati storici da file Excel:
 **Qualità dati**: 30% (no SVG, no point-by-point, no statistiche dettagliate)
 
 ### 3.2 SofaScore Scraper
-**File**: `backend/scraper/sofascoreScraper.js`
+**File**: [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js)
 
 Scrape dati completi da SofaScore:
 - Dati evento (`/api/v1/event/:id`)
@@ -152,7 +161,7 @@ Scrape dati completi da SofaScore:
 **Qualità dati**: 80-100% (dipende da disponibilità dati SofaScore)
 
 ### 3.3 SVG Momentum
-**File**: `backend/services/svgMomentumService.js`
+**File**: [`backend/services/svgMomentumService.js`](../../backend/services/svgMomentumService.js)
 
 Parsing del grafico SVG momentum:
 - Estrae punti dal path SVG
@@ -187,7 +196,7 @@ Il frontend **NON**:
 GET /api/match/:matchId/bundle
 ```
 
-**File**: `backend/server.js` L3219-3423
+**File**: [`backend/server.js`](../../backend/server.js) L3219-3423
 
 Restituisce:
 ```json
@@ -216,7 +225,7 @@ Restituisce:
 GET /api/matches/db?limit=20&search=musetti
 ```
 
-**File**: `backend/server.js` L1131-1230
+**File**: [`backend/server.js`](../../backend/server.js) L1131-1230
 
 Parametri:
 - `limit` - numero max risultati (default 20)

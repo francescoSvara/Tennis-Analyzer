@@ -12,6 +12,14 @@
 |---------|-----------|--------------|
 | [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) (strategie) |
 
+### 📁 File Codice Principali
+| Tipo | File |
+|------|------|
+| Hooks | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) |
+| Components | [`src/components/match/tabs/`](../../src/components/match/tabs/) |
+| Motion | [`src/motion/`](../../src/motion/) |
+| Backend API | [`backend/server.js`](../../backend/server.js) L3219-3430 |
+
 ---
 
 ## 🧠 PRINCIPIO BASE DEL FRONTEND
@@ -100,11 +108,10 @@ GET /api/home/live → lista match live + mini card + count strategie 🟢/🟡
 
 | Funzione | File | Scopo |
 |----------|------|-------|
-| `liveManager.fetchLiveList()` | `backend/liveManager.js` | Recupera lista match live |
-| `matchCardService.getMatchCard()` | `backend/services/matchCardService.js` | Assembla card match con snapshot |
-| `valueInterpreter.getVolatility()` | `backend/utils/valueInterpreter.js` | Calcola volatilità |
-| `valueInterpreter.getElasticity()` | `backend/utils/valueInterpreter.js` | Calcola elasticità |
-| `strategyEngine.evaluateAll()` | `backend/strategies/strategyEngine.js` (NUOVO) | Valuta strategie e ritorna count ready/watch |
+| `liveManager.fetchLiveList()` | [`backend/liveManager.js`](../../backend/liveManager.js) | Recupera lista match live |
+| `matchCardService.getMatchCard()` | [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) | Assembla card match con snapshot |
+| `featureEngine.computeFeatures()` | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Calcola tutte le features |
+| `strategyEngine.evaluateAll()` | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Valuta strategie e ritorna count ready/watch |
 
 ---
 
@@ -152,10 +159,10 @@ WS   /ws/match/:id → push: scoreboard, odds, pbp, strategy signals, momentum
 
 | Funzione | File | Scopo |
 |----------|------|-------|
-| `liveManager.getTrackedMatch()` | `backend/liveManager.js` | Match live snapshot |
-| `rawEventsProcessor.processRawEvents()` | `backend/services/rawEventsProcessor.js` | Pipeline RAW → Canonical |
-| `valueInterpreter.*` | `backend/utils/valueInterpreter.js` | Volatility, elasticity, character |
-| `pressureCalculator.calculatePressureIndex()` | `backend/utils/pressureCalculator.js` | Pressure index |
+| `liveManager.getTrackedMatch()` | [`backend/liveManager.js`](../../backend/liveManager.js) | Match live snapshot |
+| `featureEngine.computeFeatures()` | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Tutte le features |
+| `strategyEngine.evaluateAll()` | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Valuta strategie |
+| `pressureCalculator.calculatePressureIndex()` | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Pressure index |
 
 ---
 
@@ -354,19 +361,18 @@ bundle.header.features.momentum.last5avg    → MiniMomentum (number)
 
 ### Endpoint
 ```
-GET /api/match/:id/overview
+GET /api/match/:eventId/bundle → bundle.tabs.overview + bundle.header.features
 ```
+**File**: [`backend/server.js`](../../backend/server.js) L3219-3430
 
 ### Funzioni Backend da usare:
 
 | Funzione | File | Scopo |
 |----------|------|-------|
-| `pressureCalculator.calculatePressureIndex()` | `backend/utils/pressureCalculator.js` | Calcola pressure index server/receiver |
-| `valueInterpreter.getVolatility()` | `backend/utils/valueInterpreter.js` | Volatilità |
-| `valueInterpreter.getElasticity()` | `backend/utils/valueInterpreter.js` | Elasticità |
-| `valueInterpreter.getMatchCharacter()` | `backend/utils/valueInterpreter.js` | Carattere match (COMEBACK_PRONE, etc) |
-| `breakDetector.calculateBreaksFromPbp()` | `backend/utils/breakDetector.js` | Calcola break da PbP |
-| `strategyEngine.getSummary()` | `backend/strategies/strategyEngine.js` (NUOVO) | Count ready/watch/off |
+| `featureEngine.computeFeatures()` | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Calcola TUTTE le features |
+| `pressureCalculator.calculatePressureIndex()` | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Pressure index |
+| `breakDetector.calculateBreaksFromPbp()` | [`backend/utils/breakDetector.js`](../../backend/utils/breakDetector.js) | Calcola break da PbP |
+| `strategyEngine.getSummary()` | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Count ready/watch/off |
 
 ### Dati Quick Signals:
 ```js
@@ -552,7 +558,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.strategies
 ```
 
 ### Implementazione Reale
-**File**: `backend/strategies/strategyEngine.js`
+**File**: [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js)
 
 ```js
 // Output reale di bundle.tabs.strategies
@@ -586,19 +592,18 @@ GET /api/match/:eventId/bundle → bundle.tabs.strategies
 ```
 
 ### Frontend Component
-**File**: `src/components/match/StrategiesTab.jsx`
+**File**: [`src/components/match/tabs/StrategiesTab.jsx`](../../src/components/match/tabs/StrategiesTab.jsx)
 
 Legge `data.signals[]` e renderizza una card per strategia.
-**FIX applicato**: variabile `status` (era `statusKey` undefined)
 
 ### Funzioni Backend da usare:
 
 | Funzione | File | Scopo |
 |----------|------|-------|
-| `strategyEngine.evaluateLayWinner()` | `backend/strategies/strategyEngine.js` | Valuta Lay The Winner |
-| `strategyEngine.evaluateBancaServizio()` | `backend/strategies/strategyEngine.js` | Valuta Banca Servizio |
-| `strategyEngine.evaluateSuperBreak()` | `backend/strategies/strategyEngine.js` | Valuta Super Break |
-| `pressureCalculator.getHoldDifficulty()` | `backend/utils/pressureCalculator.js` | Hold difficulty |
+| `strategyEngine.evaluateLayWinner()` | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) L63 | Valuta Lay The Winner |
+| `strategyEngine.evaluateBancaServizio()` | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) L148 | Valuta Banca Servizio |
+| `strategyEngine.evaluateSuperBreak()` | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) L222 | Valuta Super Break |
+| `pressureCalculator.getHoldDifficulty()` | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Hold difficulty |
 
 ### Dipendenze dati per le 3 strategie:
 
@@ -656,7 +661,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.odds
 ```
 
 ### Implementazione Reale
-**File**: `backend/server.js` → `normalizeOddsForBundle()`
+**File**: [`backend/server.js`](../../backend/server.js) → `normalizeOddsForBundle()`
 
 ```js
 // Output reale di bundle.tabs.odds
@@ -670,7 +675,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.odds
 ```
 
 ### Frontend Component
-**File**: `src/components/match/OddsTab.jsx`
+**File**: [`src/components/match/tabs/OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx)
 
 Legge `data.matchWinner.home.value` / `data.matchWinner.away.value` e calcola trend.
 
@@ -706,15 +711,16 @@ Legge `data.matchWinner.home.value` / `data.matchWinner.away.value` e calcola tr
 
 ### Endpoint
 ```
-GET /api/match/:id/point-by-point
+GET /api/match/:eventId/bundle → bundle.tabs.pointByPoint
 ```
+**File**: [`backend/server.js`](../../backend/server.js)
 
 ### Funzioni Backend da usare:
 
 | Funzione | File | Scopo |
 |----------|------|-------|
-| `sofascoreScraper.getPointByPoint()` | `backend/scraper/sofascoreScraper.js` | Fetch PbP da SofaScore |
-| `breakDetector.calculateBreaksFromPbp()` | `backend/utils/breakDetector.js` | Calcola break da PbP |
+| `sofascoreScraper.getPointByPoint()` | [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Fetch PbP da SofaScore |
+| `breakDetector.calculateBreaksFromPbp()` | [`backend/utils/breakDetector.js`](../../backend/utils/breakDetector.js) | Calcola break da PbP |
 
 ### Arricchimento:
 - Tag break point / set point / match point
@@ -764,7 +770,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.stats
 ```
 
 ### Implementazione Reale
-**File**: `backend/server.js` → bundle.tabs.stats
+**File**: [`backend/server.js`](../../backend/server.js) → bundle.tabs.stats
 
 ```js
 // Output reale di bundle.tabs.stats
@@ -776,7 +782,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.stats
 ```
 
 ### Frontend Component
-**File**: `src/components/match/StatsTab.jsx`
+**File**: [`src/components/match/tabs/StatsTab.jsx`](../../src/components/match/tabs/StatsTab.jsx)
 
 Legge `data.match`, `data.bySet` per visualizzare statistiche.
 
@@ -813,7 +819,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.momentum
 ```
 
 ### Implementazione Reale
-**File**: `backend/server.js` → bundle.tabs.momentum
+**File**: [`backend/server.js`](../../backend/server.js) → bundle.tabs.momentum
 
 ```js
 // Output reale di bundle.tabs.momentum
@@ -834,7 +840,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.momentum
 ```
 
 ### Frontend Component
-**File**: `src/components/match/MomentumTab.jsx`
+**File**: [`src/components/match/tabs/MomentumTab.jsx`](../../src/components/match/tabs/MomentumTab.jsx)
 
 Legge:
 - `data.powerRankings[]` per grafico momentum
@@ -878,7 +884,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.predictor
 ```
 
 ### Implementazione Reale
-**File**: `backend/server.js` → bundle.tabs.predictor
+**File**: [`backend/server.js`](../../backend/server.js) → bundle.tabs.predictor
 
 ```js
 // Output reale di bundle.tabs.predictor
@@ -897,7 +903,7 @@ GET /api/match/:eventId/bundle → bundle.tabs.predictor
 ```
 
 ### Frontend Component
-**File**: `src/components/match/PredictorTab.jsx`
+**File**: [`src/components/match/tabs/PredictorTab.jsx`](../../src/components/match/tabs/PredictorTab.jsx)
 
 Legge:
 - `data.winProbability` per gauge principale
@@ -976,32 +982,29 @@ Questa parte aumenta tantissimo l'usabilità.
 
 | File | Funzionalità |
 |------|-------------|
-| `backend/liveManager.js` | Polling, reconcile, tracked matches, broadcast |
-| `backend/db/liveTrackingRepository.js` | CRUD tracking |
-| `backend/scraper/sofascoreScraper.js` | Endpoint SofaScore (event, statistics, power rankings, PbP) |
-| `backend/services/rawEventsProcessor.js` | Pipeline RAW → Canonical |
-| `backend/services/calculationQueueWorker.js` | Task async |
-| `backend/utils/valueInterpreter.js` | Volatility, elasticity, match character, power rankings enhanced |
-| `backend/utils/pressureCalculator.js` | Pressure index |
-| `backend/utils/breakDetector.js` | Break detection |
-| `backend/utils/matchSegmenter.js` | Fasi match |
-| `backend/services/matchCardService.js` | Match card assembly + snapshots |
+| [`backend/liveManager.js`](../../backend/liveManager.js) | Polling, reconcile, tracked matches, broadcast |
+| [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) | CRUD tracking |
+| [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Endpoint SofaScore (event, statistics, power rankings, PbP) |
+| [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) | Match card assembly + snapshots |
+| [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Tutte le features (volatility, dominance, pressure, momentum) |
+| [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Pressure index |
+| [`backend/utils/breakDetector.js`](../../backend/utils/breakDetector.js) | Break detection |
+| [`backend/utils/matchSegmenter.js`](../../backend/utils/matchSegmenter.js) | Fasi match |
+| [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Strategy evaluation engine |
 
-## Nuovi Servizi da Creare
+## Servizi da Completare (TODO)
 
-| File | Funzionalità |
-|------|-------------|
-| `backend/strategies/strategyEngine.js` | Strategy evaluation engine |
-| `backend/services/oddsService.js` | Implied prob, fair odds, edge |
-| `backend/services/momentumService.js` | Momentum owner, shift detection |
-| `backend/services/predictorService.js` | Win prob, break prob, edge vs market |
+| File | Funzionalità | Stato |
+|------|-------------|-------|
+| `backend/services/oddsService.js` | Implied prob, fair odds, edge | TODO |
+| `backend/services/predictorService.js` | Win prob avanzata, edge vs market | TODO |
 
-## Spostamenti Obbligati
+## Spostamenti Implementati
 
-- ❌ FE scraping → ✅ Solo backend
-- ❌ Duplicazione pressure calcs → ✅ Pressure calcolato backend, FE solo render
-- ❌ Strategie in FE utils → ✅ Strategy engine backend, FE consuma segnali
-- ❌ Data completeness in FE → ✅ Backend calcola completeness e manda badge
+- ✅ FE scraping rimosso → Solo backend [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js)
+- ✅ Pressure calcolato backend → [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
+- ✅ Strategie in backend → [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js)
+- ✅ Data completeness backend → `bundle.dataQuality`
 
 ---
 
@@ -1422,9 +1425,10 @@ animate: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } }
 
 ---
 
-## 6️⃣ File Motion da Creare
+## 6️⃣ File Motion
 
-### `src/motion/tokens.ts`
+### `src/motion/tokens.js`
+**File**: [`src/motion/tokens.js`](../../src/motion/tokens.js)
 ```typescript
 export const durations = {
   fast: 0.18,
@@ -1471,12 +1475,14 @@ export const variants = {
 
 ---
 
-## 7️⃣ Wrapper Components da Creare
+## 7️⃣ Wrapper Components
 
-- `<MotionCard>` - Card con hover animation
-- `<MotionButton>` - Button con tap/hover feedback
-- `<MotionTab>` - Tab con underline animata
-- `<MotionRow>` - Row tabella con fade slide
+**File**: [`src/motion/`](../../src/motion/)
+
+- [`MotionCard.jsx`](../../src/motion/MotionCard.jsx) - Card con hover animation
+- [`MotionButton.jsx`](../../src/motion/MotionButton.jsx) - Button con tap/hover feedback
+- [`MotionTab.jsx`](../../src/motion/MotionTab.jsx) - Tab con underline animata
+- [`MotionRow.jsx`](../../src/motion/MotionRow.jsx) - Row tabella con fade slide
 
 ### Esempio MotionCard
 ```tsx
@@ -1589,16 +1595,17 @@ npm install lottie-react
 - [ ] Psicologia > numeri
 
 ## Backend
-- [ ] Strategy Engine nel backend
+- [x] Strategy Engine → [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js)
+- [x] Feature Engine → [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
 - [ ] Odds Service con edge calculation
-- [ ] Momentum Service con shift detection
-- [ ] Predictor Service con win probability
-- [ ] Niente scraping dal frontend
-- [ ] Pressure calculator solo backend
+- [x] Momentum da powerRankings → [`backend/server.js`](../../backend/server.js)
+- [ ] Predictor Service con win probability avanzata
+- [x] Scraping solo backend → [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js)
+- [x] Pressure calculator backend → [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js)
 
 ## Motion
-- [ ] tokens.ts con durations/easings/variants
-- [ ] MotionCard, MotionButton, MotionTab, MotionRow
+- [x] [`src/motion/tokens.js`](../../src/motion/tokens.js) con durations/easings/variants
+- [x] [`MotionCard`](../../src/motion/MotionCard.jsx), [`MotionButton`](../../src/motion/MotionButton.jsx), [`MotionTab`](../../src/motion/MotionTab.jsx), [`MotionRow`](../../src/motion/MotionRow.jsx)
 - [ ] AnimatePresence per mount/unmount
 - [ ] prefers-reduced-motion rispettato
 - [ ] Phosphor Icons con weight coerente

@@ -451,17 +451,34 @@ function computeFeatures(matchData) {
     momentum = { trend: 'stable', recentSwing: 0, last5avg: 50, breakCount: 0 };
   }
   
+  // =====================================================================
+  // DATA SOURCE FLAGS: Indica l'origine di ogni feature per trasparenza
+  // =====================================================================
+  const volatilitySource = hasPowerRankings ? 'live' : (hasScore ? 'score' : 'estimated');
+  const pressureSource = hasStatistics ? 'statistics' : (hasScore ? 'score' : 'estimated');
+  const dominanceSource = hasPowerRankings ? 'live' : (hasScore ? 'score' : (hasOdds ? 'odds' : 'estimated'));
+  const serveDominanceSource = hasStatistics ? 'statistics' : (hasRankings ? 'rankings' : 'estimated');
+  const breakProbabilitySource = hasStatistics ? 'statistics' : (hasOdds || hasRankings ? 'odds' : 'estimated');
+  const momentumSource = hasPowerRankings ? 'live' : (hasScore ? 'score' : 'estimated');
+  
   return {
     volatility: Math.round(volatility),
+    volatilitySource,
     pressure: Math.round(pressure),
+    pressureSource,
     dominance: Math.round(dominance),
+    dominanceSource,
     serveDominance: Math.round(serveDominance),
+    serveDominanceSource,
     returnDominance: Math.round(returnDominance),
+    returnDominanceSource: serveDominanceSource, // Same as serveDominance
     breakProbability: Math.round(breakProbability),
+    breakProbabilitySource,
     dominantPlayer,
     serverPlayerId: serving,
     momentum,
-    // Indica la qualità dei dati
+    momentumSource,
+    // Backward compatibility: dataSource globale (più conservativo)
     dataSource: hasPowerRankings ? 'live' : (hasStatistics ? 'statistics' : (hasScore ? 'score' : 'estimated'))
   };
 }

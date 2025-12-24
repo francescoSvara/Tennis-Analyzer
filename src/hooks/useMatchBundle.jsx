@@ -13,7 +13,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { apiUrl } from '../config';
+import { apiUrl, WS_URL, IS_DEVELOPMENT } from '../config';
 
 // Stati del fetch
 export const BundleState = {
@@ -177,22 +177,23 @@ export function useMatchBundle(matchId, options = {}) {
   const connectWebSocket = useCallback(() => {
     if (!matchIdRef.current) return;
 
-    // Costruisci URL WebSocket
+    // Costruisci URL WebSocket usando WS_URL da config
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     
-    // In dev, API_BASE_URL è vuoto, usa localhost:3001
-    // In prod, estrai host dall'API URL
+    // Usa WS_URL da config (già include fallback appropriato)
     let wsHost;
-    const baseUrl = apiUrl('');
-    if (baseUrl && baseUrl.startsWith('http')) {
-      try {
-        wsHost = new URL(baseUrl).host;
-      } catch {
-        wsHost = 'localhost:3001';
+    try {
+      // WS_URL da config include già il default corretto per dev/prod
+      const wsBase = WS_URL;
+      if (wsBase && wsBase.startsWith('http')) {
+        wsHost = new URL(wsBase).host;
+      } else {
+        // Fallback: usa window.location.host (funziona in prod)
+        wsHost = window.location.host;
       }
-    } else {
-      // Dev mode - usa backend locale
-      wsHost = 'localhost:3001';
+    } catch {
+      // Fallback sicuro
+      wsHost = window.location.host;
     }
     
     const wsUrl = `${wsProtocol}//${wsHost}/ws/match/${matchIdRef.current}`;

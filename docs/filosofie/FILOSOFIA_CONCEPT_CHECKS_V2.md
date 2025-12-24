@@ -14,6 +14,14 @@
 |---------|---------|------------|
 | [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | TUTTI i documenti | MatchBundle, Feature Engine, Strategy Engine |
 
+### 📁 File Codice Principali
+| File | Descrizione |
+|------|-------------|
+| [`scripts/runConceptChecks.js`](../../scripts/runConceptChecks.js) | Runner checks architetturali |
+| [`scripts/checkConceptualMap.js`](../../scripts/checkConceptualMap.js) | Verifica file esistenti |
+| [`docs/concept/rules.v1.json`](../concept/rules.v1.json) | Regole V1 (legacy) |
+| [`docs/concept/rules.v2.json`](../concept/rules.v2.json) | Regole V2 (semantic) |
+
 ---
 
 ## 0️⃣ SCOPO DEL DOCUMENTO (AGGIORNATO)

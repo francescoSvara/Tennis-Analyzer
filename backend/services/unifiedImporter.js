@@ -25,6 +25,9 @@ const {
   mergeMatches,
   areMatchesSame
 } = require('./dataNormalizer');
+const { createLogger } = require('../utils/logger');
+
+const logger = createLogger('UnifiedImporter');
 
 // ============================================
 // SUPABASE CLIENT
@@ -236,17 +239,15 @@ async function upsertMatch(matchData, source = 'unknown') {
 async function importXlsx(filePath, options = {}) {
   const { dryRun = false, limit = null, verbose = false } = options;
   
-  console.log('\n📊 IMPORTING XLSX FILE');
-  console.log('='.repeat(50));
-  console.log(`File: ${filePath}`);
-  console.log(`Dry Run: ${dryRun}`);
+  logger.info('IMPORTING XLSX FILE');
+  logger.info(`File: ${filePath}, Dry Run: ${dryRun}`);
   
   resetStats();
   stats.source = 'xlsx';
   
   // Leggi il file
   if (!fs.existsSync(filePath)) {
-    console.error(`❌ File not found: ${filePath}`);
+    logger.error(`File not found: ${filePath}`);
     return stats;
   }
   
@@ -255,7 +256,7 @@ async function importXlsx(filePath, options = {}) {
   const sheet = workbook.Sheets[sheetName];
   const rows = XLSX.utils.sheet_to_json(sheet);
   
-  console.log(`\n📋 Found ${rows.length} rows`);
+  logger.info(`Found ${rows.length} rows`);
   
   const toProcess = limit ? rows.slice(0, limit) : rows;
   
@@ -263,7 +264,7 @@ async function importXlsx(filePath, options = {}) {
     const row = toProcess[i];
     
     if (verbose) {
-      console.log(`\n[${i+1}/${toProcess.length}] ${row.Winner} vs ${row.Loser}`);
+      logger.debug(`[${i+1}/${toProcess.length}] ${row.Winner} vs ${row.Loser}`);
     }
     
     if (dryRun) {
@@ -276,9 +277,9 @@ async function importXlsx(filePath, options = {}) {
       });
       
       if (verbose) {
-        console.log(`  Fingerprint: ${fingerprint}`);
-        console.log(`  Winner: ${row.Winner} -> ${normalizePlayerName(row.Winner)}`);
-        console.log(`  Loser: ${row.Loser} -> ${normalizePlayerName(row.Loser)}`);
+        logger.debug(`Fingerprint: ${fingerprint}`);
+        logger.debug(`Winner: ${row.Winner} -> ${normalizePlayerName(row.Winner)}`);
+        logger.debug(`Loser: ${row.Loser} -> ${normalizePlayerName(row.Loser)}`);
       }
       
       stats.processed++;
@@ -289,7 +290,7 @@ async function importXlsx(filePath, options = {}) {
     
     // Progress ogni 100
     if ((i + 1) % 100 === 0) {
-      console.log(`  Progress: ${i+1}/${toProcess.length} (${stats.inserted} new, ${stats.updated} updated, ${stats.errors} errors)`);
+      logger.info(`Progress: ${i+1}/${toProcess.length} (${stats.inserted} new, ${stats.updated} updated, ${stats.errors} errors)`);
     }
   }
   
@@ -307,10 +308,10 @@ async function importXlsx(filePath, options = {}) {
 async function importSofascoreJson(filePath, options = {}) {
   const { dryRun = false, verbose = false } = options;
   
-  console.log(`\n🔵 Importing Sofascore: ${path.basename(filePath)}`);
+  logger.debug(`Importing Sofascore: ${path.basename(filePath)}`);
   
   if (!fs.existsSync(filePath)) {
-    console.error(`❌ File not found: ${filePath}`);
+    logger.error(`File not found: ${filePath}`);
     return null;
   }
   
@@ -320,7 +321,7 @@ async function importSofascoreJson(filePath, options = {}) {
   const event = data.event || data;
   
   if (!event) {
-    console.warn('  ⚠️ Invalid structure, skipping');
+    logger.warn('Invalid structure, skipping');
     return null;
   }
   
@@ -339,8 +340,8 @@ async function importSofascoreJson(filePath, options = {}) {
   };
   
   if (verbose) {
-    console.log(`  ${matchData.winner_name} vs ${matchData.loser_name}`);
-    console.log(`  Tournament: ${matchData.tournament}`);
+    logger.debug(`${matchData.winner_name} vs ${matchData.loser_name}`);
+    logger.debug(`Tournament: ${matchData.tournament}`);
   }
   
   if (dryRun) {
@@ -355,27 +356,26 @@ async function importSofascoreJson(filePath, options = {}) {
  * Importa tutti i JSON da una cartella
  */
 async function importSofascoreFolder(folderPath, options = {}) {
-  console.log('\n🔵 IMPORTING SOFASCORE FOLDER');
-  console.log('='.repeat(50));
-  console.log(`Folder: ${folderPath}`);
+  logger.info('IMPORTING SOFASCORE FOLDER');
+  logger.info(`Folder: ${folderPath}`);
   
   resetStats();
   stats.source = 'sofascore';
   
   if (!fs.existsSync(folderPath)) {
-    console.error(`❌ Folder not found: ${folderPath}`);
+    logger.error(`Folder not found: ${folderPath}`);
     return stats;
   }
   
   const files = fs.readdirSync(folderPath).filter(f => f.endsWith('.json'));
-  console.log(`Found ${files.length} JSON files`);
+  logger.info(`Found ${files.length} JSON files`);
   
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     await importSofascoreJson(path.join(folderPath, file), options);
     
     if ((i + 1) % 50 === 0) {
-      console.log(`  Progress: ${i+1}/${files.length}`);
+      logger.info(`Progress: ${i+1}/${files.length}`);
     }
   }
   
@@ -388,17 +388,7 @@ async function importSofascoreFolder(folderPath, options = {}) {
 // ============================================
 
 function printStats() {
-  console.log('\n' + '='.repeat(50));
-  console.log('📊 IMPORT SUMMARY');
-  console.log('='.repeat(50));
-  console.log(`
-Source:      ${stats.source}
-Processed:   ${stats.processed}
-Inserted:    ${stats.inserted}
-Updated:     ${stats.updated}
-Duplicates:  ${stats.duplicates}
-Errors:      ${stats.errors}
-`);
+  logger.info(`IMPORT SUMMARY - Source: ${stats.source}, Processed: ${stats.processed}, Inserted: ${stats.inserted}, Updated: ${stats.updated}, Duplicates: ${stats.duplicates}, Errors: ${stats.errors}`);
 }
 
 /**

@@ -9,6 +9,9 @@
  */
 
 const { supabase } = require('../db/supabase');
+const { createLogger } = require('../utils/logger');
+
+const logger = createLogger('PlayerProfile');
 
 // ============================================================================
 // CONSTANTS
@@ -149,14 +152,14 @@ function getFormat(match) {
  */
 async function getPlayerMatches(playerName) {
   if (!supabase) {
-    console.warn('⚠️ Supabase not available');
+    logger.warn('Supabase not available');
     return [];
   }
 
   const lastName = extractLastName(playerName);
   const normalizedSearch = normalizePlayerName(playerName);
   
-  console.log(`🔍 Searching matches for "${playerName}" (lastName: ${lastName})`);
+  logger.debug(`Searching matches for "${playerName}" (lastName: ${lastName})`);
   
   // ===== STRATEGY 1: Search by winner_name/loser_name (works for xlsx data) =====
   const { data: matchesWinner, error: err1 } = await supabase
@@ -169,8 +172,8 @@ async function getPlayerMatches(playerName) {
     .select('*')
     .ilike('loser_name', `%${lastName}%`);
 
-  if (err1) console.error('Error fetching winner matches:', err1.message);
-  if (err2) console.error('Error fetching loser matches:', err2.message);
+  if (err1) logger.error('Error fetching winner matches:', err1.message);
+  if (err2) logger.error('Error fetching loser matches:', err2.message);
 
   // ===== STRATEGY 2: Search by player_id (works for sofascore data with empty names) =====
   // First, find the player ID(s) matching this name
@@ -179,14 +182,14 @@ async function getPlayerMatches(playerName) {
     .select('id, name, full_name')
     .or(`name.ilike.%${lastName}%,full_name.ilike.%${lastName}%`);
   
-  if (playerErr) console.error('Error fetching players:', playerErr.message);
+  if (playerErr) logger.error('Error fetching players:', playerErr.message);
   
   // Filter players that actually match the search name
   const matchingPlayerIds = (players || [])
     .filter(p => playerMatches(p.name, playerName) || playerMatches(p.full_name, playerName))
     .map(p => p.id);
   
-  console.log(`   Found ${matchingPlayerIds.length} matching player IDs: ${matchingPlayerIds.join(', ')}`);
+  logger.debug(`Found ${matchingPlayerIds.length} matching player IDs: ${matchingPlayerIds.join(', ')}`);
   
   // Query matches by player_id if we found matching players
   let matchesByPlayerId = [];
@@ -211,11 +214,11 @@ async function getPlayerMatches(playerName) {
       `)
       .in('away_player_id', matchingPlayerIds);
     
-    if (homeErr) console.error('Error fetching home matches by ID:', homeErr.message);
-    if (awayErr) console.error('Error fetching away matches by ID:', awayErr.message);
+    if (homeErr) logger.error('Error fetching home matches by ID:', homeErr.message);
+    if (awayErr) logger.error('Error fetching away matches by ID:', awayErr.message);
     
     matchesByPlayerId = [...(homeMatches || []), ...(awayMatches || [])];
-    console.log(`   Found ${matchesByPlayerId.length} matches by player_id`);
+    logger.debug(`Found ${matchesByPlayerId.length} matches by player_id`);
   }
 
   // ===== COMBINE ALL MATCHES =====
@@ -297,7 +300,7 @@ async function getPlayerMatches(playerName) {
   }
 
   const result = Array.from(uniqueMatches.values());
-  console.log(`   ✅ Total unique matches found: ${result.length} (${result.filter(m => m.player_role === 'winner').length}W - ${result.filter(m => m.player_role === 'loser').length}L)`);
+  logger.info(`Total unique matches found: ${result.length} (${result.filter(m => m.player_role === 'winner').length}W - ${result.filter(m => m.player_role === 'loser').length}L)`);
   
   return result;
 }

@@ -14,6 +14,14 @@
 |---------|-----------|----------------|
 | [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [DB_V2](FILOSOFIA_DB_V2.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) (runtime features) |
 
+### 📁 File Codice Principali
+| File | Descrizione | Linee chiave |
+|------|-------------|---------------|
+| [`backend/liveManager.js`](../../backend/liveManager.js) | Gestione live tracking | `syncMatch()` L1132 |
+| [`backend/server.js`](../../backend/server.js) | WebSocket endpoint | L4950+ `/ws/match/:id` |
+| [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) | Repository live tracking | - |
+| [`backend/services/svgMomentumService.js`](../../backend/services/svgMomentumService.js) | SVG momentum parsing | - |
+
 ---
 
 ## 0️⃣ PRINCIPIO FONDANTE

@@ -14,6 +14,19 @@
 |---------|-----------|----------------|
 | [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [DB_V2](FILOSOFIA_DB_V2.md), [ODDS_V2](FILOSOFIA_ODDS_V2.md), [LIVE_V2](FILOSOFIA_LIVE_TRACKING_V2.md), [HPI](../specs/HPI_RESILIENCE.md) | [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) |
 
+### 📚 Dominio Calcoli / Feature Library
+| Documento | Scopo |
+|-----------|-------|
+| [FILOSOFIA_CALCOLI_V1](FILOSOFIA_CALCOLI_V1.md) | Tassonomia features, standard input/output, fallback, schede feature operative |
+
+### 📁 File Codice Principali
+| File | Descrizione | Linee chiave |
+|------|-------------|---------------|
+| [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Feature Engine - calcoli | L44-674 |
+| [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Strategy Engine - segnali | L39-443 |
+| [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Calcolo pressure index | - |
+| [`backend/server.js`](../../backend/server.js) | Bundle endpoint | L3219-3423 |
+
 ---
 
 ## 0️⃣ CAMBIO DI PARADIGMA (IMPORTANTE)
@@ -161,6 +174,8 @@ Esempio:
 
 ## 5️⃣ FEATURE ENGINE (REGOLE)
 
+> 📚 **Dettaglio completo**: Vedi [FILOSOFIA_CALCOLI_V1](FILOSOFIA_CALCOLI_V1.md) per tassonomia, standard, fallback e schede feature operative.
+
 Ogni feature DEVE dichiarare:
 
 ```md
@@ -186,6 +201,8 @@ Persistenza: NO
 ```
 
 Feature senza questa scheda sono **architetturalmente incomplete**.
+
+> ⚠️ Per schede complete con fallback chain, edge cases e test fixtures → [FILOSOFIA_CALCOLI_V1](FILOSOFIA_CALCOLI_V1.md)
 
 ---
 
@@ -292,26 +309,26 @@ Non esistono "dati mancanti" - ogni match ha almeno: score, odds, rankings.
 **File**: [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
 
 #### Funzioni Primarie (dati completi)
-| Feature | Funzione | Input | Output |
-|---------|----------|-------|--------|
-| volatility | `calculateVolatility()` | powerRankings, score, odds | 0..100 |
-| dominance | `calculateDominance()` | powerRankings, statistics | 0..100 |
-| serveDominance | `calculateServeDominance()` | statistics, serving | 0..100 |
-| returnDominance | `calculateServeDominance()` | statistics, serving | 0..100 |
-| breakProbability | `calculateBreakProbability()` | statistics, server, gameScore | 0..100 |
-| pressure | via `pressureCalculator` | statistics | 0..100 |
-| momentum | `calculateRecentMomentum()` | powerRankings | { trend, swing, avg, breaks } |
+| Feature | Funzione | Linea | Input | Output |
+|---------|----------|-------|-------|--------|
+| volatility | [`calculateVolatility()`](../../backend/utils/featureEngine.js#L92) | L92 | powerRankings, score, odds | 0..100 |
+| dominance | [`calculateDominance()`](../../backend/utils/featureEngine.js#L191) | L191 | powerRankings, statistics | 0..100 |
+| serveDominance | [`calculateServeDominance()`](../../backend/utils/featureEngine.js#L277) | L277 | statistics, serving | 0..100 |
+| returnDominance | [`calculateServeDominance()`](../../backend/utils/featureEngine.js#L277) | L277 | statistics, serving | 0..100 |
+| breakProbability | [`calculateBreakProbability()`](../../backend/utils/featureEngine.js#L331) | L331 | statistics, server, gameScore | 0..100 |
+| pressure | via `pressureCalculator` | - | statistics | 0..100 |
+| momentum | [`calculateRecentMomentum()`](../../backend/utils/featureEngine.js#L540) | L540 | powerRankings | { trend, swing, avg, breaks } |
 
 #### Funzioni Fallback (dati parziali)
-| Feature | Funzione Fallback | Input Minimo |
-|---------|-------------------|--------------|
-| volatility | `calculateVolatilityFromScore()` | score.sets[] |
-| dominance | `calculateDominanceFromScore()` | score.sets[] |
-| dominance | `calculateDominanceFromOdds()` | odds.matchWinner |
-| serveDominance | `calculateServeDominanceFromRankings()` | player1.ranking, player2.ranking |
-| breakProbability | `calculateBreakProbabilityFromOddsRankings()` | odds, rankings |
-| pressure | `calculatePressureFromScore()` | score.sets[] |
-| momentum | `calculateMomentumFromScore()` | score.sets[] |
+| Feature | Funzione Fallback | Linea | Input Minimo |
+|---------|-------------------|-------|---------------|
+| volatility | [`calculateVolatilityFromScore()`](../../backend/utils/featureEngine.js#L126) | L126 | score.sets[] |
+| dominance | [`calculateDominanceFromScore()`](../../backend/utils/featureEngine.js#L476) | L476 | score.sets[] |
+| dominance | [`calculateDominanceFromOdds()`](../../backend/utils/featureEngine.js#L507) | L507 | odds.matchWinner |
+| serveDominance | [`calculateServeDominanceFromRankings()`](../../backend/utils/featureEngine.js#L573) | L573 | player1.ranking, player2.ranking |
+| breakProbability | [`calculateBreakProbabilityFromOddsRankings()`](../../backend/utils/featureEngine.js#L598) | L598 | odds, rankings |
+| pressure | [`calculatePressureFromScore()`](../../backend/utils/featureEngine.js#L643) | L643 | score.sets[] |
+| momentum | [`calculateMomentumFromScore()`](../../backend/utils/featureEngine.js#L674) | L674 | score.sets[] |
 
 #### Gerarchia di Calcolo in `computeFeatures()`
 ```
@@ -327,13 +344,13 @@ Per ogni feature:
 ### Strategy Engine
 **File**: [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js)
 
-| Strategia | Status Conditions | Output Fields |
-|-----------|-------------------|---------------|
-| **LayWinner** | volatility > 60 + dominance > 70 → READY | conditions.set1Winner, favoriteLeading, lowOdds |
-| **BancaServizio** | breakProb > 35 + pressure > 50 → READY | conditions.highPressure, highBreakProb |
-| **SuperBreak** | volatility > 70 + breakProb > 40 + pressure > 60 → READY | conditions.strongDominance |
-| **TiebreakSpecialist** | tiebreak detected + volatility > 50 → READY | conditions.nearTiebreak |
-| **MomentumSwing** | momentum shift + volatile + close score → READY | conditions.bigSwing, multipleBreaks |
+| Strategia | Funzione | Linea | Status Conditions |
+|-----------|----------|-------|-------------------|
+| **LayWinner** | [`evaluateLayWinner()`](../../backend/strategies/strategyEngine.js#L63) | L63 | volatility > 60 + dominance > 70 → READY |
+| **BancaServizio** | [`evaluateBancaServizio()`](../../backend/strategies/strategyEngine.js#L148) | L148 | breakProb > 35 + pressure > 50 → READY |
+| **SuperBreak** | [`evaluateSuperBreak()`](../../backend/strategies/strategyEngine.js#L222) | L222 | volatility > 70 + breakProb > 40 + pressure > 60 → READY |
+| **TiebreakSpecialist** | [`evaluateTiebreakSpecialist()`](../../backend/strategies/strategyEngine.js#L307) | L307 | tiebreak detected + volatility > 50 → READY |
+| **MomentumSwing** | [`evaluateMomentumSwing()`](../../backend/strategies/strategyEngine.js#L378) | L378 | momentum shift + volatile + close score → READY |
 
 ### Bundle Endpoint
 **File**: [`backend/server.js`](../../backend/server.js) (L3220-3430)

@@ -10,11 +10,20 @@ Questa è la **Costituzione tecnica** del progetto Tennis.
 
 Il progetto è progettato per **crescere come un’azienda tecnologica di grandi dimensioni**, ma con **terminologia e responsabilità da software system**, non astratte.
 
-*Ultimo aggiornamento: 23 Dicembre 2025*
+*Ultimo aggiornamento: 24 Dicembre 2025*
 
 ---
 
 > 📚 **[APRI INDEX COMPLETO](INDEX_FILOSOFIE.md)** – Mappa navigazione con diagrammi e FAQ
+
+### 📁 File Codice Chiave (Quick Reference)
+| Area | File Principale | Descrizione |
+|------|-----------------|-------------|
+| Feature Engine | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Calcola tutte le features |
+| Strategy Engine | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Valuta segnali READY/WATCH/OFF |
+| Bundle Endpoint | [`backend/server.js`](../../backend/server.js) L3219-3423 | API unificata `/api/match/:id/bundle` |
+| Frontend Hook | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | Consumo bundle + WebSocket |
+| Concept Checks | [`scripts/runConceptChecks.js`](../../scripts/runConceptChecks.js) | Validazione architettura |
 
 ---
 

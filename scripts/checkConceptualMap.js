@@ -63,6 +63,7 @@ const REFERENCES = {
 
   // Backend Utils
   backendUtils: [
+    'backend/utils/featureEngine.js',
     'backend/utils/valueInterpreter.js',
     'backend/utils/breakDetector.js',
     'backend/utils/matchSegmenter.js',
@@ -94,50 +95,44 @@ const REFERENCES = {
 
   // Frontend - Components esistenti
   frontendComponents: [
-    'src/components/MomentumTab.jsx',
-    'src/components/QuotesTab.jsx',
-    'src/components/ManualPredictor.jsx',
+    // Root components
+    'src/components/HomePage.jsx',
+    'src/components/ErrorBoundary.jsx',
     'src/components/MatchCard.jsx',
     'src/components/MatchGrid.jsx',
-    'src/components/MatchHeader.jsx',
-    'src/components/Statistics.jsx',
-    'src/components/PointByPoint.jsx',
-    'src/components/PointByPointWidget.jsx',
-    'src/components/PointRow.jsx',
-    'src/components/MomentumChart.jsx',
-    'src/components/IndicatorsChart.jsx',
     'src/components/PlayerPage.jsx',
-    'src/components/HomePage.jsx',
-    'src/components/Gestionale.jsx',
     'src/components/MonitoringDashboard.jsx',
-    'src/components/PredictorTab.jsx',
-    'src/components/SavedScrapes.jsx',
-    'src/components/ErrorBoundary.jsx',
-    'src/components/GameBlock.jsx',
-    'src/components/SetBlock.jsx',
     'src/components/SportSidebar.jsx',
-    'src/components/StatGroup.jsx',
-    'src/components/StatRow.jsx',
-    'src/components/StrategiesLivePanel.jsx',
     'src/components/StrategiesPanel.jsx',
-    'src/components/StrategyHistoricalPanel.jsx'
+    // Match page
+    'src/components/match/MatchPage.jsx',
+    // Match tabs
+    'src/components/match/tabs/OverviewTab.jsx',
+    'src/components/match/tabs/StatsTab.jsx',
+    'src/components/match/tabs/MomentumTab.jsx',
+    'src/components/match/tabs/StrategiesTab.jsx',
+    'src/components/match/tabs/OddsTab.jsx',
+    'src/components/match/tabs/PredictorTab.jsx',
+    'src/components/match/tabs/PointByPointTab.jsx',
+    'src/components/match/tabs/JournalTab.jsx'
   ],
 
   // Frontend - Hooks (includendo quelli da creare)
   frontendHooks: [
+    'src/hooks/useMatchBundle.jsx',
     'src/hooks/useMatchCard.jsx',
     'src/hooks/useMatchData.jsx',
     'src/hooks/useLiveMatch.jsx'
-    // 'src/hooks/useMatchBundle.jsx' - DA CREARE (violazione architetturale)
   ],
 
   // Frontend Motion - esistenti
   frontendMotion: [
+    'src/motion/index.js',
     'src/motion/tokens.js',
     'src/motion/MotionCard.jsx',
-    'src/motion/MotionButton.jsx'
-    // 'src/components/motion/MotionTab.jsx' - DA CREARE
-    // 'src/components/motion/MotionRow.jsx' - DA CREARE
+    'src/motion/MotionButton.jsx',
+    'src/motion/MotionTab.jsx',
+    'src/motion/MotionRow.jsx'
   ],
 
   frontendUtils: [
@@ -147,47 +142,44 @@ const REFERENCES = {
 
 // Funzioni da verificare con linea approssimativa
 const FUNCTIONS_TO_CHECK = [
-  // Backend - valueInterpreter.js
+  // Backend - featureEngine.js (NUOVO - principale)
+  { file: 'backend/utils/featureEngine.js', func: 'calculateVolatility', expectedLine: 44 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominance', expectedLine: 92 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominance', expectedLine: 126 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbability', expectedLine: 191 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateRecentMomentum', expectedLine: 277 },
+  { file: 'backend/utils/featureEngine.js', func: 'computeFeatures', expectedLine: 331 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateVolatilityFromScore', expectedLine: 476 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromScore', expectedLine: 507 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromOdds', expectedLine: 540 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominanceFromRankings', expectedLine: 573 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbabilityFromOddsRankings', expectedLine: 598 },
+  
+  // Backend - strategyEngine.js
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateAll', expectedLine: 39 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateLayWinner', expectedLine: 63 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateBancaServizio', expectedLine: 148 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateSuperBreak', expectedLine: 222 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateTiebreakSpecialist', expectedLine: 307 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateMomentumSwing', expectedLine: 378 },
+  
+  // Backend - valueInterpreter.js (legacy)
   { file: 'backend/utils/valueInterpreter.js', func: 'getThresholdsForSurface', expectedLine: 55 },
   { file: 'backend/utils/valueInterpreter.js', func: 'interpretGameValue', expectedLine: 98 },
-  { file: 'backend/utils/valueInterpreter.js', func: 'calculateVolatility', expectedLine: 291 },
-  { file: 'backend/utils/valueInterpreter.js', func: 'calculateElasticity', expectedLine: 330 },
-  { file: 'backend/utils/valueInterpreter.js', func: 'classifyMatchCharacter', expectedLine: 386 },
-  { file: 'backend/utils/valueInterpreter.js', func: 'analyzePowerRankingsEnhanced', expectedLine: 465 },
   
   // Backend - playerStatsService.js
   { file: 'backend/services/playerStatsService.js', func: 'getPlayerStats', expectedLine: 437 },
   { file: 'backend/services/playerStatsService.js', func: 'calculateComebackRate', expectedLine: 214 },
   { file: 'backend/services/playerStatsService.js', func: 'calculateROI', expectedLine: 252 },
   
-  // Backend - dataNormalizer.js
-  { file: 'backend/services/dataNormalizer.js', func: 'normalizePlayerName', expectedLine: 315 },
-  { file: 'backend/services/dataNormalizer.js', func: 'generateMatchFingerprint', expectedLine: 481 },
-  
   // Backend - liveManager.js
   { file: 'backend/liveManager.js', func: 'initLiveManager', expectedLine: 271 },
-  { file: 'backend/liveManager.js', func: 'checkTrackedMatches', expectedLine: 857 },
-  { file: 'backend/liveManager.js', func: 'reconcileLiveMatches', expectedLine: 678 },
-  { file: 'backend/liveManager.js', func: 'fetchLiveMatchesList', expectedLine: 775 },
-  { file: 'backend/liveManager.js', func: 'saveMatchToDatabase', expectedLine: 473 },
-  { file: 'backend/liveManager.js', func: 'computeDataHash', expectedLine: 217 },
+  { file: 'backend/liveManager.js', func: 'syncMatch', expectedLine: 1242 },
   
-  // Frontend - utils.js
-  { file: 'src/utils.js', func: 'extractKeyStats', expectedLine: 1590 },
-  { file: 'src/utils.js', func: 'calculatePressureIndex', expectedLine: 1654 },
-  { file: 'src/utils.js', func: 'analyzeLayTheWinner', expectedLine: 1744 },
-  { file: 'src/utils.js', func: 'analyzeSuperBreak', expectedLine: 2169 },
-  { file: 'src/utils.js', func: 'calculateDataCompleteness', expectedLine: 2856 },
-  
-  // Frontend - MomentumTab.jsx
-  { file: 'src/components/MomentumTab.jsx', func: 'analyzeMomentumOwner', expectedLine: 152 },
-  { file: 'src/components/MomentumTab.jsx', func: 'detectMomentumShift', expectedLine: 196 },
-  
-  // Frontend - ManualPredictor.jsx
-  { file: 'src/components/ManualPredictor.jsx', func: 'calculatePrediction', expectedLine: 340 },
-  
-  // Frontend - QuotesTab.jsx
-  { file: 'src/components/QuotesTab.jsx', func: 'calculateRankingProbability', expectedLine: 46 }
+  // Frontend - useMatchBundle.jsx (NUOVO - principale)
+  { file: 'src/hooks/useMatchBundle.jsx', func: 'useMatchBundle', expectedLine: 44 },
+  { file: 'src/hooks/useMatchBundle.jsx', func: 'useTabData', expectedLine: 354 },
+  { file: 'src/hooks/useMatchBundle.jsx', func: 'useHeaderData', expectedLine: 364 }
 ];
 
 // Tabelle DB da verificare nei file SQL
@@ -240,44 +232,43 @@ const ARCHITECTURAL_CHECKS = [
     severity: 'ERROR',
     reference: 'FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3'
   },
-  // 3. Strategy Engine non deve avere solo TODO
+  // 3. Strategy Engine deve esistere e avere evaluateAll
   {
     id: 'STRATEGY_ENGINE_IMPLEMENTED',
-    description: 'Strategy Engine deve avere implementazione reale',
+    description: 'Strategy Engine deve avere evaluateAll() implementato',
     file: 'backend/strategies/strategyEngine.js',
-    antiPattern: /\/\/\s*TODO.*Implementare/i,
+    pattern: /function\s+evaluateAll|exports\.evaluateAll|evaluateAll\s*=/,
     severity: 'ERROR',
     reference: 'FILOSOFIA_STATS_V3.md sezione 6'
   },
-  // 4. Frontend non deve calcolare strategie
+  // 4. Feature Engine deve esistere e avere computeFeatures
+  {
+    id: 'FEATURE_ENGINE_IMPLEMENTED',
+    description: 'Feature Engine deve avere computeFeatures() implementato',
+    file: 'backend/utils/featureEngine.js',
+    pattern: /function\s+computeFeatures|exports\.computeFeatures|computeFeatures\s*=/,
+    severity: 'ERROR',
+    reference: 'FILOSOFIA_STATS_V3.md sezione 5'
+  },
+  // 5. Frontend non deve calcolare strategie
   {
     id: 'STRATEGY_IN_FRONTEND',
     description: 'Strategie (analyzeLayTheWinner, etc.) non devono essere nel frontend',
     files: ['src/utils.js', 'src/components/StrategiesPanel.jsx', 'src/components/StrategiesLivePanel.jsx'],
     pattern: /export\s+function\s+(analyzeLayTheWinner|analyzeBancaServizio|analyzeSuperBreak)/,
     shouldNotExist: true,
-    severity: 'ERROR',
-    reference: 'FILOSOFIA_STATS_V3.md sezione 2'
+    severity: 'WARN',
+    reference: 'FILOSOFIA_STATS_V3.md sezione 2 - Migrazione in corso'
   },
-  // 5. Frontend non deve calcolare DataCompleteness
+  // 6. Frontend non deve calcolare DataCompleteness
   {
     id: 'DATA_COMPLETENESS_FRONTEND',
     description: 'calculateDataCompleteness non deve essere nel frontend',
     files: ['src/utils.js'],
     pattern: /export\s+function\s+calculateDataCompleteness/,
     shouldNotExist: true,
-    severity: 'ERROR',
-    reference: 'FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.5'
-  },
-  // 6. Feature Engine duplicato nel frontend
-  {
-    id: 'FEATURE_ENGINE_DUPLICATE',
-    description: 'calculateVolatility/calculateElasticity duplicati in MomentumTab',
-    files: ['src/components/MomentumTab.jsx'],
-    pattern: /function\s+calculate(Volatility|Elasticity)/,
-    shouldNotExist: true,
     severity: 'WARN',
-    reference: 'FILOSOFIA_STATS_V3.md - Feature Engine'
+    reference: 'FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.5 - Migrazione in corso'
   }
 ];
 

@@ -391,8 +391,29 @@ const VOLATILITY_THRESHOLDS = {
 
 /**
  * Calcola la volatilità del momentum
+ * 
+ * @deprecated Preferire usare i valori pre-calcolati dal MatchBundle:
+ *   bundle.header.features.volatility (valore 0-100)
+ *   bundle.header.features.volatilitySource ('live' | 'statistics' | 'score' | 'estimated')
+ * Questa funzione rimane per retrocompatibilità con codice legacy.
+ * Vedi: docs/filosofie/FILOSOFIA_CALCOLI_V1.md sezione "Volatility & Momentum".
+ * 
+ * @param {Array} powerRankings - Array di powerRanking points
+ * @param {Object} [preComputed] - Valori pre-calcolati dal backend (opzionale)
+ * @returns {Object} { value, class, deltas, maxSwing, minSwing }
  */
-export function calculateVolatility(powerRankings) {
+export function calculateVolatility(powerRankings, preComputed = null) {
+  // Se abbiamo valori pre-calcolati dal backend, usiamoli
+  if (preComputed?.volatility !== undefined) {
+    const v = preComputed.volatility;
+    let volatilityClass;
+    if (v < 30) volatilityClass = 'STABILE';
+    else if (v < 50) volatilityClass = 'MODERATO';
+    else if (v < 70) volatilityClass = 'VOLATILE';
+    else volatilityClass = 'MOLTO_VOLATILE';
+    return { value: v, class: volatilityClass, deltas: [], maxSwing: 0, minSwing: 0, fromBackend: true };
+  }
+  
   if (!Array.isArray(powerRankings) || powerRankings.length < 2) {
     return { value: 0, class: 'STABILE', deltas: [] };
   }
@@ -423,8 +444,26 @@ export function calculateVolatility(powerRankings) {
 
 /**
  * Calcola l'elasticità (capacità di recupero)
+ * 
+ * @deprecated Preferire usare i valori pre-calcolati dal MatchBundle:
+ *   bundle.tabs.stats.analysis.elasticity
+ * Questa funzione rimane per retrocompatibilità con codice legacy.
+ * 
+ * @param {Array} powerRankings - Array di powerRanking points
+ * @param {Object} [preComputed] - Valori pre-calcolati dal backend (opzionale)
+ * @returns {Object} { value, class, negative_phases, avg_recovery_games }
  */
-export function calculateElasticity(powerRankings) {
+export function calculateElasticity(powerRankings, preComputed = null) {
+  // Se abbiamo valori pre-calcolati dal backend, usiamoli
+  if (preComputed?.elasticity !== undefined) {
+    const e = preComputed.elasticity;
+    let elasticityClass;
+    if (e >= 0.5) elasticityClass = 'RESILIENTE';
+    else if (e >= 0.33) elasticityClass = 'NORMALE';
+    else elasticityClass = 'FRAGILE';
+    return { value: e, class: elasticityClass, negative_phases: 0, avg_recovery_games: 0, fromBackend: true };
+  }
+
   if (!Array.isArray(powerRankings) || powerRankings.length < 3) {
     return { value: 0, class: 'NORMALE', negative_phases: 0, avg_recovery_games: 0 };
   }
@@ -468,8 +507,25 @@ export function calculateElasticity(powerRankings) {
 
 /**
  * Classifica il carattere del match
+ * 
+ * @deprecated Preferire usare i valori pre-calcolati dal MatchBundle:
+ *   bundle.tabs.stats.analysis.character
+ *   bundle.tabs.stats.calculatedData.matchCharacter
+ * Questa funzione rimane per retrocompatibilità con codice legacy.
+ * 
+ * @param {Object} volatility - Risultato di calculateVolatility
+ * @param {Object} elasticity - Risultato di calculateElasticity
+ * @param {number} breakCount - Numero di break nel match
+ * @param {Object} [preComputed] - Valori pre-calcolati dal backend (opzionale)
+ * @returns {Object} { character, description }
  */
-export function classifyMatchCharacter(volatility, elasticity, breakCount = 0) {
+export function classifyMatchCharacter(volatility, elasticity, breakCount = 0, preComputed = null) {
+  // Se abbiamo character pre-calcolato dal backend, usiamolo
+  if (preComputed?.matchCharacter || preComputed?.character) {
+    const char = preComputed.matchCharacter || preComputed.character;
+    return { character: char, description: `From backend: ${char}`, fromBackend: true };
+  }
+
   const v = volatility?.class || 'STABILE';
   const e = elasticity?.class || 'NORMALE';
   
@@ -1648,6 +1704,13 @@ export function extractKeyStats(data) {
 
 /**
  * Calcola il Pressure Index per un giocatore basato sulle statistiche
+ * 
+ * @deprecated PREFERIRE usare i valori pre-calcolati dal MatchBundle:
+ *   bundle.header.features.pressure (0-100)
+ *   bundle.header.features.pressureSource ('statistics' | 'score' | 'estimated')
+ * Questa funzione rimane per retrocompatibilità con codice legacy.
+ * Vedi: docs/filosofie/FILOSOFIA_CALCOLI_V1.md sezione "Pressure & Clutch".
+ * 
  * @param {Object} playerStats - Statistiche del giocatore
  * @returns {Object} Pressure index e breakdown
  */
@@ -2793,6 +2856,11 @@ export function calculateBreakResilience(data, playerSide = 'home') {
 
 /**
  * Combina HPI e Break Resilience in un Pressure Performance Score
+ * 
+ * @deprecated PREFERIRE usare i valori pre-calcolati dal MatchBundle:
+ *   bundle.tabs.stats.pressurePerformance (se implementato nel backend)
+ * Questa funzione rimane per analisi legacy point-by-point.
+ * Vedi: docs/specs/HPI_RESILIENCE.md per formule.
  * 
  * @param {Object} data - Dati del match
  * @param {string} playerSide - 'home' o 'away'

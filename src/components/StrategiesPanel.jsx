@@ -2,11 +2,13 @@
  * StrategiesPanel Component
  * 
  * Layout a due colonne per le strategie di trading:
- * - SINISTRA: Analisi del match corrente (cosa farebbe la strategia sui dati live)
+ * - SINISTRA: Analisi del match corrente (da bundle.tabs.strategies.signals)
  * - DESTRA: Analisi storica dei due player (dal DB)
  * 
- * Filosofia: I dati del match sono caricati UNA SOLA VOLTA dal parent.
- *            Le statistiche storiche dei player sono caricate qui on-demand.
+ * Filosofia: I dati del match e strategie sono già calcolati dal backend.
+ *            Il frontend consuma SOLO il MatchBundle, niente calcoli locali.
+ * 
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -30,11 +32,7 @@ import {
   ArrowClockwise
 } from '@phosphor-icons/react';
 import { apiUrl } from '../config';
-import {
-  analyzeLayTheWinner,
-  analyzeBancaServizio,
-  analyzeSuperBreak,
-} from '../utils';
+// Strategia functions now come from backend via bundle.tabs.strategies
 import './StrategiesPanel.css';
 
 // Signal colors/backgrounds
@@ -346,22 +344,57 @@ function PlayerHistoryCard({ title, homeName, awayName, homeStats, awayStats, lo
 /**
  * Componente principale: StrategiesPanel
  * Mostra le 3 strategie con layout a due colonne
+ * 
+ * @param {Object} props
+ * @param {Object} props.bundle - MatchBundle completo dal backend
+ * @param {Object} props.eventInfo - Info evento (home/away names)
  */
-function StrategiesPanel({ matchData, eventInfo, powerRankings, dataKey }) {
+function StrategiesPanel({ bundle, eventInfo }) {
   const [homeStats, setHomeStats] = useState(null);
   const [awayStats, setAwayStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsLoaded, setStatsLoaded] = useState(false);
 
   // Estrai nomi giocatori
-  const homeName = eventInfo?.home?.name || eventInfo?.home?.shortName || 'Home';
-  const awayName = eventInfo?.away?.name || eventInfo?.away?.shortName || 'Away';
+  const homeName = eventInfo?.home?.name || eventInfo?.home?.shortName || 
+                   bundle?.header?.players?.home?.name || 'Home';
+  const awayName = eventInfo?.away?.name || eventInfo?.away?.shortName || 
+                   bundle?.header?.players?.away?.name || 'Away';
   
   // Estrai superficie
-  const surface = matchData?.surface || eventInfo?.surface || eventInfo?.groundType || 
-                  matchData?.tournament_ground || 'Unknown';
+  const surface = bundle?.header?.match?.surface || eventInfo?.surface || 
+                  eventInfo?.groundType || 'Unknown';
 
-  // Carica statistiche storiche UNA SOLA VOLTA quando cambiano i nomi
+  // Estrai strategie calcolate dal backend
+  const strategySignals = bundle?.tabs?.strategies?.signals || [];
+  
+  // Helper per trovare il signal di una strategia specifica
+  const getSignal = (strategyId) => {
+    const signal = strategySignals.find(s => s.id === strategyId);
+    if (!signal) return { signal: 'none', message: 'Strategia non disponibile', confidence: 0 };
+    
+    // Converti formato backend -> formato UI
+    return {
+      signal: signal.status === 'READY' ? 'strong' : signal.status === 'WATCH' ? 'medium' : 'weak',
+      message: signal.reasons?.join(' | ') || signal.entryRule || 'Analisi in corso...',
+      confidence: Math.round((signal.confidence || 0) * 100),
+      recommendation: signal.action ? `${signal.action} ${signal.target || ''}`.trim() : null,
+      applicable: signal.status !== 'OFF',
+      details: {
+        conditions: signal.conditions,
+        target: signal.target,
+        action: signal.action
+      }
+    };
+  };
+
+  // Ottieni le analisi per ogni strategia dal bundle
+  const layTheWinnerAnalysis = useMemo(() => getSignal('LAY_WINNER'), [strategySignals]);
+  const bancaServizioAnalysis = useMemo(() => getSignal('BANCA_SERVIZIO'), [strategySignals]);
+  const superBreakAnalysis = useMemo(() => getSignal('SUPER_BREAK'), [strategySignals]);
+
+  // Carica statistiche storiche dei player (per colonna destra)
+  // Nota: queste potrebbero essere incluse nel bundle in futuro
   useEffect(() => {
     const fetchPlayerStats = async () => {
       if (!homeName || !awayName || homeName === 'Home' || awayName === 'Away') {
@@ -399,11 +432,6 @@ function StrategiesPanel({ matchData, eventInfo, powerRankings, dataKey }) {
 
     fetchPlayerStats();
   }, [homeName, awayName]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Calcola analisi per ogni strategia (solo dal match corrente)
-  const layTheWinnerAnalysis = useMemo(() => analyzeLayTheWinner(matchData), [matchData, dataKey]);
-  const bancaServizioAnalysis = useMemo(() => analyzeBancaServizio(matchData), [matchData, dataKey]);
-  const superBreakAnalysis = useMemo(() => analyzeSuperBreak(matchData), [matchData, dataKey]);
 
   return (
     <div className="strategies-panel">

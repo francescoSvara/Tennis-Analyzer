@@ -13,6 +13,11 @@
 |---------|-----------|-----------------|
 | [FILOSOFIA_MADRE](../filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [DB_V2](../filosofie/FILOSOFIA_DB_V2.md) (point-by-point) | [STATS_V3](../filosofie/FILOSOFIA_STATS_V3.md) (Strategy Engine) |
 
+### 📚 Feature Library
+| Documento | Scopo |
+|-----------|-------|
+| [FILOSOFIA_CALCOLI_V1](../filosofie/FILOSOFIA_CALCOLI_V1.md) | Tassonomia completa features, standard input/output, fallback, schede operative |
+
 ---
 
 ## HPI - Hold Pressure Index
