@@ -1,0 +1,396 @@
+/**
+ * JournalTab CSS
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
+ */
+
+.journal-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.journal-tab__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.tab-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* ===========================================
+   JOURNAL STATS
+=========================================== */
+
+.journal-stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-3);
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value.profit {
+  color: var(--color-success);
+}
+
+.stat-value.loss {
+  color: var(--color-danger);
+}
+
+/* ===========================================
+   FORM OVERLAY/MODAL
+=========================================== */
+
+.form-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--space-5);
+}
+
+.form-modal {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-xl);
+}
+
+.form-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-5) 0;
+}
+
+/* ===========================================
+   TRADE FORM
+=========================================== */
+
+.trade-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.form-label.full-width {
+  flex: none;
+  width: 100%;
+}
+
+.form-label input,
+.form-label select,
+.form-label textarea {
+  padding: var(--space-3);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--motion-fast) var(--motion-ease-out);
+}
+
+.form-label input:focus,
+.form-label select:focus,
+.form-label textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.form-label textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ===========================================
+   TRADES LIST CARD
+=========================================== */
+
+.trades-list-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--space-5);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-4) 0;
+}
+
+.trade-count {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-muted);
+  text-transform: none;
+}
+
+.trades-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ===========================================
+   TRADE ROW
+=========================================== */
+
+.trade-row {
+  display: grid;
+  grid-template-columns: 100px 1.5fr 120px 80px 90px 90px 70px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+  transition: background var(--motion-fast) var(--motion-ease-out);
+}
+
+.trade-row:hover {
+  background: var(--bg-interactive);
+}
+
+.trade-time {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.trade-strategy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.trade-strategy-badge {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.trade-type {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.trade-type.back {
+  color: var(--color-primary);
+}
+
+.trade-type.lay {
+  color: var(--color-accent);
+}
+
+.trade-odds {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.trade-stake {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.trade-pnl {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.trade-pnl.profit {
+  color: var(--color-success);
+}
+
+.trade-pnl.loss {
+  color: var(--color-danger);
+}
+
+.trade-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.trade-action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.trade-action-btn:hover {
+  background: var(--bg-interactive);
+  color: var(--text-primary);
+}
+
+.trade-action-btn.delete:hover {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+/* ===========================================
+   EMPTY STATE
+=========================================== */
+
+.no-trades {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-5);
+  text-align: center;
+}
+
+.no-trades .icon {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.no-trades p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 1200px) {
+  .journal-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .trade-row {
+    grid-template-columns: 80px 1fr 80px 70px;
+  }
+
+  .trade-type,
+  .trade-stake,
+  .trade-actions {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .journal-tab {
+    gap: var(--space-4);
+  }
+
+  .journal-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .journal-tab__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .trade-row {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2);
+  }
+
+  .trade-time,
+  .trade-odds {
+    display: none;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-modal {
+    padding: var(--space-4);
+    margin: var(--space-3);
+  }
+}

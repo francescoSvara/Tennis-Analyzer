@@ -2,7 +2,7 @@
 
 > Sistema avanzato di analisi match tennistici con dati real-time, storico quote e analytics predittivi.
 
-[![Version](https://img.shields.io/badge/Version-4.5-blue)](https://github.com/yourusername/React-Betfair)
+[![Version](https://img.shields.io/badge/Version-4.6-blue)](https://github.com/yourusername/React-Betfair)
 [![Backend](https://img.shields.io/badge/API-Railway-green)](https://tennis-analyzer-production.up.railway.app)
 [![Database](https://img.shields.io/badge/DB-Supabase-orange)](https://supabase.com)
 
@@ -102,7 +102,7 @@ React-Betfair/
 │   ├── services/              # Business logic
 │   ├── utils/                 # Calculation utilities
 │   ├── scraper/               # SofaScore scraper
-│   ├── strategies/            # Strategy Engine (DA CREARE)
+│   ├── strategies/            # Strategy Engine
 │   └── migrations/            # SQL schemas
 ├── src/
 │   ├── App.jsx               # Main React app
@@ -111,9 +111,8 @@ React-Betfair/
 │   ├── motion/               # Animation tokens & wrappers
 │   └── utils/                # Frontend utilities
 ├── docs/
-│   ├── filosofie/            # Philosophy docs (8)
-│   ├── specs/                # Technical specs
-│   ├── MAPPA_RETE_CONCETTUALE.md
+│   ├── filosofie/            # Philosophy docs V2/V3 (9)
+│   ├── specs/                # Technical specs (HPI, etc.)
 │   └── TODO_LIST.md
 └── scripts/                  # Utility scripts
 ```
@@ -226,41 +225,27 @@ GET /api/match/12345/card
 
 | Documento | Contenuto |
 |-----------|-----------|
-| [README_IMPLEMENTATION_GUIDE.md](README_IMPLEMENTATION_GUIDE.md) | **Guida concettuale** - Definizioni, formule, architetture |
-| [docs/MAPPA_RETE_CONCETTUALE.md](docs/MAPPA_RETE_CONCETTUALE.md) | **Mappa riferimenti** - File, funzioni, tabelle, relazioni |
-| [docs/TODO_LIST.md](docs/TODO_LIST.md) | **Task list** - TODO attivi, completati, backlog |
-| [docs/CHECK_MAPPA_CONCETTUALE.md](docs/CHECK_MAPPA_CONCETTUALE.md) | **Verifica automatica** - Stato integrità documentazione |
-| [docs/checks/report.md](docs/checks/report.md) | **Concept Checks** - Verifica confini architetturali |
-| [docs/concept/rules.v1.json](docs/concept/rules.v1.json) | **Regole domini** - Definizione confini architetturali |
+| [docs/filosofie/INDEX_FILOSOFIE.md](docs/filosofie/INDEX_FILOSOFIE.md) | **🏠 Entry point** - Hub navigazione architettura |
+| [docs/TODO_LIST.md](docs/TODO_LIST.md) | **Task list** - 7 TODO attivi, backlog |
+| [docs/MAPPA_RETE_CONCETTUALE_V2.md](docs/MAPPA_RETE_CONCETTUALE_V2.md) | **Mappa riferimenti** - File, funzioni, tabelle |
 
-### Filosofie (Architettura Concettuale)
+### Filosofie (v2/v3)
 
 | Documento | Focus |
 |-----------|-------|
-| [FILOSOFIA_MADRE.md](docs/filosofie/FILOSOFIA_MADRE.md) | **Entry point** - Indice documentazione |
-| [FILOSOFIA_DB.md](docs/filosofie/FILOSOFIA_DB.md) | Schema database, flussi dati |
-| [FILOSOFIA_STATS_V2.md](docs/filosofie/FILOSOFIA_STATS_V2.md) | Metriche e calcoli statistici |
-| [FILOSOFIA_LIVE_TRACKING.md](docs/filosofie/FILOSOFIA_LIVE_TRACKING.md) | Sistema tracking real-time |
-| [FILOSOFIA_ODDS.md](docs/filosofie/FILOSOFIA_ODDS.md) | Quote mercato, fair odds, value |
-| [**FILOSOFIA_FRONTEND.md**](docs/filosofie/FILOSOFIA_FRONTEND.md) | **✨ NUOVO** - Visual design, wireframe, backend allacci, JSON schema, motion/icons, strategie UI |
-| [FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md](docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Pattern data consumption (snapshot vs live) |
-| [FILOSOFIA_CONCEPT_CHECKS.md](docs/filosofie/FILOSOFIA_CONCEPT_CHECKS.md) | Guardrail Docs ↔ Code |
+| [FILOSOFIA_MADRE](docs/filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Settori, flussi, MatchBundle |
+| [DB_V2](docs/filosofie/FILOSOFIA_DB_V2.md) | Schema Supabase, repository |
+| [STATS_V3](docs/filosofie/FILOSOFIA_STATS_V3.md) | Metriche HPI, Resilience, Pressure |
+| [LIVE_V2](docs/filosofie/FILOSOFIA_LIVE_V2.md) | WebSocket, tracking live |
+| [ODDS_V2](docs/filosofie/FILOSOFIA_ODDS_V2.md) | Fair odds, value detection |
+| [FRONTEND](docs/filosofie/FILOSOFIA_FRONTEND.md) | UI components, motion system |
+| [HPI_RESILIENCE](docs/specs/HPI_RESILIENCE.md) | Formula metriche avanzate |
 
-> ⚠️ **Deprecati**: `FILOSOFIA_FRONTEND_UI_UX.md`, `SPEC_FRONTEND_MOTION_UI.md` → ora integrati in **FILOSOFIA_FRONTEND.md**
-
-### Verifica Documentazione
+### Checks (116/116 ✅)
 
 ```bash
-# Verifica mappa concettuale (esistenza file/funzioni/tabelle)
-node scripts/checkConceptualMap.js
-
-# Verifica confini architetturali (import proibiti, pattern)
-node scripts/runConceptChecks.js
-
-# Output:
-# - docs/CHECK_MAPPA_CONCETTUALE.md - Stato file/funzioni
-# - docs/checks/report.md - Problemi architetturali
-# - docs/TODO_LIST.md - Sezioni auto-aggiornate
+node scripts/checkConceptualMap.js   # Verifica mappa concettuale
+node scripts/runConceptChecks.js     # Verifica architettura
 ```
 
 ---
@@ -416,7 +401,18 @@ node scripts/checkConceptualMap.js
 - **Sistema Check Automatico** - Verifica integrità documentazione
 - **TODO_LIST Centralizzato** - Task management con auto-update
 - **Guida Concettuale** - README_IMPLEMENTATION_GUIDE pulito (solo concetti)
-- **7 Documenti Filosofia** - Architettura completa documentata
+- **9 Documenti Filosofia** - Architettura MatchBundle-Centric documentata
+
+### v4.6 (24 Dicembre 2025) - Motion Components & Audit
+- Nuovi componenti: `MotionTab`, `MotionRow` con varianti (MotionTabList, MotionTabButton, MotionTabPanel, MotionRowGroup, MotionTableRow)
+- Script check architetturali aggiornati (`checkConceptualMap.js`, `runConceptChecks.js`)
+- Regole MatchBundle-Centric in `docs/concept/rules.v2.json`
+- Audit completo violazioni vs filosofie
+
+### v4.5 (Dicembre 2025) - Documentazione V2
+- FILOSOFIA_DB_V2, FILOSOFIA_STATS_V3, FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2
+- MAPPA_RETE_CONCETTUALE_V2 con cross-reference completi
+- HPI_RESILIENCE spec
 
 ### v3.5 (Dicembre 2025) - Live Tracking
 - WebSocket real-time updates
@@ -444,7 +440,7 @@ node scripts/checkConceptualMap.js
 
 ## 🤝 Contributing
 
-1. Leggi [docs/MAPPA_RETE_CONCETTUALE.md](docs/MAPPA_RETE_CONCETTUALE.md) per orientarti
+1. Leggi [docs/MAPPA_RETE_CONCETTUALE_V2.md](docs/MAPPA_RETE_CONCETTUALE_V2.md) per orientarti
 2. Controlla [docs/TODO_LIST.md](docs/TODO_LIST.md) per task aperti
 3. Segui le filosofie in `docs/filosofie/`
 4. Esegui `node scripts/checkConceptualMap.js` prima di committare

@@ -1,11 +1,1388 @@
 {
-  "timestamp": "2025-12-23T04:04:55.682Z",
-  "mode": "diff",
-  "duration_ms": 982,
+  "timestamp": "2025-12-23T23:16:44.484Z",
+  "mode": "full",
+  "duration_ms": 73,
   "summary": {
-    "errors": 0,
-    "warns": 0,
-    "infos": 0
+    "errors": 42,
+    "warns": 23,
+    "infos": 72
   },
-  "findings": []
+  "findings": [
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/components/MomentumTab.jsx",
+      "line": 35,
+      "domain": "frontend_ui",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateVolatility",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/components/MomentumTab.jsx",
+      "line": 76,
+      "domain": "frontend_ui",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateElasticity",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/components/MomentumTab.jsx",
+      "line": 314,
+      "domain": "frontend_ui",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateVolatility",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/components/MomentumTab.jsx",
+      "line": 315,
+      "domain": "frontend_ui",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateElasticity",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "MATCHBUNDLE_ONLY_FE",
+      "file": "src/components/PredictorTab.jsx",
+      "line": 316,
+      "domain": "frontend_ui",
+      "message": "Frontend consuma SOLO MatchBundle - niente fetch separati per stats/momentum/odds",
+      "match": "fetch(apiUrl(`/api/player",
+      "remediation": "Usare /api/match/:id/bundle per ottenere tutto in un solo fetch"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "MATCHBUNDLE_ONLY_FE",
+      "file": "src/components/QuotesTab.jsx",
+      "line": 108,
+      "domain": "frontend_ui",
+      "message": "Frontend consuma SOLO MatchBundle - niente fetch separati per stats/momentum/odds",
+      "match": "fetch(apiUrl(`/api/player",
+      "remediation": "Usare /api/match/:id/bundle per ottenere tutto in un solo fetch"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 22,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeLayTheWinner",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 23,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeBancaServizio",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 24,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeSuperBreak",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 411,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeLayTheWinner",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 412,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeBancaServizio",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 413,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeSuperBreak",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "MATCHBUNDLE_ONLY_FE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 378,
+      "domain": "frontend_ui",
+      "message": "Frontend consuma SOLO MatchBundle - niente fetch separati per stats/momentum/odds",
+      "match": "fetch(apiUrl(`/api/player",
+      "remediation": "Usare /api/match/:id/bundle per ottenere tutto in un solo fetch"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "MATCHBUNDLE_ONLY_FE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 379,
+      "domain": "frontend_ui",
+      "message": "Frontend consuma SOLO MatchBundle - niente fetch separati per stats/momentum/odds",
+      "match": "fetch(apiUrl(`/api/player",
+      "remediation": "Usare /api/match/:id/bundle per ottenere tutto in un solo fetch"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 34,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeLayTheWinner",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 35,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeBancaServizio",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 36,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeSuperBreak",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 404,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeLayTheWinner",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 405,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeBancaServizio",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/components/StrategiesPanel.jsx",
+      "line": 406,
+      "domain": "frontend_ui",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeSuperBreak",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "MATCHBUNDLE_ONLY_FE",
+      "file": "src/hooks/useMatchCard.jsx",
+      "line": 205,
+      "domain": "frontend_hooks",
+      "message": "Frontend consuma SOLO MatchBundle - niente fetch separati per stats/momentum/odds",
+      "match": "fetch(apiUrl(`/api/player",
+      "remediation": "Usare /api/match/:id/bundle per ottenere tutto in un solo fetch"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 395,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateVolatility",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 427,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateElasticity",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 537,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateVolatility",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 538,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateElasticity",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 1654,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculatePressure",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 2076,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculatePressure",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 2335,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateVolatility",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 2336,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateElasticity",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 2705,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateElasticity",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 2801,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculatePressure",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BACKEND_INTERPRETATION",
+      "file": "src/utils.js",
+      "line": 2856,
+      "domain": "frontend_utils",
+      "message": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "match": "calculateDataCompleteness",
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/utils.js",
+      "line": 1744,
+      "domain": "frontend_utils",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeLayTheWinner",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/utils.js",
+      "line": 1974,
+      "domain": "frontend_utils",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeBancaServizio",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_OUTSIDE_ENGINE",
+      "file": "src/utils.js",
+      "line": 2169,
+      "domain": "frontend_utils",
+      "message": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "match": "analyzeSuperBreak",
+      "remediation": "Spostare in backend/strategies/strategyEngine.js"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "DATAQUALITY_BACKEND",
+      "file": "src/utils.js",
+      "line": 2856,
+      "domain": "frontend_utils",
+      "message": "DataQuality calcolata SOLO nel backend",
+      "match": "calculateDataCompleteness",
+      "remediation": "Leggere bundle.dataQuality, non calcolare"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "BUNDLE_ENDPOINT_EXISTS",
+      "file": "backend/server.js",
+      "line": 0,
+      "domain": "architecture",
+      "message": "Endpoint /api/match/:matchId/bundle deve esistere",
+      "match": "PATTERN_MISSING",
+      "remediation": "Implementare: app\\.(get|post).*\\/api\\/match\\/:.*\\/bundle",
+      "reference": "FILOSOFIA_DB_V2.md sezione 3"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_ENGINE_IMPLEMENTED",
+      "file": "backend/strategies/strategyEngine.js",
+      "line": 39,
+      "domain": "architecture",
+      "message": "Strategy Engine deve avere implementazione reale (non solo TODO)",
+      "match": "TODO: Implementare",
+      "remediation": "Rimuovere/implementare: TODO.*Implementare",
+      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_ENGINE_IMPLEMENTED",
+      "file": "backend/strategies/strategyEngine.js",
+      "line": 53,
+      "domain": "architecture",
+      "message": "Strategy Engine deve avere implementazione reale (non solo TODO)",
+      "match": "TODO: Implementare",
+      "remediation": "Rimuovere/implementare: TODO.*Implementare",
+      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_ENGINE_IMPLEMENTED",
+      "file": "backend/strategies/strategyEngine.js",
+      "line": 73,
+      "domain": "architecture",
+      "message": "Strategy Engine deve avere implementazione reale (non solo TODO)",
+      "match": "TODO: Implementare",
+      "remediation": "Rimuovere/implementare: TODO.*Implementare",
+      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "STRATEGY_ENGINE_IMPLEMENTED",
+      "file": "backend/strategies/strategyEngine.js",
+      "line": 93,
+      "domain": "architecture",
+      "message": "Strategy Engine deve avere implementazione reale (non solo TODO)",
+      "match": "TODO: Implementare",
+      "remediation": "Rimuovere/implementare: TODO.*Implementare",
+      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+    },
+    {
+      "severity": "ERROR",
+      "ruleId": "USE_MATCH_BUNDLE_HOOK",
+      "file": "src/hooks/useMatchBundle.jsx",
+      "line": 0,
+      "domain": "architecture",
+      "message": "Hook useMatchBundle deve esistere",
+      "match": "FILE_MISSING",
+      "remediation": "Creare il file src/hooks/useMatchBundle.jsx",
+      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 395,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "calculateVolatility",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 427,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "calculateElasticity",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 472,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "classifyMatchCharacter",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 537,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "calculateVolatility",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 538,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "calculateElasticity",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 541,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "classifyMatchCharacter",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 2335,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "calculateVolatility",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 2336,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "calculateElasticity",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 2343,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "classifyMatchCharacter",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "INV-006",
+      "file": "src/utils.js",
+      "line": 2705,
+      "domain": "frontend_utils",
+      "message": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "match": "calculateElasticity",
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 1934,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateHPI",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 1935,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateBreakResilience",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 1936,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateHPI",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2133,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateHPI",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2134,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateBreakResilience",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2409,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateHPI",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2410,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateHPI",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2411,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateBreakResilience",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2485,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateHPI",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2663,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateBreakResilience",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2801,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculatePressurePerformance",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2802,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateHPI",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "WARN",
+      "ruleId": "HPI_IN_FRONTEND",
+      "file": "src/utils.js",
+      "line": 2803,
+      "domain": "frontend_utils",
+      "message": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "match": "calculateBreakResilience",
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 37,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 43,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 57,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 58,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 155,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 181,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 259,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 279,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 394,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 419,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/calculationQueueWorker.js",
+      "line": 651,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/dataNormalizer.js",
+      "line": 741,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/matchCardService.js",
+      "line": 41,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/matchCardService.js",
+      "line": 47,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/matchCardService.js",
+      "line": 158,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerProfileService.js",
+      "line": 159,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerProfileService.js",
+      "line": 189,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerProfileService.js",
+      "line": 218,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerProfileService.js",
+      "line": 300,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerService.js",
+      "line": 159,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerService.js",
+      "line": 388,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerStatsService.js",
+      "line": 78,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerStatsService.js",
+      "line": 205,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerStatsService.js",
+      "line": 438,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerStatsService.js",
+      "line": 450,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerStatsService.js",
+      "line": 610,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/playerStatsService.js",
+      "line": 756,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/rawEventsProcessor.js",
+      "line": 122,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/rawEventsProcessor.js",
+      "line": 128,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/rawEventsProcessor.js",
+      "line": 142,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/rawEventsProcessor.js",
+      "line": 143,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/rawEventsProcessor.js",
+      "line": 1140,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/strategyStatsService.js",
+      "line": 473,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 239,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 240,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 241,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 242,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 258,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 266,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 279,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 280,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 281,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 292,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 310,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 342,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 343,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 358,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 359,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 360,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 371,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 378,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 391,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 392,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 393,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 394,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 468,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/unifiedImporter.js",
+      "line": 472,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/HomePage.jsx",
+      "line": 68,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/HomePage.jsx",
+      "line": 70,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/ManualPredictor.jsx",
+      "line": 49,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/ManualPredictor.jsx",
+      "line": 52,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/ManualPredictor.jsx",
+      "line": 87,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/ManualPredictor.jsx",
+      "line": 277,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/ManualPredictor.jsx",
+      "line": 281,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/ManualPredictor.jsx",
+      "line": 305,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/ManualPredictor.jsx",
+      "line": 309,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/MatchGrid.jsx",
+      "line": 156,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 409,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 415,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 416,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/StrategiesLivePanel.jsx",
+      "line": 417,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "src/components/StrategyHistoricalPanel.jsx",
+      "line": 205,
+      "domain": "frontend_ui",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    }
+  ]
 }

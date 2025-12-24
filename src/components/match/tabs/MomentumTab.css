@@ -1,0 +1,459 @@
+/**
+ * MomentumTab CSS
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
+ */
+
+.momentum-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.momentum-tab__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tab-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ===========================================
+   MOMENTUM GRID
+=========================================== */
+
+.momentum-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+/* ===========================================
+   MOMENTUM CARD
+=========================================== */
+
+.momentum-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--space-5);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-4) 0;
+}
+
+/* ===========================================
+   POINTS VISUALIZATION
+=========================================== */
+
+.points-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ===========================================
+   TREND INFO
+=========================================== */
+
+.trend-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.trend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-sm);
+}
+
+.trend-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.trend-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.trend-value.mono {
+  font-family: var(--font-mono);
+}
+
+.trend-value.trend-rising {
+  color: var(--color-success);
+}
+
+.trend-value.trend-falling {
+  color: var(--color-danger);
+}
+
+.trend-value.trend-stable {
+  color: var(--text-secondary);
+}
+
+.trend-icon {
+  flex-shrink: 0;
+}
+
+.trend-value.trend-rising .trend-icon {
+  color: var(--color-success);
+}
+
+.trend-value.trend-falling .trend-icon {
+  color: var(--color-danger);
+}
+
+.trend-value.trend-stable .trend-icon {
+  color: var(--text-muted);
+}
+
+/* ===========================================
+   RETURN INFO
+=========================================== */
+
+.return-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.return-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-sm);
+}
+
+.return-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.return-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* ===========================================
+   RANKINGS CONTAINER
+=========================================== */
+
+.rankings-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ranking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-sm);
+}
+
+.rank-position {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.rank-score {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.no-data {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.points-viz {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.points-label {
+  min-width: 40px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+.points-dots {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.point-dot {
+  font-size: var(--font-size-base);
+  transition: transform var(--motion-fast) var(--motion-ease-out);
+}
+
+.point-dot:hover {
+  transform: scale(1.3);
+}
+
+.point-dot.won {
+  color: var(--color-success);
+}
+
+.point-dot.lost {
+  color: var(--text-muted);
+}
+
+/* ===========================================
+   RUNS
+=========================================== */
+
+.runs-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.run-indicator {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.run-indicator:hover {
+  background: var(--bg-interactive);
+}
+
+.run-indicator.hot {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+}
+
+.run-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+}
+
+.run-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hot-icon {
+  color: var(--color-danger);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.run-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.run-value .current {
+  color: var(--text-primary);
+}
+
+.run-value .separator {
+  color: var(--text-muted);
+  margin: 0 var(--space-1);
+}
+
+.run-value .total {
+  color: var(--text-secondary);
+}
+
+/* ===========================================
+   SERVE DOMINANCE
+=========================================== */
+
+.dominance-card {
+  grid-column: span 2;
+}
+
+.serve-dominance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dominance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+.player-label.home {
+  color: var(--color-primary);
+}
+
+.player-label.away {
+  color: var(--color-accent);
+}
+
+.section-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dominance-bar {
+  display: flex;
+  height: 36px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.dominance-fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: width var(--motion-normal) var(--motion-ease-out);
+}
+
+.dominance-fill.home {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  color: white;
+}
+
+.dominance-fill.away {
+  background: linear-gradient(90deg, var(--color-accent-light), var(--color-accent));
+  color: white;
+}
+
+/* ===========================================
+   POWER RANKINGS
+=========================================== */
+
+.power-rankings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.power-ranking-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+}
+
+.ranking-position {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.ranking-position.top {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.ranking-player {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.ranking-score {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 1024px) {
+  .momentum-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dominance-card {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .momentum-tab {
+    gap: var(--space-4);
+  }
+
+  .momentum-card {
+    padding: var(--space-4);
+  }
+
+  .dominance-bar {
+    height: 28px;
+  }
+}

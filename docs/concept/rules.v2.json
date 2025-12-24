@@ -1,0 +1,333 @@
+{
+  "version": 2,
+  "description": "Regole architetturali Tennis Analyzer v5.0 - MatchBundle-Centric",
+  "lastUpdated": "2025-12-24",
+  "philosophy": "FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md",
+  
+  "domains": {
+    "frontend_ui": {
+      "description": "Componenti React di presentazione - SOLO rendering da MatchBundle",
+      "allowedPaths": ["src/components/**/*.jsx", "src/components/**/*.css"],
+      "forbiddenImports": [
+        "supabase",
+        "matchRepository",
+        "liveTrackingRepository",
+        "sofascoreScraper"
+      ],
+      "forbiddenPatterns": [
+        "createClient",
+        "supabase.from",
+        "fetch.*sofascore"
+      ],
+      "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md"
+    },
+    
+    "frontend_hooks": {
+      "description": "Custom hooks React - deve esistere useMatchBundle",
+      "allowedPaths": ["src/hooks/**/*.jsx", "src/hooks/**/*.js"],
+      "forbiddenImports": [
+        "supabase",
+        "matchRepository"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3"
+    },
+    
+    "frontend_utils": {
+      "description": "Utility frontend - NO logica di dominio",
+      "allowedPaths": ["src/utils/**/*.js", "src/utils.js"],
+      "forbiddenImports": [
+        "supabase",
+        "express"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Ref: FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.2 - Backend Interpretation Invariant"
+    },
+    
+    "backend_api": {
+      "description": "Express routes e server - deve esporre /api/match/:id/bundle",
+      "allowedPaths": ["backend/server.js"],
+      "forbiddenImports": [
+        "react",
+        "jsx"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Ref: FILOSOFIA_DB_V2.md sezione 3"
+    },
+    
+    "backend_services": {
+      "description": "Business logic layer",
+      "allowedPaths": ["backend/services/**/*.js"],
+      "forbiddenImports": [
+        "react",
+        "express"
+      ],
+      "forbiddenPatterns": [],
+      "note": "I services non devono conoscere Express direttamente"
+    },
+    
+    "backend_strategies": {
+      "description": "Strategy Engine - produce SIGNALS (READY/WATCH/OFF)",
+      "allowedPaths": ["backend/strategies/**/*.js"],
+      "forbiddenImports": [
+        "react",
+        "express",
+        "supabase"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Ref: FILOSOFIA_STATS_V3.md sezione 6 - Strategy Engine"
+    },
+    
+    "backend_db": {
+      "description": "Data access layer",
+      "allowedPaths": ["backend/db/**/*.js"],
+      "forbiddenImports": [
+        "react",
+        "express",
+        "sofascoreScraper"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Repository non devono fare scraping"
+    },
+    
+    "backend_utils": {
+      "description": "Feature Engine - calcola features per Strategy Engine",
+      "allowedPaths": ["backend/utils/**/*.js"],
+      "forbiddenImports": [
+        "react",
+        "express",
+        "supabase"
+      ],
+      "forbiddenPatterns": [],
+      "note": "Ref: FILOSOFIA_STATS_V3.md sezione 5 - Feature Engine"
+    },
+    
+    "backend_scraper": {
+      "description": "External data fetching",
+      "allowedPaths": ["backend/scraper/**/*.js"],
+      "forbiddenImports": [
+        "react"
+      ],
+      "forbiddenPatterns": []
+    }
+  },
+  
+  "invariants": [
+    {
+      "id": "MATCHBUNDLE_ONLY_FE",
+      "severity": "ERROR",
+      "description": "Frontend consuma SOLO MatchBundle - niente fetch separati per stats/momentum/odds",
+      "domains": ["frontend_ui", "frontend_hooks"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "fetch.*\\/api\\/(player|stats|momentum|odds|strategies)"
+      },
+      "remediation": "Usare /api/match/:id/bundle per ottenere tutto in un solo fetch",
+      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 2"
+    },
+    {
+      "id": "BACKEND_INTERPRETATION",
+      "severity": "ERROR",
+      "description": "Solo il backend interpreta i dati - niente calcoli dominio nel frontend",
+      "domains": ["frontend_ui", "frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "calculatePressure|calculateMomentum|calculateEdge|calculateDataCompleteness|calculateVolatility|calculateElasticity"
+      },
+      "remediation": "Spostare calcoli in backend/utils/ o backend/services/",
+      "reference": "FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.2"
+    },
+    {
+      "id": "STRATEGY_OUTSIDE_ENGINE",
+      "severity": "ERROR",
+      "description": "Le strategie devono vivere SOLO nello Strategy Engine backend",
+      "domains": ["frontend_ui", "frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "analyzeLayTheWinner|analyzeBancaServizio|analyzeSuperBreak|evaluateStrategy"
+      },
+      "remediation": "Spostare in backend/strategies/strategyEngine.js",
+      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+    },
+    {
+      "id": "SIGNAL_NOT_METRIC",
+      "severity": "ERROR",
+      "description": "I segnali (READY/WATCH/OFF) non devono essere persistiti come metriche",
+      "domains": ["backend_db"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "INSERT.*status.*READY|INSERT.*signal.*WATCH|persist.*signal"
+      },
+      "remediation": "Segnali sono runtime, non persistibili",
+      "reference": "FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.4"
+    },
+    {
+      "id": "DATAQUALITY_BACKEND",
+      "severity": "ERROR",
+      "description": "DataQuality calcolata SOLO nel backend",
+      "domains": ["frontend_ui", "frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "calculateDataCompleteness|calculateQuality|completeness.*percent"
+      },
+      "remediation": "Leggere bundle.dataQuality, non calcolare",
+      "reference": "FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.5"
+    },
+    {
+      "id": "INV-001",
+      "severity": "ERROR",
+      "description": "Frontend non deve accedere direttamente a Supabase",
+      "domains": ["frontend_ui", "frontend_hooks", "frontend_utils"],
+      "matcher": {
+        "type": "import",
+        "pattern": "supabase|@supabase"
+      },
+      "remediation": "Usare API backend invece di accesso diretto DB"
+    },
+    {
+      "id": "INV-002", 
+      "severity": "ERROR",
+      "description": "Frontend non deve fare scraping diretto",
+      "domains": ["frontend_ui", "frontend_hooks", "frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "fetch.*sofascore\\.com"
+      },
+      "remediation": "Usare endpoint /api/match/:id invece di scraping diretto"
+    },
+    {
+      "id": "INV-003",
+      "severity": "WARN",
+      "description": "Calcoli odds devono stare nel backend",
+      "domains": ["frontend_ui", "frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "impliedProbability|fairOdds|calculateValue|overround"
+      },
+      "remediation": "Spostare calcoli in backend/utils/valueInterpreter.js"
+    },
+    {
+      "id": "INV-004",
+      "severity": "WARN",
+      "description": "Repository non devono contenere business logic",
+      "domains": ["backend_db"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "calculateHPI|calculateClutch|analyzeMomentum"
+      },
+      "remediation": "Spostare logica in backend/services/"
+    },
+    {
+      "id": "INV-005",
+      "severity": "ERROR",
+      "description": "Utils di calcolo devono essere pure (no DB access)",
+      "domains": ["backend_utils"],
+      "matcher": {
+        "type": "import",
+        "pattern": "supabase|matchRepository"
+      },
+      "remediation": "Utils devono ricevere dati come parametri, non fetchare"
+    },
+    {
+      "id": "INV-006",
+      "severity": "WARN",
+      "description": "Feature Engine duplicato - stesse funzioni frontend/backend",
+      "domains": ["frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "calculateVolatility|calculateElasticity|classifyMatchCharacter"
+      },
+      "remediation": "Rimuovere duplicato frontend, usare valore da MatchBundle"
+    },
+    {
+      "id": "INV-007",
+      "severity": "INFO",
+      "description": "Console.log in production code",
+      "domains": ["frontend_ui", "backend_services"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "console\\.log\\("
+      },
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "id": "INV-008",
+      "severity": "WARN",
+      "description": "Hardcoded API URLs",
+      "domains": ["frontend_ui", "frontend_hooks"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "localhost:3001|railway\\.app"
+      },
+      "remediation": "Usare variabili ambiente VITE_API_URL"
+    },
+    {
+      "id": "INV-009",
+      "severity": "ERROR",
+      "description": "Services non devono usare Express direttamente",
+      "domains": ["backend_services"],
+      "matcher": {
+        "type": "import",
+        "pattern": "^express$"
+      },
+      "remediation": "Services ricevono/restituiscono dati, non gestiscono HTTP"
+    },
+    {
+      "id": "HPI_IN_FRONTEND",
+      "severity": "WARN",
+      "description": "Calcoli HPI/Resilience devono stare nel backend Feature Engine",
+      "domains": ["frontend_utils"],
+      "matcher": {
+        "type": "pattern",
+        "pattern": "calculateHPI|calculateBreakResilience|calculatePressurePerformance"
+      },
+      "remediation": "Spostare in backend, frontend legge da MatchBundle.tabs.stats",
+      "reference": "HPI_RESILIENCE.md"
+    }
+  ],
+  
+  "architecturalChecks": [
+    {
+      "id": "BUNDLE_ENDPOINT_EXISTS",
+      "description": "Endpoint /api/match/:matchId/bundle deve esistere",
+      "file": "backend/server.js",
+      "pattern": "app\\.(get|post).*\\/api\\/match\\/:.*\\/bundle",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_DB_V2.md sezione 3"
+    },
+    {
+      "id": "STRATEGY_ENGINE_IMPLEMENTED",
+      "description": "Strategy Engine deve avere implementazione reale (non solo TODO)",
+      "file": "backend/strategies/strategyEngine.js",
+      "antiPattern": "TODO.*Implementare",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+    },
+    {
+      "id": "USE_MATCH_BUNDLE_HOOK",
+      "description": "Hook useMatchBundle deve esistere",
+      "file": "src/hooks/useMatchBundle.jsx",
+      "mustExist": true,
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3"
+    }
+  ],
+  
+  "allowlist": [
+    {
+      "file": "src/config.js",
+      "rule": "INV-008",
+      "reason": "File di configurazione centralizzato"
+    },
+    {
+      "file": "backend/server.js",
+      "rule": "INV-007",
+      "reason": "Logging startup server"
+    },
+    {
+      "file": "src/components/MonitoringDashboard.jsx",
+      "rule": "MATCHBUNDLE_ONLY_FE",
+      "reason": "Dashboard admin può avere fetch multipli per monitoraggio"
+    }
+  ]
+}

@@ -1,0 +1,448 @@
+/**
+ * StrategiesTab CSS
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
+ */
+
+.strategies-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ===========================================
+   HEADER
+=========================================== */
+
+.strategies-tab__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.tab-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.tab-controls {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.control-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-interactive);
+  border-radius: var(--radius-sm);
+}
+
+/* ===========================================
+   FILTERS
+=========================================== */
+
+.strategies-tab__filters {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-interactive);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.filter-button:hover {
+  background: var(--bg-interactive-hover);
+  color: var(--text-primary);
+}
+
+.filter-button.active {
+  background: var(--color-primary-bg);
+  border-color: var(--color-primary-border);
+  color: var(--color-primary);
+}
+
+.filter-count {
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-interactive);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.filter-button.active .filter-count {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* ===========================================
+   STRATEGY CARDS
+=========================================== */
+
+.strategies-tab__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.no-strategies {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+}
+
+.no-strategies .icon {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.no-strategies p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ===========================================
+   STRATEGY CARD
+=========================================== */
+
+.strategy-card {
+  background: var(--bg-card);
+  border: 2px solid;
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.strategy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.strategy-card.ready {
+  border-color: var(--color-success-border);
+  background: var(--color-success-bg);
+}
+
+.strategy-card.watch {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.strategy-card.off {
+  border-color: var(--border-color);
+}
+
+.strategy-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.strategy-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: white;
+}
+
+/* Status dot for badges */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+}
+
+.status-dot.ready {
+  background: white;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.status-dot.watch {
+  background: white;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.status-dot.off {
+  background: white;
+  opacity: 0.6;
+}
+
+/* Event dot for log */
+.event-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.event-dot.ready {
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+}
+
+.event-dot.watch {
+  background: var(--color-warning);
+  box-shadow: 0 0 8px var(--color-warning);
+}
+
+.event-dot.off {
+  background: var(--text-muted);
+}
+
+.strategy-name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.strategy-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+}
+
+.confidence,
+.risk {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/* ===========================================
+   STRATEGY BODY
+=========================================== */
+
+.strategy-card__body {
+  margin-bottom: var(--space-4);
+}
+
+.strategy-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.detail-row {
+  display: flex;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.detail-label {
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===========================================
+   CONDITIONS
+=========================================== */
+
+.conditions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+}
+
+.condition-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.condition-item.met {
+  color: var(--color-success);
+}
+
+.condition-item.unmet {
+  color: var(--text-muted);
+}
+
+/* ===========================================
+   STRATEGY FOOTER
+=========================================== */
+
+.strategy-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color);
+}
+
+.strategy-why {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-style: italic;
+  padding-right: var(--space-4);
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.action-button:hover {
+  background: var(--color-primary-light);
+  transform: translateY(-1px);
+}
+
+.action-button:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-button.success {
+  background: var(--color-success);
+}
+
+.action-button.danger {
+  background: var(--color-danger);
+}
+
+/* ===========================================
+   EVENT LOG
+=========================================== */
+
+.strategy-event-log {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--space-4);
+}
+
+.log-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-3) 0;
+}
+
+.log-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  padding: var(--space-2);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-sm);
+}
+
+.log-time {
+  color: var(--text-muted);
+  margin-right: var(--space-2);
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 768px) {
+  .strategies-tab {
+    gap: var(--space-4);
+  }
+
+  .strategies-tab__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .strategy-card {
+    padding: var(--space-4);
+  }
+
+  .strategy-card__header {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .strategy-meta {
+    align-items: flex-start;
+    flex-direction: row;
+    gap: var(--space-3);
+  }
+
+  .strategy-card__footer {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .strategy-why {
+    padding-right: 0;
+    padding-bottom: var(--space-3);
+  }
+
+  .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

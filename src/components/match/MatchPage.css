@@ -1,0 +1,282 @@
+/**
+ * MatchPage CSS
+ * 
+ * Layout a 3 zone: Header sticky + Sidebar + Main + Right Rail
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
+ */
+
+.match-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===========================================
+   LAYOUT - Grid 3 colonne
+=========================================== */
+
+.match-page__layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr var(--right-rail-width);
+  min-height: calc(100vh - var(--header-height));
+  flex: 1;
+}
+
+/* ===========================================
+   SIDEBAR
+=========================================== */
+
+.match-page__sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  padding: var(--space-4) 0;
+  transition: width var(--motion-normal) var(--motion-ease-out);
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+}
+
+.match-page__sidebar--collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+/* ===========================================
+   MAIN CONTENT
+=========================================== */
+
+.match-page__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg-primary);
+}
+
+.match-page__content {
+  flex: 1;
+  padding: var(--space-6);
+  overflow-y: auto;
+}
+
+.match-page__tab-content {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ===========================================
+   RIGHT RAIL
+=========================================== */
+
+.match-page__right-rail {
+  width: var(--right-rail-width);
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  padding: var(--space-4);
+  overflow-y: auto;
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+}
+
+/* ===========================================
+   MOBILE TAB BAR
+=========================================== */
+
+.match-page__tabs-mobile {
+  display: none;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.match-page__tabs-mobile::-webkit-scrollbar {
+  display: none;
+}
+
+.match-page__tabs-mobile .motion-tab-list {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  min-width: max-content;
+}
+
+.match-page__tabs-mobile .motion-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.match-page__tabs-mobile .motion-tab:hover {
+  background: var(--bg-interactive);
+  color: var(--text-primary);
+}
+
+.match-page__tabs-mobile .motion-tab--active {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+/* ===========================================
+   TAB LABEL
+=========================================== */
+
+.tab-label {
+  margin-left: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+/* ===========================================
+   RESPONSIVE - Desktop Large (1400px+)
+=========================================== */
+
+@media (min-width: 1400px) {
+  .match-page__content {
+    padding: var(--space-8);
+  }
+}
+
+/* ===========================================
+   RESPONSIVE - Desktop (1200px)
+=========================================== */
+
+@media (max-width: 1200px) {
+  .match-page__right-rail {
+    width: 280px;
+  }
+
+  .match-page__layout {
+    grid-template-columns: var(--sidebar-width) 1fr 280px;
+  }
+}
+
+/* ===========================================
+   RESPONSIVE - Tablet (1024px)
+=========================================== */
+
+@media (max-width: 1024px) {
+  .match-page__layout {
+    grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+  }
+
+  .match-page__right-rail {
+    display: none;
+  }
+
+  .match-page__sidebar {
+    width: var(--sidebar-collapsed-width);
+  }
+
+  .match-page__content {
+    padding: var(--space-5);
+  }
+}
+
+/* ===========================================
+   RESPONSIVE - Mobile (768px)
+=========================================== */
+
+@media (max-width: 768px) {
+  .match-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .match-page__sidebar {
+    display: none;
+  }
+
+  .match-page__tabs-mobile {
+    display: block;
+    position: sticky;
+    top: var(--header-height);
+    z-index: var(--z-sticky);
+  }
+
+  .match-page__content {
+    padding: var(--space-4);
+  }
+
+  .tab-label {
+    display: none;
+  }
+}
+
+/* ===========================================
+   RESPONSIVE - Small Mobile (480px)
+=========================================== */
+
+@media (max-width: 480px) {
+  .match-page__content {
+    padding: var(--space-3);
+  }
+
+  .match-page__tabs-mobile .motion-tab {
+    padding: var(--space-2);
+  }
+}
+
+/* ===========================================
+   SCROLLBAR STYLING
+=========================================== */
+
+.match-page__content::-webkit-scrollbar,
+.match-page__right-rail::-webkit-scrollbar,
+.match-page__sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.match-page__content::-webkit-scrollbar-track,
+.match-page__right-rail::-webkit-scrollbar-track,
+.match-page__sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.match-page__content::-webkit-scrollbar-thumb,
+.match-page__right-rail::-webkit-scrollbar-thumb,
+.match-page__sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+.match-page__content::-webkit-scrollbar-thumb:hover,
+.match-page__right-rail::-webkit-scrollbar-thumb:hover,
+.match-page__sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color-strong);
+}
+
+/* ===========================================
+   ANIMATIONS
+=========================================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

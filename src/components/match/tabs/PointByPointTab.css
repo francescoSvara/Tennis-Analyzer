@@ -1,0 +1,529 @@
+/**
+ * PointByPointTab CSS - UI/UX migliorata
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
+ */
+
+.pbp-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ===========================================
+   HEADER
+=========================================== */
+
+.pbp-tab__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.pbp-tab__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pbp-tab__title h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.pbp-tab__count {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  background: var(--bg-highlight);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.pbp-tab__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.action-btn {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  background: var(--bg-interactive);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+  background: var(--bg-interactive-hover);
+  color: var(--text-primary);
+}
+
+/* ===========================================
+   LEGEND
+=========================================== */
+
+.pbp-tab__legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-medium);
+}
+
+.legend-item.home {
+  color: var(--color-success);
+}
+
+.legend-item.away {
+  color: var(--color-primary);
+}
+
+.legend-source {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ===========================================
+   FILTERS
+=========================================== */
+
+.pbp-tab__filters {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-2);
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-chip:hover:not(.disabled) {
+  background: var(--bg-interactive-hover);
+  border-color: var(--border-color-strong);
+}
+
+.filter-chip.active {
+  background: var(--color-primary-bg);
+  border-color: var(--color-primary-border);
+  color: var(--color-primary);
+}
+
+.filter-chip.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.filter-count {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background: var(--bg-highlight);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  min-width: 20px;
+  text-align: center;
+}
+
+.filter-chip.active .filter-count {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ===========================================
+   GAMES LIST
+=========================================== */
+
+.pbp-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--space-3);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ===========================================
+   GAME GROUP
+=========================================== */
+
+.game-group {
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.game-group--bp {
+  border-left: 3px solid #ef4444;
+}
+
+.game-group--sp {
+  border-left: 3px solid #f59e0b;
+}
+
+.game-group--mp {
+  border-left: 3px solid #10b981;
+}
+
+.game-group--break {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.game-group__header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: var(--space-3);
+  transition: background 0.15s ease;
+}
+
+.game-group__header:hover {
+  background: var(--bg-interactive-hover);
+}
+
+.game-group__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 140px;
+}
+
+.game-group__set-game {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-group__badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.game-group__result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.winner-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.winner-indicator.home {
+  color: var(--color-success);
+}
+
+.winner-indicator.away {
+  color: var(--color-primary);
+}
+
+.points-count {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.expand-icon {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+/* ===========================================
+   SERVER INDICATOR
+=========================================== */
+
+.server-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.server-indicator.home {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.server-indicator.away {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+/* ===========================================
+   BADGES
+=========================================== */
+
+.point-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.break-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-sm);
+  color: #ef4444;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.stat-badge.ace {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.stat-badge.df {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+/* ===========================================
+   POINTS INSIDE GAME
+=========================================== */
+
+.game-group__points {
+  padding: 0 var(--space-3) var(--space-3);
+  overflow: hidden;
+}
+
+.point-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.point-row--breakpoint {
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 2px solid #ef4444;
+}
+
+.point-row--setpoint {
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 2px solid #f59e0b;
+}
+
+.point-row--matchpoint {
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 2px solid #10b981;
+}
+
+.point-row--ace {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.point-row--doublefault {
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.point-row__score {
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  min-width: 50px;
+  color: var(--text-primary);
+}
+
+.point-row__details {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.point-row__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ===========================================
+   POINT WINNER
+=========================================== */
+
+.point-winner {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.point-winner.home {
+  color: #10b981;
+}
+
+.point-winner.away {
+  color: #3b82f6;
+}
+
+/* ===========================================
+   RALLY BADGE
+=========================================== */
+
+.rally-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--space-2);
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ===========================================
+   NO POINTS STATE
+=========================================== */
+
+.no-points {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-5);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.no-points h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+}
+
+.no-points p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 768px) {
+  .pbp-tab__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .pbp-tab__legend {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  
+  .legend-source {
+    width: 100%;
+    margin-left: 0;
+    margin-top: var(--space-1);
+  }
+
+  .pbp-tab__filters {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: var(--space-2);
+    scrollbar-width: none;
+  }
+
+  .pbp-tab__filters::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .filter-chip {
+    flex-shrink: 0;
+  }
+
+  .pbp-card {
+    max-height: 500px;
+  }
+
+  .game-group__header {
+    flex-wrap: wrap;
+  }
+  
+  .game-group__badges {
+    order: 3;
+    width: 100%;
+    margin-top: var(--space-2);
+  }
+  
+  .point-row {
+    flex-wrap: wrap;
+  }
+  
+  .point-row__details {
+    order: 3;
+    width: 100%;
+    margin-top: var(--space-1);
+  }
+}

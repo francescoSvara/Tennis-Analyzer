@@ -304,9 +304,9 @@ Max momentum AWAY: -100
 ### Documenti Correlati
 | Documento | Sezione | Relazione |
 |-----------|---------|-----------|
-| [FILOSOFIA_DB.md](FILOSOFIA_DB.md) | Schema Database | Tabella power_rankings |
-| [MAPPA_RETE_CONCETTUALE.md](../MAPPA_RETE_CONCETTUALE.md) | Sezione 6 | Funzioni SVG |
-| [FILOSOFIA_STATS_V2.md](FILOSOFIA_STATS_V2.md) | Momentum | Dati derivati |
+| [FILOSOFIA_DB_V2.md](../filosofie/FILOSOFIA_DB_V2.md) | Schema Database | Tabella power_rankings |
+| [MAPPA_RETE_CONCETTUALE_V2.md](../MAPPA_RETE_CONCETTUALE_V2.md) | Sezione 6 | Funzioni SVG |
+| [FILOSOFIA_STATS_V3.md](../filosofie/FILOSOFIA_STATS_V3.md) | Momentum | Dati derivati |
 
 ### File Sorgente Principali
 | Concetto | File Backend | File Frontend |

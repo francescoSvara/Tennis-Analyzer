@@ -1,7 +1,7 @@
 /**
  * 🧪 CONCEPT CHECKS - Verifica confini architetturali
  * 
- * Controlla che il codice rispetti le regole definite in docs/concept/rules.v1.json
+ * Controlla che il codice rispetti le regole definite in docs/concept/rules.v2.json
  * Complementare a checkConceptualMap.js (che verifica esistenza file)
  * 
  * Uso: node scripts/runConceptChecks.js [--mode full|diff]
@@ -20,7 +20,8 @@ const { execSync } = require('child_process');
 // ============================================================================
 
 const ROOT_DIR = path.join(__dirname, '..');
-const RULES_FILE = path.join(ROOT_DIR, 'docs', 'concept', 'rules.v1.json');
+const RULES_FILE_V2 = path.join(ROOT_DIR, 'docs', 'concept', 'rules.v2.json');
+const RULES_FILE_V1 = path.join(ROOT_DIR, 'docs', 'concept', 'rules.v1.json');
 const REPORT_JSON = path.join(ROOT_DIR, 'docs', 'checks', 'report.json');
 const REPORT_MD = path.join(ROOT_DIR, 'docs', 'checks', 'report.md');
 const TODO_LIST_FILE = path.join(ROOT_DIR, 'docs', 'TODO_LIST.md');
@@ -30,11 +31,17 @@ const TODO_LIST_FILE = path.join(ROOT_DIR, 'docs', 'TODO_LIST.md');
 // ============================================================================
 
 function loadRules() {
-  if (!fs.existsSync(RULES_FILE)) {
-    console.error(`❌ Rules file not found: ${RULES_FILE}`);
-    process.exit(1);
+  // Prova prima V2, poi V1
+  if (fs.existsSync(RULES_FILE_V2)) {
+    console.log('📜 Using rules.v2.json (MatchBundle-Centric)');
+    return JSON.parse(fs.readFileSync(RULES_FILE_V2, 'utf-8'));
   }
-  return JSON.parse(fs.readFileSync(RULES_FILE, 'utf-8'));
+  if (fs.existsSync(RULES_FILE_V1)) {
+    console.log('📜 Using rules.v1.json (legacy)');
+    return JSON.parse(fs.readFileSync(RULES_FILE_V1, 'utf-8'));
+  }
+  console.error(`❌ Rules file not found`);
+  process.exit(1);
 }
 
 // ============================================================================
@@ -264,6 +271,100 @@ function runChecks(files, rules) {
 }
 
 // ============================================================================
+// ARCHITECTURAL CHECKS - Verifica struttura progetto
+// ============================================================================
+
+function runArchitecturalChecks(rules) {
+  const findings = [];
+  
+  if (!rules.architecturalChecks) return findings;
+  
+  for (const check of rules.architecturalChecks) {
+    // Check file must exist
+    if (check.mustExist) {
+      const fullPath = path.join(ROOT_DIR, check.file);
+      if (!fs.existsSync(fullPath)) {
+        findings.push({
+          severity: check.severity || 'ERROR',
+          ruleId: check.id,
+          file: check.file,
+          line: 0,
+          domain: 'architecture',
+          message: check.description,
+          match: 'FILE_MISSING',
+          remediation: `Creare il file ${check.file}`,
+          reference: check.reference
+        });
+      }
+      continue;
+    }
+    
+    // Check pattern in file
+    const fullPath = path.join(ROOT_DIR, check.file);
+    if (!fs.existsSync(fullPath)) {
+      findings.push({
+        severity: check.severity || 'ERROR',
+        ruleId: check.id,
+        file: check.file,
+        line: 0,
+        domain: 'architecture',
+        message: `File non trovato: ${check.file}`,
+        match: 'FILE_MISSING',
+        remediation: `Verificare esistenza di ${check.file}`
+      });
+      continue;
+    }
+    
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    
+    // Check if pattern should exist
+    if (check.pattern) {
+      const regex = new RegExp(check.pattern, 'i');
+      if (!regex.test(content)) {
+        findings.push({
+          severity: check.severity || 'ERROR',
+          ruleId: check.id,
+          file: check.file,
+          line: 0,
+          domain: 'architecture',
+          message: check.description,
+          match: 'PATTERN_MISSING',
+          remediation: `Implementare: ${check.pattern}`,
+          reference: check.reference
+        });
+      }
+    }
+    
+    // Check if antiPattern should NOT exist
+    if (check.antiPattern) {
+      const regex = new RegExp(check.antiPattern, 'gi');
+      const matches = content.match(regex);
+      if (matches && matches.length > 0) {
+        // Trova la riga
+        const lines = content.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          if (regex.test(lines[i])) {
+            findings.push({
+              severity: check.severity || 'ERROR',
+              ruleId: check.id,
+              file: check.file,
+              line: i + 1,
+              domain: 'architecture',
+              message: check.description,
+              match: matches[0],
+              remediation: `Rimuovere/implementare: ${check.antiPattern}`,
+              reference: check.reference
+            });
+          }
+        }
+      }
+    }
+  }
+  
+  return findings;
+}
+
+// ============================================================================
 // REPORT GENERATION
 // ============================================================================
 
@@ -464,8 +565,15 @@ function main() {
   console.log(`📂 Checking ${files.length} files...`);
   console.log('');
   
-  // Run checks
-  const findings = runChecks(files, rules);
+  // Run invariant checks
+  const invariantFindings = runChecks(files, rules);
+  
+  // Run architectural checks
+  console.log('🏗️  Running architectural checks...');
+  const archFindings = runArchitecturalChecks(rules);
+  
+  // Combine findings
+  const findings = [...invariantFindings, ...archFindings];
   
   // Generate report
   const report = generateReport(findings, mode, startTime);

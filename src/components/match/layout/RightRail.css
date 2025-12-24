@@ -1,0 +1,318 @@
+/**
+ * RightRail CSS
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
+ */
+
+.right-rail {
+  width: var(--right-rail-width);
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow-y: auto;
+}
+
+/* ===========================================
+   SECTION
+=========================================== */
+
+.right-rail__section {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: 1px solid var(--border-color);
+}
+
+/* ===========================================
+   SECTION TITLE
+=========================================== */
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-3) 0;
+}
+
+/* ===========================================
+   STRATEGY CTA
+=========================================== */
+
+.strategy-cta {
+  border: 2px solid;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.strategy-cta--ready {
+  border-color: var(--color-success-border);
+  background: var(--color-success-bg);
+}
+
+.strategy-cta--watch {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.strategy-cta--off {
+  border-color: var(--border-color);
+  background: var(--bg-highlight);
+}
+
+.strategy-cta__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: white;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: white;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.status-dot.off {
+  opacity: 0.6;
+}
+
+.strategy-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.strategy-cta__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.strategy-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.strategy-detail .label {
+  color: var(--text-secondary);
+}
+
+.strategy-detail .value {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.strategy-cta__action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.strategy-cta__footer {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-align: center;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-color);
+}
+
+.exit-rule {
+  font-style: italic;
+}
+
+/* ===========================================
+   NO STRATEGY STATE
+=========================================== */
+
+.no-strategy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.no-strategy .icon {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.no-strategy p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.no-strategy .hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ===========================================
+   ODDS QUICK VIEW
+=========================================== */
+
+.odds-quick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.odds-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+  transition: background var(--motion-fast) var(--motion-ease-out);
+}
+
+.odds-row:hover {
+  background: var(--bg-interactive);
+}
+
+.odds-row .player-name {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.odds-row .odds-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* ===========================================
+   RISK CONTROLS
+=========================================== */
+
+.risk-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.risk-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.risk-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+}
+
+.risk-label {
+  color: var(--text-secondary);
+}
+
+.risk-value {
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.risk-value--low { color: var(--color-success); }
+.risk-value--medium { color: var(--color-warning); }
+.risk-value--high { color: var(--color-danger); }
+
+.risk-progress {
+  height: 4px;
+  background: var(--bg-interactive);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.risk-progress__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--motion-normal) var(--motion-ease-out);
+}
+
+.risk-progress__fill--low { background: var(--color-success); }
+.risk-progress__fill--medium { background: var(--color-warning); }
+.risk-progress__fill--high { background: var(--color-danger); }
+
+/* ===========================================
+   RISK TOGGLES
+=========================================== */
+
+.risk-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-color);
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--motion-ease-out);
+}
+
+.toggle-item:hover {
+  color: var(--text-primary);
+}
+
+.toggle-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 1200px) {
+  .right-rail {
+    width: 280px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .right-rail {
+    display: none;
+  }
+}

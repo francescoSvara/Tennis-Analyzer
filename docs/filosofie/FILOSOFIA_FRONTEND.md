@@ -1,6 +1,16 @@
 # 📖 FILOSOFIA FRONTEND – DOCUMENTO UNIFICATO
 
-> **Scopo**: Documento completo che unisce visual design, backend allacci, JSON schema e motion/icons spec.
+> **Scopo**: Documento completo che unisce visual design, backend allacci, JSON schema e motion/icons spec.  
+> **Stato**: ATTIVA  
+> **Ultimo aggiornamento**: Dicembre 2025  
+
+---
+
+## 🧭 NAVIGAZIONE ARCHITETTURA
+
+| ⬆️ Padre | ⬅️ Input da | ➡️ Correlato |
+|---------|-----------|--------------|
+| [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) (strategie) |
 
 ---
 
@@ -149,7 +159,58 @@ WS   /ws/match/:id → push: scoreboard, odds, pbp, strategy signals, momentum
 
 ---
 
-# 📑 TAB: OVERVIEW (Operativa)
+# � IMPLEMENTAZIONE REALE BUNDLE ENDPOINT (Dicembre 2025)
+
+> **Stato**: ✅ IMPLEMENTATO
+> **File**: `backend/server.js` (L3170-3370)
+
+## Endpoint Unico per tutti i Tab
+
+```
+GET /api/match/:eventId/bundle
+```
+
+### Flow Interno
+```
+1. Load raw data → matchRepository, statistics, odds, points, powerRankings
+2. Compute features → featureEngine.computeFeatures()
+3. Evaluate strategies → strategyEngine.evaluateAll(features)
+4. Normalize odds → normalizeOddsForBundle()
+5. Normalize points → normalizePointsForBundle()
+6. Build tabs → uno per ogni tab frontend
+7. Return unified bundle
+```
+
+### Helper Functions Implementate
+
+#### `normalizeOddsForBundle(oddsData)`
+Converte formato DB:
+```js
+// Input (DB)
+{ opening: { home: 1.50, away: 2.80 }, closing: { home: 1.45, away: 2.95 }, all: [...] }
+
+// Output (Frontend)
+{ home: { value: 1.45, trend: 'falling' }, away: { value: 2.95, trend: 'rising' } }
+```
+
+#### `normalizePointsForBundle(pointsData)`
+Normalizza point-by-point con struttura consistente.
+
+### Header Features (esposto a tutti i tab)
+```js
+header.features = {
+  volatility: 62,        // da featureEngine
+  pressure: 45,          // da featureEngine
+  dominance: 58,         // da featureEngine
+  serveDominance: 72,    // NUOVO - per MomentumTab
+  returnDominance: 48,   // NUOVO - per MomentumTab
+  breakProbability: 35   // NUOVO - per PredictorTab
+}
+```
+
+---
+
+# �📑 TAB: OVERVIEW (Operativa)
 
 ## 🎨 Visual Design
 
@@ -181,6 +242,111 @@ WS   /ws/match/:id → push: scoreboard, odds, pbp, strategy signals, momentum
 - Indicatori rapidi (fatigue, break chances, clutch)
 - Mini momentum
 - Stato strategie (riassunto)
+
+---
+
+## 🔧 IMPLEMENTAZIONE OVERVIEWTAB (Dicembre 2025)
+
+> **File**: [`src/components/match/tabs/OverviewTab.jsx`](../../src/components/match/tabs/OverviewTab.jsx)  
+> **Stili**: [`src/components/match/tabs/OverviewTab.css`](../../src/components/match/tabs/OverviewTab.css)
+
+### 4 Componenti Interni
+
+| Componente | Dati da Bundle | Descrizione |
+|------------|----------------|-------------|
+| **Scoreboard** | `header.players`, `header.score`, `header.match`, `header.odds` | Tabellone con nomi, punteggio set/game, odds |
+| **QuickSignals** | `header.features` | 6 metriche: volatility, pressure, dominance, breakProb, serveDom, returnDom |
+| **StrategyMiniPanel** | `tabs.strategies.signals`, `tabs.strategies.summary` | Lista strategie con semafori READY/WATCH/OFF |
+| **MiniMomentum** | `header.features.momentum` | Trend, swing recente, break count, last 5 avg |
+
+### Gestione Dati Non Disponibili
+
+> **Feature Engine**: [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
+
+Quando un match non ha statistiche reali (es. match legacy XLSX), il backend ritorna:
+```js
+features: {
+  volatility: null,
+  pressure: null,
+  dominance: null,
+  breakProbability: null,
+  serveDominance: null,
+  returnDominance: null,
+  hasRealData: false,
+  momentum: { trend: 'unknown', recentSwing: null, breakCount: null, last5avg: null }
+}
+```
+
+Il frontend gestisce questo stato:
+- **QuickSignals**: Mostra "N/A" invece del valore numerico, colore grigio
+- **MiniMomentum**: Mostra "N/A", badge "Dati non disponibili"
+- **Classe CSS**: `.no-data`, `.na` per styling degradato
+
+```jsx
+// QuickSignals - gestione null
+const formatValue = (value) => {
+  if (!hasRealData || value === null || value === undefined) return 'N/A';
+  return `${Math.round(value * 100)}%`;
+};
+```
+
+### Props OverviewTab
+
+```jsx
+// Da MatchPage.jsx:
+<OverviewTab 
+  data={bundle.tabs.overview}       // h2h, recentForm, keyStats (non usati direttamente)
+  header={bundle.header}            // players, score, odds, features, match
+  strategies={bundle.tabs.strategies}  // signals, summary
+/>
+```
+
+### Mapping Dati → Componenti
+
+```
+bundle.header.players.home/away      → Scoreboard (nomi, ranking)
+bundle.header.score.sets[]           → Scoreboard (punteggio set)
+bundle.header.score.game             → Scoreboard (punteggio game)
+bundle.header.score.serving          → Scoreboard (pallina servizio)
+bundle.header.match.status           → Scoreboard (badge LIVE/finished)
+bundle.header.odds.home/away         → Scoreboard (quote)
+
+bundle.header.features.volatility    → QuickSignals (0-100)
+bundle.header.features.pressure      → QuickSignals (0-100)
+bundle.header.features.dominance     → QuickSignals (0-100)
+bundle.header.features.breakProbability → QuickSignals (0-100)
+bundle.header.features.serveDominance   → QuickSignals (0-100)
+bundle.header.features.returnDominance  → QuickSignals (0-100)
+
+bundle.tabs.strategies.signals[]     → StrategyMiniPanel (array strategie)
+bundle.tabs.strategies.summary       → StrategyMiniPanel ({ ready, watch, off })
+
+bundle.header.features.momentum.trend      → MiniMomentum ('stable'|'rising'|'falling')
+bundle.header.features.momentum.recentSwing → MiniMomentum (number)
+bundle.header.features.momentum.breakCount  → MiniMomentum (number)
+bundle.header.features.momentum.last5avg    → MiniMomentum (number)
+```
+
+### Layout CSS Grid
+
+```
+.overview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.overview-top, .overview-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* 2 colonne uguali */
+  gap: var(--space-5);
+}
+
+/* 
+  Top row:    [Scoreboard]  [QuickSignals]
+  Bottom row: [StrategyMini] [MiniMomentum]
+*/
+```
 
 ---
 
@@ -380,30 +546,50 @@ NON in tempo reale. Serve solo per fiducia psicologica.
 
 ## ⚙️ Backend Functions (Strategie)
 
-### Endpoint
+### Endpoint ATTUALE (Dicembre 2025)
 ```
-GET /api/match/:id/strategies
-WS  → push: strategy signals
+GET /api/match/:eventId/bundle → bundle.tabs.strategies
 ```
 
-### Nuovo: Strategy Engine
-**File da creare**: `backend/strategies/strategyEngine.js`
+### Implementazione Reale
+**File**: `backend/strategies/strategyEngine.js`
 
 ```js
-// Ogni strategia ritorna sempre lo stesso schema:
+// Output reale di bundle.tabs.strategies
 {
-  id,
-  status: "OFF" | "WATCH" | "READY",
-  action: "BACK" | "LAY" | null,
-  target,
-  confidence,
-  entryRule,
-  exitRule,
-  reasons: [ ... ],
-  requiredData: [ ... ],
-  risk: { stakeSuggested, liabilityCap }
+  signals: [
+    {
+      id: "lay_winner",
+      name: "Lay The Winner",
+      status: "READY" | "WATCH" | "OFF",
+      confidence: 0.78,
+      action: "LAY" | "BACK" | null,
+      target: "Player Name",
+      conditions: {
+        set1Winner: true,
+        favoriteLeading: false,
+        lowOdds: true
+      },
+      risk: "MED" | "HIGH" | "LOW",
+      reasons: ["Favorito sotto di un set", "Quote non corrette"],
+      entryRule: "Al break point 2° set",
+      exitRule: "Break del favorito / Fine game"
+    },
+    // ... altre 4 strategie (BancaServizio, SuperBreak, TiebreakSpecialist, MomentumSwing)
+  ],
+  summary: {
+    ready: 1,
+    watch: 2,
+    off: 2
+  }
 }
 ```
+
+### Frontend Component
+**File**: `src/components/match/StrategiesTab.jsx`
+
+Legge `data.signals[]` e renderizza una card per strategia.
+**FIX applicato**: variabile `status` (era `statusKey` undefined)
 
 ### Funzioni Backend da usare:
 
@@ -464,23 +650,33 @@ Deve sembrare una piattaforma trading, non un box quote.
 
 ## ⚙️ Backend Functions (Odds)
 
-### Endpoint
+### Endpoint ATTUALE (Dicembre 2025)
 ```
-GET /api/match/:id/odds
+GET /api/match/:eventId/bundle → bundle.tabs.odds
 ```
 
-### Nuovo: Odds Service
-**File da creare**: `backend/services/oddsService.js`
+### Implementazione Reale
+**File**: `backend/server.js` → `normalizeOddsForBundle()`
 
-| Funzione | Scopo |
-|----------|-------|
-| `oddsService.calculateImpliedProbability()` | Probabilità implicita dalle quote |
-| `oddsService.calculateFairOdds()` | Fair odds da ranking + stats |
-| `oddsService.detectValueEdge()` | Rileva edge vs mercato |
+```js
+// Output reale di bundle.tabs.odds
+{
+  matchWinner: {
+    home: { value: 1.45, trend: "falling", change: -0.05 },
+    away: { value: 2.95, trend: "rising", change: +0.15 }
+  },
+  raw: { opening, closing, all } // dati DB originali
+}
+```
+
+### Frontend Component
+**File**: `src/components/match/OddsTab.jsx`
+
+Legge `data.matchWinner.home.value` / `data.matchWinner.away.value` e calcola trend.
 
 ### Fonti Dati:
-- Pre-match: `match_odds`
-- Live: feed da `liveManager` o refresh scraper
+- Pre-match: `match_odds` (tabella DB)
+- Normalizzazione: `normalizeOddsForBundle()`
 
 ---
 
@@ -562,18 +758,27 @@ providerConvention: {
 
 ## ⚙️ Backend Functions (Stats)
 
-### Endpoint
+### Endpoint ATTUALE (Dicembre 2025)
 ```
-GET /api/match/:id/stats
+GET /api/match/:eventId/bundle → bundle.tabs.stats
 ```
 
-### Funzioni Backend da usare:
+### Implementazione Reale
+**File**: `backend/server.js` → bundle.tabs.stats
 
-| Funzione | File | Scopo |
-|----------|------|-------|
-| `pressureCalculator.calculatePressureIndex()` | `backend/utils/pressureCalculator.js` | Pressure |
-| `matchSegmenter.segmentMatch()` | `backend/utils/matchSegmenter.js` | Segmentazione match |
-| `sofascoreScraper.getStatistics()` | `backend/scraper/sofascoreScraper.js` | Stats da SofaScore |
+```js
+// Output reale di bundle.tabs.stats
+{
+  match: { /* stats aggregate match */ },
+  bySet: { /* stats per set */ },
+  raw: { /* dati grezzi da match_statistics_new */ }
+}
+```
+
+### Frontend Component
+**File**: `src/components/match/StatsTab.jsx`
+
+Legge `data.match`, `data.bySet` per visualizzare statistiche.
 
 ### Fonte: `match_statistics_new` + calcoli dinamici
 
@@ -602,25 +807,41 @@ GET /api/match/:id/stats
 
 ## ⚙️ Backend Functions (Momentum)
 
-### Endpoint
+### Endpoint ATTUALE (Dicembre 2025)
 ```
-GET /api/match/:id/momentum
+GET /api/match/:eventId/bundle → bundle.tabs.momentum
 ```
 
-### Nuovo: Momentum Service
-**File da creare**: `backend/services/momentumService.js`
+### Implementazione Reale
+**File**: `backend/server.js` → bundle.tabs.momentum
 
-| Funzione | Scopo |
-|----------|-------|
-| `momentumService.analyzeMomentumOwner()` | Chi domina il momentum |
-| `momentumService.detectMomentumShift()` | Rileva shift momentum |
+```js
+// Output reale di bundle.tabs.momentum
+{
+  powerRankings: [
+    { timestamp, home_value, away_value, home_name, away_name }
+  ],
+  features: {
+    trend: "rising" | "falling" | "stable",
+    recentSwing: 15,
+    breakCount: 2
+  },
+  qualityStats: {  // NUOVO - aggiunto Dicembre 2025
+    home: { winners: 12, ue: 8 },
+    away: { winners: 9, ue: 11 }
+  }
+}
+```
 
-### Funzioni Backend da usare:
+### Frontend Component
+**File**: `src/components/match/MomentumTab.jsx`
 
-| Funzione | File | Scopo |
-|----------|------|-------|
-| `sofascoreScraper.getPowerRankings()` | `backend/scraper/sofascoreScraper.js` | Power rankings |
-| `svgMomentumExtractor.extract()` | `backend/utils/svgMomentumExtractor.js` | Fallback SVG |
+Legge:
+- `data.powerRankings[]` per grafico momentum
+- `data.features.trend` per indicatore trend
+- `data.qualityStats` per winners/UE
+- `header.features.serveDominance` per serve dominance meter
+- `header.features.returnDominance` per return analysis
 
 ### Fonti:
 - Primary: `match_power_rankings_new.value`
@@ -651,27 +872,37 @@ GET /api/match/:id/momentum
 
 ## ⚙️ Backend Functions (Predictor)
 
-### Endpoint
+### Endpoint ATTUALE (Dicembre 2025)
 ```
-GET /api/match/:id/predictor
+GET /api/match/:eventId/bundle → bundle.tabs.predictor
 ```
 
-### Nuovo: Predictor Service
-**File da creare**: `backend/services/predictorService.js`
+### Implementazione Reale
+**File**: `backend/server.js` → bundle.tabs.predictor
 
-| Funzione | Scopo |
-|----------|-------|
-| `predictorService.computeWinProbability()` | Win prob live |
-| `predictorService.computeBreakNextGameProbability()` | Prob break prossimo game |
-| `predictorService.computeEdgeVsMarket()` | Edge vs mercato |
+```js
+// Output reale di bundle.tabs.predictor
+{
+  winProbability: {
+    home: 52,
+    away: 48,
+    confidence: "MED"
+  },
+  keyFactors: [
+    { label: "Serve dominance", impact: "high", direction: "home" },
+    { label: "Break probability", impact: "medium", direction: "away" }
+  ],
+  breakProbability: 35  // NUOVO - aggiunto Dicembre 2025
+}
+```
 
-### Funzioni Backend da usare:
+### Frontend Component
+**File**: `src/components/match/PredictorTab.jsx`
 
-| Funzione | File | Scopo |
-|----------|------|-------|
-| `playerStatsService.getPlayerStats()` | `backend/services/playerStatsService.js` | Stats giocatore + comeback rate |
-| `valueInterpreter.*` | `backend/utils/valueInterpreter.js` | Volatility/elasticity |
-| `oddsService.calculateImpliedProbability()` | `backend/services/oddsService.js` | Implied prob |
+Legge:
+- `data.winProbability` per gauge principale
+- `data.keyFactors[]` per driver list
+- `data.breakProbability` per break probability (fallback: `header.features.breakProbability`)
 
 ---
 
@@ -1371,6 +1602,18 @@ npm install lottie-react
 - [ ] AnimatePresence per mount/unmount
 - [ ] prefers-reduced-motion rispettato
 - [ ] Phosphor Icons con weight coerente
+
+---
+
+## 📍 NAVIGAZIONE RAPIDA
+
+| ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
+|--------------|--------|---------------|
+| [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | [📚 INDEX](INDEX_FILOSOFIE.md) | [CONCEPT_CHECKS_V2](FILOSOFIA_CONCEPT_CHECKS_V2.md) |
+
+---
+
+**Fine documento – FILOSOFIA_FRONTEND**
 
 ## Performance
 - [ ] UNA sola strategia attiva per match (evita overload)

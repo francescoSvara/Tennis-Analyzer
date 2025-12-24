@@ -31,7 +31,8 @@ import {
   Upload
 } from '@phosphor-icons/react';
 import { apiUrl } from '../config';
-import ManualPredictor from './ManualPredictor';
+// ManualPredictor rimosso - deprecato
+// import ManualPredictor from './ManualPredictor';
 
 /**
  * MonitoringDashboard Component
@@ -1332,10 +1333,12 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
             </div>
           )}
           
-          {/* Predictor Tab */}
+          {/* Predictor Tab - Rimosso, ora usa PredictorTab in MatchPage */}
           {activeTab === 'predictor' && (
             <div className="tab-content predictor-tab">
-              <ManualPredictor />
+              <div style={{ padding: 40, textAlign: 'center', color: '#64748b' }}>
+                <p>Predictor moved to Match Page</p>
+              </div>
             </div>
           )}
         </div>

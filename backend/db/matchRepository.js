@@ -404,11 +404,12 @@ async function insertPointByPoint(matchId, pointByPoint) {
           score_after: `${homePoint}-${awayPoint}`,
           point_winner: winner,
           serving: game.score?.serving || null,
+          scoring: game.score?.scoring || null,  // Chi ha vinto il game
           home_point_type: p.homePointType || null,
           away_point_type: p.awayPointType || null,
           point_description: p.pointDescription || null,
-          is_ace: p.pointDescription === 'ace',
-          is_double_fault: p.pointDescription === 'double_fault'
+          is_ace: p.pointDescription === 'ace' || p.pointDescription === 1,
+          is_double_fault: p.pointDescription === 'double_fault' || p.pointDescription === 2
         });
         
         prevHome = homePoint;
@@ -2245,40 +2246,94 @@ async function getMatchOdds(matchId) {
 
 /**
  * Get point-by-point data (paginated for large matches)
+ * Tries new table first, falls back to legacy table
  */
 async function getMatchPointByPoint(matchId, options = {}) {
   if (!checkSupabase()) return { data: [], total: 0 };
 
   const { offset = 0, limit = 500 } = options;
 
-  // Get total count
-  const { count } = await supabase
+  // Try new table first
+  const { count: newCount } = await supabase
     .from('match_point_by_point_new')
     .select('id', { count: 'exact', head: true })
     .eq('match_id', matchId);
 
-  // Get data
-  const { data, error } = await supabase
-    .from('match_point_by_point_new')
-    .select('*')
-    .eq('match_id', matchId)
-    .order('set_number')
-    .order('game_number')
-    .order('point_number')
-    .range(offset, offset + limit - 1);
+  if (newCount && newCount > 0) {
+    // Get data from new table
+    const { data, error } = await supabase
+      .from('match_point_by_point_new')
+      .select('*')
+      .eq('match_id', matchId)
+      .order('set_number')
+      .order('game_number')
+      .order('point_number')
+      .range(offset, offset + limit - 1);
 
-  if (error) {
-    console.error('Error fetching point-by-point:', error.message);
-    return { data: [], total: 0 };
+    if (!error && data?.length > 0) {
+      return {
+        data: data,
+        total: newCount,
+        offset,
+        limit,
+        hasMore: (offset + limit) < newCount,
+        source: 'match_point_by_point_new'
+      };
+    }
   }
 
-  return {
-    data: data || [],
-    total: count || 0,
-    offset,
-    limit,
-    hasMore: (offset + limit) < count
-  };
+  // Fallback to legacy table (point_by_point)
+  const { count: legacyCount } = await supabase
+    .from('point_by_point')
+    .select('id', { count: 'exact', head: true })
+    .eq('match_id', matchId);
+
+  if (legacyCount && legacyCount > 0) {
+    const { data: legacyData, error: legacyError } = await supabase
+      .from('point_by_point')
+      .select('*')
+      .eq('match_id', matchId)
+      .order('set_number')
+      .order('game_number')
+      .order('point_index')
+      .range(offset, offset + limit - 1);
+
+    if (!legacyError && legacyData?.length > 0) {
+      // Map legacy format to new format
+      const mappedData = legacyData.map(p => ({
+        id: p.id,
+        match_id: p.match_id,
+        set_number: p.set_number,
+        game_number: p.game_number,
+        point_number: p.point_index,
+        home_point: p.home_point,
+        away_point: p.away_point,
+        score_before: p.score_before,
+        score_after: p.score_after,
+        point_winner: p.point_winner,
+        serving: p.serving,
+        scoring: p.scoring, // Who won the game (for break detection)
+        home_point_type: p.home_point_type,
+        away_point_type: p.away_point_type,
+        point_description: p.point_description,
+        is_break_point: p.is_break_point,
+        is_ace: p.is_ace,
+        is_double_fault: p.is_double_fault,
+        created_at: p.created_at
+      }));
+
+      return {
+        data: mappedData,
+        total: legacyCount,
+        offset,
+        limit,
+        hasMore: (offset + limit) < legacyCount,
+        source: 'point_by_point'
+      };
+    }
+  }
+
+  return { data: [], total: 0, offset, limit, hasMore: false };
 }
 
 // ============================================================================

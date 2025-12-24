@@ -1,0 +1,142 @@
+/**
+ * LoadingSkeleton CSS
+ */
+
+.loading-skeleton {
+  min-height: 100vh;
+  background: var(--bg-primary, #0f172a);
+}
+
+/* Skeleton Box Base */
+.skeleton-box {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-box.rounded {
+  border-radius: 8px;
+}
+
+.skeleton-box.rounded-lg {
+  border-radius: 12px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Header Skeleton */
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--bg-secondary, #1e293b);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.skeleton-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.skeleton-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-header__center {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.skeleton-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Layout Skeleton */
+.skeleton-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr 320px;
+  gap: 0;
+  min-height: calc(100vh - 80px);
+}
+
+/* Sidebar Skeleton */
+.skeleton-sidebar {
+  background: var(--bg-secondary, #1e293b);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Main Content Skeleton */
+.skeleton-main {
+  padding: 24px;
+}
+
+.skeleton-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.skeleton-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-cards-row {
+  display: flex;
+  gap: 16px;
+}
+
+/* Right Rail Skeleton */
+.skeleton-rail {
+  background: var(--bg-secondary, #1e293b);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .skeleton-layout {
+    grid-template-columns: 64px 1fr;
+  }
+
+  .skeleton-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .skeleton-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-sidebar {
+    display: none;
+  }
+}

@@ -1,65 +1,188 @@
 /* ============================================
-   THEME: Dark Modern Tennis Dashboard
+   THEME: Dark Modern Tennis Trading Dashboard
+   @see docs/filosofie/FILOSOFIA_FRONTEND.md
    ============================================ */
 
 :root {
-  /* Primary palette - blues */
-  --primary: #3b82f6;
-  --primary-light: #60a5fa;
-  --primary-dark: #2563eb;
+  /* ==========================================
+     COLORI - Sistema Unificato
+     ========================================== */
   
-  /* Accent colors */
-  --accent: #10b981;
-  --accent-light: #34d399;
-  --accent-dark: #059669;
+  /* Primary palette - Blues */
+  --color-primary: #3b82f6;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark: #2563eb;
+  --color-primary-bg: rgba(59, 130, 246, 0.12);
+  --color-primary-border: rgba(59, 130, 246, 0.35);
   
-  /* Background colors - Dark Theme */
-  --bg: #0f1419;
-  --bg-secondary: #1a2332;
-  --card: rgba(30, 41, 59, 0.9);
-  --card-hover: rgba(40, 52, 72, 0.95);
+  /* Alias per retrocompatibilità */
+  --primary: var(--color-primary);
+  --primary-light: var(--color-primary-light);
+  --primary-dark: var(--color-primary-dark);
   
-  /* Text colors - Light for dark theme */
-  --text-primary: #e4e6eb;
-  --text-secondary: #8b95a5;
-  --text-muted: #6b7280;
+  /* Accent - Orange per contrasto (away player) */
+  --color-accent: #f97316;
+  --color-accent-light: #fb923c;
+  --color-accent-bg: rgba(249, 115, 22, 0.12);
+  --color-accent-border: rgba(249, 115, 22, 0.35);
   
-  /* Borders */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.05);
+  /* Success/Green */
+  --color-success: #10b981;
+  --color-success-light: #34d399;
+  --color-success-bg: rgba(16, 185, 129, 0.12);
+  --color-success-border: rgba(16, 185, 129, 0.35);
+  --success: var(--color-success);
+  --success-bg: var(--color-success-bg);
   
-  /* Status colors */
-  --success: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.15);
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.15);
-  --danger: #ef4444;
-  --danger-bg: rgba(239, 68, 68, 0.15);
-  --info: #3b82f6;
-  --info-bg: rgba(59, 130, 246, 0.15);
+  /* Warning/Yellow */
+  --color-warning: #f59e0b;
+  --color-warning-light: #fbbf24;
+  --color-warning-bg: rgba(245, 158, 11, 0.12);
+  --color-warning-border: rgba(245, 158, 11, 0.35);
+  --warning: var(--color-warning);
+  --warning-bg: var(--color-warning-bg);
   
-  /* Shadows - Premium */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.5);
+  /* Danger/Red */
+  --color-danger: #ef4444;
+  --color-danger-light: #f87171;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --color-danger-border: rgba(239, 68, 68, 0.35);
+  --danger: var(--color-danger);
+  --danger-bg: var(--color-danger-bg);
   
-  /* Border radius - Premium 2xl */
+  /* Info/Blue alias */
+  --info: var(--color-primary);
+  --info-bg: var(--color-primary-bg);
+  
+  /* ==========================================
+     BACKGROUNDS - Dark Theme
+     ========================================== */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-elevated: rgba(30, 41, 59, 0.95);
+  --bg-card: rgba(30, 41, 59, 0.85);
+  --bg-card-hover: rgba(40, 52, 72, 0.95);
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+  --bg-highlight: rgba(255, 255, 255, 0.03);
+  --bg-interactive: rgba(255, 255, 255, 0.05);
+  --bg-interactive-hover: rgba(255, 255, 255, 0.08);
+  
+  /* Alias retrocompatibilità */
+  --bg: var(--bg-primary);
+  --card: var(--bg-card);
+  --card-hover: var(--bg-card-hover);
+  
+  /* ==========================================
+     TEXT COLORS
+     ========================================== */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-disabled: #475569;
+  --text-inverse: #0f172a;
+  
+  /* ==========================================
+     BORDERS
+     ========================================== */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-light: rgba(255, 255, 255, 0.05);
+  --border-color-strong: rgba(255, 255, 255, 0.15);
+  --border-color-focus: var(--color-primary);
+  
+  /* Alias */
+  --border: var(--border-color);
+  --border-light: var(--border-color-light);
+  
+  /* ==========================================
+     SPACING SYSTEM (4px base)
+     ========================================== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  
+  /* ==========================================
+     BORDER RADIUS
+     ========================================== */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-2xl: 24px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
   
-  /* Motion tokens - CSS vars for non-JS animations */
-  --motion-fast: 0.18s;
-  --motion-normal: 0.32s;
-  --motion-slow: 0.42s;
+  /* ==========================================
+     SHADOWS - Premium Dark
+     ========================================== */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --shadow-glow-primary: 0 0 20px rgba(59, 130, 246, 0.25);
+  --shadow-glow-success: 0 0 20px rgba(16, 185, 129, 0.25);
+  --shadow-glow-danger: 0 0 20px rgba(239, 68, 68, 0.25);
+  
+  /* ==========================================
+     MOTION TOKENS
+     ========================================== */
+  --motion-fast: 0.15s;
+  --motion-normal: 0.25s;
+  --motion-slow: 0.35s;
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --motion-ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   
-  /* Sidebar width */
+  /* ==========================================
+     LAYOUT DIMENSIONS
+     ========================================== */
   --sidebar-width: 220px;
+  --sidebar-collapsed-width: 64px;
+  --header-height: 64px;
+  --right-rail-width: 320px;
+  --max-content-width: 1200px;
+  
+  /* ==========================================
+     Z-INDEX SCALE
+     ========================================== */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+  
+  /* ==========================================
+     TYPOGRAPHY
+     ========================================== */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
 }
+
+/* ============================================
+   BASE RESET & DEFAULTS
+   ============================================ */
 
 html, body, #root {
   height: 100%;
@@ -71,12 +194,221 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
-  color: #e4e6eb;
-  line-height: 1.5;
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: var(--line-height-normal);
   padding: 0;
   margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* Icone Phosphor - styling globale */
+svg[fill="currentColor"] {
+  flex-shrink: 0;
+}
+
+/* Focus outline globale */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling globale */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color-strong);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+
+.bg-primary { background: var(--bg-primary); }
+.bg-secondary { background: var(--bg-secondary); }
+.bg-card { background: var(--bg-card); }
+
+/* ============================================
+   CARD COMPONENT - Base styling
+   ============================================ */
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(8px);
+  transition: 
+    transform var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card--interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ============================================
+   BUTTON COMPONENTS
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  border: none;
+  transition: all var(--motion-fast) var(--motion-ease-out);
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn--primary:hover {
+  background: var(--color-primary-light);
+}
+
+.btn--secondary {
+  background: var(--bg-interactive);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn--secondary:hover {
+  background: var(--bg-interactive-hover);
+  border-color: var(--border-color-strong);
+}
+
+.btn--success {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn--danger {
+  background: var(--color-danger);
+  color: white;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn--ghost:hover {
+  background: var(--bg-interactive);
+  color: var(--text-primary);
+}
+
+.btn--icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.btn--sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+.btn--lg {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-base);
+}
+
+/* ============================================
+   BADGE COMPONENTS
+   ============================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge--success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
+}
+
+.badge--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+.badge--danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+}
+
+.badge--info {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
+}
+
+/* ============================================
+   STATUS INDICATORS
+   ============================================ */
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+}
+
+.status-dot--success { background: var(--color-success); }
+.status-dot--warning { background: var(--color-warning); }
+.status-dot--danger { background: var(--color-danger); }
+.status-dot--info { background: var(--color-primary); }
+
+.status-dot--pulse {
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 /* ============================================

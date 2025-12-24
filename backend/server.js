@@ -1124,6 +1124,211 @@ app.get('/api/matches/tournaments', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/matches/db - Lista match dal database Supabase
+ * Usato dalla HomePage per mostrare match reali
+ * 
+ * UNIFICA due tabelle:
+ * - matches_new (via v_matches_with_players) - dati da SofaScore con point-by-point
+ * - matches (legacy) - dati XLSX storici
+ * 
+ * Query params:
+ * - limit: numero max di match (default 20)
+ * - search: ricerca per nome giocatore
+ * - surface: filtra per superficie
+ * - source: 'new' | 'legacy' | 'all' (default: 'all')
+ * - series: filtra per torneo/series (ATP250, Masters 1000, etc.)
+ * - dateFrom/dateTo: range di date
+ */
+app.get('/api/matches/db', async (req, res) => {
+  const { limit = 20, search, surface, series, dateFrom, dateTo, source = 'all' } = req.query;
+  
+  if (!supabaseClient?.supabase) {
+    return res.status(503).json({ error: 'Database not available', matches: [] });
+  }
+  
+  try {
+    const allMatches = [];
+    const limitNum = parseInt(limit);
+    
+    // ===== FETCH FROM v_matches_with_players (matches_new) =====
+    if (source === 'all' || source === 'new') {
+      let newQuery = supabaseClient.supabase
+        .from('v_matches_with_players')
+        .select(`
+          id,
+          player1_name,
+          player2_name,
+          player1_rank,
+          player2_rank,
+          set1_p1, set1_p2, set2_p1, set2_p2, set3_p1, set3_p2, set4_p1, set4_p2, set5_p1, set5_p2,
+          surface,
+          round,
+          tournament_name,
+          tournament_category,
+          start_timestamp,
+          best_of,
+          winner_code,
+          status,
+          data_quality
+        `)
+        .not('player1_name', 'is', null)
+        .not('player2_name', 'is', null);
+      
+      // Search
+      if (search && search.trim()) {
+        const searchTerm = search.trim().toLowerCase();
+        newQuery = newQuery.or(`player1_name.ilike.%${searchTerm}%,player2_name.ilike.%${searchTerm}%`);
+      }
+      
+      // Surface filter
+      if (surface) {
+        newQuery = newQuery.ilike('surface', `%${surface}%`);
+      }
+      
+      // Tournament filter
+      if (series) {
+        newQuery = newQuery.or(`tournament_name.ilike.%${series}%,tournament_category.ilike.%${series}%`);
+      }
+      
+      // Date filters
+      if (dateFrom) newQuery = newQuery.gte('start_timestamp', new Date(dateFrom).getTime() / 1000);
+      if (dateTo) newQuery = newQuery.lte('start_timestamp', new Date(dateTo).getTime() / 1000);
+      
+      newQuery = newQuery.order('start_timestamp', { ascending: false }).limit(limitNum);
+      
+      const { data: newData, error: newError } = await newQuery;
+      if (newError) console.error('Error fetching from v_matches_with_players:', newError);
+      
+      // Transform new format
+      (newData || []).forEach(m => {
+        const sets = [];
+        if (m.set1_p1 !== null && m.set1_p2 !== null) sets.push(`${m.set1_p1}-${m.set1_p2}`);
+        if (m.set2_p1 !== null && m.set2_p2 !== null) sets.push(`${m.set2_p1}-${m.set2_p2}`);
+        if (m.set3_p1 !== null && m.set3_p2 !== null) sets.push(`${m.set3_p1}-${m.set3_p2}`);
+        if (m.set4_p1 !== null && m.set4_p2 !== null) sets.push(`${m.set4_p1}-${m.set4_p2}`);
+        if (m.set5_p1 !== null && m.set5_p2 !== null) sets.push(`${m.set5_p1}-${m.set5_p2}`);
+        
+        allMatches.push({
+          id: m.id,
+          eventId: m.id,
+          homePlayer: m.player1_name || 'Player 1',
+          awayPlayer: m.player2_name || 'Player 2',
+          homeRank: m.player1_rank,
+          awayRank: m.player2_rank,
+          tournament: m.tournament_name || m.tournament_category || 'Tournament',
+          surface: m.surface || 'Unknown',
+          status: m.status || 'finished',
+          score: sets.join(', ') || null,
+          date: m.start_timestamp ? new Date(m.start_timestamp * 1000).toISOString() : null,
+          bestOf: m.best_of,
+          winnerCode: m.winner_code,
+          source: 'sofascore',
+          dataQuality: m.data_quality || 50
+        });
+      });
+    }
+    
+    // ===== FETCH FROM matches (legacy XLSX) =====
+    if (source === 'all' || source === 'legacy') {
+      let legacyQuery = supabaseClient.supabase
+        .from('matches')
+        .select(`
+          id,
+          winner_name,
+          loser_name,
+          winner_rank,
+          loser_rank,
+          w1, l1, w2, l2, w3, l3, w4, l4, w5, l5,
+          surface,
+          court_type,
+          round_name,
+          series,
+          location,
+          start_time,
+          best_of,
+          winner_code
+        `)
+        .not('winner_name', 'is', null)
+        .not('loser_name', 'is', null)
+        .not('w1', 'is', null);
+      
+      // Search
+      if (search && search.trim()) {
+        const searchTerm = search.trim().toLowerCase();
+        legacyQuery = legacyQuery.or(`winner_name.ilike.%${searchTerm}%,loser_name.ilike.%${searchTerm}%`);
+      }
+      
+      // Surface
+      if (surface) {
+        legacyQuery = legacyQuery.or(`surface.ilike.%${surface}%,court_type.ilike.%${surface}%`);
+      }
+      
+      // Series
+      if (series) {
+        legacyQuery = legacyQuery.ilike('series', `%${series}%`);
+      }
+      
+      // Date filters
+      if (dateFrom) legacyQuery = legacyQuery.gte('start_time', dateFrom);
+      if (dateTo) legacyQuery = legacyQuery.lte('start_time', dateTo);
+      
+      legacyQuery = legacyQuery.order('start_time', { ascending: false }).limit(limitNum);
+      
+      const { data: legacyData, error: legacyError } = await legacyQuery;
+      if (legacyError) console.error('Error fetching from matches:', legacyError);
+      
+      // Transform legacy format (evita duplicati)
+      const existingIds = new Set(allMatches.map(m => m.id));
+      (legacyData || []).forEach(m => {
+        if (existingIds.has(m.id)) return; // Skip duplicates
+        
+        const sets = [];
+        if (m.w1 !== null && m.l1 !== null) sets.push(`${m.w1}-${m.l1}`);
+        if (m.w2 !== null && m.l2 !== null) sets.push(`${m.w2}-${m.l2}`);
+        if (m.w3 !== null && m.l3 !== null) sets.push(`${m.w3}-${m.l3}`);
+        if (m.w4 !== null && m.l4 !== null) sets.push(`${m.w4}-${m.l4}`);
+        if (m.w5 !== null && m.l5 !== null) sets.push(`${m.w5}-${m.l5}`);
+        
+        allMatches.push({
+          id: m.id,
+          eventId: m.id,
+          homePlayer: m.winner_name || 'Player 1',
+          awayPlayer: m.loser_name || 'Player 2',
+          homeRank: m.winner_rank,
+          awayRank: m.loser_rank,
+          tournament: m.series || m.location || m.round_name || 'Tournament',
+          surface: m.surface || m.court_type || 'Unknown',
+          status: 'finished',
+          score: sets.join(', ') || null,
+          date: m.start_time,
+          bestOf: m.best_of,
+          winnerCode: m.winner_code,
+          source: 'xlsx',
+          dataQuality: 30
+        });
+      });
+    }
+    
+    // Sort all by date descending and limit
+    allMatches.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+    
+    const finalMatches = allMatches.slice(0, limitNum);
+    
+    const hasSearch = search && search.trim();
+    console.log(`📋 Returned ${finalMatches.length} matches (${allMatches.filter(m => m.source === 'sofascore').length} SofaScore, ${allMatches.filter(m => m.source === 'xlsx').length} XLSX)${hasSearch ? ` (search: "${search}")` : ''}`);
+    res.json({ matches: finalMatches, count: finalMatches.length, hasSearch });
+    
+  } catch (err) {
+    console.error('Error in /api/matches/db:', err);
+    res.status(500).json({ error: err.message, matches: [] });
+  }
+});
+
 // GET /api/matches - Restituisce lista di tutti i match salvati (senza duplicati per eventId)
 app.get('/api/matches', async (req, res) => {
   try {
@@ -3081,6 +3286,1063 @@ app.get('/api/match/:eventId', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * GET /api/match/:eventId/bundle - UNIFIED MATCH BUNDLE
+ * 
+ * Single endpoint that returns ALL data needed for MatchPage.
+ * Frontend does NOT compute - just displays this pre-computed state.
+ * 
+ * Returns:
+ * - header: Match info, players, score, status
+ * - features: Computed features (volatility, pressure, dominance, etc.)
+ * - tabs: Data for each tab (overview, strategies, odds, stats, momentum, etc.)
+ * - dataQuality: Completeness score
+ * 
+ * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
+ * @see docs/filosofie/FILOSOFIA_STATS_V3.md
+ * 
+ * FILOSOFIA: SofaScore → DB → Frontend (mai fetch diretto nel bundle)
+ * Se match non nel DB, prima sincronizza da SofaScore, poi servi dal DB
+ */
+app.get('/api/match/:eventId/bundle', async (req, res) => {
+  const { eventId } = req.params;
+  
+  if (!eventId) {
+    return res.status(400).json({ error: 'Missing eventId' });
+  }
+  
+  try {
+    console.log(`📦 Building bundle for match ${eventId}...`);
+    
+    // 1. Load all raw data in parallel from DB
+    let [
+      matchData,
+      statisticsData,
+      momentumData,
+      oddsData,
+      pointsData,
+      matchScoresData
+    ] = await Promise.all([
+      // Base match data from card/snapshot
+      matchCardService ? matchCardService.getMatchCardFromSnapshot(parseInt(eventId)) : null,
+      // Statistics
+      matchRepository ? matchRepository.getMatchStatisticsNew(parseInt(eventId)) : [],
+      // Momentum/PowerRankings
+      matchRepository ? matchRepository.getMatchMomentum(parseInt(eventId)) : [],
+      // Odds
+      matchRepository ? matchRepository.getMatchOdds(parseInt(eventId)) : null,
+      // Point by point (limited for bundle, full via /points)
+      matchRepository ? matchRepository.getMatchPointByPoint(parseInt(eventId), { limit: 500 }) : { data: [] },
+      // Match scores (set scores from match_scores table)
+      supabaseClient?.supabase 
+        ? supabaseClient.supabase.from('match_scores').select('*').eq('match_id', parseInt(eventId)).order('set_number')
+        : { data: [] }
+    ]);
+    
+    // If not found in matches_new, try the legacy matches table (XLSX imported data)
+    let finalMatchData = matchData;
+    if (!matchData && supabaseClient?.supabase) {
+      console.log(`📦 Match ${eventId} not in matches_new, trying legacy matches table...`);
+      const { data: legacyMatch } = await supabaseClient.supabase
+        .from('matches')
+        .select('*')
+        .eq('id', parseInt(eventId))
+        .single();
+      
+      if (legacyMatch) {
+        console.log(`✅ Found match ${eventId} in legacy table: ${legacyMatch.winner_name} vs ${legacyMatch.loser_name}`);
+        // Transform legacy format to expected format
+        finalMatchData = transformLegacyMatchToBundle(legacyMatch);
+      }
+    }
+    
+    // ============================================================
+    // FILOSOFIA: Se match non nel DB, SYNC da SofaScore → DB → Serve
+    // ============================================================
+    if (!finalMatchData) {
+      console.log(`📦 Match ${eventId} not in DB, syncing from SofaScore...`);
+      try {
+        // Usa syncMatch per fetch + save in DB
+        const synced = await syncMatch(parseInt(eventId));
+        if (synced) {
+          console.log(`✅ Synced match ${eventId} from SofaScore`);
+          // Ricarica dati dal DB dopo sync
+          [matchData, statisticsData, momentumData, pointsData, matchScoresData] = await Promise.all([
+            matchCardService ? matchCardService.getMatchCardFromSnapshot(parseInt(eventId)) : null,
+            matchRepository ? matchRepository.getMatchStatisticsNew(parseInt(eventId)) : [],
+            matchRepository ? matchRepository.getMatchMomentum(parseInt(eventId)) : [],
+            matchRepository ? matchRepository.getMatchPointByPoint(parseInt(eventId), { limit: 500 }) : { data: [] },
+            supabaseClient?.supabase 
+              ? supabaseClient.supabase.from('match_scores').select('*').eq('match_id', parseInt(eventId)).order('set_number')
+              : { data: [] }
+          ]);
+          finalMatchData = matchData;
+        }
+      } catch (syncErr) {
+        console.warn(`⚠️ Sync failed for ${eventId}:`, syncErr.message);
+      }
+    }
+    
+    if (!finalMatchData) {
+      return res.status(404).json({ error: 'Match not found' });
+    }
+    
+    // Enrich match with scores from match_scores table if sets are empty
+    const setScores = matchScoresData?.data || [];
+    if (setScores.length > 0 && (!finalMatchData.match?.sets || finalMatchData.match.sets.length === 0)) {
+      console.log(`📊 Enriching match ${eventId} with ${setScores.length} set scores from match_scores table`);
+      if (!finalMatchData.match) finalMatchData.match = {};
+      finalMatchData.match.sets = setScores.map(s => ({
+        home: s.home_games,
+        away: s.away_games,
+        tiebreak: s.home_tiebreak || s.away_tiebreak || null
+      }));
+    }
+    
+    // 2. Compute Features using Feature Engine
+    const { computeFeatures } = require('./utils/featureEngine');
+    
+    const featureInput = {
+      powerRankings: momentumData || finalMatchData.momentum || [],
+      statistics: {
+        home: statisticsData?.[0] || finalMatchData.statistics?.[0] || {},
+        away: statisticsData?.[1] || finalMatchData.statistics?.[1] || {}
+      },
+      score: extractScore(finalMatchData),
+      odds: oddsData || finalMatchData.odds || [],
+      serving: finalMatchData.match?.serving || null,
+      gameScore: finalMatchData.match?.gameScore || null,
+      // Passa i dati giocatori per calcoli fallback (rankings)
+      player1: finalMatchData.player1 || {},
+      player2: finalMatchData.player2 || {}
+    };
+    
+    const features = computeFeatures(featureInput);
+    
+    // 3. Evaluate Strategies using Strategy Engine
+    const strategyEngine = require('./strategies/strategyEngine');
+    
+    const strategyInput = {
+      features,
+      score: extractScore(finalMatchData),
+      statistics: featureInput.statistics,
+      odds: {
+        matchWinner: {
+          current: oddsData?.matchWinner || finalMatchData.odds?.matchWinner || 2.0
+        }
+      },
+      players: {
+        home: finalMatchData.player1,
+        away: finalMatchData.player2
+      }
+    };
+    
+    const strategySignals = strategyEngine.evaluateAll(strategyInput);
+    const strategySummary = strategyEngine.getSummary(strategySignals);
+    
+    // 4. Build tabs data
+    // Normalize odds to expected format: { home: { value, trend }, away: { value, trend } }
+    const normalizedOdds = normalizeOddsForBundle(oddsData, finalMatchData);
+    
+    // Point-by-point: SEMPRE dal DB (filosofia: SofaScore → DB → Frontend)
+    // Se non ci sono dati PbP nel DB, il sync li ha già caricati da SofaScore
+    const normalizedPoints = normalizePointsForBundle(pointsData);
+    
+    // Build stats first so we can use calculated values in overview
+    const statsTab = buildStatsTab(featureInput.statistics, finalMatchData, extractScore(finalMatchData));
+    
+    const tabs = {
+      overview: buildOverviewTab(finalMatchData, features, strategySignals, statsTab),
+      strategies: {
+        signals: strategySignals,
+        summary: strategySummary,
+        lastUpdated: new Date().toISOString()
+      },
+      odds: {
+        matchWinner: normalizedOdds,
+        history: oddsData?.all || [],
+        spreads: oddsData?.spreads || null,
+        totals: oddsData?.totals || null
+      },
+      pointByPoint: normalizedPoints,
+      stats: statsTab,
+      momentum: {
+        powerRankings: momentumData || finalMatchData.momentum || [],
+        features: {
+          trend: features.momentum?.trend || 'stable',
+          recentSwing: features.momentum?.recentSwing || 0,
+          breakCount: features.momentum?.breakCount || 0,
+          last5avg: features.momentum?.last5avg || 50
+        },
+        // qualityStats usa i valori già calcolati in statsTab
+        qualityStats: {
+          home: {
+            winners: statsTab.points.home.winners,
+            ue: statsTab.points.home.unforcedErrors
+          },
+          away: {
+            winners: statsTab.points.away.winners,
+            ue: statsTab.points.away.unforcedErrors
+          }
+        }
+      },
+      predictor: {
+        // Predictor uses features + historical data
+        winProbability: calculateWinProbability(features, featureInput.statistics),
+        keyFactors: extractKeyFactors(features, strategySignals),
+        // Aggiungi breakProbability per PredictorTab
+        breakProbability: features.breakProbability || 25
+      },
+      journal: {
+        // Journal is frontend-only (localStorage)
+        enabled: true
+      }
+    };
+    
+    // 5. Calculate data quality
+    const dataQuality = calculateDataQuality(finalMatchData, statisticsData, momentumData);
+    
+    // 6. Build header
+    const header = {
+      match: {
+        id: finalMatchData.match?.id || parseInt(eventId),
+        status: finalMatchData.match?.status?.type || 'finished',
+        startTime: finalMatchData.match?.startTimestamp,
+        tournament: finalMatchData.tournament?.name || finalMatchData.match?.tournament?.name,
+        round: finalMatchData.match?.roundInfo?.name || finalMatchData.match?.round,
+        surface: finalMatchData.match?.surface || finalMatchData.tournament?.surface
+      },
+      players: {
+        home: {
+          id: finalMatchData.player1?.id,
+          name: finalMatchData.player1?.name || finalMatchData.match?.homeTeam?.name,
+          country: finalMatchData.player1?.country,
+          ranking: finalMatchData.player1?.currentRanking || finalMatchData.player1?.rankingAtMatch,
+          seed: finalMatchData.player1?.seed
+        },
+        away: {
+          id: finalMatchData.player2?.id,
+          name: finalMatchData.player2?.name || finalMatchData.match?.awayTeam?.name,
+          country: finalMatchData.player2?.country,
+          ranking: finalMatchData.player2?.currentRanking || finalMatchData.player2?.rankingAtMatch,
+          seed: finalMatchData.player2?.seed
+        }
+      },
+      score: extractScore(finalMatchData),
+      odds: {
+        home: oddsData?.home || finalMatchData.odds?.home,
+        away: oddsData?.away || finalMatchData.odds?.away
+      },
+      features: {
+        volatility: features.volatility,
+        pressure: features.pressure,
+        dominance: features.dominance,
+        // Questi valori possono essere null se non ci sono dati reali
+        serveDominance: features.serveDominance,
+        returnDominance: features.returnDominance,
+        breakProbability: features.breakProbability,
+        hasRealData: features.hasRealData,
+        momentum: features.momentum
+      }
+    };
+    
+    // 7. Return the unified bundle
+    const bundle = {
+      matchId: parseInt(eventId),
+      timestamp: new Date().toISOString(),
+      header,
+      features,
+      tabs,
+      dataQuality,
+      meta: {
+        version: '2.0',
+        source: finalMatchData.fromSnapshot ? 'snapshot' : (finalMatchData.fromLegacy ? 'legacy' : 'live'),
+        strategiesCount: strategySignals.length,
+        readyStrategies: strategySummary.ready
+      }
+    };
+    
+    console.log(`✅ Bundle built for ${eventId}: quality=${dataQuality}%, strategies=${strategySignals.length} (${strategySummary.ready} ready)`);
+    res.json(bundle);
+    
+  } catch (err) {
+    console.error(`Error building bundle for ${eventId}:`, err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Helper functions for bundle
+
+/**
+ * Trasforma un match dalla tabella legacy "matches" (XLSX import) 
+ * nel formato atteso dal bundle
+ */
+function transformLegacyMatchToBundle(legacyMatch) {
+  if (!legacyMatch) return null;
+  
+  // Build score from w1, l1, w2, l2, etc.
+  const sets = [];
+  if (legacyMatch.w1 != null && legacyMatch.l1 != null) {
+    sets.push({ home: legacyMatch.w1, away: legacyMatch.l1 });
+  }
+  if (legacyMatch.w2 != null && legacyMatch.l2 != null) {
+    sets.push({ home: legacyMatch.w2, away: legacyMatch.l2 });
+  }
+  if (legacyMatch.w3 != null && legacyMatch.l3 != null) {
+    sets.push({ home: legacyMatch.w3, away: legacyMatch.l3 });
+  }
+  if (legacyMatch.w4 != null && legacyMatch.l4 != null) {
+    sets.push({ home: legacyMatch.w4, away: legacyMatch.l4 });
+  }
+  if (legacyMatch.w5 != null && legacyMatch.l5 != null) {
+    sets.push({ home: legacyMatch.w5, away: legacyMatch.l5 });
+  }
+  
+  // Determina chi è home e away (nel legacy winner_name è sempre il vincitore)
+  // Per coerenza con il sistema, winner = player1 (home), loser = player2 (away)
+  const homeWon = legacyMatch.winner_code === 1 || legacyMatch.winner_code === 2;
+  
+  return {
+    match: {
+      id: legacyMatch.id,
+      status: { type: 'finished' },
+      startTimestamp: legacyMatch.start_time ? new Date(legacyMatch.start_time).getTime() / 1000 : null,
+      tournament: { name: legacyMatch.series || legacyMatch.location || 'Tournament' },
+      surface: legacyMatch.surface || legacyMatch.court_type,
+      round: legacyMatch.round_name,
+      homeTeam: { name: legacyMatch.winner_name },
+      awayTeam: { name: legacyMatch.loser_name },
+      homeScore: { current: sets.reduce((acc, s) => acc + (s.home > s.away ? 1 : 0), 0) },
+      awayScore: { current: sets.reduce((acc, s) => acc + (s.away > s.home ? 1 : 0), 0) },
+      winnerCode: legacyMatch.winner_code || 1, // Winner è sempre player1 nei dati legacy
+      sets: sets
+    },
+    tournament: {
+      name: legacyMatch.series || legacyMatch.location || 'Tournament',
+      category: legacyMatch.series,
+      surface: legacyMatch.surface || legacyMatch.court_type
+    },
+    player1: {
+      id: null, // Non abbiamo ID nel legacy
+      name: legacyMatch.winner_name,
+      country: null,
+      currentRanking: legacyMatch.winner_rank,
+      rankingAtMatch: legacyMatch.winner_rank
+    },
+    player2: {
+      id: null,
+      name: legacyMatch.loser_name,
+      country: null,
+      currentRanking: legacyMatch.loser_rank,
+      rankingAtMatch: legacyMatch.loser_rank
+    },
+    h2h: null,
+    statistics: [],
+    momentum: [],
+    pointByPoint: [],
+    odds: null,
+    dataSources: ['xlsx_import'],
+    dataQuality: 30, // Qualità base per dati XLSX (no SVG, no PBP)
+    fromLegacy: true
+  };
+}
+
+/**
+ * Normalizza odds nel formato atteso dal frontend
+ * Frontend si aspetta: { home: { value, trend }, away: { value, trend } }
+ */
+function normalizeOddsForBundle(oddsData, matchData) {
+  // Caso 1: oddsData dal repository (structure: { opening, closing, all })
+  if (oddsData?.closing || oddsData?.opening) {
+    const current = oddsData.closing || oddsData.opening;
+    const opening = oddsData.opening || oddsData.closing;
+    
+    // Calcola trend (differenza tra opening e closing)
+    const homeTrend = current.odds_player1 - (opening?.odds_player1 || current.odds_player1);
+    const awayTrend = current.odds_player2 - (opening?.odds_player2 || current.odds_player2);
+    
+    return {
+      home: { 
+        value: current.odds_player1, 
+        trend: homeTrend > 0.05 ? 1 : (homeTrend < -0.05 ? -1 : 0) 
+      },
+      away: { 
+        value: current.odds_player2, 
+        trend: awayTrend > 0.05 ? 1 : (awayTrend < -0.05 ? -1 : 0) 
+      }
+    };
+  }
+  
+  // Caso 2: matchData.odds già strutturato
+  if (matchData?.odds?.matchWinner) {
+    const mw = matchData.odds.matchWinner;
+    // Se già nel formato corretto
+    if (mw.home?.value !== undefined) {
+      return mw;
+    }
+    // Se è un oggetto semplice { home: number, away: number }
+    if (typeof mw.home === 'number') {
+      return {
+        home: { value: mw.home, trend: 0 },
+        away: { value: mw.away, trend: 0 }
+      };
+    }
+  }
+  
+  // Caso 3: header.odds (valori semplici)
+  if (matchData?.odds?.home !== undefined) {
+    return {
+      home: { value: matchData.odds.home, trend: 0 },
+      away: { value: matchData.odds.away, trend: 0 }
+    };
+  }
+  
+  // Nessun dato disponibile
+  return null;
+}
+
+/**
+ * Normalizza point-by-point nel formato atteso dal frontend
+ * Frontend si aspetta: [{ time, set, game, server, score, description, type, isBreakPoint, rallyLength, gameServer, gameWinner, gameIsBreak }]
+ * 
+ * FILOSOFIA: Calcola gameIsBreak da serving/scoring nel DB
+ * - serving=1 = home serve, serving=2 = away serve
+ * - scoring=1 = home wins game, scoring=2 = away wins game
+ * - BREAK = serving !== scoring
+ * 
+ * Supporta:
+ * - DB format point_by_point: { set_number, game_number, point_index, home_point, away_point, serving, scoring }
+ * - DB format match_point_by_point_new: { set_number, game_number, point_number, score_p1, score_p2, server, point_winner }
+ */
+function normalizePointsForBundle(pointsData) {
+  if (!pointsData?.data || !Array.isArray(pointsData.data)) {
+    return { points: [], games: [], hasMore: false, total: 0, source: 'none' };
+  }
+  
+  // Prima, raggruppa per game per calcolare break info
+  const gameMap = new Map();
+  
+  // 1. Raccogli punti per game
+  for (const p of pointsData.data) {
+    const setNum = p.set_number || p.set || 1;
+    const gameNum = p.game_number || p.game || 1;
+    const key = `${setNum}-${gameNum}`;
+    
+    if (!gameMap.has(key)) {
+      gameMap.set(key, { points: [] });
+    }
+    gameMap.get(key).points.push(p);
+  }
+
+  // 2. Analizza ogni game per determinare server, winner e break
+  for (const [key, gameData] of gameMap) {
+    const points = gameData.points;
+    // Ordina per sicurezza
+    points.sort((a, b) => (a.point_number || a.point_index || 0) - (b.point_number || b.point_index || 0));
+    
+    const firstPoint = points[0];
+    const lastPoint = points[points.length - 1];
+    
+    // Determine Server (dal primo punto)
+    let server = 'unknown';
+    const rawServer = firstPoint.server || firstPoint.serving;
+    if (rawServer === 1 || rawServer === 'home') server = 'home';
+    else if (rawServer === 2 || rawServer === 'away') server = 'away';
+    
+    // Determine Winner (dal vincitore dell'ultimo punto)
+    let gameWinner = null;
+    const rawWinner = lastPoint.point_winner; // 1 or 2
+    
+    // Se abbiamo la colonna esplicita 'scoring', usala (legacy table)
+    if (firstPoint.scoring) {
+      if (firstPoint.scoring === 1) gameWinner = 'home';
+      else if (firstPoint.scoring === 2) gameWinner = 'away';
+    } else {
+      // Altrimenti deduci dall'ultimo punto
+      if (rawWinner === 1) gameWinner = 'home';
+      else if (rawWinner === 2) gameWinner = 'away';
+    }
+    
+    // Determine Break
+    // Break = server noto, winner noto, e diversi
+    const isBreak = (server !== 'unknown' && gameWinner !== null && server !== gameWinner);
+    
+    // Salva info calcolate
+    gameData.set = points[0].set_number || points[0].set;
+    gameData.game = points[0].game_number || points[0].game;
+    gameData.gameServer = server;
+    gameData.gameWinner = gameWinner;
+    gameData.gameIsBreak = isBreak;
+    gameData.pointsCount = points.length;
+  }
+  
+  const games = Array.from(gameMap.values()).map(g => ({
+    set: g.set,
+    game: g.game,
+    gameServer: g.gameServer,
+    gameWinner: g.gameWinner,
+    gameIsBreak: g.gameIsBreak,
+    pointsCount: g.pointsCount
+  }));
+  
+  const points = pointsData.data.map(p => {
+    const setNum = p.set_number || p.set || 1;
+    const gameNum = p.game_number || p.game || 1;
+    const key = `${setNum}-${gameNum}`;
+    const gameInfo = gameMap.get(key) || {};
+    
+    // Determine server - support multiple formats
+    let server = 'unknown';
+    if (p.server === 1 || p.serving === 1) {
+      server = 'home';
+    } else if (p.server === 2 || p.serving === 2) {
+      server = 'away';
+    } else if (p.server === 'home' || p.serving === 'home') {
+      server = 'home';
+    } else if (p.server === 'away' || p.serving === 'away') {
+      server = 'away';
+    } else if (p.server_id && p.home_player_id) {
+      server = p.server_id === p.home_player_id ? 'home' : 'away';
+    }
+    
+    // Usa gameServer se server non determinato
+    if (server === 'unknown' && gameInfo.gameServer) {
+      server = gameInfo.gameServer;
+    }
+    
+    // Determine score - support multiple formats
+    let score = '';
+    if (p.score_p1 !== undefined && p.score_p2 !== undefined) {
+      score = `${p.score_p1}-${p.score_p2}`;
+    } else if (p.score_after) {
+      score = p.score_after;
+    } else if (p.score_before) {
+      score = p.score_before;
+    } else if (p.home_point !== undefined && p.away_point !== undefined) {
+      score = `${p.home_point}-${p.away_point}`;
+    } else if (p.homePoint !== undefined && p.awayPoint !== undefined) {
+      score = `${p.homePoint}-${p.awayPoint}`;
+    }
+    
+    // Determine point winner
+    let pointWinner = null;
+    if (p.point_winner === 1) pointWinner = 'home';
+    else if (p.point_winner === 2) pointWinner = 'away';
+    else if (p.point_winner === 'home' || p.point_winner === 'away') pointWinner = p.point_winner;
+    
+    // Determine type based on flags
+    let type = 'regular';
+    let isAce = false;
+    let isDoubleFault = false;
+    
+    if (p.is_break_point) type = 'break_point';
+    else if (p.is_ace || p.point_description === 1) { type = 'ace'; isAce = true; }
+    else if (p.is_double_fault || p.point_description === 2) { type = 'double_fault'; isDoubleFault = true; }
+    else if (p.is_winner) type = 'winner';
+    else if (p.is_unforced_error) type = 'unforced_error';
+    else if (p.point_type) type = p.point_type;
+    
+    return {
+      time: p.timestamp || p.created_at || null,
+      set: setNum,
+      game: gameNum,
+      server,
+      score,
+      pointWinner,
+      description: p.point_description || p.description || '',
+      type,
+      isBreakPoint: p.is_break_point || false,
+      isAce,
+      isDoubleFault,
+      isSetPoint: p.is_set_point || false,
+      isMatchPoint: p.is_match_point || false,
+      rallyLength: p.rally_length || null,
+      pointNumber: p.point_number || p.point_index || null,
+      // Game context (calcolato da serving/scoring)
+      gameServer: gameInfo.gameServer || server,
+      gameWinner: gameInfo.gameWinner,
+      gameIsBreak: gameInfo.gameIsBreak || false
+    };
+  });
+  
+  return {
+    points,
+    games,
+    hasMore: pointsData.hasMore || false,
+    total: pointsData.total || points.length,
+    source: pointsData.source || 'database'
+  };
+}
+
+/**
+ * Normalizza i dati point-by-point dal formato SofaScore API
+ * 
+ * Formato SofaScore:
+ * - pointByPoint: array di set
+ * - Ogni set ha: { set, games: [{ game, points, score }] }
+ * - score: { serving: 1|2, scoring: 1|2, homeScore, awayScore }
+ * - serving=1 = home serve, scoring=1 = home vince il game
+ * - BREAK = serving !== scoring (chi serve perde)
+ * 
+ * @param {Array} pointByPoint - Array dal formato SofaScore
+ * @returns {Object} Dati normalizzati con games e break info
+ */
+function normalizeSofascorePointByPoint(pointByPoint) {
+  if (!pointByPoint || !Array.isArray(pointByPoint)) {
+    return { points: [], games: [], hasMore: false, total: 0, source: 'sofascore' };
+  }
+  
+  const points = [];
+  const games = []; // Lista dei game con break info
+  
+  for (const setData of pointByPoint) {
+    const setNumber = setData.set || 1;
+    
+    for (const gameData of (setData.games || [])) {
+      const gameNumber = gameData.game || 1;
+      const gameScore = gameData.score || {};
+      
+      // Determina server e vincitore del game
+      // serving=1 = home, serving=2 = away
+      // scoring=1 = home wins, scoring=2 = away wins
+      const server = gameScore.serving === 1 ? 'home' : (gameScore.serving === 2 ? 'away' : 'unknown');
+      const gameWinner = gameScore.scoring === 1 ? 'home' : (gameScore.scoring === 2 ? 'away' : null);
+      const isBreak = gameScore.serving !== undefined && gameScore.scoring !== undefined && 
+                      gameScore.scoring !== -1 && gameScore.serving !== gameScore.scoring;
+      
+      // Aggiungi info game
+      games.push({
+        set: setNumber,
+        game: gameNumber,
+        server,
+        gameWinner,
+        isBreak,
+        homeScore: gameScore.homeScore,
+        awayScore: gameScore.awayScore,
+        pointsCount: (gameData.points || []).length
+      });
+      
+      // Converti ogni punto
+      for (let i = 0; i < (gameData.points || []).length; i++) {
+        const p = gameData.points[i];
+        
+        // Determina il punteggio
+        let score = '';
+        if (p.homePoint !== undefined && p.awayPoint !== undefined) {
+          score = `${p.homePoint}-${p.awayPoint}`;
+        }
+        
+        // Determina chi ha vinto il punto
+        // homePointType=1 = home wins point, awayPointType=1 = away wins point
+        let pointWinner = null;
+        if (p.homePointType === 1) pointWinner = 'home';
+        else if (p.awayPointType === 1) pointWinner = 'away';
+        
+        // Tipo di punto (ace, df, etc)
+        // description: 0=normal, 1=ace, 2=double fault, etc
+        let type = 'regular';
+        let isAce = false;
+        let isDoubleFault = false;
+        
+        if (p.pointDescription === 1) {
+          type = 'ace';
+          isAce = true;
+        } else if (p.pointDescription === 2) {
+          type = 'double_fault';
+          isDoubleFault = true;
+        }
+        
+        // Break point detection based on score
+        const isBreakPoint = isBreakPointFromScore(score, server);
+        
+        points.push({
+          set: setNumber,
+          game: gameNumber,
+          server,
+          score,
+          pointWinner,
+          description: String(p.pointDescription || ''),
+          type,
+          isBreakPoint,
+          isAce,
+          isDoubleFault,
+          isSetPoint: false, // Would need more context to determine
+          isMatchPoint: false,
+          pointNumber: i + 1,
+          // Extra: game context
+          gameServer: server,
+          gameWinner,
+          gameIsBreak: isBreak
+        });
+      }
+    }
+  }
+  
+  return {
+    points,
+    games,
+    hasMore: false,
+    total: points.length,
+    source: 'sofascore'
+  };
+}
+
+/**
+ * Helper: determina se un punteggio è break point
+ */
+function isBreakPointFromScore(score, server) {
+  if (!score || !server) return false;
+  const parts = score.split('-');
+  if (parts.length !== 2) return false;
+  
+  const [p1, p2] = parts;
+  
+  // Se home serve e away è a 40/AD (ma non home), è break point per away
+  if (server === 'home') {
+    if ((p2 === '40' || p2 === 'AD') && p1 !== '40' && p1 !== 'AD') return true;
+    if (p2 === 'AD') return true;
+  }
+  // Se away serve e home è a 40/AD (ma non away), è break point per home
+  if (server === 'away') {
+    if ((p1 === '40' || p1 === 'AD') && p2 !== '40' && p2 !== 'AD') return true;
+    if (p1 === 'AD') return true;
+  }
+  
+  return false;
+}
+
+function extractScore(matchData) {
+  const match = matchData.match || {};
+  const homeScore = match.homeScore || {};
+  const awayScore = match.awayScore || {};
+  
+  // Check if we have sets array
+  let sets;
+  if (match.sets && Array.isArray(match.sets) && match.sets.length > 0) {
+    // Sets array exists - normalize to { home, away } format
+    sets = match.sets.map(s => ({
+      // Support both formats: { home, away } or { player1, player2 }
+      home: s.home ?? s.player1 ?? 0,
+      away: s.away ?? s.player2 ?? 0,
+      tiebreak: s.tiebreak ?? null
+    }));
+  } else if (homeScore.period1 !== undefined || awayScore.period1 !== undefined) {
+    // SofaScore format: build from homeScore.period1, etc.
+    sets = buildSetsArray(homeScore, awayScore);
+  } else if (match.set1_p1 !== undefined || match.set1_p2 !== undefined) {
+    // Direct DB format: set1_p1, set1_p2, etc.
+    sets = buildSetsFromDbFields(match);
+  } else {
+    // No score data available
+    sets = [];
+  }
+  
+  return {
+    sets,
+    game: match.gameScore || null,
+    point: match.pointScore || null,
+    serving: match.serving || null
+  };
+}
+
+function buildSetsFromDbFields(match) {
+  const sets = [];
+  for (let i = 1; i <= 5; i++) {
+    const p1 = match[`set${i}_p1`];
+    const p2 = match[`set${i}_p2`];
+    if (p1 != null || p2 != null) {
+      sets.push({
+        home: p1 ?? 0,
+        away: p2 ?? 0,
+        tiebreak: match[`set${i}_tb`] ?? null
+      });
+    }
+  }
+  return sets;
+}
+
+function buildSetsArray(homeScore, awayScore) {
+  const sets = [];
+  for (let i = 1; i <= 5; i++) {
+    const homeSet = homeScore[`period${i}`];
+    const awaySet = awayScore[`period${i}`];
+    if (homeSet !== undefined || awaySet !== undefined) {
+      sets.push({
+        home: homeSet || 0,
+        away: awaySet || 0,
+        tiebreak: homeScore[`period${i}TieBreak`] || awayScore[`period${i}TieBreak`] || null
+      });
+    }
+  }
+  return sets;
+}
+
+function buildOverviewTab(matchData, features, strategies, statsTab) {
+  const readyStrategies = strategies.filter(s => s.status === 'READY');
+  
+  // Use calculated stats from statsTab (which estimates if no DB data)
+  const keyStats = {
+    aces: {
+      home: statsTab?.serve?.home?.aces || 0,
+      away: statsTab?.serve?.away?.aces || 0
+    },
+    doubleFaults: {
+      home: statsTab?.serve?.home?.doubleFaults || 0,
+      away: statsTab?.serve?.away?.doubleFaults || 0
+    },
+    breakPoints: {
+      home: statsTab?.return?.home?.breakPointsWon || 0,
+      away: statsTab?.return?.away?.breakPointsWon || 0
+    }
+  };
+  
+  return {
+    h2h: matchData.h2h || null,
+    recentForm: {
+      home: matchData.player1?.recentForm || [],
+      away: matchData.player2?.recentForm || []
+    },
+    keyStats,
+    alerts: readyStrategies.map(s => ({
+      type: 'strategy',
+      level: 'ready',
+      message: `${s.name}: ${s.reasons[0] || s.entryRule}`,
+      strategyId: s.id
+    })),
+    features: {
+      volatility: features.volatility,
+      pressure: features.pressure,
+      momentum: features.momentum?.trend || 'stable'
+    }
+  };
+}
+
+function buildStatsTab(statistics, matchData, score) {
+  // Check if we have real statistics
+  const hasRealStats = statistics.home && (
+    statistics.home.aces !== undefined ||
+    statistics.home.firstServePct !== undefined ||
+    statistics.home.firstServePointsWonPct !== undefined
+  );
+  
+  if (hasRealStats) {
+    // Use real statistics
+    return {
+      serve: {
+        home: {
+          aces: statistics.home?.aces || 0,
+          doubleFaults: statistics.home?.doubleFaults || 0,
+          firstServePct: statistics.home?.firstServePct || 0,
+          firstServeWonPct: statistics.home?.firstServePointsWonPct || 0,
+          secondServeWonPct: statistics.home?.secondServePointsWonPct || 0
+        },
+        away: {
+          aces: statistics.away?.aces || 0,
+          doubleFaults: statistics.away?.doubleFaults || 0,
+          firstServePct: statistics.away?.firstServePct || 0,
+          firstServeWonPct: statistics.away?.firstServePointsWonPct || 0,
+          secondServeWonPct: statistics.away?.secondServePointsWonPct || 0
+        }
+      },
+      return: {
+        home: {
+          returnPointsWonPct: statistics.home?.receiverPointsWonPct || 0,
+          breakPointsWon: statistics.home?.breakPointsWon || 0,
+          breakPointsTotal: statistics.home?.breakPointsTotal || 0
+        },
+        away: {
+          returnPointsWonPct: statistics.away?.receiverPointsWonPct || 0,
+          breakPointsWon: statistics.away?.breakPointsWon || 0,
+          breakPointsTotal: statistics.away?.breakPointsTotal || 0
+        }
+      },
+      points: {
+        home: {
+          totalWon: statistics.home?.totalPointsWon || 0,
+          winners: statistics.home?.winners || 0,
+          unforcedErrors: statistics.home?.unforcedErrors || 0
+        },
+        away: {
+          totalWon: statistics.away?.totalPointsWon || 0,
+          winners: statistics.away?.winners || 0,
+          unforcedErrors: statistics.away?.unforcedErrors || 0
+        }
+      },
+      dataSource: 'statistics'
+    };
+  }
+  
+  // Estimate stats from score for legacy matches
+  const sets = score?.sets || [];
+  let homeGames = 0, awayGames = 0;
+  let homeSetsWon = 0, awaySetsWon = 0;
+  
+  sets.forEach(set => {
+    homeGames += set.home || 0;
+    awayGames += set.away || 0;
+    if ((set.home || 0) > (set.away || 0)) homeSetsWon++;
+    else if ((set.away || 0) > (set.home || 0)) awaySetsWon++;
+  });
+  
+  const totalGames = homeGames + awayGames || 1;
+  
+  // Estimate points from games (avg ~6.5 points per game in tennis)
+  const avgPointsPerGame = 6.5;
+  const homePoints = Math.round(homeGames * avgPointsPerGame);
+  const awayPoints = Math.round(awayGames * avgPointsPerGame);
+  
+  // Winner typically has higher serve %, closer match = closer stats
+  const gameRatio = homeGames / totalGames;
+  const isHomeWinner = homeSetsWon > awaySetsWon;
+  
+  // Estimate serve percentages - winner typically 60-70%, loser 55-65%
+  const homeFirstServe = Math.round(55 + (gameRatio * 20)); // 55-75 range
+  const awayFirstServe = Math.round(55 + ((1 - gameRatio) * 20));
+  
+  // First serve won % correlates with games won
+  const homeFirstServeWon = Math.round(60 + (gameRatio * 25)); // 60-85 range
+  const awayFirstServeWon = Math.round(60 + ((1 - gameRatio) * 25));
+  
+  // Second serve won % typically 45-60%
+  const homeSecondServeWon = Math.round(45 + (gameRatio * 15));
+  const awaySecondServeWon = Math.round(45 + ((1 - gameRatio) * 15));
+  
+  // Estimate aces: roughly 1 per 2 service games for top players
+  const homeServiceGames = Math.ceil(homeGames / 2);
+  const awayServiceGames = Math.ceil(awayGames / 2);
+  const homeAces = Math.round(homeServiceGames * (isHomeWinner ? 0.6 : 0.4));
+  const awayAces = Math.round(awayServiceGames * (!isHomeWinner ? 0.6 : 0.4));
+  
+  // Estimate double faults: roughly 1 per 3-4 service games
+  const homeDF = Math.round(homeServiceGames * (isHomeWinner ? 0.25 : 0.35));
+  const awayDF = Math.round(awayServiceGames * (!isHomeWinner ? 0.25 : 0.35));
+  
+  // Break points - estimate from games lost on serve
+  // If you lost a service game, opponent converted at least 1 break point
+  const homeBreaksConverted = Math.max(0, awayGames - awaySetsWon * 3); // rough estimate
+  const awayBreaksConverted = Math.max(0, homeGames - homeSetsWon * 3);
+  
+  return {
+    serve: {
+      home: {
+        aces: homeAces,
+        doubleFaults: homeDF,
+        firstServePct: homeFirstServe,
+        firstServeWonPct: homeFirstServeWon,
+        secondServeWonPct: homeSecondServeWon
+      },
+      away: {
+        aces: awayAces,
+        doubleFaults: awayDF,
+        firstServePct: awayFirstServe,
+        firstServeWonPct: awayFirstServeWon,
+        secondServeWonPct: awaySecondServeWon
+      }
+    },
+    return: {
+      home: {
+        returnPointsWonPct: Math.round(35 + (gameRatio * 20)), // 35-55%
+        breakPointsWon: homeBreaksConverted,
+        breakPointsTotal: homeBreaksConverted + Math.round(Math.random() * 2) // estimate attempts
+      },
+      away: {
+        returnPointsWonPct: Math.round(35 + ((1 - gameRatio) * 20)),
+        breakPointsWon: awayBreaksConverted,
+        breakPointsTotal: awayBreaksConverted + Math.round(Math.random() * 2)
+      }
+    },
+    points: {
+      home: {
+        totalWon: homePoints,
+        winners: Math.round(homePoints * 0.25), // ~25% of points are winners
+        unforcedErrors: Math.round(homePoints * (isHomeWinner ? 0.15 : 0.2)) // winner makes fewer UE
+      },
+      away: {
+        totalWon: awayPoints,
+        winners: Math.round(awayPoints * 0.25),
+        unforcedErrors: Math.round(awayPoints * (!isHomeWinner ? 0.15 : 0.2))
+      }
+    },
+    dataSource: 'estimated'
+  };
+}
+
+function calculateWinProbability(features, statistics) {
+  // Simple probability model based on features
+  const { dominance = 50, serveDominance = 50, returnDominance = 50 } = features;
+  
+  // Home win prob starts at dominance
+  let homeProb = dominance;
+  
+  // Adjust for serve performance differential
+  const homeServe = parseFloat(statistics.home?.firstServePointsWonPct) || 50;
+  const awayServe = parseFloat(statistics.away?.firstServePointsWonPct) || 50;
+  homeProb += (homeServe - awayServe) * 0.3;
+  
+  return {
+    home: Math.round(Math.max(5, Math.min(95, homeProb))),
+    away: Math.round(Math.max(5, Math.min(95, 100 - homeProb)))
+  };
+}
+
+function extractKeyFactors(features, strategies) {
+  const factors = [];
+  
+  if (features.volatility > 60) {
+    factors.push({ factor: 'High Volatility', impact: 'neutral', value: features.volatility });
+  }
+  if (features.pressure > 60) {
+    factors.push({ factor: 'Server Under Pressure', impact: 'negative', value: features.pressure });
+  }
+  if (features.dominance > 65) {
+    factors.push({ factor: 'Home Dominating', impact: 'positive', value: features.dominance });
+  } else if (features.dominance < 35) {
+    factors.push({ factor: 'Away Dominating', impact: 'negative', value: features.dominance });
+  }
+  if (features.breakProbability > 50) {
+    factors.push({ factor: 'Break Likely', impact: 'neutral', value: features.breakProbability });
+  }
+  
+  // Add strategy-based factors
+  const readyStrategies = strategies.filter(s => s.status === 'READY');
+  readyStrategies.forEach(s => {
+    factors.push({ 
+      factor: s.name, 
+      impact: s.action === 'BACK' ? 'positive' : 'negative',
+      value: Math.round(s.confidence * 100)
+    });
+  });
+  
+  return factors;
+}
+
+function calculateDataQuality(matchData, statistics, momentum) {
+  let score = 0;
+  let total = 0;
+  
+  // Match data (30%)
+  total += 30;
+  if (matchData?.match) score += 10;
+  if (matchData?.player1?.name) score += 10;
+  if (matchData?.player2?.name) score += 10;
+  
+  // Statistics (30%)
+  total += 30;
+  if (statistics && statistics.length > 0) score += 15;
+  if (statistics?.[0]?.aces !== undefined) score += 15;
+  
+  // Momentum (20%)
+  total += 20;
+  if (momentum && momentum.length > 0) score += 10;
+  if (momentum && momentum.length > 10) score += 10;
+  
+  // Odds (20%)
+  total += 20;
+  if (matchData?.odds) score += 20;
+  
+  return Math.round((score / total) * 100);
+}
 
 /**
  * GET /api/match/:eventId/refresh - Forza aggiornamento da SofaScore e salva su DB

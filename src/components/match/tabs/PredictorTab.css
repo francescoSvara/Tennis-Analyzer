@@ -1,0 +1,339 @@
+/**
+ * PredictorTab CSS
+ * @see docs/filosofie/FILOSOFIA_FRONTEND.md
+ */
+
+.predictor-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.predictor-tab__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tab-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ===========================================
+   PREDICTOR GRID
+=========================================== */
+
+.predictor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+/* ===========================================
+   PREDICTOR CARD
+=========================================== */
+
+.predictor-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--space-5);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-4) 0;
+}
+
+/* ===========================================
+   PROBABILITY GAUGE
+=========================================== */
+
+.probability-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.gauge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gauge-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.confidence-badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.confidence-badge.high {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.confidence-badge.medium {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.confidence-badge.low {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.gauge-players {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gauge-player {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.gauge-player.home {
+  align-items: flex-start;
+}
+
+.gauge-player.away {
+  align-items: flex-end;
+}
+
+.gauge-player .player-name {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.gauge-player .player-prob {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.gauge-player.home .player-prob {
+  color: var(--color-primary);
+}
+
+.gauge-player.away .player-prob {
+  color: var(--color-accent);
+}
+
+.gauge-bar {
+  display: flex;
+  height: 14px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  transition: width var(--motion-slow) var(--motion-ease-out);
+}
+
+.gauge-fill.home {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+}
+
+.gauge-fill.away {
+  background: linear-gradient(90deg, var(--color-accent-light), var(--color-accent));
+}
+
+/* ===========================================
+   MARKET COMPARISON
+=========================================== */
+
+.market-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.comparison-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+  transition: background var(--motion-fast) var(--motion-ease-out);
+}
+
+.comparison-row:hover {
+  background: var(--bg-interactive);
+}
+
+.comparison-row.edge {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.comparison-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.comparison-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.comparison-value.positive {
+  color: var(--color-success);
+}
+
+.comparison-value.negative {
+  color: var(--color-danger);
+}
+
+.liquidity-warning {
+  font-size: var(--font-size-xs);
+  color: var(--color-warning);
+  width: 100%;
+  text-align: right;
+}
+
+/* ===========================================
+   BREAK PROBABILITY
+=========================================== */
+
+.break-probability {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.break-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.break-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.prob-number {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.prob-context {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.break-detail {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ===========================================
+   KEY FACTORS
+=========================================== */
+
+.key-factors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.factor-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-highlight);
+  border-radius: var(--radius-md);
+}
+
+.factor-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.factor-icon.positive {
+  color: var(--color-success);
+}
+
+.factor-icon.negative {
+  color: var(--color-danger);
+}
+
+.factor-content {
+  flex: 1;
+}
+
+.factor-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.factor-value {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 1024px) {
+  .predictor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .predictor-tab {
+    gap: var(--space-4);
+  }
+
+  .predictor-card {
+    padding: var(--space-4);
+  }
+
+  .gauge-player .player-prob {
+    font-size: var(--font-size-xl);
+  }
+
+  .prob-number {
+    font-size: var(--font-size-2xl);
+  }
+}

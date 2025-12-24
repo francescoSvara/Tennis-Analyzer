@@ -1,0 +1,37 @@
+/**
+ * SportSidebar.css
+ */
+
+.sport-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: var(--bg-secondary, #1e293b);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sport-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sport-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary, #94a3b8);
+}
+
+.sport-btn.active {
+  background: var(--accent-primary, #3b82f6);
+  color: white;
+}

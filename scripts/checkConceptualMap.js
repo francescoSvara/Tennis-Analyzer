@@ -7,9 +7,10 @@
  * - Linee di codice delle funzioni
  * - Documenti filosofie
  * - Tabelle database
+ * - Violazioni architetturali (MatchBundle-Centric)
  * 
  * Uso: node scripts/checkConceptualMap.js
- * Output: docs/TODO_MAPPA_CONCETTUALE.md
+ * Output: docs/CHECK_MAPPA_CONCETTUALE.md
  */
 
 const fs = require('fs');
@@ -24,19 +25,21 @@ const TODO_LIST_FILE = path.join(ROOT_DIR, 'docs', 'TODO_LIST.md');
 // ============================================================================
 
 const REFERENCES = {
-  // Documenti Filosofie
+  // Documenti Filosofie V2
   docs: [
-    'docs/filosofie/FILOSOFIA_MADRE.md',
-    'docs/filosofie/FILOSOFIA_DB.md',
-    'docs/filosofie/FILOSOFIA_STATS_V2.md',
-    'docs/filosofie/FILOSOFIA_LIVE_TRACKING.md',
-    'docs/filosofie/FILOSOFIA_ODDS.md',
-    'docs/filosofie/FILOSOFIA_FRONTEND_UI_UX.md',
-    'docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md',
-    'docs/filosofie/FILOSOFIA_CONCEPT_CHECKS.md',
+    'docs/filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md',
+    'docs/filosofie/FILOSOFIA_DB_V2.md',
+    'docs/filosofie/FILOSOFIA_STATS_V3.md',
+    'docs/filosofie/FILOSOFIA_LIVE_TRACKING_V2.md',
+    'docs/filosofie/FILOSOFIA_ODDS_V2.md',
+    'docs/filosofie/FILOSOFIA_FRONTEND.md',
+    'docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md',
+    'docs/filosofie/FILOSOFIA_CONCEPT_CHECKS_V2.md',
+    'docs/filosofie/INDEX_FILOSOFIE.md',
+    'docs/specs/HPI_RESILIENCE.md',
     'docs/specs/SPEC_FRONTEND_MOTION_UI.md',
-    'docs/concept/rules.v1.json',
-    'docs/MAPPA_RETE_CONCETTUALE.md',
+    'docs/specs/SPEC_VALUE_SVG.md',
+    'docs/MAPPA_RETE_CONCETTUALE_V2.md',
     'docs/TODO_LIST.md'
   ],
 
@@ -49,7 +52,13 @@ const REFERENCES = {
     'backend/services/rawEventsProcessor.js',
     'backend/services/calculationQueueWorker.js',
     'backend/services/dataNormalizer.js',
-    'backend/services/unifiedImporter.js'
+    'backend/services/unifiedImporter.js',
+    'backend/services/strategyStatsService.js'
+  ],
+
+  // Backend Strategies
+  backendStrategies: [
+    'backend/strategies/strategyEngine.js'
   ],
 
   // Backend Utils
@@ -57,7 +66,8 @@ const REFERENCES = {
     'backend/utils/valueInterpreter.js',
     'backend/utils/breakDetector.js',
     'backend/utils/matchSegmenter.js',
-    'backend/utils/pressureCalculator.js'
+    'backend/utils/pressureCalculator.js',
+    'backend/utils/svgMomentumExtractor.js'
   ],
 
   // Backend DB
@@ -82,7 +92,7 @@ const REFERENCES = {
     'backend/migrations/add-live-tracking-table.sql'
   ],
 
-  // Frontend
+  // Frontend - Components esistenti
   frontendComponents: [
     'src/components/MomentumTab.jsx',
     'src/components/QuotesTab.jsx',
@@ -107,13 +117,27 @@ const REFERENCES = {
     'src/components/SetBlock.jsx',
     'src/components/SportSidebar.jsx',
     'src/components/StatGroup.jsx',
-    'src/components/StatRow.jsx'
+    'src/components/StatRow.jsx',
+    'src/components/StrategiesLivePanel.jsx',
+    'src/components/StrategiesPanel.jsx',
+    'src/components/StrategyHistoricalPanel.jsx'
   ],
 
+  // Frontend - Hooks (includendo quelli da creare)
   frontendHooks: [
     'src/hooks/useMatchCard.jsx',
     'src/hooks/useMatchData.jsx',
     'src/hooks/useLiveMatch.jsx'
+    // 'src/hooks/useMatchBundle.jsx' - DA CREARE (violazione architetturale)
+  ],
+
+  // Frontend Motion - esistenti
+  frontendMotion: [
+    'src/motion/tokens.js',
+    'src/motion/MotionCard.jsx',
+    'src/motion/MotionButton.jsx'
+    // 'src/components/motion/MotionTab.jsx' - DA CREARE
+    // 'src/components/motion/MotionRow.jsx' - DA CREARE
   ],
 
   frontendUtils: [
@@ -152,8 +176,8 @@ const FUNCTIONS_TO_CHECK = [
   { file: 'src/utils.js', func: 'extractKeyStats', expectedLine: 1590 },
   { file: 'src/utils.js', func: 'calculatePressureIndex', expectedLine: 1654 },
   { file: 'src/utils.js', func: 'analyzeLayTheWinner', expectedLine: 1744 },
-  { file: 'src/utils.js', func: 'analyzeSuperBreak', expectedLine: 2082 },
-  { file: 'src/utils.js', func: 'calculateDataCompleteness', expectedLine: 2326 },
+  { file: 'src/utils.js', func: 'analyzeSuperBreak', expectedLine: 2169 },
+  { file: 'src/utils.js', func: 'calculateDataCompleteness', expectedLine: 2856 },
   
   // Frontend - MomentumTab.jsx
   { file: 'src/components/MomentumTab.jsx', func: 'analyzeMomentumOwner', expectedLine: 152 },
@@ -190,6 +214,71 @@ const DB_TABLES = [
   // add-live-tracking-table.sql
   { table: 'live_tracking', migration: 'add-live-tracking-table.sql' },
   { table: 'live_snapshots', migration: 'add-live-tracking-table.sql' }
+];
+
+// ============================================================================
+// VIOLAZIONI ARCHITETTURALI DA VERIFICARE (MatchBundle-Centric)
+// Ref: FILOSOFIA_CONCEPT_CHECKS_V2.md, FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
+// ============================================================================
+
+const ARCHITECTURAL_CHECKS = [
+  // 1. Endpoint Bundle deve esistere
+  {
+    id: 'BUNDLE_ENDPOINT',
+    description: 'Endpoint /api/match/:id/bundle deve esistere',
+    file: 'backend/server.js',
+    pattern: /app\.(get|post)\s*\(\s*['"`]\/api\/match\/:.*\/bundle/i,
+    severity: 'ERROR',
+    reference: 'FILOSOFIA_DB_V2.md sezione 3'
+  },
+  // 2. Hook useMatchBundle deve esistere
+  {
+    id: 'USE_MATCH_BUNDLE_HOOK',
+    description: 'Hook useMatchBundle.jsx deve esistere per consumare MatchBundle',
+    file: 'src/hooks/useMatchBundle.jsx',
+    mustExist: true,
+    severity: 'ERROR',
+    reference: 'FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3'
+  },
+  // 3. Strategy Engine non deve avere solo TODO
+  {
+    id: 'STRATEGY_ENGINE_IMPLEMENTED',
+    description: 'Strategy Engine deve avere implementazione reale',
+    file: 'backend/strategies/strategyEngine.js',
+    antiPattern: /\/\/\s*TODO.*Implementare/i,
+    severity: 'ERROR',
+    reference: 'FILOSOFIA_STATS_V3.md sezione 6'
+  },
+  // 4. Frontend non deve calcolare strategie
+  {
+    id: 'STRATEGY_IN_FRONTEND',
+    description: 'Strategie (analyzeLayTheWinner, etc.) non devono essere nel frontend',
+    files: ['src/utils.js', 'src/components/StrategiesPanel.jsx', 'src/components/StrategiesLivePanel.jsx'],
+    pattern: /export\s+function\s+(analyzeLayTheWinner|analyzeBancaServizio|analyzeSuperBreak)/,
+    shouldNotExist: true,
+    severity: 'ERROR',
+    reference: 'FILOSOFIA_STATS_V3.md sezione 2'
+  },
+  // 5. Frontend non deve calcolare DataCompleteness
+  {
+    id: 'DATA_COMPLETENESS_FRONTEND',
+    description: 'calculateDataCompleteness non deve essere nel frontend',
+    files: ['src/utils.js'],
+    pattern: /export\s+function\s+calculateDataCompleteness/,
+    shouldNotExist: true,
+    severity: 'ERROR',
+    reference: 'FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.5'
+  },
+  // 6. Feature Engine duplicato nel frontend
+  {
+    id: 'FEATURE_ENGINE_DUPLICATE',
+    description: 'calculateVolatility/calculateElasticity duplicati in MomentumTab',
+    files: ['src/components/MomentumTab.jsx'],
+    pattern: /function\s+calculate(Volatility|Elasticity)/,
+    shouldNotExist: true,
+    severity: 'WARN',
+    reference: 'FILOSOFIA_STATS_V3.md - Feature Engine'
+  }
 ];
 
 // ============================================================================
@@ -274,6 +363,138 @@ function checkTableInMigration(tableName, migrationFile) {
 }
 
 // ============================================================================
+// VERIFICA ARCHITETTURALE (MatchBundle-Centric)
+// ============================================================================
+
+function runArchitecturalChecks() {
+  const violations = [];
+  
+  console.log('\n🏗️  Verifica architetturale (MatchBundle-Centric)...');
+  
+  for (const check of ARCHITECTURAL_CHECKS) {
+    // Check file must exist
+    if (check.mustExist) {
+      const fullPath = path.join(ROOT_DIR, check.file);
+      if (!fs.existsSync(fullPath)) {
+        violations.push({
+          id: check.id,
+          severity: check.severity,
+          description: check.description,
+          file: check.file,
+          issue: 'FILE_MISSING',
+          reference: check.reference
+        });
+        console.log(`  ❌ ${check.id}: ${check.file} non esiste`);
+      } else {
+        console.log(`  ✅ ${check.id}: ${check.file} esiste`);
+      }
+      continue;
+    }
+    
+    // Check single file for pattern
+    if (check.file && check.pattern) {
+      const fullPath = path.join(ROOT_DIR, check.file);
+      if (fs.existsSync(fullPath)) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        const found = check.pattern.test(content);
+        
+        if (check.shouldNotExist && found) {
+          violations.push({
+            id: check.id,
+            severity: check.severity,
+            description: check.description,
+            file: check.file,
+            issue: 'PATTERN_SHOULD_NOT_EXIST',
+            reference: check.reference
+          });
+          console.log(`  ❌ ${check.id}: Pattern trovato in ${check.file} (non dovrebbe esserci)`);
+        } else if (!check.shouldNotExist && !found) {
+          violations.push({
+            id: check.id,
+            severity: check.severity,
+            description: check.description,
+            file: check.file,
+            issue: 'PATTERN_MISSING',
+            reference: check.reference
+          });
+          console.log(`  ❌ ${check.id}: Pattern non trovato in ${check.file}`);
+        } else {
+          console.log(`  ✅ ${check.id}: OK`);
+        }
+      }
+      continue;
+    }
+    
+    // Check antiPattern (should NOT exist)
+    if (check.file && check.antiPattern) {
+      const fullPath = path.join(ROOT_DIR, check.file);
+      if (fs.existsSync(fullPath)) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        const found = check.antiPattern.test(content);
+        
+        if (found) {
+          violations.push({
+            id: check.id,
+            severity: check.severity,
+            description: check.description,
+            file: check.file,
+            issue: 'ANTI_PATTERN_FOUND',
+            reference: check.reference
+          });
+          console.log(`  ❌ ${check.id}: Anti-pattern trovato in ${check.file}`);
+        } else {
+          console.log(`  ✅ ${check.id}: OK`);
+        }
+      }
+      continue;
+    }
+    
+    // Check multiple files
+    if (check.files && check.pattern) {
+      let foundInAny = false;
+      let foundFiles = [];
+      
+      for (const file of check.files) {
+        const fullPath = path.join(ROOT_DIR, file);
+        if (fs.existsSync(fullPath)) {
+          const content = fs.readFileSync(fullPath, 'utf8');
+          if (check.pattern.test(content)) {
+            foundInAny = true;
+            foundFiles.push(file);
+          }
+        }
+      }
+      
+      if (check.shouldNotExist && foundInAny) {
+        violations.push({
+          id: check.id,
+          severity: check.severity,
+          description: check.description,
+          file: foundFiles.join(', '),
+          issue: 'PATTERN_SHOULD_NOT_EXIST',
+          reference: check.reference
+        });
+        console.log(`  ❌ ${check.id}: Pattern trovato in ${foundFiles.join(', ')}`);
+      } else if (!check.shouldNotExist && !foundInAny) {
+        violations.push({
+          id: check.id,
+          severity: check.severity,
+          description: check.description,
+          file: check.files.join(', '),
+          issue: 'PATTERN_MISSING',
+          reference: check.reference
+        });
+        console.log(`  ❌ ${check.id}: Pattern non trovato`);
+      } else {
+        console.log(`  ✅ ${check.id}: OK`);
+      }
+    }
+  }
+  
+  return violations;
+}
+
+// ============================================================================
 // ESECUZIONE CHECK
 // ============================================================================
 
@@ -291,6 +512,7 @@ function runCheck() {
     lineMismatches: [],
     missingTables: [],
     newFilesDetected: [],
+    architecturalViolations: [],
     warnings: []
   };
 
@@ -301,12 +523,14 @@ function runCheck() {
   const allFiles = [
     ...REFERENCES.docs,
     ...REFERENCES.backendServices,
+    ...REFERENCES.backendStrategies,
     ...REFERENCES.backendUtils,
     ...REFERENCES.backendDb,
     ...REFERENCES.backendOther,
     ...REFERENCES.migrations,
     ...REFERENCES.frontendComponents,
     ...REFERENCES.frontendHooks,
+    ...REFERENCES.frontendMotion,
     ...REFERENCES.frontendUtils
   ];
 
@@ -392,6 +616,19 @@ function runCheck() {
           console.log(`  📄 Non documentato: ${relativePath}`);
         }
       }
+    }
+  }
+
+  // 5. Verifica architetturale (MatchBundle-Centric)
+  const archViolations = runArchitecturalChecks();
+  results.architecturalViolations = archViolations;
+  
+  for (const v of archViolations) {
+    results.summary.totalChecks++;
+    if (v.severity === 'ERROR') {
+      results.summary.failed++;
+    } else if (v.severity === 'WARN') {
+      results.summary.warnings++;
     }
   }
 
@@ -507,8 +744,25 @@ I seguenti file esistono ma non sono nella mappa concettuale:
     md += '\n---\n\n';
   }
 
+  // Violazioni architetturali
+  if (results.architecturalViolations.length > 0) {
+    md += `## 🏗️ Violazioni Architetturali (MatchBundle-Centric)
+
+Le seguenti violazioni rispetto alle filosofie sono state rilevate:
+
+| # | ID | Severità | Descrizione | File | Riferimento |
+|---|----|----|-------------|------|-------------|
+`;
+    results.architecturalViolations.forEach((v, i) => {
+      const icon = v.severity === 'ERROR' ? '🔴' : '🟡';
+      md += `| ${i + 1} | \`${v.id}\` | ${icon} ${v.severity} | ${v.description} | \`${v.file}\` | ${v.reference || ''} |\n`;
+    });
+    md += '\n---\n\n';
+  }
+
   // Se tutto OK
-  if (results.summary.failed === 0 && results.summary.warnings === 0 && results.newFilesDetected.length === 0) {
+  if (results.summary.failed === 0 && results.summary.warnings === 0 && 
+      results.newFilesDetected.length === 0 && results.architecturalViolations.length === 0) {
     md += `## ✅ Tutto OK!
 
 Nessun problema rilevato. La mappa concettuale è allineata con il codice.
@@ -523,9 +777,10 @@ Nessun problema rilevato. La mappa concettuale è allineata con il codice.
 
 `;
   
-  if (results.summary.failed > 0 || results.summary.warnings > 0 || results.newFilesDetected.length > 0) {
+  if (results.summary.failed > 0 || results.summary.warnings > 0 || 
+      results.newFilesDetected.length > 0 || results.architecturalViolations.length > 0) {
     md += `1. Correggi i problemi elencati sopra
-2. Aggiorna \`docs/MAPPA_RETE_CONCETTUALE.md\`
+2. Aggiorna \`docs/MAPPA_RETE_CONCETTUALE_V2.md\`
 3. Ri-esegui: \`node scripts/checkConceptualMap.js\`
 4. I problemi sono stati copiati in \`docs/TODO_LIST.md\`
 `;
@@ -544,115 +799,22 @@ Nessun problema rilevato. La mappa concettuale è allineata con il codice.
 }
 
 // ============================================================================
-// AGGIORNA TODO_LIST.MD
+// AGGIORNA CHECK_MAPPA_CONCETTUALE.MD
 // ============================================================================
 
 function updateTodoList(results) {
-  const date = new Date().toLocaleDateString('it-IT', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-
-  // Leggi il file TODO_LIST esistente
-  let todoContent = '';
-  if (fs.existsSync(TODO_LIST_FILE)) {
-    todoContent = fs.readFileSync(TODO_LIST_FILE, 'utf8');
-  } else {
-    console.log('⚠️  TODO_LIST.md non trovato, verrà creato');
-    return;
-  }
-
-  // Genera la nuova sezione problemi
-  let problemsSection = `## 🔍 Problemi Rilevati dal Check
-
-> Sezione auto-popolata da \`node scripts/checkConceptualMap.js\`
-> Ultimo check: ${date}
-
-`;
-
-  const hasProblems = results.summary.failed > 0 || 
-                      results.summary.warnings > 0 || 
-                      results.newFilesDetected.length > 0;
-
-  if (!hasProblems) {
-    problemsSection += `### Stato Attuale: ✅ Nessun problema
-
-La mappa concettuale è allineata con il codice.
-
-| Metrica | Valore |
-|---------|--------|
-| Check totali | ${results.summary.totalChecks} |
-| ✅ Passati | ${results.summary.passed} |
-| ❌ Falliti | ${results.summary.failed} |
-| ⚠️ Warning | ${results.summary.warnings} |
-`;
-  } else {
-    problemsSection += `### Stato Attuale: ⚠️ Problemi rilevati
-
-| Metrica | Valore |
-|---------|--------|
-| Check totali | ${results.summary.totalChecks} |
-| ✅ Passati | ${results.summary.passed} |
-| ❌ Falliti | ${results.summary.failed} |
-| ⚠️ Warning | ${results.summary.warnings} |
-
-`;
-
-    // File mancanti
-    if (results.missingFiles.length > 0) {
-      problemsSection += `### ❌ File Mancanti\n\n`;
-      results.missingFiles.forEach((file, i) => {
-        problemsSection += `- [ ] \`${file}\` - Creare o rimuovere riferimento\n`;
-      });
-      problemsSection += '\n';
-    }
-
-    // Funzioni mancanti
-    if (results.missingFunctions.length > 0) {
-      problemsSection += `### ❌ Funzioni Non Trovate\n\n`;
-      results.missingFunctions.forEach((f, i) => {
-        problemsSection += `- [ ] \`${f.func}()\` in \`${f.file}\` - ${f.error}\n`;
-      });
-      problemsSection += '\n';
-    }
-
-    // Linee non corrispondenti
-    if (results.lineMismatches.length > 0) {
-      problemsSection += `### ⚠️ Linee da Aggiornare\n\n`;
-      results.lineMismatches.forEach((m, i) => {
-        problemsSection += `- [ ] \`${m.func}()\` in \`${m.file}\`: L${m.expected} → L${m.actual}\n`;
-      });
-      problemsSection += '\n';
-    }
-
-    // File non documentati
-    if (results.newFilesDetected.length > 0) {
-      problemsSection += `### 📄 File Non Documentati\n\n`;
-      results.newFilesDetected.forEach((file, i) => {
-        problemsSection += `- [ ] \`${file}\` - Aggiungere alla mappa\n`;
-      });
-      problemsSection += '\n';
-    }
-  }
-
-  // Trova e sostituisci la sezione problemi nel TODO_LIST
-  const startMarker = '## 🔍 Problemi Rilevati dal Check';
-  const endMarker = '## 📝 TODO Attivi';
+  // La funzione genera CHECK_MAPPA_CONCETTUALE.md che è il report di verifica
+  // TODO_LIST.md è gestito separatamente (manualmente o da altri script)
+  console.log('📋 Report generato in CHECK_MAPPA_CONCETTUALE.md');
   
-  const startIdx = todoContent.indexOf(startMarker);
-  const endIdx = todoContent.indexOf(endMarker);
-  
-  if (startIdx !== -1 && endIdx !== -1) {
-    todoContent = todoContent.substring(0, startIdx) + 
-                  problemsSection + 
-                  '\n---\n\n' +
-                  todoContent.substring(endIdx);
-    
-    fs.writeFileSync(TODO_LIST_FILE, todoContent, 'utf8');
-    console.log(`📋 TODO_LIST aggiornato: ${TODO_LIST_FILE}`);
-  } else {
-    console.log('⚠️  Impossibile trovare sezione problemi in TODO_LIST.md');
+  // Log summary per integrazione manuale se necessario
+  if (results.architecturalViolations.length > 0) {
+    console.log('\n🏗️  VIOLAZIONI ARCHITETTURALI DA RISOLVERE:');
+    for (const v of results.architecturalViolations) {
+      const icon = v.severity === 'ERROR' ? '🔴' : '🟡';
+      console.log(`   ${icon} ${v.id}: ${v.description}`);
+      console.log(`      File: ${v.file}`);
+    }
   }
 }
 
@@ -674,6 +836,7 @@ function main() {
   console.log(`   ❌ Falliti:  ${results.summary.failed}`);
   console.log(`   ⚠️  Warning: ${results.summary.warnings}`);
   console.log(`   📄 Non doc:  ${results.newFilesDetected.length}`);
+  console.log(`   🏗️  Arch:    ${results.architecturalViolations.length}`);
   console.log('═══════════════════════════════════════════════════════════\n');
 
   // Genera file CHECK
