@@ -6,8 +6,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px 12px;
+  gap: 16px;
+  width: 64px;
+  min-width: 64px;
+  padding: 16px 0;
   background: var(--bg-secondary, #1e293b);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -20,18 +22,19 @@
   height: 44px;
   background: transparent;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text-muted, #64748b);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .sport-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--text-secondary, #94a3b8);
 }
 
 .sport-btn.active {
   background: var(--accent-primary, #3b82f6);
   color: white;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.28);
 }

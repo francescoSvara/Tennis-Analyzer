@@ -41,10 +41,14 @@ import {
   Lightning,
   GlobeSimple,
   Ruler,
-  Wrench
+  Wrench,
+  ArrowLeft,
+  House,
+  X
 } from '@phosphor-icons/react';
 import { apiUrl } from '../config';
 import { durations, easings } from '../motion/tokens';
+import { MotionButton } from '../motion';
 import './PlayerPage.css';
 
 // ============================================================================
@@ -236,7 +240,7 @@ function RecentFormStreak({ results }) {
 // MAIN PLAYER PAGE
 // ============================================================================
 
-export default function PlayerPage() {
+export default function PlayerPage({ onBack }) {
   const [playerName, setPlayerName] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [profile, setProfile] = useState(null);
@@ -372,10 +376,22 @@ export default function PlayerPage() {
     <div className="player-page">
       {/* Header con ricerca */}
       <div className="player-page-header">
-        <h1>
-          <TennisBall size={28} weight="duotone" style={{ marginRight: 10, color: '#3b82f6' }} />
-          Player Profile
-        </h1>
+        <div className="header-left">
+          {onBack && (
+            <MotionButton variant="ghost" onClick={onBack} className="back-button">
+              <ArrowLeft size={18} /> Back
+            </MotionButton>
+          )}
+          <h1>
+            <TennisBall size={28} weight="duotone" style={{ marginRight: 10, color: '#3b82f6' }} />
+            Player Profile
+          </h1>
+        </div>
+        {onBack && (
+          <MotionButton variant="ghost" onClick={onBack} className="close-button-mobile">
+            <X size={22} weight="bold" />
+          </MotionButton>
+        )}
         
         <form onSubmit={handleSearch} className="player-search-form">
           <div className="search-container">

@@ -28,15 +28,14 @@ import {
   XCircle,
   Warning,
   User,
-  ChartLineUp,
-  Database,
-  Plus
+  ChartLineUp
 } from '@phosphor-icons/react';
 import { MotionCard, MotionButton, MotionRow } from '../../motion';
 import { apiUrl } from '../../config';
 import SportSidebar from '../SportSidebar';
 import MonitoringDashboard from '../MonitoringDashboard';
 import './HomePage.css';
+import '../../styles/homepage.css';
 
 // Status indicator component
 function StatusBadge({ status }) {
@@ -362,7 +361,6 @@ export default function HomePage({
     const saved = localStorage.getItem('matchWatchlist');
     return saved ? JSON.parse(saved) : [];
   });
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
   
   // Real matches from database
@@ -505,10 +503,7 @@ export default function HomePage({
     return matches.filter(m => watchlist.includes(m.id));
   }, [matches, watchlist]);
   
-  const handleAddMatchSuccess = () => {
-    setShowAddModal(false);
-    if (onRefreshSummary) onRefreshSummary();
-  };
+
 
   return (
     <div className="home-page-new">
@@ -519,10 +514,6 @@ export default function HomePage({
             <House size={28} weight="duotone" className="home-icon" />
             Trading Lobby
           </h1>
-          <span className="db-count">
-            <Database size={14} />
-            {loading ? '...' : `${summary.total} matches`}
-          </span>
         </div>
         
         <div className="home-header-right">
@@ -537,12 +528,6 @@ export default function HomePage({
             onClick={() => setShowMonitoring(true)}
           >
             <ChartLineUp size={18} /> Monitor
-          </MotionButton>
-          <MotionButton 
-            variant="primary" 
-            onClick={() => setShowAddModal(true)}
-          >
-            <Plus size={18} /> Add Match
           </MotionButton>
         </div>
       </header>
@@ -678,16 +663,6 @@ export default function HomePage({
           </div>
         </aside>
       </div>
-      
-      {/* Modals */}
-      <AnimatePresence>
-        {showAddModal && (
-          <AddMatchModal
-            onClose={() => setShowAddModal(false)}
-            onSuccess={handleAddMatchSuccess}
-          />
-        )}
-      </AnimatePresence>
       
       <MonitoringDashboard 
         isOpen={showMonitoring}

@@ -191,7 +191,9 @@
 .home-content {
   display: flex;
   flex: 1;
-  min-height: calc(100vh - 74px);
+  height: calc(100vh - 74px);
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ============================================
@@ -199,13 +201,15 @@
    ============================================ */
 
 .sport-sidebar {
-  width: 220px;
-  min-width: 220px;
+  width: 64px;
+  min-width: 64px;
   background: rgba(26, 35, 50, 0.6);
   border-right: 1px solid var(--home-border);
-  padding: 20px 0;
+  padding: 16px 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  row-gap: 16px;
 }
 
 .sport-sidebar-header {
@@ -286,9 +290,19 @@
    ============================================ */
 
 .home-main {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   padding: 28px 32px;
-  overflow: auto;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.home-section.live-section {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .home-main-header {
@@ -1566,9 +1580,9 @@
   }
   
   .sport-sidebar {
-    width: 70px;
-    min-width: 70px;
-    padding: 16px 0;
+    width: 60px;
+    min-width: 60px;
+    padding: 12px 0;
   }
   
   .sport-sidebar-header,

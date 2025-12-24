@@ -348,6 +348,25 @@ svg[fill="currentColor"] {
 }
 
 /* ============================================
+   MOTION BUTTON COMPONENTS
+   ============================================ */
+
+.motion-button {
+  font-family: var(--font-family);
+  letter-spacing: 0.01em;
+}
+
+.motion-button--ghost {
+  transition: background var(--motion-fast) var(--motion-ease-out),
+              border-color var(--motion-fast) var(--motion-ease-out);
+}
+
+.motion-button--ghost:hover {
+  background: var(--bg-interactive-hover) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ============================================
    BADGE COMPONENTS
    ============================================ */
 

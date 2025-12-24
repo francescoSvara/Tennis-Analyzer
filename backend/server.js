@@ -3365,7 +3365,7 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
       try {
         // Usa syncMatch per fetch + save in DB
         const synced = await syncMatch(parseInt(eventId));
-        if (synced) {
+        if (synced?.success) {
           console.log(`✅ Synced match ${eventId} from SofaScore`);
           // Ricarica dati dal DB dopo sync
           [matchData, statisticsData, momentumData, pointsData, matchScoresData] = await Promise.all([
@@ -3381,6 +3381,40 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
         }
       } catch (syncErr) {
         console.warn(`⚠️ Sync failed for ${eventId}:`, syncErr.message);
+      }
+    }
+    
+    // ============================================================
+    // FILOSOFIA: Se dati incompleti (surface=Unknown, quality<50), 
+    // SYNC da SofaScore → DB → Rileggi
+    // ============================================================
+    const needsRefresh = finalMatchData && (
+      finalMatchData.match?.surface === 'Unknown' ||
+      finalMatchData.dataQuality < 50
+    );
+    
+    if (needsRefresh) {
+      console.log(`🔄 Match ${eventId} has incomplete data (surface=${finalMatchData.match?.surface}, quality=${finalMatchData.dataQuality}%), refreshing from SofaScore...`);
+      try {
+        const synced = await syncMatch(parseInt(eventId));
+        if (synced?.success) {
+          console.log(`✅ Refreshed match ${eventId} from SofaScore`);
+          // Ricarica TUTTI i dati dal DB dopo refresh
+          [matchData, statisticsData, momentumData, oddsData, pointsData, matchScoresData] = await Promise.all([
+            matchCardService ? matchCardService.getMatchCardFromSnapshot(parseInt(eventId)) : null,
+            matchRepository ? matchRepository.getMatchStatisticsNew(parseInt(eventId)) : [],
+            matchRepository ? matchRepository.getMatchMomentum(parseInt(eventId)) : [],
+            matchRepository ? matchRepository.getMatchOdds(parseInt(eventId)) : null,
+            matchRepository ? matchRepository.getMatchPointByPoint(parseInt(eventId), { limit: 500 }) : { data: [] },
+            supabaseClient?.supabase 
+              ? supabaseClient.supabase.from('match_scores').select('*').eq('match_id', parseInt(eventId)).order('set_number')
+              : { data: [] }
+          ]);
+          finalMatchData = matchData || finalMatchData; // Fallback se il reload fallisce
+        }
+      } catch (refreshErr) {
+        console.warn(`⚠️ Refresh failed for ${eventId}:`, refreshErr.message);
+        // Continua con i dati esistenti
       }
     }
     
@@ -3504,10 +3538,16 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
     const dataQuality = calculateDataQuality(finalMatchData, statisticsData, momentumData);
     
     // 6. Build header
+    // Handle status as string or object
+    const rawStatus = finalMatchData.match?.status;
+    const matchStatus = typeof rawStatus === 'string' 
+      ? rawStatus 
+      : (rawStatus?.type || rawStatus?.description || 'unknown');
+    
     const header = {
       match: {
         id: finalMatchData.match?.id || parseInt(eventId),
-        status: finalMatchData.match?.status?.type || 'finished',
+        status: matchStatus,
         startTime: finalMatchData.match?.startTimestamp,
         tournament: finalMatchData.tournament?.name || finalMatchData.match?.tournament?.name,
         round: finalMatchData.match?.roundInfo?.name || finalMatchData.match?.round,

@@ -6,11 +6,13 @@
  */
 
 .match-page {
+  height: 100vh;
   min-height: 100vh;
   background: var(--bg-primary);
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ===========================================
@@ -20,8 +22,10 @@
 .match-page__layout {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr var(--right-rail-width);
+  height: calc(100vh - var(--header-height));
   min-height: calc(100vh - var(--header-height));
   flex: 1;
+  overflow: hidden;
 }
 
 /* ===========================================
@@ -52,19 +56,26 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   background: var(--bg-primary);
 }
 
 .match-page__content {
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  min-height: 0;
   padding: var(--space-6);
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .match-page__tab-content {
   max-width: var(--max-content-width);
   margin: 0 auto;
   width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* ===========================================
@@ -186,6 +197,7 @@
 
   .match-page__content {
     padding: var(--space-5);
+    overflow: hidden;
   }
 }
 
@@ -211,6 +223,7 @@
 
   .match-page__content {
     padding: var(--space-4);
+    overflow: hidden;
   }
 
   .tab-label {
@@ -225,6 +238,7 @@
 @media (max-width: 480px) {
   .match-page__content {
     padding: var(--space-3);
+    overflow: hidden;
   }
 
   .match-page__tabs-mobile .motion-tab {

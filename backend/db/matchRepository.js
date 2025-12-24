@@ -2253,7 +2253,70 @@ async function getMatchPointByPoint(matchId, options = {}) {
 
   const { offset = 0, limit = 500 } = options;
 
-  // Try new table first
+  // PRIORITY: Check if point_by_point has serving/scoring data (needed for break detection)
+  // This table has the crucial serving/scoring fields that match_point_by_point_new lacks
+  const { count: legacyCount } = await supabase
+    .from('point_by_point')
+    .select('id', { count: 'exact', head: true })
+    .eq('match_id', matchId);
+
+  if (legacyCount && legacyCount > 0) {
+    // Check if it has serving data
+    const { data: sampleLegacy } = await supabase
+      .from('point_by_point')
+      .select('serving')
+      .eq('match_id', matchId)
+      .not('serving', 'is', null)
+      .limit(1);
+    
+    if (sampleLegacy?.length > 0) {
+      // Legacy table has serving data - use it for break detection
+      const { data: legacyData, error: legacyError } = await supabase
+        .from('point_by_point')
+        .select('*')
+        .eq('match_id', matchId)
+        .order('set_number')
+        .order('game_number')
+        .order('point_index')
+        .range(offset, offset + limit - 1);
+
+      if (!legacyError && legacyData?.length > 0) {
+        // Map legacy format to new format
+        const mappedData = legacyData.map(p => ({
+          id: p.id,
+          match_id: p.match_id,
+          set_number: p.set_number,
+          game_number: p.game_number,
+          point_number: p.point_index,
+          home_point: p.home_point,
+          away_point: p.away_point,
+          score_before: p.score_before,
+          score_after: p.score_after,
+          point_winner: p.point_winner,
+          serving: p.serving,
+          scoring: p.scoring,
+          home_point_type: p.home_point_type,
+          away_point_type: p.away_point_type,
+          point_description: p.point_description,
+          is_break_point: p.is_break_point,
+          is_ace: p.is_ace,
+          is_double_fault: p.is_double_fault,
+          created_at: p.created_at
+        }));
+
+        return {
+          data: mappedData,
+          total: legacyCount,
+          offset,
+          limit,
+          hasMore: (offset + limit) < legacyCount,
+          source: 'point_by_point'
+        };
+      }
+    }
+  }
+
+  // Try new table if legacy doesn't have serving data
   const { count: newCount } = await supabase
     .from('match_point_by_point_new')
     .select('id', { count: 'exact', head: true })
@@ -2278,57 +2341,6 @@ async function getMatchPointByPoint(matchId, options = {}) {
         limit,
         hasMore: (offset + limit) < newCount,
         source: 'match_point_by_point_new'
-      };
-    }
-  }
-
-  // Fallback to legacy table (point_by_point)
-  const { count: legacyCount } = await supabase
-    .from('point_by_point')
-    .select('id', { count: 'exact', head: true })
-    .eq('match_id', matchId);
-
-  if (legacyCount && legacyCount > 0) {
-    const { data: legacyData, error: legacyError } = await supabase
-      .from('point_by_point')
-      .select('*')
-      .eq('match_id', matchId)
-      .order('set_number')
-      .order('game_number')
-      .order('point_index')
-      .range(offset, offset + limit - 1);
-
-    if (!legacyError && legacyData?.length > 0) {
-      // Map legacy format to new format
-      const mappedData = legacyData.map(p => ({
-        id: p.id,
-        match_id: p.match_id,
-        set_number: p.set_number,
-        game_number: p.game_number,
-        point_number: p.point_index,
-        home_point: p.home_point,
-        away_point: p.away_point,
-        score_before: p.score_before,
-        score_after: p.score_after,
-        point_winner: p.point_winner,
-        serving: p.serving,
-        scoring: p.scoring, // Who won the game (for break detection)
-        home_point_type: p.home_point_type,
-        away_point_type: p.away_point_type,
-        point_description: p.point_description,
-        is_break_point: p.is_break_point,
-        is_ace: p.is_ace,
-        is_double_fault: p.is_double_fault,
-        created_at: p.created_at
-      }));
-
-      return {
-        data: mappedData,
-        total: legacyCount,
-        offset,
-        limit,
-        hasMore: (offset + limit) < legacyCount,
-        source: 'point_by_point'
       };
     }
   }

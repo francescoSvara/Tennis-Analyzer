@@ -1,456 +1,155 @@
-# 🎾 Tennis Analyzer
+# ?? Tennis Analyzer v3.0
 
-> Sistema avanzato di analisi match tennistici con dati real-time, storico quote e analytics predittivi.
-
-[![Version](https://img.shields.io/badge/Version-4.6-blue)](https://github.com/yourusername/React-Betfair)
-[![Backend](https://img.shields.io/badge/API-Railway-green)](https://tennis-analyzer-production.up.railway.app)
-[![Database](https://img.shields.io/badge/DB-Supabase-orange)](https://supabase.com)
+> Sistema di analisi match tennistici con MatchBundle architecture, real-time tracking e analytics predittivi.
 
 ---
 
-## 🚀 Quick Start
+## ?? Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/yourusername/React-Betfair.git
 cd React-Betfair
-
-# Install
 npm install && cd backend && npm install && cd ..
 
-# Configure (crea .env files - vedi sezione Configurazione)
-
 # Run
-npm run dev                    # Frontend (porta 5173)
-cd backend && node server.js   # Backend (porta 3001)
+npm run dev                    # Frontend :5173
+cd backend && node server.js   # Backend :3001
 ```
 
 ---
 
-## 📋 Indice
+## ?? Architettura v3.0
 
-- [Panoramica](#-panoramica)
-- [Architettura](#-architettura)
-- [Installazione](#-installazione)
-- [Configurazione](#-configurazione)
-- [API Reference](#-api-reference)
-- [Documentazione](#-documentazione)
-- [Scripts](#-scripts)
-- [Changelog](#-changelog)
+### MatchBundle-Centric Design
 
----
-
-## 📖 Panoramica
-
-Tennis Analyzer è una piattaforma completa per:
-
-| Feature | Descrizione |
-|---------|-------------|
-| 📊 **Match Analysis** | Statistiche, momentum, point-by-point tracking |
-| 👤 **Player Profiles** | Ranking, H2H, career stats, surface-specific performance |
-| 💰 **Odds Engine** | Import storico quote, value detection, multi-source comparison |
-| ⚡ **Live Tracking** | WebSocket updates, break detection, real-time momentum |
-| 🤖 **Analytics Layer** | HPI, Resilience Index, Clutch Factor, Volatility |
-
-### Fonti Dati
-
-| Fonte | Tipo | Contenuto |
-|-------|------|-----------|
-| **SofaScore** | API | Stats live, momentum, point-by-point |
-| **XLSX** | Import | Quote storiche (B365, Pinnacle, Max, Avg), ranking |
-
----
-
-## ⚙️ Architettura
-
-### Layer System (v4.0)
+Singola chiamata API restituisce tutto il necessario:
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│                     FRONTEND (React)                       │
-│    MatchCard • MomentumTab • PlayerProfile • LiveBadge     │
-└─────────────────────────┬──────────────────────────────────┘
-                          │ REST + WebSocket
-┌─────────────────────────▼──────────────────────────────────┐
-│                    API LAYER (Express)                      │
-│              /api/match • /api/player • /api/live           │
-└─────────────────────────┬──────────────────────────────────┘
-                          │
-┌─────────────────────────▼──────────────────────────────────┐
-│               SERVICE LAYER (Business Logic)                │
-│   matchCardService • playerService • playerProfileService   │
-└─────────────────────────┬──────────────────────────────────┘
-                          │
-┌─────────────────────────▼──────────────────────────────────┐
-│              CALCULATION LAYER (Analytics)                  │
-│   valueInterpreter • pressureCalculator • matchSegmenter    │
-└─────────────────────────┬──────────────────────────────────┘
-                          │
-┌─────────────────────────▼──────────────────────────────────┘
-│                 DATA LAYER (Supabase)                       │
-│        matchRepository • liveTrackingRepository             │
-└────────────────────────────────────────────────────────────┘
+GET /api/match/:id/bundle ? { header, tabs, dataQuality }
 ```
 
-### Struttura Progetto
+### Layer System
 
 ```
-React-Betfair/
-├── backend/
-│   ├── server.js              # Express API server
-│   ├── db/                    # Repository layer
-│   ├── services/              # Business logic
-│   ├── utils/                 # Calculation utilities
-│   ├── scraper/               # SofaScore scraper
-│   ├── strategies/            # Strategy Engine
-│   └── migrations/            # SQL schemas
-├── src/
-│   ├── App.jsx               # Main React app
-│   ├── components/           # UI components (24)
-│   ├── hooks/                # Custom hooks (3)
-│   ├── motion/               # Animation tokens & wrappers
-│   └── utils/                # Frontend utilities
-├── docs/
-│   ├── filosofie/            # Philosophy docs V2/V3 (9)
-│   ├── specs/                # Technical specs (HPI, etc.)
-│   └── TODO_LIST.md
-└── scripts/                  # Utility scripts
+Frontend (React)  ?  useMatchBundle hook
+       ?
+API Layer (Express)  ?  /api/match/:id/bundle
+       ?
+Service Layer  ?  matchCardService, strategyEngine, featureEngine
+       ?
+Data Layer (Supabase)  ?  matchRepository
 ```
 
 ---
 
-## 📦 Installazione
+## ?? Feature Engine
 
-### Prerequisiti
+Calcola features da dati disponibili (score, odds, rankings):
 
-- Node.js 18+
-- Account [Supabase](https://supabase.com) (gratuito)
-- (Opzionale) Account [Railway](https://railway.app) per deploy
+| Feature | Fonte | Fallback |
+|---------|-------|----------|
+| volatility | powerRankings | score variance |
+| dominance | game ratio | odds probability |
+| pressure | match state | set score |
+| serveDominance | stats | ranking |
+| breakProbability | stats | odds + ranking |
 
-### Setup
+**Principio**: MAI restituire null o fallback statici.
 
-```bash
-# 1. Clone repository
-git clone https://github.com/yourusername/React-Betfair.git
-cd React-Betfair
+---
 
-# 2. Install dependencies
-npm install
-cd backend && npm install && cd ..
+## ?? API Principali
 
-# 3. Setup database
-# Vai su Supabase SQL Editor ed esegui:
-# - backend/migrations/create-new-schema.sql
-# - backend/migrations/add-snapshot-queue-tables.sql
-# - backend/migrations/add-live-tracking-table.sql
+| Endpoint | Descrizione |
+|----------|-------------|
+| `/api/match/:id/bundle` | MatchBundle completo |
+| `/api/matches/db` | Lista match (SofaScore + XLSX) |
+| `/api/player/:id` | Profilo giocatore |
+| `/api/live` | Match live + WebSocket |
 
-# 4. Configure environment (vedi sezione successiva)
+---
 
-# 5. Run
-npm run dev              # Frontend http://localhost:5173
-cd backend && node server.js  # Backend http://localhost:3001
+## ??? Database (Supabase)
+
+| Tabella | Contenuto |
+|---------|-----------|
+| `matches_new` | Match SofaScore |
+| `matches` | Match XLSX legacy |
+| `match_statistics_new` | Statistiche |
+| `match_power_rankings_new` | Momentum |
+| `match_odds` | Quote |
+| `players_new` | Giocatori |
+
+---
+
+## ?? Struttura
+
+```
++-- backend/
+�   +-- server.js              # API + bundle
+�   +-- services/              # Business logic
+�   +-- strategies/            # 5 strategie trading
+�   +-- utils/featureEngine.js # Feature calculations
++-- src/
+�   +-- components/            # React UI
+�   +-- hooks/useMatchBundle.jsx
+�   +-- motion/                # Animations
++-- docs/filosofie/            # Architecture docs
 ```
 
 ---
 
-## ⚙️ Configurazione
+## ? Completato v3.0 (Dicembre 2025)
 
-### Backend (`backend/.env`)
+### Core
+- **MatchBundle endpoint** - Single API per match data
+- **Feature Engine** - Calcolo con fallback completo
+- **Strategy Engine** - 5 strategie (LayTheWinner, BancaServizio, SuperBreak, ValueBetting, MomentumShift)
+- **Dual Source** - SofaScore + XLSX unificati
+- **dataQuality scoring** per ogni match
 
-```env
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_SERVICE_KEY=eyJxxx...
-PORT=3001
-```
+### Frontend
+- useMatchBundle hook
+- Tabs: Overview, Strategies, Stats, Momentum, Predictor, PointByPoint
+- QuickSignals con features reali
+- Motion System (Framer Motion)
 
-### Frontend (`.env`)
+### Data
+- Point-by-point con fallback legacy
+- Normalizzazione odds/points
+- Stats stimate da score quando mancano
 
-```env
-VITE_API_URL=http://localhost:3001
-```
-
----
-
-## 📡 API Reference
-
-### Endpoints Principali
-
-| Endpoint | Metodo | Descrizione |
-|----------|--------|-------------|
-| `/api/match/:id/card` | GET | Card completa match |
-| `/api/match/:id/momentum` | GET | Power rankings |
-| `/api/match/:id/statistics` | GET | Statistiche dettagliate |
-| `/api/match/:id/odds` | GET | Quote betting |
-| `/api/match/:id/points` | GET | Point-by-point (paginato) |
-| `/api/matches/cards` | GET | Lista match recenti |
-| `/api/player/:id` | GET | Profilo giocatore |
-| `/api/player/:id/stats` | GET | Statistiche aggregate |
-| `/api/search/players?q=` | GET | Ricerca giocatori |
-| `/api/live` | GET | Match in corso |
-| `/api/live` | WS | WebSocket updates |
-
-### Esempio Response
-
-```json
-GET /api/match/12345/card
-
-{
-  "match": {
-    "id": 12345,
-    "tournament": "Australian Open",
-    "surface": "Hard",
-    "round": "Final",
-    "score": "6-4 7-5"
-  },
-  "player1": {
-    "name": "Jannik Sinner",
-    "rank": 1,
-    "stats": { "winRate": 0.78 }
-  },
-  "player2": { ... },
-  "h2h": { "total": "5-3" },
-  "momentum": [ ... ],
-  "odds": {
-    "opening": { "p1": 1.85, "p2": 2.10 },
-    "closing": { "p1": 1.75, "p2": 2.20 }
-  }
-}
-```
+### Docs
+- 9 documenti filosofia
+- Mappa concettuale
+- Check scripts automatici
 
 ---
 
-## 📚 Documentazione
+## ?? Changelog
 
-### Documenti di Progetto
+### v3.0 (Dic 2025) - MatchBundle Architecture
+- Single endpoint design
+- Feature Engine con fallback
+- Strategy Engine 5 strategie
+- Motion System
 
-| Documento | Contenuto |
-|-----------|-----------|
-| [docs/filosofie/INDEX_FILOSOFIE.md](docs/filosofie/INDEX_FILOSOFIE.md) | **🏠 Entry point** - Hub navigazione architettura |
-| [docs/TODO_LIST.md](docs/TODO_LIST.md) | **Task list** - 7 TODO attivi, backlog |
-| [docs/MAPPA_RETE_CONCETTUALE_V2.md](docs/MAPPA_RETE_CONCETTUALE_V2.md) | **Mappa riferimenti** - File, funzioni, tabelle |
+### v2.0 (Nov 2025)
+- Nuovo schema DB
+- Alias giocatori
+- Import XLSX
 
-### Filosofie (v2/v3)
-
-| Documento | Focus |
-|-----------|-------|
-| [FILOSOFIA_MADRE](docs/filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Settori, flussi, MatchBundle |
-| [DB_V2](docs/filosofie/FILOSOFIA_DB_V2.md) | Schema Supabase, repository |
-| [STATS_V3](docs/filosofie/FILOSOFIA_STATS_V3.md) | Metriche HPI, Resilience, Pressure |
-| [LIVE_V2](docs/filosofie/FILOSOFIA_LIVE_V2.md) | WebSocket, tracking live |
-| [ODDS_V2](docs/filosofie/FILOSOFIA_ODDS_V2.md) | Fair odds, value detection |
-| [FRONTEND](docs/filosofie/FILOSOFIA_FRONTEND.md) | UI components, motion system |
-| [HPI_RESILIENCE](docs/specs/HPI_RESILIENCE.md) | Formula metriche avanzate |
-
-### Checks (116/116 ✅)
-
-```bash
-node scripts/checkConceptualMap.js   # Verifica mappa concettuale
-node scripts/runConceptChecks.js     # Verifica architettura
-```
+### v1.0 (Ott 2025)
+- MVP SofaScore scraping
 
 ---
 
-## 🛠️ Scripts
+## ?? Docs
 
-### Import Dati
-
-```bash
-# Import file XLSX quote storiche
-cd backend && node importXlsx.js ./data/atp_2024.xlsx
-
-# Arricchimento match con dati SofaScore
-node scripts/enrich-xlsx-matches.js --limit 50
-
-# Popolare alias giocatori
-node scripts/populate-player-aliases.js
-```
-
-### Manutenzione
-
-```bash
-# Deduplica match
-node scripts/deduplicate-all.js
-
-# Normalizza nomi giocatori
-node scripts/normalize-player-names.js
-
-# Check stato database
-node backend/check_supabase.js
-```
-
-### Verifica
-
-```bash
-# Test connessione database
-cd backend && node test-db.js
-
-# Test repository
-node test-repo.js
-
-# Verifica integrità documentazione
-node scripts/checkConceptualMap.js
-```
+- [TODO List](docs/TODO_LIST.md)
+- [Filosofie](docs/filosofie/)
+- [Mappa Concettuale](docs/MAPPA_RETE_CONCETTUALE_V2.md)
 
 ---
 
-## 🗃️ Database Schema
-
-### Tabelle Principali
-
-| Tabella | Descrizione |
-|---------|-------------|
-| `players_new` | Anagrafica tennisti |
-| `player_aliases` | Mapping varianti nomi |
-| `player_rankings` | Storico ranking ATP/WTA |
-| `tournaments_new` | Tornei (Grand Slam, Masters, etc.) |
-| `matches_new` | Match con risultati |
-| `match_statistics_new` | Statistiche dettagliate |
-| `match_power_rankings_new` | Momentum point-by-point |
-| `match_odds` | Quote betting multi-source |
-| `match_card_snapshot` | Card pre-calcolate |
-| `live_tracking` | Dati tracking real-time |
-
-> Schema completo: [backend/migrations/create-new-schema.sql](backend/migrations/create-new-schema.sql)
-
----
-
-## 📜 Changelog
-
-### v4.5 (23 Dicembre 2025) - FILOSOFIA_FRONTEND Unificato
-- **Documento Unificato Frontend** - `FILOSOFIA_FRONTEND.md`
-  - Visual design con wireframe ASCII per HOME e MATCH PAGE
-  - Backend allacci per ogni TAB (funzioni + endpoint)
-  - Sistema strategie trading (🟢🟡🔴) con 3 strategie specifiche
-  - JSON Schema completo (`match-bundle.v1`)
-  - Motion/Icons spec (Framer Motion + Phosphor)
-- **Strategy Engine** (backend) - File da creare:
-  - `backend/strategies/strategyEngine.js`
-  - `backend/services/oddsService.js`
-  - `backend/services/momentumService.js`
-  - `backend/services/predictorService.js`
-- **Motion System** (frontend) - File da creare:
-  - `src/motion/tokens.ts`
-  - Wrapper components: MotionCard, MotionButton, MotionTab, MotionRow
-- **Documentazione**
-  - FILOSOFIA_MADRE.md aggiornato
-  - MAPPA_RETE_CONCETTUALE.md con nuovi domini
-  - TODO_LIST.md con file da creare
-- **Deprecati**: `FILOSOFIA_FRONTEND_UI_UX.md`, `SPEC_FRONTEND_MOTION_UI.md`
-
-### v4.4 (22-23 Dicembre 2025) - Frontend UI Premium
-- **Phosphor Icons** - Sistema icone coerente (duotone)
-- **Framer Motion** - Animazioni premium
-  - Motion tokens: durations, easings, variants
-  - Componenti: MotionCard, MotionButton, MotionList
-  - Skeleton loading, EmptyState animato
-- **prefers-reduced-motion** - Accessibilità
-- **UI Components Enhanced**
-  - HomePage: hover animations, bottoni animati
-  - SportSidebar: hover indicator, icone sport
-  - MatchCard: lift effect, shadow soft
-  - MatchGrid: stagger animation
-  - PlayerPage: form streak animato
-  - MonitoringDashboard: 30+ emoji → Phosphor icons
-
-### v4.3 (Dicembre 2025) - Dual Source Logic (API vs SVG)
-- **Data Source Detection** - Rilevamento automatico origine dati
-  - `isSvgSource`: controlla `source === 'svg_dom'`
-  - `hasBreakOccurred`: verifica presenza campo `breakOccurred`
-- **Game Totali Logic** - Calcolo adattivo
-  - **API**: Usa punteggi set reali (`w1+l1`, `w2+l2`, etc.)
-  - **SVG**: Conta dal campo `side` o segno di `value`
-- **Break Source Tracking** - Campo `breakSource` nel return
-  - `'api'`: da `powerRankings.breakOccurred`
-  - `'statistics'`: da `statistics.breakPointsScored`  
-  - `'unavailable'`: nessuna fonte disponibile
-- **IndicatorsChart Enhanced**
-  - Logica separata per `isSvgSource`
-  - `dataSource` field per debug/UI
-  - Documentato in `FILOSOFIA_STATS_V2.md` sezione 9
-
-### v4.2 (Gennaio 2025) - SVG Momentum & Break Fallback
-- **SVG Momentum Extractor** - Estrazione momentum da DOM SVG SofaScore
-  - Funzione `extractMomentumFromSvgHtml()` per parsing SVG paths
-  - Normalizzazione valori per set o per match
-  - Output: `{ set, game, value, raw_v, side, source: 'svg_dom' }`
-- **Break Fallback System** - Triple source per dati break:
-  1. `powerRankings.breakOccurred` (da point-by-point)
-  2. `matchData.statistics.breakPointsScored` (da API statistics)
-  3. Fallback a 0 se nessuna fonte disponibile
-- **Max Momentum Fix** - Non più sempre 100
-  - Usa `raw_v` (valori originali) se disponibile dal SVG
-  - Altrimenti calcola momentum medio per giocatore
-  - I valori normalizzati (-100..+100) erano sempre ~100 max
-- **IndicatorsChart Enhanced**
-  - `extractBreaksFromStatistics()` per fallback break da statistics
-  - Supporto `raw_v` nel calcolo Max Momentum
-
-### v4.1 (Gennaio 2025) - Fix Break/Momentum Calculation
-- **Break Detection Fix** - Corretta convenzione serving/scoring SofaScore
-  - `serving=1` = HOME serve, `serving=2` = AWAY serve
-  - `scoring=1` = HOME wins, `scoring=2` = AWAY wins
-  - Break = il giocatore che vince NON è quello che serve
-- **Break Frontend** - Separazione `homeBreaks` e `awayBreaks` in IndicatorsChart
-- **Momentum Normalization** - Algoritmo running score con reset per set
-  - Accumulo +1/-1 per ogni game vinto (HOME/AWAY)
-  - Normalizzazione finale su scala -100..+100
-- **Raw JSON Usage** - Uso `raw_json.pointByPoint` per break (contiene serving/scoring)
-
-### v4.0 (Dicembre 2025) - Documentazione Strutturata
-- **Mappa Rete Concettuale** - Riferimenti completi file/funzioni/tabelle
-- **Sistema Check Automatico** - Verifica integrità documentazione
-- **TODO_LIST Centralizzato** - Task management con auto-update
-- **Guida Concettuale** - README_IMPLEMENTATION_GUIDE pulito (solo concetti)
-- **9 Documenti Filosofia** - Architettura MatchBundle-Centric documentata
-
-### v4.6 (24 Dicembre 2025) - Motion Components & Audit
-- Nuovi componenti: `MotionTab`, `MotionRow` con varianti (MotionTabList, MotionTabButton, MotionTabPanel, MotionRowGroup, MotionTableRow)
-- Script check architetturali aggiornati (`checkConceptualMap.js`, `runConceptChecks.js`)
-- Regole MatchBundle-Centric in `docs/concept/rules.v2.json`
-- Audit completo violazioni vs filosofie
-
-### v4.5 (Dicembre 2025) - Documentazione V2
-- FILOSOFIA_DB_V2, FILOSOFIA_STATS_V3, FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2
-- MAPPA_RETE_CONCETTUALE_V2 con cross-reference completi
-- HPI_RESILIENCE spec
-
-### v3.5 (Dicembre 2025) - Live Tracking
-- WebSocket real-time updates
-- Break detection automatico
-- Pressure calculator
-- Match segmenter
-
-### v3.0 (Dicembre 2025) - Architettura Avanzata
-- Match Card Snapshot (single query ~5ms)
-- Raw Events Pipeline
-- Calculation Queue Worker
-- Multi-source odds comparison
-
-### v2.0 (Novembre 2025) - Nuovo Schema DB
-- Separazione Player/Match
-- Sistema alias nomi
-- Import XLSX storico
-
-### v1.0 (Ottobre 2025) - MVP
-- SofaScore scraping
-- Match card base
-- Frontend React
-
----
-
-## 🤝 Contributing
-
-1. Leggi [docs/MAPPA_RETE_CONCETTUALE_V2.md](docs/MAPPA_RETE_CONCETTUALE_V2.md) per orientarti
-2. Controlla [docs/TODO_LIST.md](docs/TODO_LIST.md) per task aperti
-3. Segui le filosofie in `docs/filosofie/`
-4. Esegui `node scripts/checkConceptualMap.js` prima di committare
-
----
-
-## 📄 License
-
-MIT License
-
----
-
-**Made with ❤️ for tennis data analysis**
+**Made with ?? for tennis analytics**

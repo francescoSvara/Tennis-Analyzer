@@ -213,51 +213,6 @@ export function MatchHeader({
       <div className="match-header__right">
         <QuickIndicators header={header} />
         <DataQualityBadge quality={dataQuality} />
-
-        <div className="header-actions">
-          <motion.button
-            className="icon-button"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            animate={isRefreshing ? { rotate: 360 } : {}}
-            transition={{ 
-              duration: isRefreshing ? 1 : durations.fast, 
-              repeat: isRefreshing ? Infinity : 0,
-              ease: 'linear'
-            }}
-            title="Refresh data"
-            aria-label="Refresh data"
-          >
-            <ArrowClockwise size={20} weight="bold" />
-          </motion.button>
-
-          <motion.button
-            className="icon-button"
-            onClick={() => console.log('Notifications clicked')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: durations.fast }}
-            title="Notifications"
-            aria-label="Notifications"
-          >
-            <Bell size={20} weight="fill" />
-            <span className="badge">1</span>
-          </motion.button>
-
-          <motion.button
-            className="icon-button"
-            onClick={() => console.log('Settings clicked')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: durations.fast }}
-            title="Settings"
-            aria-label="Settings"
-          >
-            <Gear size={20} weight="fill" />
-          </motion.button>
-        </div>
       </div>
     </header>
   );

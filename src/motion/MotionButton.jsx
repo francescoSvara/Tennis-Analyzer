@@ -62,14 +62,14 @@ export function MotionButton({
       border: 'none',
     },
     secondary: {
-      background: 'var(--bg-secondary, #f1f5f9)',
-      color: 'var(--text-primary, #1e293b)',
-      border: '1px solid var(--border-color, #e2e8f0)',
+      background: 'var(--bg-secondary, #1e293b)',
+      color: 'var(--text-primary, #f1f5f9)',
+      border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
     },
     ghost: {
-      background: 'transparent',
-      color: 'var(--text-primary, #1e293b)',
-      border: 'none',
+      background: 'rgba(255, 255, 255, 0.05)',
+      color: 'var(--text-primary, #f1f5f9)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
     },
   };
 

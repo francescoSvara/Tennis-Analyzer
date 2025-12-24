@@ -11,6 +11,16 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
+// Supabase client for direct snapshot updates
+let supabase = null;
+try {
+  const supabaseModule = require('./db/supabase');
+  supabase = supabaseModule.supabase;
+  console.log('✅ LiveManager: Supabase client loaded');
+} catch (e) {
+  console.warn('⚠️ LiveManager: Supabase client not available:', e.message);
+}
+
 // Database imports
 let matchRepository = null;
 try {
@@ -516,15 +526,115 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
       }
     }
 
-    // ⚠️ DEPRECATO: Non salvare più su file JSON (filosofia: solo DB)
-    // I file JSON in data/scrapes/ possono essere eliminati con cleanup-scrapes.js
-    // await saveMatchToFile(eventId, data, saveType);
+    // 3. FILOSOFIA: Aggiorna anche match_card_snapshot con i dati freschi
+    // Lo snapshot è la fonte principale per il bundle API
+    if (supabase) {
+      try {
+        // Calcola superficie da groundType o tournament
+        const surface = eventData.groundType || 
+                       eventData.tournament?.uniqueTournament?.groundType || 
+                       eventData.tournament?.groundType ||
+                       'Unknown';
+        
+        // Costruisci sets dai punteggi
+        const sets = [];
+        const homeScore = eventData.homeScore || {};
+        const awayScore = eventData.awayScore || {};
+        for (let i = 1; i <= 5; i++) {
+          const hPeriod = homeScore[`period${i}`];
+          const aPeriod = awayScore[`period${i}`];
+          if (hPeriod !== undefined && aPeriod !== undefined) {
+            sets.push({ home: hPeriod, away: aPeriod });
+          }
+        }
+        
+        const snapshotData = {
+          match_id: parseInt(eventId),
+          core_json: {
+            id: parseInt(eventId),
+            status: eventData.status?.type || eventData.status?.description?.toLowerCase().replace(/\s/g, '') || 'unknown',
+            date: eventData.startTimestamp ? new Date(eventData.startTimestamp * 1000).toISOString().split('T')[0] : null,
+            time: eventData.startTimestamp ? new Date(eventData.startTimestamp * 1000).toISOString().split('T')[1]?.substring(0, 5) : null,
+            surface: surface,
+            round: eventData.roundInfo?.name || null,
+            bestOf: eventData.tournament?.uniqueTournament?.tennisMatchFormat?.matchBestOf || 3,
+            sets: sets,
+            score: homeScore?.current != null && awayScore?.current != null 
+              ? `${homeScore.current}-${awayScore.current}` 
+              : null,
+            winner: eventData.winnerCode || null,
+            setsPlayer1: homeScore?.current,
+            setsPlayer2: awayScore?.current,
+            tournament: {
+              name: eventData.tournament?.name || eventData.tournament?.uniqueTournament?.name,
+              category: eventData.tournament?.category?.name,
+              id: eventData.tournament?.id
+            }
+          },
+          players_json: {
+            player1: {
+              id: eventData.homeTeam?.id,
+              name: eventData.homeTeam?.name,
+              country: eventData.homeTeam?.country?.alpha2,
+              currentRanking: eventData.homeTeam?.ranking,
+              seed: eventData.homeTeam?.seed
+            },
+            player2: {
+              id: eventData.awayTeam?.id,
+              name: eventData.awayTeam?.name,
+              country: eventData.awayTeam?.country?.alpha2,
+              currentRanking: eventData.awayTeam?.ranking,
+              seed: eventData.awayTeam?.seed
+            }
+          },
+          stats_json: data.statistics || [],
+          momentum_json: data.powerRankings || [],
+          odds_json: data.odds || null,
+          h2h_json: data.h2h ? {
+            player1_wins: data.h2h.homeWins || 0,
+            player2_wins: data.h2h.awayWins || 0
+          } : null,
+          data_sources_json: [{ source_type: 'sofascore_sync' }],
+          data_quality_int: calculateDataQualityFromCompleteness(data.dataCompleteness),
+          last_updated_at: new Date().toISOString()
+        };
+        
+        const { error: snapshotError } = await supabase
+          .from('match_card_snapshot')
+          .upsert(snapshotData, { onConflict: 'match_id' });
+        
+        if (snapshotError) {
+          console.error(`❌ Snapshot update failed for ${eventId}:`, snapshotError.message);
+        } else {
+          console.log(`📸 [${saveType}] Snapshot updated for match ${eventId} (surface=${surface})`);
+        }
+      } catch (snapErr) {
+        console.error(`❌ Snapshot error for ${eventId}:`, snapErr.message);
+      }
+    }
 
     return true;
   } catch (error) {
     console.error(`❌ Error saving match ${eventId}:`, error.message);
     return false;
   }
+}
+
+/**
+ * Calcola la qualità dei dati dalla completeness
+ */
+function calculateDataQualityFromCompleteness(completeness) {
+  if (!completeness) return 20;
+  
+  let score = 0;
+  if (completeness.event) score += 30;
+  if (completeness.statistics) score += 20;
+  if (completeness.pointByPoint) score += 20;
+  if (completeness.powerRankings) score += 15;
+  if (completeness.h2h) score += 10;
+  if (completeness.graph) score += 5;
+  
+  return Math.min(100, score);
 }
 
 /**
