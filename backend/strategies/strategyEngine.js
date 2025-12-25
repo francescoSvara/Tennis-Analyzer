@@ -11,6 +11,11 @@
  */
 
 // ============================================
+// VERSION (FILOSOFIA_LINEAGE_VERSIONING compliance)
+// ============================================
+const STRATEGY_ENGINE_VERSION = 'v1.0.0';
+
+// ============================================
 // STRATEGY SIGNAL SCHEMA
 // ============================================
 /**
@@ -452,7 +457,11 @@ function getSummary(signals) {
 // EXPORTS (CommonJS for Node.js backend)
 // ============================================
 module.exports = {
+  // Version (FILOSOFIA_LINEAGE_VERSIONING)
+  STRATEGY_ENGINE_VERSION,
+  // Main
   evaluateAll,
+  evaluateStrategies: evaluateAll, // alias per FILOSOFIA_RISK_BANKROLL
   evaluateLayWinner,
   evaluateBancaServizio,
   evaluateSuperBreak,

@@ -1,142 +1,13 @@
 {
-  "timestamp": "2025-12-25T09:32:28.475Z",
+  "timestamp": "2025-12-25T09:42:44.634Z",
   "mode": "full",
-  "duration_ms": 177,
+  "duration_ms": 206,
   "summary": {
-    "errors": 12,
-    "warns": 10,
+    "errors": 0,
+    "warns": 8,
     "infos": 30
   },
   "findings": [
-    {
-      "severity": "ERROR",
-      "ruleId": "LIN-001",
-      "file": "backend/utils/featureEngine.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "featureEngine.js deve esportare FEATURE_ENGINE_VERSION",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: (FEATURE_ENGINE_VERSION|VERSION)\\s*[=:]\\s*['\"]v",
-      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 1.2"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "LIN-002",
-      "file": "backend/strategies/strategyEngine.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "strategyEngine.js deve esportare STRATEGY_ENGINE_VERSION",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: (STRATEGY_ENGINE_VERSION|VERSION)\\s*[=:]\\s*['\"]v",
-      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 1.4"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "LIN-003",
-      "file": "backend/server.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "Bundle endpoint deve avere meta.versions con bundle_schema, features, strategies",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: meta:\\s*\\{[^}]*versions:\\s*\\{[^}]*(bundle_schema|features|strategies)",
-      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 3"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "REG-001",
-      "file": "data/mappings/players.json",
-      "line": 0,
-      "domain": "architecture",
-      "message": "Registry Canon: mappings/players.json deve esistere per normalizzazione nomi",
-      "match": "FILE_MISSING",
-      "remediation": "Creare il file data/mappings/players.json",
-      "reference": "FILOSOFIA_REGISTRY_CANON.md sezione 1 - Player Registry"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "DB-002",
-      "file": "backend/db/matchRepository.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "matchRepository deve esportare getMatchBundle",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: getMatchBundle|getBundle|fetchBundle",
-      "reference": "FILOSOFIA_DB.md sezione 2 - Bundle Repository"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "RISK-002",
-      "file": "backend/services/riskEngine.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "File non trovato: backend/services/riskEngine.js",
-      "match": "FILE_MISSING",
-      "remediation": "Verificare esistenza di backend/services/riskEngine.js"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "RISK-003",
-      "file": "backend/services/riskEngine.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "File non trovato: backend/services/riskEngine.js",
-      "match": "FILE_MISSING",
-      "remediation": "Verificare esistenza di backend/services/riskEngine.js"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "RISK-004",
-      "file": "backend/services/riskEngine.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "File non trovato: backend/services/riskEngine.js",
-      "match": "FILE_MISSING",
-      "remediation": "Verificare esistenza di backend/services/riskEngine.js"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "FE-DEEP-001",
-      "file": "backend/utils/pressureCalculator.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "pressureCalculator deve esportare getHoldDifficulty()",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: getHoldDifficulty|module\\.exports[^}]*getHoldDifficulty",
-      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Strategie)"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "FE-DEEP-002",
-      "file": "backend/utils/breakDetector.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "breakDetector deve esportare calculateBreaksFromPbp()",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: calculateBreaksFromPbp|module\\.exports[^}]*calculateBreaksFromPbp",
-      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Overview/PbP)"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "FE-DEEP-003",
-      "file": "backend/liveManager.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "liveManager deve esportare fetchLiveList()",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: fetchLiveList|module\\.exports[^}]*fetchLiveList",
-      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (HOME)"
-    },
-    {
-      "severity": "ERROR",
-      "ruleId": "FE-DEEP-005",
-      "file": "backend/scraper/sofascoreScraper.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "sofascoreScraper deve esportare getPointByPoint()",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: getPointByPoint|module\\.exports[^}]*getPointByPoint",
-      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Point-by-Point)"
-    },
     {
       "severity": "WARN",
       "ruleId": "LIN-004",
@@ -224,27 +95,6 @@
       "match": "PATTERN_MISSING",
       "remediation": "Implementare: adaptivePolling|backoff|pollingInterval|FAST|SLOW|BOOST",
       "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 4 - Polling Adattivo"
-    },
-    {
-      "severity": "WARN",
-      "ruleId": "RISK-001",
-      "file": "backend/services/riskEngine.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "riskEngine deve esistere per decisioni betting",
-      "match": "FILE_MISSING",
-      "remediation": "Creare il file backend/services/riskEngine.js",
-      "reference": "FILOSOFIA_RISK_BANKROLL.md sezione 1 - Risk Engine Layer"
-    },
-    {
-      "severity": "WARN",
-      "ruleId": "RISK-005",
-      "file": "backend/services/riskEngine.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "File non trovato: backend/services/riskEngine.js",
-      "match": "FILE_MISSING",
-      "remediation": "Verificare esistenza di backend/services/riskEngine.js"
     },
     {
       "severity": "INFO",

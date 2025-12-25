@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-12-25T09:32:28.628Z",
+  "timestamp": "2025-12-25T09:42:37.036Z",
   "summary": {
-    "totalChecks": 75,
-    "passed": 47,
-    "failed": 22,
-    "todoItems": 4
+    "totalChecks": 79,
+    "passed": 65,
+    "failed": 9,
+    "todoItems": 3
   },
   "philosophies": {
     "BANKROLL": {
@@ -15,7 +15,7 @@
           "type": "FILE",
           "path": "backend/services/riskEngine.js",
           "description": "Risk layer: edge → stake suggestion",
-          "passed": false,
+          "passed": true,
           "isTodo": true
         },
         {
@@ -27,16 +27,44 @@
         },
         {
           "type": "EXPORT",
+          "file": "backend/services/riskEngine.js",
+          "export": "calculateStake",
+          "passed": true,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/riskEngine.js",
+          "export": "calculateEdge",
+          "passed": true,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/riskEngine.js",
+          "export": "controlExposure",
+          "passed": true,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/riskEngine.js",
+          "export": "kellyFractional",
+          "passed": false,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
           "file": "backend/strategies/strategyEngine.js",
           "export": "evaluateStrategies",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
           "type": "EXPORT",
           "file": "backend/strategies/strategyEngine.js",
           "export": "STRATEGY_ENGINE_VERSION",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
@@ -57,18 +85,6 @@
       ],
       "errors": [
         {
-          "type": "EXPORT_MISSING",
-          "file": "backend/strategies/strategyEngine.js",
-          "export": "evaluateStrategies",
-          "message": "Export richiesto NON TROVATO: backend/strategies/strategyEngine.js → evaluateStrategies()"
-        },
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/strategies/strategyEngine.js",
-          "export": "STRATEGY_ENGINE_VERSION",
-          "message": "Export richiesto NON TROVATO: backend/strategies/strategyEngine.js → STRATEGY_ENGINE_VERSION()"
-        },
-        {
           "type": "PATTERN_MISSING",
           "file": "backend/services/matchCardService.js",
           "pattern": "/risk|stake|edge/i",
@@ -79,10 +95,10 @@
       "warnings": [],
       "todos": [
         {
-          "type": "FILE_MISSING_TODO",
-          "path": "backend/services/riskEngine.js",
-          "description": "Risk layer: edge → stake suggestion",
-          "message": "File dichiarato come TODO: backend/services/riskEngine.js"
+          "type": "EXPORT_MISSING_TODO",
+          "file": "backend/services/riskEngine.js",
+          "export": "kellyFractional",
+          "message": "Export dichiarato come TODO: backend/services/riskEngine.js → kellyFractional"
         },
         {
           "type": "TABLE_MISSING_TODO",
@@ -128,7 +144,7 @@
           "type": "EXPORT",
           "file": "backend/utils/featureEngine.js",
           "export": "FEATURE_ENGINE_VERSION",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
@@ -157,12 +173,6 @@
         }
       ],
       "errors": [
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/utils/featureEngine.js",
-          "export": "FEATURE_ENGINE_VERSION",
-          "message": "Export richiesto NON TROVATO: backend/utils/featureEngine.js → FEATURE_ENGINE_VERSION()"
-        },
         {
           "type": "PATTERN_MISSING",
           "file": "backend/liveManager.js",
@@ -203,21 +213,21 @@
           "type": "FILE",
           "path": "data/mappings/players.json",
           "description": "Registry alias mapping per player names",
-          "passed": false,
+          "passed": true,
           "isTodo": true
         },
         {
           "type": "EXPORT",
           "file": "backend/services/dataNormalizer.js",
           "export": "normalizeName",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
           "type": "EXPORT",
           "file": "backend/services/dataNormalizer.js",
           "export": "resolvePlayerId",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
@@ -245,29 +255,9 @@
           "isTodo": false
         }
       ],
-      "errors": [
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/services/dataNormalizer.js",
-          "export": "normalizeName",
-          "message": "Export richiesto NON TROVATO: backend/services/dataNormalizer.js → normalizeName()"
-        },
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/services/dataNormalizer.js",
-          "export": "resolvePlayerId",
-          "message": "Export richiesto NON TROVATO: backend/services/dataNormalizer.js → resolvePlayerId()"
-        }
-      ],
+      "errors": [],
       "warnings": [],
-      "todos": [
-        {
-          "type": "FILE_MISSING_TODO",
-          "path": "data/mappings/players.json",
-          "description": "Registry alias mapping per player names",
-          "message": "File dichiarato come TODO: data/mappings/players.json"
-        }
-      ]
+      "todos": []
     },
     "LINEAGE": {
       "name": "FILOSOFIA_LINEAGE_VERSIONING",
@@ -298,14 +288,14 @@
           "type": "EXPORT",
           "file": "backend/utils/featureEngine.js",
           "export": "FEATURE_ENGINE_VERSION",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
           "type": "EXPORT",
           "file": "backend/strategies/strategyEngine.js",
           "export": "STRATEGY_ENGINE_VERSION",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
@@ -326,18 +316,6 @@
         }
       ],
       "errors": [
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/utils/featureEngine.js",
-          "export": "FEATURE_ENGINE_VERSION",
-          "message": "Export richiesto NON TROVATO: backend/utils/featureEngine.js → FEATURE_ENGINE_VERSION()"
-        },
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/strategies/strategyEngine.js",
-          "export": "STRATEGY_ENGINE_VERSION",
-          "message": "Export richiesto NON TROVATO: backend/strategies/strategyEngine.js → STRATEGY_ENGINE_VERSION()"
-        },
         {
           "type": "PATTERN_MISSING",
           "file": "backend/services/matchCardService.js",
@@ -498,21 +476,21 @@
           "type": "EXPORT",
           "file": "backend/db/liveTrackingRepository.js",
           "export": "getLatestSnapshot",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
           "type": "EXPORT",
           "file": "backend/liveManager.js",
           "export": "startTracking",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
           "type": "EXPORT",
           "file": "backend/liveManager.js",
           "export": "stopTracking",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
@@ -539,24 +517,6 @@
         }
       ],
       "errors": [
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/db/liveTrackingRepository.js",
-          "export": "getLatestSnapshot",
-          "message": "Export richiesto NON TROVATO: backend/db/liveTrackingRepository.js → getLatestSnapshot()"
-        },
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/liveManager.js",
-          "export": "startTracking",
-          "message": "Export richiesto NON TROVATO: backend/liveManager.js → startTracking()"
-        },
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/liveManager.js",
-          "export": "stopTracking",
-          "message": "Export richiesto NON TROVATO: backend/liveManager.js → stopTracking()"
-        },
         {
           "type": "PATTERN_MISSING",
           "file": "backend/db/liveTrackingRepository.js",
@@ -632,7 +592,7 @@
           "type": "EXPORT",
           "file": "backend/services/playerStatsService.js",
           "export": "calculateH2H",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
@@ -644,14 +604,7 @@
           "antiPattern": false
         }
       ],
-      "errors": [
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/services/playerStatsService.js",
-          "export": "calculateH2H",
-          "message": "Export richiesto NON TROVATO: backend/services/playerStatsService.js → calculateH2H()"
-        }
-      ],
+      "errors": [],
       "warnings": [],
       "todos": []
     },
@@ -723,14 +676,14 @@
           "type": "EXPORT",
           "file": "backend/db/matchRepository.js",
           "export": "saveMatch",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
           "type": "EXPORT",
           "file": "backend/db/matchRepository.js",
           "export": "getMatchBundle",
-          "passed": false,
+          "passed": true,
           "isTodo": false
         },
         {
@@ -774,20 +727,7 @@
           "isTodo": false
         }
       ],
-      "errors": [
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/db/matchRepository.js",
-          "export": "saveMatch",
-          "message": "Export richiesto NON TROVATO: backend/db/matchRepository.js → saveMatch()"
-        },
-        {
-          "type": "EXPORT_MISSING",
-          "file": "backend/db/matchRepository.js",
-          "export": "getMatchBundle",
-          "message": "Export richiesto NON TROVATO: backend/db/matchRepository.js → getMatchBundle()"
-        }
-      ],
+      "errors": [],
       "warnings": [],
       "todos": []
     },

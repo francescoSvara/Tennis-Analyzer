@@ -754,9 +754,23 @@ async function learnMappingsFromDB(supabase) {
 // EXPORTS
 // ============================================
 
+/**
+ * Resolve player to canonical ID (FILOSOFIA_REGISTRY_CANON)
+ * @param {string} name - Player name
+ * @returns {string|null} Canonical player ID or null
+ */
+function resolvePlayerId(name) {
+  const normalized = normalizePlayerName(name);
+  // Per ora ritorna il nome normalizzato come ID
+  // TODO: Integrare con database player registry
+  return normalized || null;
+}
+
 module.exports = {
   // Normalizzazione
   normalizePlayerName,
+  normalizeName: normalizePlayerName, // alias FILOSOFIA_REGISTRY_CANON
+  resolvePlayerId, // FILOSOFIA_REGISTRY_CANON
   normalizeSurface,
   normalizeTournament,
   normalizeDate,

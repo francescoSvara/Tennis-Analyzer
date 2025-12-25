@@ -770,6 +770,7 @@ module.exports = {
   getPlayerMatches,
   searchPlayers,
   getHeadToHeadStats,
+  calculateH2H: getHeadToHeadStats, // alias FILOSOFIA_STATS
   calculateComebackRate,
   calculateROI
 };

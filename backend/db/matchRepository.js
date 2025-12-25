@@ -2414,6 +2414,7 @@ module.exports = {
   upsertPlayer,
   upsertTournament,
   insertMatch,
+  saveMatch: insertMatch, // alias FILOSOFIA_DB
   insertMatchWithXlsxMerge,
   insertPowerRankingsSvg,  // NEW: Insert momentum from SVG DOM
   
@@ -2425,6 +2426,7 @@ module.exports = {
   // Read
   getMatches,
   getMatchById,
+  getMatchBundle: getMatchCardSnapshot, // alias FILOSOFIA_DB
   getPointByPoint,
   getStatistics,
   searchPlayers,

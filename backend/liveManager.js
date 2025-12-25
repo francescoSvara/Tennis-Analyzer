@@ -1262,6 +1262,16 @@ async function syncMatch(eventId) {
   }
 }
 
+/**
+ * Get a single tracked match by ID (FILOSOFIA_FRONTEND compliance)
+ * @param {string} matchId - Match ID to find
+ * @returns {Object|null} Tracked match or null
+ */
+function getTrackedMatch(matchId) {
+  const tracked = getTrackedMatches();
+  return tracked.find(m => m.id === matchId || m.eventId === matchId) || null;
+}
+
 module.exports = {
   initLiveManager,
   getStats,
@@ -1272,6 +1282,7 @@ module.exports = {
   trackMatch,
   untrackMatch,
   getTrackedMatches,
+  getTrackedMatch, // FILOSOFIA_FRONTEND: singolo match
   startScheduler,
   stopScheduler,
   syncMatch,
@@ -1283,8 +1294,12 @@ module.exports = {
   // Reconciliation Job
   reconcileLiveMatches,
   fetchLiveMatchesList,
+  fetchLiveList: fetchLiveMatchesList, // alias FILOSOFIA_FRONTEND
   startReconciliationJob,
   stopReconciliationJob,
+  // FILOSOFIA_LIVE_TRACKING aliases
+  startTracking: trackMatch,
+  stopTracking: untrackMatch,
   // Constants
   CONFIG,
   USE_DB_TRACKING

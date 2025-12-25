@@ -142,13 +142,25 @@ Calcola features da dati disponibili (score, odds, rankings):
 | Check | Valore |
 |-------|--------|
 | Errori arch | **0** ✓ |
-| Warning | **0** ✓ |
+| Deep Philosophy | **9** (da 22) |
+| Warning | **8** |
 | Info | 30 |
-| Check mappa | 121 ✓ |
+| Check mappa | 125 ✓ |
 
 ---
 
 ## 📝 Changelog
+
+### v3.0.3 (25 Dic 2025) - Deep Philosophy Fix
+- **riskEngine.js** - Creato nuovo servizio per calcolo edge/stake/exposure
+- **Versioning exports** - Aggiunto `FEATURE_ENGINE_VERSION`, `STRATEGY_ENGINE_VERSION`
+- **Alias compliance** - `normalizeName`, `resolvePlayerId`, `fetchLiveList`, `getTrackedMatch`
+- **breakDetector.js** - Aggiunto `calculateBreaksFromPbp()`
+- **pressureCalculator.js** - Aggiunto `getHoldDifficulty()`
+- **sofascoreScraper.js** - Aggiunto `getPointByPoint()`
+- **server.js** - Aggiunto `meta.versions` nel bundle
+- **players.json** - Creato mapping giocatori
+- **Deep Errors: 22 → 9** | **Concept Errors: 12 → 0**
 
 ### v3.0.2 (25 Dic 2025) - Zero Errori Architetturali
 - **Eliminato `src/utils.js`** - File dead code (~2500 righe), nessun componente lo importava

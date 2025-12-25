@@ -670,4 +670,15 @@ async function runDirectFetch(url) {
   return id;
 }
 
-module.exports = { runScraper, getData, getStatus, runDirectFetch, directFetch };
+/**
+ * Get point-by-point data for an event (FILOSOFIA_FRONTEND compliance)
+ * @param {string|number} eventId - SofaScore event ID
+ * @returns {Promise<Object>} Point-by-point incidents data
+ */
+async function getPointByPoint(eventId) {
+  const url = `https://api.sofascore.com/api/v1/event/${eventId}/incidents`;
+  const result = await directFetch(url);
+  return result.body;
+}
+
+module.exports = { runScraper, getData, getStatus, runDirectFetch, directFetch, getPointByPoint };

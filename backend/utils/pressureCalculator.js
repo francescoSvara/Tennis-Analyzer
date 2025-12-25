@@ -621,9 +621,25 @@ function generateComparativeInsight(p1, p2, diff) {
 // EXPORTS
 // ============================================================================
 
+/**
+ * Get hold difficulty based on pressure index (FILOSOFIA_FRONTEND compliance)
+ * @param {Object} stats - Player statistics
+ * @param {Object} context - Match context (score, set, etc.)
+ * @returns {'HIGH'|'MED'|'LOW'} Hold difficulty level
+ */
+function getHoldDifficulty(stats, context = {}) {
+  const pressure = calculatePressureIndex(stats, context);
+  if (pressure > 70) return 'HIGH';
+  if (pressure > 40) return 'MED';
+  return 'LOW';
+}
+
 module.exports = {
   // Main function
   calculatePressureIndex,
+  
+  // Hold difficulty (FILOSOFIA_FRONTEND)
+  getHoldDifficulty,
   
   // Comparison
   comparePressure,

@@ -461,6 +461,54 @@ function calculateBreakEfficiency(breakPointsWon, breakPointsTotal) {
 }
 
 // ============================================================================
+// CALCULATE BREAKS FROM POINT-BY-POINT (FILOSOFIA_FRONTEND compliance)
+// ============================================================================
+
+/**
+ * Calculate breaks from point-by-point data
+ * Moved from server.js for modularity (FILOSOFIA_FRONTEND)
+ * 
+ * @param {Array} pointByPoint - Array di set con games e points
+ * @returns {Map} Mappa "set-game" -> boolean (true se break)
+ */
+function calculateBreaksFromPbp(pointByPoint) {
+  const breakMap = new Map();
+  
+  if (!pointByPoint || !Array.isArray(pointByPoint)) {
+    return breakMap;
+  }
+  
+  for (const setData of pointByPoint) {
+    const setNumber = setData.set || 1;
+    
+    for (const gameData of (setData.games || [])) {
+      const gameNumber = gameData.game || 1;
+      const key = `${setNumber}-${gameNumber}`;
+      
+      // game.score contiene {serving, scoring, homeScore, awayScore}
+      const score = gameData.score;
+      if (score && score.serving !== undefined && score.scoring !== undefined) {
+        // scoring=-1 significa game non completato, non è un break
+        if (score.scoring === -1) {
+          breakMap.set(key, false);
+          continue;
+        }
+        
+        // BREAK = serving !== scoring (chi serve perde il game)
+        // serving=1 (home) + scoring=2 (away wins) = BREAK per away
+        // serving=2 (away) + scoring=1 (home wins) = BREAK per home
+        // serving=1 (home) + scoring=1 (home wins) = HOLD
+        // serving=2 (away) + scoring=2 (away wins) = HOLD
+        const isBreak = score.serving !== score.scoring;
+        breakMap.set(key, isBreak);
+      }
+    }
+  }
+  
+  return breakMap;
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -472,6 +520,9 @@ module.exports = {
   // Pattern analysis
   analyzeBreakPatterns,
   classifySet,
+  
+  // Point-by-point (FILOSOFIA_FRONTEND)
+  calculateBreaksFromPbp,
   
   // Utilities
   estimateFirstServer,

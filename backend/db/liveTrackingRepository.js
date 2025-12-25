@@ -540,6 +540,16 @@ async function getTrackingStats() {
 // EXPORTS
 // ============================================================================
 
+/**
+ * Get latest snapshot for a match (FILOSOFIA_LIVE_TRACKING compliance)
+ * @param {string} matchId - Match ID
+ * @returns {Promise<Object|null>} Latest snapshot or null
+ */
+async function getLatestSnapshot(matchId) {
+  const snapshots = await getSnapshots(matchId, 1);
+  return snapshots && snapshots.length > 0 ? snapshots[0] : null;
+}
+
 module.exports = {
   // Constants
   STATUS,
@@ -564,6 +574,7 @@ module.exports = {
   // Snapshots
   saveSnapshot,
   getSnapshots,
+  getLatestSnapshot, // FILOSOFIA_LIVE_TRACKING
   cleanOldSnapshots,
   
   // Stats

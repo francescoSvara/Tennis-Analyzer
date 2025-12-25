@@ -13,6 +13,11 @@
 const { calculatePressureIndex } = require('./pressureCalculator');
 
 // ============================================================================
+// VERSION (FILOSOFIA_LINEAGE_VERSIONING compliance)
+// ============================================================================
+const FEATURE_ENGINE_VERSION = 'v1.0.0';
+
+// ============================================================================
 // FEATURE DEFINITIONS
 // ============================================================================
 
@@ -735,6 +740,9 @@ function calculateMomentumFromScore(score) {
 // ============================================================================
 
 module.exports = {
+  // Version (FILOSOFIA_LINEAGE_VERSIONING)
+  FEATURE_ENGINE_VERSION,
+  // Main
   computeFeatures,
   calculateVolatility,
   calculateDominance,

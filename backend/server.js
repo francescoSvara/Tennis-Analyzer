@@ -3352,7 +3352,13 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
         version: '2.0',
         source: finalMatchData.fromSnapshot ? 'snapshot' : (finalMatchData.fromLegacy ? 'legacy' : 'live'),
         strategiesCount: strategySignals.length,
-        readyStrategies: strategySummary.ready
+        readyStrategies: strategySummary.ready,
+        // FILOSOFIA_LINEAGE_VERSIONING compliance
+        versions: {
+          bundle_schema: '2.0.0',
+          features: require('./utils/featureEngine').FEATURE_ENGINE_VERSION || 'v1.0.0',
+          strategies: require('./strategies/strategyEngine').STRATEGY_ENGINE_VERSION || 'v1.0.0'
+        }
       }
     };
     
