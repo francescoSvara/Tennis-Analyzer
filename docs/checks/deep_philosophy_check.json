@@ -1,0 +1,858 @@
+{
+  "timestamp": "2025-12-25T09:32:28.628Z",
+  "summary": {
+    "totalChecks": 75,
+    "passed": 47,
+    "failed": 22,
+    "todoItems": 4
+  },
+  "philosophies": {
+    "BANKROLL": {
+      "name": "FILOSOFIA_RISK_BANKROLL",
+      "file": "docs/filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/services/riskEngine.js",
+          "description": "Risk layer: edge → stake suggestion",
+          "passed": false,
+          "isTodo": true
+        },
+        {
+          "type": "FILE",
+          "path": "backend/strategies/strategyEngine.js",
+          "description": "Strategy signals: produce edge + confidence",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/strategies/strategyEngine.js",
+          "export": "evaluateStrategies",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/strategies/strategyEngine.js",
+          "export": "STRATEGY_ENGINE_VERSION",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/risk|stake|edge/i",
+          "description": "matchCardService deve integrare risk output nel bundle",
+          "passed": false,
+          "antiPattern": false
+        },
+        {
+          "type": "TABLE",
+          "name": "bet_decisions",
+          "description": "Log delle decisioni di betting",
+          "passed": false,
+          "isTodo": true
+        }
+      ],
+      "errors": [
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/strategies/strategyEngine.js",
+          "export": "evaluateStrategies",
+          "message": "Export richiesto NON TROVATO: backend/strategies/strategyEngine.js → evaluateStrategies()"
+        },
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/strategies/strategyEngine.js",
+          "export": "STRATEGY_ENGINE_VERSION",
+          "message": "Export richiesto NON TROVATO: backend/strategies/strategyEngine.js → STRATEGY_ENGINE_VERSION()"
+        },
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/risk|stake|edge/i",
+          "description": "matchCardService deve integrare risk output nel bundle",
+          "message": "Pattern richiesto NON TROVATO in backend/services/matchCardService.js: matchCardService deve integrare risk output nel bundle"
+        }
+      ],
+      "warnings": [],
+      "todos": [
+        {
+          "type": "FILE_MISSING_TODO",
+          "path": "backend/services/riskEngine.js",
+          "description": "Risk layer: edge → stake suggestion",
+          "message": "File dichiarato come TODO: backend/services/riskEngine.js"
+        },
+        {
+          "type": "TABLE_MISSING_TODO",
+          "name": "bet_decisions",
+          "description": "Log delle decisioni di betting",
+          "message": "Tabella dichiarata come TODO: bet_decisions"
+        }
+      ]
+    },
+    "TEMPORAL": {
+      "name": "FILOSOFIA_TEMPORAL",
+      "file": "docs/filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/liveManager.js",
+          "description": "Live tracking con ingestion_time, event_time",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/services/matchCardService.js",
+          "description": "MatchBundle builder con as_of_time",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/utils/featureEngine.js",
+          "description": "Feature computation con as_of_time",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/featureEngine.js",
+          "export": "computeFeatures",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/featureEngine.js",
+          "export": "FEATURE_ENGINE_VERSION",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/liveManager.js",
+          "pattern": "/ingestion_time|event_time|source_time/i",
+          "description": "liveManager deve usare timestamp semantici (ingestion_time, event_time)",
+          "passed": false,
+          "antiPattern": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/utils/featureEngine.js",
+          "pattern": "/as_of_time|asOfTime/i",
+          "description": "featureEngine deve supportare as_of_time per anti-leakage",
+          "passed": false,
+          "antiPattern": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/as_of_time|asOfTime|generated_at/i",
+          "description": "matchCardService deve includere meta.as_of_time nel bundle",
+          "passed": false,
+          "antiPattern": false
+        }
+      ],
+      "errors": [
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/utils/featureEngine.js",
+          "export": "FEATURE_ENGINE_VERSION",
+          "message": "Export richiesto NON TROVATO: backend/utils/featureEngine.js → FEATURE_ENGINE_VERSION()"
+        },
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/liveManager.js",
+          "pattern": "/ingestion_time|event_time|source_time/i",
+          "description": "liveManager deve usare timestamp semantici (ingestion_time, event_time)",
+          "message": "Pattern richiesto NON TROVATO in backend/liveManager.js: liveManager deve usare timestamp semantici (ingestion_time, event_time)"
+        },
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/utils/featureEngine.js",
+          "pattern": "/as_of_time|asOfTime/i",
+          "description": "featureEngine deve supportare as_of_time per anti-leakage",
+          "message": "Pattern richiesto NON TROVATO in backend/utils/featureEngine.js: featureEngine deve supportare as_of_time per anti-leakage"
+        },
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/as_of_time|asOfTime|generated_at/i",
+          "description": "matchCardService deve includere meta.as_of_time nel bundle",
+          "message": "Pattern richiesto NON TROVATO in backend/services/matchCardService.js: matchCardService deve includere meta.as_of_time nel bundle"
+        }
+      ],
+      "warnings": [],
+      "todos": []
+    },
+    "REGISTRY": {
+      "name": "FILOSOFIA_REGISTRY_CANON",
+      "file": "docs/filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/services/dataNormalizer.js",
+          "description": "Normalizzazione e mapping nomi → canonical IDs",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "data/mappings/players.json",
+          "description": "Registry alias mapping per player names",
+          "passed": false,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/dataNormalizer.js",
+          "export": "normalizeName",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/dataNormalizer.js",
+          "export": "resolvePlayerId",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/services/dataNormalizer.js",
+          "pattern": "/canonical|normalize|alias/i",
+          "description": "dataNormalizer deve avere logica canonical ID",
+          "passed": true,
+          "antiPattern": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/db/matchRepository.js",
+          "pattern": "/player_id|home_player_id|away_player_id/i",
+          "description": "matchRepository deve usare canonical player IDs",
+          "passed": true,
+          "antiPattern": false
+        },
+        {
+          "type": "TABLE",
+          "name": "players",
+          "description": "Tabella players con canonical IDs e name_variants",
+          "passed": true,
+          "migrationFile": "create-new-schema.sql",
+          "isTodo": false
+        }
+      ],
+      "errors": [
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/services/dataNormalizer.js",
+          "export": "normalizeName",
+          "message": "Export richiesto NON TROVATO: backend/services/dataNormalizer.js → normalizeName()"
+        },
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/services/dataNormalizer.js",
+          "export": "resolvePlayerId",
+          "message": "Export richiesto NON TROVATO: backend/services/dataNormalizer.js → resolvePlayerId()"
+        }
+      ],
+      "warnings": [],
+      "todos": [
+        {
+          "type": "FILE_MISSING_TODO",
+          "path": "data/mappings/players.json",
+          "description": "Registry alias mapping per player names",
+          "message": "File dichiarato come TODO: data/mappings/players.json"
+        }
+      ]
+    },
+    "LINEAGE": {
+      "name": "FILOSOFIA_LINEAGE_VERSIONING",
+      "file": "docs/filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/services/matchCardService.js",
+          "description": "MatchBundle builder: aggiungere meta.versions",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/utils/featureEngine.js",
+          "description": "Export FEATURE_ENGINE_VERSION",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/strategies/strategyEngine.js",
+          "description": "Export STRATEGY_ENGINE_VERSION",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/featureEngine.js",
+          "export": "FEATURE_ENGINE_VERSION",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/strategies/strategyEngine.js",
+          "export": "STRATEGY_ENGINE_VERSION",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/meta\\.versions|versions\\s*:|bundle_schema|feature_version|strategy_version/i",
+          "description": "matchCardService deve includere meta.versions nel bundle",
+          "passed": false,
+          "antiPattern": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "src/hooks/useMatchBundle.jsx",
+          "pattern": "/meta\\.versions|\\.meta\\b/i",
+          "description": "useMatchBundle deve esporre meta dal bundle",
+          "passed": false,
+          "antiPattern": false
+        }
+      ],
+      "errors": [
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/utils/featureEngine.js",
+          "export": "FEATURE_ENGINE_VERSION",
+          "message": "Export richiesto NON TROVATO: backend/utils/featureEngine.js → FEATURE_ENGINE_VERSION()"
+        },
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/strategies/strategyEngine.js",
+          "export": "STRATEGY_ENGINE_VERSION",
+          "message": "Export richiesto NON TROVATO: backend/strategies/strategyEngine.js → STRATEGY_ENGINE_VERSION()"
+        },
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/meta\\.versions|versions\\s*:|bundle_schema|feature_version|strategy_version/i",
+          "description": "matchCardService deve includere meta.versions nel bundle",
+          "message": "Pattern richiesto NON TROVATO in backend/services/matchCardService.js: matchCardService deve includere meta.versions nel bundle"
+        },
+        {
+          "type": "PATTERN_MISSING",
+          "file": "src/hooks/useMatchBundle.jsx",
+          "pattern": "/meta\\.versions|\\.meta\\b/i",
+          "description": "useMatchBundle deve esporre meta dal bundle",
+          "message": "Pattern richiesto NON TROVATO in src/hooks/useMatchBundle.jsx: useMatchBundle deve esporre meta dal bundle"
+        }
+      ],
+      "warnings": [],
+      "todos": []
+    },
+    "OBSERVABILITY": {
+      "name": "FILOSOFIA_OBSERVABILITY_DATAQUALITY",
+      "file": "docs/filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/services/dataQualityChecker.js",
+          "description": "Data quality validation: missingness, outliers, staleness",
+          "passed": false,
+          "isTodo": true
+        },
+        {
+          "type": "FILE",
+          "path": "backend/utils/logger.js",
+          "description": "Structured logging",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/logger.js",
+          "export": "logger",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/logger.js",
+          "export": "createLogger",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/dataQuality|data_quality|quality_score/i",
+          "description": "matchCardService deve includere dataQuality nel bundle",
+          "passed": true,
+          "antiPattern": false
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "todos": [
+        {
+          "type": "FILE_MISSING_TODO",
+          "path": "backend/services/dataQualityChecker.js",
+          "description": "Data quality validation: missingness, outliers, staleness",
+          "message": "File dichiarato come TODO: backend/services/dataQualityChecker.js"
+        }
+      ]
+    },
+    "ODDS": {
+      "name": "FILOSOFIA_ODDS",
+      "file": "docs/filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/services/matchCardService.js",
+          "description": "Include odds nel bundle",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/services/matchCardService.js",
+          "pattern": "/odds|implied_prob|closing_line/i",
+          "description": "matchCardService deve gestire odds nel bundle",
+          "passed": true,
+          "antiPattern": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/server.js",
+          "pattern": "/event_time.*odds|odds.*timestamp|ingestion_time/i",
+          "description": "Odds devono avere timestamp per tracciare movimento",
+          "passed": false,
+          "antiPattern": false
+        },
+        {
+          "type": "TABLE",
+          "name": "match_odds_new",
+          "description": "Tabella odds con event_time per ogni tick",
+          "passed": false,
+          "isTodo": false
+        }
+      ],
+      "errors": [
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/server.js",
+          "pattern": "/event_time.*odds|odds.*timestamp|ingestion_time/i",
+          "description": "Odds devono avere timestamp per tracciare movimento",
+          "message": "Pattern richiesto NON TROVATO in backend/server.js: Odds devono avere timestamp per tracciare movimento"
+        }
+      ],
+      "warnings": [
+        {
+          "type": "TABLE_NOT_IN_MIGRATION",
+          "name": "match_odds_new",
+          "description": "Tabella odds con event_time per ogni tick",
+          "message": "Tabella non trovata in migrations: match_odds_new (potrebbe esistere in Supabase)"
+        }
+      ],
+      "todos": []
+    },
+    "LIVE": {
+      "name": "FILOSOFIA_LIVE_TRACKING",
+      "file": "docs/filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/liveManager.js",
+          "description": "Gestione tracking live matches",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/db/liveTrackingRepository.js",
+          "description": "Repository per live snapshots",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/db/liveTrackingRepository.js",
+          "export": "saveSnapshot",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/db/liveTrackingRepository.js",
+          "export": "getSnapshots",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/db/liveTrackingRepository.js",
+          "export": "getLatestSnapshot",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/liveManager.js",
+          "export": "startTracking",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/liveManager.js",
+          "export": "stopTracking",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/liveManager.js",
+          "export": "getTrackedMatches",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/db/liveTrackingRepository.js",
+          "pattern": "/snapshot_time|snapshotTime|event_time/i",
+          "description": "liveTrackingRepository deve usare snapshotTime per i dati live",
+          "passed": false,
+          "antiPattern": false
+        },
+        {
+          "type": "TABLE",
+          "name": "live_tracking_snapshots",
+          "description": "Tabella per live snapshots con timestamp",
+          "passed": false,
+          "isTodo": false
+        }
+      ],
+      "errors": [
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/db/liveTrackingRepository.js",
+          "export": "getLatestSnapshot",
+          "message": "Export richiesto NON TROVATO: backend/db/liveTrackingRepository.js → getLatestSnapshot()"
+        },
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/liveManager.js",
+          "export": "startTracking",
+          "message": "Export richiesto NON TROVATO: backend/liveManager.js → startTracking()"
+        },
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/liveManager.js",
+          "export": "stopTracking",
+          "message": "Export richiesto NON TROVATO: backend/liveManager.js → stopTracking()"
+        },
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/db/liveTrackingRepository.js",
+          "pattern": "/snapshot_time|snapshotTime|event_time/i",
+          "description": "liveTrackingRepository deve usare snapshotTime per i dati live",
+          "message": "Pattern richiesto NON TROVATO in backend/db/liveTrackingRepository.js: liveTrackingRepository deve usare snapshotTime per i dati live"
+        }
+      ],
+      "warnings": [
+        {
+          "type": "TABLE_NOT_IN_MIGRATION",
+          "name": "live_tracking_snapshots",
+          "description": "Tabella per live snapshots con timestamp",
+          "message": "Tabella non trovata in migrations: live_tracking_snapshots (potrebbe esistere in Supabase)"
+        }
+      ],
+      "todos": []
+    },
+    "STATS": {
+      "name": "FILOSOFIA_STATS",
+      "file": "docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/utils/featureEngine.js",
+          "description": "Calcolo features: volatility, pressure, dominance",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/services/playerStatsService.js",
+          "description": "Stats aggregate per player",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/featureEngine.js",
+          "export": "computeFeatures",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/featureEngine.js",
+          "export": "calculateVolatility",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/featureEngine.js",
+          "export": "calculatePressure",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/utils/featureEngine.js",
+          "export": "calculateDominance",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/playerStatsService.js",
+          "export": "getPlayerStats",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/playerStatsService.js",
+          "export": "calculateH2H",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/utils/featureEngine.js",
+          "pattern": "/volatility|pressure|dominance/i",
+          "description": "featureEngine deve calcolare volatility, pressure, dominance",
+          "passed": true,
+          "antiPattern": false
+        }
+      ],
+      "errors": [
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/services/playerStatsService.js",
+          "export": "calculateH2H",
+          "message": "Export richiesto NON TROVATO: backend/services/playerStatsService.js → calculateH2H()"
+        }
+      ],
+      "warnings": [],
+      "todos": []
+    },
+    "CALCOLI": {
+      "name": "FILOSOFIA_CALCOLI",
+      "file": "docs/filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md",
+      "checks": [
+        {
+          "type": "PATTERN",
+          "file": "backend/utils/featureEngine.js",
+          "pattern": "/null.*return|return.*null|!=\\s*null|\\?\\?/i",
+          "description": "featureEngine: MAI restituire null, sempre fallback calcolato",
+          "passed": false,
+          "antiPattern": true
+        }
+      ],
+      "errors": [
+        {
+          "type": "ANTIPATTERN_FOUND",
+          "file": "backend/utils/featureEngine.js",
+          "pattern": "/null.*return|return.*null|!=\\s*null|\\?\\?/i",
+          "description": "featureEngine: MAI restituire null, sempre fallback calcolato",
+          "message": "Anti-pattern trovato in backend/utils/featureEngine.js: featureEngine: MAI restituire null, sempre fallback calcolato"
+        }
+      ],
+      "warnings": [],
+      "todos": []
+    },
+    "DB": {
+      "name": "FILOSOFIA_DB",
+      "file": "docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "backend/db/matchRepository.js",
+          "description": "CRUD matches_new",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/db/supabase.js",
+          "description": "Client Supabase",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "backend/server.js",
+          "description": "Bundle endpoint /api/match/:id/bundle",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/db/matchRepository.js",
+          "export": "getMatches",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/db/matchRepository.js",
+          "export": "getMatchById",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/db/matchRepository.js",
+          "export": "saveMatch",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/db/matchRepository.js",
+          "export": "getMatchBundle",
+          "passed": false,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/server.js",
+          "pattern": "/\\/api\\/match\\/:.*\\/bundle|getMatchBundle/i",
+          "description": "server.js deve avere endpoint /api/match/:id/bundle",
+          "passed": true,
+          "antiPattern": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "backend/server.js",
+          "pattern": "/transformLegacyMatchToBundle|legacy.*fallback/i",
+          "description": "server.js deve avere fallback legacy per match XLSX",
+          "passed": true,
+          "antiPattern": false
+        },
+        {
+          "type": "TABLE",
+          "name": "matches",
+          "description": "Tabella legacy con winner_name, loser_name",
+          "passed": true,
+          "migrationFile": "create-new-schema.sql",
+          "isTodo": false
+        },
+        {
+          "type": "TABLE",
+          "name": "matches_new",
+          "description": "Tabella nuova con home_player_id, away_player_id",
+          "passed": true,
+          "migrationFile": "create-new-schema.sql",
+          "isTodo": false
+        },
+        {
+          "type": "TABLE",
+          "name": "match_card_snapshot",
+          "description": "Cache per MatchBundle",
+          "passed": true,
+          "migrationFile": "add-snapshot-queue-tables.sql",
+          "isTodo": false
+        }
+      ],
+      "errors": [
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/db/matchRepository.js",
+          "export": "saveMatch",
+          "message": "Export richiesto NON TROVATO: backend/db/matchRepository.js → saveMatch()"
+        },
+        {
+          "type": "EXPORT_MISSING",
+          "file": "backend/db/matchRepository.js",
+          "export": "getMatchBundle",
+          "message": "Export richiesto NON TROVATO: backend/db/matchRepository.js → getMatchBundle()"
+        }
+      ],
+      "warnings": [],
+      "todos": []
+    },
+    "FRONTEND": {
+      "name": "FILOSOFIA_FRONTEND",
+      "file": "docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md",
+      "checks": [
+        {
+          "type": "FILE",
+          "path": "src/hooks/useMatchBundle.jsx",
+          "description": "Hook consumo bundle",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "FILE",
+          "path": "src/components/match/MatchPage.jsx",
+          "description": "Container tabs",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "src/hooks/useMatchBundle.jsx",
+          "export": "useMatchBundle",
+          "passed": true,
+          "isTodo": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "src/hooks/useMatchBundle.jsx",
+          "pattern": "/\\/api\\/match\\/.*\\/bundle|getMatchBundle/i",
+          "description": "useMatchBundle deve chiamare endpoint bundle",
+          "passed": true,
+          "antiPattern": false
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "todos": []
+    },
+    "FRONTEND_DATA": {
+      "name": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION",
+      "file": "docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md",
+      "checks": [
+        {
+          "type": "PATTERN",
+          "file": "src/components/match/MatchPage.jsx",
+          "pattern": "/useMatchBundle/i",
+          "description": "MatchPage deve usare useMatchBundle",
+          "passed": true,
+          "antiPattern": false
+        },
+        {
+          "type": "PATTERN",
+          "file": "src/App.jsx",
+          "pattern": "/useMatchBundle|MatchPage/i",
+          "description": "App.jsx deve importare useMatchBundle o MatchPage",
+          "passed": true,
+          "antiPattern": false
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "todos": []
+    }
+  }
+}

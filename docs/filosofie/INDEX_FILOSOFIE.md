@@ -2,11 +2,32 @@
 
 > **Ultimo aggiornamento**: 25 Dicembre 2025  
 > **Stato**: ATTIVO – Source of Truth per navigazione documentale  
-> **Integra**: `MAPPA_RETE_CONCETTUALE_V2.md`
+> **Integra**: `MAPPA_RETE_CONCETTUALE_V2.md`  
+> **Novità**: 57 check automatizzati per TUTTE le filosofie (`rules.v2.json`)
 
 ---
 
-## � STRUTTURA CODICE RAPIDA
+## 🛡️ CI GUARDRAILS RAPIDI
+
+```bash
+# Verifica conformità a TUTTE le filosofie (57 regole)
+node scripts/runConceptChecks.js
+
+# Verifica esistenza file documentati  
+node scripts/checkConceptualMap.js
+
+# Verifica funzioni/export vs filosofie (deep check)
+node scripts/deepPhilosophyCheck.js
+
+# Report unificato (esegue tutti)
+node scripts/generateTodoReport.js
+```
+
+**Stato attuale**: 🔴 12 errori, 🟡 10 warning, 📋 22 deep errors (vedi [TODO_LIST](../TODO_LIST.md))
+
+---
+
+## 📂 STRUTTURA CODICE RAPIDA
 
 ```
 React-Betfair/
@@ -300,15 +321,22 @@ node scripts/generateTodoReport.js
 
 ### ⚠️ Regole Non Negoziabili
 
-| ID | Regola | Livello |
-|----|--------|---------|
-| `BUNDLE_ENDPOINT` | Endpoint /api/match/:id/bundle deve esistere | ERROR |
-| `USE_MATCH_BUNDLE_HOOK` | Hook useMatchBundle.jsx obbligatorio | ERROR |
-| `STRATEGY_ENGINE_IMPLEMENTED` | evaluateAll() in strategyEngine.js | ERROR |
-| `FEATURE_ENGINE_IMPLEMENTED` | computeFeatures() in featureEngine.js | ERROR |
-| `PHILOSOPHY_FOLDER_STRUCTURE` | Filosofie nella cartella corretta | ERROR |
-| `STRATEGY_IN_FRONTEND` | No strategie nel frontend | WARN (migrazione) |
-| `DATA_COMPLETENESS_FRONTEND` | No DataCompleteness nel frontend | WARN (migrazione) |
+> **Versione**: V2.2 - 25 Dicembre 2025 - Check automatizzati per TUTTE le filosofie
+
+| ID | Regola | Livello | Filosofia |
+|----|--------|---------|-----------|
+| `BUNDLE_ENDPOINT` | Endpoint /api/match/:id/bundle deve esistere | ERROR | DB |
+| `USE_MATCH_BUNDLE_HOOK` | Hook useMatchBundle.jsx obbligatorio | ERROR | FRONTEND_DATA |
+| `STRATEGY_ENGINE_IMPLEMENTED` | evaluateAll() in strategyEngine.js | ERROR | STATS |
+| `FEATURE_ENGINE_IMPLEMENTED` | computeFeatures() in featureEngine.js | ERROR | STATS |
+| `LIN-001` to `LIN-005` | Versioning in moduli e bundle | ERROR/WARN | LINEAGE_VERSIONING |
+| `REG-001` | players.json mapping deve esistere | ERROR | REGISTRY_CANON |
+| `CALC-001`, `CALC-003` | Feature Engine MAI NULL/UNDEFINED | ERROR | CALCOLI |
+| `DB-002` | matchRepository.getMatchBundle | ERROR | DB |
+| `TEMP-001`, `TEMP-002` | event_time nei repository | WARN | TEMPORAL |
+| `OBS-001` | dataQuality nel bundle | ERROR | OBSERVABILITY |
+
+**Totale Check Automatizzati**: 28 (in `rules.v2.json`)
 
 ---
 

@@ -10,7 +10,45 @@ Questa è la **Costituzione tecnica** del progetto Tennis.
 
 Il progetto è progettato per **crescere come un’azienda tecnologica di grandi dimensioni**, ma con **terminologia e responsabilità da software system**, non astratte.
 
-*Ultimo aggiornamento: 24 Dicembre 2025*
+*Ultimo aggiornamento: 25 Dicembre 2025*
+
+---
+
+## ⛔ REGOLA ASSOLUTA – INTEGRITÀ FILOSOFIE
+
+> **L'AI NON PUÒ MAI modificare i documenti filosofia di propria iniziativa.**
+
+### Regola vincolante
+
+| Azione | Permesso |
+|--------|----------|
+| Modificare filosofie autonomamente | ❌ **VIETATO** |
+| Modificare filosofie su richiesta esplicita dell'utente | ✅ Permesso |
+| Proporre modifiche e chiedere permesso | ✅ Permesso |
+| Segnalare incongruenze in TODO_LIST | ✅ Obbligatorio |
+
+### Flusso corretto
+
+```
+FILOSOFIE (specifica) → CHECK → TODO_LIST (errori) → FIX CODICE
+                                                      ↓
+                                               NON le filosofie!
+```
+
+**Le filosofie dichiarano cosa DEVE esistere.**  
+**Il codice si adatta alle filosofie, MAI il contrario.**
+
+Se l'AI trova che una funzione dichiarata in una filosofia non esiste nel codice:
+1. ✅ Segnala in TODO_LIST come "da implementare"
+2. ✅ Propone il fix del codice
+3. ❌ **NON modifica la filosofia per riflettere il codice esistente**
+
+### Eccezioni
+
+L'AI può modificare filosofie SOLO se:
+1. L'utente lo chiede **esplicitamente** ("modifica la filosofia X")
+2. L'AI chiede permesso e l'utente conferma
+3. Si tratta di correggere errori di battitura o link rotti (non contenuto)
 
 ---
 

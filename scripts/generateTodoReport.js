@@ -31,6 +31,7 @@ function runAllChecks() {
   const results = {
     checkConceptualMap: null,
     runConceptChecks: null,
+    deepPhilosophyCheck: null,
     timestamp: new Date().toISOString()
   };
   
@@ -69,6 +70,26 @@ function runAllChecks() {
     console.log('\n⚠️ rules.v2.json non trovato, skip runConceptChecks.js');
   }
   
+  // 3. Esegui deepPhilosophyCheck.js
+  const deepCheckScript = path.join(ROOT_DIR, 'scripts', 'deepPhilosophyCheck.js');
+  if (fs.existsSync(deepCheckScript)) {
+    console.log('\n📋 Esecuzione deepPhilosophyCheck.js...');
+    try {
+      const output = execSync('node scripts/deepPhilosophyCheck.js', { 
+        cwd: ROOT_DIR, 
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      console.log('   ✅ deepPhilosophyCheck.js completato');
+      results.deepPhilosophyCheck = { success: true, output };
+    } catch (err) {
+      console.log('   ⚠️ deepPhilosophyCheck.js completato con errori');
+      results.deepPhilosophyCheck = { success: false, error: err.message };
+    }
+  } else {
+    console.log('\n⚠️ deepPhilosophyCheck.js non trovato');
+  }
+  
   return results;
 }
 
@@ -88,11 +109,19 @@ function generateSummary(results) {
   if (results.runConceptChecks) {
     console.log('   - docs/checks/report.md');
     console.log('   - docs/checks/report.json');
+    console.log('   - docs/TODO_LIST.md (sezione Problemi Architetturali)');
+  }
+  
+  if (results.deepPhilosophyCheck) {
+    console.log('   - docs/checks/DEEP_PHILOSOPHY_CHECK.md');
+    console.log('   - docs/checks/deep_philosophy_check.json');
+    console.log('   - docs/TODO_LIST.md (sezione Deep Philosophy)');
   }
   
   console.log('\n🛠️ Comandi per verifiche manuali:');
-  console.log('   node scripts/checkConceptualMap.js');
-  console.log('   node scripts/runConceptChecks.js');
+  console.log('   node scripts/checkConceptualMap.js      # Verifica esistenza file');
+  console.log('   node scripts/runConceptChecks.js        # Verifica pattern architetturali');
+  console.log('   node scripts/deepPhilosophyCheck.js     # Verifica funzioni vs filosofie');
   console.log('   node scripts/cleanDuplicates.js --dry-run');
   
   console.log('\n═══════════════════════════════════════════════════════════\n');

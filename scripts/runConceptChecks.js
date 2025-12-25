@@ -493,7 +493,6 @@ function updateTodoList(findings) {
 
   if (errors.length === 0 && warns.length === 0) {
     section += `✅ **Nessun problema architetturale rilevato**
-
 `;
   } else {
     if (errors.length > 0) {
@@ -513,22 +512,33 @@ function updateTodoList(findings) {
       for (const w of warns) {
         section += `- [ ] **${w.ruleId}** - \`${w.file}:${w.line}\` - ${w.message}\n`;
       }
-      section += '\n';
     }
   }
   
-  // Trova e sostituisci sezione esistente o aggiungi dopo "Problemi Check Mappa"
-  const archSectionRegex = /## 🏗️ Problemi Architetturali.*?(?=\n## |\n---|\Z)/s;
+  // Aggiorna SOLO la sezione auto-generata, fermandosi prima della prossima sezione o fine file
+  // Match: dalla intestazione fino a (escludendo): prossimo ## oppure ---\n\n## oppure fine
+  const archSectionRegex = /## 🏗️ Problemi Architetturali \(Auto-generato\)[\s\S]*?(?=\n---\n\n## |\n## [^🏗️]|$)/;
   
   if (archSectionRegex.test(content)) {
-    content = content.replace(archSectionRegex, section);
+    content = content.replace(archSectionRegex, section.trim());
   } else {
-    // Aggiungi dopo la sezione "Problemi Check Mappa" se esiste
-    const insertPoint = content.indexOf('## 📋 TODO Attivi');
-    if (insertPoint !== -1) {
-      content = content.slice(0, insertPoint) + section + content.slice(insertPoint);
+    // Cerca il punto giusto dove inserire: dopo "BASSA PRIORITÀ" o prima di "Report Check Mappa"
+    const insertBeforeReport = content.indexOf('## 🔍 Report Check Mappa');
+    const insertAfterLow = content.indexOf('## 🔵 BASSA PRIORITÀ');
+    
+    if (insertBeforeReport !== -1) {
+      // Inserisci prima di "Report Check Mappa" con separatore
+      content = content.slice(0, insertBeforeReport) + section + '\n---\n\n' + content.slice(insertBeforeReport);
+    } else if (insertAfterLow !== -1) {
+      // Trova la fine della sezione BASSA PRIORITÀ e inserisci dopo
+      const nextSection = content.indexOf('\n## ', insertAfterLow + 5);
+      if (nextSection !== -1) {
+        content = content.slice(0, nextSection) + '\n\n' + section + content.slice(nextSection);
+      } else {
+        content += '\n\n---\n\n' + section;
+      }
     } else {
-      content += '\n' + section;
+      content += '\n\n---\n\n' + section;
     }
   }
   

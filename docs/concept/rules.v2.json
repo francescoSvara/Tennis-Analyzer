@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "Regole architetturali Tennis Analyzer v5.0 - MatchBundle-Centric",
-  "lastUpdated": "2025-12-24",
+  "lastUpdated": "2025-12-25",
   "philosophy": "filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md",
   
   "domains": {
@@ -310,6 +310,330 @@
       "mustExist": true,
       "severity": "ERROR",
       "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 3"
+    },
+    {
+      "id": "LIN-001",
+      "description": "featureEngine.js deve esportare FEATURE_ENGINE_VERSION",
+      "file": "backend/utils/featureEngine.js",
+      "pattern": "(FEATURE_ENGINE_VERSION|VERSION)\\s*[=:]\\s*['\"]v",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 1.2"
+    },
+    {
+      "id": "LIN-002", 
+      "description": "strategyEngine.js deve esportare STRATEGY_ENGINE_VERSION",
+      "file": "backend/strategies/strategyEngine.js",
+      "pattern": "(STRATEGY_ENGINE_VERSION|VERSION)\\s*[=:]\\s*['\"]v",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 1.4"
+    },
+    {
+      "id": "LIN-003",
+      "description": "Bundle endpoint deve avere meta.versions con bundle_schema, features, strategies",
+      "file": "backend/server.js",
+      "pattern": "meta:\\s*\\{[^}]*versions:\\s*\\{[^}]*(bundle_schema|features|strategies)",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 3"
+    },
+    {
+      "id": "LIN-004",
+      "description": "matchCardService deve includere meta nel bundle salvato",
+      "file": "backend/services/matchCardService.js",
+      "pattern": "meta:\\s*\\{|meta\\.versions|versions:\\s*\\{",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 5"
+    },
+    {
+      "id": "LIN-005",
+      "description": "useMatchBundle deve esporre meta dal bundle",
+      "file": "src/hooks/useMatchBundle.jsx",
+      "pattern": "bundle\\.meta|meta:\\s*bundle",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 4"
+    },
+    
+    {
+      "id": "TEMP-001",
+      "description": "Repository deve avere event_time per ogni entità temporale",
+      "file": "backend/db/matchRepository.js",
+      "pattern": "event_time|eventTime",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_TEMPORAL.md sezione 2 - Event Time vs Ingestion Time"
+    },
+    {
+      "id": "TEMP-002",
+      "description": "Live tracking deve usare snapshotTime per i dati live",
+      "file": "backend/db/liveTrackingRepository.js",
+      "pattern": "snapshot_time|snapshotTime|event_time",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_TEMPORAL.md sezione 3 - Live Snapshot Time"
+    },
+    
+    {
+      "id": "REG-001",
+      "description": "Registry Canon: mappings/players.json deve esistere per normalizzazione nomi",
+      "file": "data/mappings/players.json",
+      "mustExist": true,
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_REGISTRY_CANON.md sezione 1 - Player Registry"
+    },
+    {
+      "id": "REG-002",
+      "description": "sofascoreScraper deve normalizzare i nomi giocatori tramite registry",
+      "file": "backend/scraper/sofascoreScraper.js",
+      "pattern": "normaliz|mapping|playerRegistry|lookupPlayer",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_REGISTRY_CANON.md sezione 2 - Name Normalization"
+    },
+    
+    {
+      "id": "OBS-001",
+      "description": "Bundle deve includere sezione dataQuality",
+      "file": "backend/server.js",
+      "pattern": "dataQuality|data_quality|completeness",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_OBSERVABILITY_DATAQUALITY.md sezione 1"
+    },
+    {
+      "id": "OBS-002",
+      "description": "matchCardService deve calcolare data completeness",
+      "file": "backend/services/matchCardService.js",
+      "pattern": "completeness|dataQuality|qualityScore|calculateQuality",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_OBSERVABILITY_DATAQUALITY.md sezione 2"
+    },
+    
+    {
+      "id": "STATS-001",
+      "description": "Feature Engine deve esistere in backend/utils",
+      "file": "backend/utils/featureEngine.js",
+      "mustExist": true,
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_STATS.md sezione 5 - Feature Engine"
+    },
+    {
+      "id": "STATS-002",
+      "description": "Strategy Engine deve esistere in backend/strategies",
+      "file": "backend/strategies/strategyEngine.js",
+      "mustExist": true,
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_STATS.md sezione 6 - Strategy Engine"
+    },
+    {
+      "id": "STATS-003",
+      "description": "featureEngine deve calcolare momentum",
+      "file": "backend/utils/featureEngine.js",
+      "pattern": "momentum|Momentum|calculateMomentum",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_STATS.md sezione 5.1 - Momentum Feature"
+    },
+    {
+      "id": "STATS-004",
+      "description": "featureEngine deve calcolare pressure",
+      "file": "backend/utils/featureEngine.js",
+      "pattern": "pressure|Pressure|calculatePressure",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_STATS.md sezione 5.2 - Pressure Feature"
+    },
+    
+    {
+      "id": "CALC-001",
+      "description": "featureEngine NON deve MAI ritornare null - regola MAI NULL",
+      "file": "backend/utils/featureEngine.js",
+      "antiPattern": "return\\s+null\\s*;|return\\s+null\\s*$",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_CALCOLI.md sezione 1 - MAI NULL"
+    },
+    {
+      "id": "CALC-002",
+      "description": "featureEngine deve avere fallback chain (powerRankings→stats→score→odds)",
+      "file": "backend/utils/featureEngine.js",
+      "pattern": "fallback|default|\\|\\||\\?\\?",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_CALCOLI.md sezione 2 - Fallback Hierarchy"
+    },
+    {
+      "id": "CALC-003",
+      "description": "Ogni feature deve avere un valore calcolato, non undefined",
+      "file": "backend/utils/featureEngine.js",
+      "antiPattern": "return\\s+undefined",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_CALCOLI.md sezione 1 - MAI NULL/UNDEFINED"
+    },
+    
+    {
+      "id": "FE-001",
+      "description": "App.jsx non deve importare featureEngine direttamente",
+      "file": "src/App.jsx",
+      "antiPattern": "import.*featureEngine|require.*featureEngine",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 1"
+    },
+    {
+      "id": "FE-002",
+      "description": "Frontend deve usare useMemo per rendering pesanti",
+      "file": "src/components/MatchCard.jsx",
+      "pattern": "useMemo|useCallback",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_FRONTEND.md sezione Performance"
+    },
+    {
+      "id": "FE-003",
+      "description": "App.jsx deve importare useMatchBundle",
+      "file": "src/App.jsx",
+      "pattern": "useMatchBundle|import.*useMatchBundle",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 3"
+    },
+    
+    {
+      "id": "DB-001",
+      "description": "Supabase client deve essere centralizzato",
+      "file": "backend/db/supabase.js",
+      "mustExist": true,
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_DB.md sezione 1 - Centralized Client"
+    },
+    {
+      "id": "DB-002",
+      "description": "matchRepository deve esportare getMatchBundle",
+      "file": "backend/db/matchRepository.js",
+      "pattern": "getMatchBundle|getBundle|fetchBundle",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_DB.md sezione 2 - Bundle Repository"
+    },
+    
+    {
+      "id": "LIVE-001",
+      "description": "liveManager deve gestire WebSocket o polling",
+      "file": "backend/liveManager.js",
+      "pattern": "WebSocket|polling|setInterval|subscribe",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 1 - Live Updates"
+    },
+    {
+      "id": "LIVE-002",
+      "description": "Live tracking repository deve salvare snapshots",
+      "file": "backend/db/liveTrackingRepository.js",
+      "pattern": "snapshot|saveSnapshot|insertSnapshot",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 2 - Snapshot Persistence"
+    },
+    
+    {
+      "id": "ODDS-001",
+      "description": "Odds devono avere timestamp per tracciare movimento",
+      "file": "backend/services/matchCardService.js",
+      "pattern": "odds.*time|oddsTimestamp|odds_at",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_ODDS.md sezione 1 - OddsTick vs OddsSnapshot"
+    },
+    {
+      "id": "ODDS-002",
+      "description": "valueInterpreter deve esistere per calcoli fair value",
+      "file": "backend/utils/valueInterpreter.js",
+      "mustExist": true,
+      "severity": "WARN",
+      "reference": "FILOSOFIA_ODDS.md sezione 2 - Value Calculation"
+    },
+    
+    {
+      "id": "LIVE-003",
+      "description": "liveManager deve avere polling adattivo (non fisso)",
+      "file": "backend/liveManager.js",
+      "pattern": "adaptivePolling|backoff|pollingInterval|FAST|SLOW|BOOST",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 4 - Polling Adattivo"
+    },
+    {
+      "id": "LIVE-004",
+      "description": "liveManager deve aggiornare dataQuality (freshness/staleness)",
+      "file": "backend/liveManager.js",
+      "pattern": "dataQuality|freshness|staleness|completeness",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 5 - Data Quality Live"
+    },
+    
+    {
+      "id": "RISK-001",
+      "description": "riskEngine deve esistere per decisioni betting",
+      "file": "backend/services/riskEngine.js",
+      "mustExist": true,
+      "severity": "WARN",
+      "reference": "FILOSOFIA_RISK_BANKROLL.md sezione 1 - Risk Engine Layer"
+    },
+    {
+      "id": "RISK-002",
+      "description": "riskEngine deve calcolare edge (model_prob - implied_prob)",
+      "file": "backend/services/riskEngine.js",
+      "pattern": "edge|calculateEdge|modelProb.*impliedProb",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_RISK_BANKROLL.md sezione 2.1 - Edge Calculation"
+    },
+    {
+      "id": "RISK-003",
+      "description": "riskEngine deve calcolare stake con Kelly (frazionale)",
+      "file": "backend/services/riskEngine.js",
+      "pattern": "kelly|calculateStake|stake.*bankroll",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_RISK_BANKROLL.md sezione 2.3 - Stake Suggestion"
+    },
+    {
+      "id": "RISK-004",
+      "description": "riskEngine deve controllare exposure totale (max 20%)",
+      "file": "backend/services/riskEngine.js",
+      "pattern": "exposure|totalExposure|maxExposure|exposurePct",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_RISK_BANKROLL.md sezione 2.4 - Exposure Control"
+    },
+    {
+      "id": "RISK-005",
+      "description": "riskEngine deve avere price_min (worst acceptable price)",
+      "file": "backend/services/riskEngine.js",
+      "pattern": "price_min|priceMin|minPrice|worstPrice",
+      "severity": "WARN",
+      "reference": "FILOSOFIA_RISK_BANKROLL.md sezione 2.2 - Price Minimum"
+    },
+    
+    {
+      "id": "FE-DEEP-001",
+      "description": "pressureCalculator deve esportare getHoldDifficulty()",
+      "file": "backend/utils/pressureCalculator.js",
+      "pattern": "getHoldDifficulty|module\\.exports[^}]*getHoldDifficulty",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Strategie)"
+    },
+    {
+      "id": "FE-DEEP-002",
+      "description": "breakDetector deve esportare calculateBreaksFromPbp()",
+      "file": "backend/utils/breakDetector.js",
+      "pattern": "calculateBreaksFromPbp|module\\.exports[^}]*calculateBreaksFromPbp",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Overview/PbP)"
+    },
+    {
+      "id": "FE-DEEP-003",
+      "description": "liveManager deve esportare fetchLiveList()",
+      "file": "backend/liveManager.js",
+      "pattern": "fetchLiveList|module\\.exports[^}]*fetchLiveList",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (HOME)"
+    },
+    {
+      "id": "FE-DEEP-004",
+      "description": "liveManager deve esportare getTrackedMatch() per singolo match",
+      "file": "backend/liveManager.js",
+      "pattern": "getTrackedMatch|module\\.exports[^}]*getTrackedMatch[^e]",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Match Page Base)"
+    },
+    {
+      "id": "FE-DEEP-005",
+      "description": "sofascoreScraper deve esportare getPointByPoint()",
+      "file": "backend/scraper/sofascoreScraper.js",
+      "pattern": "getPointByPoint|module\\.exports[^}]*getPointByPoint",
+      "severity": "ERROR",
+      "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Point-by-Point)"
     }
   ],
   

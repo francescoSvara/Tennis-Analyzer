@@ -2,7 +2,7 @@
 
 > **Scopo**: Documento completo che unisce visual design, backend allacci, JSON schema e motion/icons spec.  
 > **Stato**: ATTIVA  
-> **Ultimo aggiornamento**: Dicembre 2025  
+> **Ultimo aggiornamento**: 25 Dicembre 2025 (Fix backend references)  
 
 ---
 
@@ -168,7 +168,7 @@ WS   /ws/match/:id → push: scoreboard, odds, pbp, strategy signals, momentum
 
 | Funzione | File | Scopo |
 |----------|------|-------|
-| `liveManager.getTrackedMatch()` | [`backend/liveManager.js`](../../backend/liveManager.js) | Match live snapshot |
+| `liveManager.getTrackedMatch()` | [`backend/liveManager.js`](../../backend/liveManager.js) | Match live snapshot (singolo) |
 | `featureEngine.computeFeatures()` | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Tutte le features |
 | `strategyEngine.evaluateAll()` | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Valuta strategie |
 | `pressureCalculator.calculatePressureIndex()` | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Pressure index |

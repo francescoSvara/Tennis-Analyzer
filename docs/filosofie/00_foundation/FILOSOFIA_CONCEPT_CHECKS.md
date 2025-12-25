@@ -1,10 +1,10 @@
 # 🧪 FILOSOFIA CONCEPT CHECKS  
-## Versione V2 – Semantic & Architectural Guardrails
+## Versione V2.2 – Semantic & Architectural Guardrails
 
 > **Dominio**: Architettura · Qualità · Governance del Codice  
 > **Stato**: ATTIVA  
-> **Sostituisce**: `FILOSOFIA_CONCEPT_CHECKS.md` (V1 – DEPRECATA)  
-> **Ultimo aggiornamento**: Dicembre 2025  
+> **Versione**: V2.2 (25 Dicembre 2025)  
+> **Ultimo aggiornamento**: 25 Dicembre 2025  
 
 ---
 
@@ -589,7 +589,11 @@ async function checkNotQuarantined(match_id) {
 
 ---
 
-## 1️⃣3️⃣ TABELLA RIEPILOGATIVA REGOLE V2.1
+## 1️⃣3️⃣ TABELLA RIEPILOGATIVA REGOLE V2.2
+
+> **Aggiornato**: 25 Dicembre 2025 - Check automatizzati per TUTTE le filosofie
+
+### Invarianti Esistenti (V2.0)
 
 | ID | Nome | Severity | Filosofia | Automated |
 |----|------|----------|-----------|-----------|
@@ -598,13 +602,45 @@ async function checkNotQuarantined(match_id) {
 | `FEATURE_VS_STRATEGY` | Features ≠ Strategie | ERROR | STATS | ✅ |
 | `SIGNAL_NOT_METRIC` | Segnali non persistibili | ERROR | STATS | ✅ |
 | `DATAQUALITY_BACKEND` | DataQuality solo backend | ERROR | STATS | ✅ |
-| **`TEMPORAL_ASOF`** | as_of_time coerente | **ERROR** | **TEMPORAL** | ✅ |
-| **`NO_FUTURE_DATA`** | No dati futuri | **ERROR** | **TEMPORAL** | ✅ |
-| **`CANONICAL_IDS_REQUIRED`** | IDs canonici obbligatori | **ERROR** | **REGISTRY_CANON** | ✅ |
-| **`MATCHBUNDLE_META_REQUIRED`** | Meta completo | **ERROR** | **LINEAGE** | ✅ |
-| **`ODDS_STALENESS_WARNING`** | Odds fresche | **WARNING** | **TEMPORAL** + **OBSERVABILITY** | ✅ |
-| **`DATA_QUALITY_THRESHOLD`** | Score >= 60 | **WARNING** | **OBSERVABILITY** | ✅ |
-| **`NO_QUARANTINED_DATA`** | No dati quarantinati | **ERROR** | **OBSERVABILITY** | ✅ |
+| `TEMPORAL_ASOF` | as_of_time coerente | ERROR | TEMPORAL | ✅ |
+| `NO_FUTURE_DATA` | No dati futuri | ERROR | TEMPORAL | ✅ |
+| `CANONICAL_IDS_REQUIRED` | IDs canonici obbligatori | ERROR | REGISTRY_CANON | ✅ |
+| `MATCHBUNDLE_META_REQUIRED` | Meta completo | ERROR | LINEAGE | ✅ |
+| `ODDS_STALENESS_WARNING` | Odds fresche | WARNING | TEMPORAL + OBSERVABILITY | ✅ |
+| `DATA_QUALITY_THRESHOLD` | Score >= 60 | WARNING | OBSERVABILITY | ✅ |
+| `NO_QUARANTINED_DATA` | No dati quarantinati | ERROR | OBSERVABILITY | ✅ |
+
+### Architectural Checks (V2.2 - NUOVI)
+
+| ID | Nome | Severity | Filosofia | File Target |
+|----|------|----------|-----------|-------------|
+| `LIN-001` | featureEngine deve esportare VERSION | ERROR | LINEAGE_VERSIONING | `backend/utils/featureEngine.js` |
+| `LIN-002` | strategyEngine deve esportare VERSION | ERROR | LINEAGE_VERSIONING | `backend/strategies/strategyEngine.js` |
+| `LIN-003` | Bundle endpoint deve avere meta.versions | ERROR | LINEAGE_VERSIONING | `backend/server.js` |
+| `LIN-004` | matchCardService deve includere meta | WARN | LINEAGE_VERSIONING | `backend/services/matchCardService.js` |
+| `LIN-005` | useMatchBundle deve esporre meta | WARN | LINEAGE_VERSIONING | `src/hooks/useMatchBundle.jsx` |
+| `TEMP-001` | Repository deve avere event_time | WARN | TEMPORAL | `backend/db/matchRepository.js` |
+| `TEMP-002` | Live tracking deve usare snapshotTime | WARN | TEMPORAL | `backend/db/liveTrackingRepository.js` |
+| `REG-001` | players.json mapping deve esistere | ERROR | REGISTRY_CANON | `data/mappings/players.json` |
+| `REG-002` | Scraper deve normalizzare nomi | WARN | REGISTRY_CANON | `backend/scraper/sofascoreScraper.js` |
+| `OBS-001` | Bundle deve includere dataQuality | ERROR | OBSERVABILITY | `backend/server.js` |
+| `OBS-002` | matchCardService deve calcolare quality | WARN | OBSERVABILITY | `backend/services/matchCardService.js` |
+| `STATS-001` | Feature Engine deve esistere | ERROR | STATS | `backend/utils/featureEngine.js` |
+| `STATS-002` | Strategy Engine deve esistere | ERROR | STATS | `backend/strategies/strategyEngine.js` |
+| `STATS-003` | featureEngine deve calcolare momentum | ERROR | STATS | `backend/utils/featureEngine.js` |
+| `STATS-004` | featureEngine deve calcolare pressure | ERROR | STATS | `backend/utils/featureEngine.js` |
+| `CALC-001` | featureEngine NON deve MAI ritornare null | ERROR | CALCOLI | `backend/utils/featureEngine.js` |
+| `CALC-002` | featureEngine deve avere fallback chain | WARN | CALCOLI | `backend/utils/featureEngine.js` |
+| `CALC-003` | Features NON devono ritornare undefined | ERROR | CALCOLI | `backend/utils/featureEngine.js` |
+| `FE-001` | App.jsx non deve importare featureEngine | ERROR | FRONTEND_DATA | `src/App.jsx` |
+| `FE-002` | MatchCard deve usare useMemo | WARN | FRONTEND | `src/components/MatchCard.jsx` |
+| `FE-003` | App.jsx deve importare useMatchBundle | WARN | FRONTEND_DATA | `src/App.jsx` |
+| `DB-001` | Supabase client centralizzato | ERROR | DB | `backend/db/supabase.js` |
+| `DB-002` | matchRepository deve esportare getMatchBundle | ERROR | DB | `backend/db/matchRepository.js` |
+| `LIVE-001` | liveManager deve gestire WebSocket/polling | WARN | LIVE_TRACKING | `backend/liveManager.js` |
+| `LIVE-002` | Live tracking deve salvare snapshots | WARN | LIVE_TRACKING | `backend/db/liveTrackingRepository.js` |
+| `ODDS-001` | Odds devono avere timestamp | WARN | ODDS | `backend/services/matchCardService.js` |
+| `ODDS-002` | valueInterpreter deve esistere | WARN | ODDS | `backend/utils/valueInterpreter.js` |
 
 ---
 

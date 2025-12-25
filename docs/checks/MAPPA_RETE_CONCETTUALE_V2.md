@@ -1,10 +1,11 @@
 # 🗺️ MAPPA RETE CONCETTUALE  
-## Versione V2.3 – MatchBundle-Centric Architecture + Full Code References
+## Versione V2.4 – MatchBundle-Centric Architecture + Full Code References
 
 > **Scopo**: fornire una visione unificata e navigabile dell'architettura concettuale del progetto.  
 > **Stato**: ATTIVA  
 > **Sostituisce**: `MAPPA_RETE_CONCETTUALE.md` (V1 – DEPRECATA)  
 > **Ultimo aggiornamento**: 25 Dicembre 2025  
+> **Novità V2.5**: Check automatici per TUTTE le filosofie (57 regole in `rules.v2.json`)  
 
 ---
 
@@ -208,6 +209,56 @@ Match dalla tabella legacy (`matches` - import XLSX) non erano visualizzabili pe
 
 ### Documenti DEPRECATED
 - tutte le versioni V1 precedenti non elencate sopra
+
+---
+
+## 🛡️ CI GUARDRAILS – Check Automatici per Filosofie (V2.5)
+
+> **Aggiornato**: 25 Dicembre 2025
+> **Totale Regole**: 57 check automatizzati in `rules.v2.json`
+> **Deep Philosophy Check**: 22 errori funzioni/export mancanti
+
+### Esecuzione Check
+
+```bash
+# Verifica architettura e filosofie (57 regole)
+node scripts/runConceptChecks.js
+
+# Verifica mappa concettuale (esistenza file)
+node scripts/checkConceptualMap.js
+
+# Verifica funzioni/export vs filosofie (deep check)
+node scripts/deepPhilosophyCheck.js
+
+# Report unificato (esegue tutti)
+node scripts/generateTodoReport.js
+```
+
+### Check per Filosofia
+
+| Filosofia | ID Check | Severity | Descrizione |
+|-----------|----------|----------|-------------|
+| **LINEAGE_VERSIONING** | `LIN-001` to `LIN-005` | ERROR/WARN | Versioning in featureEngine, strategyEngine, bundle |
+| **TEMPORAL** | `TEMP-001`, `TEMP-002` | WARN | event_time nei repository |
+| **REGISTRY_CANON** | `REG-001`, `REG-002` | ERROR/WARN | players.json, normalizzazione nomi |
+| **OBSERVABILITY** | `OBS-001`, `OBS-002` | ERROR/WARN | dataQuality nel bundle |
+| **STATS** | `STATS-001` to `STATS-004` | ERROR | Feature/Strategy Engine esistenza e funzioni |
+| **CALCOLI** | `CALC-001` to `CALC-003` | ERROR/WARN | MAI NULL, fallback chain |
+| **FRONTEND_DATA** | `FE-001` to `FE-003` | ERROR/WARN | No featureEngine import, useMatchBundle |
+| **FRONTEND** | `FE-DEEP-001` to `FE-DEEP-005` | ERROR | Funzioni backend dichiarate in FILOSOFIA_FRONTEND |
+| **DB** | `DB-001`, `DB-002` | ERROR | Supabase client, getMatchBundle |
+| **LIVE_TRACKING** | `LIVE-001` to `LIVE-004` | WARN | WebSocket/polling, snapshots, adaptive polling |
+| **ODDS** | `ODDS-001`, `ODDS-002` | WARN | Timestamp odds, valueInterpreter |
+| **RISK_BANKROLL** | `RISK-001` to `RISK-005` | ERROR/WARN | riskEngine, edge, stake, exposure |
+
+### Stato Attuale (25 Dic 2025)
+
+```
+🔴 Errori: 12 (LIN-001/002/003, REG-001, DB-002, RISK-002/003/004, FE-DEEP-001/002/003/005)
+🟡 Warning: 10 (LIN-004/005, TEMP-001/002, FE-002/003, ODDS-001, LIVE-003, RISK-001/005)
+ℹ️ Info: 30 (console.log residui)
+📋 Deep Check: 22 errori funzioni/export dichiarati in filosofie
+```
 
 ---
 

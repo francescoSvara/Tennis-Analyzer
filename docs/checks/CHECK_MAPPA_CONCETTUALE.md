@@ -1,6 +1,6 @@
 # 🔍 CHECK MAPPA CONCETTUALE
 
-> Risultato verifica automatica: 25 dicembre 2025 alle ore 09:17
+> Risultato verifica automatica: 25 dicembre 2025 alle ore 10:31
 > Script: `scripts/checkConceptualMap.js`
 > Esegui: `node scripts/checkConceptualMap.js`
 

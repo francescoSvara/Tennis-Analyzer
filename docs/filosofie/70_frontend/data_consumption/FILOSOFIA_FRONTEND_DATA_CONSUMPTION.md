@@ -4,7 +4,7 @@
 > **Dominio**: Frontend · Data Consumption · UI State  
 > **Stato**: ATTIVA  
 > **Sostituisce**: `FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md` (V1 – DEPRECATA)  
-> **Ultimo aggiornamento**: 24 Dicembre 2025  
+> **Ultimo aggiornamento**: 25 Dicembre 2025 (Fix file extension .jsx)  
 
 ---
 
@@ -29,7 +29,7 @@
 | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Calcola TUTTE le features |
 | [`backend/server.js`](../../backend/server.js) L3220-3430 | Endpoint `/api/match/:id/bundle` |
 | [`src/components/match/tabs/OverviewTab.jsx`](../../src/components/match/tabs/OverviewTab.jsx) | Consuma `header.features` |
-| [`src/hooks/useMatchBundle.js`](../../src/hooks/useMatchBundle.js) | Hook per fetch bundle |
+| [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | Hook per fetch bundle |
 
 ---
 
