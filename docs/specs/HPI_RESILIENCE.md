@@ -11,12 +11,14 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
 |---------|-----------|-----------------|
-| [FILOSOFIA_MADRE](../filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [DB_V2](../filosofie/FILOSOFIA_DB_V2.md) (point-by-point) | [STATS_V3](../filosofie/FILOSOFIA_STATS_V3.md) (Strategy Engine) |
+| [FILOSOFIA_MADRE](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) (point-by-point) | [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) (Strategy Engine) |
 
-### 📚 Feature Library
+### 📚 Documenti Correlati
 | Documento | Scopo |
 |-----------|-------|
-| [FILOSOFIA_CALCOLI_V1](../filosofie/FILOSOFIA_CALCOLI_V1.md) | Tassonomia completa features, standard input/output, fallback, schede operative |
+| [CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | Tassonomia completa features, standard input/output, fallback |
+| [LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | HPI in real-time |
+| [OBSERVABILITY](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Quality metrics per HPI |
 
 ---
 
@@ -163,7 +165,7 @@ if (underdogResilience.level === 'FRAGILE' || underdogResilience.level === 'BRIT
 
 | ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
 |--------------|--------|---------------|
-| [DB_V2](../filosofie/FILOSOFIA_DB_V2.md) | [📚 INDEX](../filosofie/INDEX_FILOSOFIE.md) | [STATS_V3](../filosofie/FILOSOFIA_STATS_V3.md) |
+| [DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [📚 INDEX](../filosofie/INDEX_FILOSOFIE.md) | [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) |
 
 ---
 

@@ -186,41 +186,4 @@ export function usePlayerSearch(query) {
   return { players, loading, error };
 }
 
-/**
- * Hook per caricare dettagli giocatore
- * @param {number} playerId - ID del giocatore
- * @returns {object} - { player, loading, error }
- */
-export function usePlayer(playerId) {
-  const [player, setPlayer] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!playerId) return;
-
-    const fetchPlayer = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(apiUrl(`/api/player/${playerId}`));
-        
-        if (response.ok) {
-          const data = await response.json();
-          setPlayer(data.player || null);
-        } else {
-          throw new Error(`HTTP ${response.status}`);
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlayer();
-  }, [playerId]);
-
-  return { player, loading, error };
-}
-
 export default useMatchCard;

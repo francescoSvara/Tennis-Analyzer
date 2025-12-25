@@ -17,7 +17,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT_DIR = path.join(__dirname, '..');
-const CHECK_OUTPUT_FILE = path.join(ROOT_DIR, 'docs', 'CHECK_MAPPA_CONCETTUALE.md');
+const CHECK_OUTPUT_FILE = path.join(ROOT_DIR, 'docs', 'checks', 'CHECK_MAPPA_CONCETTUALE.md');
 const TODO_LIST_FILE = path.join(ROOT_DIR, 'docs', 'TODO_LIST.md');
 
 // ============================================================================
@@ -25,21 +25,41 @@ const TODO_LIST_FILE = path.join(ROOT_DIR, 'docs', 'TODO_LIST.md');
 // ============================================================================
 
 const REFERENCES = {
-  // Documenti Filosofie V2
+  // Documenti Filosofie (nuova struttura gerarchica)
   docs: [
-    'docs/filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md',
-    'docs/filosofie/FILOSOFIA_DB_V2.md',
-    'docs/filosofie/FILOSOFIA_STATS_V3.md',
-    'docs/filosofie/FILOSOFIA_LIVE_TRACKING_V2.md',
-    'docs/filosofie/FILOSOFIA_ODDS_V2.md',
-    'docs/filosofie/FILOSOFIA_FRONTEND.md',
-    'docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md',
-    'docs/filosofie/FILOSOFIA_CONCEPT_CHECKS_V2.md',
+    // 00_foundation
+    'docs/filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md',
+    'docs/filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md',
+    // 10_data_platform
+    'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md',
+    'docs/filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md',
+    'docs/filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md',
+    'docs/filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md',
+    'docs/filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md',
+    // 20_domain_tennis
+    'docs/filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md',
+    // 30_domain_odds_markets
+    'docs/filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md',
+    // 40_analytics_features_models
+    'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md',
+    'docs/filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md',
+    // 50_strategy_risk_execution
+    'docs/filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md',
+    // 70_frontend
+    'docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md',
+    'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md',
+    // Index
     'docs/filosofie/INDEX_FILOSOFIE.md',
+    // Specs
     'docs/specs/HPI_RESILIENCE.md',
     'docs/specs/SPEC_FRONTEND_MOTION_UI.md',
     'docs/specs/SPEC_VALUE_SVG.md',
-    'docs/MAPPA_RETE_CONCETTUALE_V2.md',
+    'docs/specs/FRONTEND_MIGRATION.md',
+    'docs/specs/DEPRECATION_FRONTEND_UTILS.md',
+    // Checks
+    'docs/checks/MAPPA_RETE_CONCETTUALE_V2.md',
+    'docs/checks/CHECK_MAPPA_CONCETTUALE.md',
+    // Root docs
     'docs/TODO_LIST.md'
   ],
 
@@ -61,14 +81,15 @@ const REFERENCES = {
     'backend/strategies/strategyEngine.js'
   ],
 
-  // Backend Utils
+  // Backend Utils (tutti i file .js esistenti)
   backendUtils: [
     'backend/utils/featureEngine.js',
     'backend/utils/valueInterpreter.js',
     'backend/utils/breakDetector.js',
     'backend/utils/matchSegmenter.js',
     'backend/utils/pressureCalculator.js',
-    'backend/utils/svgMomentumExtractor.js'
+    'backend/utils/svgMomentumExtractor.js',
+    'backend/utils/logger.js'
   ],
 
   // Backend DB
@@ -135,8 +156,15 @@ const REFERENCES = {
     'src/motion/MotionRow.jsx'
   ],
 
-  frontendUtils: [
-    'src/utils.js'
+  // Note: src/utils.js eliminato il 25 Dic 2025 (era dead code)
+  frontendUtils: [],
+
+  // Scripts di verifica architetturale
+  scripts: [
+    'scripts/checkConceptualMap.js',
+    'scripts/runConceptChecks.js',
+    'scripts/cleanDuplicates.js',
+    'scripts/generateTodoReport.js'
   ]
 };
 
@@ -210,7 +238,7 @@ const DB_TABLES = [
 
 // ============================================================================
 // VIOLAZIONI ARCHITETTURALI DA VERIFICARE (MatchBundle-Centric)
-// Ref: FILOSOFIA_CONCEPT_CHECKS_V2.md, FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
+// Ref: FILOSOFIA_CONCEPT_CHECKS.md, FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
 // ============================================================================
 
 const ARCHITECTURAL_CHECKS = [
@@ -221,7 +249,7 @@ const ARCHITECTURAL_CHECKS = [
     file: 'backend/server.js',
     pattern: /app\.(get|post)\s*\(\s*['"`]\/api\/match\/:.*\/bundle/i,
     severity: 'ERROR',
-    reference: 'FILOSOFIA_DB_V2.md sezione 3'
+    reference: 'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md#sezione-3'
   },
   // 2. Hook useMatchBundle deve esistere
   {
@@ -230,7 +258,7 @@ const ARCHITECTURAL_CHECKS = [
     file: 'src/hooks/useMatchBundle.jsx',
     mustExist: true,
     severity: 'ERROR',
-    reference: 'FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3'
+    reference: 'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md#sezione-3'
   },
   // 3. Strategy Engine deve esistere e avere evaluateAll
   {
@@ -239,7 +267,7 @@ const ARCHITECTURAL_CHECKS = [
     file: 'backend/strategies/strategyEngine.js',
     pattern: /function\s+evaluateAll|exports\.evaluateAll|evaluateAll\s*=/,
     severity: 'ERROR',
-    reference: 'FILOSOFIA_STATS_V3.md sezione 6'
+    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-6'
   },
   // 4. Feature Engine deve esistere e avere computeFeatures
   {
@@ -248,27 +276,54 @@ const ARCHITECTURAL_CHECKS = [
     file: 'backend/utils/featureEngine.js',
     pattern: /function\s+computeFeatures|exports\.computeFeatures|computeFeatures\s*=/,
     severity: 'ERROR',
-    reference: 'FILOSOFIA_STATS_V3.md sezione 5'
+    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-5'
   },
   // 5. Frontend non deve calcolare strategie
+  // Note: src/utils.js eliminato, check ora solo su componenti residui
   {
     id: 'STRATEGY_IN_FRONTEND',
     description: 'Strategie (analyzeLayTheWinner, etc.) non devono essere nel frontend',
-    files: ['src/utils.js', 'src/components/StrategiesPanel.jsx', 'src/components/StrategiesLivePanel.jsx'],
+    files: ['src/components/StrategiesPanel.jsx', 'src/components/StrategiesLivePanel.jsx'],
     pattern: /export\s+function\s+(analyzeLayTheWinner|analyzeBancaServizio|analyzeSuperBreak)/,
     shouldNotExist: true,
     severity: 'WARN',
-    reference: 'FILOSOFIA_STATS_V3.md sezione 2 - Migrazione in corso'
+    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-2'
   },
   // 6. Frontend non deve calcolare DataCompleteness
+  // Note: src/utils.js eliminato il 25 Dic 2025 - check non più necessario
+  // Mantenuto per eventuale regressione in altri file
   {
     id: 'DATA_COMPLETENESS_FRONTEND',
     description: 'calculateDataCompleteness non deve essere nel frontend',
-    files: ['src/utils.js'],
+    files: ['src/components/*.jsx'],
     pattern: /export\s+function\s+calculateDataCompleteness/,
     shouldNotExist: true,
     severity: 'WARN',
-    reference: 'FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.5 - Migrazione in corso'
+    reference: 'docs/filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md#invariante-35'
+  },
+  // 7. Struttura cartelle filosofie (CI sulla struttura)
+  {
+    id: 'PHILOSOPHY_FOLDER_STRUCTURE',
+    description: 'Le filosofie devono stare nella cartella architetturale corretta',
+    files: [
+      'docs/filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md',
+      'docs/filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md',
+      'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md',
+      'docs/filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md',
+      'docs/filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md',
+      'docs/filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md',
+      'docs/filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md',
+      'docs/filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md',
+      'docs/filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md',
+      'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md',
+      'docs/filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md',
+      'docs/filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md',
+      'docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md',
+      'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md'
+    ],
+    mustAllExist: true,
+    severity: 'ERROR',
+    reference: 'docs/filosofie/INDEX_FILOSOFIE.md#struttura-cartelle'
   }
 ];
 
@@ -479,6 +534,39 @@ function runArchitecturalChecks() {
       } else {
         console.log(`  ✅ ${check.id}: OK`);
       }
+      continue;
+    }
+    
+    // Check mustAllExist - tutti i file devono esistere
+    if (check.files && check.mustAllExist) {
+      let missingFiles = [];
+      
+      for (const file of check.files) {
+        const fullPath = path.join(ROOT_DIR, file);
+        if (!fs.existsSync(fullPath)) {
+          missingFiles.push(file);
+        }
+      }
+      
+      if (missingFiles.length > 0) {
+        violations.push({
+          id: check.id,
+          severity: check.severity,
+          description: check.description,
+          file: missingFiles.join(', '),
+          issue: 'FILES_MISSING',
+          reference: check.reference
+        });
+        console.log(`  ❌ ${check.id}: ${missingFiles.length} file mancanti`);
+        for (const f of missingFiles.slice(0, 3)) {
+          console.log(`      - ${f}`);
+        }
+        if (missingFiles.length > 3) {
+          console.log(`      ... e altri ${missingFiles.length - 3}`);
+        }
+      } else {
+        console.log(`  ✅ ${check.id}: Tutti i ${check.files.length} file esistono`);
+      }
     }
   }
   
@@ -522,7 +610,8 @@ function runCheck() {
     ...REFERENCES.frontendComponents,
     ...REFERENCES.frontendHooks,
     ...REFERENCES.frontendMotion,
-    ...REFERENCES.frontendUtils
+    ...REFERENCES.frontendUtils,
+    ...REFERENCES.scripts
   ];
 
   for (const file of allFiles) {
@@ -643,6 +732,7 @@ function generateCheckMarkdown(results) {
 
 > Risultato verifica automatica: ${date}
 > Script: \`scripts/checkConceptualMap.js\`
+> Esegui: \`node scripts/checkConceptualMap.js\`
 
 ---
 
@@ -654,6 +744,8 @@ function generateCheckMarkdown(results) {
 | ✅ Passati | ${results.summary.passed} |
 | ❌ Falliti | ${results.summary.failed} |
 | ⚠️ Warning | ${results.summary.warnings} |
+| 📄 Non doc | ${results.newFilesDetected.length} |
+| 🏗️ Arch viol | ${results.architecturalViolations.length} |
 
 ---
 
@@ -771,7 +863,7 @@ Nessun problema rilevato. La mappa concettuale è allineata con il codice.
   if (results.summary.failed > 0 || results.summary.warnings > 0 || 
       results.newFilesDetected.length > 0 || results.architecturalViolations.length > 0) {
     md += `1. Correggi i problemi elencati sopra
-2. Aggiorna \`docs/MAPPA_RETE_CONCETTUALE_V2.md\`
+2. Aggiorna \`docs/checks/MAPPA_RETE_CONCETTUALE_V2.md\`
 3. Ri-esegui: \`node scripts/checkConceptualMap.js\`
 4. I problemi sono stati copiati in \`docs/TODO_LIST.md\`
 `;
@@ -794,11 +886,94 @@ Nessun problema rilevato. La mappa concettuale è allineata con il codice.
 // ============================================================================
 
 function updateTodoList(results) {
-  // La funzione genera CHECK_MAPPA_CONCETTUALE.md che è il report di verifica
-  // TODO_LIST.md è gestito separatamente (manualmente o da altri script)
   console.log('📋 Report generato in CHECK_MAPPA_CONCETTUALE.md');
   
-  // Log summary per integrazione manuale se necessario
+  // Aggiorna sezione Check Mappa in TODO_LIST.md
+  if (!fs.existsSync(TODO_LIST_FILE)) {
+    console.warn('⚠️ TODO_LIST.md non trovato');
+    return;
+  }
+  
+  try {
+    let content = fs.readFileSync(TODO_LIST_FILE, 'utf8');
+    
+    // Genera nuova sezione Check Mappa
+    const date = new Date().toISOString().split('T')[0];
+    let section = `## 🔍 Report Check Mappa (Auto-generato)
+
+> Ultimo check: ${date}
+> Esegui: \`node scripts/checkConceptualMap.js\`
+
+`;
+    
+    section += `| Metrica | Valore |\n|---------|--------|\n`;
+    section += `| Check totali | ${results.summary.totalChecks} |\n`;
+    section += `| ✅ Passati | ${results.summary.passed} |\n`;
+    section += `| ❌ Falliti | ${results.summary.failed} |\n`;
+    section += `| ⚠️ Warning | ${results.summary.warnings} |\n`;
+    section += `| 📄 Non doc | ${results.newFilesDetected.length} |\n`;
+    section += `| 🏗️ Arch viol | ${results.architecturalViolations.length} |\n\n`;
+    
+    // Dettagli violazioni architetturali
+    if (results.architecturalViolations.length > 0) {
+      section += `### Violazioni Architetturali\n\n`;
+      for (const v of results.architecturalViolations) {
+        const icon = v.severity === 'ERROR' ? '🔴' : '🟡';
+        section += `- ${icon} **${v.id}**: ${v.description}\n`;
+        section += `  - File: \`${v.file}\`\n`;
+        if (v.reference) section += `  - Ref: ${v.reference}\n`;
+      }
+      section += '\n';
+    }
+    
+    // File mancanti
+    if (results.missingFiles.length > 0) {
+      section += `### File Mancanti (${results.missingFiles.length})\n\n`;
+      for (const f of results.missingFiles.slice(0, 10)) {
+        section += `- [ ] \`${f}\`\n`;
+      }
+      if (results.missingFiles.length > 10) {
+        section += `- ... e altri ${results.missingFiles.length - 10}\n`;
+      }
+      section += '\n';
+    }
+    
+    // File non documentati
+    if (results.newFilesDetected.length > 0) {
+      section += `### File Non Documentati (${results.newFilesDetected.length})\n\n`;
+      for (const f of results.newFilesDetected.slice(0, 10)) {
+        section += `- [ ] \`${f}\` → Aggiungere alla mappa\n`;
+      }
+      if (results.newFilesDetected.length > 10) {
+        section += `- ... e altri ${results.newFilesDetected.length - 10}\n`;
+      }
+      section += '\n';
+    }
+    
+    section += '\n';
+    
+    // Sostituisce o aggiunge sezione
+    const sectionRegex = /## 🔍 Report Check Mappa \(Auto-generato\)[\s\S]*?(?=\n## |$)/;
+    
+    if (sectionRegex.test(content)) {
+      content = content.replace(sectionRegex, section);
+    } else {
+      // Inserisce dopo "## 🔵 BASSA PRIORITÀ" o alla fine
+      const insertPoint = content.indexOf('## 📊 PRINCIPIO FONDAMENTALE');
+      if (insertPoint !== -1) {
+        content = content.slice(0, insertPoint) + section + content.slice(insertPoint);
+      } else {
+        content += '\n---\n\n' + section;
+      }
+    }
+    
+    fs.writeFileSync(TODO_LIST_FILE, content, 'utf8');
+    console.log('📋 Sezione Check Mappa aggiornata in TODO_LIST.md');
+  } catch (err) {
+    console.error('❌ Errore aggiornamento TODO_LIST:', err.message);
+  }
+  
+  // Log summary
   if (results.architecturalViolations.length > 0) {
     console.log('\n🏗️  VIOLAZIONI ARCHITETTURALI DA RISOLVERE:');
     for (const v of results.architecturalViolations) {

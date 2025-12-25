@@ -1,6 +1,6 @@
 # 📚 INDEX FILOSOFIE – Mappa Navigazione Progetto
 
-> **Ultimo aggiornamento**: 24 Dicembre 2025  
+> **Ultimo aggiornamento**: 25 Dicembre 2025  
 > **Stato**: ATTIVO – Source of Truth per navigazione documentale  
 > **Integra**: `MAPPA_RETE_CONCETTUALE_V2.md`
 
@@ -42,12 +42,12 @@ React-Betfair/
 
 ---
 
-## �🔗 LINK RAPIDI
+## 🔗 LINK RAPIDI
 
 | 📄 Documento | Descrizione |
 |-------------|-------------|
-| [🗺️ MAPPA_RETE_CONCETTUALE_V2](../MAPPA_RETE_CONCETTUALE_V2.md) | Visione architetturale unificata |
-| [✅ CHECK_MAPPA_CONCETTUALE](../CHECK_MAPPA_CONCETTUALE.md) | Risultati verifica automatica |
+| [🗺️ MAPPA_RETE_CONCETTUALE](../checks/MAPPA_RETE_CONCETTUALE_V2.md) | Visione architetturale unificata |
+| [✅ CHECK_MAPPA_CONCETTUALE](../checks/CHECK_MAPPA_CONCETTUALE.md) | Risultati verifica automatica |
 | [📋 TODO_LIST](../TODO_LIST.md) | Attività e backlog |
 
 ---
@@ -78,7 +78,7 @@ Nessun dominio **bypassa** il MatchBundle
 
 | Documento | Scopo | Quando leggerlo |
 |-----------|-------|-----------------|
-| [**FILOSOFIA_MADRE**](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Costituzione tecnica del progetto | SEMPRE – Prima di ogni task |
+| [**FILOSOFIA_MADRE**](00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Costituzione tecnica del progetto | SEMPRE – Prima di ogni task |
 
 ---
 
@@ -90,45 +90,57 @@ Nessun dominio **bypassa** il MatchBundle
                     │    (Costituzione/Ruoli)     │
                     └─────────────┬───────────────┘
                                   │
-    ┌─────────────────────────────┼─────────────────────────────┐
-    │                             │                             │
-    ▼                             ▼                             ▼
-┌───────────┐             ┌───────────┐              ┌───────────┐
-│   DB_V2   │             │  ODDS_V2  │              │  LIVE_V2  │
-│   (DBA)   │             │  (Quant)  │              │(RT Engin) │
-└─────┬─────┘             └─────┬─────┘              └─────┬─────┘
-      │                         │                         │
-      │    ┌───────────┐        │                         │
-      └───►│    HPI    │◄───────┘                         │
-           │(Features) │                                  │
-           └─────┬─────┘                                  │
-                 │                                        │
-                 ├─────────────────────────────────┐      │
-                 │                                 │      │
-                 ▼                                 ▼      │
-           ┌────────────────┐             ┌───────────────┴───────┐
-           │  CALCOLI_V1    │────────────►│       STATS_V3        │
-           │(Feature Library)│             │(Feature→Strategy→Signal)│
-           └────────────────┘             └───────────┬───────────┘
-                             │
-                             ▼
-                    ┌────────────────┐
-                    │  MATCH BUNDLE  │
-                    │ (Unico Output) │
-                    └────────┬───────┘
-                             │
-              ┌──────────────┴──────────────┐
-              ▼                             ▼
-    ┌──────────────────┐         ┌──────────────────┐
-    │ FRONTEND_DATA_V2 │────────►│   FRONTEND_UI    │
-    │  (Come consumo)  │         │  (Come mostro)   │
-    └──────────────────┘         └──────────────────┘
-                             │
-                             ▼
-                    ┌────────────────┐
-                    │CONCEPT_CHECKS_V2│
-                    │  (Guardrails)  │
-                    └────────────────┘
+         ┌────────────────────────┼────────────────────────┐
+         │                        │                        │
+         ▼                        ▼                        ▼
+  ┌─────────────┐        ┌─────────────┐         ┌─────────────┐
+  │  TEMPORAL   │        │REGISTRY     │         │  LINEAGE    │
+  │(Time Rules) │        │(Canon IDs)  │         │(Versioning) │
+  └──────┬──────┘        └──────┬──────┘         └──────┬──────┘
+         │                      │                        │
+         └──────────┬───────────┴───────┬────────────────┘
+                    │                   │
+    ┌───────────────┼───────────────────┼───────────────┐
+    │               │                   │               │
+    ▼               ▼                   ▼               ▼
+┌───────┐     ┌──────────┐       ┌──────────┐    ┌──────────┐
+│  DB   │     │   ODDS   │       │   LIVE   │    │OBSERV    │
+│(DBA)  │     │ (Quant)  │       │(RT Eng)  │    │(Quality) │
+└───┬───┘     └────┬─────┘       └────┬─────┘    └────┬─────┘
+    │              │                  │               │
+    │    ┌─────────┴──────┐           │               │
+    └───►│      HPI       │◄──────────┘               │
+         │   (Features)   │                           │
+         └────────┬───────┘                           │
+                  │                                   │
+                  ├─────────────────────┐             │
+                  │                     │             │
+                  ▼                     ▼             │
+           ┌────────────┐       ┌─────────────┐      │
+           │  CALCOLI   │──────►│    STATS    │◄─────┘
+           │  (Library) │       │(F→S→Signal) │
+           └────────────┘       └──────┬──────┘
+                                       │
+                                       ▼
+                              ┌─────────────────┐
+                              │  MATCH BUNDLE   │
+                              │ + META Standard │
+                              └────────┬────────┘
+                                       │
+                        ┌──────────────┼──────────────┐
+                        │              │              │
+                        ▼              ▼              ▼
+                  ┌──────────┐  ┌───────────┐  ┌──────────┐
+                  │  FE_DATA │  │   FE_UI   │  │   RISK   │
+                  │   (Hook) │  │ (Display) │  │(Bankroll)│
+                  └──────────┘  └───────────┘  └──────────┘
+                        │              │              │
+                        └──────────────┼──────────────┘
+                                       ▼
+                              ┌─────────────────┐
+                              │ CONCEPT_CHECKS  │
+                              │  (Guardrails)   │
+                              └─────────────────┘
 ```
 
 ---
@@ -139,16 +151,21 @@ Nessun dominio **bypassa** il MatchBundle
 
 | File | Ruolo AI | Responsabilità | 📁 Codice Correlato |
 |------|----------|----------------|---------------------|
-| [FILOSOFIA_DB_V2.md](FILOSOFIA_DB_V2.md) | DBA / Data Engineer | Schema, pipeline, MatchBundle snapshot | [`backend/db/`](../../backend/db/), [`backend/importXlsx.js`](../../backend/importXlsx.js), [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
-| [FILOSOFIA_LIVE_TRACKING_V2.md](FILOSOFIA_LIVE_TRACKING_V2.md) | Real-time Engineer | Polling, WS, patch incrementali | [`backend/liveManager.js`](../../backend/liveManager.js), [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) |
-| [FILOSOFIA_ODDS_V2.md](FILOSOFIA_ODDS_V2.md) | Quant / Market Engineer | Market data, implied prob, liquidity | [`backend/server.js`](../../backend/server.js) (endpoints `/api/match/:id/odds`) |
+| [FILOSOFIA_TEMPORAL.md](10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | Time Architect | Time semantics, anti-leakage, as-of snapshots | [`backend/liveManager.js`](../../backend/liveManager.js), [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
+| [FILOSOFIA_REGISTRY_CANON.md](10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | Data Architect | Canonical IDs, entity resolution, dedup | [`backend/services/dataNormalizer.js`](../../backend/services/dataNormalizer.js), [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js) |
+| [FILOSOFIA_LINEAGE_VERSIONING.md](10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | Audit Architect | Versioning, lineage, reproducibility | [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js), [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
+| [FILOSOFIA_DB.md](10_data_platform/storage/FILOSOFIA_DB.md) | DBA / Data Engineer | Schema, pipeline, MatchBundle snapshot | [`backend/db/`](../../backend/db/), [`backend/importXlsx.js`](../../backend/importXlsx.js), [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
+| [FILOSOFIA_LIVE_TRACKING.md](20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | Real-time Engineer | Polling, WS, patch incrementali | [`backend/liveManager.js`](../../backend/liveManager.js), [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) |
+| [FILOSOFIA_ODDS.md](30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | Quant / Market Engineer | Market data, implied prob, liquidity | [`backend/server.js`](../../backend/server.js) (endpoints `/api/match/:id/odds`) |
 
 ### 🧮 Logic Layer (Processing)
 
 | File | Ruolo AI | Responsabilità | 📁 Codice Correlato |
 |------|----------|----------------|---------------------|
-| [FILOSOFIA_STATS_V3.md](FILOSOFIA_STATS_V3.md) | Data Analyst / Feature Engineer | Features, Strategy Engine, Signals | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js), [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) |
-| [FILOSOFIA_CALCOLI_V1.md](FILOSOFIA_CALCOLI_V1.md) | Feature Library | Tassonomia calcoli, standard, ownership | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js), [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) |
+| [FILOSOFIA_STATS.md](40_analytics_features_models/stats/FILOSOFIA_STATS.md) | Data Analyst / Feature Engineer | Features, Strategy Engine, Signals | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js), [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) |
+| [FILOSOFIA_CALCOLI.md](40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | Feature Library | Tassonomia calcoli, standard, ownership | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js), [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) |
+| [FILOSOFIA_RISK_BANKROLL.md](50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | Risk Manager / Quant | Edge, staking, bankroll, bet decisions | [`backend/services/riskEngine.js`](../../backend/services/riskEngine.js), [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) |
+| [FILOSOFIA_OBSERVABILITY_DATAQUALITY.md](10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Data Quality Engineer | Monitoring, quarantine, alerts | [`backend/services/dataQualityChecker.js`](../../backend/services/dataQualityChecker.js), [`backend/utils/logger.js`](../../backend/utils/logger.js) |
 | [HPI_RESILIENCE.md](../specs/HPI_RESILIENCE.md) | Feature Specialist | HPI, Break Resilience, Pressure | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js), [`backend/utils/breakDetector.js`](../../backend/utils/breakDetector.js) |
 
 ### 📋 Specifications (docs/specs/)
@@ -163,8 +180,8 @@ Nessun dominio **bypassa** il MatchBundle
 
 | File | Ruolo AI | Responsabilità | 📁 Codice Correlato |
 |------|----------|----------------|---------------------|
-| [FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | FE Data Consumer | Hook, cache, error handling | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`src/hooks/useLiveMatch.jsx`](../../src/hooks/useLiveMatch.jsx) |
-| [FILOSOFIA_FRONTEND.md](FILOSOFIA_FRONTEND.md) | Frontend Engineer | UI, UX, visual design | [`src/components/`](../../src/components/) |
+| [FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md](70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | FE Data Consumer | Hook, cache, error handling | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`src/hooks/useLiveMatch.jsx`](../../src/hooks/useLiveMatch.jsx) |
+| [FILOSOFIA_FRONTEND.md](70_frontend/ui/FILOSOFIA_FRONTEND.md) | Frontend Engineer | UI, UX, visual design | [`src/components/`](../../src/components/) |
 
 ### 📦 Componenti Frontend Principali
 
@@ -222,7 +239,76 @@ Nessun dominio **bypassa** il MatchBundle
 
 | File | Ruolo AI | Responsabilità | 📁 Codice Correlato |
 |------|----------|----------------|---------------------|
-| [FILOSOFIA_CONCEPT_CHECKS_V2.md](FILOSOFIA_CONCEPT_CHECKS_V2.md) | Architecture Guardrail | Invarianti, validazione, CI | [`scripts/runConceptChecks.js`](../../scripts/runConceptChecks.js), [`scripts/checkConceptualMap.js`](../../scripts/checkConceptualMap.js) |
+| [FILOSOFIA_CONCEPT_CHECKS.md](00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | Architecture Guardrail | Invarianti, validazione, CI | [`scripts/runConceptChecks.js`](../../scripts/runConceptChecks.js), [`scripts/checkConceptualMap.js`](../../scripts/checkConceptualMap.js) |
+
+---
+
+## 🧪 CI GUARDRAILS – Sistema Immunitario Architetturale
+
+> **Principio**: L'architettura è codice verificabile.
+
+Il progetto ha **due livelli di CI**, complementari e separati:
+
+### 1️⃣ CI di Integrità Concettuale
+**Script**: [`scripts/checkConceptualMap.js`](../../scripts/checkConceptualMap.js)
+
+**Cosa verifica**:
+- ✅ Esistenza file documentati (filosofie, services, components)
+- ✅ Linee di codice delle funzioni chiave
+- ✅ Tabelle DB nelle migrations
+- ✅ Struttura cartelle filosofie
+- ✅ Violazioni architetturali MatchBundle-centric
+
+**Output**: 
+- `docs/checks/CHECK_MAPPA_CONCETTUALE.md`
+- Sezione auto-aggiornata in `docs/TODO_LIST.md`
+
+**Filosofia**: *"Se lo dichiari, deve esistere"*
+
+```bash
+node scripts/checkConceptualMap.js
+```
+
+### 2️⃣ CI di Disciplina Architetturale
+**Script**: [`scripts/runConceptChecks.js`](../../scripts/runConceptChecks.js)
+
+**Cosa verifica**:
+- ✅ Inferenza dominio per file
+- ✅ Import/pattern vietati
+- ✅ Invarianti definiti in `rules.v2.json`
+- ✅ Allowlist + annotation override
+
+**Output**:
+- `docs/checks/report.md`
+- `docs/checks/report.json`
+- Sezione auto-aggiornata in `docs/TODO_LIST.md`
+
+**Filosofia**: *"Questo codice NON dovrebbe stare qui"*
+
+```bash
+node scripts/runConceptChecks.js [--mode full|diff]
+```
+
+### 🔄 Report Unificato
+**Script**: [`scripts/generateTodoReport.js`](../../scripts/generateTodoReport.js)
+
+Esegue entrambi i CI e genera un report consolidato:
+
+```bash
+node scripts/generateTodoReport.js
+```
+
+### ⚠️ Regole Non Negoziabili
+
+| ID | Regola | Livello |
+|----|--------|---------|
+| `BUNDLE_ENDPOINT` | Endpoint /api/match/:id/bundle deve esistere | ERROR |
+| `USE_MATCH_BUNDLE_HOOK` | Hook useMatchBundle.jsx obbligatorio | ERROR |
+| `STRATEGY_ENGINE_IMPLEMENTED` | evaluateAll() in strategyEngine.js | ERROR |
+| `FEATURE_ENGINE_IMPLEMENTED` | computeFeatures() in featureEngine.js | ERROR |
+| `PHILOSOPHY_FOLDER_STRUCTURE` | Filosofie nella cartella corretta | ERROR |
+| `STRATEGY_IN_FRONTEND` | No strategie nel frontend | WARN (migrazione) |
+| `DATA_COMPLETENESS_FRONTEND` | No DataCompleteness nel frontend | WARN (migrazione) |
 
 ---
 
@@ -255,43 +341,108 @@ Nessun dominio **bypassa** il MatchBundle
 
 ```
 1. FONTI (SofaScore, XLSX, Market APIs)
-        │
         │  📁 backend/scraper/sofascoreScraper.js
         │  📁 backend/importXlsx.js
         ▼
-2. RAW EVENTS ─────────────────────────► DB_V2 (persistenza)
-        │                                 📁 backend/db/matchRepository.js
+2. RAW EVENTS ────────────────────────► REGISTRY_CANON
+        │                                (normalizzazione, canonical IDs)
+        │                                📁 backend/services/dataNormalizer.js
         ▼
-3. TABELLE CANONICHE
-        │
-        ├──► ODDS_V2 (market features)
-        │
-        ├──► LIVE_V2 (runtime updates)
+3. CANONICAL TABLES ──────────────────► DB (persistenza)
+        │                                📁 backend/db/matchRepository.js
+        │  + TEMPORAL (event_time, ingestion_time)
+        ▼
+4. DATA RETRIEVAL (as-of query)
+        │  TEMPORAL: filter by as_of_time
+        │  OBSERVABILITY: data quality check
+        ├──► ODDS (market features)
+        ├──► LIVE (runtime updates)
         │    📁 backend/liveManager.js
         ▼
-4. FEATURE ENGINE ◄─── HPI_RESILIENCE
+5. FEATURE ENGINE ◄─── HPI_RESILIENCE
         │  📁 backend/utils/featureEngine.js
         │  📁 backend/utils/pressureCalculator.js
+        │  + LINEAGE: feature_version
         ▼
-5. STRATEGY ENGINE
+6. STRATEGY ENGINE
         │  📁 backend/strategies/strategyEngine.js
+        │  + LINEAGE: strategy_version
         ▼
-6. MATCH BUNDLE SNAPSHOT
+7. RISK ENGINE (edge, staking)
+        │  📁 backend/services/riskEngine.js
+        │  RISK_BANKROLL: Kelly, exposure
+        ▼
+8. MATCH BUNDLE SNAPSHOT
         │  📁 backend/services/matchCardService.js
+        │  + LINEAGE: meta.versions, meta.as_of_time
+        │  + OBSERVABILITY: meta.data_quality
         ▼
-7. API / WebSocket
+9. API / WebSocket
         │  📁 backend/server.js (GET /api/match/:id/bundle)
         ▼
-8. FRONTEND HOOKS
+10. FRONTEND HOOKS
         │  📁 src/hooks/useMatchBundle.jsx
         ▼
-9. UI RENDER
+11. UI RENDER
            📁 src/components/match/tabs/*.jsx
 ```
 
 ---
 
-## 📏 INVARIANTI ARCHITETTURALI (DA CONCEPT_CHECKS)
+## � MATCHBUNDLE META STANDARD (OBBLIGATORIO)
+
+> **Vedi**: [FILOSOFIA_LINEAGE_VERSIONING.md](10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md)
+
+Ogni `MatchBundle` DEVE includere un blocco `meta` standard:
+
+```typescript
+interface MatchBundleMeta {
+  // Temporal (FILOSOFIA_TEMPORAL)
+  generated_at: Date;        // quando il bundle è stato creato
+  as_of_time: Date;          // cut temporale logico
+  
+  // Lineage & Versioning (FILOSOFIA_LINEAGE_VERSIONING)
+  versions: {
+    bundle_schema: string;   // es. "v2.1.0"
+    data: string;            // es. "canonical_v2"
+    features: string;        // es. "v1.2.0"
+    odds: string;            // es. "v2.0.0"
+    strategies: string;      // es. "v2.0.0"
+  };
+  
+  // Observability (FILOSOFIA_OBSERVABILITY_DATAQUALITY)
+  data_quality: {
+    overall_score: number;   // 0-100
+    completeness: object;
+    staleness: object;
+    outliers: object;
+  };
+  
+  // Data Freshness (FILOSOFIA_TEMPORAL)
+  data_freshness: {
+    last_live_ingestion_time?: Date;
+    last_odds_ingestion_time?: Date;
+  };
+  
+  // Identity Warnings (FILOSOFIA_REGISTRY_CANON)
+  identity_warnings?: {
+    home_player?: { confidence: number; reason: string; };
+    tournament?: { confidence: number; reason: string; };
+  };
+}
+```
+
+**Campi obbligatori**:
+- `meta.generated_at`
+- `meta.as_of_time`
+- `meta.versions` (tutti i sub-campi)
+- `meta.data_quality.overall_score`
+
+**Concept Check**: `MATCHBUNDLE_META_REQUIRED`
+
+---
+
+## �📏 INVARIANTI ARCHITETTURALI (DA CONCEPT_CHECKS)
 
 | ID | Regola | Violazione = |
 |----|--------|--------------|
@@ -310,17 +461,17 @@ Nessun dominio **bypassa** il MatchBundle
 │                    STRATEGY LIFECYCLE                        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  RAW DATA (DB_V2)                                           │
+│  RAW DATA (DB)                                              │
 │  📁 backend/db/matchRepository.js                           │
 │       │                                                     │
 │       ▼                                                     │
-│  FEATURES (STATS_V3 + HPI)                                  │
+│  FEATURES (STATS + HPI)                                     │
 │  📁 backend/utils/featureEngine.js                          │
 │  - volatility, pressure, dominance                          │
 │  - HPI, resilience, momentum                                │
 │       │                                                     │
 │       ▼                                                     │
-│  STRATEGY ENGINE (STATS_V3)                                 │
+│  STRATEGY ENGINE (STATS)                                    │
 │  📁 backend/strategies/strategyEngine.js                    │
 │  - LayWinner, BancaServizio, SuperBreak                     │
 │       │                                                     │
@@ -347,19 +498,19 @@ Nessun dominio **bypassa** il MatchBundle
 ## ❓ FAQ RAPIDE
 
 ### Dove calcolo la pressure?
-→ Backend (STATS_V3), usando HPI_RESILIENCE
+→ Backend (STATS), usando HPI_RESILIENCE
 
 ### Dove mostro la strategia?
 → Frontend (FILOSOFIA_FRONTEND), leggendo da MatchBundle
 
 ### Posso fare fetch separati per ogni tab?
-→ NO. Un solo fetch MatchBundle (FRONTEND_DATA_V2)
+→ NO. Un solo fetch MatchBundle (FRONTEND_DATA)
 
 ### Chi decide READY/WATCH/OFF?
-→ Solo Strategy Engine (STATS_V3)
+→ Solo Strategy Engine (STATS)
 
 ### Dove persisto i segnali?
-→ NON li persisti. Sono runtime (CONCEPT_CHECKS_V2)
+→ NON li persisti. Sono runtime (CONCEPT_CHECKS)
 
 ---
 
@@ -380,7 +531,7 @@ Prima di scrivere codice, verifica:
 ### Aggiungere una nuova feature
 1. Dichiararla in [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
 2. Classificarla (Player / Match / Combined)
-3. Documentarla in `FILOSOFIA_STATS_V3.md`
+3. Documentarla in `FILOSOFIA_STATS.md`
 4. Creare spec in `docs/specs/` se complessa
 5. Usarla in Predictor o Strategy
 
@@ -424,7 +575,7 @@ Quando si crea una dashboard che mostra metriche:
 
 **Implementazione**: [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
 
-Vedi [MAPPA_RETE_CONCETTUALE_V2](../MAPPA_RETE_CONCETTUALE_V2.md) per dettagli completi.
+Vedi [MAPPA_RETE_CONCETTUALE_V2](../checks/MAPPA_RETE_CONCETTUALE_V2.md) per dettagli completi.
 
 ---
 
@@ -432,17 +583,49 @@ Vedi [MAPPA_RETE_CONCETTUALE_V2](../MAPPA_RETE_CONCETTUALE_V2.md) per dettagli c
 
 ```
 docs/
-├── filosofie/           # Documenti architetturali (FILOSOFIA_*.md)
-│   ├── INDEX_FILOSOFIE.md   ← SEI QUI
-│   ├── FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md
-│   ├── FILOSOFIA_DB_V2.md
-│   ├── FILOSOFIA_STATS_V3.md
-│   ├── FILOSOFIA_CALCOLI_V1.md     # 🆕 Feature Library
-│   ├── FILOSOFIA_LIVE_TRACKING_V2.md
-│   ├── FILOSOFIA_ODDS_V2.md
-│   ├── FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
-│   ├── FILOSOFIA_FRONTEND.md
-│   └── FILOSOFIA_CONCEPT_CHECKS_V2.md
+├── filosofie/                   # Documenti architetturali
+│   ├── INDEX_FILOSOFIE.md       ← SEI QUI
+│   │
+│   ├── 00_foundation/           # Documenti fondamentali
+│   │   ├── FILOSOFIA_MADRE_TENNIS.md           # Costituzione
+│   │   └── FILOSOFIA_CONCEPT_CHECKS.md         # Guardrails
+│   │
+│   ├── 10_data_platform/        # Data Layer
+│   │   ├── storage/
+│   │   │   └── FILOSOFIA_DB.md
+│   │   ├── temporal/
+│   │   │   └── FILOSOFIA_TEMPORAL.md
+│   │   ├── registry_canon/
+│   │   │   └── FILOSOFIA_REGISTRY_CANON.md
+│   │   ├── lineage_versioning/
+│   │   │   └── FILOSOFIA_LINEAGE_VERSIONING.md
+│   │   └── quality_observability/
+│   │       └── FILOSOFIA_OBSERVABILITY_DATAQUALITY.md
+│   │
+│   ├── 20_domain_tennis/        # Domain Tennis
+│   │   └── live_scoring/
+│   │       └── FILOSOFIA_LIVE_TRACKING.md
+│   │
+│   ├── 30_domain_odds_markets/  # Domain Odds
+│   │   └── odds_ticks_snapshots/
+│   │       └── FILOSOFIA_ODDS.md
+│   │
+│   ├── 40_analytics_features_models/  # Analytics
+│   │   ├── stats/
+│   │   │   └── FILOSOFIA_STATS.md
+│   │   └── calcoli/
+│   │       └── FILOSOFIA_CALCOLI.md
+│   │
+│   ├── 50_strategy_risk_execution/    # Risk Management
+│   │   └── bankroll_risk/
+│   │       └── FILOSOFIA_RISK_BANKROLL.md
+│   │
+│   └── 70_frontend/             # Presentation Layer
+│       ├── ui/
+│       │   └── FILOSOFIA_FRONTEND.md
+│       └── data_consumption/
+│           └── FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
+│
 ├── specs/               # Specifiche tecniche dettagliate
 │   ├── HPI_RESILIENCE.md
 │   ├── SPEC_FRONTEND_MOTION_UI.md

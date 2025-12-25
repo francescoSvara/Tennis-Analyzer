@@ -12,7 +12,14 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
 |---------|-----------|----------------|
-| [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [DB_V2](FILOSOFIA_DB_V2.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) (runtime features) |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [DB](../../10_data_platform/storage/FILOSOFIA_DB.md), [TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) (runtime features) |
+
+### 📚 Documenti Correlati
+| Documento | Relazione |
+|-----------|-----------|
+| [TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | `event_time` vs `ingestion_time` per live events |
+| [OBSERVABILITY](../../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Latency monitoring, staleness alerts |
+| [ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | Live odds sync con live score |
 
 ### 📁 File Codice Principali
 | File | Descrizione | Linee chiave |
@@ -153,8 +160,8 @@ Se un update live:
 
 | ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
 |--------------|--------|---------------|
-| [ODDS_V2](FILOSOFIA_ODDS_V2.md) | [📚 INDEX](INDEX_FILOSOFIE.md) | [DB_V2](FILOSOFIA_DB_V2.md) |
+| [ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [📚 INDEX](../../INDEX_FILOSOFIE.md) | [DB](../../10_data_platform/storage/FILOSOFIA_DB.md) |
 
 ---
 
-**Fine documento – FILOSOFIA_LIVE_TRACKING_V2**
+**Fine documento – FILOSOFIA_LIVE_TRACKING**

@@ -12,12 +12,15 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
 |---------|-----------|----------------|
-| [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [DB_V2](FILOSOFIA_DB_V2.md), [ODDS_V2](FILOSOFIA_ODDS_V2.md), [LIVE_V2](FILOSOFIA_LIVE_TRACKING_V2.md), [HPI](../specs/HPI_RESILIENCE.md) | [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [DB](../../10_data_platform/storage/FILOSOFIA_DB.md), [ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md), [LIVE](../../20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md), [HPI](../../specs/HPI_RESILIENCE.md) | [FRONTEND_DATA](../../70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md), [RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) |
 
-### 📚 Dominio Calcoli / Feature Library
-| Documento | Scopo |
-|-----------|-------|
-| [FILOSOFIA_CALCOLI_V1](FILOSOFIA_CALCOLI_V1.md) | Tassonomia features, standard input/output, fallback, schede feature operative |
+### 📚 Documenti Correlati
+| Documento | Relazione |
+|-----------|-----------|
+| [CALCOLI](../calcoli/FILOSOFIA_CALCOLI.md) | Tassonomia features, standard input/output, fallback |
+| [TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | `as_of_time` per feature calculation |
+| [OBSERVABILITY](../../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Feature quality metrics, outlier detection |
+| [RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | Consuma features per edge calculation |
 
 ### 📁 File Codice Principali
 | File | Descrizione | Linee chiave |
@@ -174,7 +177,7 @@ Esempio:
 
 ## 5️⃣ FEATURE ENGINE (REGOLE)
 
-> 📚 **Dettaglio completo**: Vedi [FILOSOFIA_CALCOLI_V1](FILOSOFIA_CALCOLI_V1.md) per tassonomia, standard, fallback e schede feature operative.
+> 📚 **Dettaglio completo**: Vedi [FILOSOFIA_CALCOLI](../calcoli/FILOSOFIA_CALCOLI.md) per tassonomia, standard, fallback e schede feature operative.
 
 Ogni feature DEVE dichiarare:
 
@@ -202,7 +205,7 @@ Persistenza: NO
 
 Feature senza questa scheda sono **architetturalmente incomplete**.
 
-> ⚠️ Per schede complete con fallback chain, edge cases e test fixtures → [FILOSOFIA_CALCOLI_V1](FILOSOFIA_CALCOLI_V1.md)
+> ⚠️ Per schede complete con fallback chain, edge cases e test fixtures → [FILOSOFIA_CALCOLI](../calcoli/FILOSOFIA_CALCOLI.md)
 
 ---
 
@@ -399,11 +402,400 @@ header.features = {
 
 ---
 
+## 1️⃣4️⃣ NO FUTURE LEAKAGE (TEMPORAL INTEGRITY)
+
+> **Vedi**: [FILOSOFIA_TEMPORAL.md](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md)
+
+### 14.1 Principio Anti-Leakage
+
+**Regola fondamentale**:
+```text
+Nessuna feature può usare dati con event_time > as_of_time.
+```
+
+**Rationale**: se usi dati futuri → edge finto, modello inutile.
+
+---
+
+### 14.2 Implementation in featureEngine
+
+```javascript
+// backend/utils/featureEngine.js
+
+function computeFeatures(data, options) {
+  const { as_of_time } = options;  // ← parametro obbligatorio
+  
+  // Filter all data by as_of_time
+  const validOdds = data.odds.filter(o => o.event_time <= as_of_time);
+  const validLiveSnaps = data.liveSnaps?.filter(s => s.event_time <= as_of_time);
+  
+  // Compute features using only valid data
+  const features = {
+    volatility: calculateVolatility(data.powerRankings, as_of_time),
+    pressure: calculatePressure(data.score, as_of_time),
+    // ...
+  };
+  
+  return {
+    match_id: data.match.match_id,
+    as_of_time,                    // ← include in output
+    feature_version: VERSION,
+    features,
+    computed_at: new Date()
+  };
+}
+```
+
+---
+
+### 14.3 Concept Check Integration
+
+**Check**: `NO_FUTURE_DATA`
+
+```javascript
+function checkNoFutureData(bundle, rawData) {
+  const { meta } = bundle;
+  const futureOdds = rawData.odds.filter(o => o.event_time > meta.as_of_time);
+  const futureSnaps = rawData.liveSnaps?.filter(s => s.event_time > meta.as_of_time);
+  
+  if (futureOdds.length > 0 || futureSnaps.length > 0) {
+    return { error: 'future data detected', details: { futureOdds, futureSnaps } };
+  }
+  
+  return { ok: true };
+}
+```
+
+---
+
+## 1️⃣5️⃣ FEATURE SNAPSHOT AS-OF
+
+> **Vedi**: [FILOSOFIA_TEMPORAL.md](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md), [FILOSOFIA_LINEAGE_VERSIONING.md](../../10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md)
+
+### 15.1 FeatureSnapshot Contract
+
+```typescript
+interface FeatureSnapshot {
+  match_id: string;
+  as_of_time: Date;         // cut temporale (TEMPORAL)
+  feature_version: string;  // versioning (LINEAGE)
+  features: {
+    volatility: number;
+    pressure: number;
+    dominance: number;
+    // ...
+  };
+  computed_at: Date;        // ingestion_time
+  data_sources: {
+    had_power_rankings: boolean;
+    had_statistics: boolean;
+    had_odds: boolean;
+    had_live_snapshots: boolean;
+  };
+}
+```
+
+---
+
+### 15.2 Uso
+
+**Pre-match snapshot**:
+```javascript
+const as_of_time = new Date(match.event_time.getTime() - 5 * 60000);  // -5 min
+const preMatchFeatures = await featureEngine.computeFeatures({
+  match,
+  odds,
+  stats,
+  as_of_time
+});
+```
+
+**Live snapshot**:
+```javascript
+const as_of_time = new Date();  // now
+const liveFeatures = await featureEngine.computeFeatures({
+  match,
+  odds,
+  stats,
+  liveSnaps,
+  as_of_time
+});
+```
+
+---
+
+### 15.3 Storage (Opzionale)
+
+Non è obbligatorio persistere feature snapshots, ma **se lo fai**:
+
+```sql
+CREATE TABLE feature_snapshots (
+  match_id TEXT NOT NULL,
+  as_of_time TIMESTAMPTZ NOT NULL,
+  feature_version TEXT NOT NULL,
+  features JSONB NOT NULL,
+  computed_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (match_id, as_of_time)
+);
+
+CREATE INDEX idx_features_match ON feature_snapshots(match_id);
+CREATE INDEX idx_features_time ON feature_snapshots(as_of_time);
+```
+
+**Uso**: backtest, audit, riproducibilità.
+
+---
+
+## 1️⃣6️⃣ REASON CODES OUTPUT
+
+> **Vedi**: [FILOSOFIA_RISK_BANKROLL.md](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md)
+
+### 16.1 Perché Reason Codes?
+
+**Problema**: Strategy dice READY, ma perché?
+
+**Soluzione**: ogni strategy output include `reason` code.
+
+---
+
+### 16.2 Standard Reason Codes
+
+```typescript
+type ReasonCode = 
+  | "high_pressure_favorite"       // Favorite sotto pressione
+  | "weak_server_vulnerable"       // Servizio debole
+  | "momentum_shift_detected"      // Cambio momentum
+  | "volatile_match_conditions"    // Match volatile
+  | "tiebreak_specialist_edge"     // Vantaggio tiebreak
+  | "break_point_resilience"       // Resilienza break point
+  | "comeback_pattern"             // Pattern rimonta
+  | "closing_odds_value"           // Value su closing line
+  | "low_confidence_opponent";     // Avversario bassa confidence
+```
+
+---
+
+### 16.3 Strategy Output
+
+```typescript
+interface StrategySignal {
+  id: string;               // "LayWinner", "BancaServizio", ...
+  status: "READY" | "WATCH" | "OFF";
+  action?: "BACK" | "LAY";
+  selection?: "home" | "away";
+  confidence: number;       // 0-1
+  reason: ReasonCode;       // ← obbligatorio se READY
+  conditions: {
+    [key: string]: {
+      value: number;
+      threshold: number;
+      met: boolean;
+    };
+  };
+}
+```
+
+---
+
+### 16.4 Esempio Implementation
+
+```javascript
+// backend/strategies/strategyEngine.js
+
+function evaluateLayWinner(features) {
+  const conditions = {
+    pressure: { value: features.pressure, threshold: 60, met: features.pressure > 60 },
+    volatility: { value: features.volatility, threshold: 50, met: features.volatility > 50 },
+    dominance: { value: features.dominance, threshold: 40, met: features.dominance < 40 }
+  };
+  
+  const allMet = Object.values(conditions).every(c => c.met);
+  
+  return {
+    id: 'LayWinner',
+    status: allMet ? 'READY' : 'WATCH',
+    action: 'LAY',
+    selection: features.dominance < 50 ? 'home' : 'away',
+    confidence: allMet ? 0.85 : 0.50,
+    reason: allMet ? 'high_pressure_favorite' : null,  // ← reason code
+    conditions
+  };
+}
+```
+
+---
+
+### 16.5 FE Display
+
+```jsx
+function StrategyCard({ strategy }) {
+  const reasonLabels = {
+    high_pressure_favorite: "Favorito sotto pressione",
+    weak_server_vulnerable: "Servizio vulnerabile",
+    // ...
+  };
+  
+  return (
+    <div className={`strategy-card status-${strategy.status}`}>
+      <h3>{strategy.id}</h3>
+      <StatusBadge status={strategy.status} />
+      {strategy.reason && (
+        <p className="reason">
+          {reasonLabels[strategy.reason]}
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## 1️⃣7️⃣ EDGE CALCULATION VS MARKET
+
+> **Vedi**: [FILOSOFIA_ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md), [FILOSOFIA_RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md)
+
+### 17.1 Chi Calcola l'Edge?
+
+**Separazione responsabilità**:
+
+- **STATS (featureEngine)**: calcola features
+- **ODDS**: fornisce market odds + implied prob
+- **Predictor** (futuro): calcola model probability
+- **RISK (riskEngine)**: calcola edge = model_prob - implied_prob
+
+**Regola**: `featureEngine` NON calcola edge.
+
+---
+
+### 17.2 Edge Calculation (Risk Layer)
+
+```javascript
+// backend/services/riskEngine.js
+
+function calculateEdge(strategy, odds, predictor) {
+  // 1. Get market odds
+  const marketOdds = odds[strategy.selection];  // es. 1.85
+  const impliedProb = 1 / marketOdds;           // 0.54
+  
+  // 2. Get model probability
+  const modelProb = predictor.predictWinProb(strategy.selection);  // 0.60
+  
+  // 3. Calculate edge
+  const edge = modelProb - impliedProb;  // 0.06 (6%)
+  
+  return {
+    market_odds: marketOdds,
+    implied_prob: impliedProb,
+    model_prob: modelProb,
+    edge,
+    has_edge: edge > 0
+  };
+}
+```
+
+---
+
+### 17.3 Integration con Strategy Signals
+
+```javascript
+// backend/services/matchCardService.js
+
+async function buildMatchBundle(match_id) {
+  // ... fetch data
+  
+  // 1. Compute features
+  const features = await featureEngine.computeFeatures(data);
+  
+  // 2. Evaluate strategies
+  const strategies = await strategyEngine.evaluateAll(features);
+  
+  // 3. Calculate edge for READY strategies
+  const strategiesWithEdge = strategies
+    .filter(s => s.status === 'READY')
+    .map(s => ({
+      ...s,
+      edge: riskEngine.calculateEdge(s, odds, predictor)
+    }));
+  
+  return {
+    header: { /* ... */ },
+    tabs: {
+      strategies: strategiesWithEdge,
+      // ...
+    },
+    meta: { /* ... */ }
+  };
+}
+```
+
+---
+
+### 17.4 Output nel Bundle
+
+```typescript
+interface StrategyWithEdge extends StrategySignal {
+  edge?: {
+    market_odds: number;
+    implied_prob: number;
+    model_prob: number;
+    edge: number;           // edge %
+    has_edge: boolean;
+  };
+}
+```
+
+**NOTA**: edge è opzionale, presente solo se strategy = READY e predictor disponibile.
+
+---
+
+## 1️⃣8️⃣ INTEGRAZIONE FILOSOFIE CORRELATE
+
+### 18.1 TEMPORAL
+
+- `as_of_time` parametro obbligatorio per `computeFeatures()`
+- Anti-leakage: filtrare odds/live con `event_time <= as_of_time`
+- Feature snapshot include `as_of_time`
+
+---
+
+### 18.2 REGISTRY_CANON
+
+- Features usano `player_id` canonico
+- NON usano `player_name` (string)
+- Player stats linkati tramite canonical ID
+
+---
+
+### 18.3 LINEAGE
+
+- `feature_version` in output
+- `strategy_version` in output
+- Meta bundle include entrambe
+
+---
+
+### 18.4 OBSERVABILITY
+
+- Feature computation errors → log
+- Outlier detection (volatility > 100)
+- Data quality score integrato
+
+---
+
+### 18.5 RISK_BANKROLL
+
+- Strategy signals → risk engine
+- Edge calculation separato
+- Bet decisions con reason codes
+
+---
+
 ## 📍 NAVIGAZIONE RAPIDA
 
 | ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
 |--------------|--------|---------------|
-| [DB_V2](FILOSOFIA_DB_V2.md) | [📚 INDEX](INDEX_FILOSOFIE.md) | [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) |
+| [DB](../../10_data_platform/storage/FILOSOFIA_DB.md) | [📚 INDEX](../../INDEX_FILOSOFIE.md) | [FRONTEND_DATA](../../70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) |
 
 ---
-**Fine documento – FILOSOFIA_STATS_V3**
+**Fine documento – FILOSOFIA_STATS**

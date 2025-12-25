@@ -12,9 +12,18 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
 |---------|-----------|----------------|
-| [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) (MatchBundle) | [FRONTEND_UI](FILOSOFIA_FRONTEND.md) |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md), [RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | [FRONTEND_UI](../ui/FILOSOFIA_FRONTEND.md) |
 
-### File Correlati
+### 📚 Documenti Correlati
+| Documento | Relazione |
+|-----------|-----------|
+| [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) | MatchBundle producer (features, signals) |
+| [RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | Stake suggestions nel bundle |
+| [CALCOLI](../../40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | Definizione features consumate |
+| [TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | Timestamp display rules |
+| [CONCEPT_CHECKS](../../00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | Validazione bundle prima del render |
+
+### 📁 File Codice Principali
 | File | Descrizione |
 |------|-------------|
 | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Calcola TUTTE le features |
@@ -638,8 +647,8 @@ Il break viene calcolato dalla tabella `point_by_point`:
 
 | ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
 |--------------|--------|---------------|
-| [STATS_V3](FILOSOFIA_STATS_V3.md) | [📚 INDEX](INDEX_FILOSOFIE.md) | [FRONTEND_UI](FILOSOFIA_FRONTEND.md) |
+| [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [📚 INDEX](../../INDEX_FILOSOFIE.md) | [FRONTEND_UI](../ui/FILOSOFIA_FRONTEND.md) |
 
 ---
 
-**Fine documento – FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2**
+**Fine documento – FILOSOFIA_FRONTEND_DATA_CONSUMPTION**

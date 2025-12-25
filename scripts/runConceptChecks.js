@@ -108,7 +108,8 @@ function inferDomain(filePath, rules) {
   // Inferenza euristica per file non mappati
   if (relativePath.startsWith('src/components/')) return 'frontend_ui';
   if (relativePath.startsWith('src/hooks/')) return 'frontend_hooks';
-  if (relativePath.startsWith('src/utils/') || relativePath === 'src/utils.js') return 'frontend_utils';
+  // Note: src/utils.js eliminato il 25 Dic 2025 (era dead code)
+  if (relativePath.startsWith('src/utils/')) return 'frontend_utils';
   if (relativePath.startsWith('backend/services/')) return 'backend_services';
   if (relativePath.startsWith('backend/db/')) return 'backend_db';
   if (relativePath.startsWith('backend/utils/')) return 'backend_utils';

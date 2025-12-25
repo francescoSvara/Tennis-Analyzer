@@ -1,43 +1,26 @@
 # 📝 Deprecation Notice - Frontend Utils Functions
 
-> **Data**: 24 Dicembre 2025  
-> **Riferimento**: FILOSOFIA_CALCOLI_V1.md  
+> **Data**: 25 Dicembre 2025 (aggiornato)  
+> **Stato**: ✅ **COMPLETATO** - `src/utils.js` eliminato  
+> **Riferimento**: [FILOSOFIA_CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md)  
 
 ---
 
-## ⚠️ Funzioni Deprecate in `src/utils.js`
+## ✅ COMPLETATO: `src/utils.js` ELIMINATO
 
-Le seguenti funzioni di calcolo features esistono sia nel frontend che nel backend.  
-**L'implementazione canonica è nel backend** ([FILOSOFIA_CALCOLI_V1](../filosofie/FILOSOFIA_CALCOLI_V1.md)).
+Il file `src/utils.js` (~2500 righe) è stato **completamente eliminato** il 25 Dicembre 2025.
 
-### 🔴 Da Rimuovere/Deprecare
+**Motivo**: Nessun componente lo importava - era dead code dopo la migrazione a MatchBundle architecture.
 
-| Funzione Frontend | Stato | Rimpiazzare con |
-|-------------------|-------|-----------------|
-| `calculateVolatility()` | ✅ **DEPRECATED** (già marcata) | `bundle.header.features.volatility` + `volatilitySource` |
-| `calculateElasticity()` | ✅ **DEPRECATED** (già marcata) | `bundle.tabs.stats.analysis.elasticity` |
-| `calculatePressureIndex()` | ⚠️ **DA DEPRECARE** | `bundle.header.features.pressure` + `pressureSource` |
-| `calculateHPI()` | ⚠️ **DA DEPRECARE** | `bundle.tabs.stats.hpi` (futuro) o backend calculation |
-| `calculatePressurePerformance()` | ⚠️ **DA DEPRECARE** | `bundle.tabs.stats.pressurePerformance` (futuro) |
-| `calculateBreakResilience()` | ⚠️ **DA DEPRECARE** | `bundle.tabs.stats.breakResilience` (futuro) |
+### Funzioni rimosse:
+- `calculateVolatility()`, `calculateElasticity()`, `classifyMatchCharacter()`
+- `calculatePressureIndex()`, `calculateHPI()`, `calculateBreakResilience()`
+- `analyzeLayTheWinner()`, `analyzeBancaServizio()`, `analyzeSuperBreak()`
+- E altre ~50 funzioni di utilità non usate
 
 ---
 
 ## ✅ Pattern Corretto di Consumo
-
-### Prima (❌ Deprecato)
-```javascript
-import { calculateVolatility, calculatePressure } from '../utils';
-
-const MyComponent = ({ powerRankings, statistics }) => {
-  const volatility = calculateVolatility(powerRankings);
-  const pressure = calculatePressure(statistics);
-  
-  return <div>Volatility: {volatility.value}%</div>;
-};
-```
-
-### Dopo (✅ Corretto)
 ```javascript
 import { useMatchBundle } from '../hooks/useMatchBundle';
 
@@ -90,12 +73,12 @@ bundle.header.features = {
 
 ---
 
-## 🔧 Azioni Richieste
+## 🔧 Migrazione Completata
 
 ### Per Componenti UI
-1. ✅ Già fatto: `StrategiesTab.jsx` usa `bundle.tabs.strategies.signals`
-2. ⏳ **TODO**: Rimuovere import di `calculateVolatility`, `calculatePressure` dai componenti
-3. ⏳ **TODO**: Usare sempre `bundle.header.features.*` e `bundle.header.features.*Source`
+1. ✅ `StrategiesTab.jsx` usa `bundle.tabs.strategies.signals`
+2. ✅ `StrategiesPanel.jsx` usa solo `bundle.header.player*.stats`
+3. ✅ Nessun componente importa più funzioni di calcolo frontend
 
 ### Per Backend
 1. ✅ Fatto: `featureEngine.js` calcola tutte le features con fallback chain
@@ -106,9 +89,9 @@ bundle.header.features = {
 
 ## 📚 Riferimenti
 
-- [FILOSOFIA_CALCOLI_V1](../filosofie/FILOSOFIA_CALCOLI_V1.md) - Tassonomia features e standard
+- [FILOSOFIA_CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) - Tassonomia features e standard
 - [HPI_RESILIENCE](HPI_RESILIENCE.md) - Spec dettagliata pressure/HPI
-- [FILOSOFIA_STATS_V3](../filosofie/FILOSOFIA_STATS_V3.md) - Feature→Strategy→Signal architecture
+- [FILOSOFIA_STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) - Feature→Strategy→Signal architecture
 - [TODO_LIST](../TODO_LIST.md) - Progresso migrazione
 
 ---

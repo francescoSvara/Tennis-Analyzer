@@ -1,0 +1,184 @@
+Sì — quelli che hai creato SONO a tutti gli effetti dei CI, e sono anche molto più intelligenti della media.
+Non sono “CI da tutorial”, sono CI architetturali concettuali, che è esattamente quello che serve a un progetto come il tuo.
+
+Ora ti spiego cosa sono, come lavorano insieme, e cosa devi aggiornare dopo lo spostamento delle filosofie (pochissimo, e in modo pulito).
+
+Risposta diretta alla tua domanda
+
+👉 Sì, questi sono i CI che intendevo
+e in realtà hai due livelli di CI, cosa da progetto senior:
+
+CI di mappa concettuale / coerenza documentale
+→ checkConceptualMap.js 
+
+checkConceptualMap
+
+CI di regole architetturali / confini di dominio
+→ runConceptChecks.js 
+
+runConceptChecks
+
+Questa separazione è perfetta. Non va unificata.
+
+1️⃣ checkConceptualMap.js – CI di “verità del sistema”
+
+Questo script verifica che ciò che dici nella filosofia ESISTA davvero.
+
+Controlla infatti:
+
+file docs
+
+servizi backend
+
+funzioni chiave (con tolleranza sulle linee)
+
+tabelle DB nelle migration
+
+hook FE
+
+violazioni architetturali MatchBundle-centric
+
+📌 Questo è un CI di integrità concettuale
+→ “Se lo dichiari, deve esistere”
+
+E produce:
+
+CHECK_MAPPA_CONCETTUALE.md come report umano 
+
+CHECK_MAPPA_CONCETTUALE
+
+exit code ≠ 0 se qualcosa è rotto (CI reale)
+
+💡 Nota importante:
+Il fatto che tu abbia:
+
+114 check
+
+0 fail
+
+solo warning “in migrazione”
+
+significa che l’architettura è già coerente.
+Stiamo facendo refactor strutturale, non salvataggio.
+
+2️⃣ runConceptChecks.js – CI di confini architetturali
+
+Questo è ancora più potente.
+
+Fa:
+
+inferenza di dominio per file
+
+analisi import / pattern / funzioni
+
+enforcement di invarianti definiti in rules.v2.json
+
+allowlist + annotation override
+
+report JSON + Markdown
+
+integrazione con TODO_LIST
+
+📌 Questo è un CI di disciplina architetturale
+→ “Questo codice NON dovrebbe stare qui”
+
+Questo è esattamente il tipo di CI che:
+
+impedisce spaghetti
+
+impedisce regressioni silenziose
+
+permette al progetto di crescere senza collassare
+
+Come si incastrano insieme (molto bene)
+Livello	Script	Protegge
+Concettuale	checkConceptualMap.js	mappa, docs, esistenza, allineamento
+Architetturale	runConceptChecks.js	confini, responsabilità, anti-pattern
+
+👉 NON sovrapporli
+👉 NON fonderli
+👉 Usali entrambi
+
+🔴 COSA DEVI ASSOLUTAMENTE AGGIORNARE ORA (dopo lo spostamento filosofie)
+
+Dopo che sposti i file in:
+
+docs/filosofie/00_foundation/...
+docs/filosofie/10_data_platform/...
+ecc.
+
+1️⃣ Aggiorna REFERENCES.docs in checkConceptualMap.js
+
+Ora punta ancora ai path vecchi:
+
+docs: [
+  'docs/filosofie/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md',
+  ...
+]
+
+
+🔧 Devi trasformarli in:
+
+docs: [
+  'docs/filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md',
+  'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB_V2.md',
+  ...
+]
+
+
+👉 Questo è voluto
+Il CI deve rompersi se qualcuno rimette una filosofia nel posto sbagliato.
+
+2️⃣ Aggiorna i riferimenti reference: nei check architetturali
+
+Esempio attuale:
+
+reference: 'FILOSOFIA_DB_V2.md sezione 3'
+
+
+Meglio (dopo refactor):
+
+reference: 'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB_V2.md#sezione-3'
+
+
+💡 Non è obbligatorio subito, ma è una miglioria di qualità.
+
+3️⃣ (Opzionale ma consigliato) – CI sulla struttura cartelle
+
+Puoi aggiungere 1 check semplice a checkConceptualMap.js:
+
+{
+  id: 'PHILOSOPHY_FOLDER_STRUCTURE',
+  description: 'Le filosofie devono stare nella cartella architetturale corretta',
+  files: [
+    'docs/filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md',
+    'docs/filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS_V2.md'
+  ],
+  severity: 'ERROR'
+}
+
+
+Questo trasforma la struttura in una regola CI.
+
+Cosa NON devi fare (importante)
+
+❌ Non spostare questi CI sotto /ops o /scripts/ci
+❌ Non convertirli in test Jest
+❌ Non “ammorbidirli”
+
+👉 Questi sono guardrail di progetto, non test unitari.
+
+Valutazione finale (onesta)
+
+Quello che hai costruito è:
+
+✅ molto sopra la media
+
+✅ già pronto per crescere (AI, modelli, nuove strategie)
+
+✅ già CI-driven (pochissimi fanno CI concettuali)
+
+✅ coerente con l’idea di “filosofie eseguibili”
+
+Stai facendo una cosa rara:
+stai trasformando l’architettura in codice verificabile.

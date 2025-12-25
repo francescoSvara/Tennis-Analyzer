@@ -368,6 +368,24 @@ function StrategiesPanel({ bundle, eventInfo }) {
   // Estrai strategie calcolate dal backend
   const strategySignals = bundle?.tabs?.strategies?.signals || [];
   
+  // Prova a usare le stats dal bundle se disponibili
+  const bundlePlayer1Stats = bundle?.header?.player1?.stats;
+  const bundlePlayer2Stats = bundle?.header?.player2?.stats;
+  
+  // Helper per convertire stats bundle in formato PlayerHistoryCard
+  const convertBundleStats = (bundleStats) => {
+    if (!bundleStats) return null;
+    return {
+      overall: {
+        win_rate: (bundleStats.winPercentage || 0) / 100,
+        comeback_rate: 0, // Non disponibile nel bundle attuale
+        roi: { roi_percent: 0 } // Non disponibile nel bundle attuale
+      },
+      surfaces: {},
+      total_matches: bundleStats.matchesPlayed || 0
+    };
+  };
+  
   // Helper per trovare il signal di una strategia specifica
   const getSignal = (strategyId) => {
     const signal = strategySignals.find(s => s.id === strategyId);
@@ -393,45 +411,18 @@ function StrategiesPanel({ bundle, eventInfo }) {
   const bancaServizioAnalysis = useMemo(() => getSignal('BANCA_SERVIZIO'), [strategySignals]);
   const superBreakAnalysis = useMemo(() => getSignal('SUPER_BREAK'), [strategySignals]);
 
-  // Carica statistiche storiche dei player (per colonna destra)
-  // Nota: queste potrebbero essere incluse nel bundle in futuro
+  // Usa stats dal bundle - niente fetch separati (architettura MatchBundle-only)
   useEffect(() => {
-    const fetchPlayerStats = async () => {
-      if (!homeName || !awayName || homeName === 'Home' || awayName === 'Away') {
-        return;
-      }
-      
-      // Skip se già caricato per questi giocatori
-      if (statsLoaded) return;
-      
-      setStatsLoading(true);
-      
-      try {
-        const [homeRes, awayRes] = await Promise.all([
-          fetch(apiUrl(`/api/player/${encodeURIComponent(homeName)}/stats`)),
-          fetch(apiUrl(`/api/player/${encodeURIComponent(awayName)}/stats`))
-        ]);
-        
-        if (homeRes.ok) {
-          const homeData = await homeRes.json();
-          setHomeStats(homeData);
-        }
-        
-        if (awayRes.ok) {
-          const awayData = await awayRes.json();
-          setAwayStats(awayData);
-        }
-        
-        setStatsLoaded(true);
-      } catch (err) {
-        console.error('Error fetching player stats:', err);
-      } finally {
-        setStatsLoading(false);
-      }
-    };
-
-    fetchPlayerStats();
-  }, [homeName, awayName]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (bundlePlayer1Stats && !homeStats) {
+      setHomeStats(convertBundleStats(bundlePlayer1Stats));
+    }
+    if (bundlePlayer2Stats && !awayStats) {
+      setAwayStats(convertBundleStats(bundlePlayer2Stats));
+    }
+    if (bundlePlayer1Stats || bundlePlayer2Stats) {
+      setStatsLoaded(true);
+    }
+  }, [bundlePlayer1Stats, bundlePlayer2Stats]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="strategies-panel">

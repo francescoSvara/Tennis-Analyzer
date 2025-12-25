@@ -4,7 +4,7 @@
 >
 > ⚠️ Questo NON è un documento “filosofico”. È una **spec tecnica** che può cambiare spesso.
 >
-> Riferimento architetturale: `docs/filosofie/FILOSOFIA_FRONTEND_UI_UX.md`
+> Riferimento architetturale: `docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md`
 
 ---
 
@@ -173,5 +173,5 @@ animate: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } }
 - Lottie solo se minimale/coerente (altrimenti placeholder + istruzioni)
 - Non introdurre dipendenze pesanti inutili
 
-Riferimento: `docs/filosofie/FILOSOFIA_FRONTEND_UI_UX.md` (principi e responsabilità)
+Riferimento: `docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md` (principi e responsabilità)
 

@@ -2,7 +2,7 @@
   "version": 2,
   "description": "Regole architetturali Tennis Analyzer v5.0 - MatchBundle-Centric",
   "lastUpdated": "2025-12-24",
-  "philosophy": "FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md",
+  "philosophy": "filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md",
   
   "domains": {
     "frontend_ui": {
@@ -19,7 +19,7 @@
         "supabase.from",
         "fetch.*sofascore"
       ],
-      "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md"
+      "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md"
     },
     
     "frontend_hooks": {
@@ -30,7 +30,7 @@
         "matchRepository"
       ],
       "forbiddenPatterns": [],
-      "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3"
+      "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 3"
     },
     
     "frontend_utils": {
@@ -41,7 +41,7 @@
         "express"
       ],
       "forbiddenPatterns": [],
-      "note": "Ref: FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.2 - Backend Interpretation Invariant"
+      "note": "Ref: FILOSOFIA_CONCEPT_CHECKS.md invariante 3.2 - Backend Interpretation Invariant"
     },
     
     "backend_api": {
@@ -52,7 +52,7 @@
         "jsx"
       ],
       "forbiddenPatterns": [],
-      "note": "Ref: FILOSOFIA_DB_V2.md sezione 3"
+      "note": "Ref: FILOSOFIA_DB.md sezione 3"
     },
     
     "backend_services": {
@@ -75,7 +75,7 @@
         "supabase"
       ],
       "forbiddenPatterns": [],
-      "note": "Ref: FILOSOFIA_STATS_V3.md sezione 6 - Strategy Engine"
+      "note": "Ref: FILOSOFIA_STATS.md sezione 6 - Strategy Engine"
     },
     
     "backend_db": {
@@ -99,7 +99,7 @@
         "supabase"
       ],
       "forbiddenPatterns": [],
-      "note": "Ref: FILOSOFIA_STATS_V3.md sezione 5 - Feature Engine"
+      "note": "Ref: FILOSOFIA_STATS.md sezione 5 - Feature Engine"
     },
     
     "backend_scraper": {
@@ -123,7 +123,7 @@
         "pattern": "fetch.*\\/api\\/(player|stats|momentum|odds|strategies)"
       },
       "remediation": "Usare /api/match/:id/bundle per ottenere tutto in un solo fetch",
-      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 2"
+      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 2"
     },
     {
       "id": "BACKEND_INTERPRETATION",
@@ -135,7 +135,7 @@
         "pattern": "calculatePressure|calculateMomentum|calculateEdge|calculateDataCompleteness|calculateVolatility|calculateElasticity"
       },
       "remediation": "Spostare calcoli in backend/utils/ o backend/services/",
-      "reference": "FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.2"
+      "reference": "FILOSOFIA_CONCEPT_CHECKS.md invariante 3.2"
     },
     {
       "id": "STRATEGY_OUTSIDE_ENGINE",
@@ -147,7 +147,7 @@
         "pattern": "analyzeLayTheWinner|analyzeBancaServizio|analyzeSuperBreak|evaluateStrategy"
       },
       "remediation": "Spostare in backend/strategies/strategyEngine.js",
-      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+      "reference": "FILOSOFIA_STATS.md sezione 6"
     },
     {
       "id": "SIGNAL_NOT_METRIC",
@@ -159,7 +159,7 @@
         "pattern": "INSERT.*status.*READY|INSERT.*signal.*WATCH|persist.*signal"
       },
       "remediation": "Segnali sono runtime, non persistibili",
-      "reference": "FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.4"
+      "reference": "FILOSOFIA_CONCEPT_CHECKS.md invariante 3.4"
     },
     {
       "id": "DATAQUALITY_BACKEND",
@@ -171,7 +171,7 @@
         "pattern": "calculateDataCompleteness|calculateQuality|completeness.*percent"
       },
       "remediation": "Leggere bundle.dataQuality, non calcolare",
-      "reference": "FILOSOFIA_CONCEPT_CHECKS_V2.md invariante 3.5"
+      "reference": "FILOSOFIA_CONCEPT_CHECKS.md invariante 3.5"
     },
     {
       "id": "INV-001",
@@ -293,7 +293,7 @@
       "file": "backend/server.js",
       "pattern": "app\\.(get|post).*\\/api\\/match\\/:.*\\/bundle",
       "severity": "ERROR",
-      "reference": "FILOSOFIA_DB_V2.md sezione 3"
+      "reference": "FILOSOFIA_DB.md sezione 3"
     },
     {
       "id": "STRATEGY_ENGINE_IMPLEMENTED",
@@ -301,7 +301,7 @@
       "file": "backend/strategies/strategyEngine.js",
       "antiPattern": "TODO.*Implementare",
       "severity": "ERROR",
-      "reference": "FILOSOFIA_STATS_V3.md sezione 6"
+      "reference": "FILOSOFIA_STATS.md sezione 6"
     },
     {
       "id": "USE_MATCH_BUNDLE_HOOK",
@@ -309,7 +309,7 @@
       "file": "src/hooks/useMatchBundle.jsx",
       "mustExist": true,
       "severity": "ERROR",
-      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md sezione 3"
+      "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 3"
     }
   ],
   

@@ -10,7 +10,16 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Correlato |
 |---------|-----------|--------------|
-| [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) (strategie) |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FRONTEND_DATA](../data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md), [RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) |
+
+### 📚 Documenti Correlati
+| Documento | Relazione |
+|-----------|-----------|
+| [FRONTEND_DATA](../data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Architettura hook/consumer |
+| [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) | Segnali strategia visualizzati |
+| [RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | Stake/risk display nel Journal |
+| [HPI_RESILIENCE](../../specs/HPI_RESILIENCE.md) | Pressure indicators UI |
+| [SPEC_MOTION_UI](../../specs/SPEC_FRONTEND_MOTION_UI.md) | Animazioni e transizioni |
 
 ### 📁 File Codice Principali
 | Tipo | File |
@@ -1616,7 +1625,7 @@ npm install lottie-react
 
 | ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
 |--------------|--------|---------------|
-| [FRONTEND_DATA_V2](FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md) | [📚 INDEX](INDEX_FILOSOFIE.md) | [CONCEPT_CHECKS_V2](FILOSOFIA_CONCEPT_CHECKS_V2.md) |
+| [FRONTEND_DATA](../data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [📚 INDEX](../../INDEX_FILOSOFIE.md) | [CONCEPT_CHECKS](../../00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) |
 
 ---
 

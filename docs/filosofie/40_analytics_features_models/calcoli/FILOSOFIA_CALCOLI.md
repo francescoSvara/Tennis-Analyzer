@@ -12,7 +12,15 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
 |---------|-----------|-----------------|
-| [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | [DB_V2](FILOSOFIA_DB_V2.md), [ODDS_V2](FILOSOFIA_ODDS_V2.md), [LIVE_V2](FILOSOFIA_LIVE_TRACKING_V2.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) (Strategy Engine) |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [DB](../../10_data_platform/storage/FILOSOFIA_DB.md), [ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md), [LIVE](../../20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [STATS](../stats/FILOSOFIA_STATS.md) (Strategy Engine) |
+
+### 📚 Documenti Correlati
+| Documento | Relazione |
+|-----------|-----------|
+| [STATS](../stats/FILOSOFIA_STATS.md) | Consuma le features per generare segnali |
+| [TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | `as_of_time` per calcoli deterministici |
+| [OBSERVABILITY](../../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Outlier detection, feature range validation |
+| [HPI_RESILIENCE](../../specs/HPI_RESILIENCE.md) | Specifiche pressure/resilience features |
 
 ### 📁 File Codice Principali
 | File | Descrizione | Entry Point |
@@ -488,13 +496,13 @@ const fixtures = [
 
 Le definizioni delle feature esistono in:
 - ✅ `backend/utils/featureEngine.js` - implementazione
-- ⚠️ `FILOSOFIA_STATS_V3.md` - documentazione parziale
+- ⚠️ `FILOSOFIA_STATS.md` - documentazione parziale
 - ⚠️ `HPI_RESILIENCE.md` - spec parziale HPI
 
 ### Piano Migrazione
 
-1. **STATS_V3** mantiene: architettura Feature→Strategy→Signal, regole macro
-2. **Questo documento** (CALCOLI_V1) diventa: contratto operativo per ogni feature
+1. **STATS** mantiene: architettura Feature→Strategy→Signal, regole macro
+2. **Questo documento** (CALCOLI) diventa: contratto operativo per ogni feature
 3. **HPI_RESILIENCE** rimane: spec dettagliata pressure/resilience (collegata qui)
 
 ---
@@ -503,7 +511,7 @@ Le definizioni delle feature esistono in:
 
 | ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
 |--------------|--------|---------------|
-| [HPI_RESILIENCE](../specs/HPI_RESILIENCE.md) | [📚 INDEX](INDEX_FILOSOFIE.md) | [STATS_V3](FILOSOFIA_STATS_V3.md) |
+| [HPI_RESILIENCE](../specs/HPI_RESILIENCE.md) | [📚 INDEX](../../INDEX_FILOSOFIE.md) | [STATS](../stats/FILOSOFIA_STATS.md) |
 
 ---
-**Fine documento – FILOSOFIA_CALCOLI_V1**
+**Fine documento – FILOSOFIA_CALCOLI**

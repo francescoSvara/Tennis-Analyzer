@@ -103,14 +103,14 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ### Core
 - **MatchBundle endpoint** - Single API per match data
-- **Feature Engine** - Calcolo con fallback completo
+- **Feature Engine** - Calcolo con fallback completo + dataSource flags per trasparenza origine dati
 - **Strategy Engine** - 5 strategie backend (LayTheWinner, BancaServizio, SuperBreak, ValueBetting, MomentumShift)
 - **Dual Source** - SofaScore + XLSX unificati
 - **dataQuality scoring** per ogni match
-- **Logger utility** - Logging strutturato backend
+- **Logger utility** - Logging strutturato backend (`backend/utils/logger.js`)
 
 ### Frontend
-- useMatchBundle hook
+- useMatchBundle hook (WS_URL da config, no localhost hardcoded)
 - StrategiesPanel consuma `bundle.tabs.strategies` (no calcoli locali)
 - Tabs: Overview, Strategies, Stats, Momentum, Predictor, PointByPoint
 - QuickSignals con features reali
@@ -121,21 +121,48 @@ Calcola features da dati disponibili (score, odds, rankings):
 - Normalizzazione odds/points
 - Stats stimate da score quando mancano
 
-### Docs
-- 9 documenti filosofia
-- Mappa concettuale
-- Check scripts automatici
+### Docs (25 Dic 2025)
+- **10 documenti filosofia** riorganizzati in cartelle gerarchiche:
+  - `00_foundation/` - MADRE, CONCEPT_CHECKS
+  - `10_data_platform/` - DB, TEMPORAL, REGISTRY_CANON, LINEAGE_VERSIONING, OBSERVABILITY
+  - `20_domain_tennis/` - LIVE_TRACKING
+  - `30_domain_odds_markets/` - ODDS
+  - `40_analytics_features_models/` - STATS, CALCOLI (nuovo)
+  - `50_strategy_risk_execution/` - RISK_BANKROLL
+  - `70_frontend/` - FRONTEND, FRONTEND_DATA_CONSUMPTION
+- **FILOSOFIA_CALCOLI** - Feature Library & Calculation Standards completa
+- **DEPRECATION_FRONTEND_UTILS.md** - Guida migrazione funzioni deprecate
+- Mappa concettuale con check automatici
+- Cross-references aggiornati (rimossi V1/V2/V3)
 
-### Metriche (24 Dic 2025)
+### Test (24 Dic 2025)
+- `test/features/volatility.test.js` - Test fixtures per fallback chain e dataSource
+
+### Metriche (25 Dic 2025)
 | Check | Valore |
 |-------|--------|
-| Errori arch | 20 |
-| Warning | 25 |
-| Check mappa | 112 ✓ |
+| Errori arch | **0** ✓ |
+| Warning | **0** ✓ |
+| Info | 30 |
+| Check mappa | 121 ✓ |
 
 ---
 
-## ?? Changelog
+## 📝 Changelog
+
+### v3.0.2 (25 Dic 2025) - Zero Errori Architetturali
+- **Eliminato `src/utils.js`** - File dead code (~2500 righe), nessun componente lo importava
+- **StrategiesPanel** - Rimosso fetch separato, usa solo bundle.header.player*.stats
+- **useMatchCard** - Rimosso hook `usePlayer` inutilizzato
+- **Errori: 20 → 0** | **Warning: 25 → 0**
+
+### v3.0.1 (25 Dic 2025) - Pulizia & Documentazione
+- Riorganizzazione filosofie in cartelle gerarchiche
+- FILOSOFIA_CALCOLI con tassonomia completa calcoli
+- Feature Engine con dataSource flags trasparenza
+- WS_URL da config (no localhost hardcoded)
+- 26 console.log migrati a logger strutturato
+- Cross-references documentazione aggiornati
 
 ### v3.0 (Dic 2025) - MatchBundle Architecture
 - Single endpoint design

@@ -12,7 +12,15 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
 |---------|-----------|----------------|
-| [FILOSOFIA_MADRE](FILOSOFIA_MADRE_TENNIS_ROLE_DRIVEN.md) | Fonti Esterne (SofaScore, XLSX) | [STATS_V3](FILOSOFIA_STATS_V3.md) |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Fonti Esterne (SofaScore, XLSX) | [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md), [LIVE](../../20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) |
+
+### 📚 Documenti Correlati (stesso layer)
+| Documento | Relazione |
+|-----------|-----------|
+| [TEMPORAL](../temporal/FILOSOFIA_TEMPORAL.md) | Regole timestamps per insert/query |
+| [REGISTRY_CANON](../registry_canon/FILOSOFIA_REGISTRY_CANON.md) | Normalizzazione player/match IDs |
+| [LINEAGE_VERSIONING](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | Versioning schema e snapshot |
+| [OBSERVABILITY](../quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Data quality checks su DB |
 
 ### 📁 File Codice Principali
 | File | Descrizione | Linee chiave |
@@ -363,4 +371,4 @@ MEDIA - Il fallback funziona, ma mantiene complessità
 
 ---
 
-**Fine documento – FILOSOFIA_DB_V2.1**
+**Fine documento – FILOSOFIA_DB**
