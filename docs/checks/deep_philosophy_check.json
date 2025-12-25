@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-12-25T09:42:37.036Z",
+  "timestamp": "2025-12-25T10:40:36.991Z",
   "summary": {
-    "totalChecks": 79,
-    "passed": 65,
-    "failed": 9,
-    "todoItems": 3
+    "totalChecks": 83,
+    "passed": 77,
+    "failed": 0,
+    "todoItems": 4
   },
   "philosophies": {
     "BANKROLL": {
@@ -72,26 +72,19 @@
           "file": "backend/services/matchCardService.js",
           "pattern": "/risk|stake|edge/i",
           "description": "matchCardService deve integrare risk output nel bundle",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         },
         {
           "type": "TABLE",
           "name": "bet_decisions",
           "description": "Log delle decisioni di betting",
-          "passed": false,
+          "passed": true,
+          "migrationFile": "add-bet-decisions-table.sql",
           "isTodo": true
         }
       ],
-      "errors": [
-        {
-          "type": "PATTERN_MISSING",
-          "file": "backend/services/matchCardService.js",
-          "pattern": "/risk|stake|edge/i",
-          "description": "matchCardService deve integrare risk output nel bundle",
-          "message": "Pattern richiesto NON TROVATO in backend/services/matchCardService.js: matchCardService deve integrare risk output nel bundle"
-        }
-      ],
+      "errors": [],
       "warnings": [],
       "todos": [
         {
@@ -99,12 +92,6 @@
           "file": "backend/services/riskEngine.js",
           "export": "kellyFractional",
           "message": "Export dichiarato come TODO: backend/services/riskEngine.js → kellyFractional"
-        },
-        {
-          "type": "TABLE_MISSING_TODO",
-          "name": "bet_decisions",
-          "description": "Log delle decisioni di betting",
-          "message": "Tabella dichiarata come TODO: bet_decisions"
         }
       ]
     },
@@ -152,7 +139,7 @@
           "file": "backend/liveManager.js",
           "pattern": "/ingestion_time|event_time|source_time/i",
           "description": "liveManager deve usare timestamp semantici (ingestion_time, event_time)",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         },
         {
@@ -160,7 +147,7 @@
           "file": "backend/utils/featureEngine.js",
           "pattern": "/as_of_time|asOfTime/i",
           "description": "featureEngine deve supportare as_of_time per anti-leakage",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         },
         {
@@ -168,33 +155,11 @@
           "file": "backend/services/matchCardService.js",
           "pattern": "/as_of_time|asOfTime|generated_at/i",
           "description": "matchCardService deve includere meta.as_of_time nel bundle",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         }
       ],
-      "errors": [
-        {
-          "type": "PATTERN_MISSING",
-          "file": "backend/liveManager.js",
-          "pattern": "/ingestion_time|event_time|source_time/i",
-          "description": "liveManager deve usare timestamp semantici (ingestion_time, event_time)",
-          "message": "Pattern richiesto NON TROVATO in backend/liveManager.js: liveManager deve usare timestamp semantici (ingestion_time, event_time)"
-        },
-        {
-          "type": "PATTERN_MISSING",
-          "file": "backend/utils/featureEngine.js",
-          "pattern": "/as_of_time|asOfTime/i",
-          "description": "featureEngine deve supportare as_of_time per anti-leakage",
-          "message": "Pattern richiesto NON TROVATO in backend/utils/featureEngine.js: featureEngine deve supportare as_of_time per anti-leakage"
-        },
-        {
-          "type": "PATTERN_MISSING",
-          "file": "backend/services/matchCardService.js",
-          "pattern": "/as_of_time|asOfTime|generated_at/i",
-          "description": "matchCardService deve includere meta.as_of_time nel bundle",
-          "message": "Pattern richiesto NON TROVATO in backend/services/matchCardService.js: matchCardService deve includere meta.as_of_time nel bundle"
-        }
-      ],
+      "errors": [],
       "warnings": [],
       "todos": []
     },
@@ -303,7 +268,7 @@
           "file": "backend/services/matchCardService.js",
           "pattern": "/meta\\.versions|versions\\s*:|bundle_schema|feature_version|strategy_version/i",
           "description": "matchCardService deve includere meta.versions nel bundle",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         },
         {
@@ -311,26 +276,11 @@
           "file": "src/hooks/useMatchBundle.jsx",
           "pattern": "/meta\\.versions|\\.meta\\b/i",
           "description": "useMatchBundle deve esporre meta dal bundle",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         }
       ],
-      "errors": [
-        {
-          "type": "PATTERN_MISSING",
-          "file": "backend/services/matchCardService.js",
-          "pattern": "/meta\\.versions|versions\\s*:|bundle_schema|feature_version|strategy_version/i",
-          "description": "matchCardService deve includere meta.versions nel bundle",
-          "message": "Pattern richiesto NON TROVATO in backend/services/matchCardService.js: matchCardService deve includere meta.versions nel bundle"
-        },
-        {
-          "type": "PATTERN_MISSING",
-          "file": "src/hooks/useMatchBundle.jsx",
-          "pattern": "/meta\\.versions|\\.meta\\b/i",
-          "description": "useMatchBundle deve esporre meta dal bundle",
-          "message": "Pattern richiesto NON TROVATO in src/hooks/useMatchBundle.jsx: useMatchBundle deve esporre meta dal bundle"
-        }
-      ],
+      "errors": [],
       "warnings": [],
       "todos": []
     },
@@ -342,7 +292,7 @@
           "type": "FILE",
           "path": "backend/services/dataQualityChecker.js",
           "description": "Data quality validation: missingness, outliers, staleness",
-          "passed": false,
+          "passed": true,
           "isTodo": true
         },
         {
@@ -351,6 +301,34 @@
           "description": "Structured logging",
           "passed": true,
           "isTodo": false
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/dataQualityChecker.js",
+          "export": "calculateCompleteness",
+          "passed": false,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/dataQualityChecker.js",
+          "export": "calculateStaleness",
+          "passed": true,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/dataQualityChecker.js",
+          "export": "detectOutliers",
+          "passed": false,
+          "isTodo": true
+        },
+        {
+          "type": "EXPORT",
+          "file": "backend/services/dataQualityChecker.js",
+          "export": "checkConsistency",
+          "passed": false,
+          "isTodo": true
         },
         {
           "type": "EXPORT",
@@ -379,10 +357,22 @@
       "warnings": [],
       "todos": [
         {
-          "type": "FILE_MISSING_TODO",
-          "path": "backend/services/dataQualityChecker.js",
-          "description": "Data quality validation: missingness, outliers, staleness",
-          "message": "File dichiarato come TODO: backend/services/dataQualityChecker.js"
+          "type": "EXPORT_MISSING_TODO",
+          "file": "backend/services/dataQualityChecker.js",
+          "export": "calculateCompleteness",
+          "message": "Export dichiarato come TODO: backend/services/dataQualityChecker.js → calculateCompleteness"
+        },
+        {
+          "type": "EXPORT_MISSING_TODO",
+          "file": "backend/services/dataQualityChecker.js",
+          "export": "detectOutliers",
+          "message": "Export dichiarato come TODO: backend/services/dataQualityChecker.js → detectOutliers"
+        },
+        {
+          "type": "EXPORT_MISSING_TODO",
+          "file": "backend/services/dataQualityChecker.js",
+          "export": "checkConsistency",
+          "message": "Export dichiarato come TODO: backend/services/dataQualityChecker.js → checkConsistency"
         }
       ]
     },
@@ -410,7 +400,7 @@
           "file": "backend/server.js",
           "pattern": "/event_time.*odds|odds.*timestamp|ingestion_time/i",
           "description": "Odds devono avere timestamp per tracciare movimento",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         },
         {
@@ -421,15 +411,7 @@
           "isTodo": false
         }
       ],
-      "errors": [
-        {
-          "type": "PATTERN_MISSING",
-          "file": "backend/server.js",
-          "pattern": "/event_time.*odds|odds.*timestamp|ingestion_time/i",
-          "description": "Odds devono avere timestamp per tracciare movimento",
-          "message": "Pattern richiesto NON TROVATO in backend/server.js: Odds devono avere timestamp per tracciare movimento"
-        }
-      ],
+      "errors": [],
       "warnings": [
         {
           "type": "TABLE_NOT_IN_MIGRATION",
@@ -505,7 +487,7 @@
           "file": "backend/db/liveTrackingRepository.js",
           "pattern": "/snapshot_time|snapshotTime|event_time/i",
           "description": "liveTrackingRepository deve usare snapshotTime per i dati live",
-          "passed": false,
+          "passed": true,
           "antiPattern": false
         },
         {
@@ -516,15 +498,7 @@
           "isTodo": false
         }
       ],
-      "errors": [
-        {
-          "type": "PATTERN_MISSING",
-          "file": "backend/db/liveTrackingRepository.js",
-          "pattern": "/snapshot_time|snapshotTime|event_time/i",
-          "description": "liveTrackingRepository deve usare snapshotTime per i dati live",
-          "message": "Pattern richiesto NON TROVATO in backend/db/liveTrackingRepository.js: liveTrackingRepository deve usare snapshotTime per i dati live"
-        }
-      ],
+      "errors": [],
       "warnings": [
         {
           "type": "TABLE_NOT_IN_MIGRATION",
@@ -617,19 +591,11 @@
           "file": "backend/utils/featureEngine.js",
           "pattern": "/null.*return|return.*null|!=\\s*null|\\?\\?/i",
           "description": "featureEngine: MAI restituire null, sempre fallback calcolato",
-          "passed": false,
+          "passed": true,
           "antiPattern": true
         }
       ],
-      "errors": [
-        {
-          "type": "ANTIPATTERN_FOUND",
-          "file": "backend/utils/featureEngine.js",
-          "pattern": "/null.*return|return.*null|!=\\s*null|\\?\\?/i",
-          "description": "featureEngine: MAI restituire null, sempre fallback calcolato",
-          "message": "Anti-pattern trovato in backend/utils/featureEngine.js: featureEngine: MAI restituire null, sempre fallback calcolato"
-        }
-      ],
+      "errors": [],
       "warnings": [],
       "todos": []
     },

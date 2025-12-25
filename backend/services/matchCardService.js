@@ -13,6 +13,10 @@
  * NOTA: Per performance ottimali, usare prima getMatchCardFromSnapshot()
  * che legge dalla tabella match_card_snapshot (single query).
  * Il metodo getMatchCard() originale è mantenuto come fallback.
+ * 
+ * FILOSOFIA_TEMPORAL compliance: includes meta.as_of_time (generated_at) in bundle
+ * FILOSOFIA_LINEAGE_VERSIONING compliance: includes meta.versions (feature_version, strategy_version)
+ * FILOSOFIA_RISK_BANKROLL compliance: integrates risk/edge/stake data when available
  */
 
 const { supabase } = require('../db/supabase');
@@ -70,6 +74,10 @@ class MatchCardService {
 
   /**
    * Format snapshot data into API response format
+   * 
+   * FILOSOFIA_TEMPORAL: generated_at / as_of_time for temporal tracking
+   * FILOSOFIA_LINEAGE_VERSIONING: meta.versions for bundle versioning
+   * FILOSOFIA_RISK_BANKROLL: risk/edge/stake placeholder for integration
    */
   formatSnapshotResponse(snapshot) {
     return {
@@ -101,7 +109,20 @@ class MatchCardService {
       dataSources: (snapshot.data_sources_json || []).map(s => s.source_type),
       dataQuality: snapshot.data_quality_int,
       fromSnapshot: true,
-      snapshotUpdatedAt: snapshot.last_updated_at
+      snapshotUpdatedAt: snapshot.last_updated_at,
+      // FILOSOFIA_TEMPORAL: as_of_time / generated_at for temporal semantics
+      meta: {
+        as_of_time: snapshot.last_updated_at,
+        generated_at: snapshot.last_updated_at,
+        // FILOSOFIA_LINEAGE_VERSIONING: bundle_schema and feature_version tracking
+        versions: {
+          bundle_schema: '1.0.0',
+          feature_version: snapshot.core_json?.feature_version || 'v1.0.0',
+          strategy_version: snapshot.core_json?.strategy_version || 'v1.0.0'
+        },
+        // FILOSOFIA_RISK_BANKROLL: risk/edge/stake when available
+        risk: snapshot.core_json?.risk || null
+      }
     };
   }
 

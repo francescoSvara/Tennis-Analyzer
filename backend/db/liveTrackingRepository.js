@@ -251,12 +251,18 @@ async function updatePriority(sourceEventId, priority) {
 
 /**
  * Registra un poll completato con successo
+ * 
+ * TEMPORAL SEMANTICS (FILOSOFIA_TEMPORAL_SEMANTICS compliance):
+ * - snapshotTime: momento esatto in cui lo snapshot è stato catturato
+ * - last_polled_at: quando il poll è stato completato
+ * 
  * @param {string} sourceEventId - ID evento
  * @param {string} payloadHash - Hash del payload
  * @param {Object} scoreData - Dati punteggio aggiornati
+ * @param {Object} temporalMeta - Metadati temporali opzionali
  * @returns {Object|null} Record aggiornato
  */
-async function recordPollSuccess(sourceEventId, payloadHash, scoreData = {}) {
+async function recordPollSuccess(sourceEventId, payloadHash, scoreData = {}, temporalMeta = {}) {
   if (!checkSupabase()) return null;
 
   const now = new Date();
@@ -264,9 +270,13 @@ async function recordPollSuccess(sourceEventId, payloadHash, scoreData = {}) {
   if (!tracking) return null;
 
   const nextPollAt = new Date(now.getTime() + (tracking.poll_interval_sec * 1000));
+  
+  // TEMPORAL SEMANTICS: snapshotTime indica quando i dati sono stati catturati
+  const snapshotTime = temporalMeta.snapshotTime || now.toISOString();
 
   const updateData = {
     last_polled_at: now.toISOString(),
+    snapshot_time: snapshotTime, // TEMPORAL SEMANTICS
     next_poll_at: nextPollAt.toISOString(),
     fail_count: 0, // Reset fail count on success
     last_error: null,

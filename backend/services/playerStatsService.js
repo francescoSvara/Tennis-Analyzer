@@ -765,6 +765,216 @@ async function getHeadToHeadStats(player1, player2) {
   };
 }
 
+// ============================================================================
+// SURFACE ANALYSIS (FILOSOFIA_STATS surface splits)
+// ============================================================================
+
+/**
+ * Sample size thresholds for surface analysis
+ */
+const SURFACE_SAMPLE_THRESHOLDS = {
+  MIN_SAMPLE: 8,           // Minimum matches for valid analysis
+  LOW_SAMPLE_WARN: 15,     // Below this, flag as LOW_SAMPLE
+  OK_SAMPLE: 25            // Above this, sample is good
+};
+
+/**
+ * Normalize surface name
+ */
+function normalizeSurface(surface) {
+  if (!surface) return 'unknown';
+  const s = surface.toLowerCase().trim();
+  
+  if (s.includes('hard')) return 'hard';
+  if (s.includes('clay')) return 'clay';
+  if (s.includes('grass')) return 'grass';
+  if (s.includes('carpet')) return 'carpet';
+  
+  return s;
+}
+
+/**
+ * Calculate surface splits for a player
+ * 
+ * Returns win rate, hold/break rates (if available), with sample flags
+ * 
+ * ANTI-BIAS RULES:
+ * - sampleFlag = "LOW_SAMPLE" if matches < 8
+ * - sampleFlag = "OK" if matches >= 8
+ * - Supports time windows: career, last_52_weeks, last_24_months
+ * 
+ * @param {string} playerName - Player name to search
+ * @param {Object} options - Options
+ * @param {string} [options.window='career'] - Time window: 'career' | 'last_52_weeks' | 'last_24_months'
+ * @returns {Object} Surface splits { hard, clay, grass } with sampleFlag
+ */
+async function calculateSurfaceSplits(playerName, options = {}) {
+  const { window = 'career' } = options;
+  
+  // Get all matches for player
+  let matches = await getPlayerMatches(playerName);
+  
+  if (!matches || matches.length === 0) {
+    return {
+      hard: { matches: 0, winRate: 0, sampleFlag: 'NO_DATA' },
+      clay: { matches: 0, winRate: 0, sampleFlag: 'NO_DATA' },
+      grass: { matches: 0, winRate: 0, sampleFlag: 'NO_DATA' },
+      window,
+      totalMatches: 0
+    };
+  }
+  
+  // Apply time window filter
+  const now = new Date();
+  if (window === 'last_52_weeks') {
+    const cutoff = new Date(now.getTime() - 52 * 7 * 24 * 60 * 60 * 1000);
+    matches = matches.filter(m => {
+      const matchDate = new Date(m.start_time || m.date || m.match_date);
+      return matchDate >= cutoff;
+    });
+  } else if (window === 'last_24_months') {
+    const cutoff = new Date(now.getTime() - 24 * 30 * 24 * 60 * 60 * 1000);
+    matches = matches.filter(m => {
+      const matchDate = new Date(m.start_time || m.date || m.match_date);
+      return matchDate >= cutoff;
+    });
+  }
+  
+  // Group by surface
+  const surfaces = {
+    hard: { wins: 0, losses: 0, matches: [] },
+    clay: { wins: 0, losses: 0, matches: [] },
+    grass: { wins: 0, losses: 0, matches: [] }
+  };
+  
+  for (const match of matches) {
+    const surface = normalizeSurface(match.surface);
+    
+    if (!surfaces[surface]) {
+      surfaces[surface] = { wins: 0, losses: 0, matches: [] };
+    }
+    
+    surfaces[surface].matches.push(match);
+    
+    if (match.player_role === 'winner') {
+      surfaces[surface].wins++;
+    } else {
+      surfaces[surface].losses++;
+    }
+  }
+  
+  // Build result with sample flags
+  const result = {
+    window,
+    totalMatches: matches.length
+  };
+  
+  for (const [surface, data] of Object.entries(surfaces)) {
+    const matchCount = data.matches.length;
+    const winRate = matchCount > 0 ? data.wins / matchCount : 0;
+    
+    // Determine sample flag
+    let sampleFlag;
+    if (matchCount === 0) {
+      sampleFlag = 'NO_DATA';
+    } else if (matchCount < SURFACE_SAMPLE_THRESHOLDS.MIN_SAMPLE) {
+      sampleFlag = 'LOW_SAMPLE';
+    } else if (matchCount < SURFACE_SAMPLE_THRESHOLDS.LOW_SAMPLE_WARN) {
+      sampleFlag = 'SMALL_SAMPLE';
+    } else {
+      sampleFlag = 'OK';
+    }
+    
+    // Calculate hold/break rates from statistics if available (future enhancement)
+    // For now, use estimate from win rate
+    let holdRate = null;
+    let breakRate = null;
+    
+    // Estimate hold/break from win rate (rough approximation)
+    // Better players hold more and break more
+    if (matchCount >= SURFACE_SAMPLE_THRESHOLDS.MIN_SAMPLE) {
+      // Hold rate typically 70-90% for pros, correlates with win rate
+      holdRate = 0.70 + (winRate * 0.20);
+      // Break rate typically 15-35% for pros
+      breakRate = 0.15 + (winRate * 0.20);
+    }
+    
+    result[surface] = {
+      matches: matchCount,
+      wins: data.wins,
+      losses: data.losses,
+      winRate: parseFloat(winRate.toFixed(4)),
+      winRatePercent: parseFloat((winRate * 100).toFixed(1)),
+      holdRate: holdRate ? parseFloat(holdRate.toFixed(4)) : null,
+      breakRate: breakRate ? parseFloat(breakRate.toFixed(4)) : null,
+      sampleFlag,
+      // Include recent form if we have recent matches
+      recentForm: data.matches.slice(-5).map(m => m.player_role === 'winner' ? 'W' : 'L').reverse()
+    };
+  }
+  
+  return result;
+}
+
+/**
+ * Get surface splits for both players in a match
+ * 
+ * @param {string} player1Name - Player 1 name
+ * @param {string} player2Name - Player 2 name
+ * @param {string} matchSurface - Surface of current match (for highlighting)
+ * @param {Object} options - Options passed to calculateSurfaceSplits
+ * @returns {Object} { playerA: surfaceSplits, playerB: surfaceSplits, matchSurface }
+ */
+async function getMatchSurfaceSplits(player1Name, player2Name, matchSurface, options = {}) {
+  const [player1Splits, player2Splits] = await Promise.all([
+    calculateSurfaceSplits(player1Name, options),
+    calculateSurfaceSplits(player2Name, options)
+  ]);
+  
+  const normalizedSurface = normalizeSurface(matchSurface);
+  
+  return {
+    playerA: player1Splits,
+    playerB: player2Splits,
+    matchSurface: normalizedSurface,
+    // Quick comparison for current surface
+    comparison: {
+      surface: normalizedSurface,
+      playerA: player1Splits[normalizedSurface] || null,
+      playerB: player2Splits[normalizedSurface] || null,
+      advantage: calculateSurfaceAdvantage(
+        player1Splits[normalizedSurface], 
+        player2Splits[normalizedSurface]
+      )
+    }
+  };
+}
+
+/**
+ * Calculate which player has advantage on surface
+ */
+function calculateSurfaceAdvantage(p1Stats, p2Stats) {
+  if (!p1Stats || !p2Stats) return null;
+  if (p1Stats.sampleFlag === 'NO_DATA' || p2Stats.sampleFlag === 'NO_DATA') return null;
+  
+  // Low sample warning
+  const lowSample = p1Stats.sampleFlag === 'LOW_SAMPLE' || p2Stats.sampleFlag === 'LOW_SAMPLE';
+  
+  const diff = p1Stats.winRate - p2Stats.winRate;
+  
+  let advantage = 'even';
+  if (diff > 0.10) advantage = 'playerA';
+  else if (diff < -0.10) advantage = 'playerB';
+  else if (diff > 0.05) advantage = 'slight_playerA';
+  else if (diff < -0.05) advantage = 'slight_playerB';
+  
+  return {
+    advantage,
+    winRateDiff: parseFloat(diff.toFixed(4)),
+    lowSampleWarning: lowSample
+  };
+}
+
 module.exports = {
   getPlayerStats,
   getPlayerMatches,
@@ -772,5 +982,10 @@ module.exports = {
   getHeadToHeadStats,
   calculateH2H: getHeadToHeadStats, // alias FILOSOFIA_STATS
   calculateComebackRate,
-  calculateROI
+  calculateROI,
+  // Surface analysis (new)
+  calculateSurfaceSplits,
+  getMatchSurfaceSplits,
+  normalizeSurface,
+  SURFACE_SAMPLE_THRESHOLDS
 };

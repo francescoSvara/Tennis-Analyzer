@@ -1,24 +1,13 @@
 {
-  "timestamp": "2025-12-25T09:42:44.634Z",
+  "timestamp": "2025-12-25T10:40:36.810Z",
   "mode": "full",
-  "duration_ms": 206,
+  "duration_ms": 161,
   "summary": {
     "errors": 0,
-    "warns": 8,
+    "warns": 6,
     "infos": 30
   },
   "findings": [
-    {
-      "severity": "WARN",
-      "ruleId": "LIN-004",
-      "file": "backend/services/matchCardService.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "matchCardService deve includere meta nel bundle salvato",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: meta:\\s*\\{|meta\\.versions|versions:\\s*\\{",
-      "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 5"
-    },
     {
       "severity": "WARN",
       "ruleId": "LIN-005",
@@ -40,17 +29,6 @@
       "match": "PATTERN_MISSING",
       "remediation": "Implementare: event_time|eventTime",
       "reference": "FILOSOFIA_TEMPORAL.md sezione 2 - Event Time vs Ingestion Time"
-    },
-    {
-      "severity": "WARN",
-      "ruleId": "TEMP-002",
-      "file": "backend/db/liveTrackingRepository.js",
-      "line": 0,
-      "domain": "architecture",
-      "message": "Live tracking deve usare snapshotTime per i dati live",
-      "match": "PATTERN_MISSING",
-      "remediation": "Implementare: snapshot_time|snapshotTime|event_time",
-      "reference": "FILOSOFIA_TEMPORAL.md sezione 3 - Live Snapshot Time"
     },
     {
       "severity": "WARN",

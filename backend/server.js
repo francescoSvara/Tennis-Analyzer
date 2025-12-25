@@ -3341,6 +3341,62 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
     };
     
     // 7. Return the unified bundle
+    // DEEP-001: Integrate risk engine if available
+    let riskAnalysis = null;
+    try {
+      const riskEngine = require('./services/riskEngine');
+      // Calcola risk se abbiamo odds e features
+      if (normalizedOdds?.home?.value && features.dominance) {
+        const modelProb = features.dominance / 100; // Converti dominance in probabilità
+        riskAnalysis = riskEngine.analyzeRisk({
+          modelProb,
+          marketOdds: normalizedOdds.home.value,
+          bankroll: 1000, // Default, frontend può ricalcolare
+          confidence: (100 - features.volatility) / 100,
+          volatility: features.volatility
+        });
+      }
+    } catch (e) {
+      // riskEngine non disponibile, continua senza
+    }
+    
+    // DEEP-004: as_of_time per il bundle
+    const bundleAsOfTime = new Date().toISOString();
+    
+    // =================================================================
+    // SURFACE SPLITS (FILOSOFIA_STATS surface analysis)
+    // =================================================================
+    let surfaceSplitsData = null;
+    try {
+      if (playerStatsService?.getMatchSurfaceSplits) {
+        const player1Name = finalMatchData.player1?.name || finalMatchData.match?.homeTeam?.name;
+        const player2Name = finalMatchData.player2?.name || finalMatchData.match?.awayTeam?.name;
+        const matchSurface = finalMatchData.match?.surface || finalMatchData.tournament?.surface;
+        
+        if (player1Name && player2Name && matchSurface) {
+          surfaceSplitsData = await playerStatsService.getMatchSurfaceSplits(
+            player1Name, 
+            player2Name, 
+            matchSurface,
+            { window: 'career' }
+          );
+        }
+      }
+    } catch (surfaceErr) {
+      console.warn(`⚠️ Surface splits calculation failed:`, surfaceErr.message);
+    }
+    
+    // Add surface splits to stats tab if available
+    if (surfaceSplitsData) {
+      tabs.stats = tabs.stats || {};
+      tabs.stats.surfaceSplits = {
+        playerA: surfaceSplitsData.playerA,
+        playerB: surfaceSplitsData.playerB,
+        matchSurface: surfaceSplitsData.matchSurface,
+        comparison: surfaceSplitsData.comparison
+      };
+    }
+    
     const bundle = {
       matchId: parseInt(eventId),
       timestamp: new Date().toISOString(),
@@ -3353,14 +3409,89 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
         source: finalMatchData.fromSnapshot ? 'snapshot' : (finalMatchData.fromLegacy ? 'legacy' : 'live'),
         strategiesCount: strategySignals.length,
         readyStrategies: strategySummary.ready,
+        // DEEP-004: TEMPORAL SEMANTICS - as_of_time per il bundle
+        as_of_time: bundleAsOfTime,
+        // DEEP-001: Risk analysis output
+        risk: riskAnalysis,
         // FILOSOFIA_LINEAGE_VERSIONING compliance
         versions: {
           bundle_schema: '2.0.0',
           features: require('./utils/featureEngine').FEATURE_ENGINE_VERSION || 'v1.0.0',
-          strategies: require('./strategies/strategyEngine').STRATEGY_ENGINE_VERSION || 'v1.0.0'
+          strategies: require('./strategies/strategyEngine').STRATEGY_ENGINE_VERSION || 'v1.0.0',
+          risk: riskAnalysis?.meta?.version || 'v1.0.0'
         }
       }
     };
+    
+    // =================================================================
+    // QUALITY EVALUATION (FILOSOFIA_OBSERVABILITY)
+    // =================================================================
+    try {
+      const dataQualityChecker = require('./services/dataQualityChecker');
+      const qualityResult = dataQualityChecker.evaluateBundleQuality(bundle);
+      bundle.meta.quality = qualityResult;
+      
+      if (qualityResult.status === 'FAIL') {
+        console.warn(`⚠️ Bundle quality FAIL for ${eventId}:`, qualityResult.issues.map(i => i.code).join(', '));
+      }
+    } catch (qualityErr) {
+      console.warn(`⚠️ Quality check failed:`, qualityErr.message);
+    }
+    
+    // =================================================================
+    // BET DECISION LOGGING (if enabled via env and recommendation exists)
+    // =================================================================
+    if (process.env.LOG_BET_DECISIONS === 'true' && riskAnalysis?.recommendation) {
+      try {
+        const betDecisionsRepo = require('./db/betDecisionsRepository');
+        
+        // Determine decision type from risk analysis
+        let decision = 'NO_BET';
+        if (riskAnalysis.recommendation === 'BET' && riskAnalysis.edge?.hasEdge) {
+          decision = 'RECOMMEND';
+        } else if (riskAnalysis.edge?.value > 0) {
+          decision = 'WATCH';
+        }
+        
+        // Only log if there's some action (not pure NO_BET with no edge)
+        if (decision !== 'NO_BET' || riskAnalysis.edge?.value > -0.05) {
+          await betDecisionsRepo.insertDecision({
+            matchId: parseInt(eventId),
+            playerAId: finalMatchData.player1?.id,
+            playerBId: finalMatchData.player2?.id,
+            tournamentId: finalMatchData.tournament?.id,
+            asOfTime: bundleAsOfTime,
+            versions: bundle.meta.versions,
+            market: 'match_winner',
+            selection: features.dominantPlayer === 'home' ? 'home' : 'away',
+            pricing: {
+              priceSeen: normalizedOdds?.home?.value,
+              priceMin: riskAnalysis.priceMin,
+              impliedProb: normalizedOdds?.home?.value ? 1 / normalizedOdds.home.value : null,
+              modelProb: features.dominance / 100,
+              edge: riskAnalysis.edge?.value
+            },
+            stake: {
+              bankroll: 1000,
+              recommended: riskAnalysis.stake?.amount,
+              kellyFraction: 0.25
+            },
+            risk: riskAnalysis.risk,
+            decision,
+            confidence: (100 - features.volatility) / 100,
+            reasonCodes: strategySignals.filter(s => s.ready).map(s => s.name),
+            bundleMeta: {
+              source: bundle.meta.source,
+              quality: bundle.meta.quality?.status,
+              qualityScore: bundle.meta.quality?.score
+            }
+          });
+        }
+      } catch (betLogErr) {
+        // Non-blocking: log error but continue
+        console.warn(`⚠️ Bet decision logging failed:`, betLogErr.message);
+      }
+    }
     
     console.log(`✅ Bundle built for ${eventId}: quality=${dataQuality}%, strategies=${strategySignals.length} (${strategySummary.ready} ready)`);
     res.json(bundle);
@@ -3450,6 +3581,12 @@ function transformLegacyMatchToBundle(legacyMatch) {
 /**
  * Normalizza odds nel formato atteso dal frontend
  * Frontend si aspetta: { home: { value, trend }, away: { value, trend } }
+ * 
+ * TEMPORAL SEMANTICS (FILOSOFIA_TEMPORAL_SEMANTICS compliance):
+ * - event_time: timestamp del movimento delle quote
+ * 
+ * FILOSOFIA_ODDS compliance: odds timestamp for movement tracking
+ * Pattern: event_time for odds, ingestion_time for tracking when data arrived
  */
 function normalizeOddsForBundle(oddsData, matchData) {
   // Caso 1: oddsData dal repository (structure: { opening, closing, all })
@@ -3469,7 +3606,9 @@ function normalizeOddsForBundle(oddsData, matchData) {
       away: { 
         value: current.odds_player2, 
         trend: awayTrend > 0.05 ? 1 : (awayTrend < -0.05 ? -1 : 0) 
-      }
+      },
+      // DEEP-007: TEMPORAL SEMANTICS - event_time per movimento quote
+      event_time: current.recorded_at || current.timestamp || new Date().toISOString()
     };
   }
   

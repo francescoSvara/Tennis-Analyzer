@@ -1,6 +1,6 @@
 # 🔍 CHECK MAPPA CONCETTUALE
 
-> Risultato verifica automatica: 25 dicembre 2025 alle ore 10:31
+> Risultato verifica automatica: 25 dicembre 2025 alle ore 11:40
 > Script: `scripts/checkConceptualMap.js`
 > Esegui: `node scripts/checkConceptualMap.js`
 
@@ -10,8 +10,8 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Check totali | 125 |
-| ✅ Passati | 125 |
+| Check totali | 128 |
+| ✅ Passati | 128 |
 | ❌ Falliti | 0 |
 | ⚠️ Warning | 0 |
 | 📄 Non doc | 0 |

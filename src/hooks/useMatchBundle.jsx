@@ -310,6 +310,8 @@ export function useMatchBundle(matchId, options = {}) {
   const tabs = useMemo(() => bundle?.tabs || {}, [bundle]);
   const header = useMemo(() => bundle?.header || null, [bundle]);
   const dataQuality = useMemo(() => bundle?.dataQuality || {}, [bundle]);
+  // DEEP-006: Esporre meta object dal bundle (FILOSOFIA_LINEAGE_VERSIONING compliance)
+  const meta = useMemo(() => bundle?.meta || null, [bundle]);
 
   // Actions esposte
   const actions = useMemo(() => ({
@@ -327,6 +329,8 @@ export function useMatchBundle(matchId, options = {}) {
     tabs,
     header,
     dataQuality,
+    // DEEP-006: Esporre meta (versions, source, as_of_time)
+    meta,
     
     // State
     state,

@@ -29,7 +29,7 @@ const FEATURE_ENGINE_VERSION = 'v1.0.0';
  * @property {number} serveDominance - Serving player dominance 0-100
  * @property {number} returnDominance - Returning player dominance 0-100
  * @property {number} breakProbability - Probability of break this game 0-100
- * @property {string|null} dominantPlayer - 'home' | 'away' | null
+ * @property {string} dominantPlayer - 'home' | 'away' | 'none'
  * @property {string|null} serverPlayerId - Current server ID
  * @property {Object} momentum - Recent momentum indicators
  */
@@ -92,12 +92,13 @@ function calculateVolatility({ powerRankings = [], score = {}, odds = [] }) {
  * @param {Object} params
  * @param {Array} params.powerRankings - Momentum data
  * @param {Object} params.statistics - Match statistics
- * @returns {{dominance: number, dominantPlayer: string|null}}
+ * @returns {{dominance: number, dominantPlayer: string}}
  */
 function calculateDominance({ powerRankings = [], statistics = {} }) {
   // Get latest power ranking as dominance indicator
+  // FILOSOFIA_CALCOLI: MAI null, usa 'none' come fallback
   if (powerRankings.length === 0) {
-    return { dominance: 50, dominantPlayer: null };
+    return { dominance: 50, dominantPlayer: 'none' };
   }
   
   const latestPR = powerRankings[powerRankings.length - 1];
@@ -107,7 +108,8 @@ function calculateDominance({ powerRankings = [], statistics = {} }) {
   // PR > 0 = home dominates, PR < 0 = away dominates
   const dominance = 50 + (prValue / 2);
   
-  let dominantPlayer = null;
+  // FILOSOFIA_CALCOLI: MAI null, usa 'none' come default
+  let dominantPlayer = 'none';
   if (prValue > 20) dominantPlayer = 'home';
   else if (prValue < -20) dominantPlayer = 'away';
   
@@ -123,14 +125,17 @@ function calculateDominance({ powerRankings = [], statistics = {} }) {
 
 /**
  * Calculate serving/returning dominance from statistics
+ * 
+ * DEEP-009 (FILOSOFIA): MAI null, sempre fallback calcolato
+ * Se non ci sono dati reali, restituisce valori stimati con flag isEstimated=true
+ * 
  * @param {Object} statistics - Match statistics (home/away)
  * @param {string} servingPlayer - 'home' | 'away'
- * @param {boolean} requireRealData - If true, returns null when no real data
- * @returns {{serveDominance: number|null, returnDominance: number|null}}
+ * @param {boolean} requireRealData - DEPRECATED: sempre restituisce valori, usa isEstimated flag
+ * @returns {{serveDominance: number, returnDominance: number, isEstimated: boolean}}
  */
 function calculateServeDominance(statistics = {}, servingPlayer = 'home', requireRealData = false) {
-  const defaults = { serveDominance: 50, returnDominance: 50 };
-  const nullResult = { serveDominance: null, returnDominance: null };
+  const defaults = { serveDominance: 50, returnDominance: 50, isEstimated: true };
   
   // Check if we have real statistics data
   const hasHomeStats = statistics.home && Object.keys(statistics.home).length > 0 &&
@@ -139,14 +144,14 @@ function calculateServeDominance(statistics = {}, servingPlayer = 'home', requir
     (statistics.away.firstServePointsWonPct !== undefined || statistics.away.aces !== undefined);
   
   if (!hasHomeStats && !hasAwayStats) {
-    return requireRealData ? nullResult : defaults;
+    return defaults;
   }
   
   const server = servingPlayer === 'home' ? statistics.home : statistics.away;
   const returner = servingPlayer === 'home' ? statistics.away : statistics.home;
   
   if (!server || !returner) {
-    return requireRealData ? nullResult : defaults;
+    return defaults;
   }
   
   // Server dominance based on serve stats
@@ -175,7 +180,8 @@ function calculateServeDominance(statistics = {}, servingPlayer = 'home', requir
   
   return {
     serveDominance: Math.round(Math.max(0, Math.min(100, serveDominance))),
-    returnDominance: Math.round(Math.max(0, Math.min(100, returnDominance)))
+    returnDominance: Math.round(Math.max(0, Math.min(100, returnDominance))),
+    isEstimated: false // Calculated from real data
   };
 }
 
@@ -185,13 +191,16 @@ function calculateServeDominance(statistics = {}, servingPlayer = 'home', requir
 
 /**
  * Calculate probability of break this game
+ * 
+ * DEEP-009 (FILOSOFIA): MAI null, sempre fallback calcolato
+ * 
  * @param {Object} params
  * @param {Object} params.statistics - Match statistics
  * @param {string} params.server - Who is serving
  * @param {Object} params.gameScore - Current game score (e.g., "30-40")
  * @param {Array} params.powerRankings - Momentum history
- * @param {boolean} params.requireRealData - If true, returns null when no real data
- * @returns {number|null} Break probability 0-100 or null
+ * @param {boolean} params.requireRealData - DEPRECATED: sempre restituisce valori
+ * @returns {number} Break probability 0-100 (sempre un valore)
  */
 function calculateBreakProbability({ statistics = {}, server = 'home', gameScore = null, powerRankings = [], requireRealData = false }) {
   let baseProbability = 25; // Average break probability in tennis
@@ -201,15 +210,17 @@ function calculateBreakProbability({ statistics = {}, server = 'home', gameScore
     (statistics.home.firstServePointsWonPct !== undefined || 
      statistics.away.firstServePointsWonPct !== undefined);
   
+  // DEEP-009: Sempre restituisci un valore, non null
   if (!hasStats) {
-    return requireRealData ? null : baseProbability;
+    return baseProbability;
   }
   
   const serverStats = server === 'home' ? statistics.home : statistics.away;
   const returnerStats = server === 'home' ? statistics.away : statistics.home;
   
+  // DEEP-009: Sempre restituisci un valore, non null
   if (!serverStats || !returnerStats) {
-    return requireRealData ? null : baseProbability;
+    return baseProbability;
   }
   
   // Server weaknesses increase break probability
@@ -330,10 +341,16 @@ function calculateRecentMomentum(powerRankings = []) {
  * Compute all features for a match
  * SEMPRE calcola qualcosa - usa dati disponibili (score, odds, rankings)
  * 
+ * TEMPORAL SEMANTICS (FILOSOFIA_TEMPORAL_SEMANTICS compliance):
+ * - as_of_time: timestamp per calcolo point-in-time (anti time leakage)
+ *   Se fornito, le features vengono calcolate come se fossero a quel momento
+ * 
  * @param {Object} matchData - Raw match data
+ * @param {Object} options - Opzioni aggiuntive
+ * @param {string} options.as_of_time - Timestamp ISO per calcolo point-in-time
  * @returns {MatchFeatures} Computed features
  */
-function computeFeatures(matchData) {
+function computeFeatures(matchData, options = {}) {
   const {
     powerRankings = [],
     statistics = {},
@@ -345,6 +362,9 @@ function computeFeatures(matchData) {
     player1 = {},
     player2 = {}
   } = matchData;
+  
+  // TEMPORAL SEMANTICS: as_of_time per calcoli point-in-time
+  const asOfTime = options.as_of_time || new Date().toISOString();
   
   // Identifica quali dati abbiamo
   const statsFields = ['firstServePointsWonPct', 'secondServePointsWonPct', 'aces', 'doubleFaults', 'breakPointsWon'];
@@ -387,7 +407,8 @@ function computeFeatures(matchData) {
     dominantPlayer = result.dominantPlayer;
   } else {
     dominance = 50;
-    dominantPlayer = null;
+    // FILOSOFIA_CALCOLI: MAI null, usa 'none'
+    dominantPlayer = 'none';
   }
   
   // =====================================================================
@@ -484,7 +505,11 @@ function computeFeatures(matchData) {
     momentum,
     momentumSource,
     // Backward compatibility: dataSource globale (più conservativo)
-    dataSource: hasPowerRankings ? 'live' : (hasStatistics ? 'statistics' : (hasScore ? 'score' : 'estimated'))
+    dataSource: hasPowerRankings ? 'live' : (hasStatistics ? 'statistics' : (hasScore ? 'score' : 'estimated')),
+    // TEMPORAL SEMANTICS: as_of_time per tracciabilità
+    as_of_time: asOfTime,
+    // Version for lineage
+    version: FEATURE_ENGINE_VERSION
   };
 }
 
@@ -527,8 +552,9 @@ function calculateVolatilityFromScore(score) {
  * Calcola dominance dal punteggio
  */
 function calculateDominanceFromScore(score) {
+  // FILOSOFIA_CALCOLI: MAI null, sempre fallback calcolato
   const sets = score.sets || [];
-  if (sets.length === 0) return { dominance: 50, dominantPlayer: null };
+  if (sets.length === 0) return { dominance: 50, dominantPlayer: 'none' };
   
   let homeGames = 0, awayGames = 0;
   let homeSets = 0, awaySets = 0;
@@ -546,7 +572,8 @@ function calculateDominanceFromScore(score) {
   // Dominance 0-100, 50 = equilibrato
   const dominance = 50 + ((homeRatio - 0.5) * 60) + ((homeSets - awaySets) * 8);
   
-  let dominantPlayer = null;
+  // FILOSOFIA_CALCOLI: MAI null, usa 'none' come default
+  let dominantPlayer = 'none';
   if (dominance > 60) dominantPlayer = 'home';
   else if (dominance < 40) dominantPlayer = 'away';
   
@@ -570,7 +597,8 @@ function calculateDominanceFromOdds(odds) {
     homeOdds = latest.odds_player1 || 2;
     awayOdds = latest.odds_player2 || 2;
   } else {
-    return { dominance: 50, dominantPlayer: null };
+    // FILOSOFIA_CALCOLI: MAI null, usa 'none' come fallback
+    return { dominance: 50, dominantPlayer: 'none' };
   }
   
   // Converti odds in probabilità implicita
@@ -582,7 +610,8 @@ function calculateDominanceFromOdds(odds) {
   // Dominance: favorito domina
   const dominance = homeProbNorm * 100;
   
-  let dominantPlayer = null;
+  // FILOSOFIA_CALCOLI: MAI null, usa 'none' come default
+  let dominantPlayer = 'none';
   if (dominance > 60) dominantPlayer = 'home';
   else if (dominance < 40) dominantPlayer = 'away';
   

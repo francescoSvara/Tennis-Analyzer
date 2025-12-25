@@ -73,7 +73,9 @@ const REFERENCES = {
     'backend/services/calculationQueueWorker.js',
     'backend/services/dataNormalizer.js',
     'backend/services/unifiedImporter.js',
-    'backend/services/strategyStatsService.js'
+    'backend/services/strategyStatsService.js',
+    'backend/services/dataQualityChecker.js',
+    'backend/services/riskEngine.js'
   ],
 
   // Backend Strategies
@@ -96,6 +98,7 @@ const REFERENCES = {
   backendDb: [
     'backend/db/matchRepository.js',
     'backend/db/liveTrackingRepository.js',
+    'backend/db/betDecisionsRepository.js',
     'backend/db/supabase.js'
   ],
 
@@ -176,12 +179,12 @@ const FUNCTIONS_TO_CHECK = [
   { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominance', expectedLine: 126 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbability', expectedLine: 191 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateRecentMomentum', expectedLine: 277 },
-  { file: 'backend/utils/featureEngine.js', func: 'computeFeatures', expectedLine: 331 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateVolatilityFromScore', expectedLine: 476 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromScore', expectedLine: 507 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromOdds', expectedLine: 540 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominanceFromRankings', expectedLine: 573 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbabilityFromOddsRankings', expectedLine: 598 },
+  { file: 'backend/utils/featureEngine.js', func: 'computeFeatures', expectedLine: 353 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateVolatilityFromScore', expectedLine: 523 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromScore', expectedLine: 554 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromOdds', expectedLine: 589 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominanceFromRankings', expectedLine: 624 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbabilityFromOddsRankings', expectedLine: 649 },
   
   // Backend - strategyEngine.js
   { file: 'backend/strategies/strategyEngine.js', func: 'evaluateAll', expectedLine: 39 },
@@ -201,7 +204,7 @@ const FUNCTIONS_TO_CHECK = [
   { file: 'backend/services/playerStatsService.js', func: 'calculateROI', expectedLine: 252 },
   
   // Backend - liveManager.js
-  { file: 'backend/liveManager.js', func: 'initLiveManager', expectedLine: 271 },
+  { file: 'backend/liveManager.js', func: 'initLiveManager', expectedLine: 297 },
   { file: 'backend/liveManager.js', func: 'syncMatch', expectedLine: 1242 },
   
   // Frontend - useMatchBundle.jsx (NUOVO - principale)

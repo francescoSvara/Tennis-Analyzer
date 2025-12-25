@@ -1,0 +1,222 @@
+1) dataQualityChecker.js – Quality validation service
+Obiettivo
+
+Avere un servizio unico che:
+
+valida un MatchBundle (o i raw/canonical) con regole deterministiche
+
+produce un output standard:
+
+quality.status = OK | WARN | FAIL
+
+quality.issues[] con codici stabili
+
+quality.metrics numeriche (missingness, staleness, ecc.)
+
+alimenta:
+
+meta.quality nel bundle
+
+(opzionale) una tabella data_quality_events per audit
+
+Metriche minime (che valgono davvero nel betting)
+
+Ti conviene partire con 3 “famiglie”:
+
+A) Completeness (mancanze)
+
+missing_ratio_tab: percentuale campi mancanti per tab (stats/odds/live/features)
+
+missing_critical_fields: elenco campi critici mancanti (es. player_id, match_id, tournament_id, status)
+
+B) Freshness / Staleness (tempo)
+
+live_staleness_sec = now - last_live_ingestion_time
+
+odds_staleness_sec = now - last_odds_ingestion_time
+
+soglie: WARN/FAIL diverse per pre-match vs live
+
+C) Consistency (coerenza)
+
+score coerente con status (finished deve avere score finale)
+
+odds coerenti (price > 1.01, no NaN)
+
+no future data: event_time <= meta.as_of_time per ticks e live snapshots
+
+Output standard (da mettere in meta.quality)
+
+Esempio:
+
+"quality": {
+  "status": "WARN",
+  "score": 78,
+  "metrics": {
+    "missing_ratio": 0.08,
+    "live_staleness_sec": 45,
+    "odds_staleness_sec": 220
+  },
+  "issues": [
+    {"code":"ODDS_STALE", "severity":"WARN", "detail":"last odds tick older than threshold"},
+    {"code":"STATS_PARTIAL", "severity":"INFO", "detail":"break points missing"}
+  ]
+}
+
+Regole iniziali (pronte)
+
+FAIL se manca match_id/player_id/status
+
+FAIL se odds contengono valori invalidi (<=1, NaN, Infinity)
+
+WARN se odds stale oltre soglia
+
+WARN se live stale oltre soglia mentre status=live
+
+WARN se missing_ratio > 0.15
+
+INFO se features sono isEstimated=true oltre una certa percentuale
+
+Soglie pragmatiche
+
+pre-match:
+
+odds stale WARN > 15 min, FAIL > 60 min
+
+live:
+
+live stale WARN > 30 sec, FAIL > 120 sec
+
+odds stale WARN > 60 sec, FAIL > 300 sec
+
+2) bet_decisions table – Log decisioni betting (audit)
+
+Qui devi scegliere: vuoi loggare solo consigli (recommended) o anche eseguito (placed)?
+Io ti propongo uno schema che supporta entrambi ma resta semplice.
+
+Schema SQL consigliato (Postgres)
+CREATE TABLE IF NOT EXISTS bet_decisions (
+  id BIGSERIAL PRIMARY KEY,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  -- Identità
+  match_id UUID NOT NULL,
+  player_a_id UUID,
+  player_b_id UUID,
+  tournament_id UUID,
+
+  -- Contesto temporale (riproducibilità)
+  as_of_time TIMESTAMPTZ NOT NULL,
+  generated_at TIMESTAMPTZ NOT NULL,
+
+  -- Versioni (critico per audit)
+  versions JSONB NOT NULL,  -- {bundle, data, features, odds, strategies, risk, model?}
+
+  -- Mercato
+  market TEXT NOT NULL,      -- es: "match_winner"
+  selection TEXT NOT NULL,   -- es: "A" / "B" / "Over"
+  book_id TEXT,              -- opzionale se lavori su best price / median
+
+  -- Prezzi
+  price_seen NUMERIC(10,4),         -- quota osservata
+  price_min_acceptable NUMERIC(10,4), -- threshold (value line)
+  implied_prob NUMERIC(10,6),       -- da price_seen
+  model_prob NUMERIC(10,6),         -- dal modello/strategia
+  edge NUMERIC(10,6),               -- model_prob - implied_prob
+
+  -- Stake & Risk
+  bankroll NUMERIC(14,2),
+  stake_recommended NUMERIC(14,2),
+  stake_final NUMERIC(14,2),
+  kelly_fraction NUMERIC(10,6),
+  risk JSONB, -- output risk engine (exposure, caps, warnings)
+
+  -- Decisione
+  decision TEXT NOT NULL,  -- "NO_BET" | "WATCH" | "RECOMMEND" | "PLACE"
+  confidence NUMERIC(10,6),
+  reason_codes TEXT[] DEFAULT '{}',
+
+  -- Snapshot leggero (opzionale ma utilissimo)
+  bundle_meta JSONB,       -- copia di meta (senza tabs pesanti)
+  notes TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_bet_decisions_match_time
+  ON bet_decisions(match_id, as_of_time DESC);
+
+CREATE INDEX IF NOT EXISTS idx_bet_decisions_created
+  ON bet_decisions(created_at DESC);
+
+Perché così
+
+ti permette di rispondere a: “perché ho puntato?” anche tra 6 mesi
+
+ti permette backtest reale su consigli generati
+
+ti permette calcolare performance per strategia/versione
+
+Collegamento con JournalTab
+
+JournalTab può mostrare la cronologia decisioni per match
+
+non stai “persistendo segnali come metriche”: stai persistendo audit decisionale (legittimo e utile)
+
+3) Surface analysis – Analisi per superficie
+
+Questa è la parte che dà edge più spesso (tennis = surface heavy).
+Ma va fatta senza farsi male (sample bias).
+
+Minimo indispensabile (che funziona subito)
+
+Per ogni player e per ogni surface {hard, clay, grass} calcola:
+
+A) Win rate + sample
+
+matches_played_surface
+
+win_rate_surface
+
+B) Hold/Break proxy (se hai stats)
+
+hold_rate_surface
+
+break_rate_surface
+
+C) “Form surface” (ultimi N)
+
+last 10 matches su quella superficie:
+
+win_rate_last10_surface
+
+avg_opponent_rank_last10 (se hai ranking)
+
+fatigue_last10 (minuti o set se hai)
+
+Anti-bias rules (fondamentali)
+
+non mostrare una metrica se matches_played_surface < 8 (o mostrala con “LOW_SAMPLE”)
+
+preferisci finestre:
+
+last 52 weeks
+
+last 24 months
+
+career
+
+non “mescolare” superfici, e non usare indoor/outdoor finché non hai dati affidabili
+
+Output nel bundle
+
+Dove metterlo:
+
+in stats.playerA.surfaceSplits e stats.playerB.surfaceSplits
+oppure in una tab “PlayerProfile” se la UI lo permette.
+
+Esempio:
+
+"surfaceSplits": {
+  "hard": {"matches": 34, "winRate": 0.62, "holdRate": 0.81, "breakRate": 0.23, "sampleFlag":"OK"},
+  "clay": {"matches": 7, "winRate": 0.43, "sampleFlag":"LOW_SAMPLE"},
+  "grass": {"matches": 12, "winRate": 0.58, "sampleFlag":"OK"}

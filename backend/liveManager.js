@@ -75,12 +75,20 @@ const headers = {
 
 /**
  * Fetch dati live per un evento
+ * 
+ * TEMPORAL SEMANTICS (FILOSOFIA_TEMPORAL_SEMANTICS compliance):
+ * - ingestion_time: quando i dati sono stati ricevuti dal sistema
+ * - event_time: timestamp dell'evento originale (se disponibile)
  */
 async function fetchLiveData(eventId) {
   const baseUrl = CONFIG.SOFASCORE_API;
+  const ingestionTime = new Date().toISOString();
   const result = {
     eventId,
-    timestamp: new Date().toISOString(),
+    timestamp: ingestionTime,
+    // TEMPORAL SEMANTICS
+    ingestion_time: ingestionTime,
+    event_time: null, // Sarà popolato dall'evento se disponibile
     event: null,
     pointByPoint: [],
     statistics: [],
@@ -91,7 +99,15 @@ async function fetchLiveData(eventId) {
   const fetches = [
     fetch(`${baseUrl}/${eventId}`, { headers })
       .then(r => r.ok ? r.json() : null)
-      .then(data => { result.event = data?.event || data; })
+      .then(data => { 
+        result.event = data?.event || data;
+        // TEMPORAL SEMANTICS: Extract event_time from source
+        if (result.event?.startTimestamp) {
+          result.event_time = new Date(result.event.startTimestamp * 1000).toISOString();
+        } else if (result.event?.changes?.changeTimestamp) {
+          result.event_time = new Date(result.event.changes.changeTimestamp * 1000).toISOString();
+        }
+      })
       .catch(e => result.errors.push({ endpoint: 'event', error: e.message })),
 
     fetch(`${baseUrl}/${eventId}/point-by-point`, { headers })

@@ -1,0 +1,157 @@
+Integra nelle filosofie e nel sistema di output i 3 pattern “Easy” di strategie live tennis:
+1) Lay the Winner
+2) Banca Servizio
+3) Super Break
+(Font: docs/Strategie di Base Tennis (testo).txt)
+
+OBIETTIVO:
+- Formalizzare le strategie come contratti implementabili, non solo descrizione.
+- Standardizzare output strategy per UI + logging (bet_decisions) + risk/meta.
+
+TASK (docs + concetti):
+1) Aggiorna docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS_V3.md:
+   - aggiungi sezione “Strategy Output Contract (standard)”
+   - definisci shape comune:
+     decision: OFF|WATCH|READY|RECOMMEND|EXIT
+     confidence 0..1
+     reason_codes[]
+     entry_rules[] / exit_rules[]
+     targets (monitor window: next game / break point / set2)
+     (opzionale) edge, price_min_acceptable
+   - aggiungi reason_codes stabili per le 3 strategie.
+
+2) Aggiorna docs/filosofie/50_strategy_risk_execution/ (se esiste) o crea un doc “FILOSOFIA_STRATEGY_ENGINE_CONTRACT_V1.md”
+   - per ciascuna strategia definisci:
+     INPUT minimi richiesti (score, odds, favorite, break point signals)
+     ENTRY conditions
+     EXIT conditions
+     INVALIDATION conditions
+     TIMEOUT (default 1 game)
+   - Inserisci note anti-leakage: usare solo live snapshots <= meta.as_of_time.
+
+3) Bet decisions logging:
+   - collega decision output a tabella bet_decisions: logga solo se decision=RECOMMEND o EXIT,
+     includendo match_id, as_of_time, versions, market, selection, price_seen, decision, confidence, reason_codes, risk hints.
+
+4) Surface analysis (solo docs):
+   - aggiungi una sezione “surface splits” come feature/metriche usate dalle strategie medium/hard (future),
+     includendo sampleFlag LOW_SAMPLE se matches<8.
+
+DEFAULT (se mancano dati):
+- mercati: match_winner
+- trigger live: game score 0-40/15-40/0-30 come proxy di break point
+- stake: flat 1 unit (easy)
+- timeout: 1 game
+- exit: evento (break/hold) o tie-break per Super Break
+
+Non cambiare codice se non richiesto; se necessario aggiungi TODO pointers ai file:
+backend/strategies/strategyEngine.js
+backend/services/matchCardService.js
+backend/utils/featureEngine.js
+
+
+Dda inserire in todolist.md:
+
+## 🎾 Strategie Easy (da formalizzare in contratto + soglie)
+
+> Fonte: "Strategie di Base Tennis (testo)"  
+> Strategie: Lay the Winner, Banca Servizio, Super Break
+
+### 🎯 Obiettivo
+Formalizzare le 3 strategie “easy” come **contratto implementabile** (input minimi, output standard, reason codes),
+senza inventare soglie non validate. Le soglie/trigger verranno decise in seguito (fase Medium/Hard).
+
+---
+
+### ✅ TODO-S1 — Strategy Output Contract (standard unico)
+- [ ] Definire output standard per TUTTE le strategie:
+  - `decision`: OFF | WATCH | READY | RECOMMEND | EXIT
+  - `confidence`: 0..1
+  - `reason_codes[]` (codici stabili, no testo libero)
+  - `entry_rules[]` / `exit_rules[]` (descrittivi)
+  - `targets` (cosa monitorare: next game / break point / set2)
+  - (opzionale) `edge`, `price_min_acceptable`, `risk_hints`
+- [ ] Inserire il contract in filosofia Stats/Strategy (doc)
+
+**Note:** Non servono soglie numeriche ora. Basta fissare “shape” e naming.
+
+---
+
+### ✅ TODO-S2 — Lay the Winner (Easy) – formalizzazione
+- [ ] Documentare input minimi richiesti:
+  - set score (chi ha vinto 1° set)
+  - set2 game score
+  - odds match_winner live (minimo)
+  - segnale pressione/breakpoint (anche proxy: 0-40, 15-40)
+- [ ] Definire logica a stati (senza soglie dettagliate):
+  - WATCH: inizio set2
+  - READY: pressione sul set2 per lo sfavorito del set1
+  - RECOMMEND: occasione breakpoint set2
+  - EXIT: break avvenuto / invalidazione / fine set
+- [ ] Definire reason_codes base (bozza), aggiornabili in futuro:
+  - LTW_SET1_WINNER
+  - LTW_SET2_PRESSURE
+  - LTW_BREAKPOINT_WINDOW
+  - LTW_EXIT_BREAK
+  - LTW_EXIT_INVALIDATION
+
+**Fonte concetto:** banca chi ha vinto il primo set, aspettandosi break nel secondo. :contentReference[oaicite:1]{index=1}
+
+---
+
+### ✅ TODO-S3 — Banca Servizio (Easy) – formalizzazione
+- [ ] Documentare input minimi richiesti:
+  - game score corrente (0-30, 15-40, 0-40)
+  - server attuale
+  - odds match_winner live (minimo)
+- [ ] Definire logica a stati:
+  - READY: server sotto pressione (proxy via punteggio)
+  - RECOMMEND: 15-40 / 0-40 / breakpoint (o proxy equivalente)
+  - EXIT: servizio vinto / break / invalidazione
+- [ ] Reason_codes bozza:
+  - BS_SERVER_UNDER_PRESSURE
+  - BS_BREAKPOINT_OR_CRITICAL_SCORE
+  - BS_EXIT_HOLD
+  - BS_EXIT_BREAK
+
+**Fonte concetto:** banca server sotto pressione; uscire a break point o servizio vinto. :contentReference[oaicite:2]{index=2}
+
+---
+
+### ✅ TODO-S4 — Super Break (Easy) – formalizzazione
+- [ ] Documentare input minimi richiesti:
+  - identificazione favorito (anche solo “fav pre-match” se disponibile)
+  - proxy dominanza al servizio (es. “nessuna palla break concessa” / game rapidi se disponibili)
+  - odds match_winner live
+  - segnale breakpoint sul servizio avversario (o proxy)
+- [ ] Definire logica a stati:
+  - WATCH: favorito domina al servizio
+  - RECOMMEND (BACK): quando scenario “dominanza + finestra risposta” si presenta
+  - RECOMMEND (LAY hedge/freebet): su breakpoint
+  - EXIT: fine set / tie-break / break del non favorito
+- [ ] Reason_codes bozza:
+  - SB_FAV_DOMINANT_ON_SERVE
+  - SB_EXPECT_BREAK_WINDOW
+  - SB_HEDGE_ON_BREAKPOINT
+  - SB_EXIT_TIEBREAK
+  - SB_EXIT_UNDERDOG_BREAK
+
+**Fonte concetto:** puntare favorito dominante, hedge su breakpoint, uscire a tie-break o fine set. :contentReference[oaicite:3]{index=3}
+
+---
+
+### ✅ TODO-S5 — Decision Logging (bet_decisions) collegato alle strategie
+- [ ] Quando decision = RECOMMEND o EXIT, salvare un record in `bet_decisions` (audit)
+  - includere: match_id, as_of_time, versions, decision, confidence, reason_codes, price_seen (se disponibile), risk summary
+- [ ] In questa fase non servono stake “reali”: usare placeholder `stake_recommended = null` o “1 unit” in modo opzionale
+
+---
+
+### ✅ TODO-S6 — Trigger/Soglie (da decidere in fase Medium/Hard)
+- [ ] Definire soglie numeriche reali per:
+  - cosa conta come “pressione” (oltre a 0-40/15-40)
+  - stop-loss / take-profit
+  - timeout (quanti game restare nel trade)
+  - filtri: maschile/femminile, superficie, best_of
+- [ ] Solo dopo aver raccolto esempi reali e fatto replay/backtest
+

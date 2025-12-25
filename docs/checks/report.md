@@ -1,8 +1,8 @@
 # 🧪 Concept Checks Report
 
-> Generato: 2025-12-25T09:42:44.634Z  
+> Generato: 2025-12-25T10:40:36.810Z  
 > Modalità: full  
-> Durata: 206ms
+> Durata: 161ms
 
 ---
 
@@ -11,21 +11,14 @@
 | Severità | Count |
 |----------|-------|
 | 🔴 ERROR | 0 |
-| 🟡 WARN | 8 |
+| 🟡 WARN | 6 |
 | 🔵 INFO | 30 |
 
 ---
 
 ## 🔍 Findings
 
-### 🟡 WARN (8)
-
-#### `LIN-004` - backend/services/matchCardService.js:0
-
-- **Dominio:** architecture
-- **Problema:** matchCardService deve includere meta nel bundle salvato
-- **Match:** `PATTERN_MISSING`
-- **Rimedio:** Implementare: meta:\s*\{|meta\.versions|versions:\s*\{
+### 🟡 WARN (6)
 
 #### `LIN-005` - src/hooks/useMatchBundle.jsx:0
 
@@ -40,13 +33,6 @@
 - **Problema:** Repository deve avere event_time per ogni entità temporale
 - **Match:** `PATTERN_MISSING`
 - **Rimedio:** Implementare: event_time|eventTime
-
-#### `TEMP-002` - backend/db/liveTrackingRepository.js:0
-
-- **Dominio:** architecture
-- **Problema:** Live tracking deve usare snapshotTime per i dati live
-- **Match:** `PATTERN_MISSING`
-- **Rimedio:** Implementare: snapshot_time|snapshotTime|event_time
 
 #### `FE-002` - src/components/MatchCard.jsx:0
 

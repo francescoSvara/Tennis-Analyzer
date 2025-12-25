@@ -1,11 +1,11 @@
 # 🗺️ MAPPA RETE CONCETTUALE  
-## Versione V2.4 – MatchBundle-Centric Architecture + Full Code References
+## Versione V2.5 – MatchBundle-Centric Architecture + Full Code References
 
 > **Scopo**: fornire una visione unificata e navigabile dell'architettura concettuale del progetto.  
 > **Stato**: ATTIVA  
 > **Sostituisce**: `MAPPA_RETE_CONCETTUALE.md` (V1 – DEPRECATA)  
-> **Ultimo aggiornamento**: 25 Dicembre 2025  
-> **Novità V2.5**: Check automatici per TUTTE le filosofie (57 regole in `rules.v2.json`)  
+> **Ultimo aggiornamento**: 26 Dicembre 2025  
+> **Novità V2.5**: dataQualityChecker, betDecisionsRepository, Surface Splits in StatsTab, useQualityAssessment hook  
 
 ---
 
@@ -20,6 +20,7 @@
 |------|------|-------------|
 | **Feature Engine** | [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) | `computeFeatures()` L44 |
 | **Strategy Engine** | [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js) | `evaluateAll()` L39 |
+| **Data Quality** | [`backend/services/dataQualityChecker.js`](../backend/services/dataQualityChecker.js) | `evaluateBundleQuality()` |
 | **Bundle Endpoint** | [`backend/server.js`](../backend/server.js) | L3219-3430 `/api/match/:id/bundle` |
 | **Frontend Hook** | [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` L44 |
 | **Concept Checks** | [`scripts/runConceptChecks.js`](../scripts/runConceptChecks.js) | Validazione architettura |
@@ -37,12 +38,14 @@ React-Betfair/
 │   ├── db/
 │   │   ├── supabase.js                # 🔌 Client Supabase
 │   │   ├── matchRepository.js         # 📦 CRUD matches_new
-│   │   └── liveTrackingRepository.js  # 📦 CRUD live tracking
+│   │   ├── liveTrackingRepository.js  # 📦 CRUD live tracking
+│   │   └── betDecisionsRepository.js  # 📦 CRUD bet_decisions audit
 │   ├── services/
 │   │   ├── matchCardService.js        # 🎴 MatchBundle snapshot
-│   │   ├── playerStatsService.js      # 👤 Stats giocatori
+│   │   ├── playerStatsService.js      # 👤 Stats giocatori + Surface Splits
 │   │   ├── playerProfileService.js    # 👤 Profili giocatori
 │   │   ├── dataNormalizer.js          # 🔄 Normalizzazione dati
+│   │   ├── dataQualityChecker.js      # 🔍 Bundle quality evaluation
 │   │   └── unifiedImporter.js         # 📥 Import unificato
 │   ├── strategies/
 │   │   └── strategyEngine.js          # 🎯 Strategy Engine
@@ -360,12 +363,12 @@ node scripts/generateTodoReport.js
 | | `calculateServeDominance()` | L126 | Da statistics |
 | | `calculateBreakProbability()` | L191 | Da statistics |
 | | `calculateRecentMomentum()` | L277 | Da powerRankings |
-| | `computeFeatures()` | L331 | Entry point - Calcola TUTTE le features |
-| | `calculateVolatilityFromScore()` | L476 | Fallback da score |
-| | `calculateDominanceFromScore()` | L507 | Fallback da score |
-| | `calculateDominanceFromOdds()` | L540 | Fallback da odds |
-| | `calculateServeDominanceFromRankings()` | L573 | Fallback da rankings |
-| | `calculateBreakProbabilityFromOddsRankings()` | L598 | Fallback |
+| | `computeFeatures()` | L353 | Entry point - Calcola TUTTE le features |
+| | `calculateVolatilityFromScore()` | L523 | Fallback da score |
+| | `calculateDominanceFromScore()` | L554 | Fallback da score |
+| | `calculateDominanceFromOdds()` | L589 | Fallback da odds |
+| | `calculateServeDominanceFromRankings()` | L624 | Fallback da rankings |
+| | `calculateBreakProbabilityFromOddsRankings()` | L649 | Fallback |
 
 ### 🎯 Backend - Strategy Engine
 
@@ -385,11 +388,13 @@ node scripts/generateTodoReport.js
 |------|-------------|
 | [`backend/db/matchRepository.js`](../backend/db/matchRepository.js) | CRUD matches_new, statistics, pbp |
 | [`backend/db/liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js) | CRUD live tracking |
+| [`backend/db/betDecisionsRepository.js`](../backend/db/betDecisionsRepository.js) | CRUD bet_decisions audit table |
 | [`backend/db/supabase.js`](../backend/db/supabase.js) | Client Supabase |
 | [`backend/services/matchCardService.js`](../backend/services/matchCardService.js) | Snapshot cache + build card |
-| [`backend/services/playerStatsService.js`](../backend/services/playerStatsService.js) | Statistiche giocatori |
+| [`backend/services/playerStatsService.js`](../backend/services/playerStatsService.js) | Statistiche giocatori + Surface Splits |
 | [`backend/services/playerProfileService.js`](../backend/services/playerProfileService.js) | Profili giocatori |
 | [`backend/services/dataNormalizer.js`](../backend/services/dataNormalizer.js) | Normalizzazione dati |
+| [`backend/services/dataQualityChecker.js`](../backend/services/dataQualityChecker.js) | Bundle quality evaluation |
 | [`backend/scraper/sofascoreScraper.js`](../backend/scraper/sofascoreScraper.js) | Scraper SofaScore |
 | [`backend/importXlsx.js`](../backend/importXlsx.js) | Import XLSX → matches (legacy) |
 
@@ -610,6 +615,7 @@ Questi invarianti sono **verificati automaticamente** dai Concept Checks → [`r
 | `match_statistics_new` | Detail | SofaScore | [`matchRepository.js`](../backend/db/matchRepository.js) | Statistiche match |
 | `match_power_rankings_new` | Detail | SofaScore/SVG | [`matchRepository.js`](../backend/db/matchRepository.js) | Momentum per game |
 | `match_odds_new` | Detail | SofaScore | [`matchRepository.js`](../backend/db/matchRepository.js) | Odds storiche |
+| `bet_decisions` | Audit | Bundle Engine | [`betDecisionsRepository.js`](../backend/db/betDecisionsRepository.js) | Audit trail decisioni bet |
 
 ### Fallback Order (Bundle Endpoint)
 
