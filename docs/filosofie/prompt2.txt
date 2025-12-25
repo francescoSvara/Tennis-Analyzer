@@ -1,0 +1,171 @@
+Sei un architect + quant gambler. Devi creare/aggiornare 3 nuove filosofie in docs/filosofie/ in stile coerente con INDEX_FILOSOFIE.md:
+- tutto converge sul MatchBundle
+- FE consuma solo MatchBundle
+- backend interpreta dati (features/strategie/segnali)
+- Features ≠ Strategie, Segnali non persistiti
+Mantieni questi invarianti e integra le nuove filosofie nel flusso canonico.
+
+========================================
+1) FILOSOFIA_TEMPORAL_V1.md (TIME SEMANTICS)
+========================================
+OBIETTIVO: rendere il TEMPO una “first-class rule” per evitare leakage e bug sulle odds/live.
+
+STRUTTURA DEL DOCUMENTO (sezioni obbligatorie):
+
+A. Perché esiste (gambler reason)
+- Odds e live sono serie temporali: se sbagli timestamps, produci edge finti.
+- Ogni output (features, strategie) deve essere “as-of” rispetto al match.
+
+B. Glossario tempi (definizioni rigide)
+Definisci questi campi e quando usarli:
+- event_time: quando l’evento è “valido nel mondo” (es. quota osservata alle 14:03, punto giocato alle 14:10)
+- source_time: timestamp della fonte se disponibile (SofaScore/Book)
+- ingestion_time: quando il nostro sistema riceve/salva l’evento
+- as_of_time: timestamp di riferimento per calcoli/snapshot (il “cut” temporale)
+Regola: non mischiare mai ingestion_time come se fosse event_time.
+
+C. Tipi di dati e semantica temporale
+- Match: evento discreto, con event_time (scheduled start) + status (scheduled/live/finished/retired/walkover)
+- Live snapshots: serie temporale (event_time punto/game) + ingestion_time
+- Odds ticks: serie temporale (event_time della quota) + ingestion_time
+- Feature snapshots: sempre calcolate con as_of_time
+
+D. Regole Anti-Leakage (invarianti)
+- NO_FUTURE_DATA: nessun calcolo usa dati con event_time > as_of_time
+- TEMPORAL_ASOF: feature_snapshot.as_of_time <= match.event_time (pre-match) oppure <= “now” (live)
+- ODDS_PHASE: pre-match odds non possono includere ticks in-play (se non esplicitato)
+- Closing line: definisci cosa significa (ultima quota pre-event_time o pre-live-start)
+
+E. Contratti pratici (pseudo-contratti da implementare)
+Definisci standard minimo:
+- OddsTick { match_id, market, selection, book_id, price, event_time, ingestion_time }
+- FeatureSnapshot { match_id, as_of_time, feature_version, features }
+- MatchBundle.meta deve includere: meta.as_of_time, meta.generated_at, meta.data_freshness
+
+F. Impatti su moduli esistenti (puntatori al codice, senza cambiare codice)
+- backend/liveManager.js: produce snapshots con ingestion_time + event_time (se possibile)
+- backend/server.js endpoints odds: distinguere tick vs snapshot
+- backend/services/matchCardService.js: deve costruire bundle “as-of”
+- src/hooks/useMatchBundle.jsx: FE non inventa tempo; usa meta dal bundle
+
+G. Test/Concept Checks da aggiungere
+- TEMPORAL_ASOF: feature_snapshot.as_of_time coerente
+- NO_FUTURE_DATA: query/trasformazioni non usano righe future
+- ODDS_STALENESS_WARNING: se last odds tick ingestion_time troppo vecchio rispetto a now o match start -> warning
+
+========================================
+2) FILOSOFIA_REGISTRY_CANON_V1.md (CANONICAL IDs & NORMALIZATION)
+========================================
+OBIETTIVO: evitare duplicati, mismatch e “player A != player A”, soprattutto tra legacy matches e matches_new.
+
+STRUTTURA DEL DOCUMENTO:
+
+A. Perché esiste
+- Il betting muore se le stats si attaccano al player sbagliato.
+- Il progetto ha più fonti (XLSX legacy + SofaScore + odds provider): serve un “canon”.
+
+B. Entità canoniche (ID obbligatori)
+Definisci che ogni cosa ha un canonical_id stabile:
+- PlayerCanonical (player_id)
+- MatchCanonical (match_id)
+- TournamentCanonical (tournament_id)
+- BookCanonical (book_id)
+- MarketCanonical (market_id o enum stabile)
+Regola: il FE/Strategy lavora solo su canonical_id.
+
+C. Mapping & Resolution (come risolvi)
+- Normalizzazione nomi: trim, unicode, alias noti
+- Dedup: regole “same person” (nome+dob se disponibile, altrimenti alias mapping)
+- Cross-source linking: legacy match (winner/loser string) -> players canonical
+- Tornei: normalizza nome torneo + location + category + surface (se applicabile)
+
+D. Canonical Schema Contract (minimo indispensabile)
+Definisci requisiti per un MatchCanonical “valido”:
+- match_id unico
+- home_player_id/away_player_id canonici
+- tournament_id canonico
+- surface normalizzata (enum)
+- best_of coerente
+- status coerente (scheduled/live/finished/retired/walkover)
+Se mancano: match va in “quarantine” o “partial”.
+
+E. Dove vive la logica
+- backend/services/dataNormalizer.js: normalizzazione e mapping
+- backend/db/matchRepository.js: persistenza
+- NOTA: il frontend non fa resolution, consuma già canonical.
+
+F. Output nel MatchBundle
+- sempre esportare canonical ids + (opzionale) display_name
+- includere “identity_warnings[]” se mapping incerto (ma senza rompere UI)
+
+G. Concept checks
+- CANONICAL_IDS_REQUIRED: nessun bundle senza player_id e tournament_id canonici
+- NO_DUPLICATE_PLAYERS: regola anti-duplicati in registry (anche solo report)
+
+========================================
+3) FILOSOFIA_LINEAGE_VERSIONING_V1.md (REPRODUCIBILITY)
+========================================
+OBIETTIVO: ogni card/predizione deve essere riproducibile e auditabile (da gambler: “perché ho preso questa bet?”).
+
+STRUTTURA DEL DOCUMENTO:
+
+A. Perché esiste
+- Senza versioning non sai se l’edge era reale o un bug.
+- Devi poter dire: “questa decisione è stata calcolata con feature vX e odds snapshot vY”.
+
+B. Cosa si versiona (rigido)
+- data_version (schema + origine dataset)
+- feature_version (featureEngine)
+- odds_schema_version (ticks/snapshot)
+- strategy_version (strategyEngine)
+- bundle_schema_version (MatchBundle contract)
+- (futuro) model_version (predictor/AI)
+
+C. Lineage (catena di derivazione)
+Definisci una catena standard:
+RawEvents -> Canonical Tables -> FeatureSnapshot -> StrategyEvaluation -> MatchBundleSnapshot
+Regola: ogni step produce meta con version + timestamp.
+
+D. MatchBundle.meta (obbligatorio)
+Definisci un blocco meta standard, minimo:
+meta: {
+  generated_at,
+  as_of_time,
+  versions: {
+    bundle_schema,
+    data,
+    features,
+    odds,
+    strategies
+  },
+  freshness: {
+    last_live_ingestion_time?,
+    last_odds_ingestion_time?
+  }
+}
+Regola: FE usa solo questi meta per capire “quanto è fresco”.
+
+E. Riproducibilità (contratto)
+Dato: match_id + meta.versions + as_of_time
+Devo poter rigenerare (entro tolleranza) lo stesso bundle.
+
+F. Storage / Snapshot
+- match_card_snapshot deve salvare anche meta (non solo tabs)
+- non persistere segnali come “storia”, ma puoi persistere “bundle snapshot” con meta per audit.
+
+G. Concept checks
+- MATCHBUNDLE_META_REQUIRED: meta.generated_at e meta.versions obbligatori
+- VERSION_BUMP_RULE: se cambi calcoli o strategia, incrementa version (anche manuale in doc)
+
+========================================
+INTEGRAZIONE NELL’INDICE
+========================================
+Aggiorna INDEX_FILOSOFIE.md:
+- Inserisci le 3 nuove filosofie nella mappa settori (tra DB e Odds/Live e Stats)
+- Aggiorna “Flusso dati canonico” includendo: Registry/Canon -> Temporal -> Features -> Strategies -> Bundle
+- Aggiungi sezione: “MatchBundle Meta Standard (obbligatorio)”
+
+IMPORTANTE:
+- Non modificare codice in questa task.
+- Scrivi i file in stile pratico come le filosofie esistenti: principi, invarianti, flusso, esempi pseudo-contratti, collegamenti ai file.
+- Mantieni compatibilità concettuale con gli invarianti già presenti in INDEX_FILOSOFIE.md.
