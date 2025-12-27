@@ -32,6 +32,10 @@
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .pbp-tab__count {
@@ -389,8 +393,10 @@
 .point-row__score {
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
-  min-width: 50px;
+  min-width: 40px;
+  flex-shrink: 0;
   color: var(--text-primary);
+  font-size: var(--font-size-sm);
 }
 
 .point-row__details {

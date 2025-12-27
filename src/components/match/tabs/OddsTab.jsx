@@ -255,12 +255,10 @@ export function OddsTab({ data, header, strategies }) {
   };
 
   const handleBack = (player, oddValue) => {
-    console.log(`BACK ${player} @ ${oddValue} - Stake: €${stake}`);
     // TODO: Implementare logica
   };
 
   const handleLay = (player, oddValue) => {
-    console.log(`LAY ${player} @ ${oddValue} - Stake: €${stake}`);
     // TODO: Implementare logica
   };
 

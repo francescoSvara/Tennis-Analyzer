@@ -98,6 +98,26 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ---
 
+## ✅ Completato v3.1.1 (Dicembre 2025)
+
+### Stats Tab Fix
+- **SofaScore JSON Match** - Tutte le statistiche ora corrispondono esattamente al formato JSON SofaScore
+- **mergeValue fix** - Logica corretta: 0 è valore valido, fallback solo per undefined/null
+- **convertSofaScoreArrayFormat** - Mappatura completa chiavi: secondServeAccuracy, maxPointsInRow, gamesWon, maxGamesInRow, tiebreaks, serviceGamesTotal
+- **Duplicate stat removed** - "Service Points Won" rimosso da Serve Statistics (appare solo in Points Statistics)
+
+### UI Responsive
+- **Stats Cards 2x2** - Layout responsive con Bootstrap col-6 + CSS Grid per tutti i dispositivi
+- **Font scaling** - CSS clamp() per scaling automatico font su tutti i tab
+- **Overflow prevention** - min-width:0 globale, text-overflow:ellipsis, scrollable filters
+- **Tab CSS fixes** - 8 file CSS aggiornati per responsive completo
+
+### Code Quality
+- **Dead code removal** - Rimossa funzione `countBreakPointsFromPBP` (93 righe mai chiamate)
+- **FILOSOFIA compliance** - Verificata conformità architetturale completa
+
+---
+
 ## ✅ Completato v3.1 (Dicembre 2025)
 
 ### Core
@@ -149,6 +169,14 @@ Calcola features da dati disponibili (score, odds, rankings):
 ---
 
 ## 📝 Changelog
+
+### v3.1.1 (28 Dic 2025) - Stats Fix & Responsive UI
+- **SofaScore Stats** - Mapping completo JSON: secondServeAccuracy, maxPointsInRow, gamesWon, tiebreaks
+- **mergeValue** - Fix logica fallback (0 è valore valido)
+- **Stats Tab** - Rimosso duplicato "Service Points Won", layout 2x2 responsive
+- **Global CSS** - Font clamp() responsive + overflow prevention su tutti i tab
+- **Dead code** - Rimossa funzione `countBreakPointsFromPBP` non utilizzata
+- **Architecture** - Verificata conformità FILOSOFIA documents
 
 ### v3.0.3 (25 Dic 2025) - Deep Philosophy Fix
 - **riskEngine.js** - Creato nuovo servizio per calcolo edge/stake/exposure

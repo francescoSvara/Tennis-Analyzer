@@ -1,9 +1,10 @@
-# HPI e Break Resilience - Indicatori di Pressione
+# 💪 HPI & BREAK RESILIENCE
+## Indicatori di Pressione – Feature Specification
 
 > **Dominio**: Features · Pressure Metrics · Strategy Inputs  
 > **Stato**: ATTIVA  
 > **Tipo**: Feature Specification  
-> **Ultimo aggiornamento**: Dicembre 2025  
+> **Ultimo aggiornamento**: 27 Dicembre 2025  
 
 ---
 
@@ -14,109 +15,111 @@
 | [FILOSOFIA_MADRE](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) (point-by-point) | [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) (Strategy Engine) |
 
 ### 📚 Documenti Correlati
+
 | Documento | Scopo |
 |-----------|-------|
 | [CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | Tassonomia completa features, standard input/output, fallback |
 | [LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | HPI in real-time |
 | [OBSERVABILITY](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Quality metrics per HPI |
 
+### 📁 File Codice Principali
+
+| File | Descrizione |
+|------|-------------|
+| [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Calcolo HPI/Resilience |
+| [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Pressure index |
+| [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Consumer HPI |
+
 ---
 
-## HPI - Hold Pressure Index
+## 0️⃣ SCOPO DEL DOCUMENTO
 
-Misura quanto un giocatore tiene il servizio in situazioni di pressione.
+Definisce due indicatori chiave per la valutazione della **resistenza psicologica** dei giocatori:
 
-### Situazioni di Pressione
+- **HPI** (Hold Pressure Index): capacità di tenere il servizio sotto pressione
+- **Break Resilience**: capacità di recupero da situazioni negative
+
+Questi indicatori **potenziano le strategie** di trading.
+
+---
+
+## 1️⃣ HPI – HOLD PRESSURE INDEX
+
+Misura quanto un giocatore tiene il servizio in **situazioni di pressione**.
+
+### 1.1 Situazioni di Pressione
 
 | Situazione | Punteggio | Peso |
 |------------|-----------|------|
 | **Deuce** | 40-40, AD-40, 40-AD | Alto |
-| **30-30** | Parita critica | Medio |
+| **30-30** | Parità critica | Medio |
 | **Break Point** | 30-40, 15-40, 0-40 | Altissimo |
 | **Server in Danger** | 0-30, 15-30 | Medio |
 
-### Formula
+### 1.2 Formula
 
 ```
-HPI = (game tenuti sotto pressione / game totali al servizio sotto pressione) * 100
+HPI = (game tenuti sotto pressione / game totali al servizio sotto pressione) × 100
 ```
 
-### Livelli
+### 1.3 Livelli
 
 | Range | Livello | Significato |
 |-------|---------|-------------|
-| >=80% | ELITE | Eccezionale sotto pressione |
-| >=65% | STRONG | Solido nei momenti chiave |
-| >=50% | AVERAGE | Normale gestione pressione |
-| >=35% | VULNERABLE | Fragile sotto pressione |
+| ≥80% | ELITE | Eccezionale sotto pressione |
+| ≥65% | STRONG | Solido nei momenti chiave |
+| ≥50% | AVERAGE | Normale gestione pressione |
+| ≥35% | VULNERABLE | Fragile sotto pressione |
 | <35% | WEAK | Crolla nei momenti decisivi |
 
 ---
 
-## Break Resilience Score
+## 2️⃣ BREAK RESILIENCE SCORE
 
-Combina capacita di salvare BP e recupero da momentum negativo.
+Combina capacità di salvare BP e recupero da momentum negativo.
 
-### Formula
+### 2.1 Formula
 
 ```
-Resilience = (BP Saved % * 0.6) + (Recovery Rate * 0.4)
+Resilience = (BP Saved % × 0.6) + (Recovery Rate × 0.4)
 ```
 
-### Componenti
+### 2.2 Componenti
 
-- **BP Saved %** (peso 60%): % break point salvati
-- **Recovery Rate** (peso 40%): % fasi negative da cui si e recuperato
+| Componente | Peso | Descrizione |
+|------------|------|-------------|
+| **BP Saved %** | 60% | Percentuale break point salvati |
+| **Recovery Rate** | 40% | Percentuale fasi negative recuperate |
 
-### Livelli
+### 2.3 Livelli
 
 | Range | Livello | Significato |
 |-------|---------|-------------|
-| >=75% | RESILIENT | Alta capacita di recupero |
-| >=60% | SOLID | Buona resistenza mentale |
-| >=45% | AVERAGE | Resilienza nella media |
-| >=30% | FRAGILE | Difficolta a recuperare |
+| ≥75% | RESILIENT | Alta capacità di recupero |
+| ≥60% | SOLID | Buona resistenza mentale |
+| ≥45% | AVERAGE | Resilienza nella media |
+| ≥30% | FRAGILE | Difficoltà a recuperare |
 | <30% | BRITTLE | Crolla dopo momenti negativi |
 
 ---
 
-## Funzioni Frontend
+## 3️⃣ UTILIZZO NELLE STRATEGIE
 
-| Funzione | File | Tipo |
-|----------|------|------|
-| `calculateHPI` | `src/utils.js` | DERIVED |
-| `calculateBreakResilience` | `src/utils.js` | DERIVED |
-| `calculatePressurePerformance` | `src/utils.js` | DERIVED |
-
----
-
-## Funzioni Backend (Statistiche Storiche)
-
-| Funzione | File | Tipo |
-|----------|------|------|
-| `calculateHPIStats` | `backend/services/strategyStatsService.js` | DERIVED |
-| `calculateBreakResilienceStats` | `backend/services/strategyStatsService.js` | DERIVED |
-
----
-
-## Utilizzo nelle Strategie
-
-HPI e Resilience potenziano le 3 strategie base:
+HPI e Resilience potenziano le **3 strategie base**:
 
 | Strategia | Come usa HPI | Come usa Resilience |
 |-----------|--------------|---------------------|
-| **Lay the Winner** | HPI basso del leader = piu probabile comeback | Resilience alto del perdente = piu chance di recupero |
-| **Banca Servizio** | HPI basso del server = segnale piu forte | Resilience basso = probabile cedimento |
-| **Super Break** | HPI alto del favorito = conferma dominio | Resilience basso underdog = break piu facile |
+| **Lay the Winner** | HPI basso del leader → più probabile comeback | Resilience alto del perdente → più chance di recupero |
+| **Banca Servizio** | HPI basso del server → segnale più forte | Resilience basso → probabile cedimento |
+| **Super Break** | HPI alto del favorito → conferma dominio | Resilience basso underdog → break più facile |
 
 ---
 
-## Integrazione nelle Strategie Base
+## 4️⃣ INTEGRAZIONE STRATEGIE
 
-### 1. Lay the Winner + HPI/Resilience
+### 4.1 Lay the Winner + HPI/Resilience
 
 ```javascript
-// In analyzeLayTheWinner - potenziamento con HPI
 const loserHPI = calculateHPI(data, loserFirstSet);
 const loserResilience = calculateBreakResilience(data, loserFirstSet);
 
@@ -126,10 +129,9 @@ if (loserResilience.level === 'RESILIENT' && loserHPI.level !== 'WEAK') {
 }
 ```
 
-### 2. Banca Servizio + HPI
+### 4.2 Banca Servizio + HPI
 
 ```javascript
-// In analyzeBancaServizio - potenziamento con HPI
 const serverHPI = calculateHPI(data, serving === 1 ? 'home' : 'away');
 
 if (serverHPI.level === 'VULNERABLE' || serverHPI.level === 'WEAK') {
@@ -139,10 +141,9 @@ if (serverHPI.level === 'VULNERABLE' || serverHPI.level === 'WEAK') {
 }
 ```
 
-### 3. Super Break + Resilience
+### 4.3 Super Break + Resilience
 
 ```javascript
-// In analyzeSuperBreak - potenziamento con Resilience
 const underdogResilience = calculateBreakResilience(data, sfavorito.side);
 
 if (underdogResilience.level === 'FRAGILE' || underdogResilience.level === 'BRITTLE') {
@@ -153,11 +154,13 @@ if (underdogResilience.level === 'FRAGILE' || underdogResilience.level === 'BRIT
 
 ---
 
-## Note Implementazione
+## 5️⃣ NOTE IMPLEMENTATIVE
 
-- **Tipo dati**: DERIVED (calcolato da dati puri RAW)
-- **Persistenza**: Cache consigliata per statistiche storiche
-- **Frequenza update**: Real-time per match live, batch per storici
+| Aspetto | Valore |
+|---------|--------|
+| **Tipo dati** | DERIVED (calcolato da dati RAW) |
+| **Persistenza** | Cache consigliata per statistiche storiche |
+| **Frequenza update** | Real-time per match live, batch per storici |
 
 ---
 

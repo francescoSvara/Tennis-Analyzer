@@ -86,12 +86,7 @@ function TournamentWithLogo({ tournament, category }) {
   const logoPath = getTournamentLogo(tournament, category);
   
   // Se non c'è logo o c'è stato errore, mostra solo il testo
-  // In console logga il nome file suggerito per debug
   if (!logoPath || logoError) {
-    // Debug: mostra in console come dovrebbe chiamarsi il file
-    if (tournament && !logoPath) {
-      console.debug(`[Logo mancante] Torneo: "${tournament}" → Rinomina il logo come: "${getSuggestedFileName(tournament)}" e salvalo in public/logos/tournaments/`);
-    }
     return (
       <div className="match-tournament">
         {tournament || 'Unknown Tournament'}

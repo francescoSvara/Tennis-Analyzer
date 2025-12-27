@@ -1,118 +1,210 @@
-# Frontend Migration Guide
+# 🔄 FRONTEND MIGRATION GUIDE
+## Nuova Struttura Componenti
 
-## New Structure (FILOSOFIA_FRONTEND.md)
+> **Dominio**: Frontend · Migration · Structure  
+> **Stato**: ATTIVA  
+> **Tipo**: Guida Migrazione  
+> **Ultimo aggiornamento**: 27 Dicembre 2025  
+
+---
+
+## 🧭 NAVIGAZIONE ARCHITETTURA
+
+| ⬆️ Padre | ➡️ Correlato |
+|---------|--------------|
+| [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) |
+
+---
+
+## 0️⃣ SCOPO DEL DOCUMENTO
+
+Guida per la **migrazione alla nuova struttura frontend** basata su:
+
+- MatchBundle-Centric Architecture
+- Hook unificato `useMatchBundle`
+- Struttura componenti organizzata
+
+---
+
+## 1️⃣ NUOVA STRUTTURA
 
 ```
 src/
 ├── components/
 │   ├── home/
-│   │   ├── HomePage.jsx        # NEW - Trading Lobby with Watchlist, Alerts
+│   │   ├── HomePage.jsx        # Trading Lobby con Watchlist, Alerts
 │   │   ├── HomePage.css
 │   │   └── index.js
 │   ├── match/
-│   │   ├── MatchPage.jsx       # NEW - Main 3-zone layout
+│   │   ├── MatchPage.jsx       # Main 3-zone layout
 │   │   ├── MatchPage.css
 │   │   ├── index.js
 │   │   ├── layout/
-│   │   │   ├── MatchHeader.jsx     # NEW - Scoreboard, odds
-│   │   │   ├── MatchSidebar.jsx    # NEW - Tab navigation
-│   │   │   ├── RightRail.jsx       # NEW - Strategy CTA
-│   │   │   ├── LoadingSkeleton.jsx # NEW
-│   │   │   ├── ErrorState.jsx      # NEW
+│   │   │   ├── MatchHeader.jsx     # Scoreboard, odds
+│   │   │   ├── MatchSidebar.jsx    # Tab navigation
+│   │   │   ├── RightRail.jsx       # Strategy CTA
+│   │   │   ├── LoadingSkeleton.jsx
+│   │   │   ├── ErrorState.jsx
 │   │   │   └── index.js
 │   │   └── tabs/
-│   │       ├── OverviewTab.jsx     # NEW - Key stats, H2H
-│   │       ├── StrategiesTab.jsx   # NEW - All strategies
-│   │       ├── OddsTab.jsx         # NEW - Live odds, EV
-│   │       ├── PointByPointTab.jsx # NEW - Timeline
-│   │       ├── StatsTab.jsx        # NEW - Stats
-│   │       ├── MomentumTab.jsx     # NEW - Trends
-│   │       ├── PredictorTab.jsx    # NEW - Predictions
-│   │       ├── JournalTab.jsx      # NEW - Trade log
+│   │       ├── OverviewTab.jsx     # Key stats, H2H
+│   │       ├── StrategiesTab.jsx   # All strategies
+│   │       ├── OddsTab.jsx         # Live odds, EV
+│   │       ├── PointByPointTab.jsx # Timeline
+│   │       ├── StatsTab.jsx        # Stats
+│   │       ├── MomentumTab.jsx     # Trends
+│   │       ├── PredictorTab.jsx    # Predictions
+│   │       ├── JournalTab.jsx      # Trade log
 │   │       └── index.js
 ├── hooks/
-│   └── useMatchBundle.jsx      # NEW - Unified data consumption
+│   └── useMatchBundle.jsx      # Unified data consumption
 ├── motion/
 │   ├── tokens.js               # Animation tokens
 │   ├── MotionCard.jsx
 │   ├── MotionButton.jsx
-│   ├── MotionTab.jsx           # NEW
-│   ├── MotionRow.jsx           # NEW
-│   └── index.js                # NEW - Exports
+│   ├── MotionTab.jsx
+│   ├── MotionRow.jsx
+│   └── index.js                # Exports
 ```
 
-## Deprecated Files (can be removed)
+---
 
-These files in `src/components/` are now replaced by the new structure:
+## 2️⃣ FILE DEPRECATI
 
-| Old File | Replaced By | Notes |
-|----------|-------------|-------|
-| `HomePage.jsx` | `home/HomePage.jsx` | New lobby with Watchlist, Alerts |
-| `MatchHeader.jsx` | `match/layout/MatchHeader.jsx` | New scoreboard design |
+Questi file in `src/components/` sono sostituiti dalla nuova struttura:
+
+| Old File | Replaced By | Note |
+|----------|-------------|------|
+| `HomePage.jsx` | `home/HomePage.jsx` | Nuova lobby |
+| `MatchHeader.jsx` | `match/layout/MatchHeader.jsx` | Nuovo design |
 | `MomentumTab.jsx` | `match/tabs/MomentumTab.jsx` | Trend analysis |
-| `MomentumTab.css` | `match/tabs/MomentumTab.css` | - |
 | `PredictorTab.jsx` | `match/tabs/PredictorTab.jsx` | Win probability |
-| `PredictorTab.css` | `match/tabs/PredictorTab.css` | - |
 | `QuotesTab.jsx` | `match/tabs/OddsTab.jsx` | Renamed + redesigned |
-| `QuotesTab.css` | `match/tabs/OddsTab.css` | - |
 | `PointByPoint.jsx` | `match/tabs/PointByPointTab.jsx` | Timeline view |
-| `PointRow.jsx` | (integrated) | Integrated into PointByPointTab |
-| `PointByPointWidget.jsx` | (integrated) | Integrated into MatchHeader |
+| `PointRow.jsx` | (integrated) | In PointByPointTab |
+| `PointByPointWidget.jsx` | (integrated) | In MatchHeader |
 | `StrategiesPanel.jsx` | `match/tabs/StrategiesTab.jsx` | Full strategies tab |
-| `StrategiesPanel.css` | `match/tabs/StrategiesTab.css` | - |
 | `StrategiesLivePanel.jsx` | `match/layout/RightRail.jsx` | Quick strategy CTA |
-| `StrategyHistoricalPanel.jsx` | (integrated) | Integrated into StrategiesTab |
+| `StrategyHistoricalPanel.jsx` | (integrated) | In StrategiesTab |
 
-## Files to Keep
+---
 
-These components may still be used:
+## 3️⃣ FILE DA MANTENERE
 
-- `ErrorBoundary.jsx` - Error boundary wrapper
-- `GameBlock.jsx` - Game block display
-- `SetBlock.jsx` - Set block display  
-- `Gestionale.jsx` - Admin/management (if needed)
-- `MatchCard.jsx` - Card for match list
-- `MatchGrid.jsx` - Grid layout for matches
-- `MonitoringDashboard.jsx` - Database monitoring
-- `SportSidebar.jsx` - Sport selection
-- `PlayerPage.jsx/css` - Player profiles
-- `SavedScrapes.jsx` - Scrape management
-- `Statistics.jsx` - Stats display
-- `StatGroup.jsx` - Stats grouping
-- `StatRow.jsx` - Stats row
-- `IndicatorsChart.jsx` - Chart component
-- `MomentumChart.jsx` - Momentum visualization
-- `ManualPredictor.jsx/css` - Manual prediction tool
+Questi componenti sono ancora usati:
 
-## Migration Steps
+| File | Scopo |
+|------|-------|
+| `ErrorBoundary.jsx` | Error boundary wrapper |
+| `GameBlock.jsx` | Game block display |
+| `SetBlock.jsx` | Set block display |
+| `MatchCard.jsx` | Card per match list |
+| `MatchGrid.jsx` | Grid layout matches |
+| `MonitoringDashboard.jsx` | Database monitoring |
+| `SportSidebar.jsx` | Sport selection |
+| `PlayerPage.jsx` | Player profiles |
+| `Statistics.jsx` | Stats display |
+| `StatGroup.jsx` | Stats grouping |
+| `StatRow.jsx` | Stats row |
+| `MomentumChart.jsx` | Momentum visualization |
 
-1. Update `App.jsx` imports:
-   ```jsx
-   // Old
-   import HomePage from './components/HomePage';
-   
-   // New
-   import { HomePage } from './components/home';
-   ```
+---
 
-2. Update match page routing:
-   ```jsx
-   // Old
-   // ... various component imports
-   
-   // New
-   import { MatchPage } from './components/match';
-   ```
+## 4️⃣ STEP DI MIGRAZIONE
 
-3. After confirming everything works, delete deprecated files
+### Step 1: Update Imports in App.jsx
 
-## Data Consumption Pattern
+```jsx
+// ❌ OLD
+import HomePage from './components/HomePage';
 
-The new architecture uses `useMatchBundle` hook which follows the V2 philosophy:
+// ✅ NEW
+import { HomePage } from './components/home';
+```
 
-- **Single endpoint**: `/api/match/:id/bundle`
-- **No tab-specific fetches**: All data in one payload
-- **WebSocket + polling**: Real-time updates with fallback
-- **Cache management**: SWR-like pattern
+### Step 2: Update Match Page Routing
 
-See: `src/hooks/useMatchBundle.jsx`
+```jsx
+// ❌ OLD
+// ... various component imports
+
+// ✅ NEW
+import { MatchPage } from './components/match';
+```
+
+### Step 3: Delete Deprecated Files
+
+Dopo aver verificato che tutto funziona, eliminare i file deprecati.
+
+---
+
+## 5️⃣ DATA CONSUMPTION PATTERN
+
+La nuova architettura usa `useMatchBundle` hook che segue la filosofia V2:
+
+### Principi
+
+| Principio | Implementazione |
+|-----------|-----------------|
+| **Single endpoint** | `/api/match/:id/bundle` |
+| **No tab-specific fetches** | Tutti i dati in un payload |
+| **WebSocket + polling** | Real-time updates con fallback |
+| **Cache management** | SWR-like pattern |
+
+### Esempio
+
+```jsx
+import { useMatchBundle } from '../hooks/useMatchBundle';
+
+const MatchPage = ({ matchId }) => {
+  const { bundle, loading, error } = useMatchBundle(matchId);
+  
+  if (loading) return <LoadingSkeleton />;
+  if (error) return <ErrorState error={error} />;
+  
+  return (
+    <div>
+      <MatchHeader data={bundle.header} />
+      <MatchTabs tabs={bundle.tabs} />
+    </div>
+  );
+};
+```
+
+---
+
+## 6️⃣ REGOLE DI MIGRAZIONE
+
+```
+RULE Component_Organization
+  home/ → HomePage + related
+  match/ → MatchPage + layout/ + tabs/
+  hooks/ → useMatchBundle.jsx only
+  motion/ → animation components
+END
+
+RULE Data_Consumption
+  ALL data from bundle
+  NO direct API calls from tabs
+  NO calculation in frontend
+END
+
+RULE File_Cleanup
+  AFTER migration_verified
+    DELETE deprecated files
+END
+```
+
+---
+
+## 📚 RIFERIMENTI
+
+| Documento | Scopo |
+|-----------|-------|
+| [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | Visual design e UI |
+| [FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Data consumption architecture |
+| [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | Hook implementation |
+
+---
+
+**Fine documento – FRONTEND_MIGRATION**

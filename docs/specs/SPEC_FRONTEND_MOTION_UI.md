@@ -1,177 +1,278 @@
-# ✨ SPEC FRONTEND – UI / MOTION / ICONS (IMPLEMENTATION SPEC)
+# ✨ SPEC FRONTEND – UI / MOTION / ICONS
+## Implementation Spec – Premium UI Design
 
-> **Scopo**: questo documento contiene la **specifica operativa** (task + regole + token) per implementare UI premium, motion e iconografia.
->
-> ⚠️ Questo NON è un documento “filosofico”. È una **spec tecnica** che può cambiare spesso.
->
-> Riferimento architetturale: `docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md`
-
----
-
-## 1️⃣ Stack desiderato (vincolante)
-
-- React + TypeScript
-- Tailwind CSS
-- Animazioni: **Framer Motion** (primary)
-- Lottie: opzionale per empty/loading (pochi casi)
-- Icone: **Phosphor Icons** (primary) oppure Iconoir (se serve look più geometrico)
-- Accessibilità: rispettare `prefers-reduced-motion`
+> **Dominio**: Frontend · UI Design · Animation · Iconography  
+> **Stato**: ATTIVA  
+> **Tipo**: Specifica Operativa  
+> **Ultimo aggiornamento**: 27 Dicembre 2025  
 
 ---
 
-## 2️⃣ Obiettivo UX/Motion
+## 🧭 NAVIGAZIONE ARCHITETTURA
+
+| ⬆️ Padre | ➡️ Correlato |
+|---------|--------------|
+| [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) |
+
+### 📁 File Codice Principali
+
+| Tipo | File |
+|------|------|
+| Motion Tokens | [`src/motion/tokens.js`](../../src/motion/tokens.js) |
+| Motion Components | [`src/motion/`](../../src/motion/) |
+| UI Components | [`src/components/`](../../src/components/) |
+
+---
+
+## 0️⃣ SCOPO DEL DOCUMENTO
+
+> ⚠️ Questo NON è un documento "filosofico". È una **spec tecnica** operativa.
+
+Definisce:
+- Stack tecnologico UI/Motion
+- Regole di motion design
+- Standard iconografici
+- Componenti da implementare
+
+---
+
+## 1️⃣ STACK TECNOLOGICO (VINCOLANTE)
+
+| Tecnologia | Ruolo | Note |
+|------------|-------|------|
+| **React + TypeScript** | Base | - |
+| **Tailwind CSS** | Styling | - |
+| **Framer Motion** | Animazioni | Primary |
+| **Lottie** | Empty/Loading states | Opzionale |
+| **Phosphor Icons** | Iconografia | Primary |
+| **Iconoir** | Alternative | Se serve look geometrico |
+
+### Accessibilità
+
+```
+ASSERT prefers-reduced-motion RESPECTED
+```
+
+---
+
+## 2️⃣ OBIETTIVO UX/MOTION
 
 Trasformare la dashboard in una UI **high-end** senza eccessi:
-- micro-interazioni sui componenti (hover, tap, focus)
-- transizioni di pagina/route leggere
-- animazioni **data-aware** (quando cambiano filtri e metriche)
-- stati: loading, empty, error e success più curati (niente spinner brutti)
+
+- ✅ Micro-interazioni sui componenti (hover, tap, focus)
+- ✅ Transizioni di pagina leggere
+- ✅ Animazioni **data-aware** (cambio filtri/metriche)
+- ✅ Stati loading/empty/error/success curati
+- ❌ NO spinner brutti
+- ❌ NO bounce eccessivo
 
 ---
 
-## 3️⃣ Regole di Motion Design
+## 3️⃣ REGOLE MOTION DESIGN
 
-1) Animazioni rapide e sottili: **180–420ms max**, niente bounce eccessivo.
-2) Easing custom (non usare solo easeInOut):
-   - default: `cubic-bezier(0.22, 1, 0.36, 1)` (easeOut “premium”)
-   - ingresso: opacity + y (8–16px)
-   - hover: scale 0.98→1 o 1→1.02 con ombra/blur leggero (senza esagerare)
-3) Layout shift: usare **layout animations** quando cambiano card/filtri.
-4) Riduzione motion: se `prefers-reduced-motion`, disattivare spostamenti e usare solo fade.
+### 3.1 Durata e Timing
 
----
+| Tipo | Durata | Note |
+|------|--------|------|
+| Micro-interactions | 180ms | Hover, focus |
+| Transizioni | 280-320ms | Route change, tab switch |
+| Layout animations | 320-420ms | Reorder, resize |
+| **MAX** | 420ms | Mai superare |
 
-## 4️⃣ Iconografia
+### 3.2 Easing
 
-- Usare **un unico set** in tutta la UI.
-- Se Phosphor: scegliere **weight coerente** (es. `duotone` o `regular`) e mantenerlo ovunque.
-- Dimensioni standard:
-  - sidebar/menu: **20–22**
-  - azioni su card: **18–20**
-  - KPI header: **24–28**
-- Mantenere stroke/weight coerente anche nei bottoni (non mischiare stili).
+```javascript
+// Default premium
+const easing = [0.22, 1, 0.36, 1];  // cubic-bezier
 
----
+// ❌ EVITARE
+// easeInOut standard
+// bounce eccessivo
+```
 
-## 5️⃣ Componenti da migliorare (TASK)
+### 3.3 Pattern di Ingresso
 
-### 5.1 DashboardPage layout
-- Header con titolo + chip filtri (stagione, campionato, squadra)
-- KPI cards (x4) animate al mount e al cambio filtro (stagger)
-- Tab switch (Overview / Match / Players / Trends) con underline animata
-- Sezione grafici e tabella partite
-
-### 5.2 KPI Card “premium”
-- hover: leggero lift (y -2/-4), shadow soft, bordi 2xl, transizione morbida
-- on filter change: animate number (count-up) + highlight breve (glow/fade) senza flash
-- icona grande top-right in duotone con opacità bassa
-
-### 5.3 DataTable (partite)
-- righe con hover elegante (bg + subtle slide indicator)
-- sort icon animata (rotate/fade)
-- row expansion (accordion) con AnimatePresence
-
-### 5.4 Sidebar + Nav
-- icone coerenti + hover indicator animato (pill/left border)
-- item attivo con micro-motion (layoutId per pill)
-
-### 5.5 Stati (importantissimo)
-- Loading: skeleton elegante (shimmer leggerissimo) o Lottie SOLO se davvero serve e coerente con brand
-- Empty state: illustrazione/animazione Lottie minimale + call to action
-- Error state: messaggio chiaro + retry button con micro-interazione
-- Success toast/snackbar con motion pulita
-
----
-
-## 6️⃣ Implementazione (file e struttura)
-
-### 6.1 Dipendenze
-- `framer-motion`
-- `@phosphor-icons/react` (oppure `iconoir-react`)
-- `lottie-react` (opzionale)
-
-### 6.2 Motion tokens
-Creare:
-- `src/motion/tokens.ts`
-  - durations (fast, normal, slow)
-  - easings
-  - varianti: `fadeUp`, `fade`, `scaleIn`, `staggerContainer`, `tableRow`
-
-### 6.3 Wrapper components
-Creare wrapper:
-- `<MotionCard>`
-- `<MotionButton>`
-- `<MotionTab>`
-- `<MotionRow>`
-
-### 6.4 AnimatePresence
-Usare `AnimatePresence` per mount/unmount:
-- modali
-- drawer
-- espansioni
-- tab content
-
-### 6.5 prefers-reduced-motion
-Usare `useReducedMotion()`:
-- se true: rimuovere y/scale
-- mantenere solo opacity
-
----
-
-## 7️⃣ Varianti base (da implementare)
-
-### fadeUp
-```js
+```javascript
+// fadeUp (standard)
 initial: { opacity: 0, y: 12 }
 animate: { opacity: 1, y: 0 }
 exit:    { opacity: 0, y: 8 }
 transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] }
 ```
 
-### cardHover
-```js
+### 3.4 Pattern Hover
+
+```javascript
+// cardHover
 whileHover: { y: -3, scale: 1.01 }
 transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] }
+
+// ❌ NO scale > 1.05
+// ❌ NO y > 5px
 ```
 
-### staggerContainer
-```js
-animate: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } }
+### 3.5 Stagger
+
+```javascript
+// staggerContainer
+animate: { 
+  transition: { 
+    staggerChildren: 0.06, 
+    delayChildren: 0.04 
+  } 
+}
+```
+
+### 3.6 Reduced Motion
+
+```javascript
+IF prefers-reduced-motion
+  THEN remove y/scale transforms
+  KEEP only opacity transitions
 ```
 
 ---
 
-## 8️⃣ Look & Feel
+## 4️⃣ ICONOGRAFIA
 
-- Card: `rounded-2xl`, shadow soft, border subtle, spacing generosa
-- Tipografia: numeri KPI ben leggibili, gerarchia chiara
-- Colore: niente arcobaleno: 1 colore primario + 1 accento; stati discreti
-- Densità: dashboard “aria”, non troppo compressa
+### 4.1 Set Unico
+
+```
+USE Phosphor Icons (primary)
+  OR Iconoir (if geometric needed)
+
+NEVER mix icon sets
+```
+
+### 4.2 Weight Coerente
+
+| Contesto | Weight |
+|----------|--------|
+| Sidebar/Menu | `duotone` o `regular` |
+| Card actions | `regular` |
+| KPI header | `bold` o `fill` |
+
+### 4.3 Dimensioni Standard
+
+| Contesto | Size |
+|----------|------|
+| Sidebar/Menu | 20-22px |
+| Card actions | 18-20px |
+| KPI header | 24-28px |
 
 ---
 
-## 9️⃣ Output atteso
+## 5️⃣ COMPONENTI DA IMPLEMENTARE
 
-1) PR diff o codice completo per:
-- `motion/tokens.ts`
-- `components/MotionCard.tsx`, `MotionButton.tsx`, `MotionTabs.tsx`
-- `pages/DashboardPage.tsx` (o equivalent)
-- `components/KpiCard.tsx`, `MatchTable.tsx`, `SidebarNav.tsx`
+### 5.1 Motion Components
 
-2) Aggiornare almeno:
-- 1 empty state
-- 1 loading state
+| Componente | Scopo |
+|------------|-------|
+| `<MotionCard>` | Card con hover lift |
+| `<MotionButton>` | Button con feedback |
+| `<MotionTab>` | Tab con underline animata |
+| `<MotionRow>` | Row con hover indicator |
 
-3) Verificare coerenza (no over-animation).
+### 5.2 KPI Card Premium
+
+```
+✅ Hover: leggero lift (y -2/-4), shadow soft
+✅ On filter change: animate number (count-up)
+✅ Icona grande top-right in duotone
+❌ NO flash
+❌ NO bounce
+```
+
+### 5.3 DataTable
+
+```
+✅ Righe con hover elegante (bg + subtle slide)
+✅ Sort icon animata (rotate/fade)
+✅ Row expansion con AnimatePresence
+```
+
+### 5.4 Stati
+
+| Stato | Implementazione |
+|-------|-----------------|
+| **Loading** | Skeleton con shimmer leggerissimo |
+| **Empty** | Illustrazione minimale + CTA |
+| **Error** | Messaggio chiaro + retry button |
+| **Success** | Toast/snackbar con motion pulita |
 
 ---
 
-## ✅ Nota finale
+## 6️⃣ STRUTTURA FILE
 
-- Evitare animazioni standard/banali
-- Coerenza prima di tutto
-- Lottie solo se minimale/coerente (altrimenti placeholder + istruzioni)
-- Non introdurre dipendenze pesanti inutili
+```
+src/
+├── motion/
+│   ├── tokens.js         # durations, easings, variants
+│   ├── MotionCard.jsx
+│   ├── MotionButton.jsx
+│   ├── MotionTab.jsx
+│   ├── MotionRow.jsx
+│   └── index.js          # exports
+```
 
-Riferimento: `docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md` (principi e responsabilità)
+### 6.1 Motion Tokens
+
+```javascript
+// src/motion/tokens.js
+
+export const durations = {
+  fast: 0.18,
+  normal: 0.32,
+  slow: 0.42
+};
+
+export const easings = {
+  premium: [0.22, 1, 0.36, 1],
+  bounce: [0.68, -0.6, 0.32, 1.6]
+};
+
+export const variants = {
+  fadeUp: {
+    initial: { opacity: 0, y: 12 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 8 }
+  },
+  // ...
+};
+```
+
+---
+
+## 7️⃣ LOOK & FEEL
+
+| Aspetto | Standard |
+|---------|----------|
+| **Card** | `rounded-2xl`, shadow soft, border subtle |
+| **Tipografia** | Numeri KPI leggibili, gerarchia chiara |
+| **Colore** | 1 primario + 1 accento, stati discreti |
+| **Densità** | Dashboard "aria", non compressa |
+
+---
+
+## 8️⃣ CHECKLIST IMPLEMENTAZIONE
+
+> ⚠️ **Le checklist sono state consolidate in** [`docs/TODO_LIST.md`](../TODO_LIST.md#32-checklist-motion-ui-spec_frontend_motion_uimd)
+> 
+> Vai al documento TODO_LIST per tracciare lo stato delle implementazioni.
+
+---
+
+## ⚠️ REGOLE FINALI
+
+```
+❌ NO animazioni standard/banali
+❌ NO dipendenze pesanti inutili
+❌ NO Lottie se non minimale/coerente
+✅ Coerenza prima di tutto
+✅ Performance first
+```
+
+---
+
+**Fine documento – SPEC_FRONTEND_MOTION_UI**
 

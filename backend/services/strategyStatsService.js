@@ -31,13 +31,14 @@ async function calculateLayTheWinnerStats(playerName = null, surface = null) {
   }
 
   try {
-    // Query match completati con dati set
+    // Query match completati con dati set - usa matches_new
+    // matches_new usa: set1_p1/set1_p2 invece di w1/l1 e sets_player1/sets_player2 invece di winner_sets/loser_sets
     let query = supabase
-      .from('matches')
-      .select('id, winner_name, loser_name, w1, l1, winner_sets, loser_sets, surface, court_type, best_of')
-      .not('w1', 'is', null)
-      .not('l1', 'is', null)
-      .gt('winner_sets', 0);
+      .from('matches_new')
+      .select('id, player1_id, player2_id, winner_code, set1_p1, set1_p2, sets_player1, sets_player2, surface, best_of')
+      .not('set1_p1', 'is', null)
+      .not('set1_p2', 'is', null)
+      .gt('sets_player1', 0);
 
     if (surface) {
       query = query.or(`surface.ilike.%${surface}%,court_type.ilike.%${surface}%`);
@@ -58,21 +59,19 @@ async function calculateLayTheWinnerStats(playerName = null, surface = null) {
     let successCount = 0;    // Match dove il perdente del 1° set ha vinto
 
     for (const match of matches) {
-      // w1, l1 sono game del PRIMO set dal punto di vista del WINNER
-      // Se l1 > w1 → il loser aveva vinto il primo set
-      // Se w1 > l1 → il winner aveva vinto il primo set
-      
-      const winnerWonSet1 = match.w1 > match.l1;
-      const loserWonSet1 = match.l1 > match.w1;
+      // matches_new: set1_p1/set1_p2 sono i game del primo set per player1/player2
+      // winner_code: 1 = player1 vince, 2 = player2 vince
+      const p1WonSet1 = match.set1_p1 > match.set1_p2;
+      const p2WonSet1 = match.set1_p2 > match.set1_p1;
+      const p1WonMatch = match.winner_code === 1;
+      const p2WonMatch = match.winner_code === 2;
 
-      if (loserWonSet1) {
-        // Il LOSER aveva vinto il set 1 ma poi ha perso il match
-        // Questo è un caso dove "Lay the Winner" FALLISCE (il winner del set1 ha perso)
+      // Caso: chi ha vinto il primo set ha poi perso il match (LTW success)
+      if ((p1WonSet1 && p2WonMatch) || (p2WonSet1 && p1WonMatch)) {
         totalApplicable++;
-        // successCount NON aumenta - la strategia ha funzionato per chi ha bancato
-      } else if (winnerWonSet1) {
-        // Il WINNER aveva vinto il set 1 e ha vinto il match
-        // Questo è un caso dove il perdente del set1 NON ha recuperato
+        // successCount NON aumenta - la strategia ha funzionato
+      } else if ((p1WonSet1 && p1WonMatch) || (p2WonSet1 && p2WonMatch)) {
+        // Chi ha vinto il set 1 ha anche vinto il match
         totalApplicable++;
         successCount++; // La strategia "Lay" avrebbe perso qui
       }
@@ -195,13 +194,14 @@ async function calculateSuperBreakStats(playerName = null, surface = null) {
   }
 
   try {
+    // matches_new usa player1_rank/player2_rank invece di winner_rank/loser_rank
     let query = supabase
-      .from('matches')
-      .select('id, winner_name, loser_name, winner_rank, loser_rank, surface, court_type')
-      .not('winner_rank', 'is', null)
-      .not('loser_rank', 'is', null)
-      .gt('winner_rank', 0)
-      .gt('loser_rank', 0);
+      .from('matches_new')
+      .select('id, player1_id, player2_id, winner_code, player1_rank, player2_rank, surface')
+      .not('player1_rank', 'is', null)
+      .not('player2_rank', 'is', null)
+      .gt('player1_rank', 0)
+      .gt('player2_rank', 0);
 
     if (surface) {
       query = query.or(`surface.ilike.%${surface}%,court_type.ilike.%${surface}%`);
@@ -222,11 +222,14 @@ async function calculateSuperBreakStats(playerName = null, surface = null) {
     let underdogWins = 0;
 
     for (const match of matches) {
+      // matches_new: player1_rank/player2_rank sono i ranking al momento del match
       // Ranking più basso = favorito (es: #5 è favorito vs #50)
-      const winnerRank = match.winner_rank;
-      const loserRank = match.loser_rank;
+      const p1Rank = match.player1_rank;
+      const p2Rank = match.player2_rank;
+      const p1IsFavorite = p1Rank < p2Rank;
+      const p1WonMatch = match.winner_code === 1;
 
-      if (winnerRank < loserRank) {
+      if ((p1IsFavorite && p1WonMatch) || (!p1IsFavorite && !p1WonMatch)) {
         // Favorito ha vinto
         favoriteWins++;
       } else {
@@ -240,7 +243,7 @@ async function calculateSuperBreakStats(playerName = null, surface = null) {
 
     // Calcola anche il gap medio di ranking nei match
     const avgRankGap = matches.length > 0 
-      ? matches.reduce((sum, m) => sum + Math.abs(m.winner_rank - m.loser_rank), 0) / matches.length
+      ? matches.reduce((sum, m) => sum + Math.abs(m.player1_rank - m.player2_rank), 0) / matches.length
       : 0;
 
     return {
@@ -388,13 +391,13 @@ async function calculateBreakResilienceStats(playerName = null, surface = null) 
       `)
       .not('home_break_points_total', 'is', null);
 
-    // Query match con comeback (perdente 1° set poi vince)
+    // Query match con comeback (perdente 1° set poi vince) - usa matches_new
     let matchQuery = supabase
-      .from('matches')
-      .select('id, winner_name, loser_name, w1, l1, winner_sets, loser_sets')
-      .not('w1', 'is', null)
-      .not('l1', 'is', null)
-      .gt('winner_sets', 0);
+      .from('matches_new')
+      .select('id, player1_id, player2_id, winner_code, set1_p1, set1_p2, sets_player1, sets_player2')
+      .not('set1_p1', 'is', null)
+      .not('set1_p2', 'is', null)
+      .gt('sets_player1', 0);
 
     if (surface) {
       matchQuery = matchQuery.or(`surface.ilike.%${surface}%,court_type.ilike.%${surface}%`);
@@ -426,13 +429,19 @@ async function calculateBreakResilienceStats(playerName = null, surface = null) 
 
     if (matches && matches.length > 0) {
       for (const match of matches) {
-        // Se l1 > w1, significa che il loser aveva vinto il primo set
-        // Quindi il winner ha fatto comeback
-        if (match.l1 > match.w1) {
+        // matches_new: set1_p1/set1_p2 e winner_code
+        // Comeback = chi perde il primo set poi vince il match
+        const p1WonSet1 = match.set1_p1 > match.set1_p2;
+        const p2WonSet1 = match.set1_p2 > match.set1_p1;
+        const p1WonMatch = match.winner_code === 1;
+        const p2WonMatch = match.winner_code === 2;
+        
+        // Se winner del match aveva perso il primo set = comeback
+        if ((p2WonSet1 && p1WonMatch) || (p1WonSet1 && p2WonMatch)) {
           comebackWins++;
         }
-        // Tutti i match dove qualcuno ha perso il primo set
-        if (match.l1 !== match.w1) {
+        // Tutti i match con set1 deciso
+        if (match.set1_p1 !== match.set1_p2) {
           totalWithSet1Loss++;
         }
       }

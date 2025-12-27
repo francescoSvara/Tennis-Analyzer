@@ -386,7 +386,6 @@ export function StrategiesTab({ data, header }) {
   }), [strategies, favorites]);
 
   const handleExecute = (strategy) => {
-    console.log('Execute strategy:', strategy);
     // TODO: Implementare logica di esecuzione
   };
 

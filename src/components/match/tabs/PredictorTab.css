@@ -31,7 +31,7 @@
 
 .predictor-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-5);
 }
 
@@ -126,6 +126,10 @@
 .gauge-player .player-name {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .gauge-player .player-prob {
@@ -329,11 +333,35 @@
     padding: var(--space-4);
   }
 
+  .gauge-players {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .gauge-player.home,
+  .gauge-player.away {
+    align-items: center;
+  }
+
   .gauge-player .player-prob {
     font-size: var(--font-size-xl);
   }
 
   .prob-number {
     font-size: var(--font-size-2xl);
+  }
+
+  .comparison-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .factor-item {
+    flex-direction: column;
+  }
+
+  .tab-title {
+    font-size: var(--font-size-lg);
   }
 }

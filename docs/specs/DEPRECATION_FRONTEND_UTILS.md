@@ -1,36 +1,71 @@
-# 📝 Deprecation Notice - Frontend Utils Functions
+# 📝 DEPRECATION FRONTEND UTILS
+## Migration Notice – src/utils.js Eliminato
 
-> **Data**: 25 Dicembre 2025 (aggiornato)  
-> **Stato**: ✅ **COMPLETATO** - `src/utils.js` eliminato  
-> **Riferimento**: [FILOSOFIA_CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md)  
-
----
-
-## ✅ COMPLETATO: `src/utils.js` ELIMINATO
-
-Il file `src/utils.js` (~2500 righe) è stato **completamente eliminato** il 25 Dicembre 2025.
-
-**Motivo**: Nessun componente lo importava - era dead code dopo la migrazione a MatchBundle architecture.
-
-### Funzioni rimosse:
-- `calculateVolatility()`, `calculateElasticity()`, `classifyMatchCharacter()`
-- `calculatePressureIndex()`, `calculateHPI()`, `calculateBreakResilience()`
-- `analyzeLayTheWinner()`, `analyzeBancaServizio()`, `analyzeSuperBreak()`
-- E altre ~50 funzioni di utilità non usate
+> **Dominio**: Frontend · Migration · Deprecation  
+> **Stato**: ✅ COMPLETATO  
+> **Data completamento**: 25 Dicembre 2025  
+> **Ultimo aggiornamento**: 27 Dicembre 2025  
 
 ---
 
-## ✅ Pattern Corretto di Consumo
+## 🧭 NAVIGAZIONE ARCHITETTURA
+
+| ⬆️ Padre | ➡️ Correlato |
+|---------|--------------|
+| [FILOSOFIA_FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [FILOSOFIA_CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) |
+
+### 📁 File Codice Principali
+
+| File | Stato |
+|------|-------|
+| `src/utils.js` | ❌ ELIMINATO |
+| [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | ✅ Source of Truth |
+| [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | ✅ Consumer Pattern |
+
+---
+
+## 0️⃣ STATO ATTUALE
+
+```
+✅ COMPLETATO: src/utils.js ELIMINATO (25 Dicembre 2025)
+```
+
+Il file `src/utils.js` (~2500 righe) era **dead code** dopo la migrazione a MatchBundle architecture.
+
+---
+
+## 1️⃣ FUNZIONI RIMOSSE
+
+| Categoria | Funzioni |
+|-----------|----------|
+| **Volatility** | `calculateVolatility()`, `calculateElasticity()`, `classifyMatchCharacter()` |
+| **Pressure** | `calculatePressureIndex()`, `calculateHPI()`, `calculateBreakResilience()` |
+| **Strategies** | `analyzeLayTheWinner()`, `analyzeBancaServizio()`, `analyzeSuperBreak()` |
+| **Altre** | ~50 funzioni di utilità non usate |
+
+---
+
+## 2️⃣ PATTERN CORRETTO
+
+### ❌ PRIMA (Sbagliato)
+
+```javascript
+import { calculateVolatility } from '../utils';
+
+const volatility = calculateVolatility(rawData);  // ❌ Frontend calcola
+```
+
+### ✅ DOPO (Corretto)
+
 ```javascript
 import { useMatchBundle } from '../hooks/useMatchBundle';
 
 const MyComponent = ({ matchId }) => {
   const { bundle } = useMatchBundle(matchId);
   
+  // ✅ Frontend consuma solo
   const volatility = bundle?.header?.features?.volatility || 50;
   const volatilitySource = bundle?.header?.features?.volatilitySource || 'estimated';
-  const pressure = bundle?.header?.features?.pressure || 50;
-  const pressureSource = bundle?.header?.features?.pressureSource || 'estimated';
   
   return (
     <div>
@@ -43,9 +78,9 @@ const MyComponent = ({ matchId }) => {
 
 ---
 
-## 📊 DataSource Flag
+## 3️⃣ DATASOURCE FLAG
 
-Ogni feature ora espone la sua origine dati:
+Ogni feature ora espone la sua **origine dati**:
 
 ```javascript
 bundle.header.features = {
@@ -63,37 +98,64 @@ bundle.header.features = {
 }
 ```
 
-**Valori possibili** per `*Source`:
-- `'live'` - Da powerRankings (game-by-game, massima precisione)
-- `'statistics'` - Da statistics aggregate (buona precisione)
-- `'score'` - Da score/set results (precisione media)
-- `'odds'` - Da market odds (stima)
-- `'rankings'` - Da world rankings (stima base)
-- `'estimated'` - Fallback default
+### Valori Possibili per `*Source`
+
+| Valore | Descrizione | Precisione |
+|--------|-------------|------------|
+| `'live'` | Da powerRankings (game-by-game) | Massima |
+| `'statistics'` | Da statistics aggregate | Buona |
+| `'score'` | Da score/set results | Media |
+| `'odds'` | Da market odds | Stima |
+| `'rankings'` | Da world rankings | Base |
+| `'estimated'` | Fallback default | Minima |
 
 ---
 
-## 🔧 Migrazione Completata
+## 4️⃣ MIGRAZIONE COMPLETATA
 
 ### Per Componenti UI
-1. ✅ `StrategiesTab.jsx` usa `bundle.tabs.strategies.signals`
-2. ✅ `StrategiesPanel.jsx` usa solo `bundle.header.player*.stats`
-3. ✅ Nessun componente importa più funzioni di calcolo frontend
+
+| Componente | Stato | Note |
+|------------|-------|------|
+| `StrategiesTab.jsx` | ✅ | Usa `bundle.tabs.strategies.signals` |
+| `StrategiesPanel.jsx` | ✅ | Usa solo `bundle.header.player*.stats` |
+| Altri componenti | ✅ | Nessuno importa funzioni calcolo |
 
 ### Per Backend
-1. ✅ Fatto: `featureEngine.js` calcola tutte le features con fallback chain
-2. ✅ Fatto: Aggiunto `*Source` flag a ogni feature in `computeFeatures()`
-3. ✅ Fatto: Test fixtures creati in `test/features/volatility.test.js`
+
+| Task | Stato | File |
+|------|-------|------|
+| Features con fallback | ✅ | `featureEngine.js` |
+| `*Source` flag | ✅ | `computeFeatures()` |
+| Test fixtures | ✅ | `test/features/volatility.test.js` |
 
 ---
 
-## 📚 Riferimenti
+## 5️⃣ REGOLA ARCHITETTTURALE
 
-- [FILOSOFIA_CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) - Tassonomia features e standard
-- [HPI_RESILIENCE](HPI_RESILIENCE.md) - Spec dettagliata pressure/HPI
-- [FILOSOFIA_STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) - Feature→Strategy→Signal architecture
-- [TODO_LIST](../TODO_LIST.md) - Progresso migrazione
+```
+RULE Frontend_No_Calculation
+  IF component needs calculated_value
+    THEN read from bundle.header.features
+    NEVER import calculation_function
+END
+
+RULE Backend_Calculates_All
+  ALL features computed in featureEngine.js
+  ALL features include *Source flag
+END
+```
 
 ---
 
-**Fine documento**
+## 📚 RIFERIMENTI
+
+| Documento | Scopo |
+|-----------|-------|
+| [FILOSOFIA_CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | Tassonomia features e standard |
+| [HPI_RESILIENCE](HPI_RESILIENCE.md) | Spec dettagliata pressure/HPI |
+| [FILOSOFIA_STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | Feature→Strategy→Signal architecture |
+
+---
+
+**Fine documento – DEPRECATION_FRONTEND_UTILS**

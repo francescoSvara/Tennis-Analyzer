@@ -1,6 +1,6 @@
 # 🔬 DEEP PHILOSOPHY CHECK REPORT
 
-> **Generato**: 2025-12-25T10:40:36.991Z  
+> **Generato**: 2025-12-27T06:37:25.567Z  
 > **Script**: `node scripts/deepPhilosophyCheck.js`
 
 ---
@@ -10,10 +10,19 @@
 | Metrica | Valore |
 |---------|--------|
 | Check totali | 83 |
-| ✅ Passati | 77 |
-| ❌ Falliti | 0 |
+| ✅ Passati | 76 |
+| ❌ Falliti | 1 |
 | 📋 TODO dichiarati | 4 |
 
+---
+
+## 🔴 ERRORI CRITICI (1)
+
+Questi sono file/funzioni dichiarate nelle filosofie che **DOVREBBERO ESISTERE** ma NON esistono.
+
+| # | Filosofia | Tipo | Dettaglio | Descrizione |
+|---|-----------|------|-----------|-------------|
+| 1 | DB | PATTERN_MISSING | `backend/server.js`  | server.js deve avere fallback legacy per match XLSX |
 
 ---
 
@@ -109,11 +118,14 @@ Questi elementi sono dichiarati come "TODO" nelle filosofie stesse (non ancora i
 - **Check**: 1/1 passati
 - **Errori**: 0 | **Warning**: 0 | **TODO**: 0
 
-### ✅ FILOSOFIA_DB
+### 🔴 FILOSOFIA_DB
 
 - **File**: `docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md`
-- **Check**: 12/12 passati
-- **Errori**: 0 | **Warning**: 0 | **TODO**: 0
+- **Check**: 11/12 passati
+- **Errori**: 1 | **Warning**: 0 | **TODO**: 0
+
+**Errori:**
+- ❌ Pattern richiesto NON TROVATO in backend/server.js: server.js deve avere fallback legacy per match XLSX
 
 ### ✅ FILOSOFIA_FRONTEND
 

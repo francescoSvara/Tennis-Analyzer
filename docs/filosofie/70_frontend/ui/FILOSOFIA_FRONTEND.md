@@ -1596,28 +1596,15 @@ npm install lottie-react
 
 # ✅ CHECKLIST FINALE
 
-## Visual/UX
-- [ ] Card modulari
-- [ ] Stato semaforico (🟢🟡🔴)
-- [ ] Azione unica per strategia
-- [ ] Dati minimi ma decisivi
-- [ ] Psicologia > numeri
-
-## Backend
-- [x] Strategy Engine → [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js)
-- [x] Feature Engine → [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
-- [ ] Odds Service con edge calculation
-- [x] Momentum da powerRankings → [`backend/server.js`](../../backend/server.js)
-- [ ] Predictor Service con win probability avanzata
-- [x] Scraping solo backend → [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js)
-- [x] Pressure calculator backend → [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js)
-
-## Motion
-- [x] [`src/motion/tokens.js`](../../src/motion/tokens.js) con durations/easings/variants
-- [x] [`MotionCard`](../../src/motion/MotionCard.jsx), [`MotionButton`](../../src/motion/MotionButton.jsx), [`MotionTab`](../../src/motion/MotionTab.jsx), [`MotionRow`](../../src/motion/MotionRow.jsx)
-- [ ] AnimatePresence per mount/unmount
-- [ ] prefers-reduced-motion rispettato
-- [ ] Phosphor Icons con weight coerente
+> ⚠️ **Le checklist sono state consolidate in** [`docs/TODO_LIST.md`](../../../TODO_LIST.md#31-checklist-frontend-filosofia_frontendmd)
+> 
+> Vai al documento TODO_LIST per tracciare lo stato delle implementazioni.
+> 
+> **Riepilogo stato attuale:**
+> - Visual/UX: 5 item da fare
+> - Backend: 2 TODO (oddsService, predictorService), 5 completati
+> - Motion: 3 item da fare, 2 completati
+> - Performance: 4 item da fare
 
 ---
 
@@ -1630,12 +1617,6 @@ npm install lottie-react
 ---
 
 **Fine documento – FILOSOFIA_FRONTEND**
-
-## Performance
-- [ ] UNA sola strategia attiva per match (evita overload)
-- [ ] Notifiche solo 🟢 READY (niente spam)
-- [ ] Cooldown segnali (anti-flap)
-- [ ] Data completeness badge
 
 ---
 

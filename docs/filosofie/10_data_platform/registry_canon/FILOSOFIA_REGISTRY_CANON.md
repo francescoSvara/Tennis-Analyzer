@@ -1,633 +1,76 @@
-# 🔖 FILOSOFIA REGISTRY & CANONICAL IDs  
-## Versione V1 – Entity Resolution & Normalization
+# 🔖 FILOSOFIA REGISTRY & CANONICAL IDs (CONCETTO)
 
-> **Dominio**: Canonical IDs · Entity Resolution · Data Normalization  
-> **Stato**: ATTIVA  
-> **Ultimo aggiornamento**: Dicembre 2025  
-
----
-
-## 🧭 NAVIGAZIONE ARCHITETTURA
-
-| ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
-|---------|-----------|----------------|
-| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Tutte le fonti (SofaScore API, SVG Momentum) | [DB](../storage/FILOSOFIA_DB.md), [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) |
-
-### � Documenti Correlati (stesso layer)
-| Documento | Relazione |
-|-----------|-----------|
-| [DB](../storage/FILOSOFIA_DB.md) | Storage canonical IDs |
-| [TEMPORAL](../temporal/FILOSOFIA_TEMPORAL.md) | Timestamps per resolution history |
-| [LINEAGE_VERSIONING](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | Versioning entity mappings |
-| [OBSERVABILITY](../quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Resolution quality metrics |
-
-### �📁 File Codice Principali
-| File | Descrizione | Responsabilità |
-|------|-------------|----------------|
-| [`backend/services/dataNormalizer.js`](../../backend/services/dataNormalizer.js) | Normalizzazione e mapping | Resolve player/tournament names → canonical IDs |
-| [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js) | Persistenza match | Salva solo con canonical IDs |
-| [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Scraping SofaScore | Ottiene player_id nativo |
+> **Una entità, una identità**
+> Questo documento definisce come ogni giocatore, torneo, match ha un ID unico e stabile.
+> Senza identità chiare, le statistiche si attaccano al giocatore sbagliato.
 
 ---
 
-## 0️⃣ PERCHÉ ESISTE (GAMBLER REASON)
-
-> **Il betting muore se le stats si attaccano al player sbagliato.**
+## 1️⃣ Perché esiste questo documento
 
 Problema reale:
-```text
-SofaScore API: "Alcaraz C."
-Odds API:      "C. Alcaraz"
-Display Name:  "Carlos Alcaraz Garfia"
+- SofaScore: "Alcaraz C."
+- Odds API: "C. Alcaraz"  
+- Display: "Carlos Alcaraz Garfia"
 
 Se non risolvi → player diversi → stats sbagliate → edge finto.
-```
-
-Il progetto ha **più fonti** potenziali:
-- SofaScore con `home_player_id`, `away_player_id` (int) - FONTE PRIMARIA
-- Odds provider con nomi variabili (potenziale futura integrazione)
-
-**Serve un "canon"**: una singola identità per ogni entità.
 
 ---
 
-## 1️⃣ ENTITÀ CANONICHE (ID OBBLIGATORI)
+## 2️⃣ Principio del Canon
 
-Ogni cosa nel sistema deve avere un **canonical_id** stabile:
+> **Ogni entità ha un canonical_id stabile.**
 
-### 1.1 PlayerCanonical
-
-```typescript
-interface PlayerCanonical {
-  player_id: string;         // canonical ID (es. "sof_123456" o UUID)
-  name: string;              // nome display preferito
-  name_variants: string[];   // alias noti
-  dob?: Date;                // disambiguatore
-  country?: string;
-  sources: {
-    sofascore_id?: number;
-    atp_id?: number;
-    wta_id?: number;
-    // ...
-  };
-}
-```
-
-**Storage**: `players` table
+Il canonical_id:
+- non cambia nel tempo
+- è unico nel sistema
+- mappa tutte le varianti
 
 ---
 
-### 1.2 MatchCanonical
+## 3️⃣ Entità Canoniche
 
-```typescript
-interface MatchCanonical {
-  match_id: string;              // canonical ID (es. UUID o "sof_12345678")
-  home_player_id: string;        // FK → players.player_id
-  away_player_id: string;        // FK → players.player_id
-  tournament_id: string;         // FK → tournaments.tournament_id
-  event_time: Date;
-  surface: SurfaceEnum;          // normalizzato
-  best_of: 3 | 5;
-  status: MatchStatus;
-  sources: {
-    sofascore_id?: number;
-    // ...
-  };
-}
-```
+| Entità | ID Format | Esempio |
+|--------|-----------|---------|
+| Player | `sof_123456` | `sof_12345` |
+| Match | `sof_14968724` | `sof_14968724` |
+| Tournament | `sof_2345` | `sof_2345` |
 
-**Storage**: `matches_new` table
+Il prefisso indica la fonte primaria.
 
 ---
 
-### 1.3 TournamentCanonical
+## 4️⃣ Resolution Flow
 
-```typescript
-interface TournamentCanonical {
-  tournament_id: string;     // canonical ID
-  name: string;              // nome display
-  name_variants: string[];
-  location?: string;
-  category: "GrandSlam" | "Masters1000" | "ATP500" | "ATP250" | ...;
-  surface: SurfaceEnum;
-  sources: {
-    sofascore_id?: number;
-    atp_id?: string;
-    // ...
-  };
-}
+```
+Nome grezzo → dataNormalizer → canonical_id
 ```
 
-**Storage**: `tournaments` table
+Ordine di priorità:
+1. ID nativo SofaScore (se disponibile)
+2. Mapping da players.json
+3. Fuzzy match + conferma manuale
 
 ---
 
-### 1.4 BookCanonical
+## 5️⃣ Alias e Varianti
 
-```typescript
-interface BookCanonical {
-  book_id: string;       // "bet365", "pinnacle", ...
-  name: string;
-  is_sharp: boolean;     // per market analysis
-  markets: string[];     // "match_winner", "set_winner", ...
-}
+Ogni player può avere N alias:
+
+```
+player_id: sof_12345
+name: "Carlos Alcaraz"
+aliases: ["C. Alcaraz", "Alcaraz C.", "Carlos Alcaraz Garfia"]
 ```
 
-**Storage**: config file o `books` table
+Il sistema accetta qualsiasi alias, ritorna sempre il canonical.
 
 ---
 
-### 1.5 MarketCanonical
+## 6️⃣ Regola finale
 
-```typescript
-type MarketEnum = 
-  | "match_winner"
-  | "set_winner"
-  | "game_handicap"
-  | "total_games"
-  | ...;
-```
-
-**Storage**: enum stabile (non DB)
+> **Se due record hanno ID diversi, sono entità diverse. Sempre.**
 
 ---
 
-## 2️⃣ REGOLA FONDAMENTALE
-
-> **Il FE/Strategy lavora SOLO su canonical_id.**
-
-❌ NON accettabile:
-```javascript
-// Frontend
-const playerName = "Alcaraz";  // string grezzo
-const stats = getStats(playerName);  // ❌ fragile
-```
-
-✅ Corretto:
-```javascript
-// Frontend
-const player_id = bundle.header.home_player.player_id;
-const stats = getStats(player_id);  // ✅ robusto
-```
-
----
-
-## 3️⃣ MAPPING & RESOLUTION (COME RISOLVI)
-
-### 3.1 Normalizzazione Nomi
-
-**Passaggi standard**:
-1. Trim whitespace
-2. Unicode normalize (NFD → rimuovi accenti opzionale)
-3. Lowercase
-4. Rimuovi caratteri speciali (`-`, `.`, etc.)
-
-**Esempio**:
-```javascript
-function normalizeName(name) {
-  return name
-    .trim()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // rimuovi accenti
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '');  // solo alphanum
-}
-
-normalizeName("Carlos Alcaraz Garfia")  // "carlos alcaraz garfia"
-normalizeName("Alcaraz C.")              // "alcaraz c"
-```
-
----
-
-### 3.2 Alias Mapping
-
-**Struttura**:
-```javascript
-const PLAYER_ALIASES = {
-  "sof_123456": [
-    "Carlos Alcaraz Garfia",
-    "Alcaraz C.",
-    "C. Alcaraz",
-    "Carlos Alcaraz"
-  ],
-  "sof_789012": [
-    "Novak Djokovic",
-    "Djokovic N.",
-    "N. Djokovic"
-  ]
-};
-```
-
-**Storage**: `players.name_variants` (JSONB) o file config
-
----
-
-### 3.3 Deduplication Rules
-
-**"Same person" se**:
-1. Nome normalizzato identico + DOB identico (se disponibile)
-2. Nome normalizzato molto simile (Levenshtein < 3) + country identico
-3. Match manual in alias mapping
-
-**Algoritmo**:
-```javascript
-function resolvePlayers(rawPlayers) {
-  const canonical = [];
-  
-  for (const raw of rawPlayers) {
-    const normalized = normalizeName(raw.name);
-    
-    // Check alias mapping
-    const existing = findByAlias(normalized);
-    if (existing) {
-      linkToCanonical(raw, existing);
-      continue;
-    }
-    
-    // Check fuzzy match + DOB
-    const similar = findSimilar(normalized, raw.dob);
-    if (similar && similar.similarity > 0.9) {
-      linkToCanonical(raw, similar);
-      continue;
-    }
-    
-    // Create new canonical
-    const newCanonical = createCanonicalPlayer(raw);
-    canonical.push(newCanonical);
-  }
-  
-  return canonical;
-}
-```
-
----
-
-### 3.4 Tournament Normalization
-
-**Campi da normalizzare**:
-- Nome: "Australian Open" vs "AO" vs "Aus Open"
-- Location: "Melbourne" vs "Melbourne Park"
-- Surface: "hard" vs "Hard" vs "HARD" → enum `SurfaceEnum.HARD`
-
-**Standard**:
-```typescript
-enum SurfaceEnum {
-  HARD = "hard",
-  CLAY = "clay",
-  GRASS = "grass",
-  CARPET = "carpet",
-  UNKNOWN = "unknown"
-}
-
-enum TournamentCategory {
-  GRAND_SLAM = "grand_slam",
-  MASTERS_1000 = "masters_1000",
-  ATP_500 = "atp_500",
-  ATP_250 = "atp_250",
-  CHALLENGER = "challenger",
-  // ...
-}
-```
-
----
-
-## 4️⃣ CANONICAL SCHEMA CONTRACT (MINIMO INDISPENSABILE)
-
-### Match Canonico Valido
-
-**Requisiti obbligatori**:
-```typescript
-interface ValidMatchCanonical {
-  match_id: string;                    // ✅ unique
-  home_player_id: string;              // ✅ FK valido
-  away_player_id: string;              // ✅ FK valido
-  tournament_id: string;               // ✅ FK valido
-  surface: SurfaceEnum;                // ✅ enum normalizzato
-  best_of: 3 | 5;                      // ✅ coerente
-  status: "scheduled" | "live" | "finished" | "retired" | "walkover";  // ✅ enum
-  event_time: Date;                    // ✅ required
-}
-```
-
-**Se manca uno di questi → match va in "quarantine"**:
-```javascript
-async function validateMatch(match) {
-  const errors = [];
-  
-  if (!match.match_id) errors.push('missing match_id');
-  if (!match.home_player_id) errors.push('missing home_player_id');
-  if (!match.away_player_id) errors.push('missing away_player_id');
-  if (!match.tournament_id) errors.push('missing tournament_id');
-  if (!['hard', 'clay', 'grass', 'carpet'].includes(match.surface)) {
-    errors.push('invalid surface');
-  }
-  if (![3, 5].includes(match.best_of)) errors.push('invalid best_of');
-  
-  if (errors.length > 0) {
-    await db.query(`
-      INSERT INTO quarantine_matches (match_id, errors)
-      VALUES ($1, $2)
-    `, [match.match_id, JSON.stringify(errors)]);
-    return false;
-  }
-  
-  return true;
-}
-```
-
----
-
-## 5️⃣ DOVE VIVE LA LOGICA
-
-### 5.1 `backend/services/dataNormalizer.js`
-
-**Responsabilità**:
-- Normalizzazione nomi
-- Resolution player/tournament
-- Mapping cross-source
-- Dedup detection
-
-**Funzioni chiave**:
-```javascript
-- normalizeName(name)
-- resolvePlayerName(name, dob?, country?)
-- resolveTournamentName(name, location?)
-- detectDuplicatePlayers()
-```
-
-**TODO**: se non esiste, crearlo.
-
----
-
-### 5.2 `backend/db/matchRepository.js`
-
-**Responsabilità**:
-- Persistenza solo con canonical IDs
-- Validazione schema before insert
-- Query su canonical tables
-
-**Regola**:
-```javascript
-// ❌ VIETATO
-await matchRepository.saveMatch({
-  winner_name: "Alcaraz",  // string grezzo
-  loser_name: "Sinner"
-});
-
-// ✅ OBBLIGATORIO
-await matchRepository.saveMatch({
-  home_player_id: "sof_123456",
-  away_player_id: "sof_789012",
-  tournament_id: "tour_001"
-});
-```
-
----
-
-### 5.3 NOTA: Frontend NON fa resolution
-
-Il frontend:
-- ✅ Consuma `player_id` già canonici dal bundle
-- ✅ Mostra `player.name` (display name)
-- ❌ NON chiama `resolvePlayerName()`
-- ❌ NON fa fuzzy matching
-
-Tutta la resolution = **backend only**.
-
----
-
-## 6️⃣ OUTPUT NEL MATCHBUNDLE
-
-### 6.1 Esportare Canonical IDs
-
-```typescript
-interface MatchBundleHeader {
-  match_id: string;
-  home_player: {
-    player_id: string;        // ✅ canonical ID
-    name: string;             // display name
-    country?: string;
-  };
-  away_player: {
-    player_id: string;
-    name: string;
-    country?: string;
-  };
-  tournament: {
-    tournament_id: string;    // ✅ canonical ID
-    name: string;             // display name
-    category: string;
-    surface: SurfaceEnum;
-  };
-  // ...
-}
-```
-
----
-
-### 6.2 Identity Warnings (opzionale)
-
-Se mapping incerto:
-```typescript
-interface MatchBundleMeta {
-  // ... altri campi
-  identity_warnings?: {
-    home_player?: {
-      confidence: number;  // 0.0 - 1.0
-      reason: string;      // "fuzzy match: Levenshtein = 2"
-    };
-    tournament?: {
-      confidence: number;
-      reason: string;
-    };
-  };
-}
-```
-
-**Uso**:
-- `confidence >= 0.95` → OK
-- `0.8 <= confidence < 0.95` → warning giallo in UI
-- `confidence < 0.8` → errore, non usare
-
----
-
-## 7️⃣ CONCEPT CHECKS
-
-### 7.1 CANONICAL_IDS_REQUIRED
-
-**Regola**:
-```text
-Nessun bundle senza player_id e tournament_id canonici.
-```
-
-**Test**:
-```javascript
-function checkCanonicalIds(bundle) {
-  const { header } = bundle;
-  
-  assert(header.home_player.player_id, 'missing home_player_id');
-  assert(header.away_player.player_id, 'missing away_player_id');
-  assert(header.tournament.tournament_id, 'missing tournament_id');
-  
-  // Verifica formato
-  assert(header.home_player.player_id.match(/^(sof_|uuid_)/), 'invalid player_id format');
-}
-```
-
----
-
-### 7.2 NO_DUPLICATE_PLAYERS
-
-**Regola**:
-```text
-Non devono esistere player duplicati nel registry.
-```
-
-**Test** (batch):
-```javascript
-async function detectDuplicatePlayers() {
-  const players = await db.query('SELECT * FROM players');
-  
-  const normalized = players.map(p => ({
-    ...p,
-    norm_name: normalizeName(p.name)
-  }));
-  
-  const groups = groupBy(normalized, 'norm_name');
-  const duplicates = groups.filter(g => g.length > 1);
-  
-  if (duplicates.length > 0) {
-    console.error('Duplicate players detected:', duplicates);
-    return { error: 'duplicates found', count: duplicates.length };
-  }
-  
-  return { ok: true };
-}
-```
-
-**Azione**: review manuale + merge.
-
----
-
-## 8️⃣ ESEMPI PRATICI
-
-### Esempio 1: Import SofaScore Match con Canonical IDs
-
-```javascript
-async function importSofaScoreMatch(sofascoreEvent) {
-  // 1. Players già con IDs canonici da SofaScore
-  const homePlayerId = sofascoreEvent.homeTeam.id;
-  const awayPlayerId = sofascoreEvent.awayTeam.id;
-  
-  // 2. Resolve tournament
-  const tournamentId = sofascoreEvent.tournament.uniqueTournament.id;
-  
-  // 3. Normalize surface from ground type
-  const surface = normalizeSurface(sofascoreEvent.groundType);
-  
-  // 4. Create canonical match
-  const match = {
-    match_id: sofascoreEvent.id,
-    home_player_id: homePlayerId,
-    away_player_id: awayPlayerId,
-    tournament_id: tournamentId,
-    surface,
-    best_of: determineBestOf(sofascoreEvent),
-    event_time: new Date(sofascoreEvent.startTimestamp * 1000),
-    status: sofascoreEvent.status.type,
-    score: extractScore(sofascoreEvent)
-  };
-  
-  // 5. Validate
-  const valid = await validateMatch(match);
-  if (!valid) return;
-  
-  // 6. Save
-  await matchRepository.insertMatch(match);
-}
-```
-
----
-
-### Esempio 2: MatchBundle con Canonical
-
-```javascript
-async function buildMatchBundle(match_id) {
-  // 1. Fetch match con canonical IDs
-  const match = await matchRepository.getMatchById(match_id);
-  
-  // 2. Fetch player details
-  const homePlayer = await playerService.getPlayerById(match.home_player_id);
-  const awayPlayer = await playerService.getPlayerById(match.away_player_id);
-  const tournament = await tournamentService.getTournamentById(match.tournament_id);
-  
-  // 3. Build header
-  const header = {
-    match_id: match.match_id,
-    home_player: {
-      player_id: homePlayer.player_id,  // canonical
-      name: homePlayer.name,            // display
-      country: homePlayer.country
-    },
-    away_player: {
-      player_id: awayPlayer.player_id,
-      name: awayPlayer.name,
-      country: awayPlayer.country
-    },
-    tournament: {
-      tournament_id: tournament.tournament_id,
-      name: tournament.name,
-      category: tournament.category,
-      surface: tournament.surface
-    },
-    event_time: match.event_time,
-    status: match.status
-  };
-  
-  // 4. Build bundle
-  return {
-    header,
-    tabs: { /* ... */ },
-    meta: { /* ... */ }
-  };
-}
-```
-
----
-
-## 9️⃣ MIGRATION CHECKLIST
-
-Per passare da legacy a canonical:
-
-- [ ] Crea `players` table con `player_id` + `name_variants`
-- [ ] Populate da SofaScore scraping
-- [ ] Script di migration: `UPDATE matches SET home_player_id = ...`
-- [ ] Valida: `SELECT * FROM matches WHERE home_player_id IS NULL`
-- [ ] Update tutti i consumer (featureEngine, strategyEngine, bundle)
-- [ ] Test: nessun bundle con player_id mancanti
-
----
-
-## 🔟 REGOLA FINALE
-
-> **Un player è un player.  
-> Un tournament è un tournament.  
-> Stringhe != Identità.**
-
-Se usi stringhe per identificare:
-- Non puoi fare stats affidabili
-- Non puoi linkare dati cross-source
-- Non puoi dedupare
-
-**Canonical IDs = fondamenta del sistema.**
-
----
-
-## 📍 NAVIGAZIONE RAPIDA
-
-| ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
-|--------------|--------|---------------|
-| [TEMPORAL](../temporal/FILOSOFIA_TEMPORAL.md) | [📚 INDEX](../../INDEX_FILOSOFIE.md) | [LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) |
-
----
-
-**Fine documento – FILOSOFIA_REGISTRY_CANON**
+**Fine FILOSOFIA_REGISTRY_CANON – Concetto**

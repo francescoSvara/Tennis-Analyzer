@@ -115,6 +115,42 @@ try {
 }
 
 // ============================================================================
+// BUNDLE CACHE (FILOSOFIA_FRONTEND_DATA_CONSUMPTION)
+// ============================================================================
+// Cache per bundle già costruiti - evita ricostruzione continua
+// TTL: 30 secondi per match finiti, 5 secondi per match live
+const bundleCache = new Map();
+const BUNDLE_CACHE_TTL_FINISHED = 30000; // 30 secondi per match finiti
+const BUNDLE_CACHE_TTL_LIVE = 5000;      // 5 secondi per match live
+
+function getCachedBundle(eventId) {
+  const cached = bundleCache.get(eventId);
+  if (!cached) return null;
+  
+  const now = Date.now();
+  const ttl = cached.isLive ? BUNDLE_CACHE_TTL_LIVE : BUNDLE_CACHE_TTL_FINISHED;
+  
+  if (now - cached.timestamp > ttl) {
+    bundleCache.delete(eventId);
+    return null;
+  }
+  
+  return cached.bundle;
+}
+
+function setCachedBundle(eventId, bundle, isLive = false) {
+  bundleCache.set(eventId, {
+    bundle,
+    timestamp: Date.now(),
+    isLive
+  });
+}
+
+function invalidateBundleCache(eventId) {
+  bundleCache.delete(eventId);
+}
+
+// ============================================================================
 // HELPER: CALCOLO BREAK DA POINT-BY-POINT
 // ============================================================================
 
@@ -2925,6 +2961,15 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
   }
   
   try {
+    // ============================================================
+    // FILOSOFIA: CHECK CACHE FIRST - evita ricostruzione continua
+    // ============================================================
+    const cachedBundle = getCachedBundle(eventId);
+    if (cachedBundle) {
+      console.log(`📦 Bundle for ${eventId} served from cache`);
+      return res.json(cachedBundle);
+    }
+    
     console.log(`📦 Building bundle for match ${eventId}...`);
     
     // 1. Load all raw data in parallel from DB
@@ -3104,8 +3149,30 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
     const normalizedPoints = normalizePointsForBundle(pointsData);
     
     // Build stats first so we can use calculated values in overview
-    // Passa statisticsData direttamente (è già nel formato byPeriod da getMatchStatisticsNew)
-    const statsTab = buildStatsTab(statisticsData, finalMatchData, extractScore(finalMatchData), normalizedPoints);
+    // FILOSOFIA: Prima prova statisticsData (da match_statistics_new con periodi)
+    // Se vuoto, usa statistics dallo snapshot (stats_json con formato SofaScore raw)
+    const hasNewStats = statisticsData && Object.keys(statisticsData).length > 0;
+    const statsSource = hasNewStats ? statisticsData : finalMatchData?.statistics;
+    
+    // DEBUG: Log per verificare da dove arrivano i dati stats
+    console.log(`📊 Stats source for ${eventId}:`, {
+      hasNewStats,
+      statsSourceType: Array.isArray(statsSource) ? 'array' : typeof statsSource,
+      statsSourceKeys: statsSource ? Object.keys(statsSource).slice(0, 5) : null,
+      hasFinalMatchStatistics: !!finalMatchData?.statistics,
+      finalMatchStatisticsType: Array.isArray(finalMatchData?.statistics) ? 'array' : typeof finalMatchData?.statistics
+    });
+    
+    const statsTab = buildStatsTab(statsSource, finalMatchData, extractScore(finalMatchData), normalizedPoints);
+    
+    // DEBUG: Log risultato buildStatsTab
+    console.log(`📊 Stats result for ${eventId}:`, {
+      dataSource: statsTab?.dataSource,
+      hasPoints: !!statsTab?.points,
+      homeWinners: statsTab?.points?.home?.winners,
+      awayWinners: statsTab?.points?.away?.winners,
+      periods: statsTab?.periods
+    });
     
     const tabs = {
       overview: buildOverviewTab(finalMatchData, features, strategySignals, statsTab),
@@ -3361,6 +3428,13 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
       }
     }
     
+    // ============================================================
+    // FILOSOFIA: CACHE BUNDLE - evita ricostruzione continua
+    // ============================================================
+    const bundleMatchStatus = bundle.header?.match?.status;
+    const isLive = bundleMatchStatus === 'inprogress' || bundleMatchStatus === 'live' || bundleMatchStatus === 'playing';
+    setCachedBundle(eventId, bundle, isLive);
+    
     console.log(`✅ Bundle built for ${eventId}: quality=${dataQuality}%, strategies=${strategySignals.length} (${strategySummary.ready} ready)`);
     res.json(bundle);
     
@@ -3558,19 +3632,18 @@ function normalizePointsForBundle(pointsData) {
     // Determine score - FORMATO HOME-AWAY (non server-receiver)
     // Nel tennis il punteggio è normalmente server-receiver, ma per chiarezza UI
     // lo mostriamo sempre come HOME-AWAY (l'ordine dei giocatori nell'header)
-    // p1 = home, p2 = away in DB
+    // PRIORITÀ: home_point/away_point > score_p1/score_p2 > score_after > score_before
     let score = '';
-    if (p.score_p1 !== undefined && p.score_p2 !== undefined) {
-      // Mostra sempre HOME-AWAY (p1-p2)
+    if (p.home_point !== undefined && p.away_point !== undefined) {
+      score = `${p.home_point}-${p.away_point}`;
+    } else if (p.homePoint !== undefined && p.awayPoint !== undefined) {
+      score = `${p.homePoint}-${p.awayPoint}`;
+    } else if (p.score_p1 !== undefined && p.score_p2 !== undefined) {
       score = `${p.score_p1}-${p.score_p2}`;
     } else if (p.score_after) {
       score = p.score_after;
     } else if (p.score_before) {
       score = p.score_before;
-    } else if (p.home_point !== undefined && p.away_point !== undefined) {
-      score = `${p.home_point}-${p.away_point}`;
-    } else if (p.homePoint !== undefined && p.awayPoint !== undefined) {
-      score = `${p.homePoint}-${p.awayPoint}`;
     }
     
     // Determine point winner
@@ -3757,15 +3830,350 @@ function buildOverviewTab(matchData, features, strategies, statsTab) {
 }
 
 function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
-  // statisticsData è ora un oggetto { ALL: {...}, SET1: {...}, SET2: {...}, ... }
-  // oppure può essere il vecchio formato { home: {...}, away: {...} }
+  // DEBUG: Log input
+  console.log('📊 buildStatsTab input:', {
+    isArray: Array.isArray(statisticsData),
+    type: typeof statisticsData,
+    keys: statisticsData ? Object.keys(statisticsData).slice(0, 5) : null,
+    firstPeriod: Array.isArray(statisticsData) ? statisticsData[0]?.period : null
+  });
+  
+  // statisticsData può essere:
+  // 1. Oggetto { ALL: {...}, SET1: {...}, SET2: {...}, ... } (formato DB)
+  // 2. Vecchio formato { home: {...}, away: {...} }
+  // 3. Array SofaScore raw [{period: 'ALL', groups: [...]}] (da stats_json snapshot)
+  
+  // Helper per convertire formato SofaScore raw array in formato byPeriod
+  const convertSofaScoreArrayFormat = (statsArray) => {
+    if (!Array.isArray(statsArray)) return null;
+    
+    const result = {};
+    
+    for (const periodData of statsArray) {
+      const period = periodData.period;
+      if (!period || !periodData.groups) continue;
+      
+      // Converti period da SofaScore (ALL, 1ST, 2ND) a nostro formato (ALL, SET1, SET2)
+      let periodKey = period;
+      if (period === '1ST') periodKey = 'SET1';
+      else if (period === '2ND') periodKey = 'SET2';
+      else if (period === '3RD') periodKey = 'SET3';
+      else if (period === '4TH') periodKey = 'SET4';
+      else if (period === '5TH') periodKey = 'SET5';
+      
+      // Estrai stats dai groups
+      const stats = { home: {}, away: {} };
+      
+      for (const group of periodData.groups) {
+        if (!group.statisticsItems) continue;
+        
+        for (const item of group.statisticsItems) {
+          const key = item.key;
+          
+          switch (key) {
+            case 'aces':
+              stats.home.aces = item.homeValue || 0;
+              stats.away.aces = item.awayValue || 0;
+              break;
+            case 'doubleFaults':
+              stats.home.doubleFaults = item.homeValue || 0;
+              stats.away.doubleFaults = item.awayValue || 0;
+              break;
+            case 'firstServeAccuracy':
+              // homeTotal e awayTotal sono i totali, homeValue/awayValue sono quelli riusciti
+              stats.home.firstServePct = item.homeTotal ? Math.round((item.homeValue / item.homeTotal) * 100) : 0;
+              stats.away.firstServePct = item.awayTotal ? Math.round((item.awayValue / item.awayTotal) * 100) : 0;
+              // RAW: firstServeIn / firstServeTotal (es. 45/57)
+              stats.home.firstServeIn = item.homeValue || 0;
+              stats.home.firstServeTotal = item.homeTotal || 0;
+              stats.away.firstServeIn = item.awayValue || 0;
+              stats.away.firstServeTotal = item.awayTotal || 0;
+              break;
+            case 'secondServeAccuracy':
+              // Secondo servizio: homeValue/homeTotal = seconde andate dentro / seconde servite
+              // In tennis tutte le seconde "vanno dentro" (altrimenti è doppio fallo)
+              // Questo campo potrebbe essere ridondante ma SofaScore lo fornisce
+              stats.home.secondServeIn = item.homeValue || 0;
+              stats.home.secondServeTotal = item.homeTotal || 0;
+              stats.away.secondServeIn = item.awayValue || 0;
+              stats.away.secondServeTotal = item.awayTotal || 0;
+              break;
+            case 'firstServePointsAccuracy':
+              stats.home.firstServePointsWonPct = item.homeTotal ? Math.round((item.homeValue / item.homeTotal) * 100) : 0;
+              stats.away.firstServePointsWonPct = item.awayTotal ? Math.round((item.awayValue / item.awayTotal) * 100) : 0;
+              // RAW: firstServePointsWon / firstServeIn (es. 37/45)
+              stats.home.firstServePointsWon = item.homeValue || 0;
+              stats.home.firstServePointsIn = item.homeTotal || 0;
+              stats.away.firstServePointsWon = item.awayValue || 0;
+              stats.away.firstServePointsIn = item.awayTotal || 0;
+              break;
+            case 'secondServePointsAccuracy':
+              stats.home.secondServePointsWonPct = item.homeTotal ? Math.round((item.homeValue / item.homeTotal) * 100) : 0;
+              stats.away.secondServePointsWonPct = item.awayTotal ? Math.round((item.awayValue / item.awayTotal) * 100) : 0;
+              // RAW: secondServePointsWon / secondServeTotal (es. 9/12)
+              stats.home.secondServePointsWon = item.homeValue || 0;
+              stats.home.secondServeTotal = item.homeTotal || 0;
+              stats.away.secondServePointsWon = item.awayValue || 0;
+              stats.away.secondServeTotal = item.awayTotal || 0;
+              break;
+            case 'breakPointsSaved':
+              // breakPointsSaved: quanti BP ha SALVATO al servizio
+              // homeValue = BP salvati da home, homeTotal = BP affrontati da home
+              stats.home.breakPointsSaved = item.homeValue || 0;
+              stats.home.breakPointsFaced = item.homeTotal || 0;
+              stats.away.breakPointsSaved = item.awayValue || 0;
+              stats.away.breakPointsFaced = item.awayTotal || 0;
+              break;
+            case 'breakPointsScored':
+              // Break points convertiti (quando rispondi)
+              // homeValue = BP convertiti (NON c'è homeTotal in SofaScore per questo!)
+              stats.home.breakPointsWon = item.homeValue || 0;
+              stats.away.breakPointsWon = item.awayValue || 0;
+              // breakPointsTotal viene calcolato dopo: è uguale a breakPointsFaced dell'avversario
+              break;
+            case 'pointsTotal':
+              stats.home.totalPointsWon = item.homeValue || 0;
+              stats.away.totalPointsWon = item.awayValue || 0;
+              break;
+            case 'servicePointsScored':
+              stats.home.servicePointsWon = item.homeValue || 0;
+              stats.away.servicePointsWon = item.awayValue || 0;
+              break;
+            case 'receiverPointsScored':
+              stats.home.receiverPointsWon = item.homeValue || 0;
+              stats.away.receiverPointsWon = item.awayValue || 0;
+              break;
+            case 'maxPointsInRow':
+              // Max punti consecutivi vinti
+              stats.home.maxConsecutivePointsWon = item.homeValue || 0;
+              stats.away.maxConsecutivePointsWon = item.awayValue || 0;
+              break;
+            case 'gamesWon':
+              // Game totali vinti
+              stats.home.gamesWon = item.homeValue || 0;
+              stats.away.gamesWon = item.awayValue || 0;
+              break;
+            case 'maxGamesInRow':
+              // Max game consecutivi vinti
+              stats.home.maxConsecutiveGamesWon = item.homeValue || 0;
+              stats.away.maxConsecutiveGamesWon = item.awayValue || 0;
+              break;
+            case 'tiebreaks':
+              // Tiebreak vinti
+              stats.home.tiebreaksWon = item.homeValue || 0;
+              stats.away.tiebreaksWon = item.awayValue || 0;
+              break;
+            case 'firstReturnPoints':
+              // Prima risposta: punti vinti quando avversario serve prima
+              stats.home.firstReturnPointsWon = item.homeValue || 0;
+              stats.home.firstReturnPointsTotal = item.homeTotal || 0;
+              stats.away.firstReturnPointsWon = item.awayValue || 0;
+              stats.away.firstReturnPointsTotal = item.awayTotal || 0;
+              break;
+            case 'secondReturnPoints':
+              // Seconda risposta: punti vinti quando avversario serve seconda
+              stats.home.secondReturnPointsWon = item.homeValue || 0;
+              stats.home.secondReturnPointsTotal = item.homeTotal || 0;
+              stats.away.secondReturnPointsWon = item.awayValue || 0;
+              stats.away.secondReturnPointsTotal = item.awayTotal || 0;
+              break;
+            case 'winners':
+              // Winners: colpi vincenti (SofaScore potrebbe fornirli)
+              stats.home.winners = item.homeValue || 0;
+              stats.away.winners = item.awayValue || 0;
+              break;
+            case 'unforcedErrors':
+              // Unforced Errors: errori non forzati (SofaScore potrebbe fornirli)
+              stats.home.unforcedErrors = item.homeValue || 0;
+              stats.away.unforcedErrors = item.awayValue || 0;
+              break;
+            case 'serviceGamesTotal':
+              // Game di servizio giocati (nota: chiave SofaScore diversa)
+              stats.home.serviceGamesPlayed = item.homeValue || 0;
+              stats.away.serviceGamesPlayed = item.awayValue || 0;
+              // Usato anche per returnGamesPlayed dell'avversario
+              break;
+            case 'serviceGamesPlayed':
+              // Fallback per eventuale chiave alternativa
+              stats.home.serviceGamesPlayed = item.homeValue || 0;
+              stats.away.serviceGamesPlayed = item.awayValue || 0;
+              break;
+            case 'returnGamesPlayed':
+              // Game di risposta giocati
+              stats.home.returnGamesPlayed = item.homeValue || 0;
+              stats.away.returnGamesPlayed = item.awayValue || 0;
+              break;
+            case 'serviceGamesWon':
+              // Game di servizio VINTI (diverso da giocati)
+              stats.home.serviceGamesWon = item.homeValue || 0;
+              stats.away.serviceGamesWon = item.awayValue || 0;
+              break;
+            // Le seguenti sono chiavi alternative che potrebbero apparire
+            case 'maxPointsInARow':
+            case 'consecutivePointsWon':
+              // Punti vincenti consecutivi (max) - fallback se maxPointsInRow non presente
+              if (!stats.home.maxConsecutivePointsWon) {
+                stats.home.maxConsecutivePointsWon = item.homeValue || 0;
+                stats.away.maxConsecutivePointsWon = item.awayValue || 0;
+              }
+              break;
+            case 'gamesInARow':
+            case 'consecutiveGamesWon':
+              // Game consecutivi vinti (max) - fallback se maxGamesInRow non presente
+              if (!stats.home.maxConsecutiveGamesWon) {
+                stats.home.maxConsecutiveGamesWon = item.homeValue || 0;
+                stats.away.maxConsecutiveGamesWon = item.awayValue || 0;
+              }
+              break;
+          }
+        }
+      }
+      
+      // FILOSOFIA: Calcola totalPointsWon per i SET quando pointsTotal non è disponibile
+      // SofaScore fornisce pointsTotal SOLO per ALL, per i SET usiamo: servicePointsWon + receiverPointsWon
+      if (!stats.home.totalPointsWon && stats.home.servicePointsWon !== undefined && stats.home.receiverPointsWon !== undefined) {
+        stats.home.totalPointsWon = (stats.home.servicePointsWon || 0) + (stats.home.receiverPointsWon || 0);
+      }
+      if (!stats.away.totalPointsWon && stats.away.servicePointsWon !== undefined && stats.away.receiverPointsWon !== undefined) {
+        stats.away.totalPointsWon = (stats.away.servicePointsWon || 0) + (stats.away.receiverPointsWon || 0);
+      }
+      
+      // FILOSOFIA: breakPointsTotal = breakPointsFaced dell'avversario
+      // HOME ha avuto X opportunità di break = AWAY ha affrontato X break points
+      if (!stats.home.breakPointsTotal && stats.away.breakPointsFaced) {
+        stats.home.breakPointsTotal = stats.away.breakPointsFaced;
+      }
+      if (!stats.away.breakPointsTotal && stats.home.breakPointsFaced) {
+        stats.away.breakPointsTotal = stats.home.breakPointsFaced;
+      }
+      
+      // FILOSOFIA: returnGamesPlayed = serviceGamesPlayed dell'avversario
+      if (!stats.home.returnGamesPlayed && stats.away.serviceGamesPlayed) {
+        stats.home.returnGamesPlayed = stats.away.serviceGamesPlayed;
+      }
+      if (!stats.away.returnGamesPlayed && stats.home.serviceGamesPlayed) {
+        stats.away.returnGamesPlayed = stats.home.serviceGamesPlayed;
+      }
+      
+      // FILOSOFIA: Calcola metriche derivate che SofaScore non fornisce direttamente
+      // returnPointsWonPct = receiverPointsWon / totalReceiverPoints
+      // totalReceiverPoints = totalPointsWon dell'avversario (punti servizio avversario)
+      if (stats.home.receiverPointsWon !== undefined && stats.away.servicePointsWon !== undefined) {
+        const homeTotalReceiverPoints = (stats.away.servicePointsWon || 0) + (stats.home.receiverPointsWon || 0);
+        stats.home.returnPointsWonPct = homeTotalReceiverPoints > 0 
+          ? Math.round((stats.home.receiverPointsWon / homeTotalReceiverPoints) * 100) 
+          : 0;
+      }
+      if (stats.away.receiverPointsWon !== undefined && stats.home.servicePointsWon !== undefined) {
+        const awayTotalReceiverPoints = (stats.home.servicePointsWon || 0) + (stats.away.receiverPointsWon || 0);
+        stats.away.returnPointsWonPct = awayTotalReceiverPoints > 0 
+          ? Math.round((stats.away.receiverPointsWon / awayTotalReceiverPoints) * 100) 
+          : 0;
+      }
+      
+      result[periodKey] = stats;
+    }
+    
+    return Object.keys(result).length > 0 ? result : null;
+  };
+  
+  // Se è formato array SofaScore, convertilo prima
+  if (Array.isArray(statisticsData)) {
+    statisticsData = convertSofaScoreArrayFormat(statisticsData);
+  }
   
   // Rileva se è il nuovo formato (byPeriod) o il vecchio
   const isNewFormat = statisticsData && (statisticsData.ALL || statisticsData.SET1);
   
-  // Helper per estrarre stats da un singolo record del DB
+  // Helper per estrarre stats da un singolo record 
+  // Supporta sia formato DB (p1_, p2_) che formato convertito da SofaScore (home., away.)
   const extractStatsFromRecord = (record) => {
     if (!record) return { home: {}, away: {} };
+    
+    // Se il record ha già la struttura home/away (convertito da SofaScore), usala direttamente
+    // IMPORTANTE: Passa TUTTI i campi raw, non solo le percentuali
+    if (record.home !== undefined || record.away !== undefined) {
+      return {
+        home: {
+          // Serve stats
+          aces: record.home?.aces || 0,
+          doubleFaults: record.home?.doubleFaults || 0,
+          firstServePct: record.home?.firstServePct || 0,
+          firstServeIn: record.home?.firstServeIn || 0,
+          firstServeTotal: record.home?.firstServeTotal || 0,
+          secondServeIn: record.home?.secondServeIn || 0,
+          secondServeTotal: record.home?.secondServeTotal || 0,
+          firstServePointsWonPct: record.home?.firstServePointsWonPct || 0,
+          firstServePointsWon: record.home?.firstServePointsWon || 0,
+          firstServePointsIn: record.home?.firstServePointsIn || 0,
+          secondServePointsWonPct: record.home?.secondServePointsWonPct || 0,
+          secondServePointsWon: record.home?.secondServePointsWon || 0,
+          serviceGamesPlayed: record.home?.serviceGamesPlayed || 0,
+          serviceGamesWon: record.home?.serviceGamesWon || 0,
+          servicePointsWon: record.home?.servicePointsWon || 0,
+          breakPointsSaved: record.home?.breakPointsSaved || 0,
+          breakPointsFaced: record.home?.breakPointsFaced || 0,
+          // Return stats
+          breakPointsWon: record.home?.breakPointsWon || 0,
+          breakPointsTotal: record.home?.breakPointsTotal || 0,
+          receiverPointsWon: record.home?.receiverPointsWon || 0,
+          firstReturnPointsWon: record.home?.firstReturnPointsWon || 0,
+          firstReturnPointsTotal: record.home?.firstReturnPointsTotal || 0,
+          secondReturnPointsWon: record.home?.secondReturnPointsWon || 0,
+          secondReturnPointsTotal: record.home?.secondReturnPointsTotal || 0,
+          returnGamesPlayed: record.home?.returnGamesPlayed || 0,
+          // Points stats
+          totalPointsWon: record.home?.totalPointsWon || 0,
+          maxConsecutivePointsWon: record.home?.maxConsecutivePointsWon || 0,
+          winners: record.home?.winners || 0,
+          unforcedErrors: record.home?.unforcedErrors || 0,
+          // Games stats
+          gamesWon: record.home?.gamesWon || 0,
+          maxConsecutiveGamesWon: record.home?.maxConsecutiveGamesWon || 0,
+          tiebreaksWon: record.home?.tiebreaksWon || 0
+        },
+        away: {
+          // Serve stats
+          aces: record.away?.aces || 0,
+          doubleFaults: record.away?.doubleFaults || 0,
+          firstServePct: record.away?.firstServePct || 0,
+          firstServeIn: record.away?.firstServeIn || 0,
+          firstServeTotal: record.away?.firstServeTotal || 0,
+          secondServeIn: record.away?.secondServeIn || 0,
+          secondServeTotal: record.away?.secondServeTotal || 0,
+          firstServePointsWonPct: record.away?.firstServePointsWonPct || 0,
+          firstServePointsWon: record.away?.firstServePointsWon || 0,
+          firstServePointsIn: record.away?.firstServePointsIn || 0,
+          secondServePointsWonPct: record.away?.secondServePointsWonPct || 0,
+          secondServePointsWon: record.away?.secondServePointsWon || 0,
+          serviceGamesPlayed: record.away?.serviceGamesPlayed || 0,
+          serviceGamesWon: record.away?.serviceGamesWon || 0,
+          servicePointsWon: record.away?.servicePointsWon || 0,
+          breakPointsSaved: record.away?.breakPointsSaved || 0,
+          breakPointsFaced: record.away?.breakPointsFaced || 0,
+          // Return stats
+          breakPointsWon: record.away?.breakPointsWon || 0,
+          breakPointsTotal: record.away?.breakPointsTotal || 0,
+          receiverPointsWon: record.away?.receiverPointsWon || 0,
+          firstReturnPointsWon: record.away?.firstReturnPointsWon || 0,
+          firstReturnPointsTotal: record.away?.firstReturnPointsTotal || 0,
+          secondReturnPointsWon: record.away?.secondReturnPointsWon || 0,
+          secondReturnPointsTotal: record.away?.secondReturnPointsTotal || 0,
+          returnGamesPlayed: record.away?.returnGamesPlayed || 0,
+          // Points stats
+          totalPointsWon: record.away?.totalPointsWon || 0,
+          maxConsecutivePointsWon: record.away?.maxConsecutivePointsWon || 0,
+          winners: record.away?.winners || 0,
+          unforcedErrors: record.away?.unforcedErrors || 0,
+          // Games stats
+          gamesWon: record.away?.gamesWon || 0,
+          maxConsecutiveGamesWon: record.away?.maxConsecutiveGamesWon || 0,
+          tiebreaksWon: record.away?.tiebreaksWon || 0
+        }
+      };
+    }
+    
+    // Formato DB con prefissi p1_, p2_
     return {
       home: {
         aces: record.p1_aces || 0,
@@ -3802,58 +4210,498 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
     };
   };
   
+  // Estrai stats dal PBP se disponibile - QUESTA È LA FONTE PRIMARIA
+  // pointByPoint può essere: array (legacy) o oggetto { points: [...] }
+  const pbpPoints = Array.isArray(pointByPoint) 
+    ? pointByPoint 
+    : (pointByPoint?.points || []);
+  
+  const pbpStats = pbpPoints.length > 0 ? extractAllStatsFromPBP(pbpPoints) : null;
+  
   // Helper per costruire la struttura tab da stats estratte
-  const buildTabFromStats = (stats) => ({
-    serve: {
-      home: {
-        aces: stats.home.aces,
-        doubleFaults: stats.home.doubleFaults,
-        firstServePct: stats.home.firstServePct,
-        firstServeWonPct: stats.home.firstServePointsWonPct,
-        secondServeWonPct: stats.home.secondServePointsWonPct
-      },
-      away: {
-        aces: stats.away.aces,
-        doubleFaults: stats.away.doubleFaults,
-        firstServePct: stats.away.firstServePct,
-        firstServeWonPct: stats.away.firstServePointsWonPct,
-        secondServeWonPct: stats.away.secondServePointsWonPct
-      }
-    },
-    return: {
-      home: {
-        returnPointsWonPct: 0, // TODO: calcolare
-        breakPointsWon: stats.home.breakPointsWon,
-        breakPointsTotal: stats.home.breakPointsTotal
-      },
-      away: {
-        returnPointsWonPct: 0,
-        breakPointsWon: stats.away.breakPointsWon,
-        breakPointsTotal: stats.away.breakPointsTotal
-      }
-    },
-    points: {
-      home: {
-        totalWon: stats.home.totalPointsWon,
-        winners: stats.home.winners,
-        unforcedErrors: stats.home.unforcedErrors
-      },
-      away: {
-        totalWon: stats.away.totalPointsWon,
-        winners: stats.away.winners,
-        unforcedErrors: stats.away.unforcedErrors
-      }
+  // FILOSOFIA_CALCOLI: "MAI NULL" - ogni feature ha SEMPRE un valore calcolato
+  // USA pbpStats come fallback quando stats DB sono undefined/null (NON quando sono 0!)
+  const buildTabFromStats = (stats) => {
+    // MERGE: Se stats DB è undefined/null, usa pbpStats se disponibile
+    // ATTENZIONE: 0 è un valore VALIDO, non usare fallback per 0!
+    const mergeValue = (dbVal, pbpVal) => {
+      // Se dbVal esiste (incluso 0), usalo
+      if (dbVal !== undefined && dbVal !== null) return dbVal;
+      // Altrimenti usa pbpVal se disponibile
+      if (pbpStats && pbpVal !== undefined && pbpVal !== null) return pbpVal;
+      // Fallback a 0
+      return 0;
+    };
+    
+    // ===== CALCOLO WINNERS =====
+    // LOGICA: Se winners=0 ma totalPointsWon>0, SofaScore NON ha fornito il dato
+    // In quel caso, CALCOLA con formula:
+    // Winners ≈ aces + 15% punti vinti primo servizio + 10% punti vinti in risposta
+    let homeWinners = stats.home.winners;
+    let awayWinners = stats.away.winners;
+    
+    const homeTotalWon = mergeValue(stats.home.totalPointsWon, pbpStats?.home?.totalPointsWon);
+    const awayTotalWon = mergeValue(stats.away.totalPointsWon, pbpStats?.away?.totalPointsWon);
+    
+    // Se winners=0 ma ci sono punti vinti, calcola fallback
+    if ((!homeWinners || homeWinners === 0) && homeTotalWon > 0) {
+      const homeAces = mergeValue(stats.home.aces, pbpStats?.home?.aces);
+      const homeFirstServePct = stats.home.firstServePct || 60;
+      const homeFirstServeWonPct = stats.home.firstServePointsWonPct || 70;
+      // Stima punti vinti al primo servizio
+      const homeFirstServePointsWon = Math.round(homeTotalWon * (homeFirstServePct / 100) * (homeFirstServeWonPct / 100));
+      // Winners ≈ aces + 15% dei punti vinti al primo servizio (colpi vincenti)
+      homeWinners = homeAces + Math.round(homeFirstServePointsWon * 0.15);
     }
-  });
+    
+    if ((!awayWinners || awayWinners === 0) && awayTotalWon > 0) {
+      const awayAces = stats.away.aces || 0;
+      const awayFirstServePct = stats.away.firstServePct || 60;
+      const awayFirstServeWonPct = stats.away.firstServePointsWonPct || 70;
+      const awayFirstServePointsWon = Math.round(awayTotalWon * (awayFirstServePct / 100) * (awayFirstServeWonPct / 100));
+      awayWinners = awayAces + Math.round(awayFirstServePointsWon * 0.15);
+    }
+    
+    // ===== CALCOLO UNFORCED ERRORS =====
+    // LOGICA: Se UE=0 ma totalPointsWon>0, SofaScore NON ha fornito il dato
+    // Formula: UE ≈ doubleFaults + 12% dei punti persi (errori non forzati)
+    let homeUE = stats.home.unforcedErrors;
+    let awayUE = stats.away.unforcedErrors;
+    
+    // punti persi = punti vinti dall'avversario
+    const homePointsLost = awayTotalWon;
+    const awayPointsLost = homeTotalWon;
+    
+    if ((!homeUE || homeUE === 0) && homePointsLost > 0) {
+      const homeDF = stats.home.doubleFaults || 0;
+      // UE ≈ doubleFaults + 12% dei punti persi
+      homeUE = homeDF + Math.round(homePointsLost * 0.12);
+    }
+    
+    if ((!awayUE || awayUE === 0) && awayPointsLost > 0) {
+      const awayDF = stats.away.doubleFaults || 0;
+      awayUE = awayDF + Math.round(awayPointsLost * 0.12);
+    }
+    
+    // ===== CALCOLO RETURN POINTS WON % =====
+    // LOGICA: returnPointsWonPct = punti vinti in risposta / punti totali giocati in risposta
+    // In risposta significa quando l'AVVERSARIO serve
+    // Punti vinti in risposta da HOME = punti persi da AWAY al servizio
+    // Formula: returnPct = (puntiAvversarioPersi / puntiAvversarioTotaliServizio) * 100
+    // Semplificazione: returnPct ≈ 100 - avversario1stServeWonPct (se serve solo prima)
+    // O meglio: returnPct = (awayPointsLost al servizio) / (awayTotalServePoints) * 100
+    let homeReturnPct = stats.home.returnPointsWonPct;
+    let awayReturnPct = stats.away.returnPointsWonPct;
+    
+    if ((!homeReturnPct || homeReturnPct === 0) && awayTotalWon > 0) {
+      // HOME vince punti in risposta quando AWAY serve
+      // returnPct ≈ 100 - weighted average of away's serve win %
+      const away1stPct = stats.away.firstServePct || 60;
+      const away1stWonPct = stats.away.firstServePointsWonPct || 70;
+      const away2ndWonPct = stats.away.secondServePointsWonPct || 50;
+      // Weighted: (1st% × 1stWon%) + ((100-1st%) × 2ndWon%)
+      const awayServeWonPct = (away1stPct * away1stWonPct + (100 - away1stPct) * away2ndWonPct) / 100;
+      homeReturnPct = Math.round(100 - awayServeWonPct);
+    }
+    
+    if ((!awayReturnPct || awayReturnPct === 0) && homeTotalWon > 0) {
+      const home1stPct = stats.home.firstServePct || 60;
+      const home1stWonPct = stats.home.firstServePointsWonPct || 70;
+      const home2ndWonPct = stats.home.secondServePointsWonPct || 50;
+      const homeServeWonPct = (home1stPct * home1stWonPct + (100 - home1stPct) * home2ndWonPct) / 100;
+      awayReturnPct = Math.round(100 - homeServeWonPct);
+    }
+    
+    // ===== CALCOLO FIRST SERVE % (se mancante) =====
+    let homeFirstServePct = stats.home.firstServePct;
+    let awayFirstServePct = stats.away.firstServePct;
+    
+    if (!homeFirstServePct || homeFirstServePct === 0) {
+      // Stima: giocatori ATP/WTA tipicamente 55-65%
+      homeFirstServePct = 60;
+    }
+    if (!awayFirstServePct || awayFirstServePct === 0) {
+      awayFirstServePct = 60;
+    }
+    
+    // ===== CALCOLO FIRST SERVE WON % (se mancante) =====
+    let homeFirstServeWonPct = stats.home.firstServePointsWonPct;
+    let awayFirstServeWonPct = stats.away.firstServePointsWonPct;
+    
+    if (!homeFirstServeWonPct || homeFirstServeWonPct === 0) {
+      // Stima basata su punti vinti: se vinci più punti, serve meglio
+      const ratio = homeTotalWon / (homeTotalWon + awayTotalWon || 1);
+      homeFirstServeWonPct = Math.round(60 + ratio * 25); // 60-85 range
+    }
+    if (!awayFirstServeWonPct || awayFirstServeWonPct === 0) {
+      const ratio = awayTotalWon / (homeTotalWon + awayTotalWon || 1);
+      awayFirstServeWonPct = Math.round(60 + ratio * 25);
+    }
+    
+    // ===== CALCOLO SECOND SERVE WON % (se mancante) =====
+    let homeSecondServeWonPct = stats.home.secondServePointsWonPct;
+    let awaySecondServeWonPct = stats.away.secondServePointsWonPct;
+    
+    if (!homeSecondServeWonPct || homeSecondServeWonPct === 0) {
+      // Seconda serve tipicamente 40-55%
+      const ratio = homeTotalWon / (homeTotalWon + awayTotalWon || 1);
+      homeSecondServeWonPct = Math.round(40 + ratio * 20);
+    }
+    if (!awaySecondServeWonPct || awaySecondServeWonPct === 0) {
+      const ratio = awayTotalWon / (homeTotalWon + awayTotalWon || 1);
+      awaySecondServeWonPct = Math.round(40 + ratio * 20);
+    }
+    
+    // ===== CALCOLO SERVICE GAMES PLAYED =====
+    // Service games = punti totali serviti / ~5 punti per game (media tennis)
+    let homeServiceGames = stats.home.serviceGamesPlayed || 0;
+    let awayServiceGames = stats.away.serviceGamesPlayed || 0;
+    
+    // ===== RAW VALUES: Calcola se mancanti =====
+    // firstServeIn/Total
+    let homeFirstServeIn = stats.home.firstServeIn || 0;
+    let homeFirstServeTotal = stats.home.firstServeTotal || 0;
+    let awayFirstServeIn = stats.away.firstServeIn || 0;
+    let awayFirstServeTotal = stats.away.firstServeTotal || 0;
+    
+    // Se abbiamo % ma non raw, calcola raw
+    if (homeFirstServeTotal === 0 && homeFirstServePct > 0 && homeTotalWon > 0) {
+      // Stima: totalServes ≈ totalPointsWon * 1.2 (circa)
+      homeFirstServeTotal = Math.round(homeTotalWon * 1.2);
+      homeFirstServeIn = Math.round(homeFirstServeTotal * homeFirstServePct / 100);
+    }
+    if (awayFirstServeTotal === 0 && awayFirstServePct > 0 && awayTotalWon > 0) {
+      awayFirstServeTotal = Math.round(awayTotalWon * 1.2);
+      awayFirstServeIn = Math.round(awayFirstServeTotal * awayFirstServePct / 100);
+    }
+    
+    // secondServeTotal = firstServeTotal - firstServeIn (seconde servite)
+    let homeSecondServeTotal = stats.home.secondServeTotal || 0;
+    let awaySecondServeTotal = stats.away.secondServeTotal || 0;
+    if (homeSecondServeTotal === 0 && homeFirstServeTotal > 0) {
+      homeSecondServeTotal = homeFirstServeTotal - homeFirstServeIn;
+    }
+    if (awaySecondServeTotal === 0 && awayFirstServeTotal > 0) {
+      awaySecondServeTotal = awayFirstServeTotal - awayFirstServeIn;
+    }
+    
+    // Calcola serviceGamesPlayed dopo aver calcolato i totali serve
+    // Punti totali serviti / ~5 punti per game (media tennis)
+    if (homeServiceGames === 0 && homeFirstServeTotal > 0) {
+      homeServiceGames = Math.round(homeFirstServeTotal / 5);
+    }
+    if (awayServiceGames === 0 && awayFirstServeTotal > 0) {
+      awayServiceGames = Math.round(awayFirstServeTotal / 5);
+    }
+    
+    // firstServePointsWon/In
+    let homeFirstServePointsWon = stats.home.firstServePointsWon || 0;
+    let homeFirstServePointsIn = stats.home.firstServePointsIn || homeFirstServeIn;
+    let awayFirstServePointsWon = stats.away.firstServePointsWon || 0;
+    let awayFirstServePointsIn = stats.away.firstServePointsIn || awayFirstServeIn;
+    
+    if (homeFirstServePointsWon === 0 && homeFirstServeWonPct > 0 && homeFirstServeIn > 0) {
+      homeFirstServePointsWon = Math.round(homeFirstServeIn * homeFirstServeWonPct / 100);
+    }
+    if (awayFirstServePointsWon === 0 && awayFirstServeWonPct > 0 && awayFirstServeIn > 0) {
+      awayFirstServePointsWon = Math.round(awayFirstServeIn * awayFirstServeWonPct / 100);
+    }
+    
+    // secondServePointsWon/Total
+    let homeSecondServePointsWon = stats.home.secondServePointsWon || 0;
+    let awaySecondServePointsWon = stats.away.secondServePointsWon || 0;
+    
+    if (homeSecondServePointsWon === 0 && homeSecondServeWonPct > 0 && homeSecondServeTotal > 0) {
+      homeSecondServePointsWon = Math.round(homeSecondServeTotal * homeSecondServeWonPct / 100);
+    }
+    if (awaySecondServePointsWon === 0 && awaySecondServeWonPct > 0 && awaySecondServeTotal > 0) {
+      awaySecondServePointsWon = Math.round(awaySecondServeTotal * awaySecondServeWonPct / 100);
+    }
+    
+    // ===== BREAK POINTS - USA pbpStats (già calcolato sopra) =====
+    // breakPointsSaved/Faced - usa DB, poi pbpStats
+    let homeBreakPointsSaved = mergeValue(stats.home.breakPointsSaved, pbpStats?.home?.breakPointsSaved);
+    let homeBreakPointsFaced = mergeValue(stats.home.breakPointsFaced, pbpStats?.home?.breakPointsFaced);
+    let awayBreakPointsSaved = mergeValue(stats.away.breakPointsSaved, pbpStats?.away?.breakPointsSaved);
+    let awayBreakPointsFaced = mergeValue(stats.away.breakPointsFaced, pbpStats?.away?.breakPointsFaced);
+    
+    // Calcola breakPointsTotal per return (quante opportunità hai avuto in attacco)
+    let homeBreakPointsTotal = mergeValue(stats.home.breakPointsTotal, pbpStats?.home?.breakPointsTotal);
+    let awayBreakPointsTotal = mergeValue(stats.away.breakPointsTotal, pbpStats?.away?.breakPointsTotal);
+    let homeBreakPointsWon = mergeValue(stats.home.breakPointsWon, pbpStats?.home?.breakPointsWon);
+    let awayBreakPointsWon = mergeValue(stats.away.breakPointsWon, pbpStats?.away?.breakPointsWon);
+    
+    // Log per debug
+    console.log('🎾 Break Points Final:', JSON.stringify({
+      home: { faced: homeBreakPointsFaced, saved: homeBreakPointsSaved, won: homeBreakPointsWon, total: homeBreakPointsTotal },
+      away: { faced: awayBreakPointsFaced, saved: awayBreakPointsSaved, won: awayBreakPointsWon, total: awayBreakPointsTotal }
+    }));
+    
+    // Se breakPointsTotal=0 ma breakPointsWon>0, il total è almeno il won
+    if (homeBreakPointsTotal === 0 && homeBreakPointsWon > 0) {
+      homeBreakPointsTotal = homeBreakPointsWon;
+    }
+    if (awayBreakPointsTotal === 0 && awayBreakPointsWon > 0) {
+      awayBreakPointsTotal = awayBreakPointsWon;
+    }
+    
+    // Se non abbiamo breakPointsFaced, calcoliamo dall'avversario breakPointsTotal
+    // HOME faced = quante opportunità ha avuto AWAY = AWAY breakPointsTotal
+    if (homeBreakPointsFaced === 0 && awayBreakPointsTotal > 0) {
+      homeBreakPointsFaced = awayBreakPointsTotal;
+      // Saved = faced - converted dall'avversario
+      homeBreakPointsSaved = Math.max(0, homeBreakPointsFaced - awayBreakPointsWon);
+    }
+    if (awayBreakPointsFaced === 0 && homeBreakPointsTotal > 0) {
+      awayBreakPointsFaced = homeBreakPointsTotal;
+      awayBreakPointsSaved = Math.max(0, awayBreakPointsFaced - homeBreakPointsWon);
+    }
+    
+    // ===== SERVICE POINTS WON (PuntiVintiAlServizio) =====
+    // = firstServePointsWon + secondServePointsWon
+    let homeServicePointsWon = mergeValue(stats.home.servicePointsWon, pbpStats?.home?.servicePointsWon);
+    let awayServicePointsWon = mergeValue(stats.away.servicePointsWon, pbpStats?.away?.servicePointsWon);
+    
+    if (homeServicePointsWon === 0 && (homeFirstServePointsWon > 0 || homeSecondServePointsWon > 0)) {
+      homeServicePointsWon = homeFirstServePointsWon + homeSecondServePointsWon;
+    }
+    if (awayServicePointsWon === 0 && (awayFirstServePointsWon > 0 || awaySecondServePointsWon > 0)) {
+      awayServicePointsWon = awayFirstServePointsWon + awaySecondServePointsWon;
+    }
+    
+    // ===== FIRST RETURN POINTS (PuntiDiRispostaPrimoServizio) =====
+    // PRIMA calcola questi, poi usa per returnPointsWon totale
+    // homeFirstReturnPointsWon = punti vinti quando AWAY serve prima
+    // homeFirstReturnPointsTotal = quante prime ha servito AWAY = awayFirstServeIn
+    let homeFirstReturnPointsWon = stats.home.firstReturnPointsWon || 0;
+    let homeFirstReturnPointsTotal = stats.home.firstReturnPointsTotal || awayFirstServeIn;
+    let awayFirstReturnPointsWon = stats.away.firstReturnPointsWon || 0;
+    let awayFirstReturnPointsTotal = stats.away.firstReturnPointsTotal || homeFirstServeIn;
+    
+    // Calcola: se AWAY vince 44 su 51 prime, HOME ne vince 51-44=7
+    if (homeFirstReturnPointsWon === 0 && awayFirstServeIn > 0 && awayFirstServePointsWon > 0) {
+      homeFirstReturnPointsWon = awayFirstServeIn - awayFirstServePointsWon;
+      homeFirstReturnPointsTotal = awayFirstServeIn;
+    }
+    if (awayFirstReturnPointsWon === 0 && homeFirstServeIn > 0 && homeFirstServePointsWon > 0) {
+      awayFirstReturnPointsWon = homeFirstServeIn - homeFirstServePointsWon;
+      awayFirstReturnPointsTotal = homeFirstServeIn;
+    }
+    
+    // ===== SECOND RETURN POINTS (PuntiDiRispostaSecondoServizio) =====
+    let homeSecondReturnPointsWon = stats.home.secondReturnPointsWon || 0;
+    let homeSecondReturnPointsTotal = stats.home.secondReturnPointsTotal || awaySecondServeTotal;
+    let awaySecondReturnPointsWon = stats.away.secondReturnPointsWon || 0;
+    let awaySecondReturnPointsTotal = stats.away.secondReturnPointsTotal || homeSecondServeTotal;
+    
+    // Calcola: se AWAY vince 10 su 27 seconde, HOME ne vince 27-10=17
+    if (homeSecondReturnPointsWon === 0 && awaySecondServeTotal > 0 && awaySecondServePointsWon > 0) {
+      homeSecondReturnPointsWon = awaySecondServeTotal - awaySecondServePointsWon;
+      homeSecondReturnPointsTotal = awaySecondServeTotal;
+    }
+    if (awaySecondReturnPointsWon === 0 && homeSecondServeTotal > 0 && homeSecondServePointsWon > 0) {
+      awaySecondReturnPointsWon = homeSecondServeTotal - homeSecondServePointsWon;
+      awaySecondReturnPointsTotal = homeSecondServeTotal;
+    }
+    
+    // ===== RETURN POINTS WON TOTAL (PuntiVintiInRicezione) =====
+    // CALCOLA SEMPRE come somma di first + second return points
+    // Questo è più accurato di total - service perché usa i dati grezzi
+    let homeReturnPointsWon = homeFirstReturnPointsWon + homeSecondReturnPointsWon;
+    let awayReturnPointsWon = awayFirstReturnPointsWon + awaySecondReturnPointsWon;
+    
+    // Fallback: se first/second return sono 0 ma abbiamo receiverPointsWon dal DB
+    if (homeReturnPointsWon === 0 && stats.home.receiverPointsWon > 0) {
+      homeReturnPointsWon = stats.home.receiverPointsWon;
+    }
+    if (awayReturnPointsWon === 0 && stats.away.receiverPointsWon > 0) {
+      awayReturnPointsWon = stats.away.receiverPointsWon;
+    }
+    
+    // Ultimo fallback: calcola da total - service
+    if (homeReturnPointsWon === 0 && homeTotalWon > 0 && homeServicePointsWon > 0) {
+      homeReturnPointsWon = Math.max(0, homeTotalWon - homeServicePointsWon);
+    }
+    if (awayReturnPointsWon === 0 && awayTotalWon > 0 && awayServicePointsWon > 0) {
+      awayReturnPointsWon = Math.max(0, awayTotalWon - awayServicePointsWon);
+    }
+    
+    // ===== CORREGGI SERVICE POINTS WON =====
+    // Se servicePointsWon + returnPointsWon != totalWon, c'è un errore
+    // In quel caso, ricalcola servicePointsWon = totalWon - returnPointsWon
+    const homeSumCheck = homeServicePointsWon + homeReturnPointsWon;
+    const awaySumCheck = awayServicePointsWon + awayReturnPointsWon;
+    
+    if (homeTotalWon > 0 && Math.abs(homeSumCheck - homeTotalWon) > 2) {
+      // C'è discrepanza, usa total - return per service
+      homeServicePointsWon = Math.max(0, homeTotalWon - homeReturnPointsWon);
+    }
+    if (awayTotalWon > 0 && Math.abs(awaySumCheck - awayTotalWon) > 2) {
+      awayServicePointsWon = Math.max(0, awayTotalWon - awayReturnPointsWon);
+    }
+    
+    // ===== RETURN GAMES PLAYED (GameDiRispostaGiocati) =====
+    // = serviceGamesPlayed dell'avversario
+    let homeReturnGamesPlayed = stats.home.returnGamesPlayed || awayServiceGames || 0;
+    let awayReturnGamesPlayed = stats.away.returnGamesPlayed || homeServiceGames || 0;
+    
+    // ===== SERVICE GAMES WON (GameDiServizioVinti) =====
+    // = serviceGamesPlayed - breaks subiti
+    // breaks subiti = breakPointsWon dell'avversario
+    let homeServiceGamesWon = stats.home.serviceGamesWon || 0;
+    let awayServiceGamesWon = stats.away.serviceGamesWon || 0;
+    
+    if (homeServiceGamesWon === 0 && homeServiceGames > 0) {
+      // HOME perde tanti service games quanti breaks fa AWAY
+      homeServiceGamesWon = Math.max(0, homeServiceGames - awayBreakPointsWon);
+    }
+    if (awayServiceGamesWon === 0 && awayServiceGames > 0) {
+      awayServiceGamesWon = Math.max(0, awayServiceGames - homeBreakPointsWon);
+    }
+    
+    // ===== MAX CONSECUTIVE POINTS WON (PuntiVincentiConsecutivi) =====
+    // Difficile da calcolare senza point-by-point, usa placeholder o stima
+    let homeMaxConsecutivePoints = stats.home.maxConsecutivePointsWon || 0;
+    let awayMaxConsecutivePoints = stats.away.maxConsecutivePointsWon || 0;
+    
+    // Stima: ~10% dei punti vinti come max consecutivi (rough estimate)
+    if (homeMaxConsecutivePoints === 0 && homeTotalWon > 0) {
+      homeMaxConsecutivePoints = Math.max(3, Math.round(homeTotalWon * 0.09));
+    }
+    if (awayMaxConsecutivePoints === 0 && awayTotalWon > 0) {
+      awayMaxConsecutivePoints = Math.max(3, Math.round(awayTotalWon * 0.09));
+    }
+    
+    // ===== MAX CONSECUTIVE GAMES WON (GameConsecutiviVinti) =====
+    let homeMaxConsecutiveGames = stats.home.maxConsecutiveGamesWon || 0;
+    let awayMaxConsecutiveGames = stats.away.maxConsecutiveGamesWon || 0;
+    // Questo viene calcolato da calculateGameStatsFromScore, qui mettiamo fallback
+    
+    return {
+      serve: {
+        home: {
+          aces: stats.home.aces || 0,
+          doubleFaults: stats.home.doubleFaults || 0,
+          firstServePct: homeFirstServePct,
+          firstServeIn: homeFirstServeIn,
+          firstServeTotal: homeFirstServeTotal,
+          firstServeWonPct: homeFirstServeWonPct,
+          firstServePointsWon: homeFirstServePointsWon,
+          firstServePointsIn: homeFirstServePointsIn,
+          secondServeWonPct: homeSecondServeWonPct,
+          secondServePointsWon: homeSecondServePointsWon,
+          secondServeTotal: homeSecondServeTotal,
+          serviceGamesPlayed: homeServiceGames || 0,
+          serviceGamesWon: homeServiceGamesWon,
+          servicePointsWon: homeServicePointsWon,
+          breakPointsSaved: homeBreakPointsSaved,
+          breakPointsFaced: homeBreakPointsFaced
+        },
+        away: {
+          aces: stats.away.aces || 0,
+          doubleFaults: stats.away.doubleFaults || 0,
+          firstServePct: awayFirstServePct,
+          firstServeIn: awayFirstServeIn,
+          firstServeTotal: awayFirstServeTotal,
+          firstServeWonPct: awayFirstServeWonPct,
+          firstServePointsWon: awayFirstServePointsWon,
+          firstServePointsIn: awayFirstServePointsIn,
+          secondServeWonPct: awaySecondServeWonPct,
+          secondServePointsWon: awaySecondServePointsWon,
+          secondServeTotal: awaySecondServeTotal,
+          serviceGamesPlayed: awayServiceGames || 0,
+          serviceGamesWon: awayServiceGamesWon,
+          servicePointsWon: awayServicePointsWon,
+          breakPointsSaved: awayBreakPointsSaved,
+          breakPointsFaced: awayBreakPointsFaced
+        }
+      },
+      return: {
+        home: {
+          returnPointsWonPct: homeReturnPct,
+          returnPointsWon: homeReturnPointsWon,
+          firstReturnPointsWon: homeFirstReturnPointsWon,
+          firstReturnPointsTotal: homeFirstReturnPointsTotal,
+          secondReturnPointsWon: homeSecondReturnPointsWon,
+          secondReturnPointsTotal: homeSecondReturnPointsTotal,
+          returnGamesPlayed: homeReturnGamesPlayed,
+          breakPointsWon: homeBreakPointsWon,
+          breakPointsTotal: homeBreakPointsTotal
+        },
+        away: {
+          returnPointsWonPct: awayReturnPct,
+          returnPointsWon: awayReturnPointsWon,
+          firstReturnPointsWon: awayFirstReturnPointsWon,
+          firstReturnPointsTotal: awayFirstReturnPointsTotal,
+          secondReturnPointsWon: awaySecondReturnPointsWon,
+          secondReturnPointsTotal: awaySecondReturnPointsTotal,
+          returnGamesPlayed: awayReturnGamesPlayed,
+          breakPointsWon: awayBreakPointsWon,
+          breakPointsTotal: awayBreakPointsTotal
+        }
+      },
+      points: {
+        home: {
+          totalWon: stats.home.totalPointsWon || 0,
+          servicePointsWon: homeServicePointsWon,
+          returnPointsWon: homeReturnPointsWon,
+          maxConsecutivePointsWon: homeMaxConsecutivePoints,
+          winners: homeWinners,
+          unforcedErrors: homeUE
+        },
+        away: {
+          totalWon: stats.away.totalPointsWon || 0,
+          servicePointsWon: awayServicePointsWon,
+          returnPointsWon: awayReturnPointsWon,
+          maxConsecutivePointsWon: awayMaxConsecutivePoints,
+          winners: awayWinners,
+          unforcedErrors: awayUE
+        }
+      }
+    };
+  };
   
   if (isNewFormat) {
     // Nuovo formato con periodi
     const periods = Object.keys(statisticsData).filter(k => statisticsData[k]);
     const byPeriod = {};
     
+    // Calcola games stats dallo score come FALLBACK
+    const gameStatsFromScore = calculateGameStatsFromScore(score);
+    
+    // Prendi i valori dal DB ALL se presenti (questi sono i valori SofaScore corretti!)
+    const allStats = statisticsData.ALL ? extractStatsFromRecord(statisticsData.ALL) : {};
+    
+    // FILOSOFIA: Usa SEMPRE valori SofaScore se disponibili, altrimenti calcolo da score
+    const gameStats = {
+      home: {
+        // gamesWon: usa SofaScore se disponibile
+        gamesWon: allStats.home?.gamesWon || gameStatsFromScore.home.gamesWon,
+        // tiebreaksWon: usa SofaScore se disponibile
+        tiebreaksWon: allStats.home?.tiebreaksWon !== undefined ? allStats.home.tiebreaksWon : gameStatsFromScore.home.tiebreaksWon,
+        // consecutiveGamesWon: usa SofaScore se disponibile
+        consecutiveGamesWon: allStats.home?.maxConsecutiveGamesWon || gameStatsFromScore.home.consecutiveGamesWon,
+        // serviceGamesWon: usa SofaScore se disponibile
+        serviceGamesWon: allStats.home?.serviceGamesWon || 0
+      },
+      away: {
+        gamesWon: allStats.away?.gamesWon || gameStatsFromScore.away.gamesWon,
+        tiebreaksWon: allStats.away?.tiebreaksWon !== undefined ? allStats.away.tiebreaksWon : gameStatsFromScore.away.tiebreaksWon,
+        consecutiveGamesWon: allStats.away?.maxConsecutiveGamesWon || gameStatsFromScore.away.consecutiveGamesWon,
+        serviceGamesWon: allStats.away?.serviceGamesWon || 0
+      }
+    };
+    
+    console.log('🎯 Game Stats from SofaScore:', JSON.stringify({
+      home: { gamesWon: allStats.home?.gamesWon, tiebreaks: allStats.home?.tiebreaksWon, consec: allStats.home?.maxConsecutiveGamesWon, serviceWon: allStats.home?.serviceGamesWon },
+      away: { gamesWon: allStats.away?.gamesWon, tiebreaks: allStats.away?.tiebreaksWon, consec: allStats.away?.maxConsecutiveGamesWon, serviceWon: allStats.away?.serviceGamesWon }
+    }));
+    
     for (const period of periods) {
       const stats = extractStatsFromRecord(statisticsData[period]);
-      byPeriod[period] = buildTabFromStats(stats);
+      const periodTab = buildTabFromStats(stats);
+      // Aggiungi games a OGNI periodo
+      byPeriod[period] = { ...periodTab, games: gameStats };
     }
     
     // Usa ALL come default, fallback al primo periodo disponibile
@@ -3865,6 +4713,7 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
     
     return {
       ...defaultTab,
+      games: gameStats,
       periods: periods.sort((a, b) => {
         // Ordina: ALL prima, poi SET1, SET2, etc.
         if (a === 'ALL') return -1;
@@ -3887,50 +4736,55 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
   );
   
   if (hasRealStats) {
-    // Use real statistics
-    return {
-      serve: {
-        home: {
-          aces: statistics.home?.aces || 0,
-          doubleFaults: statistics.home?.doubleFaults || 0,
-          firstServePct: statistics.home?.firstServePct || 0,
-          firstServeWonPct: statistics.home?.firstServePointsWonPct || 0,
-          secondServeWonPct: statistics.home?.secondServePointsWonPct || 0
-        },
-        away: {
-          aces: statistics.away?.aces || 0,
-          doubleFaults: statistics.away?.doubleFaults || 0,
-          firstServePct: statistics.away?.firstServePct || 0,
-          firstServeWonPct: statistics.away?.firstServePointsWonPct || 0,
-          secondServeWonPct: statistics.away?.secondServePointsWonPct || 0
-        }
+    // FILOSOFIA: Usa buildTabFromStats per calcolare winners/UE con fallback
+    const statsForBuilder = {
+      home: {
+        aces: statistics.home?.aces || 0,
+        doubleFaults: statistics.home?.doubleFaults || 0,
+        firstServePct: statistics.home?.firstServePct || 0,
+        firstServePointsWonPct: statistics.home?.firstServePointsWonPct || 0,
+        firstServePointsWon: statistics.home?.firstServePointsWon || 0,
+        secondServePointsWonPct: statistics.home?.secondServePointsWonPct || 0,
+        breakPointsWon: statistics.home?.breakPointsWon || 0,
+        breakPointsTotal: statistics.home?.breakPointsTotal || 0,
+        totalPointsWon: statistics.home?.totalPointsWon || 0,
+        returnPointsWonPct: statistics.home?.receiverPointsWonPct || 0,
+        winners: statistics.home?.winners,
+        unforcedErrors: statistics.home?.unforcedErrors
       },
-      return: {
-        home: {
-          returnPointsWonPct: statistics.home?.receiverPointsWonPct || 0,
-          breakPointsWon: statistics.home?.breakPointsWon || 0,
-          breakPointsTotal: statistics.home?.breakPointsTotal || 0
-        },
-        away: {
-          returnPointsWonPct: statistics.away?.receiverPointsWonPct || 0,
-          breakPointsWon: statistics.away?.breakPointsWon || 0,
-          breakPointsTotal: statistics.away?.breakPointsTotal || 0
-        }
-      },
-      points: {
-        home: {
-          totalWon: statistics.home?.totalPointsWon || 0,
-          winners: statistics.home?.winners || 0,
-          unforcedErrors: statistics.home?.unforcedErrors || 0
-        },
-        away: {
-          totalWon: statistics.away?.totalPointsWon || 0,
-          winners: statistics.away?.winners || 0,
-          unforcedErrors: statistics.away?.unforcedErrors || 0
-        }
-      },
-      dataSource: 'statistics'
+      away: {
+        aces: statistics.away?.aces || 0,
+        doubleFaults: statistics.away?.doubleFaults || 0,
+        firstServePct: statistics.away?.firstServePct || 0,
+        firstServePointsWonPct: statistics.away?.firstServePointsWonPct || 0,
+        firstServePointsWon: statistics.away?.firstServePointsWon || 0,
+        secondServePointsWonPct: statistics.away?.secondServePointsWonPct || 0,
+        breakPointsWon: statistics.away?.breakPointsWon || 0,
+        breakPointsTotal: statistics.away?.breakPointsTotal || 0,
+        totalPointsWon: statistics.away?.totalPointsWon || 0,
+        returnPointsWonPct: statistics.away?.receiverPointsWonPct || 0,
+        winners: statistics.away?.winners,
+        unforcedErrors: statistics.away?.unforcedErrors
+      }
     };
+    const result = buildTabFromStats(statsForBuilder);
+    const gameStatsFromScore = calculateGameStatsFromScore(score);
+    
+    // Merge: usa valori DB se presenti (consecutiveGamesWon)
+    const gameStats = {
+      home: {
+        gamesWon: gameStatsFromScore.home.gamesWon,
+        tiebreaksWon: gameStatsFromScore.home.tiebreaksWon,
+        consecutiveGamesWon: statistics.home?.maxConsecutiveGamesWon || gameStatsFromScore.home.consecutiveGamesWon
+      },
+      away: {
+        gamesWon: gameStatsFromScore.away.gamesWon,
+        tiebreaksWon: gameStatsFromScore.away.tiebreaksWon,
+        consecutiveGamesWon: statistics.away?.maxConsecutiveGamesWon || gameStatsFromScore.away.consecutiveGamesWon
+      }
+    };
+    
+    return { ...result, games: gameStats, dataSource: 'statistics' };
   }
   
   // Estimate stats from score for legacy matches
@@ -4031,6 +4885,7 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
             unforcedErrors: Math.round(awayPoints * (!isHomeWinner ? 0.15 : 0.2))
           }
         },
+        games: calculateGameStatsFromScore(score),
         dataSource: 'point_by_point'
       };
     }
@@ -4081,8 +4936,420 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
         unforcedErrors: Math.round(awayPoints * (!isHomeWinner ? 0.15 : 0.2))
       }
     },
+    games: calculateGameStatsFromScore(score),
     dataSource: 'estimated'
   };
+}
+
+/**
+ * Calcola statistiche di game dallo score (sets)
+ * FILOSOFIA: DATA_LAYER → estrae dati dallo score
+ * Calcola: gamesWon, tiebreaksWon, consecutiveGamesWon
+ */
+function calculateGameStatsFromScore(score) {
+  const sets = score?.sets || [];
+  
+  let homeGamesWon = 0;
+  let awayGamesWon = 0;
+  let homeTiebreaksWon = 0;
+  let awayTiebreaksWon = 0;
+  let homeMaxConsecutive = 0;
+  let awayMaxConsecutive = 0;
+  
+  // Calcola games totali e tiebreaks
+  for (const set of sets) {
+    const homeSetGames = set.home || 0;
+    const awaySetGames = set.away || 0;
+    
+    homeGamesWon += homeSetGames;
+    awayGamesWon += awaySetGames;
+    
+    // Tiebreak: se il set finisce 7-6 o 6-7, c'è stato un tiebreak
+    // Il vincitore del tiebreak è chi ha vinto il set
+    if ((homeSetGames === 7 && awaySetGames === 6) || 
+        (homeSetGames === 6 && awaySetGames === 7)) {
+      if (homeSetGames > awaySetGames) {
+        homeTiebreaksWon++;
+      } else {
+        awayTiebreaksWon++;
+      }
+    }
+  }
+  
+  // Consecutive games: stima basata sul margine di vittoria nei set
+  // Se vinci un set 6-1, hai probabilmente vinto 4-5 game consecutivi
+  // Anche chi perde ha sempre almeno 1 game consecutivo (il proprio servizio)
+  for (const set of sets) {
+    const homeSetGames = set.home || 0;
+    const awaySetGames = set.away || 0;
+    const diff = Math.abs(homeSetGames - awaySetGames);
+    
+    // FILOSOFIA: Ogni giocatore vince ALMENO 1 game consecutivo (proprio servizio tenuto)
+    // diff >= 4 → vincitore ha ~3-4 consecutive, diff >= 2 → vincitore ha ~2-3
+    if (homeSetGames > awaySetGames) {
+      // Home vince set
+      homeMaxConsecutive = Math.max(homeMaxConsecutive, Math.min(diff + 1, 5));
+      // Away perde ma avrà tenuto almeno 1-2 servizi consecutivi
+      awayMaxConsecutive = Math.max(awayMaxConsecutive, Math.min(awaySetGames > 0 ? 2 : 1, awaySetGames));
+    } else if (awaySetGames > homeSetGames) {
+      // Away vince set
+      awayMaxConsecutive = Math.max(awayMaxConsecutive, Math.min(diff + 1, 5));
+      // Home perde ma avrà tenuto almeno 1-2 servizi consecutivi
+      homeMaxConsecutive = Math.max(homeMaxConsecutive, Math.min(homeSetGames > 0 ? 2 : 1, homeSetGames));
+    }
+  }
+  
+  // FALLBACK: Se ancora 0, ogni giocatore con games > 0 ha almeno 1 consecutivo
+  if (homeMaxConsecutive === 0 && homeGamesWon > 0) homeMaxConsecutive = 1;
+  if (awayMaxConsecutive === 0 && awayGamesWon > 0) awayMaxConsecutive = 1;
+  
+  return {
+    home: {
+      gamesWon: homeGamesWon,
+      tiebreaksWon: homeTiebreaksWon,
+      consecutiveGamesWon: homeMaxConsecutive
+    },
+    away: {
+      gamesWon: awayGamesWon,
+      tiebreaksWon: awayTiebreaksWon,
+      consecutiveGamesWon: awayMaxConsecutive
+    }
+  };
+}
+
+/**
+ * Conta i break points effettivi analizzando i punteggi nel PBP
+ * Score format: "home-away" (es. "40-30" = Home ha 40, Away ha 30)
+ * Break point = receiver è a 40/A mentre server non ha A
+ * Se server=away e homeScore=40 → Home (receiver) ha break point
+ * Se server=home e awayScore=40 → Away (receiver) ha break point
+ */
+/**
+ * FUNZIONE MASTER: Estrae TUTTE le statistiche dal PBP in un JSON strutturato
+ * Questa è la SINGOLA fonte di verità per tutti i calcoli statistici
+ * Score format: "home-away" (es. "40-30" = Home ha 40, Away ha 30)
+ */
+function extractAllStatsFromPBP(points) {
+  if (!Array.isArray(points) || points.length === 0) return null;
+  
+  // Inizializza tutti i contatori
+  const stats = {
+    home: {
+      // SERVE
+      aces: 0,
+      doubleFaults: 0,
+      firstServeIn: 0,
+      firstServeTotal: 0,
+      firstServePointsWon: 0,
+      secondServeTotal: 0,
+      secondServePointsWon: 0,
+      servicePointsWon: 0,
+      servicePointsTotal: 0,
+      serviceGamesWon: 0,
+      serviceGamesTotal: 0,
+      breakPointsFaced: 0,
+      breakPointsSaved: 0,
+      // RETURN  
+      firstReturnPointsWon: 0,
+      firstReturnPointsTotal: 0,
+      secondReturnPointsWon: 0,
+      secondReturnPointsTotal: 0,
+      returnPointsWon: 0,
+      returnPointsTotal: 0,
+      breakPointsWon: 0,
+      breakPointsTotal: 0,
+      // POINTS
+      totalPointsWon: 0,
+      maxConsecutivePointsWon: 0,
+      // GAMES
+      gamesWon: 0,
+      tiebreaksWon: 0,
+      consecutiveGamesWon: 0
+    },
+    away: {
+      aces: 0,
+      doubleFaults: 0,
+      firstServeIn: 0,
+      firstServeTotal: 0,
+      firstServePointsWon: 0,
+      secondServeTotal: 0,
+      secondServePointsWon: 0,
+      servicePointsWon: 0,
+      servicePointsTotal: 0,
+      serviceGamesWon: 0,
+      serviceGamesTotal: 0,
+      breakPointsFaced: 0,
+      breakPointsSaved: 0,
+      firstReturnPointsWon: 0,
+      firstReturnPointsTotal: 0,
+      secondReturnPointsWon: 0,
+      secondReturnPointsTotal: 0,
+      returnPointsWon: 0,
+      returnPointsTotal: 0,
+      breakPointsWon: 0,
+      breakPointsTotal: 0,
+      totalPointsWon: 0,
+      maxConsecutivePointsWon: 0,
+      gamesWon: 0,
+      tiebreaksWon: 0,
+      consecutiveGamesWon: 0
+    }
+  };
+  
+  // Tracciatori per calcoli complessi
+  let currentConsecutiveHome = 0;
+  let currentConsecutiveAway = 0;
+  let lastBpKeyHome = '';
+  let lastBpKeyAway = '';
+  let lastGameKey = '';
+  let lastGameServer = null;
+  let lastGameWinner = null;
+  let currentConsecutiveGamesHome = 0;
+  let currentConsecutiveGamesAway = 0;
+  
+  // Traccia primo/secondo servizio per game corrente
+  let currentGameFirstServes = { home: 0, away: 0 };
+  let currentGameKey = '';
+  
+  for (const point of points) {
+    const server = point.server || point.gameServer;
+    const winner = point.pointWinner;
+    const score = point.score || '';
+    const set = point.set;
+    const game = point.game;
+    const isAce = point.isAce || false;
+    const isDoubleFault = point.isDoubleFault || false;
+    const isTiebreak = point.isTiebreak || false;
+    
+    if (!server || !winner) continue;
+    
+    const gameKey = `${set}-${game}`;
+    
+    // Reset contatori per nuovo game
+    if (gameKey !== currentGameKey) {
+      currentGameKey = gameKey;
+      currentGameFirstServes = { home: 0, away: 0 };
+    }
+    
+    // === PUNTI TOTALI ===
+    if (winner === 'home') {
+      stats.home.totalPointsWon++;
+      currentConsecutiveHome++;
+      stats.home.maxConsecutivePointsWon = Math.max(stats.home.maxConsecutivePointsWon, currentConsecutiveHome);
+      currentConsecutiveAway = 0;
+    } else {
+      stats.away.totalPointsWon++;
+      currentConsecutiveAway++;
+      stats.away.maxConsecutivePointsWon = Math.max(stats.away.maxConsecutivePointsWon, currentConsecutiveAway);
+      currentConsecutiveHome = 0;
+    }
+    
+    // === ACE e DOPPI FALLI ===
+    if (isAce) {
+      if (server === 'home') stats.home.aces++;
+      else stats.away.aces++;
+    }
+    if (isDoubleFault) {
+      if (server === 'home') stats.home.doubleFaults++;
+      else stats.away.doubleFaults++;
+    }
+    
+    // === SERVIZIO ===
+    if (server === 'home') {
+      stats.home.servicePointsTotal++;
+      if (winner === 'home') stats.home.servicePointsWon++;
+      
+      // Determina se primo o secondo servizio
+      // Primo servizio: primo punto del game o dopo un punto vinto/perso
+      // Secondo servizio: dopo un fault (ma non abbiamo questo dato diretto)
+      // APPROSSIMAZIONE: consideriamo che ~65% siano prime, ~35% seconde
+      // Oppure usiamo isDoubleFault come indicatore di seconda
+      if (!isDoubleFault) {
+        // Se non è doppio fallo, è o prima o seconda andata dentro
+        // Usiamo una euristica: track dei servizi per game
+        currentGameFirstServes.home++;
+        if (currentGameFirstServes.home <= 4) { // ~60% prime nei primi punti
+          stats.home.firstServeTotal++;
+          stats.home.firstServeIn++;
+          if (winner === 'home') stats.home.firstServePointsWon++;
+        } else {
+          stats.home.secondServeTotal++;
+          if (winner === 'home') stats.home.secondServePointsWon++;
+        }
+      } else {
+        // Doppio fallo = seconda servizio fallita
+        stats.home.secondServeTotal++;
+      }
+      
+      // Return per Away (quando Home serve)
+      stats.away.returnPointsTotal++;
+      if (winner === 'away') stats.away.returnPointsWon++;
+      
+    } else if (server === 'away') {
+      stats.away.servicePointsTotal++;
+      if (winner === 'away') stats.away.servicePointsWon++;
+      
+      if (!isDoubleFault) {
+        currentGameFirstServes.away++;
+        if (currentGameFirstServes.away <= 4) {
+          stats.away.firstServeTotal++;
+          stats.away.firstServeIn++;
+          if (winner === 'away') stats.away.firstServePointsWon++;
+        } else {
+          stats.away.secondServeTotal++;
+          if (winner === 'away') stats.away.secondServePointsWon++;
+        }
+      } else {
+        stats.away.secondServeTotal++;
+      }
+      
+      // Return per Home (quando Away serve)
+      stats.home.returnPointsTotal++;
+      if (winner === 'home') stats.home.returnPointsWon++;
+    }
+    
+    // === BREAK POINTS (dal punteggio) ===
+    // Ogni punto con score 40-X o A-40 è un break point UNICO
+    // Non usiamo chiavi per evitare duplicati - ogni punto è un BP separato
+    const parts = score.split('-');
+    if (parts.length === 2) {
+      const homeScore = parts[0].trim();
+      const awayScore = parts[1].trim();
+      
+      // BP per Home (quando Away serve e Home è a 40/A)
+      if (server === 'away') {
+        const isBP = (homeScore === '40' && ['0', '15', '30'].includes(awayScore)) ||
+                     (homeScore === 'A' && awayScore === '40');
+        if (isBP) {
+          // Ogni punto con questo score è un break point
+          stats.away.breakPointsFaced++;
+          stats.home.breakPointsTotal++;
+          if (winner === 'away') {
+            stats.away.breakPointsSaved++;
+          } else if (winner === 'home') {
+            stats.home.breakPointsWon++;
+          }
+        }
+      }
+      
+      // BP per Away (quando Home serve e Away è a 40/A)
+      if (server === 'home') {
+        const isBP = (awayScore === '40' && ['0', '15', '30'].includes(homeScore)) ||
+                     (awayScore === 'A' && homeScore === '40');
+        if (isBP) {
+          stats.home.breakPointsFaced++;
+          stats.away.breakPointsTotal++;
+          if (winner === 'home') {
+            stats.home.breakPointsSaved++;
+          } else if (winner === 'away') {
+            stats.away.breakPointsWon++;
+          }
+        }
+      }
+    }
+    
+    // === GAMES (traccia vincitori di game) ===
+    // Rileva fine game quando il punteggio torna a 0-0 o cambia set/game
+    if (gameKey !== lastGameKey && lastGameKey !== '') {
+      // Il game precedente è finito
+      if (lastGameServer && lastGameWinner) {
+        if (lastGameServer === 'home') {
+          stats.home.serviceGamesTotal++;
+          if (lastGameWinner === 'home') {
+            stats.home.serviceGamesWon++;
+            stats.home.gamesWon++;
+            currentConsecutiveGamesHome++;
+            stats.home.consecutiveGamesWon = Math.max(stats.home.consecutiveGamesWon, currentConsecutiveGamesHome);
+            currentConsecutiveGamesAway = 0;
+          } else {
+            stats.away.gamesWon++;
+            currentConsecutiveGamesAway++;
+            stats.away.consecutiveGamesWon = Math.max(stats.away.consecutiveGamesWon, currentConsecutiveGamesAway);
+            currentConsecutiveGamesHome = 0;
+          }
+        } else {
+          stats.away.serviceGamesTotal++;
+          if (lastGameWinner === 'away') {
+            stats.away.serviceGamesWon++;
+            stats.away.gamesWon++;
+            currentConsecutiveGamesAway++;
+            stats.away.consecutiveGamesWon = Math.max(stats.away.consecutiveGamesWon, currentConsecutiveGamesAway);
+            currentConsecutiveGamesHome = 0;
+          } else {
+            stats.home.gamesWon++;
+            currentConsecutiveGamesHome++;
+            stats.home.consecutiveGamesWon = Math.max(stats.home.consecutiveGamesWon, currentConsecutiveGamesHome);
+            currentConsecutiveGamesAway = 0;
+          }
+        }
+      }
+    }
+    
+    lastGameKey = gameKey;
+    lastGameServer = server;
+    lastGameWinner = winner; // L'ultimo winner del game è chi ha vinto il game
+  }
+  
+  // Processa l'ultimo game
+  if (lastGameServer && lastGameWinner) {
+    if (lastGameServer === 'home') {
+      stats.home.serviceGamesTotal++;
+      if (lastGameWinner === 'home') {
+        stats.home.serviceGamesWon++;
+        stats.home.gamesWon++;
+        currentConsecutiveGamesHome++;
+        stats.home.consecutiveGamesWon = Math.max(stats.home.consecutiveGamesWon, currentConsecutiveGamesHome);
+      } else {
+        stats.away.gamesWon++;
+        currentConsecutiveGamesAway++;
+        stats.away.consecutiveGamesWon = Math.max(stats.away.consecutiveGamesWon, currentConsecutiveGamesAway);
+      }
+    } else {
+      stats.away.serviceGamesTotal++;
+      if (lastGameWinner === 'away') {
+        stats.away.serviceGamesWon++;
+        stats.away.gamesWon++;
+        currentConsecutiveGamesAway++;
+        stats.away.consecutiveGamesWon = Math.max(stats.away.consecutiveGamesWon, currentConsecutiveGamesAway);
+      } else {
+        stats.home.gamesWon++;
+        currentConsecutiveGamesHome++;
+        stats.home.consecutiveGamesWon = Math.max(stats.home.consecutiveGamesWon, currentConsecutiveGamesHome);
+      }
+    }
+  }
+  
+  // === CALCOLI DERIVATI ===
+  // First/Second Return Points
+  stats.home.firstReturnPointsTotal = stats.away.firstServeIn;
+  stats.home.firstReturnPointsWon = stats.away.firstServeIn - stats.away.firstServePointsWon;
+  stats.home.secondReturnPointsTotal = stats.away.secondServeTotal;
+  stats.home.secondReturnPointsWon = stats.away.secondServeTotal - stats.away.secondServePointsWon;
+  
+  stats.away.firstReturnPointsTotal = stats.home.firstServeIn;
+  stats.away.firstReturnPointsWon = stats.home.firstServeIn - stats.home.firstServePointsWon;
+  stats.away.secondReturnPointsTotal = stats.home.secondServeTotal;
+  stats.away.secondReturnPointsWon = stats.home.secondServeTotal - stats.home.secondServePointsWon;
+  
+  console.log('📊 PBP Stats Extracted:', JSON.stringify({
+    totalPoints: stats.home.totalPointsWon + stats.away.totalPointsWon,
+    home: { 
+      total: stats.home.totalPointsWon,
+      service: stats.home.servicePointsWon,
+      return: stats.home.returnPointsWon,
+      bpFaced: stats.home.breakPointsFaced,
+      bpSaved: stats.home.breakPointsSaved
+    },
+    away: {
+      total: stats.away.totalPointsWon,
+      service: stats.away.servicePointsWon,
+      return: stats.away.returnPointsWon,
+      bpFaced: stats.away.breakPointsFaced,
+      bpSaved: stats.away.breakPointsSaved
+    }
+  }));
+  
+  return stats;
 }
 
 /**

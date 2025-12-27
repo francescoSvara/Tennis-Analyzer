@@ -153,7 +153,6 @@ function MonthGroupLazy({ monthKey, count, onMatchClick }) {
           const data = await res.json();
           setMatches(data.matches || []);
           setLoaded(true);
-          console.log(`📂 Lazy loaded ${data.matches?.length || 0} matches for ${monthKey}`);
         }
       } catch (err) {
         console.error('Error loading month matches:', err);

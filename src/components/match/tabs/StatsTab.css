@@ -62,13 +62,17 @@
 }
 
 /* ===========================================
-   STATS GRID
+   STATS GRID - 2x2 layout (col-6 each)
 =========================================== */
 
 .stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-5);
+}
+
+.stats-grid > .stats-card {
+  min-width: 0; /* Prevent overflow */
 }
 
 /* ===========================================
@@ -110,10 +114,11 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
-  max-width: 120px;
+  max-width: 45%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .stats-players .player-name.home {
@@ -154,7 +159,11 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
-  min-width: 50px;
+  min-width: 0;
+  flex-shrink: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stat-value.home {
@@ -172,6 +181,11 @@
   color: var(--text-secondary);
   text-align: center;
   flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 var(--space-1);
 }
 
 .stat-bar__track {
@@ -255,14 +269,22 @@
    RESPONSIVE
 =========================================== */
 
+/* Tablet - mantiene 2 colonne */
 @media (max-width: 1024px) {
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
   }
 }
 
+/* Mobile - 1 colonna */
 @media (max-width: 768px) {
   .stats-tab {
+    gap: var(--space-4);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
     gap: var(--space-4);
   }
 
@@ -272,5 +294,10 @@
 
   .stat-bar__track {
     height: 6px;
+  }
+
+  .stat-value {
+    font-size: var(--font-size-xs);
+    min-width: 45px;
   }
 }

@@ -161,14 +161,15 @@
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   
-  --font-size-xs: 11px;
-  --font-size-sm: 13px;
-  --font-size-base: 14px;
-  --font-size-md: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 20px;
-  --font-size-2xl: 24px;
-  --font-size-3xl: 30px;
+  /* Font sizes responsive con clamp per scalare con viewport */
+  --font-size-xs: clamp(10px, 2.5vw, 11px);
+  --font-size-sm: clamp(11px, 2.8vw, 13px);
+  --font-size-base: clamp(12px, 3vw, 14px);
+  --font-size-md: clamp(14px, 3.2vw, 16px);
+  --font-size-lg: clamp(16px, 3.5vw, 18px);
+  --font-size-xl: clamp(17px, 4vw, 20px);
+  --font-size-2xl: clamp(20px, 4.5vw, 24px);
+  --font-size-3xl: clamp(24px, 5vw, 30px);
   
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -191,6 +192,17 @@ html, body, #root {
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* Global responsive text handling */
+* {
+  min-width: 0; /* Prevent flex/grid children overflow */
+}
+
+/* Prevent text overflow globally */
+p, span, h1, h2, h3, h4, h5, h6, label {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 body {
@@ -249,6 +261,28 @@ svg[fill="currentColor"] {
 .bg-primary { background: var(--bg-primary); }
 .bg-secondary { background: var(--bg-secondary); }
 .bg-card { background: var(--bg-card); }
+
+/* Responsive utilities */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.break-word {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.no-shrink {
+  flex-shrink: 0;
+}
+
+/* Container query fallback */
+.responsive-text {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+}
 
 /* ============================================
    CARD COMPONENT - Base styling

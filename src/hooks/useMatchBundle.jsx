@@ -172,10 +172,64 @@ export function useMatchBundle(matchId, options = {}) {
   }, [bundle, onLiveEvent]);
 
   /**
+   * Avvia polling (fallback quando WS non disponibile)
+   * FILOSOFIA: Polling SOLO per match live, MAI per match finiti
+   */
+  const startPolling = useCallback(() => {
+    // NON avviare polling se già attivo
+    if (pollRef.current) return;
+    
+    // FILOSOFIA: NON fare polling per match finiti
+    // Controlla lo status dal bundle corrente
+    const matchStatus = bundle?.header?.match?.status;
+    const isFinished = matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
+    
+    if (isFinished) {
+      console.log('[MatchBundle] Match finished, no polling needed');
+      return;
+    }
+
+    pollRef.current = setInterval(() => {
+      fetchBundle(true);
+    }, pollInterval);
+  }, [fetchBundle, pollInterval, bundle]);
+
+  /**
+   * Ferma polling
+   */
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Disconnetti WebSocket
+   */
+  const disconnectWebSocket = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+  }, []);
+
+  /**
    * Connessione WebSocket per live updates
+   * FILOSOFIA: WebSocket SOLO per match live, MAI per match finiti
    */
   const connectWebSocket = useCallback(() => {
     if (!matchIdRef.current) return;
+    
+    // FILOSOFIA: NON connettersi a WS per match finiti
+    // Il bundle ha già tutti i dati necessari
+    const matchStatus = bundle?.header?.match?.status;
+    const isFinished = matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
+    
+    if (isFinished) {
+      console.log('[MatchBundle] Match finished, no WebSocket needed');
+      return;
+    }
 
     // Costruisci URL WebSocket usando WS_URL da config
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -220,7 +274,7 @@ export function useMatchBundle(matchId, options = {}) {
         console.log('[MatchBundle] WS disconnected');
         setIsLive(false);
         
-        // Fallback a polling
+        // Fallback a polling SOLO se match non finito
         if (matchIdRef.current) {
           startPolling();
         }
@@ -231,41 +285,10 @@ export function useMatchBundle(matchId, options = {}) {
       };
     } catch (err) {
       console.warn('[MatchBundle] WS connection failed:', err);
-      // Fallback a polling
+      // Fallback a polling SOLO se match non finito
       startPolling();
     }
-  }, [applyPatch]);
-
-  /**
-   * Disconnetti WebSocket
-   */
-  const disconnectWebSocket = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-  }, []);
-
-  /**
-   * Avvia polling (fallback quando WS non disponibile)
-   */
-  const startPolling = useCallback(() => {
-    if (pollRef.current) return;
-
-    pollRef.current = setInterval(() => {
-      fetchBundle(true);
-    }, pollInterval);
-  }, [fetchBundle, pollInterval]);
-
-  /**
-   * Ferma polling
-   */
-  const stopPolling = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-  }, []);
+  }, [applyPatch, bundle, startPolling]);
 
   /**
    * Refresh manuale
@@ -282,14 +305,28 @@ export function useMatchBundle(matchId, options = {}) {
   }, []);
 
   // Effect: fetch iniziale quando matchId cambia
+  // FILOSOFIA: UNA sola fetch per match finiti, WS/polling SOLO per match live
   useEffect(() => {
     if (matchId) {
-      fetchBundle();
-      
-      // Tenta connessione WS se autoConnect
-      if (autoConnect) {
-        connectWebSocket();
-      }
+      // Fetch iniziale
+      fetchBundle().then((data) => {
+        if (!data) return;
+        
+        // FILOSOFIA: Controlla se il match è finito
+        const matchStatus = data?.header?.match?.status;
+        const isFinished = matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
+        
+        if (isFinished) {
+          // Match finito: NON serve WS né polling
+          console.log('[MatchBundle] Match finished, single fetch completed');
+          return;
+        }
+        
+        // Match live: tenta connessione WS se autoConnect
+        if (autoConnect) {
+          connectWebSocket();
+        }
+      });
     }
 
     return () => {

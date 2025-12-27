@@ -25,31 +25,55 @@ const TODO_LIST_FILE = path.join(ROOT_DIR, 'docs', 'TODO_LIST.md');
 // ============================================================================
 
 const REFERENCES = {
-  // Documenti Filosofie (nuova struttura gerarchica)
+  // Documenti Filosofie (nuova struttura gerarchica) - Concetto + Pseudocode
   docs: [
-    // 00_foundation
+    // 00_foundation - Concetto
     'docs/filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md',
     'docs/filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md',
-    // 10_data_platform
+    // 00_foundation - Pseudocode
+    'docs/filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS_PSEUDOCODE.md',
+    'docs/filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS_PSEUDOCODE.md',
+    // 10_data_platform - Concetto
     'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md',
     'docs/filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md',
     'docs/filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md',
     'docs/filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md',
     'docs/filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md',
-    // 20_domain_tennis
+    // 10_data_platform - Pseudocode
+    'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB_PSEUDOCODE.md',
+    'docs/filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL_PSEUDOCODE.md',
+    'docs/filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON_PSEUDOCODE.md',
+    'docs/filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING_PSEUDOCODE.md',
+    'docs/filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY_PSEUDOCODE.md',
+    // 20_domain_tennis - Concetto
     'docs/filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md',
-    // 30_domain_odds_markets
+    'docs/filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md',
+    // 20_domain_tennis - Pseudocode
+    'docs/filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING_PSEUDOCODE.md',
+    'docs/filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION_PSEUDOCODE.md',
+    // 30_domain_odds_markets - Concetto
     'docs/filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md',
-    // 40_analytics_features_models
+    // 30_domain_odds_markets - Pseudocode
+    'docs/filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS_PSEUDOCODE.md',
+    // 40_analytics_features_models - Concetto
     'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md',
     'docs/filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md',
-    // 50_strategy_risk_execution
+    // 40_analytics_features_models - Pseudocode
+    'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS_PSEUDOCODE.md',
+    'docs/filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI_PSEUDOCODE.md',
+    // 50_strategy_risk_execution - Concetto
     'docs/filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md',
-    // 70_frontend
+    // 50_strategy_risk_execution - Pseudocode
+    'docs/filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL_PSEUDOCODE.md',
+    // 70_frontend - Concetto
     'docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md',
     'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md',
-    // Index
+    // 70_frontend - Pseudocode
+    'docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND_PSEUDOCODE.md',
+    'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_PSEUDOCODE.md',
+    // Index (Concetto + Pseudocode)
     'docs/filosofie/INDEX_FILOSOFIE.md',
+    'docs/filosofie/INDEX_FILOSOFIE_PSEUDOCODE.md',
     // Specs
     'docs/specs/HPI_RESILIENCE.md',
     'docs/specs/SPEC_FRONTEND_MOTION_UI.md',
@@ -118,8 +142,9 @@ const REFERENCES = {
 
   // Frontend - Components esistenti
   frontendComponents: [
+    // Home
+    'src/components/home/HomePage.jsx',
     // Root components
-    'src/components/HomePage.jsx',
     'src/components/ErrorBoundary.jsx',
     'src/components/MatchCard.jsx',
     'src/components/MatchGrid.jsx',
@@ -140,12 +165,11 @@ const REFERENCES = {
     'src/components/match/tabs/JournalTab.jsx'
   ],
 
-  // Frontend - Hooks (includendo quelli da creare)
+  // Frontend - Hooks (solo esistenti)
   frontendHooks: [
-    'src/hooks/useMatchBundle.jsx',
-    'src/hooks/useMatchCard.jsx',
-    'src/hooks/useMatchData.jsx',
-    'src/hooks/useLiveMatch.jsx'
+    'src/hooks/useMatchBundle.jsx'
+    // Note: useMatchCard.jsx, useMatchData.jsx, useLiveMatch.jsx non esistono ancora
+    // La funzionalità live è gestita da useMatchBundle con WebSocket
   ],
 
   // Frontend Motion - esistenti
@@ -165,6 +189,8 @@ const REFERENCES = {
   scripts: [
     'scripts/checkConceptualMap.js',
     'scripts/runConceptChecks.js',
+    'scripts/deepPhilosophyCheck.js',
+    'scripts/philosophyEnforcer.js',
     'scripts/cleanDuplicates.js',
     'scripts/generateTodoReport.js'
   ]
@@ -172,26 +198,28 @@ const REFERENCES = {
 
 // Funzioni da verificare con linea approssimativa
 const FUNCTIONS_TO_CHECK = [
-  // Backend - featureEngine.js (NUOVO - principale)
-  { file: 'backend/utils/featureEngine.js', func: 'calculateVolatility', expectedLine: 44 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateDominance', expectedLine: 92 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominance', expectedLine: 126 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbability', expectedLine: 191 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateRecentMomentum', expectedLine: 277 },
+  // Backend - featureEngine.js (NUOVO - principale) - AGGIORNATO 27 Dic 2025
+  { file: 'backend/utils/featureEngine.js', func: 'calculateVolatility', expectedLine: 49 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominance', expectedLine: 97 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominance', expectedLine: 137 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbability', expectedLine: 205 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateRecentMomentum', expectedLine: 293 },
   { file: 'backend/utils/featureEngine.js', func: 'computeFeatures', expectedLine: 353 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateVolatilityFromScore', expectedLine: 523 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromScore', expectedLine: 554 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromOdds', expectedLine: 589 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominanceFromRankings', expectedLine: 624 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbabilityFromOddsRankings', expectedLine: 649 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculatePressureFromScore', expectedLine: 694 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateMomentumFromScore', expectedLine: 725 },
   
-  // Backend - strategyEngine.js
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateAll', expectedLine: 39 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateLayWinner', expectedLine: 63 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateBancaServizio', expectedLine: 148 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateSuperBreak', expectedLine: 222 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateTiebreakSpecialist', expectedLine: 307 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateMomentumSwing', expectedLine: 378 },
+  // Backend - strategyEngine.js - AGGIORNATO 27 Dic 2025
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateAll', expectedLine: 44 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateLayWinner', expectedLine: 68 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateBancaServizio', expectedLine: 153 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateSuperBreak', expectedLine: 227 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateTiebreakSpecialist', expectedLine: 312 },
+  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateMomentumSwing', expectedLine: 383 },
   
   // Backend - valueInterpreter.js (legacy)
   { file: 'backend/utils/valueInterpreter.js', func: 'getThresholdsForSurface', expectedLine: 55 },
@@ -206,10 +234,10 @@ const FUNCTIONS_TO_CHECK = [
   { file: 'backend/liveManager.js', func: 'initLiveManager', expectedLine: 297 },
   { file: 'backend/liveManager.js', func: 'syncMatch', expectedLine: 1242 },
   
-  // Frontend - useMatchBundle.jsx (NUOVO - principale)
+  // Frontend - useMatchBundle.jsx (NUOVO - principale) - AGGIORNATO 27 Dic 2025
   { file: 'src/hooks/useMatchBundle.jsx', func: 'useMatchBundle', expectedLine: 44 },
-  { file: 'src/hooks/useMatchBundle.jsx', func: 'useTabData', expectedLine: 354 },
-  { file: 'src/hooks/useMatchBundle.jsx', func: 'useHeaderData', expectedLine: 364 }
+  { file: 'src/hooks/useMatchBundle.jsx', func: 'useTabData', expectedLine: 359 },
+  { file: 'src/hooks/useMatchBundle.jsx', func: 'useHeaderData', expectedLine: 369 }
 ];
 
 // Tabelle DB da verificare nei file SQL

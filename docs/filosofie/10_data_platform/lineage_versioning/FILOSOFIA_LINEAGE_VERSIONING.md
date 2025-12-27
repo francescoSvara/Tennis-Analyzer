@@ -457,11 +457,9 @@ function checkBundleMeta(bundle) {
 Se cambi calcoli o strategia, incrementa version.
 ```
 
-**Checklist**:
-- [ ] Cambio formula feature → bump `feature_version`
-- [ ] Nuova strategia → bump `strategy_version`
-- [ ] Fix bug calcolo → bump `feature_version` (patch)
-- [ ] Cambio struttura bundle → bump `bundle_schema_version`
+> ⚠️ **Le checklist sono state consolidate in** [`docs/TODO_LIST.md`](../../../TODO_LIST.md#34-checklist-lineage--versioning-filosofia_lineage_versioningmd)
+> 
+> Vedi TODO_LIST per: version bump rules e pre-commit checklist
 
 **Standard**: semantic versioning
 - `major`: breaking changes
@@ -635,18 +633,7 @@ function MatchBundleMeta({ bundle }) {
 
 ### 8.1 Prima di Committare
 
-Checklist:
-- [ ] Ho cambiato una feature calculation?  
-  → Bump `FEATURE_ENGINE_VERSION` in `featureEngine.js`
-  
-- [ ] Ho cambiato una strategia?  
-  → Bump `STRATEGY_ENGINE_VERSION` in `strategyEngine.js`
-  
-- [ ] Ho cambiato il contratto MatchBundle?  
-  → Bump `BUNDLE_SCHEMA_VERSION` in `matchCardService.js`
-  
-- [ ] Ho fatto migration DB?  
-  → Bump `DATA_VERSION` in `matchRepository.js`
+> ⚠️ **Le checklist pre-commit sono in** [`docs/TODO_LIST.md`](../../../TODO_LIST.md#34-checklist-lineage--versioning-filosofia_lineage_versioningmd)
 
 ---
 

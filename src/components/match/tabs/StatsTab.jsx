@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChartBar, TennisBall, Target, Pulse } from '@phosphor-icons/react';
+import { ChartBar, TennisBall, Target, Pulse, Trophy } from '@phosphor-icons/react';
 import { MotionCard } from '../../../motion/MotionCard';
 import { fadeUp, durations, easings } from '../../../motion/tokens';
 import './StatsTab.css';
@@ -40,6 +40,45 @@ function StatBar({ label, homeValue, awayValue, format = 'percent', homeLabel, a
         <div 
           className="stat-bar__fill away" 
           style={{ width: `${100 - homePercent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Stat Bar Fraction - Mostra X/Y (Z%) come su SofaScore
+ */
+function StatBarFraction({ label, homeWon, homeTotal, awayWon, awayTotal }) {
+  // Calcola percentuali
+  const homePct = homeTotal > 0 ? Math.round((homeWon / homeTotal) * 100) : 0;
+  const awayPct = awayTotal > 0 ? Math.round((awayWon / awayTotal) * 100) : 0;
+  
+  // Per la barra, usa le percentuali
+  const total = homePct + awayPct || 1;
+  const homeBarPercent = (homePct / total) * 100;
+  
+  // Formatta: "X/Y (Z%)"
+  const formatFraction = (won, tot, pct) => {
+    if (tot === 0) return '0/0 (0%)';
+    return `${won}/${tot} (${pct}%)`;
+  };
+
+  return (
+    <div className="stat-bar">
+      <div className="stat-bar__header">
+        <span className="stat-value home">{formatFraction(homeWon, homeTotal, homePct)}</span>
+        <span className="stat-label">{label}</span>
+        <span className="stat-value away">{formatFraction(awayWon, awayTotal, awayPct)}</span>
+      </div>
+      <div className="stat-bar__track">
+        <div 
+          className="stat-bar__fill home" 
+          style={{ width: `${homeBarPercent}%` }}
+        />
+        <div 
+          className="stat-bar__fill away" 
+          style={{ width: `${100 - homeBarPercent}%` }}
         />
       </div>
     </div>
@@ -84,6 +123,7 @@ export function StatsTab({ data, header }) {
   const serve = currentStats?.serve || { home: {}, away: {} };
   const returnStats = currentStats?.return || { home: {}, away: {} };
   const points = currentStats?.points || { home: {}, away: {} };
+  const games = currentStats?.games || { home: {}, away: {} };
   const players = header?.players || {};
 
   // Estrai valori serve
@@ -93,6 +133,8 @@ export function StatsTab({ data, header }) {
   const awayReturn = typeof returnStats.away === 'string' ? {} : returnStats.away;
   const homePoints = typeof points.home === 'string' ? {} : points.home;
   const awayPoints = typeof points.away === 'string' ? {} : points.away;
+  const homeGames = typeof games.home === 'string' ? {} : games.home;
+  const awayGames = typeof games.away === 'string' ? {} : games.away;
   
   // Labels per i periodi
   const periodLabels = {
@@ -166,20 +208,39 @@ export function StatsTab({ data, header }) {
                 awayValue={awayServe.doubleFaults || 0} 
                 format="number" 
               />
-              <StatBar 
+              <StatBarFraction 
                 label="1st Serve %" 
-                homeValue={homeServe.firstServePct || 0} 
-                awayValue={awayServe.firstServePct || 0} 
+                homeWon={homeServe.firstServeIn || 0}
+                homeTotal={homeServe.firstServeTotal || 0}
+                awayWon={awayServe.firstServeIn || 0}
+                awayTotal={awayServe.firstServeTotal || 0}
+              />
+              <StatBarFraction 
+                label="1st Serve Points" 
+                homeWon={homeServe.firstServePointsWon || 0}
+                homeTotal={homeServe.firstServePointsIn || homeServe.firstServeIn || 0}
+                awayWon={awayServe.firstServePointsWon || 0}
+                awayTotal={awayServe.firstServePointsIn || awayServe.firstServeIn || 0}
+              />
+              <StatBarFraction 
+                label="2nd Serve Points" 
+                homeWon={homeServe.secondServePointsWon || 0}
+                homeTotal={homeServe.secondServeTotal || 0}
+                awayWon={awayServe.secondServePointsWon || 0}
+                awayTotal={awayServe.secondServeTotal || 0}
               />
               <StatBar 
-                label="1st Serve Won %" 
-                homeValue={homeServe.firstServeWonPct || 0} 
-                awayValue={awayServe.firstServeWonPct || 0} 
+                label="Service Games" 
+                homeValue={homeServe.serviceGamesPlayed || 0} 
+                awayValue={awayServe.serviceGamesPlayed || 0} 
+                format="number" 
               />
-              <StatBar 
-                label="2nd Serve Won %" 
-                homeValue={homeServe.secondServeWonPct || 0} 
-                awayValue={awayServe.secondServeWonPct || 0} 
+              <StatBarFraction 
+                label="Break Points Saved" 
+                homeWon={homeServe.breakPointsSaved || 0}
+                homeTotal={homeServe.breakPointsFaced || 0}
+                awayWon={awayServe.breakPointsSaved || 0}
+                awayTotal={awayServe.breakPointsFaced || 0}
               />
             </div>
           </MotionCard>
@@ -191,22 +252,32 @@ export function StatsTab({ data, header }) {
               Return Statistics
             </h3>
             <div className="stats-list">
-              <StatBar 
-                label="Return Points Won %" 
-                homeValue={homeReturn.returnPointsWonPct || 0} 
-                awayValue={awayReturn.returnPointsWonPct || 0} 
+              <StatBarFraction 
+                label="1st Return Points" 
+                homeWon={homeReturn.firstReturnPointsWon || 0}
+                homeTotal={homeReturn.firstReturnPointsTotal || 0}
+                awayWon={awayReturn.firstReturnPointsWon || 0}
+                awayTotal={awayReturn.firstReturnPointsTotal || 0}
+              />
+              <StatBarFraction 
+                label="2nd Return Points" 
+                homeWon={homeReturn.secondReturnPointsWon || 0}
+                homeTotal={homeReturn.secondReturnPointsTotal || 0}
+                awayWon={awayReturn.secondReturnPointsWon || 0}
+                awayTotal={awayReturn.secondReturnPointsTotal || 0}
               />
               <StatBar 
-                label="Break Points Won" 
-                homeValue={homeReturn.breakPointsWon || 0} 
-                awayValue={awayReturn.breakPointsWon || 0} 
-                format="number"
+                label="Return Games Played" 
+                homeValue={homeReturn.returnGamesPlayed || 0} 
+                awayValue={awayReturn.returnGamesPlayed || 0} 
+                format="number" 
               />
-              <StatBar 
-                label="Break Points Total" 
-                homeValue={homeReturn.breakPointsTotal || 0} 
-                awayValue={awayReturn.breakPointsTotal || 0} 
-                format="number"
+              <StatBarFraction 
+                label="Break Points Converted" 
+                homeWon={homeReturn.breakPointsWon || 0}
+                homeTotal={homeReturn.breakPointsTotal || 0}
+                awayWon={awayReturn.breakPointsWon || 0}
+                awayTotal={awayReturn.breakPointsTotal || 0}
               />
             </div>
           </MotionCard>
@@ -225,15 +296,55 @@ export function StatsTab({ data, header }) {
                 format="number"
               />
               <StatBar 
-                label="Winners" 
-                homeValue={homePoints.winners || 0} 
-                awayValue={awayPoints.winners || 0} 
+                label="Service Points Won" 
+                homeValue={homePoints.servicePointsWon || 0} 
+                awayValue={awayPoints.servicePointsWon || 0} 
                 format="number"
               />
               <StatBar 
-                label="Unforced Errors" 
-                homeValue={homePoints.unforcedErrors || 0} 
-                awayValue={awayPoints.unforcedErrors || 0} 
+                label="Return Points Won" 
+                homeValue={homePoints.returnPointsWon || 0} 
+                awayValue={awayPoints.returnPointsWon || 0} 
+                format="number"
+              />
+              <StatBar 
+                label="Max Consec. Points" 
+                homeValue={homePoints.maxConsecutivePointsWon || 0} 
+                awayValue={awayPoints.maxConsecutivePointsWon || 0} 
+                format="number"
+              />
+            </div>
+          </MotionCard>
+
+          {/* Games Stats */}
+          <MotionCard className="stats-card">
+            <h3 className="card-title">
+              <Trophy size={18} weight="duotone" />
+              Game Statistics
+            </h3>
+            <div className="stats-list">
+              <StatBar 
+                label="Games Won" 
+                homeValue={homeGames.gamesWon || 0} 
+                awayValue={awayGames.gamesWon || 0} 
+                format="number"
+              />
+              <StatBar 
+                label="Service Games Won" 
+                homeValue={homeServe.serviceGamesWon || 0} 
+                awayValue={awayServe.serviceGamesWon || 0} 
+                format="number"
+              />
+              <StatBar 
+                label="Consec. Games Won" 
+                homeValue={homeGames.consecutiveGamesWon || 0} 
+                awayValue={awayGames.consecutiveGamesWon || 0} 
+                format="number"
+              />
+              <StatBar 
+                label="Tiebreaks Won" 
+                homeValue={homeGames.tiebreaksWon || 0} 
+                awayValue={awayGames.tiebreaksWon || 0} 
                 format="number"
               />
             </div>

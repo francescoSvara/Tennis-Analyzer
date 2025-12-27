@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-12-25T10:40:36.991Z",
+  "timestamp": "2025-12-27T06:37:25.567Z",
   "summary": {
     "totalChecks": 83,
-    "passed": 77,
-    "failed": 0,
+    "passed": 76,
+    "failed": 1,
     "todoItems": 4
   },
   "philosophies": {
@@ -661,6 +661,22 @@
           "antiPattern": false
         },
         {
+          "type": "PATTERN",
+          "file": "backend/server.js",
+          "pattern": "/transformLegacyMatchToBundle|legacy.*fallback/i",
+          "description": "server.js deve avere fallback legacy per match XLSX",
+          "passed": false,
+          "antiPattern": false
+        },
+        {
+          "type": "TABLE",
+          "name": "matches",
+          "description": "Tabella legacy con winner_name, loser_name",
+          "passed": true,
+          "migrationFile": "create-new-schema.sql",
+          "isTodo": false
+        },
+        {
           "type": "TABLE",
           "name": "matches_new",
           "description": "Tabella nuova con home_player_id, away_player_id",
@@ -677,7 +693,15 @@
           "isTodo": false
         }
       ],
-      "errors": [],
+      "errors": [
+        {
+          "type": "PATTERN_MISSING",
+          "file": "backend/server.js",
+          "pattern": "/transformLegacyMatchToBundle|legacy.*fallback/i",
+          "description": "server.js deve avere fallback legacy per match XLSX",
+          "message": "Pattern richiesto NON TROVATO in backend/server.js: server.js deve avere fallback legacy per match XLSX"
+        }
+      ],
       "warnings": [],
       "todos": []
     },

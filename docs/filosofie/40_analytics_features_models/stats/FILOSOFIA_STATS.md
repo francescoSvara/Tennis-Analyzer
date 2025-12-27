@@ -28,7 +28,7 @@
 | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Feature Engine - calcoli | L44-674 |
 | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Strategy Engine - segnali | L39-443 |
 | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Calcolo pressure index | - |
-| [`backend/server.js`](../../backend/server.js) | Bundle endpoint | L3219-3423 |
+| [`backend/server.js`](../../backend/server.js) | Bundle endpoint | L2920-3374 |
 
 ---
 

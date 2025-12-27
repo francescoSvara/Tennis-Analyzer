@@ -80,27 +80,37 @@ function calculateServer(point, setNumber) {
 
 /**
  * Determina se un punteggio è un break point
- * Break point = chi riceve è a un punto dal vincere il game
+ * 
+ * REGOLA TENNIS FONDAMENTALE:
+ * Break Point = il RECEIVER (chi riceve) è a UN PUNTO dal vincere il game
+ * 
+ * Il punteggio è sempre mostrato come HOME-AWAY.
+ * Il break point esiste SOLO quando il RECEIVER ha 40 o AD e il server NO.
+ * 
+ * - Se server=home e away ha 40/AD (e home non ha 40/AD) → BP per away ✓
+ * - Se server=away e home ha 40/AD (e away non ha 40/AD) → BP per home ✓
+ * - Se il SERVER ha 40/AD → NON è un break point (è game point per il server)
  */
 function isBreakPointScore(score, server) {
-  if (!score) return false;
+  if (!score || !server) return false;
   const parts = score.split('-');
   if (parts.length !== 2) return false;
   
-  const [p1, p2] = parts;
+  const [homeScore, awayScore] = parts;
   
-  // Se home serve e away è a 40 (o AD), è break point per away
-  if (server === 'home') {
-    if ((p2 === '40' || p2 === 'AD') && p1 !== '40' && p1 !== 'AD') return true;
-    if (p2 === 'AD') return true;
-  }
-  // Se away serve e home è a 40 (o AD), è break point per home
-  if (server === 'away') {
-    if ((p1 === '40' || p1 === 'AD') && p2 !== '40' && p2 !== 'AD') return true;
-    if (p1 === 'AD') return true;
-  }
+  // Il receiver è l'opposto del server
+  const receiver = server === 'home' ? 'away' : 'home';
+  const receiverScore = receiver === 'home' ? homeScore : awayScore;
+  const serverScore = server === 'home' ? homeScore : awayScore;
   
-  return false;
+  // Break point SOLO se:
+  // 1. Il receiver ha 40 o AD
+  // 2. Il server NON ha 40 o AD (altrimenti è deuce o vantaggio server)
+  const receiverHasGamePoint = receiverScore === '40' || receiverScore === 'AD' || receiverScore === 'A';
+  const serverHasGamePoint = serverScore === '40' || serverScore === 'AD' || serverScore === 'A';
+  
+  // BP solo se receiver ha game point E server non ce l'ha
+  return receiverHasGamePoint && !serverHasGamePoint;
 }
 
 /**
@@ -198,6 +208,9 @@ function PointWinner({ winner, homeName, awayName }) {
 
 /**
  * Single Point Row
+ * 
+ * REGOLA TENNIS: Il break point è SEMPRE e SOLO del receiver.
+ * Se il server tiene il servizio, non c'è mai stato un break point da mostrare.
  */
 function PointRow({ point, homeName, awayName, isFirst, showGameHeader }) {
   const server = point.server !== 'unknown' ? point.server : calculateServer(point, point.set || 1);

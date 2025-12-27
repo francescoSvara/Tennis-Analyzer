@@ -77,23 +77,11 @@ async function getPlayerMatches(playerName) {
 
   console.log(`🔍 [Stats] Searching matches for "${playerName}" (lastName: ${lastName})`);
 
-  // ===== STRATEGY 1: Search by winner_name/loser_name (xlsx format) =====
-  const { data: matchesWinner, error: err1 } = await supabase
-    .from('matches')
-    .select('*')
-    .ilike('winner_name', `%${lastName}%`);
-
-  const { data: matchesLoser, error: err2 } = await supabase
-    .from('matches')
-    .select('*')
-    .ilike('loser_name', `%${lastName}%`);
-
-  if (err1) console.error('Error fetching winner matches:', err1.message);
-  if (err2) console.error('Error fetching loser matches:', err2.message);
-
-  // ===== STRATEGY 2: Search by player_id (sofascore format with empty names) =====
+  // ===== STRATEGY 1: Search by player_id directly (primary strategy for matches_new) =====
+  // Note: matches_new uses player1_id/player2_id instead of winner_name/loser_name
+  // First get player IDs from players_new
   const { data: players, error: playerErr } = await supabase
-    .from('players')
+    .from('players_new')
     .select('id, name, full_name')
     .or(`name.ilike.%${lastName}%,full_name.ilike.%${lastName}%`);
   
@@ -103,32 +91,42 @@ async function getPlayerMatches(playerName) {
   const matchingPlayerIds = (players || [])
     .filter(p => playerMatches(p.name, playerName) || playerMatches(p.full_name, playerName))
     .map(p => p.id);
+
+  // Skip legacy winner_name/loser_name search as matches_new doesn't have these columns
+  let matchesWinner = [];
+  let matchesLoser = [];
+  const err1 = null;
+  const err2 = null;
+
+  if (err1) console.error('Error fetching winner matches:', err1.message);
+  if (err2) console.error('Error fetching loser matches:', err2.message);
   
-  // Query by player_id
+  // ===== STRATEGY 2: Search by player_id in matches_new =====
+  // matches_new uses player1_id and player2_id columns
   let matchesByPlayerId = [];
   if (matchingPlayerIds.length > 0) {
-    const { data: homeMatches, error: homeErr } = await supabase
-      .from('matches')
+    const { data: player1Matches, error: p1Err } = await supabase
+      .from('matches_new')
       .select(`
         *,
-        home_player:players!matches_home_player_id_fkey(id, name, full_name),
-        away_player:players!matches_away_player_id_fkey(id, name, full_name)
+        player1:players_new!matches_new_player1_id_fkey(id, name, full_name),
+        player2:players_new!matches_new_player2_id_fkey(id, name, full_name)
       `)
-      .in('home_player_id', matchingPlayerIds);
+      .in('player1_id', matchingPlayerIds);
     
-    const { data: awayMatches, error: awayErr } = await supabase
-      .from('matches')
+    const { data: player2Matches, error: p2Err } = await supabase
+      .from('matches_new')
       .select(`
         *,
-        home_player:players!matches_home_player_id_fkey(id, name, full_name),
-        away_player:players!matches_away_player_id_fkey(id, name, full_name)
+        player1:players_new!matches_new_player1_id_fkey(id, name, full_name),
+        player2:players_new!matches_new_player2_id_fkey(id, name, full_name)
       `)
-      .in('away_player_id', matchingPlayerIds);
+      .in('player2_id', matchingPlayerIds);
     
-    if (homeErr) console.error('Error fetching home matches by ID:', homeErr.message);
-    if (awayErr) console.error('Error fetching away matches by ID:', awayErr.message);
+    if (p1Err) console.error('Error fetching player1 matches:', p1Err.message);
+    if (p2Err) console.error('Error fetching player2 matches:', p2Err.message);
     
-    matchesByPlayerId = [...(homeMatches || []), ...(awayMatches || [])];
+    matchesByPlayerId = [...(player1Matches || []), ...(player2Matches || [])];
   }
 
   // ===== COMBINE ALL MATCHES =====
@@ -154,39 +152,39 @@ async function getPlayerMatches(playerName) {
       isLoser = true;
     }
     
-    // Check by player_id if not found by name (sofascore format)
+    // Check by player_id if not found by name (matches_new format)
     if (!isWinner && !isLoser && matchingPlayerIds.length > 0) {
-      const isHome = matchingPlayerIds.includes(match.home_player_id);
-      const isAway = matchingPlayerIds.includes(match.away_player_id);
+      const isPlayer1 = matchingPlayerIds.includes(match.player1_id);
+      const isPlayer2 = matchingPlayerIds.includes(match.player2_id);
       
-      if (isHome || isAway) {
+      if (isPlayer1 || isPlayer2) {
         const winnerCode = match.winner_code;
-        if (winnerCode === 1 && isHome) isWinner = true;
-        else if (winnerCode === 2 && isAway) isWinner = true;
-        else if (winnerCode === 1 && isAway) isLoser = true;
-        else if (winnerCode === 2 && isHome) isLoser = true;
+        if (winnerCode === 1 && isPlayer1) isWinner = true;
+        else if (winnerCode === 2 && isPlayer2) isWinner = true;
+        else if (winnerCode === 1 && isPlayer2) isLoser = true;
+        else if (winnerCode === 2 && isPlayer1) isLoser = true;
         else {
-          // Fallback: check sets
-          const homeSets = match.home_sets_won || 0;
-          const awaySets = match.away_sets_won || 0;
-          if (homeSets > awaySets && isHome) isWinner = true;
-          else if (awaySets > homeSets && isAway) isWinner = true;
-          else if (homeSets > awaySets && isAway) isLoser = true;
-          else if (awaySets > homeSets && isHome) isLoser = true;
+          // Fallback: check sets (matches_new uses sets_player1/sets_player2)
+          const p1Sets = match.sets_player1 || 0;
+          const p2Sets = match.sets_player2 || 0;
+          if (p1Sets > p2Sets && isPlayer1) isWinner = true;
+          else if (p2Sets > p1Sets && isPlayer2) isWinner = true;
+          else if (p1Sets > p2Sets && isPlayer2) isLoser = true;
+          else if (p2Sets > p1Sets && isPlayer1) isLoser = true;
         }
       }
     }
     
-    // Check home_player/away_player objects from join
+    // Check player1/player2 objects from join (matches_new format)
     if (!isWinner && !isLoser) {
-      const homeName = match.home_player?.name || match.home_player?.full_name;
-      const awayName = match.away_player?.name || match.away_player?.full_name;
+      const p1Name = match.player1?.name || match.player1?.full_name;
+      const p2Name = match.player2?.name || match.player2?.full_name;
       
-      if (homeName && playerMatches(homeName, playerName)) {
+      if (p1Name && playerMatches(p1Name, playerName)) {
         const winnerCode = match.winner_code;
         isWinner = winnerCode === 1;
         isLoser = winnerCode === 2;
-      } else if (awayName && playerMatches(awayName, playerName)) {
+      } else if (p2Name && playerMatches(p2Name, playerName)) {
         const winnerCode = match.winner_code;
         isWinner = winnerCode === 2;
         isLoser = winnerCode === 1;
@@ -512,59 +510,82 @@ async function getPlayerStats(playerName) {
 async function searchPlayers(query, limit = 10) {
   if (!supabase || !query || query.length < 2) return [];
 
-  // Cerca nei winner_name e loser_name
-  const { data: winners } = await supabase
-    .from('matches')
-    .select('winner_name')
-    .ilike('winner_name', `%${query}%`)
+  // Cerca in players_new (schema corretto)
+  const { data: playersData } = await supabase
+    .from('players_new')
+    .select('id, name, full_name')
+    .or(`name.ilike.%${query}%,full_name.ilike.%${query}%`)
     .limit(100);
 
-  const { data: losers } = await supabase
-    .from('matches')
-    .select('loser_name')
-    .ilike('loser_name', `%${query}%`)
-    .limit(100);
-
-  // Conta occorrenze per ogni nome
-  const playerCounts = {};
-  for (const w of winners || []) {
-    if (w.winner_name) {
-      if (!playerCounts[w.winner_name]) {
-        playerCounts[w.winner_name] = { wins: 0, losses: 0 };
-      }
-      playerCounts[w.winner_name].wins++;
-    }
-  }
-  for (const l of losers || []) {
-    if (l.loser_name) {
-      if (!playerCounts[l.loser_name]) {
-        playerCounts[l.loser_name] = { wins: 0, losses: 0 };
-      }
-      playerCounts[l.loser_name].losses++;
+  // DEDUPLICAZIONE: raggruppa giocatori con stesso nome (possono esserci duplicati nel DB)
+  const playersByName = new Map();
+  for (const player of playersData || []) {
+    const displayName = player.full_name || player.name;
+    const normalizedName = displayName.toLowerCase().trim();
+    
+    if (!playersByName.has(normalizedName)) {
+      playersByName.set(normalizedName, {
+        ids: [player.id],
+        name: displayName
+      });
+    } else {
+      playersByName.get(normalizedName).ids.push(player.id);
     }
   }
 
-  // Converti in array con statistiche
-  const players = Object.entries(playerCounts)
-    .filter(([name]) => {
-      const nameLower = name.toLowerCase();
-      const queryLower = query.toLowerCase();
+  // Per ogni giocatore unico, conta wins e losses da matches_new
+  const playerStats = [];
+  for (const [, playerData] of playersByName) {
+    let totalWins = 0;
+    let totalLosses = 0;
+    
+    // Conta match per tutti gli ID associati a questo nome
+    for (const playerId of playerData.ids) {
+      // Conta match come player1
+      const { count: p1Wins } = await supabase
+        .from('matches_new')
+        .select('*', { count: 'exact', head: true })
+        .eq('player1_id', playerId)
+        .eq('winner_code', 1);
       
-      // Ricerca più intelligente: nome completo, nome, cognome
-      return nameLower.includes(queryLower) || 
-             nameLower.split(' ').some(part => part.startsWith(queryLower));
-    })
-    .map(([name, counts]) => {
-      const totalMatches = counts.wins + counts.losses;
-      const winRate = totalMatches > 0 ? counts.wins / totalMatches : 0;
-      return {
-        name,
+      const { count: p1Losses } = await supabase
+        .from('matches_new')
+        .select('*', { count: 'exact', head: true })
+        .eq('player1_id', playerId)
+        .eq('winner_code', 2);
+
+      // Conta match come player2
+      const { count: p2Wins } = await supabase
+        .from('matches_new')
+        .select('*', { count: 'exact', head: true })
+        .eq('player2_id', playerId)
+        .eq('winner_code', 2);
+      
+      const { count: p2Losses } = await supabase
+        .from('matches_new')
+        .select('*', { count: 'exact', head: true })
+        .eq('player2_id', playerId)
+        .eq('winner_code', 1);
+
+      totalWins += (p1Wins || 0) + (p2Wins || 0);
+      totalLosses += (p1Losses || 0) + (p2Losses || 0);
+    }
+
+    const totalMatches = totalWins + totalLosses;
+
+    if (totalMatches > 0) {
+      playerStats.push({
+        name: playerData.name,
         totalMatches,
-        wins: counts.wins,
-        losses: counts.losses,
-        winRate
-      };
-    })
+        wins: totalWins,
+        losses: totalLosses,
+        winRate: totalWins / totalMatches
+      });
+    }
+  }
+
+  // Ordina i risultati
+  const players = playerStats
     .sort((a, b) => {
       const aLower = a.name.toLowerCase();
       const bLower = b.name.toLowerCase();
@@ -609,30 +630,19 @@ async function getHeadToHeadStats(player1, player2) {
 
   console.log(`🎾 [H2H] Searching matches: "${player1}" (${lastName1}) vs "${player2}" (${lastName2})`);
 
-  // ===== STRATEGY 1: Cerca per winner_name/loser_name (xlsx format) =====
-  // Scenario A: player1 winner, player2 loser
-  const { data: matches1wins } = await supabase
-    .from('matches')
-    .select('*')
-    .ilike('winner_name', `%${lastName1}%`)
-    .ilike('loser_name', `%${lastName2}%`);
+  // matches_new non ha winner_name/loser_name, skip legacy search
+  let matches1wins = [];
+  let matches2wins = [];
 
-  // Scenario B: player2 winner, player1 loser  
-  const { data: matches2wins } = await supabase
-    .from('matches')
-    .select('*')
-    .ilike('winner_name', `%${lastName2}%`)
-    .ilike('loser_name', `%${lastName1}%`);
-
-  // ===== STRATEGY 2: Cerca per player_id (sofascore format) =====
-  // Prima trova gli ID dei giocatori
+  // ===== STRATEGY: Cerca per player_id in matches_new =====
+  // Prima trova gli ID dei giocatori in players_new
   const { data: players1 } = await supabase
-    .from('players')
+    .from('players_new')
     .select('id, name, full_name')
     .or(`name.ilike.%${lastName1}%,full_name.ilike.%${lastName1}%`);
 
   const { data: players2 } = await supabase
-    .from('players')
+    .from('players_new')
     .select('id, name, full_name')
     .or(`name.ilike.%${lastName2}%,full_name.ilike.%${lastName2}%`);
 
@@ -648,21 +658,21 @@ async function getHeadToHeadStats(player1, player2) {
   let matchesByPlayerId = [];
   
   if (matchingIds1.length > 0 && matchingIds2.length > 0) {
-    // Player1 home, Player2 away
-    const { data: homeAway1 } = await supabase
-      .from('matches')
-      .select(`*, home_player:players!matches_home_player_id_fkey(id, name), away_player:players!matches_away_player_id_fkey(id, name)`)
-      .in('home_player_id', matchingIds1)
-      .in('away_player_id', matchingIds2);
+    // Player1 as player1_id, Player2 as player2_id
+    const { data: p1p2Matches } = await supabase
+      .from('matches_new')
+      .select(`*, player1:players_new!matches_new_player1_id_fkey(id, name), player2:players_new!matches_new_player2_id_fkey(id, name)`)
+      .in('player1_id', matchingIds1)
+      .in('player2_id', matchingIds2);
 
-    // Player2 home, Player1 away
-    const { data: homeAway2 } = await supabase
-      .from('matches')
-      .select(`*, home_player:players!matches_home_player_id_fkey(id, name), away_player:players!matches_away_player_id_fkey(id, name)`)
-      .in('home_player_id', matchingIds2)
-      .in('away_player_id', matchingIds1);
+    // Player2 as player1_id, Player1 as player2_id
+    const { data: p2p1Matches } = await supabase
+      .from('matches_new')
+      .select(`*, player1:players_new!matches_new_player1_id_fkey(id, name), player2:players_new!matches_new_player2_id_fkey(id, name)`)
+      .in('player1_id', matchingIds2)
+      .in('player2_id', matchingIds1);
 
-    matchesByPlayerId = [...(homeAway1 || []), ...(homeAway2 || [])];
+    matchesByPlayerId = [...(p1p2Matches || []), ...(p2p1Matches || [])];
   }
 
   // ===== COMBINE E DEDUPLICA =====
@@ -680,59 +690,46 @@ async function getHeadToHeadStats(player1, player2) {
   for (const match of allMatches) {
     if (uniqueMatches.has(match.id)) continue;
 
-    // Verifica che ENTRAMBI i giocatori siano nel match
+    // Verifica che ENTRAMBI i giocatori siano nel match (usando player1_id/player2_id)
     const hasPlayer1 = 
-      playerMatches(match.winner_name, player1) || 
-      playerMatches(match.loser_name, player1) ||
-      matchingIds1.includes(match.home_player_id) ||
-      matchingIds1.includes(match.away_player_id);
+      matchingIds1.includes(match.player1_id) ||
+      matchingIds1.includes(match.player2_id);
 
     const hasPlayer2 = 
-      playerMatches(match.winner_name, player2) || 
-      playerMatches(match.loser_name, player2) ||
-      matchingIds2.includes(match.home_player_id) ||
-      matchingIds2.includes(match.away_player_id);
+      matchingIds2.includes(match.player1_id) ||
+      matchingIds2.includes(match.player2_id);
 
     if (!hasPlayer1 || !hasPlayer2) continue;
 
     uniqueMatches.set(match.id, match);
 
-    // Determina chi ha vinto
+    // Determina chi ha vinto usando player1_id/player2_id e winner_code
     let p1Won = false;
     let p2Won = false;
 
-    // Check by winner_name/loser_name first (xlsx format)
-    if (match.winner_name && match.loser_name) {
-      if (playerMatches(match.winner_name, player1) && playerMatches(match.loser_name, player2)) {
-        p1Won = true;
-      } else if (playerMatches(match.winner_name, player2) && playerMatches(match.loser_name, player1)) {
-        p2Won = true;
-      }
-    }
-
-    // Check by player_id + winner_code (sofascore format)
+    // Check by player_id + winner_code (matches_new format)
     if (!p1Won && !p2Won && match.winner_code) {
-      const p1IsHome = matchingIds1.includes(match.home_player_id);
-      const p1IsAway = matchingIds1.includes(match.away_player_id);
+      const p1IsPlayer1 = matchingIds1.includes(match.player1_id);
+      const p1IsPlayer2 = matchingIds1.includes(match.player2_id);
       
-      if (match.winner_code === 1 && p1IsHome) p1Won = true;
-      else if (match.winner_code === 2 && p1IsAway) p1Won = true;
-      else if (match.winner_code === 1 && !p1IsHome) p2Won = true;
-      else if (match.winner_code === 2 && !p1IsAway) p2Won = true;
+      if (match.winner_code === 1 && p1IsPlayer1) p1Won = true;
+      else if (match.winner_code === 2 && p1IsPlayer2) p1Won = true;
+      else if (match.winner_code === 1 && !p1IsPlayer1) p2Won = true;
+      else if (match.winner_code === 2 && !p1IsPlayer2) p2Won = true;
     }
 
-    // Fallback: check sets won
+    // Fallback: check sets won (matches_new uses sets_player1/sets_player2)
     if (!p1Won && !p2Won) {
-      const homeSets = match.home_sets_won || 0;
-      const awaySets = match.away_sets_won || 0;
-      const p1IsHome = matchingIds1.includes(match.home_player_id);
+      const p1Sets = match.sets_player1 || 0;
+      const p2Sets = match.sets_player2 || 0;
+      const p1IsPlayer1 = matchingIds1.includes(match.player1_id);
       
-      if (homeSets > awaySets) {
-        p1Won = p1IsHome;
-        p2Won = !p1IsHome;
-      } else if (awaySets > homeSets) {
-        p1Won = !p1IsHome;
-        p2Won = p1IsHome;
+      if (p1Sets > p2Sets) {
+        p1Won = p1IsPlayer1;
+        p2Won = !p1IsPlayer1;
+      } else if (p2Sets > p1Sets) {
+        p1Won = !p1IsPlayer1;
+        p2Won = p1IsPlayer1;
       }
     }
 
@@ -741,11 +738,11 @@ async function getHeadToHeadStats(player1, player2) {
 
     h2hMatches.push({
       id: match.id,
-      date: match.start_time,
-      tournament: match.tournament_name || match.series,
+      date: match.match_date || match.start_timestamp,
+      tournament: match.tournament_id,
       surface: match.surface,
       winner: p1Won ? player1 : (p2Won ? player2 : 'Unknown'),
-      score: match.score || `${match.home_sets_won || 0}-${match.away_sets_won || 0}`,
+      score: match.score || `${match.sets_player1 || 0}-${match.sets_player2 || 0}`,
       round: match.round
     });
   }

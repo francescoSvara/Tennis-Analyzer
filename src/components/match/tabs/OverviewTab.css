@@ -98,6 +98,7 @@
   gap: var(--space-2);
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .serve-indicator {
@@ -112,6 +113,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .player-rank {

@@ -1,8 +1,8 @@
 # 🧪 Concept Checks Report
 
-> Generato: 2025-12-25T10:40:36.810Z  
+> Generato: 2025-12-27T06:37:25.467Z  
 > Modalità: full  
-> Durata: 161ms
+> Durata: 137ms
 
 ---
 
@@ -12,7 +12,7 @@
 |----------|-------|
 | 🔴 ERROR | 0 |
 | 🟡 WARN | 6 |
-| 🔵 INFO | 30 |
+| 🔵 INFO | 21 |
 
 ---
 
@@ -62,7 +62,7 @@
 - **Match:** `PATTERN_MISSING`
 - **Rimedio:** Implementare: adaptivePolling|backoff|pollingInterval|FAST|SLOW|BOOST
 
-### 🔵 INFO (30)
+### 🔵 INFO (21)
 
 #### `INV-007` - backend/services/calculationQueueWorker.js:158
 
@@ -190,84 +190,21 @@
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/unifiedImporter.js:458
+#### `INV-007` - backend/services/unifiedImporter.js:375
 
 - **Dominio:** backend_services
 - **Problema:** Console.log in production code
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/unifiedImporter.js:462
+#### `INV-007` - backend/services/unifiedImporter.js:379
 
 - **Dominio:** backend_services
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/home/HomePage.jsx:410
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/HomePage.jsx:68
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/HomePage.jsx:70
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/HomePage.jsx:168
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/HomePage.jsx:180
-
-- **Dominio:** frontend_ui
 - **Problema:** Console.log in production code
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
 #### `INV-007` - src/components/match/layout/RightRail.jsx:91
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/match/tabs/OddsTab.jsx:258
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/match/tabs/OddsTab.jsx:263
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/match/tabs/StrategiesTab.jsx:389
-
-- **Dominio:** frontend_ui
-- **Problema:** Console.log in production code
-- **Match:** `console.log(`
-- **Rimedio:** Usare logger strutturato o rimuovere
-
-#### `INV-007` - src/components/MatchGrid.jsx:156
 
 - **Dominio:** frontend_ui
 - **Problema:** Console.log in production code

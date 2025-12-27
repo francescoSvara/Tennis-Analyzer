@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-12-25T10:40:36.810Z",
+  "timestamp": "2025-12-27T06:37:25.467Z",
   "mode": "full",
-  "duration_ms": 161,
+  "duration_ms": 137,
   "summary": {
     "errors": 0,
     "warns": 6,
-    "infos": 30
+    "infos": 21
   },
   "findings": [
     {
@@ -258,7 +258,7 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/unifiedImporter.js",
-      "line": 458,
+      "line": 375,
       "domain": "backend_services",
       "message": "Console.log in production code",
       "match": "console.log(",
@@ -268,58 +268,8 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/unifiedImporter.js",
-      "line": 462,
+      "line": 379,
       "domain": "backend_services",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/home/HomePage.jsx",
-      "line": 410,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/HomePage.jsx",
-      "line": 68,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/HomePage.jsx",
-      "line": 70,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/HomePage.jsx",
-      "line": 168,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/HomePage.jsx",
-      "line": 180,
-      "domain": "frontend_ui",
       "message": "Console.log in production code",
       "match": "console.log(",
       "remediation": "Usare logger strutturato o rimuovere"
@@ -329,46 +279,6 @@
       "ruleId": "INV-007",
       "file": "src/components/match/layout/RightRail.jsx",
       "line": 91,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/match/tabs/OddsTab.jsx",
-      "line": 258,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/match/tabs/OddsTab.jsx",
-      "line": 263,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/match/tabs/StrategiesTab.jsx",
-      "line": 389,
-      "domain": "frontend_ui",
-      "message": "Console.log in production code",
-      "match": "console.log(",
-      "remediation": "Usare logger strutturato o rimuovere"
-    },
-    {
-      "severity": "INFO",
-      "ruleId": "INV-007",
-      "file": "src/components/MatchGrid.jsx",
-      "line": 156,
       "domain": "frontend_ui",
       "message": "Console.log in production code",
       "match": "console.log(",

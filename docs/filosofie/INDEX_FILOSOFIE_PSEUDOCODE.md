@@ -1,0 +1,228 @@
+# 🧭 INDEX FILOSOFIE — PSEUDOCODICE CANONICO (AI-READY)
+
+> Documento eseguibile mentalmente da AI / Copilot.
+> NON è codice reale. NON è documentazione narrativa.
+> È una macchina di orientamento concettuale.
+
+---
+
+## 0️⃣ Bootstrap Concettuale
+
+START Project_Context
+ SET PhilosophyMother = FILOSOFIA_MADRE_TENNIS
+ SET Index = INDEX_FILOSOFIE
+ SET Architecture = MatchBundle_Centric
+
+ ASSERT PhilosophyMother EXISTS
+ ASSERT Index EXISTS
+END
+
+---
+
+## 1️⃣ Regola Costituzionale
+
+RULE Constitutional_Principle
+ IF concept NOT derived_from PhilosophyMother
+ THEN concept IS INVALID
+END
+
+RULE Central_Truth
+ ALL domain_output MUST converge_to MatchBundle
+END
+
+---
+
+## 2️⃣ Entry Point per Umani e AI
+
+ON New_Task(task)
+ READ PhilosophyMother
+ IDENTIFY task.domain
+ IDENTIFY task.layer
+ NAVIGATE Index
+ CONTINUE only_if rules_respected
+END
+
+ON Confusion
+ STOP
+ MARK ARCH_DECISION
+END
+
+---
+
+## 3️⃣ Layer Resolution Engine
+
+FUNCTION resolveLayer(task)
+ IF task.concerns == UI OR UX
+  RETURN UI_LAYER
+
+ IF task.concerns == HTTP OR Routing
+  RETURN API_LAYER
+
+ IF task.concerns == Composition OR Business
+  RETURN SERVICE_LAYER
+
+ IF task.concerns == Calculation OR Metrics
+  RETURN CALCULATION_LAYER
+
+ IF task.concerns == DB OR External_Data
+  RETURN DATA_LAYER
+
+ ELSE
+  STOP AND ARCH_DECISION
+END
+
+---
+
+## 4️⃣ Layer Rules Enforcement
+
+RULE UI_LAYER
+ ALLOW Rendering
+ ALLOW UX_Logic
+ DENY Domain_Logic
+ DENY Calculations
+END
+
+RULE SERVICE_LAYER
+ ALLOW Composition
+ ALLOW Domain_Rules
+ DENY SQL
+ DENY UI_Normalization
+END
+
+RULE CALCULATION_LAYER
+ ALLOW Pure_Functions
+ REQUIRE Deterministic_Output
+ DENY DB_Access
+END
+
+RULE DATA_LAYER
+ ALLOW Queries
+ DENY Interpretation
+ DENY Calculations
+END
+
+---
+
+## 5️⃣ Filosofia Routing Engine
+
+FUNCTION resolvePhilosophy(task)
+ IF task.topic == DATABASE
+  RETURN FILOSOFIA_DB
+
+ IF task.topic == TEMPORAL
+  RETURN FILOSOFIA_TEMPORAL
+
+ IF task.topic == LIVE
+  RETURN FILOSOFIA_LIVE_TRACKING
+
+ IF task.topic == ODDS
+  RETURN FILOSOFIA_ODDS
+
+ IF task.topic == ANALYTICS
+  RETURN FILOSOFIA_CALCOLI
+
+ IF task.topic == STRATEGY
+  RETURN FILOSOFIA_RISK
+
+ ELSE
+  STOP AND ARCH_DECISION
+END
+
+---
+
+## 6️⃣ MatchBundle Guard
+
+RULE MatchBundle_Integrity
+ IF output NOT instance_of MatchBundle
+  THEN REJECT
+END
+
+RULE Frontend_Consumption
+ IF consumer == Frontend
+  REQUIRE MatchBundle
+END
+
+---
+
+## 7️⃣ Data Flow Canonico
+
+FLOW Data_Pipeline
+ SOURCE → RAW_EVENTS
+  → NORMALIZATION
+  → CANONICAL_DB
+  → FEATURE_ENGINE
+  → STRATEGY_ENGINE
+  → MATCHBUNDLE_SNAPSHOT
+  → API / WS
+  → useMatchBundle
+  → UI_RENDER
+END
+
+---
+
+## 8️⃣ Invariants Enforcement Engine
+
+INVARIANT MATCHBUNDLE_ONLY_FE
+INVARIANT BACKEND_INTERPRETS_DATA
+INVARIANT FEATURE_NOT_STRATEGY
+INVARIANT SIGNAL_NOT_PERSISTED
+INVARIANT DATA_QUALITY_BACKEND_ONLY
+
+FOR EACH invariant
+ IF violated
+  THROW ARCH_ERROR
+END
+
+---
+
+## 9️⃣ Copilot Decision Rules
+
+IF need_data
+ GO TO Data_Layer
+
+IF need_calculation
+ GO TO Calculation_Layer
+
+IF need_composition
+ GO TO Service_Layer
+
+IF need_rendering
+ GO TO UI_Layer
+
+IF unsure
+ STOP AND ARCH_DECISION
+
+---
+
+## 🔟 Pre-Code Checklist (Executable)
+
+BEFORE write_code
+ CHECK PhilosophyMother_read
+ CHECK Layer_identified
+ CHECK Philosophy_resolved
+ CHECK Invariants_respected
+ CHECK No_logic_duplication
+END
+
+---
+
+## 1️⃣1️⃣ Evolution Protocol
+
+ON New_Idea
+ WRITE Philosophy_Document
+ UPDATE Index
+ UPDATE Conceptual_Map
+ WRITE Code
+ RUN Concept_Checks
+END
+
+RULE No_Document_No_Code
+ IF document_missing
+  THEN code IS FORBIDDEN
+END
+
+---
+
+END Index_Filosofie_PseudoCode
+ASSERT System_Is_Governed
+ASSERT AI_Is_Aligned

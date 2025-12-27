@@ -90,6 +90,26 @@ function runAllChecks() {
     console.log('\n⚠️ deepPhilosophyCheck.js non trovato');
   }
   
+  // 4. Esegui philosophyEnforcer.js (verifica semantica)
+  const enforcerScript = path.join(ROOT_DIR, 'scripts', 'philosophyEnforcer.js');
+  if (fs.existsSync(enforcerScript)) {
+    console.log('\n📋 Esecuzione philosophyEnforcer.js...');
+    try {
+      const output = execSync('node scripts/philosophyEnforcer.js', { 
+        cwd: ROOT_DIR, 
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      console.log('   ✅ philosophyEnforcer.js completato');
+      results.philosophyEnforcer = { success: true, output };
+    } catch (err) {
+      console.log('   ⚠️ philosophyEnforcer.js completato con violazioni');
+      results.philosophyEnforcer = { success: false, error: err.message };
+    }
+  } else {
+    console.log('\n⚠️ philosophyEnforcer.js non trovato');
+  }
+  
   return results;
 }
 
@@ -118,10 +138,16 @@ function generateSummary(results) {
     console.log('   - docs/TODO_LIST.md (sezione Deep Philosophy)');
   }
   
+  if (results.philosophyEnforcer) {
+    console.log('   - docs/checks/PHILOSOPHY_ENFORCEMENT.md');
+    console.log('   - docs/TODO_LIST.md (sezione Philosophy Enforcement)');
+  }
+  
   console.log('\n🛠️ Comandi per verifiche manuali:');
   console.log('   node scripts/checkConceptualMap.js      # Verifica esistenza file');
   console.log('   node scripts/runConceptChecks.js        # Verifica pattern architetturali');
   console.log('   node scripts/deepPhilosophyCheck.js     # Verifica funzioni vs filosofie');
+  console.log('   node scripts/philosophyEnforcer.js      # Verifica SEMANTICA filosofie');
   console.log('   node scripts/cleanDuplicates.js --dry-run');
   
   console.log('\n═══════════════════════════════════════════════════════════\n');

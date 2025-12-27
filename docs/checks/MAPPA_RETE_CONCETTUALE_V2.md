@@ -1,30 +1,30 @@
 # 🗺️ MAPPA RETE CONCETTUALE  
-## Versione V2.5 – MatchBundle-Centric Architecture + Full Code References
+## Versione V2.7 – MatchBundle-Centric Architecture + Philosophy Enforcement
 
 > **Scopo**: fornire una visione unificata e navigabile dell'architettura concettuale del progetto.  
 > **Stato**: ATTIVA  
 > **Sostituisce**: `MAPPA_RETE_CONCETTUALE.md` (V1 – DEPRECATA)  
-> **Ultimo aggiornamento**: 26 Dicembre 2025  
-> **Novità V2.6**: **Statistics by Period** (ALL, SET1, SET2, SET3...) nel DB e frontend StatsTab con tabs periodo, dataQualityChecker, betDecisionsRepository, Surface Splits, useQualityAssessment hook  
+> **Ultimo aggiornamento**: 27 Dicembre 2025  
+> **Novità V2.7**: Aggiunto philosophyEnforcer.js per verifica SEMANTICA filosofie, dual-file pattern (Concetto + Pseudocode)  
 
 ---
 
 ## 🧭 NAVIGAZIONE RAPIDA
 
 | 📚 Index | 🏛️ Costituzione |
-|----------|-----------------|
+|----------|-----------------|  
 | [INDEX_FILOSOFIE](../filosofie/INDEX_FILOSOFIE.md) | [FILOSOFIA_MADRE](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) |
+| [INDEX_FILOSOFIE_PSEUDOCODE](../filosofie/INDEX_FILOSOFIE_PSEUDOCODE.md) | [FILOSOFIA_MADRE_PSEUDOCODE](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS_PSEUDOCODE.md) |
 
 ### 🎯 Quick Access - File Codice Chiave
 | Area | File | Entry Point |
 |------|------|-------------|
-| **Feature Engine** | [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) | `computeFeatures()` L44 |
-| **Strategy Engine** | [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js) | `evaluateAll()` L39 |
-| **Data Quality** | [`backend/services/dataQualityChecker.js`](../backend/services/dataQualityChecker.js) | `evaluateBundleQuality()` |
-| **Bundle Endpoint** | [`backend/server.js`](../backend/server.js) | L3219-3430 `/api/match/:id/bundle` |
-| **Frontend Hook** | [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` L44 |
-| **Concept Checks** | [`scripts/runConceptChecks.js`](../scripts/runConceptChecks.js) | Validazione architettura |
-
+| **Feature Engine** | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | `computeFeatures()` L353 |
+| **Strategy Engine** | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | `evaluateAll()` L44 |
+| **Data Quality** | [`backend/services/dataQualityChecker.js`](../../backend/services/dataQualityChecker.js) | `evaluateBundleQuality()` |
+| **Bundle Endpoint** | [`backend/server.js`](../../backend/server.js) | L2920-3374 `/api/match/:id/bundle` |
+| **Frontend Hook** | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` L44 |
+| **Philosophy Enforcer** | [`scripts/philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js) | Verifica SEMANTICA filosofie |
 ---
 
 ## 📁 STRUTTURA CODICE COMPLETA
@@ -79,15 +79,18 @@ React-Betfair/
 │       │       └── JournalTab.jsx     # 📝 Tab journal
 │       └── StrategiesPanel.jsx        # 🎯 Panel strategie
 ├── scripts/
-│   ├── checkConceptualMap.js          # 🔍 Check mappa concettuale
-│   ├── runConceptChecks.js            # 🧪 Concept checks architetturali
+│   ├── checkConceptualMap.js          # 🔍 Check mappa concettuale (esistenza file)
+│   ├── runConceptChecks.js            # 🧪 Concept checks architetturali (pattern)
+│   ├── deepPhilosophyCheck.js         # 🔬 Deep check funzioni/export
+│   ├── philosophyEnforcer.js          # 🛡️ Verifica SEMANTICA filosofie ⭐ NUOVO
 │   ├── cleanDuplicates.js             # 🗑️ Pulizia duplicati scrapes
 │   └── generateTodoReport.js          # 🔄 Genera report unificato TODO_LIST
 └── docs/
-    ├── filosofie/                     # 📚 Documenti architetturali
+    ├── filosofie/                     # 📚 Documenti architetturali (Concetto + Pseudocode)
     ├── specs/                         # 📋 Specifiche tecniche
     └── checks/
-        └── MAPPA_RETE_CONCETTUALE_V2.md  # 🗺️ SEI QUI
+        ├── MAPPA_RETE_CONCETTUALE_V2.md  # 🗺️ SEI QUI
+        └── PHILOSOPHY_ENFORCEMENT.md     # 🛡️ Report verifica semantica
 ```
 
 ---
@@ -140,7 +143,7 @@ Nessun dominio **bypassa** il MatchBundle
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementazione**: [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js)
+**Implementazione**: [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
 - Funzioni primarie (dati completi)
 - Funzioni fallback (dati parziali)
 - Gerarchia: powerRankings → statistics → score → odds → rankings
@@ -168,87 +171,132 @@ Nessun dominio **bypassa** il MatchBundle
 
 ## 1️⃣ DOCUMENTI DI RIFERIMENTO (ATTIVI)
 
-### Core Architecture (docs/filosofie/)
+### Core Architecture (docs/filosofie/) - Dual-File Pattern
 
-| Documento | Link | Ruolo | 📁 File Codice Correlati |
-|-----------|------|-------|--------------------------|
-| FILOSOFIA_MADRE | [📄](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Costituzione tecnica | - |
-| FILOSOFIA_DB | [📄](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | DBA / Data Engineer | [`backend/db/`](../backend/db/) |
-| FILOSOFIA_TEMPORAL | [📄](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | Time Architect | [`backend/liveManager.js`](../backend/liveManager.js) |
-| FILOSOFIA_REGISTRY_CANON | [📄](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | Data Architect | [`backend/services/dataNormalizer.js`](../backend/services/dataNormalizer.js) |
-| FILOSOFIA_LINEAGE_VERSIONING | [📄](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | Audit Architect | [`backend/services/matchCardService.js`](../backend/services/matchCardService.js) |
-| FILOSOFIA_OBSERVABILITY | [📄](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Data Quality Engineer | [`backend/utils/logger.js`](../../backend/utils/logger.js) |
-| FILOSOFIA_STATS | [📄](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | Feature & Strategy Engine | [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js), [`backend/strategies/`](../backend/strategies/) |
-| FILOSOFIA_CALCOLI | [📄](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | Feature Library | [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js), [`backend/utils/pressureCalculator.js`](../backend/utils/pressureCalculator.js) |
-| FILOSOFIA_LIVE_TRACKING | [📄](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | Real-time Engineer | [`backend/liveManager.js`](../backend/liveManager.js), [`backend/db/liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js) |
-| FILOSOFIA_ODDS | [📄](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | Quant / Market Data | [`backend/server.js`](../backend/server.js) (endpoints odds) |
-| FILOSOFIA_RISK_BANKROLL | [📄](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | Risk Manager / Quant | [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js) |
-| FILOSOFIA_FRONTEND | [📄](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | Frontend UI/UX | [`src/components/`](../src/components/) |
-| FILOSOFIA_FRONTEND_DATA | [📄](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | FE Data Consumer | [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx) |
-| FILOSOFIA_CONCEPT_CHECKS | [📄](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | Architecture Guardrail | [`scripts/runConceptChecks.js`](../scripts/runConceptChecks.js) |
-| INDEX_FILOSOFIE | [📄](../filosofie/INDEX_FILOSOFIE.md) | Mappa navigazione | - |
+> Ogni filosofia ha DUE file: **Concetto** (narrativo) + **Pseudocode** (regole formali)
+
+| Documento | Concetto | Pseudocode | Ruolo | 📁 File Codice |
+|-----------|----------|------------|-------|----------------|
+| FILOSOFIA_MADRE | [📄](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [📜](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS_PSEUDOCODE.md) | Costituzione tecnica | - |
+| FILOSOFIA_CONCEPT_CHECKS | [📄](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | [📜](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS_PSEUDOCODE.md) | Architecture Guardrail | [`scripts/`](../../scripts/) |
+| FILOSOFIA_DB | [📄](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [📜](../filosofie/10_data_platform/storage/FILOSOFIA_DB_PSEUDOCODE.md) | DBA / Data Engineer | [`backend/db/`](../../backend/db/) |
+| FILOSOFIA_TEMPORAL | [📄](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | [📜](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL_PSEUDOCODE.md) | Time Architect | [`backend/liveManager.js`](../../backend/liveManager.js) |
+| FILOSOFIA_REGISTRY_CANON | [📄](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | [📜](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON_PSEUDOCODE.md) | Data Architect | [`backend/services/dataNormalizer.js`](../../backend/services/dataNormalizer.js) |
+| FILOSOFIA_LINEAGE_VERSIONING | [📄](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | [📜](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING_PSEUDOCODE.md) | Audit Architect | [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
+| FILOSOFIA_OBSERVABILITY | [📄](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | [📜](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY_PSEUDOCODE.md) | Data Quality Engineer | [`backend/services/dataQualityChecker.js`](../../backend/services/dataQualityChecker.js) |
+| FILOSOFIA_PBP_EXTRACTION | [📄](../filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md) | [📜](../filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION_PSEUDOCODE.md) | Tennis Data Engineer | [`backend/utils/pbpExtractor.cjs`](../../backend/utils/pbpExtractor.cjs) |
+| FILOSOFIA_LIVE_TRACKING | [📄](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [📜](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING_PSEUDOCODE.md) | Real-time Engineer | [`backend/liveManager.js`](../../backend/liveManager.js) |
+| FILOSOFIA_ODDS | [📄](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [📜](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS_PSEUDOCODE.md) | Quant / Market Data | [`backend/server.js`](../../backend/server.js) |
+| FILOSOFIA_STATS | [📄](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [📜](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS_PSEUDOCODE.md) | Feature & Strategy Engine | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
+| FILOSOFIA_CALCOLI | [📄](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | [📜](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI_PSEUDOCODE.md) | Feature Library | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
+| FILOSOFIA_RISK_BANKROLL | [📄](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | [📜](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL_PSEUDOCODE.md) | Risk Manager / Quant | [`backend/services/riskEngine.js`](../../backend/services/riskEngine.js) |
+| FILOSOFIA_FRONTEND_DATA | [📄](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [📜](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_PSEUDOCODE.md) | FE Data Consumer | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) |
+| FILOSOFIA_FRONTEND | [📄](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [📜](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND_PSEUDOCODE.md) | Frontend UI/UX | [`src/components/`](../../src/components/) |
+| INDEX_FILOSOFIE | [📄](../filosofie/INDEX_FILOSOFIE.md) | [📜](../filosofie/INDEX_FILOSOFIE_PSEUDOCODE.md) | Mappa navigazione | - |
 
 ### Specifications (docs/specs/)
 
 | Documento | Link | Scopo | 📁 File Codice Correlati |
 |-----------|------|-------|--------------------------|
-| HPI_RESILIENCE | [📄](../specs/HPI_RESILIENCE.md) | Feature pressione/resilienza | [`backend/utils/pressureCalculator.js`](../backend/utils/pressureCalculator.js), [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) |
-| SPEC_FRONTEND_MOTION_UI | [📄](../specs/SPEC_FRONTEND_MOTION_UI.md) | Animazioni e motion | [`src/motion/`](../src/motion/) |
-| SPEC_VALUE_SVG | [📄](../specs/SPEC_VALUE_SVG.md) | Visualizzazioni SVG | [`backend/utils/svgMomentumExtractor.js`](../backend/utils/svgMomentumExtractor.js) |
-| FRONTEND_MIGRATION | [📄](../specs/FRONTEND_MIGRATION.md) | Guida migrazione frontend | [`src/components/`](../src/components/) |
-| DEPRECATION_FRONTEND_UTILS | [📄](../specs/DEPRECATION_FRONTEND_UTILS.md) | Deprecazioni frontend | [`src/utils.js`](../src/utils.js) |
+| HPI_RESILIENCE | [📄](../specs/HPI_RESILIENCE.md) | Feature pressione/resilienza | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js), [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
+| SPEC_FRONTEND_MOTION_UI | [📄](../specs/SPEC_FRONTEND_MOTION_UI.md) | Animazioni e motion | [`src/motion/`](../../src/motion/) |
+| SPEC_VALUE_SVG | [📄](../specs/SPEC_VALUE_SVG.md) | Visualizzazioni SVG | [`backend/utils/svgMomentumExtractor.js`](../../backend/utils/svgMomentumExtractor.js) |
+| FRONTEND_MIGRATION | [📄](../specs/FRONTEND_MIGRATION.md) | Guida migrazione frontend | [`src/components/`](../../src/components/) |
+| DEPRECATION_FRONTEND_UTILS | [📄](../specs/DEPRECATION_FRONTEND_UTILS.md) | Deprecazioni frontend | [`src/utils.js`](../../src/utils.js) |
 
 ### Documenti DEPRECATED
 - tutte le versioni V1 precedenti non elencate sopra
 
 ---
 
-## 🛡️ CI GUARDRAILS – Check Automatici per Filosofie (V2.5)
+## 🛡️ CI GUARDRAILS – Check Automatici per Filosofie (V2.7)
 
-> **Aggiornato**: 25 Dicembre 2025
-> **Totale Regole**: 57 check automatizzati in `rules.v2.json`
-> **Deep Philosophy Check**: 22 errori funzioni/export mancanti
+> **Aggiornato**: 27 Dicembre 2025
+> **Script Principali**: 4 livelli di verifica
+
+### Gerarchia Script di Verifica
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LIVELLO 1: ESISTENZA                                                   │
+│  checkConceptualMap.js - Verifica che i file esistano                   │
+│  Output: ✅ 143+ file verificati                                        │
+├─────────────────────────────────────────────────────────────────────────┤
+│  LIVELLO 2: PATTERN                                                     │
+│  runConceptChecks.js - Verifica pattern architetturali (import, etc)   │
+│  Output: 0 errori, 6 warning                                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│  LIVELLO 3: FUNZIONI                                                    │
+│  deepPhilosophyCheck.js - Verifica funzioni/export dichiarati          │
+│  Output: Funzioni esportate correttamente                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│  LIVELLO 4: SEMANTICA ⭐ NUOVO                                          │
+│  philosophyEnforcer.js - Verifica che il CODICE rispetti le FILOSOFIE  │
+│  Output: 2 errori, 2 warning (27 Dic 2025)                             │
+│                                                                         │
+│  Verifica:                                                              │
+│  - Strutture dati corrette (dataQuality oggetto vs numero)             │
+│  - Schema DB completo (colonne source, version)                         │
+│  - Pattern invarianti (row1=HOME sempre)                                │
+│  - Determinismo (no Math.random)                                        │
+│  - Flussi corretti (frontend non calcola)                               │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
 ### Esecuzione Check
 
 ```bash
-# Verifica architettura e filosofie (57 regole)
-node scripts/runConceptChecks.js
-
-# Verifica mappa concettuale (esistenza file)
+# Livello 1: Esistenza file
 node scripts/checkConceptualMap.js
 
-# Verifica funzioni/export vs filosofie (deep check)
+# Livello 2: Pattern architetturali
+node scripts/runConceptChecks.js
+
+# Livello 3: Funzioni/export
 node scripts/deepPhilosophyCheck.js
 
-# Report unificato (esegue tutti)
+# Livello 4: Verifica SEMANTICA filosofie ⭐
+node scripts/philosophyEnforcer.js
+
+# Tutti insieme
 node scripts/generateTodoReport.js
 ```
 
-### Check per Filosofia
+### Check Semantici per Filosofia (philosophyEnforcer.js)
 
-| Filosofia | ID Check | Severity | Descrizione |
-|-----------|----------|----------|-------------|
-| **LINEAGE_VERSIONING** | `LIN-001` to `LIN-005` | ERROR/WARN | Versioning in featureEngine, strategyEngine, bundle |
-| **TEMPORAL** | `TEMP-001`, `TEMP-002` | WARN | event_time nei repository |
-| **REGISTRY_CANON** | `REG-001`, `REG-002` | ERROR/WARN | players.json, normalizzazione nomi |
-| **OBSERVABILITY** | `OBS-001`, `OBS-002` | ERROR/WARN | dataQuality nel bundle |
-| **STATS** | `STATS-001` to `STATS-004` | ERROR | Feature/Strategy Engine esistenza e funzioni |
-| **CALCOLI** | `CALC-001` to `CALC-003` | ERROR/WARN | MAI NULL, fallback chain |
-| **FRONTEND_DATA** | `FE-001` to `FE-003` | ERROR/WARN | No featureEngine import, useMatchBundle |
-| **FRONTEND** | `FE-DEEP-001` to `FE-DEEP-005` | ERROR | Funzioni backend dichiarate in FILOSOFIA_FRONTEND |
-| **DB** | `DB-001`, `DB-002` | ERROR | Supabase client, getMatchBundle |
-| **LIVE_TRACKING** | `LIVE-001` to `LIVE-004` | WARN | WebSocket/polling, snapshots, adaptive polling |
-| **ODDS** | `ODDS-001`, `ODDS-002` | WARN | Timestamp odds, valueInterpreter |
-| **RISK_BANKROLL** | `RISK-001` to `RISK-005` | ERROR/WARN | riskEngine, edge, stake, exposure |
+| ID | Filosofia | Descrizione | Severity |
+|----|-----------|-------------|----------|
+| **DB-001** | FILOSOFIA_DB | dataQuality DEVE essere oggetto {completeness, freshness, source} | ERROR |
+| **DB-002** | FILOSOFIA_DB | matches_new DEVE avere colonne source, version | ERROR |
+| **DB-003** | FILOSOFIA_DB | Frontend chiama SOLO /api/match/:id/bundle | ERROR |
+| **PBP-001** | FILOSOFIA_PBP | row1=HOME deve essere INVARIANTE (non condizionale) | WARN |
+| **TEMP-001** | FILOSOFIA_TEMPORAL | Tabelle devono avere event_time | WARN |
+| **TEMP-002** | FILOSOFIA_TEMPORAL | Bundle deve avere meta.as_of_time | ERROR |
+| **CALC-001** | FILOSOFIA_CALCOLI | Feature functions MAI null/undefined | ERROR |
+| **CALC-002** | FILOSOFIA_CALCOLI | Calcoli DETERMINISTICI (no random) | WARN |
+| **FE-001** | FILOSOFIA_FRONTEND_DATA | Frontend NON calcola (pressure, edge...) | ERROR |
+| **LIN-001** | FILOSOFIA_LINEAGE | featureEngine export VERSION | ERROR |
+| **LIN-002** | FILOSOFIA_LINEAGE | strategyEngine export VERSION | ERROR |
+| **LIN-003** | FILOSOFIA_LINEAGE | Bundle include meta.versions | ERROR |
+| **OBS-001** | FILOSOFIA_OBSERVABILITY | dataQualityChecker valuta completeness, freshness | WARN |
+| **RISK-001** | FILOSOFIA_RISK | riskEngine verifica edge > 0 | ERROR |
+| **STATS-001** | FILOSOFIA_STATS | Signals NON persistiti come history | WARN |
 
-### Stato Attuale (25 Dic 2025)
+### Stato Attuale (27 Dic 2025)
 
 ```
-🔴 Errori: 12 (LIN-001/002/003, REG-001, DB-002, RISK-002/003/004, FE-DEEP-001/002/003/005)
-🟡 Warning: 10 (LIN-004/005, TEMP-001/002, FE-002/003, ODDS-001, LIVE-003, RISK-001/005)
-ℹ️ Info: 30 (console.log residui)
-📋 Deep Check: 22 errori funzioni/export dichiarati in filosofie
+📊 philosophyEnforcer.js:
+   ✅ Passati:  11
+   ❌ Errori:   2 (DB-001, DB-002)
+   ⚠️ Warning: 2 (PBP-001, TEMP-001)
+
+📊 runConceptChecks.js:
+   ✅ CI PASSED
+   🟡 Warning: 6
+
+📊 checkConceptualMap.js:
+   ✅ 143 file verificati
+   📄 1 file non documentato
 ```
 
 ---
@@ -335,39 +383,41 @@ node scripts/generateTodoReport.js
 
 | File | Righe | Funzione | Endpoint |
 |------|-------|----------|----------|
-| [`backend/server.js`](../backend/server.js) | ~5400 | Server Express principale | - |
-| [`backend/server.js`](../backend/server.js) | L1131-1230 | Lista match con ricerca | `GET /api/matches/db` |
-| [`backend/server.js`](../backend/server.js) | L3219-3430 | Bundle completo | `GET /api/match/:id/bundle` |
-| [`backend/server.js`](../backend/server.js) | L3431-3505 | Trasforma legacy | `transformLegacyMatchToBundle()` |
-| [`backend/server.js`](../backend/server.js) | L3591-3620 | Estrae score | `extractScore()` |
+| [`backend/server.js`](../../backend/server.js) | ~5900 | Server Express principale | - |
+| [`backend/server.js`](../../backend/server.js) | L1048-1170 | Lista match con ricerca | `GET /api/matches/db` |
+| [`backend/server.js`](../../backend/server.js) | L2920-3374 | Bundle completo | `GET /api/match/:id/bundle` |
+| [`backend/server.js`](../../backend/server.js) | L3380-3450 | Trasforma legacy | `transformLegacyMatchToBundle()` |
+| [`backend/server.js`](../../backend/server.js) | L3500-3540 | Estrae score | `extractScore()` |
 
 ### 🧮 Backend - Feature Engine
 
 | File | Funzione | Linea | Descrizione |
 |------|----------|-------|-------------|
-| [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js) | `calculateVolatility()` | L44 | Da powerRankings |
-| | `calculateDominance()` | L92 | Da powerRankings |
-| | `calculateServeDominance()` | L126 | Da statistics |
-| | `calculateBreakProbability()` | L191 | Da statistics |
-| | `calculateRecentMomentum()` | L277 | Da powerRankings |
+| [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | `calculateVolatility()` | L49 | Da powerRankings |
+| | `calculateDominance()` | L97 | Da powerRankings |
+| | `calculateServeDominance()` | L137 | Da statistics |
+| | `calculateBreakProbability()` | L205 | Da statistics |
+| | `calculateRecentMomentum()` | L293 | Da powerRankings |
 | | `computeFeatures()` | L353 | Entry point - Calcola TUTTE le features |
 | | `calculateVolatilityFromScore()` | L523 | Fallback da score |
 | | `calculateDominanceFromScore()` | L554 | Fallback da score |
 | | `calculateDominanceFromOdds()` | L589 | Fallback da odds |
 | | `calculateServeDominanceFromRankings()` | L624 | Fallback da rankings |
 | | `calculateBreakProbabilityFromOddsRankings()` | L649 | Fallback |
+| | `calculatePressureFromScore()` | L694 | Fallback pressure |
+| | `calculateMomentumFromScore()` | L725 | Fallback momentum |
 
 ### 🎯 Backend - Strategy Engine
 
 | File | Funzione | Linea | Descrizione |
 |------|----------|-------|-------------|
-| [`backend/strategies/strategyEngine.js`](../backend/strategies/strategyEngine.js) | `evaluateAll()` | L39 | Entry point - Valuta tutte le strategie |
-| | `evaluateLayWinner()` | L63 | Strategia Lay the Winner |
-| | `evaluateBancaServizio()` | L148 | Strategia Banca Servizio |
-| | `evaluateSuperBreak()` | L222 | Strategia Super Break |
-| | `evaluateTiebreakSpecialist()` | L307 | Strategia Tiebreak Specialist |
-| | `evaluateMomentumSwing()` | L378 | Strategia Momentum Swing |
-| | `getSummary()` | L443 | Riassunto segnali |
+| [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | `evaluateAll()` | L44 | Entry point - Valuta tutte le strategie |
+| | `evaluateLayWinner()` | L68 | Strategia Lay the Winner |
+| | `evaluateBancaServizio()` | L153 | Strategia Banca Servizio |
+| | `evaluateSuperBreak()` | L227 | Strategia Super Break |
+| | `evaluateTiebreakSpecialist()` | L312 | Strategia Tiebreak Specialist |
+| | `evaluateMomentumSwing()` | L383 | Strategia Momentum Swing |
+| | `getSummary()` | L448 | Riassunto segnali |
 
 ### 📦 Backend - Repository & Services
 
@@ -398,13 +448,13 @@ node scripts/generateTodoReport.js
 
 | File | Export | Linea | Descrizione |
 |------|--------|-------|-------------|
-| [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` | L44 | Hook principale fetch + WS + polling |
-| | `useTabData()` | L354 | Estrae dati tab specifico |
-| | `useHeaderData()` | L364 | Estrae header dal bundle |
-| | `useDataQuality()` | L371 | Estrae dataQuality |
+| [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` | L44 | Hook principale fetch + WS + polling |
+| | `useTabData()` | L359 | Estrae dati tab specifico |
+| | `useHeaderData()` | L369 | Estrae header dal bundle |
+| | `useDataQuality()` | L376 | Estrae dataQuality |
 | | `BundleState` | L19 | Enum stati bundle |
-| [`src/hooks/useLiveMatch.jsx`](../src/hooks/useLiveMatch.jsx) | `useLiveMatch()` | - | Hook match live |
-| [`src/hooks/useMatchCard.jsx`](../src/hooks/useMatchCard.jsx) | `useMatchCard()` | - | Hook card match |
+| [`src/hooks/useLiveMatch.jsx`](../../src/hooks/useLiveMatch.jsx) | `useLiveMatch()` | - | Hook match live |
+| [`src/hooks/useMatchCard.jsx`](../../src/hooks/useMatchCard.jsx) | `useMatchCard()` | - | Hook card match |
 
 ### 🖥️ Frontend - Componenti
 
@@ -426,7 +476,7 @@ node scripts/generateTodoReport.js
 ## 4️⃣ DOMINI CONCETTUALI E RESPONSABILITÀ
 
 ### 🗄️ Database & Data Sources
-**Documento**: [FILOSOFIA_DB](../filosofie/10_data_platform/db/FILOSOFIA_DB.md)  
+**Documento**: [FILOSOFIA_DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md)  
 **📁 Codice**: [`backend/db/`](../backend/db/), [`backend/services/matchCardService.js`](../backend/services/matchCardService.js)
 
 Responsabilità:
@@ -441,7 +491,7 @@ Output:
 ---
 
 ### ⚡ Live Tracking
-**Documento**: [FILOSOFIA_LIVE_TRACKING](../filosofie/20_domain_tennis/live_tracking/FILOSOFIA_LIVE_TRACKING.md)  
+**Documento**: [FILOSOFIA_LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md)  
 **📁 Codice**: [`backend/liveManager.js`](../backend/liveManager.js), [`backend/db/liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js)
 
 Responsabilità:
@@ -474,7 +524,7 @@ Output:
 ---
 
 ### 💹 Odds & Market Data
-**Documento**: [FILOSOFIA_ODDS](../filosofie/30_domain_odds_markets/odds/FILOSOFIA_ODDS.md)  
+**Documento**: [FILOSOFIA_ODDS](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md)  
 **📁 Codice**: [`backend/server.js`](../backend/server.js) (endpoints odds)
 
 Responsabilità:
@@ -490,7 +540,7 @@ Output:
 
 ### 🖥️ Frontend Data Consumption
 **Documento**: [FILOSOFIA_FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md)  
-**UI/UX**: [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui_ux/FILOSOFIA_FRONTEND.md)  
+**UI/UX**: [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md)  
 **📁 Codice**: [`src/hooks/useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx), [`src/components/match/`](../src/components/match/)
 
 Responsabilità:
@@ -675,14 +725,14 @@ Se un cambiamento **non è riflesso qui**,
 
 | Filosofia | File Codice Principali |
 |-----------|------------------------|
-| [DB](../filosofie/10_data_platform/db/FILOSOFIA_DB.md) | [`matchRepository.js`](../backend/db/matchRepository.js), [`sofascoreScraper.js`](../backend/scraper/sofascoreScraper.js) |
-| [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [`featureEngine.js`](../backend/utils/featureEngine.js), [`strategyEngine.js`](../backend/strategies/strategyEngine.js), [`pressureCalculator.js`](../backend/utils/pressureCalculator.js) |
-| [LIVE_TRACKING](../filosofie/20_domain_tennis/live_tracking/FILOSOFIA_LIVE_TRACKING.md) | [`liveManager.js`](../backend/liveManager.js), [`liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js) |
-| [ODDS](../filosofie/30_domain_odds_markets/odds/FILOSOFIA_ODDS.md) | [`server.js`](../backend/server.js) L3507-3590, [`OddsTab.jsx`](../src/components/match/tabs/OddsTab.jsx) |
-| [FRONTEND](../filosofie/70_frontend/ui_ux/FILOSOFIA_FRONTEND.md) | [`src/components/match/tabs/`](../src/components/match/tabs/), [`src/motion/`](../src/motion/) |
-| [FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [`useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx), [`MatchPage.jsx`](../src/components/match/MatchPage.jsx) |
-| [CONCEPT_CHECKS](../filosofie/00_foundation/concept_checks/FILOSOFIA_CONCEPT_CHECKS.md) | [`runConceptChecks.js`](../scripts/runConceptChecks.js), [`checkConceptualMap.js`](../scripts/checkConceptualMap.js) |
+| [DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [`matchRepository.js`](../../backend/db/matchRepository.js), [`sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) |
+| [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [`featureEngine.js`](../../backend/utils/featureEngine.js), [`strategyEngine.js`](../../backend/strategies/strategyEngine.js), [`pressureCalculator.js`](../../backend/utils/pressureCalculator.js) |
+| [LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [`liveManager.js`](../../backend/liveManager.js), [`liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) |
+| [ODDS](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [`server.js`](../../backend/server.js) L2920-3374, [`OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) |
+| [FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [`src/components/match/tabs/`](../../src/components/match/tabs/), [`src/motion/`](../../src/motion/) |
+| [FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [`useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`MatchPage.jsx`](../../src/components/match/MatchPage.jsx) |
+| [CONCEPT_CHECKS](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | [`runConceptChecks.js`](../../scripts/runConceptChecks.js), [`checkConceptualMap.js`](../../scripts/checkConceptualMap.js) |
 
 ---
 
-**Fine documento – MAPPA_RETE_CONCETTUALE_V2.3**
+**Fine documento – MAPPA_RETE_CONCETTUALE_V2.6**

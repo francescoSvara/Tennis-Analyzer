@@ -328,7 +328,7 @@ Tutte le tab leggono da qui.
 | Endpoint | File | Descrizione |
 |----------|------|-------------|
 | `GET /api/matches/db` | [`backend/server.js`](../../backend/server.js) L1131-1210 | Lista match dal database Supabase |
-| `GET /api/match/:id/bundle` | [`backend/server.js`](../../backend/server.js) L3219-3423 | Bundle completo per MatchPage |
+| `GET /api/match/:id/bundle` | [`backend/server.js`](../../backend/server.js) L2920-3374 | Bundle completo per MatchPage |
 | `WS /ws/match/:id` | [`backend/server.js`](../../backend/server.js) L4950+ | WebSocket per live updates |
 
 ### Helper Functions Backend
@@ -638,7 +638,59 @@ Il break viene calcolato dalla tabella `point_by_point`:
 | `backend/server.js` L3685-3800 | `normalizePointsForBundle()` | Calcola gameIsBreak |
 | `backend/db/matchRepository.js` L366-425 | `insertPointByPoint()` | Salva serving/scoring |
 | `backend/liveManager.js` L1132-1150 | `syncMatch()` | Fetch + save da SofaScore |
-| `src/components/match/tabs/PointByPointTab.jsx` | Frontend | Mostra break games |
+| `src/components/match/tabs/PointByPointTab.jsx` | Frontend | Mostra break games e break points |
+
+---
+
+## ⚠️ BREAK POINT LOGIC (REGOLA COSTITUZIONALE)
+
+> **Riferimento**: `docs/filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md`
+
+### Definizione Break Point
+
+Un **BREAK POINT** esiste **SOLO** quando:
+1. Il **RECEIVER** ha punteggio 40 o AD
+2. Il **SERVER** NON ha punteggio 40 o AD
+
+**ERRORE COMUNE DA EVITARE**: Mostrare BP quando il SERVER ha 40 o AD. In quel caso NON è un break point - è un game point per il server!
+
+### Implementazione Frontend
+
+```javascript
+// src/components/match/tabs/PointByPointTab.jsx
+const isBreakPointScore = (receiverScore, serverScore) => {
+  const gamePointScores = ['40', 'AD'];
+  
+  // Break point = receiver ha 40/AD E server NON ha 40/AD
+  const receiverHasGamePoint = gamePointScores.includes(receiverScore);
+  const serverHasGamePoint = gamePointScores.includes(serverScore);
+  
+  return receiverHasGamePoint && !serverHasGamePoint;
+};
+
+// Nell'uso:
+const serverScore = server === 'home' ? homeScore : awayScore;
+const receiverScore = server === 'home' ? awayScore : homeScore;
+const isBreakPoint = isBreakPointScore(receiverScore, serverScore);
+```
+
+### Tabella verità Break Point
+
+| Score | Server Score | Receiver Score | È BP? | Spiegazione |
+|-------|-------------|----------------|-------|-------------|
+| 40-0 | 40 | 0 | ❌ NO | Server ha game point |
+| 40-30 | 40 | 30 | ❌ NO | Server ha game point |
+| 40-40 | 40 | 40 | ❌ NO | Deuce, entrambi game point |
+| AD-40 | AD | 40 | ❌ NO | Server ha vantaggio |
+| 0-40 | 0 | 40 | ✅ SÌ | Receiver ha 3 break points |
+| 30-40 | 30 | 40 | ✅ SÌ | Receiver ha break point |
+| 40-AD | 40 | AD | ✅ SÌ | Receiver ha vantaggio/BP |
+
+### Non esiste "Break Point Saved" (BPS)
+
+- Se il server vince il punto dopo essere stato sotto break point → il break point **MAI è esistito veramente** dal punto di vista del risultato finale del game
+- Si traccia solo se il game finisce con BREAK (receiver vince) o HOLD (server vince)
+- Non mostriamo mai "BPS" come evento separato
 
 ---
 

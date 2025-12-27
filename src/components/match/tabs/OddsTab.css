@@ -95,6 +95,8 @@
 .odds-player {
   text-align: center;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .player-header {
@@ -109,6 +111,10 @@
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .trend-up {
@@ -438,6 +444,23 @@
     gap: var(--space-4);
   }
 
+  .odds-tab__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .market-selector {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .market-btn {
+    flex-shrink: 0;
+    font-size: var(--font-size-xs);
+  }
+
   .odds-main-card,
   .stake-card,
   .quick-tickets,
@@ -463,7 +486,21 @@
     align-items: flex-start;
   }
 
+  .stake-buttons {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stake-btn {
+    flex-shrink: 0;
+  }
+
   .tickets-grid {
     grid-template-columns: 1fr;
+  }
+
+  .tab-title {
+    font-size: var(--font-size-lg);
   }
 }

@@ -407,7 +407,6 @@ export default function HomePage({
       }));
       
       setMatches(transformed);
-      console.log(`📋 Loaded ${transformed.length} matches from database${search ? ` (search: "${search}")` : ''}`);
     } catch (err) {
       console.error('Error fetching matches:', err);
       setMatchesError(err.message);
