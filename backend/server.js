@@ -705,11 +705,9 @@ app.get('/api/db-stats', async (req, res) => {
     let totalPossibleFields = 0;     // Totale campi possibili
     let detectedCount = 0;
     
-    // Conta fonti dati (Sofascore vs XLSX)
+    // Conta fonti dati (solo Sofascore)
     const dataSources = {
       sofascore: 0,
-      xlsx: 0,
-      merged: 0,  // Match che hanno ENTRAMBE le fonti (arricchiti)
       unknown: 0
     };
     
@@ -750,28 +748,13 @@ app.get('/api/db-stats', async (req, res) => {
         matchesIncomplete++;
       }
       
-      // Identifica fonte dati - SOFASCORE vs XLSX
+      // Identifica fonte dati - SOFASCORE
       const isSofascore = match.sofascore_url || match.sofascore_id || 
                           match.data_source === 'sofascore' ||
                           (match.raw_json && typeof match.raw_json === 'string' && match.raw_json.includes('sofascore'));
       
-      const isXlsx = match.data_source === 'xlsx_import' || 
-                     match.data_source === 'xlsx_2025' ||
-                     match.data_source === 'csv' ||
-                     match.source === 'xlsx' ||
-                     match.source === 'csv';
-      
-      // Controlla se è un match merged (ha dati da entrambe le fonti)
-      const isMerged = match.data_source === 'merged' || 
-                       (isSofascore && match.xlsx_data) ||
-                       (match.merged_from && Array.isArray(match.merged_from));
-      
-      if (isMerged) {
-        dataSources.merged++;
-      } else if (isSofascore) {
+      if (isSofascore) {
         dataSources.sofascore++;
-      } else if (isXlsx) {
-        dataSources.xlsx++;
       } else {
         dataSources.unknown++;
       }
@@ -850,8 +833,6 @@ app.get('/api/db-stats', async (req, res) => {
         // Extra info per debug
         sources: {
           sofascore: dataSources.sofascore,
-          xlsx: dataSources.xlsx,
-          merged: dataSources.merged,
           unknown: dataSources.unknown
         },
         detected: detectedCount,
@@ -1067,20 +1048,17 @@ app.get('/api/matches/tournaments', async (req, res) => {
  * GET /api/matches/db - Lista match dal database Supabase
  * Usato dalla HomePage per mostrare match reali
  * 
- * UNIFICA due tabelle:
- * - matches_new (via v_matches_with_players) - dati da SofaScore con point-by-point
- * - matches (legacy) - dati XLSX storici
+ * Legge da matches_new (via v_matches_with_players) - dati da SofaScore con point-by-point
  * 
  * Query params:
  * - limit: numero max di match (default 20)
  * - search: ricerca per nome giocatore
  * - surface: filtra per superficie
- * - source: 'new' | 'legacy' | 'all' (default: 'all')
  * - series: filtra per torneo/series (ATP250, Masters 1000, etc.)
  * - dateFrom/dateTo: range di date
  */
 app.get('/api/matches/db', async (req, res) => {
-  const { limit = 20, search, surface, series, dateFrom, dateTo, source = 'all' } = req.query;
+  const { limit = 20, search, surface, series, dateFrom, dateTo } = req.query;
   
   if (!supabaseClient?.supabase) {
     return res.status(503).json({ error: 'Database not available', matches: [] });
@@ -1091,163 +1069,80 @@ app.get('/api/matches/db', async (req, res) => {
     const limitNum = parseInt(limit);
     
     // ===== FETCH FROM v_matches_with_players (matches_new) =====
-    if (source === 'all' || source === 'new') {
-      let newQuery = supabaseClient.supabase
-        .from('v_matches_with_players')
-        .select(`
-          id,
-          player1_name,
-          player2_name,
-          player1_rank,
-          player2_rank,
-          set1_p1, set1_p2, set2_p1, set2_p2, set3_p1, set3_p2, set4_p1, set4_p2, set5_p1, set5_p2,
-          surface,
-          round,
-          tournament_name,
-          tournament_category,
-          start_timestamp,
-          best_of,
-          winner_code,
-          status,
-          data_quality
-        `)
-        .not('player1_name', 'is', null)
-        .not('player2_name', 'is', null);
-      
-      // Search
-      if (search && search.trim()) {
-        const searchTerm = search.trim().toLowerCase();
-        newQuery = newQuery.or(`player1_name.ilike.%${searchTerm}%,player2_name.ilike.%${searchTerm}%`);
-      }
-      
-      // Surface filter
-      if (surface) {
-        newQuery = newQuery.ilike('surface', `%${surface}%`);
-      }
-      
-      // Tournament filter
-      if (series) {
-        newQuery = newQuery.or(`tournament_name.ilike.%${series}%,tournament_category.ilike.%${series}%`);
-      }
-      
-      // Date filters
-      if (dateFrom) newQuery = newQuery.gte('start_timestamp', new Date(dateFrom).getTime() / 1000);
-      if (dateTo) newQuery = newQuery.lte('start_timestamp', new Date(dateTo).getTime() / 1000);
-      
-      newQuery = newQuery.order('start_timestamp', { ascending: false }).limit(limitNum);
-      
-      const { data: newData, error: newError } = await newQuery;
-      if (newError) console.error('Error fetching from v_matches_with_players:', newError);
-      
-      // Transform new format
-      (newData || []).forEach(m => {
-        const sets = [];
-        if (m.set1_p1 !== null && m.set1_p2 !== null) sets.push(`${m.set1_p1}-${m.set1_p2}`);
-        if (m.set2_p1 !== null && m.set2_p2 !== null) sets.push(`${m.set2_p1}-${m.set2_p2}`);
-        if (m.set3_p1 !== null && m.set3_p2 !== null) sets.push(`${m.set3_p1}-${m.set3_p2}`);
-        if (m.set4_p1 !== null && m.set4_p2 !== null) sets.push(`${m.set4_p1}-${m.set4_p2}`);
-        if (m.set5_p1 !== null && m.set5_p2 !== null) sets.push(`${m.set5_p1}-${m.set5_p2}`);
-        
-        allMatches.push({
-          id: m.id,
-          eventId: m.id,
-          homePlayer: m.player1_name || 'Player 1',
-          awayPlayer: m.player2_name || 'Player 2',
-          homeRank: m.player1_rank,
-          awayRank: m.player2_rank,
-          tournament: m.tournament_name || m.tournament_category || 'Tournament',
-          surface: m.surface || 'Unknown',
-          status: m.status || 'finished',
-          score: sets.join(', ') || null,
-          date: m.start_timestamp ? new Date(m.start_timestamp * 1000).toISOString() : null,
-          bestOf: m.best_of,
-          winnerCode: m.winner_code,
-          source: 'sofascore',
-          dataQuality: m.data_quality || 50
-        });
-      });
+    let newQuery = supabaseClient.supabase
+      .from('v_matches_with_players')
+      .select(`
+        id,
+        player1_name,
+        player2_name,
+        player1_rank,
+        player2_rank,
+        set1_p1, set1_p2, set2_p1, set2_p2, set3_p1, set3_p2, set4_p1, set4_p2, set5_p1, set5_p2,
+        surface,
+        round,
+        tournament_name,
+        tournament_category,
+        start_timestamp,
+        best_of,
+        winner_code,
+        status,
+        data_quality
+      `)
+      .not('player1_name', 'is', null)
+      .not('player2_name', 'is', null);
+    
+    // Search
+    if (search && search.trim()) {
+      const searchTerm = search.trim().toLowerCase();
+      newQuery = newQuery.or(`player1_name.ilike.%${searchTerm}%,player2_name.ilike.%${searchTerm}%`);
     }
     
-    // ===== FETCH FROM matches (legacy XLSX) =====
-    if (source === 'all' || source === 'legacy') {
-      let legacyQuery = supabaseClient.supabase
-        .from('matches')
-        .select(`
-          id,
-          winner_name,
-          loser_name,
-          winner_rank,
-          loser_rank,
-          w1, l1, w2, l2, w3, l3, w4, l4, w5, l5,
-          surface,
-          court_type,
-          round_name,
-          series,
-          location,
-          start_time,
-          best_of,
-          winner_code
-        `)
-        .not('winner_name', 'is', null)
-        .not('loser_name', 'is', null)
-        .not('w1', 'is', null);
-      
-      // Search
-      if (search && search.trim()) {
-        const searchTerm = search.trim().toLowerCase();
-        legacyQuery = legacyQuery.or(`winner_name.ilike.%${searchTerm}%,loser_name.ilike.%${searchTerm}%`);
-      }
-      
-      // Surface
-      if (surface) {
-        legacyQuery = legacyQuery.or(`surface.ilike.%${surface}%,court_type.ilike.%${surface}%`);
-      }
-      
-      // Series
-      if (series) {
-        legacyQuery = legacyQuery.ilike('series', `%${series}%`);
-      }
-      
-      // Date filters
-      if (dateFrom) legacyQuery = legacyQuery.gte('start_time', dateFrom);
-      if (dateTo) legacyQuery = legacyQuery.lte('start_time', dateTo);
-      
-      legacyQuery = legacyQuery.order('start_time', { ascending: false }).limit(limitNum);
-      
-      const { data: legacyData, error: legacyError } = await legacyQuery;
-      if (legacyError) console.error('Error fetching from matches:', legacyError);
-      
-      // Transform legacy format (evita duplicati)
-      const existingIds = new Set(allMatches.map(m => m.id));
-      (legacyData || []).forEach(m => {
-        if (existingIds.has(m.id)) return; // Skip duplicates
-        
-        const sets = [];
-        if (m.w1 !== null && m.l1 !== null) sets.push(`${m.w1}-${m.l1}`);
-        if (m.w2 !== null && m.l2 !== null) sets.push(`${m.w2}-${m.l2}`);
-        if (m.w3 !== null && m.l3 !== null) sets.push(`${m.w3}-${m.l3}`);
-        if (m.w4 !== null && m.l4 !== null) sets.push(`${m.w4}-${m.l4}`);
-        if (m.w5 !== null && m.l5 !== null) sets.push(`${m.w5}-${m.l5}`);
-        
-        allMatches.push({
-          id: m.id,
-          eventId: m.id,
-          homePlayer: m.winner_name || 'Player 1',
-          awayPlayer: m.loser_name || 'Player 2',
-          homeRank: m.winner_rank,
-          awayRank: m.loser_rank,
-          tournament: m.series || m.location || m.round_name || 'Tournament',
-          surface: m.surface || m.court_type || 'Unknown',
-          status: 'finished',
-          score: sets.join(', ') || null,
-          date: m.start_time,
-          bestOf: m.best_of,
-          winnerCode: m.winner_code,
-          source: 'xlsx',
-          dataQuality: 30
-        });
-      });
+    // Surface filter
+    if (surface) {
+      newQuery = newQuery.ilike('surface', `%${surface}%`);
     }
+    
+    // Tournament filter
+    if (series) {
+      newQuery = newQuery.or(`tournament_name.ilike.%${series}%,tournament_category.ilike.%${series}%`);
+    }
+    
+    // Date filters
+    if (dateFrom) newQuery = newQuery.gte('start_timestamp', new Date(dateFrom).getTime() / 1000);
+    if (dateTo) newQuery = newQuery.lte('start_timestamp', new Date(dateTo).getTime() / 1000);
+    
+    newQuery = newQuery.order('start_timestamp', { ascending: false }).limit(limitNum);
+    
+    const { data: newData, error: newError } = await newQuery;
+    if (newError) console.error('Error fetching from v_matches_with_players:', newError);
+    
+    // Transform new format
+    (newData || []).forEach(m => {
+      const sets = [];
+      if (m.set1_p1 !== null && m.set1_p2 !== null) sets.push(`${m.set1_p1}-${m.set1_p2}`);
+      if (m.set2_p1 !== null && m.set2_p2 !== null) sets.push(`${m.set2_p1}-${m.set2_p2}`);
+      if (m.set3_p1 !== null && m.set3_p2 !== null) sets.push(`${m.set3_p1}-${m.set3_p2}`);
+      if (m.set4_p1 !== null && m.set4_p2 !== null) sets.push(`${m.set4_p1}-${m.set4_p2}`);
+      if (m.set5_p1 !== null && m.set5_p2 !== null) sets.push(`${m.set5_p1}-${m.set5_p2}`);
+      
+      allMatches.push({
+        id: m.id,
+        eventId: m.id,
+        homePlayer: m.player1_name || 'Player 1',
+        awayPlayer: m.player2_name || 'Player 2',
+        homeRank: m.player1_rank,
+        awayRank: m.player2_rank,
+        tournament: m.tournament_name || m.tournament_category || 'Tournament',
+        surface: m.surface || 'Unknown',
+        status: m.status || 'finished',
+        score: sets.join(', ') || null,
+        date: m.start_timestamp ? new Date(m.start_timestamp * 1000).toISOString() : null,
+        bestOf: m.best_of,
+        winnerCode: m.winner_code,
+        source: 'sofascore',
+        dataQuality: m.data_quality || 50
+      });
+    });
     
     // Sort all by date descending and limit
     allMatches.sort((a, b) => {
@@ -1259,7 +1154,7 @@ app.get('/api/matches/db', async (req, res) => {
     const finalMatches = allMatches.slice(0, limitNum);
     
     const hasSearch = search && search.trim();
-    console.log(`📋 Returned ${finalMatches.length} matches (${allMatches.filter(m => m.source === 'sofascore').length} SofaScore, ${allMatches.filter(m => m.source === 'xlsx').length} XLSX)${hasSearch ? ` (search: "${search}")` : ''}`);
+    console.log(`📋 Returned ${finalMatches.length} matches (SofaScore)${hasSearch ? ` (search: "${search}")` : ''}`);
     res.json({ matches: finalMatches, count: finalMatches.length, hasSearch });
     
   } catch (err) {
@@ -2253,8 +2148,8 @@ app.get('/api/db/matches', async (req, res) => {
       dataSource
     });
     
-    // Calcola la proporzione dati Sofascore vs XLSX per ogni match
-    const calculateDataSources = (m) => {
+    // Calcola la qualità dei dati per ogni match
+    const calculateDataQuality = (m) => {
       // Campi tipici da Sofascore (raw_json con API, player IDs, etc.)
       const sofascoreFields = [
         m.raw_json?.api,           // API data completa
@@ -2262,43 +2157,30 @@ app.get('/api/db/matches', async (req, res) => {
         m.away_player_id,          // Player ID
         m.raw_json?.mapping,       // Mapping data
         m.status_code,             // Status dettagliato
-        m.round_name               // Round info
-      ];
-      
-      // Campi tipici da XLSX (odds, ranking storici, punteggi set dettagliati)
-      const xlsxFields = [
+        m.round_name,              // Round info
         m.odds_b365_winner,        // Quote Bet365
         m.odds_ps_winner,          // Quote Pinnacle
         m.odds_max_winner,         // Quote Max
-        m.odds_avg_winner,         // Quote medie
-        m.winner_rank,             // Ranking xlsx
-        m.loser_rank,              // Ranking xlsx
-        m.w1,                      // Punteggi set xlsx
-        m.l1,
-        m.w2,
-        m.l2
+        m.odds_avg_winner          // Quote medie
       ];
       
       // Conta campi popolati
-      const sofascoreCount = sofascoreFields.filter(f => f !== null && f !== undefined).length;
-      const xlsxCount = xlsxFields.filter(f => f !== null && f !== undefined).length;
-      const totalFields = sofascoreCount + xlsxCount;
+      const populatedCount = sofascoreFields.filter(f => f !== null && f !== undefined).length;
+      const totalFields = sofascoreFields.length;
       
       if (totalFields === 0) {
-        return { sofascore: 50, xlsx: 50, hasBothSources: false };
+        return { sofascore: 50 };
       }
       
       return {
-        sofascore: Math.round((sofascoreCount / totalFields) * 100),
-        xlsx: Math.round((xlsxCount / totalFields) * 100),
-        hasBothSources: sofascoreCount > 0 && xlsxCount > 0
+        sofascore: Math.round((populatedCount / totalFields) * 100)
       };
     };
     
     // Trasforma i dati dal formato DB (snake_case) al formato frontend (camelCase)
     // Colonne view v_matches_full: home_name, away_name, home_country, away_country, home_ranking, away_ranking
     const matches = (dbMatches || []).map(m => {
-      const dataSources = calculateDataSources(m);
+      const dataQuality = calculateDataQuality(m);
       
       // Estrai nomi: prima dal join players, poi da raw_json, poi da winner/loser
       const raw = m.raw_json || {};
@@ -2344,7 +2226,7 @@ app.get('/api/db/matches', async (req, res) => {
         winnerCode: m.winner_code,
         dataCompleteness: m.data_completeness || 50,
         dataSource: m.data_source || 'sofascore',
-        dataSources: dataSources,  // Nuova proprietà con proporzione fonti
+        dataQuality: dataQuality,  // Qualità dati (solo SofaScore)
         source: 'database'
       };
     });
@@ -2352,29 +2234,6 @@ app.get('/api/db/matches', async (req, res) => {
     res.json({ matches, count: matches.length, totalCount, source: 'database' });
   } catch (err) {
     console.error('Error fetching matches:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ============================================
-// MERGE XLSX + SOFASCORE
-// ============================================
-
-// Batch merge - trova e unisce tutti i match xlsx con sofascore
-app.post('/api/db/merge/batch', async (req, res) => {
-  if (!matchRepository) {
-    return res.status(503).json({ error: 'Database not configured' });
-  }
-  try {
-    console.log('🔄 Avvio batch merge xlsx + sofascore...');
-    const result = await matchRepository.batchMergeXlsxData();
-    res.json({ 
-      success: true, 
-      message: `Batch merge completato`,
-      ...result 
-    });
-  } catch (err) {
-    console.error('Error batch merge:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -3093,22 +2952,7 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
         : { data: [] }
     ]);
     
-    // If not found in matches_new, try the legacy matches table (XLSX imported data)
     let finalMatchData = matchData;
-    if (!matchData && supabaseClient?.supabase) {
-      console.log(`📦 Match ${eventId} not in matches_new, trying legacy matches table...`);
-      const { data: legacyMatch } = await supabaseClient.supabase
-        .from('matches')
-        .select('*')
-        .eq('id', parseInt(eventId))
-        .single();
-      
-      if (legacyMatch) {
-        console.log(`✅ Found match ${eventId} in legacy table: ${legacyMatch.winner_name} vs ${legacyMatch.loser_name}`);
-        // Transform legacy format to expected format
-        finalMatchData = transformLegacyMatchToBundle(legacyMatch);
-      }
-    }
     
     // ============================================================
     // FILOSOFIA: Se match non nel DB, SYNC da SofaScore → DB → Serve
@@ -3190,11 +3034,34 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
     // 2. Compute Features using Feature Engine
     const { computeFeatures } = require('./utils/featureEngine');
     
+    // Per le features usiamo i dati ALL (match totale)
+    const allPeriodStats = statisticsData?.ALL || {};
+    const homeStats = {
+      aces: allPeriodStats.p1_aces,
+      doubleFaults: allPeriodStats.p1_double_faults,
+      firstServePct: allPeriodStats.p1_first_serve_pct,
+      firstServePointsWonPct: allPeriodStats.p1_first_serve_won && allPeriodStats.p1_first_serve_total 
+        ? Math.round((allPeriodStats.p1_first_serve_won / allPeriodStats.p1_first_serve_total) * 100) 
+        : undefined,
+      totalPointsWon: allPeriodStats.p1_total_points_won,
+      breakPointsWon: allPeriodStats.p1_break_points_won
+    };
+    const awayStats = {
+      aces: allPeriodStats.p2_aces,
+      doubleFaults: allPeriodStats.p2_double_faults,
+      firstServePct: allPeriodStats.p2_first_serve_pct,
+      firstServePointsWonPct: allPeriodStats.p2_first_serve_won && allPeriodStats.p2_first_serve_total
+        ? Math.round((allPeriodStats.p2_first_serve_won / allPeriodStats.p2_first_serve_total) * 100)
+        : undefined,
+      totalPointsWon: allPeriodStats.p2_total_points_won,
+      breakPointsWon: allPeriodStats.p2_break_points_won
+    };
+    
     const featureInput = {
       powerRankings: momentumData || finalMatchData.momentum || [],
       statistics: {
-        home: statisticsData?.[0] || finalMatchData.statistics?.[0] || {},
-        away: statisticsData?.[1] || finalMatchData.statistics?.[1] || {}
+        home: homeStats || finalMatchData.statistics?.[0] || {},
+        away: awayStats || finalMatchData.statistics?.[1] || {}
       },
       score: extractScore(finalMatchData),
       odds: oddsData || finalMatchData.odds || [],
@@ -3237,7 +3104,8 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
     const normalizedPoints = normalizePointsForBundle(pointsData);
     
     // Build stats first so we can use calculated values in overview
-    const statsTab = buildStatsTab(featureInput.statistics, finalMatchData, extractScore(finalMatchData));
+    // Passa statisticsData direttamente (è già nel formato byPeriod da getMatchStatisticsNew)
+    const statsTab = buildStatsTab(statisticsData, finalMatchData, extractScore(finalMatchData), normalizedPoints);
     
     const tabs = {
       overview: buildOverviewTab(finalMatchData, features, strategySignals, statsTab),
@@ -3508,76 +3376,6 @@ app.get('/api/match/:eventId/bundle', async (req, res) => {
  * Trasforma un match dalla tabella legacy "matches" (XLSX import) 
  * nel formato atteso dal bundle
  */
-function transformLegacyMatchToBundle(legacyMatch) {
-  if (!legacyMatch) return null;
-  
-  // Build score from w1, l1, w2, l2, etc.
-  const sets = [];
-  if (legacyMatch.w1 != null && legacyMatch.l1 != null) {
-    sets.push({ home: legacyMatch.w1, away: legacyMatch.l1 });
-  }
-  if (legacyMatch.w2 != null && legacyMatch.l2 != null) {
-    sets.push({ home: legacyMatch.w2, away: legacyMatch.l2 });
-  }
-  if (legacyMatch.w3 != null && legacyMatch.l3 != null) {
-    sets.push({ home: legacyMatch.w3, away: legacyMatch.l3 });
-  }
-  if (legacyMatch.w4 != null && legacyMatch.l4 != null) {
-    sets.push({ home: legacyMatch.w4, away: legacyMatch.l4 });
-  }
-  if (legacyMatch.w5 != null && legacyMatch.l5 != null) {
-    sets.push({ home: legacyMatch.w5, away: legacyMatch.l5 });
-  }
-  
-  // Determina chi è home e away (nel legacy winner_name è sempre il vincitore)
-  // Per coerenza con il sistema, winner = player1 (home), loser = player2 (away)
-  const homeWon = legacyMatch.winner_code === 1 || legacyMatch.winner_code === 2;
-  
-  return {
-    match: {
-      id: legacyMatch.id,
-      status: { type: 'finished' },
-      startTimestamp: legacyMatch.start_time ? new Date(legacyMatch.start_time).getTime() / 1000 : null,
-      tournament: { name: legacyMatch.series || legacyMatch.location || 'Tournament' },
-      surface: legacyMatch.surface || legacyMatch.court_type,
-      round: legacyMatch.round_name,
-      homeTeam: { name: legacyMatch.winner_name },
-      awayTeam: { name: legacyMatch.loser_name },
-      homeScore: { current: sets.reduce((acc, s) => acc + (s.home > s.away ? 1 : 0), 0) },
-      awayScore: { current: sets.reduce((acc, s) => acc + (s.away > s.home ? 1 : 0), 0) },
-      winnerCode: legacyMatch.winner_code || 1, // Winner è sempre player1 nei dati legacy
-      sets: sets
-    },
-    tournament: {
-      name: legacyMatch.series || legacyMatch.location || 'Tournament',
-      category: legacyMatch.series,
-      surface: legacyMatch.surface || legacyMatch.court_type
-    },
-    player1: {
-      id: null, // Non abbiamo ID nel legacy
-      name: legacyMatch.winner_name,
-      country: null,
-      currentRanking: legacyMatch.winner_rank,
-      rankingAtMatch: legacyMatch.winner_rank
-    },
-    player2: {
-      id: null,
-      name: legacyMatch.loser_name,
-      country: null,
-      currentRanking: legacyMatch.loser_rank,
-      rankingAtMatch: legacyMatch.loser_rank
-    },
-    h2h: null,
-    statistics: [],
-    momentum: [],
-    pointByPoint: [],
-    odds: null,
-    dataSources: ['xlsx_import'],
-    dataQuality: 30, // Qualità base per dati XLSX (no SVG, no PBP)
-    fromLegacy: true
-  };
-}
-
 /**
  * Normalizza odds nel formato atteso dal frontend
  * Frontend si aspetta: { home: { value, trend }, away: { value, trend } }
@@ -3682,29 +3480,37 @@ function normalizePointsForBundle(pointsData) {
     const firstPoint = points[0];
     const lastPoint = points[points.length - 1];
     
-    // Determine Server (dal primo punto)
+    // Determine Server (dal primo punto) - serving indica chi serve
+    // serving=1 → home, serving=2 → away
     let server = 'unknown';
     const rawServer = firstPoint.server || firstPoint.serving;
     if (rawServer === 1 || rawServer === 'home') server = 'home';
     else if (rawServer === 2 || rawServer === 'away') server = 'away';
     
-    // Determine Winner (dal vincitore dell'ultimo punto)
+    // Determine Winner - FILOSOFIA: usa 'scoring' che indica chi ha VINTO il game
+    // scoring=1 → home vince, scoring=2 → away vince
+    // BREAK = serving !== scoring (chi serve perde)
     let gameWinner = null;
-    const rawWinner = lastPoint.point_winner; // 1 or 2
     
-    // Se abbiamo la colonna esplicita 'scoring', usala (legacy table)
-    if (firstPoint.scoring) {
-      if (firstPoint.scoring === 1) gameWinner = 'home';
-      else if (firstPoint.scoring === 2) gameWinner = 'away';
-    } else {
-      // Altrimenti deduci dall'ultimo punto
-      if (rawWinner === 1) gameWinner = 'home';
-      else if (rawWinner === 2) gameWinner = 'away';
+    // Cerca scoring in qualsiasi punto del game (di solito è nell'ultimo)
+    for (const p of points) {
+      if (p.scoring === 1 || p.scoring === '1') {
+        gameWinner = 'home';
+        break;
+      } else if (p.scoring === 2 || p.scoring === '2') {
+        gameWinner = 'away';
+        break;
+      }
     }
     
-    // Determine Break
-    // Break = server noto, winner noto, e diversi
-    const isBreak = (server !== 'unknown' && gameWinner !== null && server !== gameWinner);
+    // Determine Break - FILOSOFIA: serving !== scoring
+    // Calculate break from serving/scoring data
+    const calculatedBreak = (server !== 'unknown' && gameWinner !== null && server !== gameWinner);
+    
+    // If break_occurred is explicitly true in DB (from SVG that detected break), use that
+    // Otherwise use the calculated value
+    const breakOccurredFromDb = points.some(p => p.break_occurred === true);
+    const isBreak = breakOccurredFromDb || calculatedBreak;
     
     // Salva info calcolate
     gameData.set = points[0].set_number || points[0].set;
@@ -3749,9 +3555,13 @@ function normalizePointsForBundle(pointsData) {
       server = gameInfo.gameServer;
     }
     
-    // Determine score - support multiple formats
+    // Determine score - FORMATO HOME-AWAY (non server-receiver)
+    // Nel tennis il punteggio è normalmente server-receiver, ma per chiarezza UI
+    // lo mostriamo sempre come HOME-AWAY (l'ordine dei giocatori nell'header)
+    // p1 = home, p2 = away in DB
     let score = '';
     if (p.score_p1 !== undefined && p.score_p2 !== undefined) {
+      // Mostra sempre HOME-AWAY (p1-p2)
       score = `${p.score_p1}-${p.score_p2}`;
     } else if (p.score_after) {
       score = p.score_after;
@@ -3800,7 +3610,10 @@ function normalizePointsForBundle(pointsData) {
       // Game context (calcolato da serving/scoring)
       gameServer: gameInfo.gameServer || server,
       gameWinner: gameInfo.gameWinner,
-      gameIsBreak: gameInfo.gameIsBreak || false
+      gameIsBreak: gameInfo.gameIsBreak || false,
+      // Preserve momentum value for debugging
+      value: p.value,
+      value_svg: p.value_svg
     };
   });
   
@@ -3943,7 +3756,129 @@ function buildOverviewTab(matchData, features, strategies, statsTab) {
   };
 }
 
-function buildStatsTab(statistics, matchData, score) {
+function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
+  // statisticsData è ora un oggetto { ALL: {...}, SET1: {...}, SET2: {...}, ... }
+  // oppure può essere il vecchio formato { home: {...}, away: {...} }
+  
+  // Rileva se è il nuovo formato (byPeriod) o il vecchio
+  const isNewFormat = statisticsData && (statisticsData.ALL || statisticsData.SET1);
+  
+  // Helper per estrarre stats da un singolo record del DB
+  const extractStatsFromRecord = (record) => {
+    if (!record) return { home: {}, away: {} };
+    return {
+      home: {
+        aces: record.p1_aces || 0,
+        doubleFaults: record.p1_double_faults || 0,
+        firstServePct: record.p1_first_serve_pct || 0,
+        firstServePointsWonPct: record.p1_first_serve_won && record.p1_first_serve_total 
+          ? Math.round((record.p1_first_serve_won / record.p1_first_serve_total) * 100) 
+          : 0,
+        secondServePointsWonPct: record.p1_second_serve_won && record.p1_second_serve_total
+          ? Math.round((record.p1_second_serve_won / record.p1_second_serve_total) * 100)
+          : 0,
+        breakPointsWon: record.p1_break_points_won || 0,
+        breakPointsTotal: record.p1_break_points_total || 0,
+        totalPointsWon: record.p1_total_points_won || 0,
+        winners: record.p1_winners || 0,
+        unforcedErrors: record.p1_unforced_errors || 0
+      },
+      away: {
+        aces: record.p2_aces || 0,
+        doubleFaults: record.p2_double_faults || 0,
+        firstServePct: record.p2_first_serve_pct || 0,
+        firstServePointsWonPct: record.p2_first_serve_won && record.p2_first_serve_total
+          ? Math.round((record.p2_first_serve_won / record.p2_first_serve_total) * 100)
+          : 0,
+        secondServePointsWonPct: record.p2_second_serve_won && record.p2_second_serve_total
+          ? Math.round((record.p2_second_serve_won / record.p2_second_serve_total) * 100)
+          : 0,
+        breakPointsWon: record.p2_break_points_won || 0,
+        breakPointsTotal: record.p2_break_points_total || 0,
+        totalPointsWon: record.p2_total_points_won || 0,
+        winners: record.p2_winners || 0,
+        unforcedErrors: record.p2_unforced_errors || 0
+      }
+    };
+  };
+  
+  // Helper per costruire la struttura tab da stats estratte
+  const buildTabFromStats = (stats) => ({
+    serve: {
+      home: {
+        aces: stats.home.aces,
+        doubleFaults: stats.home.doubleFaults,
+        firstServePct: stats.home.firstServePct,
+        firstServeWonPct: stats.home.firstServePointsWonPct,
+        secondServeWonPct: stats.home.secondServePointsWonPct
+      },
+      away: {
+        aces: stats.away.aces,
+        doubleFaults: stats.away.doubleFaults,
+        firstServePct: stats.away.firstServePct,
+        firstServeWonPct: stats.away.firstServePointsWonPct,
+        secondServeWonPct: stats.away.secondServePointsWonPct
+      }
+    },
+    return: {
+      home: {
+        returnPointsWonPct: 0, // TODO: calcolare
+        breakPointsWon: stats.home.breakPointsWon,
+        breakPointsTotal: stats.home.breakPointsTotal
+      },
+      away: {
+        returnPointsWonPct: 0,
+        breakPointsWon: stats.away.breakPointsWon,
+        breakPointsTotal: stats.away.breakPointsTotal
+      }
+    },
+    points: {
+      home: {
+        totalWon: stats.home.totalPointsWon,
+        winners: stats.home.winners,
+        unforcedErrors: stats.home.unforcedErrors
+      },
+      away: {
+        totalWon: stats.away.totalPointsWon,
+        winners: stats.away.winners,
+        unforcedErrors: stats.away.unforcedErrors
+      }
+    }
+  });
+  
+  if (isNewFormat) {
+    // Nuovo formato con periodi
+    const periods = Object.keys(statisticsData).filter(k => statisticsData[k]);
+    const byPeriod = {};
+    
+    for (const period of periods) {
+      const stats = extractStatsFromRecord(statisticsData[period]);
+      byPeriod[period] = buildTabFromStats(stats);
+    }
+    
+    // Usa ALL come default, fallback al primo periodo disponibile
+    const defaultStats = statisticsData.ALL 
+      ? extractStatsFromRecord(statisticsData.ALL)
+      : extractStatsFromRecord(statisticsData[periods[0]]);
+    
+    const defaultTab = buildTabFromStats(defaultStats);
+    
+    return {
+      ...defaultTab,
+      periods: periods.sort((a, b) => {
+        // Ordina: ALL prima, poi SET1, SET2, etc.
+        if (a === 'ALL') return -1;
+        if (b === 'ALL') return 1;
+        return a.localeCompare(b);
+      }),
+      byPeriod,
+      dataSource: 'statistics'
+    };
+  }
+  
+  // Vecchio formato o dati mancanti
+  const statistics = statisticsData || {};
+  
   // Check if we have real statistics
   const hasRealStats = statistics.home && (
     statistics.home.aces !== undefined ||
@@ -4043,8 +3978,65 @@ function buildStatsTab(statistics, matchData, score) {
   const homeDF = Math.round(homeServiceGames * (isHomeWinner ? 0.25 : 0.35));
   const awayDF = Math.round(awayServiceGames * (!isHomeWinner ? 0.25 : 0.35));
   
-  // Break points - estimate from games lost on serve
-  // If you lost a service game, opponent converted at least 1 break point
+  // FILOSOFIA: Se abbiamo point_by_point reali, calcola break stats corrette
+  if (pointByPoint && pointByPoint.length > 0) {
+    const realBreakStats = calculateBreakStatsFromPointByPoint(pointByPoint);
+    if (realBreakStats) {
+      // Usa le break stats reali invece di quelle stimate casualmente
+      homeBreaksConverted = realBreakStats.home.breakPointsWon;
+      awayBreaksConverted = realBreakStats.away.breakPointsWon;
+      
+      // Usa breakPointsTotal direttamente dalla funzione
+      const homeBreakPointsTotal = realBreakStats.home.breakPointsTotal;
+      const awayBreakPointsTotal = realBreakStats.away.breakPointsTotal;
+      
+      return {
+        serve: {
+          home: {
+            aces: homeAces,
+            doubleFaults: homeDF,
+            firstServePct: homeFirstServe,
+            firstServeWonPct: homeFirstServeWon,
+            secondServeWonPct: homeSecondServeWon
+          },
+          away: {
+            aces: awayAces,
+            doubleFaults: awayDF,
+            firstServePct: awayFirstServe,
+            firstServeWonPct: awayFirstServeWon,
+            secondServeWonPct: awaySecondServeWon
+          }
+        },
+        return: {
+          home: {
+            returnPointsWonPct: Math.round(35 + (gameRatio * 20)),
+            breakPointsWon: homeBreaksConverted,
+            breakPointsTotal: homeBreakPointsTotal
+          },
+          away: {
+            returnPointsWonPct: Math.round(35 + ((1 - gameRatio) * 20)),
+            breakPointsWon: awayBreaksConverted,
+            breakPointsTotal: awayBreakPointsTotal
+          }
+        },
+        points: {
+          home: {
+            totalWon: homePoints,
+            winners: Math.round(homePoints * 0.25),
+            unforcedErrors: Math.round(homePoints * (isHomeWinner ? 0.15 : 0.2))
+          },
+          away: {
+            totalWon: awayPoints,
+            winners: Math.round(awayPoints * 0.25),
+            unforcedErrors: Math.round(awayPoints * (!isHomeWinner ? 0.15 : 0.2))
+          }
+        },
+        dataSource: 'point_by_point'
+      };
+    }
+  }
+  
+  // Fallback: logica estimated
   const homeBreaksConverted = Math.max(0, awayGames - awaySetsWon * 3); // rough estimate
   const awayBreaksConverted = Math.max(0, homeGames - homeSetsWon * 3);
   
@@ -4090,6 +4082,74 @@ function buildStatsTab(statistics, matchData, score) {
       }
     },
     dataSource: 'estimated'
+  };
+}
+
+/**
+ * Calcola le statistiche break dai dati point_by_point reali
+ * FILOSOFIA: serving !== scoring = break, serving === scoring = hold
+ */
+function calculateBreakStatsFromPointByPoint(pointByPoint) {
+  if (!Array.isArray(pointByPoint) || pointByPoint.length === 0) return null;
+  
+  let homeBreakPointsWon = 0;     // Break convertiti da home (away perde servizio)
+  let awayBreakPointsWon = 0;     // Break convertiti da away (home perde servizio)
+  let homeGamesServed = 0;        // Giochi serviti da home
+  let awayGamesServed = 0;        // Giochi serviti da away
+  let homeHolds = 0;             // Servizi tenuti da home
+  let awayHolds = 0;             // Servizi tenuti da away
+  
+  // Conta break e hold da tutti i punti (ogni punto rappresenta un game)
+  for (const p of pointByPoint) {
+    const server = p.serving === 1 ? 'home' : (p.serving === 2 ? 'away' : null);
+    const winner = p.scoring === 1 ? 'home' : (p.scoring === 2 ? 'away' : null);
+    
+    if (server && winner) {
+      if (server === 'home') {
+        homeGamesServed++;
+        if (winner === 'home') {
+          homeHolds++;
+        } else {
+          // Home serve e perde → away converte break
+          awayBreakPointsWon++;
+        }
+      } else {
+        awayGamesServed++;
+        if (winner === 'away') {
+          awayHolds++;
+        } else {
+          // Away serve e perde → home converte break  
+          homeBreakPointsWon++;
+        }
+      }
+    }
+  }
+  
+  // STIMA break points totali: in un match con tanti break, 
+  // ogni game di servizio ha in media 1.5-2 break points
+  // Se ci sono molti break (>70%), stima più break points
+  const homeBreakRate = homeGamesServed > 0 ? awayBreakPointsWon / homeGamesServed : 0;
+  const awayBreakRate = awayGamesServed > 0 ? homeBreakPointsWon / awayGamesServed : 0;
+  
+  // Se break rate > 80% (match molto combattuto), stima ~2 BP per game servito
+  // Se break rate < 20% (molti hold), stima ~1.2 BP per game servito  
+  const homeBpMultiplier = homeBreakRate > 0.8 ? 2.0 : (homeBreakRate > 0.5 ? 1.7 : 1.3);
+  const awayBpMultiplier = awayBreakRate > 0.8 ? 2.0 : (awayBreakRate > 0.5 ? 1.7 : 1.3);
+  
+  const homeBreakPointsTotal = Math.max(homeBreakPointsWon, Math.round(awayGamesServed * homeBpMultiplier));
+  const awayBreakPointsTotal = Math.max(awayBreakPointsWon, Math.round(homeGamesServed * awayBpMultiplier));
+  
+  return {
+    home: {
+      breakPointsWon: homeBreakPointsWon,
+      breakPointsTotal: homeBreakPointsTotal,
+      breakPointsSaved: homeBreakPointsTotal - homeBreakPointsWon
+    },
+    away: {
+      breakPointsWon: awayBreakPointsWon, 
+      breakPointsTotal: awayBreakPointsTotal,
+      breakPointsSaved: awayBreakPointsTotal - awayBreakPointsWon
+    }
   };
 }
 
@@ -4270,6 +4330,9 @@ app.get('/api/match/:eventId/momentum', async (req, res) => {
 /**
  * POST /api/match/:eventId/momentum-svg - Inserisce momentum estratto da SVG DOM
  * Body: { svgHtml: string } oppure { powerRankings: Array }
+ * 
+ * NUOVO: Genera anche dati point-by-point sintetici dai game SVG
+ * Questo permette di visualizzare almeno i game nel PointByPointTab
  */
 app.post('/api/match/:eventId/momentum-svg', async (req, res) => {
   const { eventId } = req.params;
@@ -4305,19 +4368,127 @@ app.post('/api/match/:eventId/momentum-svg', async (req, res) => {
     // Inserisci nel DB con source = 'svg_dom'
     const inserted = await matchRepository.insertPowerRankingsSvg(parseInt(eventId), rankings);
     
-    console.log(`📊 SVG Momentum inserito per match ${eventId}: ${inserted} game`);
+    // FILOSOFIA: Genera point-by-point sintetici SOLO se non esistono già
+    // Se esistono dati SofaScore con serving/scoring corretti, NON sovrascrivere
+    let pbpInserted = 0;
+    const existingPbp = await supabaseClient.supabase
+      .from('point_by_point')
+      .select('id')
+      .eq('match_id', parseInt(eventId))
+      .limit(1);
+    
+    if (!existingPbp.data || existingPbp.data.length === 0) {
+      // Nessun point_by_point esistente, genera sintetici dal SVG
+      pbpInserted = await generatePointByPointFromSvg(parseInt(eventId), rankings);
+      console.log(`📊 SVG Momentum inserito per match ${eventId}: ${inserted} game, ${pbpInserted} punti sintetici generati`);
+    } else {
+      console.log(`📊 SVG Momentum inserito per match ${eventId}: ${inserted} game (point_by_point già esistenti, non sovrascritti)`);
+    }
     
     res.json({ 
       success: true, 
       matchId: eventId, 
       inserted,
-      gamesCount: rankings.length 
+      gamesCount: rankings.length,
+      pointByPointGenerated: pbpInserted,
+      pointByPointPreserved: existingPbp.data?.length > 0
     });
   } catch (err) {
     console.error('Error inserting SVG momentum:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * Genera dati point-by-point sintetici dai power rankings SVG
+ * Crea un "punto finale" per ogni game che rappresenta il risultato
+ * 
+ * @param {number} matchId - ID del match
+ * @param {Array} rankings - Power rankings estratti da SVG
+ * @returns {number} Numero di punti inseriti
+ */
+async function generatePointByPointFromSvg(matchId, rankings) {
+  if (!supabaseClient?.supabase || !rankings || rankings.length === 0) return 0;
+  
+  const supabase = supabaseClient.supabase;
+  
+  // Prima elimina vecchi punti per questo match
+  await supabase.from('point_by_point')
+    .delete()
+    .eq('match_id', matchId);
+  
+  // Raggruppa per set per calcolare i punteggi dei game
+  const setMap = new Map();
+  for (const r of rankings) {
+    const setNum = r.set || 1;
+    if (!setMap.has(setNum)) {
+      setMap.set(setNum, []);
+    }
+    setMap.get(setNum).push(r);
+  }
+  
+  const points = [];
+  
+  for (const [setNum, games] of setMap) {
+    // Ordina per game number
+    games.sort((a, b) => (a.game || 1) - (b.game || 1));
+    
+    let homeGames = 0;
+    let awayGames = 0;
+    
+    for (const g of games) {
+      const gameNum = g.game || 1;
+      const value = g.value || 0;
+      
+      // Determina chi ha vinto il game dal valore momentum
+      // value > 0 = home winning, value < 0 = away winning
+      const gameWinner = value >= 0 ? 'home' : 'away';
+      
+      // Determina il server (alterna ogni game, home inizia game dispari nel set 1)
+      const homeServesFirst = setNum % 2 === 1;
+      const isOddGame = gameNum % 2 === 1;
+      const server = homeServesFirst ? (isOddGame ? 'home' : 'away') : (isOddGame ? 'away' : 'home');
+      
+      // Aggiorna punteggio
+      if (gameWinner === 'home') homeGames++;
+      else awayGames++;
+      
+      // Determina se è un break
+      const isBreak = server !== gameWinner;
+      
+      // Crea un punto "sintetico" che rappresenta la fine del game
+      // Usa lo schema corretto della tabella point_by_point
+      points.push({
+        match_id: matchId,
+        set_number: setNum,
+        game_number: gameNum,
+        point_index: 1,  // Un solo punto per game (sintetico)
+        home_point: 'G', // Game point
+        away_point: 'G',
+        score_before: `${homeGames - (gameWinner === 'home' ? 1 : 0)}-${awayGames - (gameWinner === 'away' ? 1 : 0)}`,
+        score_after: `${homeGames}-${awayGames}`,
+        point_winner: gameWinner,
+        serving: server === 'home' ? 1 : 2,
+        scoring: gameWinner === 'home' ? 1 : 2,
+        is_break_point: isBreak,
+        is_ace: false,
+        is_double_fault: false,
+        point_description: isBreak ? 'Break' : 'Hold'
+      });
+    }
+  }
+  
+  if (points.length > 0) {
+    const { error } = await supabase.from('point_by_point').insert(points);
+    if (error) {
+      console.error('Error inserting synthetic PbP:', error.message);
+      return 0;
+    }
+    console.log(`Generated ${points.length} synthetic point-by-point records from SVG for match ${matchId}`);
+  }
+  
+  return points.length;
+}
 
 /**
  * GET /api/match/:eventId/statistics - Solo statistiche match (lazy load)

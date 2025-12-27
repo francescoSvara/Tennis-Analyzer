@@ -1080,8 +1080,8 @@
   letter-spacing: 0.3px;
 }
 
-/* Badge per match xlsx (storici) */
-.xlsx-badge {
+/* Badge per match SVG (con dati momentum) */
+.svg-badge {
   position: absolute;
   top: 0;
   right: 0;
@@ -1096,48 +1096,13 @@
   font-weight: 600;
 }
 
-.xlsx-icon {
+.svg-icon {
   font-size: 0.8rem;
 }
 
-.xlsx-text {
+.svg-text {
   text-transform: uppercase;
   letter-spacing: 0.3px;
-}
-
-/* Badge per match merged (sofascore + xlsx) */
-.merged-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 0 var(--home-radius) 0 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.65rem;
-  font-weight: 600;
-}
-
-.merged-icon {
-  font-size: 0.8rem;
-}
-
-.merged-text {
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-/* Card xlsx con bordo diverso */
-.match-card.xlsx-card {
-  border-color: rgba(99, 102, 241, 0.3);
-}
-
-.match-card.xlsx-card:hover {
-  border-color: rgba(99, 102, 241, 0.6);
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
 }
 
 /* Stile per superficie nel header */
@@ -1226,7 +1191,7 @@
 
 /* ============================================
    DATA SOURCES BAR IN MATCH CARD
-   Mostra proporzione dati Sofascore (blu) vs XLSX (verde)
+   Mostra qualità dati (SofaScore + SVG momentum)
    ============================================ */
 
 .match-data-sources {
@@ -1251,7 +1216,7 @@
   background: linear-gradient(90deg, #3b82f6, #60a5fa);
 }
 
-.source-fill.xlsx {
+.source-fill.svg-momentum {
   background: linear-gradient(90deg, #10b981, #34d399);
 }
 
@@ -1266,7 +1231,7 @@
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
-.data-sources-bar:hover .source-fill.xlsx {
+.data-sources-bar:hover .source-fill.svg-momentum {
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
 }
 

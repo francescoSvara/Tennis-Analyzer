@@ -58,23 +58,22 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ---
 
-## ?? API Principali
+## 🔌 API Principali
 
 | Endpoint | Descrizione |
 |----------|-------------|
 | `/api/match/:id/bundle` | MatchBundle completo |
-| `/api/matches/db` | Lista match (SofaScore + XLSX) |
+| `/api/matches/db` | Lista match (SofaScore) |
 | `/api/player/:id` | Profilo giocatore |
 | `/api/live` | Match live + WebSocket |
 
 ---
 
-## ??? Database (Supabase)
+## 🗄️ Database (Supabase)
 
 | Tabella | Contenuto |
 |---------|-----------|
 | `matches_new` | Match SofaScore |
-| `matches` | Match XLSX legacy |
 | `match_statistics_new` | Statistiche |
 | `match_power_rankings_new` | Momentum |
 | `match_odds` | Quote |
@@ -82,30 +81,30 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ---
 
-## ?? Struttura
+## 📂 Struttura
 
 ```
-+-- backend/
-�   +-- server.js              # API + bundle
-�   +-- services/              # Business logic
-�   +-- strategies/            # 5 strategie trading
-�   +-- utils/featureEngine.js # Feature calculations
-+-- src/
-�   +-- components/            # React UI
-�   +-- hooks/useMatchBundle.jsx
-�   +-- motion/                # Animations
-+-- docs/filosofie/            # Architecture docs
+├── backend/
+│   ├── server.js              # API + bundle
+│   ├── services/              # Business logic
+│   ├── strategies/            # 5 strategie trading
+│   ├── utils/featureEngine.js # Feature calculations
+├── src/
+│   ├── components/            # React UI
+│   ├── hooks/useMatchBundle.jsx
+│   ├── motion/                # Animations
+├── docs/filosofie/            # Architecture docs
 ```
 
 ---
 
-## ✅ Completato v3.0 (Dicembre 2025)
+## ✅ Completato v3.1 (Dicembre 2025)
 
 ### Core
 - **MatchBundle endpoint** - Single API per match data
 - **Feature Engine** - Calcolo con fallback completo + dataSource flags per trasparenza origine dati
 - **Strategy Engine** - 5 strategie backend (LayTheWinner, BancaServizio, SuperBreak, ValueBetting, MomentumShift)
-- **Dual Source** - SofaScore + XLSX unificati
+- **SofaScore + SVG** - Fonti dati unificate (rimosso supporto XLSX)
 - **dataQuality scoring** per ogni match
 - **Logger utility** - Logging strutturato backend (`backend/utils/logger.js`)
 
@@ -117,11 +116,11 @@ Calcola features da dati disponibili (score, odds, rankings):
 - Motion System (Framer Motion)
 
 ### Data
-- Point-by-point con fallback legacy
+- Point-by-point completo
 - Normalizzazione odds/points
 - Stats stimate da score quando mancano
 
-### Docs (25 Dic 2025)
+### Docs (26 Dic 2025)
 - **10 documenti filosofia** riorganizzati in cartelle gerarchiche:
   - `00_foundation/` - MADRE, CONCEPT_CHECKS
   - `10_data_platform/` - DB, TEMPORAL, REGISTRY_CANON, LINEAGE_VERSIONING, OBSERVABILITY
@@ -168,6 +167,11 @@ Calcola features da dati disponibili (score, odds, rankings):
 - **useMatchCard** - Rimosso hook `usePlayer` inutilizzato
 - **Errori: 20 → 0** | **Warning: 25 → 0**
 
+### v3.1 (26 Dic 2025) - Cleanup XLSX
+- Rimosso supporto XLSX legacy
+- Solo SofaScore + SVG come fonti dati
+- Database pulito da dati legacy
+
 ### v3.0.1 (25 Dic 2025) - Pulizia & Documentazione
 - Riorganizzazione filosofie in cartelle gerarchiche
 - FILOSOFIA_CALCOLI con tassonomia completa calcoli
@@ -185,14 +189,13 @@ Calcola features da dati disponibili (score, odds, rankings):
 ### v2.0 (Nov 2025)
 - Nuovo schema DB
 - Alias giocatori
-- Import XLSX
 
 ### v1.0 (Ott 2025)
 - MVP SofaScore scraping
 
 ---
 
-## ?? Docs
+## 📖 Docs
 
 - [TODO List](docs/TODO_LIST.md)
 - [Filosofie](docs/filosofie/)
@@ -200,4 +203,4 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ---
 
-**Made with ?? for tennis analytics**
+**Made with ❤️ for tennis analytics**

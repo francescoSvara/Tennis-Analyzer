@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS raw_events (
   id BIGSERIAL PRIMARY KEY,
   
   -- Source identification
-  source_type VARCHAR(20) NOT NULL,           -- 'sofascore', 'xlsx'
+  source_type VARCHAR(20) NOT NULL,           -- 'sofascore', 'svg_momentum'
   source_entity VARCHAR(30) NOT NULL,         -- 'match', 'player', 'tournament', 'stats', 'odds', 'points'
-  source_key TEXT NOT NULL,                   -- eventId sofascore or xlsx row key
+  source_key TEXT NOT NULL,                   -- eventId sofascore or match identifier
   
   -- Original payload (never modified)
   payload_json JSONB NOT NULL,
@@ -266,12 +266,29 @@ $$ LANGUAGE plpgsql;
 
 -- Drop old H2H trigger if exists and create new lightweight one
 DROP TRIGGER IF EXISTS trg_update_h2h ON matches_new;
+DROP TRIGGER IF EXISTS trg_enqueue_match_calculations ON matches_new;
 
-CREATE TRIGGER trg_enqueue_match_calculations
-AFTER INSERT OR UPDATE ON matches_new
-FOR EACH ROW
-WHEN (NEW.player1_id IS NOT NULL AND NEW.player2_id IS NOT NULL)
-EXECUTE FUNCTION enqueue_match_calculations();
+-- Idempotent trigger creation (safe to run multiple times)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgrelid = 'public.matches_new'::regclass
+      AND tgname = 'trg_enqueue_match_calculations'
+      AND NOT tgisinternal
+  ) THEN
+    CREATE TRIGGER trg_enqueue_match_calculations
+    AFTER INSERT OR UPDATE ON matches_new
+    FOR EACH ROW
+    WHEN (NEW.player1_id IS NOT NULL AND NEW.player2_id IS NOT NULL)
+    EXECUTE FUNCTION enqueue_match_calculations();
+    
+    RAISE NOTICE 'Trigger trg_enqueue_match_calculations created';
+  ELSE
+    RAISE NOTICE 'Trigger trg_enqueue_match_calculations already exists, skipping';
+  END IF;
+END;
+$$;
 
 -- ============================================================================
 -- 6. FUNCTION TO BUILD MATCH CARD SNAPSHOT

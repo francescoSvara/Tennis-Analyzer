@@ -337,7 +337,6 @@ Tutte le tab leggono da qui.
 |----------|------|-------------|
 | `extractScore()` | [`backend/server.js`](../../backend/server.js) L3591-3640 | Estrae score da matchData (supporta player1/player2 e home/away) |
 | `buildSetsFromDbFields()` | [`backend/server.js`](../../backend/server.js) L3630-3640 | Costruisce sets da campi DB (set1_p1, set1_p2, etc.) |
-| `transformLegacyMatchToBundle()` | [`backend/server.js`](../../backend/server.js) L3437-3505 | Trasforma match legacy (XLSX) in formato bundle |
 | `normalizeOddsForBundle()` | [`backend/server.js`](../../backend/server.js) L3507-3590 | Normalizza odds per frontend |
 | `buildOverviewTab()` | [`backend/server.js`](../../backend/server.js) L3650+ | Costruisce dati per tabs.overview |
 

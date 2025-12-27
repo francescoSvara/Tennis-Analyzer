@@ -1,0 +1,61 @@
+OBIETTIVO: Fix definitivo estrazione TABELLONE (score games/set) + PBP, senza più ambiguità.
+Fonte raw: usare ESCLUSIVAMENTE il file /mnt/data/pbp code (HTML/DOM già catturato).
+Match: sofascore eventId=14968724 (C. Norrie vs V. Vacherot) e risultato finale preso dal match endpoint / pagina (ground truth).
+NON fare fetch live durante parsing: DB-first.
+
+BUG DA ELIMINARE PER SEMPRE:
+- confusione tra ordine visivo (ROW1/ROW2) e semantica (HOME/AWAY, SERVER/RECEIVER)
+- confusione sull’ordine cronologico dei blocchi (SofaScore spesso mostra dal più recente al più vecchio)
+- confusione se lo “set/game score” del blocco è PRIMA o DOPO il game
+- regressione: non deve ricomparire mai più (aggiungere test + guardrails)
+
+REGOLE HARD (INVARIANTI):
+1) Parsing raw: estrai SOLO ROW1/ROW2 (ordine visivo), senza interpretare HOME/AWAY.
+   - extractPointsFromBlock() deve produrre: row1_points[], row2_points[], server_slug (se presente), gameScoreA, gameScoreB (numeri), setLabel.
+   - Nessuna logica tennis in questa funzione: ZERO winner, ZERO break, ZERO swap.
+
+2) Canon DB: il punteggio deve essere SERVER–RECEIVER (non HOME-AWAY, non AWAY-HOME).
+
+3) Resolver semantico (UNICO punto dove si interpreta):
+   - Mappa ROW1/ROW2 ai playerId tramite match header / registry (nome/slug).
+   - Determina chi è il server del GAME (server_slug del blocco).
+   - Converti i punti da ROW-player → SERVER/RECEIVER:
+       se server == playerRow1 => serverPoints=row1, receiverPoints=row2
+       se server == playerRow2 => serverPoints=row2, receiverPoints=row1
+   - Da qui puoi calcolare winnerPoint/winnerGame e break (winnerGame != server).
+
+4) ORDINE BLOCCHI + SEMANTICA gameScore:
+   I blocchi nel file possono essere in reverse order (più recente → più vecchio) e il gameScore può essere:
+     - score PRIMA del game
+     - score DOPO il game
+   NON assumere.
+   Implementa un “SemanticResolver” che prova automaticamente queste 4 ipotesi:
+     A) reverse + score AFTER
+     B) reverse + score BEFORE
+     C) forward + score AFTER
+     D) forward + score BEFORE
+
+   Per ogni ipotesi ricostruisci la sequenza games del set e ottieni set-final (es. 6-4 / 7-6 ecc).
+   SCEGLI l’ipotesi che combacia con la ground truth del match (winner e set score finale).
+   Se nessuna ipotesi combacia: marca set come ambiguous e NON inventare.
+
+5) Ground truth (checksum):
+   - Usa il risultato finale della partita (winner + set score) solo per validare/scelgliere ipotesi, NON per “aggiustare” punti.
+   - Se i punti estratti non permettono ricostruzione completa, salva comunque raw + marca missing.
+
+6) Output finale da salvare nel DB (SERVER–RECEIVER):
+   Per ogni point event salva:
+     match_id, set_no, game_no, point_index,
+     server_player_id, receiver_player_id,
+     server_score (0/15/30/40/A), receiver_score (0/15/30/40/A),
+     raw_row1_score, raw_row2_score,
+     raw_block_index, semantic_mode (A/B/C/D), is_break, game_winner_player_id
+
+7) Anti-regressione (OBBLIGATORIO):
+   - Aggiungi unit test: per questo match (14968724) la scelta semantic_mode deve essere stabile (sempre la stessa) e il set score finale deve combaciare col risultato reale.
+   - Aggiungi test che fallisce se qualcuno reintroduce assunzioni tipo “row1=home/away” o calcola winner prima del remapping.
+
+CONSEGNA:
+- Modifica le funzioni esistenti per rispettare queste regole.
+- Mostrami esattamente: dove leggi /mnt/data/pbp code, come splitti in set, come estrai blocks, come calcoli semantic_mode, e come produci eventi SERVER–RECEIVER.
+- Non fare refactor creativo: implementa solo il necessario per la correzione e i test.

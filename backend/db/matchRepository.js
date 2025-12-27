@@ -99,19 +99,24 @@ async function upsertPlayer(player) {
   if (!checkSupabase()) return null;
   if (!player || !player.id) return null;
   
+  // Per players_new, usa sofascore_id per trovare/creare e id come PK autoincrement
+  // Ma siccome matches_new usa id come FK, dobbiamo usare sofascore_id come id
   const playerData = {
-    id: player.id,
+    id: player.id,  // Usa sofascore_id come PK
+    sofascore_id: player.id,
     name: player.name || player.fullName || player.shortName || 'Unknown',
     full_name: player.fullName || player.name || null,
-    short_name: player.shortName || null,
+    first_name: player.firstName || null,
+    last_name: player.lastName || null,
     slug: player.slug || null,
-    country_alpha2: player.country?.alpha2 || player.countryAlpha2 || null,
+    country_code: player.country?.alpha2 || player.countryAlpha2 || null,
     country_name: player.country?.name || player.countryName || null,
-    current_ranking: player.ranking || player.currentRanking || null
+    current_ranking: player.ranking || player.currentRanking || null,
+    updated_at: new Date().toISOString()
   };
 
   const { data, error } = await supabase
-    .from('players')
+    .from('players_new')
     .upsert(playerData, { onConflict: 'id' })
     .select()
     .single();
@@ -135,16 +140,20 @@ async function upsertTournament(tournament) {
   if (!tournament || !tournament.id) return null;
 
   const tournamentData = {
-    id: tournament.id,
+    id: tournament.id,  // Usa sofascore_id come PK
+    sofascore_id: tournament.id,
     name: tournament.name || 'Unknown Tournament',
+    short_name: tournament.shortName || null,
     slug: tournament.slug || null,
     category: tournament.category?.name || tournament.category || null,
-    ground_type: tournament.groundType || null,
-    country: tournament.country?.name || tournament.country || null
+    surface: tournament.groundType || null,
+    country_code: tournament.country?.alpha2 || null,
+    country_name: tournament.country?.name || tournament.country || null,
+    updated_at: new Date().toISOString()
   };
 
   const { data, error } = await supabase
-    .from('tournaments')
+    .from('tournaments_new')
     .upsert(tournamentData, { onConflict: 'id' })
     .select()
     .single();
@@ -226,39 +235,54 @@ async function insertMatch(matchData, sourceUrl = null) {
       }
     }
 
+    // Costruisci il punteggio nel formato "6-4 7-5"
+    const scoreStr = buildScoreString(matchData.homeScore, matchData.awayScore);
+    
+    // Estrai punteggi dei set
+    const homeScore = matchData.homeScore || {};
+    const awayScore = matchData.awayScore || {};
+    
     const match = {
       id: eventId,
-      slug: matchData.slug || null,
-      home_player_id: homePlayer?.id || null,
-      away_player_id: awayPlayer?.id || null,
-      home_seed: homePlayer?.seed || null,
-      away_seed: awayPlayer?.seed || null,
+      // Colonne matches_new (nuovo schema)
+      player1_id: homePlayer?.id || null,
+      player2_id: awayPlayer?.id || null,
+      winner_id: matchData.winnerCode === 1 ? homePlayer?.id : (matchData.winnerCode === 2 ? awayPlayer?.id : null),
       tournament_id: tournament?.id || null,
-      round_name: matchData.roundInfo?.name || matchData.round || null,
-      start_time: matchData.startTimestamp 
-        ? new Date(matchData.startTimestamp * 1000).toISOString() 
+      match_date: matchData.startTimestamp 
+        ? new Date(matchData.startTimestamp * 1000).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      match_time: matchData.startTimestamp 
+        ? new Date(matchData.startTimestamp * 1000).toISOString().split('T')[1].substring(0, 8)
         : null,
-      status_code: matchData.status?.code || null,
-      status_type: matchData.status?.type || null,
-      status_description: matchData.status?.description || null,
+      start_timestamp: matchData.startTimestamp || null,
+      round: matchData.roundInfo?.name || matchData.round || null,
+      best_of: matchData.tournament?.tennisMatchFormat?.matchBestOf || 3,
+      surface: matchData.groundType || matchData.tournament?.groundType || null,
+      status: matchData.status?.type || 'finished',
       winner_code: matchData.winnerCode || null,
-      // IMPORTANT: Always populate winner_name/loser_name for statistics queries
-      winner_name: winnerName,
-      loser_name: loserName,
-      home_sets_won: calculateSetsWon(matchData.homeScore, matchData.awayScore, 'home'),
-      away_sets_won: calculateSetsWon(matchData.homeScore, matchData.awayScore, 'away'),
-      first_to_serve: matchData.firstToServe || null,
-      sofascore_url: sourceUrl,
-      extracted_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      is_live: matchData.status?.type === 'inprogress',
-      data_source: 'sofascore',
-      raw_json: matchData // Salva JSON completo come backup
+      score: scoreStr,
+      sets_player1: calculateSetsWon(matchData.homeScore, matchData.awayScore, 'home'),
+      sets_player2: calculateSetsWon(matchData.homeScore, matchData.awayScore, 'away'),
+      // Set details
+      set1_p1: homeScore.period1, set1_p2: awayScore.period1, set1_tb: null,
+      set2_p1: homeScore.period2, set2_p2: awayScore.period2, set2_tb: null,
+      set3_p1: homeScore.period3, set3_p2: awayScore.period3, set3_tb: null,
+      set4_p1: homeScore.period4, set4_p2: awayScore.period4, set4_tb: null,
+      set5_p1: homeScore.period5, set5_p2: awayScore.period5, set5_tb: null,
+      // Rankings/seed
+      player1_rank: homePlayer?.ranking || null,
+      player2_rank: awayPlayer?.ranking || null,
+      player1_seed: homePlayer?.seed || null,
+      player2_seed: awayPlayer?.seed || null,
+      // Quality & timestamps
+      data_quality: 50,
+      updated_at: new Date().toISOString()
     };
 
     // 4. Inserisci/Aggiorna match
     const { data: insertedMatch, error: matchError } = await supabase
-      .from('matches')
+      .from('matches_new')
       .upsert(match, { onConflict: 'id' })
       .select()
       .single();
@@ -304,6 +328,23 @@ async function insertMatch(matchData, sourceUrl = null) {
     
     throw error;
   }
+}
+
+/**
+ * Costruisce la stringa del punteggio (es. "6-4 7-5")
+ */
+function buildScoreString(homeScore, awayScore) {
+  if (!homeScore || !awayScore) return null;
+  
+  const sets = [];
+  for (let i = 1; i <= 5; i++) {
+    const h = homeScore[`period${i}`];
+    const a = awayScore[`period${i}`];
+    if (h === undefined || a === undefined) break;
+    sets.push(`${h}-${a}`);
+  }
+  
+  return sets.length > 0 ? sets.join(' ') : null;
 }
 
 /**
@@ -627,7 +668,7 @@ async function getMatches(options = {}) {
     playerSearch,  // Nuovo: ricerca per nome giocatore
     dateFrom,      // Nuovo: data inizio (ISO string)
     dateTo,        // Nuovo: data fine (ISO string)
-    dataSource,    // Nuovo: filtro per fonte dati (xlsx_import, sofascore, merged_sofascore_xlsx)
+    dataSource,    // Filtro per fonte dati (sofascore)
     orderBy = 'start_time' 
   } = options;
 
@@ -786,7 +827,48 @@ async function getMatches(options = {}) {
 async function getMatchById(matchId) {
   if (!checkSupabase()) return null;
   
-  // Query diretta con join
+  // Prima prova con matches_new usando sofascore_id
+  const { data: newMatchRaw, error: newMatchError } = await supabase
+    .from('matches_new')
+    .select(`
+      *,
+      player1_data:players_new!matches_new_player1_id_fkey(id, name, full_name, country_name, country_code, current_ranking),
+      player2_data:players_new!matches_new_player2_id_fkey(id, name, full_name, country_name, country_code, current_ranking),
+      tournament_data:tournaments_new!matches_new_tournament_id_fkey(id, name, surface)
+    `)
+    .or(`id.eq.${matchId},sofascore_id.eq.${matchId}`)
+    .single();
+
+  if (!newMatchError && newMatchRaw) {
+    // Mappa il formato nuovo al formato atteso dall'API legacy
+    const mappedMatch = {
+      id: newMatchRaw.sofascore_id || matchId,
+      event_id: newMatchRaw.id,
+      home_name: newMatchRaw.player1_data?.name || newMatchRaw.player1_data?.full_name || 'Player 1',
+      away_name: newMatchRaw.player2_data?.name || newMatchRaw.player2_data?.full_name || 'Player 2',
+      home_country: newMatchRaw.player1_data?.country_code || '',
+      away_country: newMatchRaw.player2_data?.country_code || '',
+      home_ranking: newMatchRaw.player1_data?.current_ranking || null,
+      away_ranking: newMatchRaw.player2_data?.current_ranking || null,
+      tournament_name: newMatchRaw.tournament_data?.name || 'Tournament',
+      tournament_category: '',
+      tournament_ground: newMatchRaw.surface || newMatchRaw.tournament_data?.surface || 'hard',
+      status: newMatchRaw.status || 'finished',
+      score: newMatchRaw.score || '',
+      start_timestamp: newMatchRaw.start_timestamp,
+      date_formatted: newMatchRaw.match_date,
+      round: newMatchRaw.round || '',
+      best_of: newMatchRaw.best_of || 3,
+      surface: newMatchRaw.surface || 'hard',
+      winner_code: newMatchRaw.winner_code,
+      sets_home: newMatchRaw.sets_player1 || 0,
+      sets_away: newMatchRaw.sets_player2 || 0
+    };
+    
+    return mappedMatch;
+  }
+  
+  // Fallback alla tabella vecchia (legacy)
   const { data: matchRaw, error: matchError } = await supabase
     .from('matches')
     .select(`
@@ -1610,339 +1692,6 @@ async function getDistinctTournaments() {
 }
 
 // ============================================================================
-// MERGE XLSX + SOFASCORE DATA
-// ============================================================================
-
-/**
- * Normalizza il nome di un giocatore per il matching
- * "Vukic A." -> "vukic a"
- * "Aleksandar Vukic" -> "vukic a" (prende iniziale nome)
- */
-function normalizePlayerName(name) {
-  if (!name) return '';
-  
-  // Rimuovi caratteri speciali e converti in minuscolo
-  let normalized = name.toLowerCase()
-    .replace(/[''`]/g, '')  // Rimuovi apostrofi
-    .replace(/\./g, '')     // Rimuovi punti
-    .replace(/\s+/g, ' ')   // Normalizza spazi
-    .trim();
-  
-  // Dividi in parti
-  const parts = normalized.split(' ');
-  
-  if (parts.length >= 2) {
-    const lastPart = parts[parts.length - 1];
-    const firstPart = parts[0];
-    
-    // CASO xlsx: "Nishikori K" -> cognome è la prima parte lunga
-    // La prima parte è lunga e l'ultima è corta (iniziale)
-    if (firstPart.length > 2 && lastPart.length <= 2) {
-      // È già nel formato xlsx "Cognome N", ritorna così
-      return normalized;
-    }
-    
-    // CASO Sofascore: "Kei Nishikori" -> nome cognome
-    // La prima parte è corta o media, l'ultima è lunga (cognome)
-    if (lastPart.length > 2) {
-      // Converti "Nome Cognome" -> "cognome n"
-      const firstName = parts.slice(0, -1).join(' ');
-      const lastName = parts[parts.length - 1];
-      return `${lastName} ${firstName.charAt(0)}`;
-    }
-  }
-  
-  return normalized;
-}
-
-/**
- * Cerca un match xlsx che corrisponde a un match Sofascore
- * Criteri di matching:
- * 1. Stessa data (±2 giorni per timezone)
- * 2. Stesso giocatore (nome normalizzato con matching fuzzy)
- */
-async function findMatchingXlsxMatch(sofascoreMatch) {
-  if (!checkSupabase()) return null;
-  
-  const homeName = sofascoreMatch.home?.name || sofascoreMatch.homeTeam?.name;
-  const awayName = sofascoreMatch.away?.name || sofascoreMatch.awayTeam?.name;
-  const matchDate = sofascoreMatch.startTimestamp 
-    ? new Date(sofascoreMatch.startTimestamp * 1000) 
-    : null;
-  
-  if (!matchDate || (!homeName && !awayName)) return null;
-  
-  // Cerca match xlsx nella stessa data (±2 giorni per maggiore tolleranza)
-  const startDate = new Date(matchDate);
-  startDate.setDate(startDate.getDate() - 2);
-  const endDate = new Date(matchDate);
-  endDate.setDate(endDate.getDate() + 2);
-  
-  // Cerca sia xlsx_import che xlsx_2025 (diversi formati di import)
-  const { data: xlsxMatches, error } = await supabase
-    .from('matches')
-    .select('*')
-    .in('data_source', ['xlsx_import', 'xlsx_2025'])
-    .gte('start_time', startDate.toISOString())
-    .lte('start_time', endDate.toISOString());
-  
-  if (error || !xlsxMatches) return null;
-  
-  // Normalizza i nomi per il confronto
-  const homeNormalized = normalizePlayerName(homeName);
-  const awayNormalized = normalizePlayerName(awayName);
-  
-  // Estrai cognome per matching più robusto
-  const getLastName = (name) => {
-    if (!name) return '';
-    const parts = name.toLowerCase().trim().split(/\s+/);
-    // Se il formato è "Cognome I." ritorna il cognome
-    if (parts.length >= 1 && parts[parts.length - 1].match(/^[a-z]\.?$/)) {
-      return parts[0];
-    }
-    // Altrimenti ritorna l'ultima parte (cognome)
-    return parts[parts.length - 1];
-  };
-  
-  const homeLastName = getLastName(homeName);
-  const awayLastName = getLastName(awayName);
-  
-  // Cerca match con giocatori corrispondenti
-  for (const xlsx of xlsxMatches) {
-    const xlsxWinner = normalizePlayerName(xlsx.winner_name);
-    const xlsxLoser = normalizePlayerName(xlsx.loser_name);
-    const xlsxWinnerLast = getLastName(xlsx.winner_name);
-    const xlsxLoserLast = getLastName(xlsx.loser_name);
-    
-    // Check 1: Match esatto normalizzato
-    const homeMatchesWinner = homeNormalized.includes(xlsxWinner) || xlsxWinner.includes(homeNormalized);
-    const homeMatchesLoser = homeNormalized.includes(xlsxLoser) || xlsxLoser.includes(homeNormalized);
-    const awayMatchesWinner = awayNormalized.includes(xlsxWinner) || xlsxWinner.includes(awayNormalized);
-    const awayMatchesLoser = awayNormalized.includes(xlsxLoser) || xlsxLoser.includes(awayNormalized);
-    
-    if ((homeMatchesWinner && awayMatchesLoser) || (homeMatchesLoser && awayMatchesWinner)) {
-      console.log(`🔗 Match trovato! Sofascore "${homeName} vs ${awayName}" = xlsx "${xlsx.winner_name} vs ${xlsx.loser_name}"`);
-      return xlsx;
-    }
-    
-    // Check 2: Match per cognome (più tollerante)
-    const homeLastMatchesWinner = homeLastName === xlsxWinnerLast;
-    const homeLastMatchesLoser = homeLastName === xlsxLoserLast;
-    const awayLastMatchesWinner = awayLastName === xlsxWinnerLast;
-    const awayLastMatchesLoser = awayLastName === xlsxLoserLast;
-    
-    if ((homeLastMatchesWinner && awayLastMatchesLoser) || (homeLastMatchesLoser && awayLastMatchesWinner)) {
-      console.log(`🔗 Match trovato (by cognome)! Sofascore "${homeName} vs ${awayName}" = xlsx "${xlsx.winner_name} vs ${xlsx.loser_name}"`);
-      return xlsx;
-    }
-  }
-  
-  return null;
-}
-
-/**
- * Unisce i dati xlsx con un match Sofascore esistente
- * I dati xlsx aggiungono: ranking, punti, quote, punteggi set dettagliati
- */
-async function mergeXlsxData(sofascoreMatchId, xlsxMatch) {
-  if (!checkSupabase()) return null;
-  
-  // First, get the current match to check if winner_name/loser_name need to be filled
-  const { data: currentMatch } = await supabase
-    .from('matches')
-    .select('winner_name, loser_name')
-    .eq('id', sofascoreMatchId)
-    .single();
-  
-  const updateData = {};
-  
-  // IMPORTANT: Copy winner_name/loser_name if empty (for statistics queries)
-  if ((!currentMatch?.winner_name || currentMatch.winner_name === '') && xlsxMatch.winner_name) {
-    updateData.winner_name = xlsxMatch.winner_name;
-  }
-  if ((!currentMatch?.loser_name || currentMatch.loser_name === '') && xlsxMatch.loser_name) {
-    updateData.loser_name = xlsxMatch.loser_name;
-  }
-  
-  // Aggiungi solo i campi che xlsx ha e sofascore non ha (o sono più completi)
-  if (xlsxMatch.location) updateData.location = xlsxMatch.location;
-  if (xlsxMatch.series) updateData.series = xlsxMatch.series;
-  if (xlsxMatch.court_type) updateData.court_type = xlsxMatch.court_type;
-  if (xlsxMatch.surface) updateData.surface = xlsxMatch.surface;
-  if (xlsxMatch.best_of) updateData.best_of = xlsxMatch.best_of;
-  
-  // Ranking e punti (xlsx ha dati storici precisi)
-  if (xlsxMatch.winner_rank) updateData.winner_rank = xlsxMatch.winner_rank;
-  if (xlsxMatch.loser_rank) updateData.loser_rank = xlsxMatch.loser_rank;
-  if (xlsxMatch.winner_points) updateData.winner_points = xlsxMatch.winner_points;
-  if (xlsxMatch.loser_points) updateData.loser_points = xlsxMatch.loser_points;
-  
-  // Punteggi set dettagliati
-  if (xlsxMatch.w1 !== null) updateData.w1 = xlsxMatch.w1;
-  if (xlsxMatch.l1 !== null) updateData.l1 = xlsxMatch.l1;
-  if (xlsxMatch.w2 !== null) updateData.w2 = xlsxMatch.w2;
-  if (xlsxMatch.l2 !== null) updateData.l2 = xlsxMatch.l2;
-  if (xlsxMatch.w3 !== null) updateData.w3 = xlsxMatch.w3;
-  if (xlsxMatch.l3 !== null) updateData.l3 = xlsxMatch.l3;
-  if (xlsxMatch.w4 !== null) updateData.w4 = xlsxMatch.w4;
-  if (xlsxMatch.l4 !== null) updateData.l4 = xlsxMatch.l4;
-  if (xlsxMatch.w5 !== null) updateData.w5 = xlsxMatch.w5;
-  if (xlsxMatch.l5 !== null) updateData.l5 = xlsxMatch.l5;
-  if (xlsxMatch.winner_sets !== null) updateData.winner_sets = xlsxMatch.winner_sets;
-  if (xlsxMatch.loser_sets !== null) updateData.loser_sets = xlsxMatch.loser_sets;
-  
-  // Quote (xlsx ha quote di chiusura)
-  if (xlsxMatch.odds_b365_winner) updateData.odds_b365_winner = xlsxMatch.odds_b365_winner;
-  if (xlsxMatch.odds_b365_loser) updateData.odds_b365_loser = xlsxMatch.odds_b365_loser;
-  if (xlsxMatch.odds_ps_winner) updateData.odds_ps_winner = xlsxMatch.odds_ps_winner;
-  if (xlsxMatch.odds_ps_loser) updateData.odds_ps_loser = xlsxMatch.odds_ps_loser;
-  if (xlsxMatch.odds_max_winner) updateData.odds_max_winner = xlsxMatch.odds_max_winner;
-  if (xlsxMatch.odds_max_loser) updateData.odds_max_loser = xlsxMatch.odds_max_loser;
-  if (xlsxMatch.odds_avg_winner) updateData.odds_avg_winner = xlsxMatch.odds_avg_winner;
-  if (xlsxMatch.odds_avg_loser) updateData.odds_avg_loser = xlsxMatch.odds_avg_loser;
-  if (xlsxMatch.odds_bfe_winner) updateData.odds_bfe_winner = xlsxMatch.odds_bfe_winner;
-  if (xlsxMatch.odds_bfe_loser) updateData.odds_bfe_loser = xlsxMatch.odds_bfe_loser;
-  
-  // Comment
-  if (xlsxMatch.comment) updateData.comment = xlsxMatch.comment;
-  
-  // Segna che i dati sono stati merged
-  updateData.data_source = 'merged_sofascore_xlsx';
-  updateData.updated_at = new Date().toISOString();
-  
-  if (Object.keys(updateData).length <= 2) {
-    console.log(`ℹ️ Nessun dato nuovo da xlsx per match ${sofascoreMatchId}`);
-    return null;
-  }
-  
-  const { data, error } = await supabase
-    .from('matches')
-    .update(updateData)
-    .eq('id', sofascoreMatchId)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error(`❌ Errore merge match ${sofascoreMatchId}:`, error.message);
-    return null;
-  }
-  
-  console.log(`✅ Match ${sofascoreMatchId} arricchito con dati xlsx (${Object.keys(updateData).length - 2} campi)`);
-  return data;
-}
-
-/**
- * Inserisce un match Sofascore e automaticamente cerca/merge con dati xlsx
- */
-async function insertMatchWithXlsxMerge(matchData, sourceUrl = null) {
-  // Prima inserisci il match normalmente
-  const insertedMatch = await insertMatch(matchData, sourceUrl);
-  
-  if (!insertedMatch) return null;
-  
-  // Cerca match xlsx corrispondente
-  const xlsxMatch = await findMatchingXlsxMatch(matchData);
-  
-  if (xlsxMatch) {
-    // Merge i dati
-    const mergedMatch = await mergeXlsxData(insertedMatch.id, xlsxMatch);
-    
-    // Elimina il record xlsx duplicato
-    await supabase.from('matches').delete().eq('id', xlsxMatch.id);
-    console.log(`🗑️ Eliminato xlsx duplicato ID ${xlsxMatch.id}`);
-    
-    return mergedMatch || insertedMatch;
-  }
-  
-  return insertedMatch;
-}
-
-/**
- * Esegue il merge batch di tutti i match sofascore con xlsx
- * Cerca match Sofascore (con home_player_id non null) che non sono già merged
- */
-async function batchMergeXlsxData() {
-  if (!checkSupabase()) return { merged: 0, errors: 0 };
-  
-  console.log('\n🔄 Inizio batch merge Sofascore + xlsx...\n');
-  
-  // Prendi tutti i match sofascore che:
-  // 1. Hanno home_player_id (sono da Sofascore, non xlsx)
-  // 2. Non sono già merged
-  const { data: sofascoreMatches, error } = await supabase
-    .from('matches')
-    .select('*')
-    .not('home_player_id', 'is', null)
-    .or('data_source.is.null,data_source.eq.sofascore')
-    .order('start_time', { ascending: false });
-  
-  if (error || !sofascoreMatches) {
-    console.error('Errore caricamento match sofascore:', error?.message);
-    return { merged: 0, errors: 1 };
-  }
-  
-  console.log(`📊 Trovati ${sofascoreMatches.length} match Sofascore da verificare\n`);
-  
-  let merged = 0;
-  let notFound = 0;
-  let deleted = 0;
-
-  for (const match of sofascoreMatches) {
-    // Estrai i nomi dai dati raw_json (formato Sofascore)
-    let homeName = null;
-    let awayName = null;
-    
-    if (match.raw_json) {
-      // Prova diversi path nel raw_json
-      homeName = match.raw_json.home?.name || 
-                 match.raw_json.homeTeam?.name || 
-                 match.raw_json.mapping?.home?.name;
-      awayName = match.raw_json.away?.name || 
-                 match.raw_json.awayTeam?.name || 
-                 match.raw_json.mapping?.away?.name;
-    }
-    
-    // Se non trovati nel raw_json, usa winner_name/loser_name
-    if (!homeName) homeName = match.winner_name;
-    if (!awayName) awayName = match.loser_name;
-    
-    // Costruisci oggetto per la ricerca
-    const matchData = {
-      home: { name: homeName },
-      away: { name: awayName },
-      startTimestamp: match.start_time ? new Date(match.start_time).getTime() / 1000 : null
-    };
-    
-    const xlsxMatch = await findMatchingXlsxMatch(matchData);
-    
-    if (xlsxMatch) {
-      await mergeXlsxData(match.id, xlsxMatch);
-      merged++;
-      
-      // Elimina il record xlsx duplicato
-      const { error: deleteError } = await supabase
-        .from('matches')
-        .delete()
-        .eq('id', xlsxMatch.id);
-      
-      if (!deleteError) {
-        deleted++;
-        console.log(`🗑️ Eliminato xlsx duplicato ID ${xlsxMatch.id}`);
-      }
-    } else {
-      notFound++;
-    }
-  }
-  
-  console.log(`\n📊 BATCH MERGE COMPLETATO:`);
-  console.log(`   ✅ Merged: ${merged}`);
-  console.log(`   🗑️ xlsx eliminati: ${deleted}`);
-  console.log(`   ⚪ Non trovati in xlsx: ${notFound}`);
-  
-  return { merged, notFound, deleted };
-}
-
-// ============================================================================
 // MATCH CARD SNAPSHOT (Single query per card)
 // ============================================================================
 
@@ -2334,15 +2083,144 @@ async function getMatchPointByPoint(matchId, options = {}) {
       .range(offset, offset + limit - 1);
 
     if (!error && data?.length > 0) {
+      // Complete games by inferring missing final points
+      const { completePbpGames } = require('../utils/completePbpGames.cjs');
+      const completedData = completePbpGames(data);
+      
       return {
-        data: data,
-        total: newCount,
+        data: completedData,
+        total: completedData.length,
         offset,
         limit,
-        hasMore: (offset + limit) < newCount,
-        source: 'match_point_by_point_new'
+        hasMore: (offset + limit) < completedData.length,
+        source: 'match_point_by_point_new_completed'
       };
     }
+  }
+
+  // FALLBACK: Try power_rankings table (SVG momentum data)
+  // This data comes from SVG insertion and has game-level momentum info
+  const { data: prData, count: prCount, error: prError } = await supabase
+    .from('power_rankings')
+    .select('*', { count: 'exact' })
+    .eq('match_id', matchId)
+    .order('set_number')
+    .order('game_number')
+    .range(offset, offset + limit - 1);
+
+  if (!prError && prData?.length > 0) {
+    // Map power_rankings to point_by_point format for consistency
+    // Momentum value indicates who won the game:
+    // - POSITIVE = Home won the game
+    // - NEGATIVE = Away won the game
+    const mappedData = prData.map((pr, idx) => {
+      const setNum = pr.set_number || 1;
+      const gameNum = pr.game_number || 1;
+      
+      // Calculate server based on tennis rules:
+      // AWAY serves first in set 1 (this match's data shows away served first)
+      // In set 1: odd games (1,3,5...) = AWAY serves, even games (2,4,6...) = HOME serves
+      // In set 2: opposite (service changes at set start)
+      const awayServesFirstInSet = setNum % 2 === 1;
+      const isOddGame = gameNum % 2 === 1;
+      const serverNum = awayServesFirstInSet 
+        ? (isOddGame ? 2 : 1)  // Set 1,3,5: odd=AWAY, even=HOME
+        : (isOddGame ? 1 : 2); // Set 2,4: odd=HOME, even=AWAY
+      
+      // Game winner from momentum value:
+      // Positive = Home won, Negative = Away won
+      const value = pr.value_svg || pr.value || 0;
+      const gameWinnerNum = value >= 0 ? 1 : 2; // 1=home, 2=away
+      
+      // BREAK = server loses the game (serving !== scoring)
+      const isBreak = serverNum !== gameWinnerNum;
+      
+      return {
+        id: pr.id,
+        match_id: pr.match_id,
+        set_number: setNum,
+        game_number: gameNum,
+        point_number: 1, // One entry per game
+        value: pr.value,
+        value_svg: pr.value_svg,
+        break_occurred: isBreak,
+        zone: pr.zone,
+        source: pr.source || 'power_rankings',
+        serving: serverNum,
+        scoring: gameWinnerNum,
+        created_at: pr.created_at
+      };
+    });
+
+    return {
+      data: mappedData,
+      total: prCount,
+      offset,
+      limit,
+      hasMore: (offset + limit) < prCount,
+      source: 'power_rankings'
+    };
+  }
+
+  // FALLBACK 3: Try match_power_rankings_new table (SVG momentum data with new schema)
+  // This table may have data inserted by Tennis-Scraper-Local
+  const { data: mprData, count: mprCount, error: mprError } = await supabase
+    .from('match_power_rankings_new')
+    .select('*', { count: 'exact' })
+    .eq('match_id', matchId)
+    .order('set_number')
+    .order('game_number')
+    .range(offset, offset + limit - 1);
+
+  if (!mprError && mprData?.length > 0) {
+    // Map match_power_rankings_new to point_by_point format
+    // Momentum value indicates who won the game:
+    // - POSITIVE = Home won the game
+    // - NEGATIVE = Away won the game
+    const mappedData = mprData.map((pr) => {
+      const setNum = pr.set_number || 1;
+      const gameNum = pr.game_number || 1;
+      
+      // Calculate server based on tennis rules
+      // AWAY serves first in set 1 (this match's data shows away served first)
+      const awayServesFirstInSet = setNum % 2 === 1;
+      const isOddGame = gameNum % 2 === 1;
+      const serverNum = awayServesFirstInSet 
+        ? (isOddGame ? 2 : 1)  // Set 1,3,5: odd=AWAY, even=HOME
+        : (isOddGame ? 1 : 2); // Set 2,4: odd=HOME, even=AWAY
+      
+      // Game winner from momentum value
+      const value = pr.value_svg || pr.value || 0;
+      const gameWinnerNum = value >= 0 ? 1 : 2;
+      
+      // BREAK = server loses the game
+      const isBreak = serverNum !== gameWinnerNum;
+      
+      return {
+        id: pr.id,
+        match_id: pr.match_id,
+        set_number: setNum,
+        game_number: gameNum,
+        point_number: 1,
+        value: pr.value,
+        value_svg: pr.value_svg,
+        break_occurred: isBreak,
+        zone: pr.zone,
+        source: pr.source || 'match_power_rankings_new',
+        serving: serverNum,
+        scoring: gameWinnerNum,
+        created_at: pr.created_at
+      };
+    });
+
+    return {
+      data: mappedData,
+      total: mprCount,
+      offset,
+      limit,
+      hasMore: (offset + limit) < mprCount,
+      source: 'match_power_rankings_new'
+    };
   }
 
   return { data: [], total: 0, offset, limit, hasMore: false };
@@ -2415,13 +2293,7 @@ module.exports = {
   upsertTournament,
   insertMatch,
   saveMatch: insertMatch, // alias FILOSOFIA_DB
-  insertMatchWithXlsxMerge,
   insertPowerRankingsSvg,  // NEW: Insert momentum from SVG DOM
-  
-  // Merge
-  findMatchingXlsxMatch,
-  mergeXlsxData,
-  batchMergeXlsxData,
   
   // Read
   getMatches,

@@ -4,7 +4,7 @@
 I dati sono mischiati tra:
 - Match data (risultato, punteggio, statistiche partita)
 - Player data (ranking, nazionalità, statistiche carriera)
-- Source data (xlsx, sofascore, merged)
+- Source data (sofascore, svg_momentum)
 
 ## Nuova Architettura
 
@@ -43,7 +43,7 @@ CREATE TABLE player_aliases (
   id SERIAL PRIMARY KEY,
   player_id BIGINT REFERENCES players(id),
   alias_name TEXT NOT NULL,
-  source TEXT,                               -- 'xlsx', 'sofascore', 'manual'
+  source TEXT,                               -- 'sofascore', 'manual'
   UNIQUE(alias_name)
 );
 ```
@@ -131,7 +131,7 @@ CREATE TABLE tournaments (
 ### 5. MATCHES (Match - dati di base)
 ```sql
 CREATE TABLE matches (
-  id BIGINT PRIMARY KEY,                     -- ID interno (generato per xlsx, sofascore per scrape)
+  id BIGINT PRIMARY KEY,                     -- ID SofaScore (event_id)
   
   -- Riferimenti
   player1_id BIGINT REFERENCES players(id),  -- Home player
@@ -184,7 +184,7 @@ CREATE TABLE matches (
 CREATE TABLE match_data_sources (
   id SERIAL PRIMARY KEY,
   match_id BIGINT REFERENCES matches(id),
-  source_type VARCHAR(50) NOT NULL,          -- 'xlsx_2025', 'sofascore', 'atp_official'
+  source_type VARCHAR(50) NOT NULL,          -- 'sofascore', 'svg_momentum'
   source_id TEXT,                            -- ID nella fonte originale
   source_url TEXT,
   
@@ -344,25 +344,17 @@ CREATE TABLE head_to_head (
 
 ## Flusso Dati Proposto
 
-### Import da XLSX:
-```
-XLSX → Normalizza nomi → Trova/Crea Player → Crea Match → Segna source 'xlsx'
-```
-
-### Import da SofaScore:
+### Import da SofaScore API:
 ```
 SofaScore → Trova/Crea Player (con sofascore_id) → Crea Match → 
   → Import Statistics → Import PowerRankings → Import PointByPoint
   → Segna source 'sofascore'
 ```
 
-### Merge intelligente:
+### Import SVG Momentum:
 ```
-Se Match esiste in entrambe le fonti:
-  - Usa ID SofaScore come ID principale
-  - Mantieni dati XLSX come backup/reference
-  - Aggiungi statistiche dettagliate da SofaScore
-  - Segna entrambe le sources in match_data_sources
+SVG Data → Parse Momentum Values → Associa a Match esistente →
+  → Calcola PowerRankings game-by-game → Segna source 'svg_momentum'
 ```
 
 ---
@@ -407,7 +399,7 @@ GET /api/match/:id/card
   },
   
   // Data quality
-  data_sources: ['xlsx_2025', 'sofascore'],
+  data_sources: ['sofascore', 'svg_momentum'],
   data_completeness: 85  // percentuale
 }
 ```

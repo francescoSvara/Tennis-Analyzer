@@ -1908,6 +1908,36 @@
       <div id="alertInfo" class="alert info"></div>
     </div>
     
+    <!-- Batch Scrape Section -->
+    <div class="card" style="border-left: 3px solid #2196f3;">
+      <h2><svg class="icon"><use href="#icon-scan"/></svg> Batch Scrape SofaScore</h2>
+      <p style="color: #888; font-size: 0.85rem; margin-bottom: 12px;">
+        Scarica automaticamente le partite ATP/WTA/Challenger finite di oggi e ieri
+      </p>
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="color: #888; font-size: 0.85rem;">Giorni:</label>
+          <select id="batchDays" style="padding: 8px 12px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+            <option value="1">Oggi + Ieri</option>
+            <option value="2">Ultimi 3 giorni</option>
+            <option value="6">Ultima settimana</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="color: #888; font-size: 0.85rem;">Max:</label>
+          <select id="batchMax" style="padding: 8px 12px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+            <option value="10">10 match</option>
+            <option value="20" selected>20 match</option>
+            <option value="50">50 match</option>
+          </select>
+        </div>
+        <button id="batchScrapeBtn" onclick="runBatchScrape()" style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);">
+          <svg class="icon icon-sm"><use href="#icon-scan"/></svg> Avvia Batch
+        </button>
+      </div>
+      <div id="batchResult" class="alert info" style="margin-top: 12px;"></div>
+    </div>
+    
     <!-- Stats Summary - Monitoraggio Scrape -->
     <div class="card stats-summary-card">
       <!-- Riga 1: Contatori principali -->
@@ -2923,6 +2953,53 @@
       }
     }
     
+    // Batch Scrape - scarica automaticamente partite da SofaScore
+    async function runBatchScrape() {
+      const btn = document.getElementById('batchScrapeBtn');
+      const resultDiv = document.getElementById('batchResult');
+      const daysBack = parseInt(document.getElementById('batchDays').value);
+      const maxMatches = parseInt(document.getElementById('batchMax').value);
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-loader"></span> Scanning...';
+      resultDiv.className = 'alert info show';
+      resultDiv.innerHTML = '⏳ Recupero partite da SofaScore... Questo può richiedere qualche minuto.';
+      
+      try {
+        const res = await fetch(`${API_BASE}/batch-scrape`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ daysBack, maxMatches })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          resultDiv.className = 'alert error show';
+          resultDiv.textContent = data.error || 'Errore durante il batch scrape';
+        } else {
+          // Mostra risultati
+          const skipped = data.matches?.filter(m => m.status === 'skipped').length || 0;
+          resultDiv.className = 'alert success show';
+          resultDiv.innerHTML = `
+            <strong>✅ Batch completato!</strong><br>
+            📊 Totale: ${data.total} | ✅ Successo: ${data.success} | ⏭️ Già presenti: ${skipped} | ❌ Falliti: ${data.failed}
+          `;
+          
+          // Ricarica la lista match
+          currentPage = 1;
+          await loadAdvancedStats();
+          await loadMatches(true);
+        }
+      } catch (e) {
+        resultDiv.className = 'alert error show';
+        resultDiv.textContent = `Errore: ${e.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="icon icon-sm"><use href="#icon-scan"/></svg> Avvia Batch';
+      }
+    }
+    
     // Detect missing matches from a tournament and save to detected_matches DB
     async function detectMissingFromTournament(tournamentId, tournamentName) {
       const missingList = document.getElementById('missingList');
@@ -3303,7 +3380,9 @@
     let selectedSvgMatch = null;
     
     // Open SVG Momentum modal for a problematic match
-    function openSvgMomentumModal(matchId) {
+    let extractedSofascoreId = null;
+    
+    async function openSvgMomentumModal(matchId) {
       const match = allMatchesFromDb.find(m => String(m.id) === String(matchId));
       if (!match) {
         showToast('Match non trovato');
@@ -3311,6 +3390,7 @@
       }
       
       selectedSvgMatch = match;
+      extractedSofascoreId = null;
       
       const modal = document.getElementById('svgMomentumModal');
       const matchInfo = document.getElementById('svgModalMatchInfo');
@@ -3322,10 +3402,27 @@
       const homeName = getPlayerName(match.home_player);
       const awayName = getPlayerName(match.away_player);
       
+      // Cerca automaticamente l'ID SofaScore da detected_matches
+      let sofascoreIdInfo = '<span style="color: #ff9800;">🔍 Cercando ID SofaScore...</span>';
+      
+      try {
+        const res = await fetch(`${API_BASE}/find-sofascore-id/${match.id}`);
+        const data = await res.json();
+        if (data.sofascoreId) {
+          extractedSofascoreId = data.sofascoreId;
+          sofascoreIdInfo = `<span style="color: #4caf50;">✅ SofaScore ID: <strong>${data.sofascoreId}</strong></span>`;
+        } else {
+          sofascoreIdInfo = '<span style="color: #ff9800;">⚠️ ID SofaScore non trovato - verrà usato ID locale</span>';
+        }
+      } catch (err) {
+        sofascoreIdInfo = '<span style="color: #ff9800;">⚠️ Impossibile recuperare ID SofaScore</span>';
+      }
+      
       matchInfo.innerHTML = `
         <strong>📊 Inserisci Momentum SVG per:</strong><br>
         ${homeName} vs ${awayName}<br>
-        <small>Event ID: ${match.id}</small>
+        <small>ID Locale: ${match.id}</small><br>
+        <div style="margin-top: 8px;">${sofascoreIdInfo}</div>
       `;
       
       input.value = '';
@@ -3340,6 +3437,17 @@
       
       // Focus on textarea
       setTimeout(() => input.focus(), 100);
+    }
+    
+    // Update submit button based on SVG validation
+    function updateSubmitButtonState() {
+      const submitBtn = document.getElementById('svgMomentumSubmitBtn');
+      const svgInput = document.getElementById('svgMomentumInput');
+      const svgHtml = svgInput.value.trim();
+      const pathMatches = svgHtml.match(/<path[^>]*fill="[^"]*home-away[^"]*"[^>]*>/gi) || [];
+      
+      // Abilita se SVG valido (ID SofaScore viene cercato automaticamente)
+      submitBtn.disabled = pathMatches.length === 0;
     }
     
     // Close SVG Momentum modal
@@ -3430,14 +3538,22 @@
       
       if (!svgHtml || !selectedSvgMatch) return;
       
+      // Usa l'ID SofaScore se disponibile, altrimenti l'ID locale
+      const targetMatchId = extractedSofascoreId || selectedSvgMatch.id;
+      
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner"></span>Elaborando...';
       
       try {
-        const res = await fetch(`${API_BASE}/match/${selectedSvgMatch.id}/momentum-svg`, {
+        // Salva con l'ID SofaScore (targetMatchId) e passa anche l'ID locale
+        const res = await fetch(`${API_BASE}/match/${targetMatchId}/momentum-svg`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ svgHtml })
+          body: JSON.stringify({ 
+            svgHtml,
+            localMatchId: selectedSvgMatch.id,
+            sofascoreId: extractedSofascoreId
+          })
         });
         
         const data = await res.json();
@@ -3463,7 +3579,10 @@
     }
     
     // Event listeners for SVG modal
-    document.getElementById('svgMomentumInput').addEventListener('input', validateSvgMomentum);
+    document.getElementById('svgMomentumInput').addEventListener('input', () => {
+      validateSvgMomentum();
+      updateSubmitButtonState();
+    });
     document.getElementById('svgMomentumModal').addEventListener('click', (e) => {
       if (e.target.id === 'svgMomentumModal') closeSvgMomentumModal();
     });

@@ -26,6 +26,42 @@
 }
 
 /* ===========================================
+   PERIOD TABS
+=========================================== */
+
+.stats-period-tabs {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+.period-tab {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.period-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.period-tab.active {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* ===========================================
    STATS GRID
 =========================================== */
 

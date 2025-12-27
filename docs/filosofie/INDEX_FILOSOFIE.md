@@ -1,9 +1,9 @@
 # 📚 INDEX FILOSOFIE – Mappa Navigazione Progetto
 
-> **Ultimo aggiornamento**: 25 Dicembre 2025  
+> **Ultimo aggiornamento**: 26 Dicembre 2025  
 > **Stato**: ATTIVO – Source of Truth per navigazione documentale  
 > **Integra**: `MAPPA_RETE_CONCETTUALE_V2.md`  
-> **Novità**: 57 check automatizzati per TUTTE le filosofie (`rules.v2.json`)
+> **Novità V2.7**: **Flusso Completamento Dati** (pending → partial → complete) - Sistema data_quality 0-100
 
 ---
 
@@ -175,7 +175,7 @@ Nessun dominio **bypassa** il MatchBundle
 | [FILOSOFIA_TEMPORAL.md](10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | Time Architect | Time semantics, anti-leakage, as-of snapshots | [`backend/liveManager.js`](../../backend/liveManager.js), [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
 | [FILOSOFIA_REGISTRY_CANON.md](10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | Data Architect | Canonical IDs, entity resolution, dedup | [`backend/services/dataNormalizer.js`](../../backend/services/dataNormalizer.js), [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js) |
 | [FILOSOFIA_LINEAGE_VERSIONING.md](10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | Audit Architect | Versioning, lineage, reproducibility | [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js), [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
-| [FILOSOFIA_DB.md](10_data_platform/storage/FILOSOFIA_DB.md) | DBA / Data Engineer | Schema, pipeline, MatchBundle snapshot | [`backend/db/`](../../backend/db/), [`backend/importXlsx.js`](../../backend/importXlsx.js), [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
+| [FILOSOFIA_DB.md](10_data_platform/storage/FILOSOFIA_DB.md) | DBA / Data Engineer | Schema, pipeline, MatchBundle snapshot | [`backend/db/`](../../backend/db/), [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
 | [FILOSOFIA_LIVE_TRACKING.md](20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | Real-time Engineer | Polling, WS, patch incrementali | [`backend/liveManager.js`](../../backend/liveManager.js), [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) |
 | [FILOSOFIA_ODDS.md](30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | Quant / Market Engineer | Market data, implied prob, liquidity | [`backend/server.js`](../../backend/server.js) (endpoints `/api/match/:id/odds`) |
 
@@ -346,8 +346,7 @@ node scripts/generateTodoReport.js
 
 | Tabella | Tipo | Repository | Descrizione |
 |---------|------|------------|-------------|
-| `matches` | Legacy | [`matchRepository.js`](../../backend/db/matchRepository.js) | ~2600 match XLSX (winner_name, loser_name) |
-| `matches_new` | Nuovo | [`matchRepository.js`](../../backend/db/matchRepository.js) | Match SofaScore (home_player_id, away_player_id) |
+| `matches_new` | Principale | [`matchRepository.js`](../../backend/db/matchRepository.js) | Match SofaScore (home_player_id, away_player_id) |
 | `match_card_snapshot` | Cache | [`matchCardService.js`](../../backend/services/matchCardService.js) | Cache pre-calcolata bundle |
 | `match_statistics_new` | Detail | [`matchRepository.js`](../../backend/db/matchRepository.js) | Statistiche match |
 | `match_power_rankings_new` | Detail | [`matchRepository.js`](../../backend/db/matchRepository.js) | Momentum per game |
@@ -368,9 +367,9 @@ node scripts/generateTodoReport.js
 ## 🔄 FLUSSO DATI CANONICO
 
 ```
-1. FONTI (SofaScore, XLSX, Market APIs)
+1. FONTI (SofaScore API, SVG Momentum)
         │  📁 backend/scraper/sofascoreScraper.js
-        │  📁 backend/importXlsx.js
+        │  📁 backend/utils/svgMomentumExtractor.js
         ▼
 2. RAW EVENTS ────────────────────────► REGISTRY_CANON
         │                                (normalizzazione, canonical IDs)
@@ -417,7 +416,87 @@ node scripts/generateTodoReport.js
 
 ---
 
-## � MATCHBUNDLE META STANDARD (OBBLIGATORIO)
+## 🔄 FLUSSO COMPLETAMENTO DATI (PENDING → COMPLETE)
+
+> **Novità V2.7**: Sistema per match con dati incompleti
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           FLUSSO COMPLETAMENTO MATCH INCOMPLETI             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. DISCOVERY AUTOMATICO                                    │
+│     📁 backend/batch-scrape.js                              │
+│     SofaScore API → partite giornaliere                     │
+│     /api/sport/tennis/scheduled-events/YYYY-MM-DD           │
+│           │                                                 │
+│           ▼ (molte partite, dati base)                      │
+│                                                             │
+│  2. INSERIMENTO CON DATA_QUALITY                            │
+│     📁 backend/db/matchRepository.js::insertMatch()         │
+│     Calcolo automatico data_quality (0-100):                │
+│     • score: +30  • players: +20  • tournament: +10         │
+│     • winner: +10 • statistics: +20  • power_rankings: +10  │
+│           │                                                 │
+│           ▼                                                 │
+│                                                             │
+│  3. CATEGORIZZAZIONE MATCH                                  │
+│     📁 GET /api/completeness-stats                          │
+│     🔴 PENDING   (<50%): Mancano dati essenziali            │
+│     🟡 PARTIAL (50-79%): Dati base presenti                 │
+│     ✅ COMPLETE  (≥80%): Pronto per analisi                 │
+│           │                                                 │
+│           ▼ (match partial richiedono completamento)        │
+│                                                             │
+│  4. COMPLETAMENTO MANUALE (UI Tennis-Scraper)               │
+│     a) Seleziona match da lista pending/partial             │
+│     b) Inserisci link SofaScore (se non presente)           │
+│     c) Copia SVG momentum dalla pagina SofaScore            │
+│     d) POST /api/match/:id/momentum-svg { svgHtml }         │
+│           │                                                 │
+│           ▼ (+10% data_quality)                             │
+│                                                             │
+│  5. RICALCOLO AUTOMATICO                                    │
+│     📁 backend/recalculate-quality.js                       │
+│     Aggiorna data_quality dopo ogni inserimento             │
+│           │                                                 │
+│           ▼                                                 │
+│                                                             │
+│  6. MATCH COMPLETO → ANALISI                                │
+│     Match con data_quality ≥ 80% può essere usato           │
+│     per training modelli e analisi avanzate                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Endpoint API per completamento**:
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/completeness-stats` | GET | Statistiche completezza DB |
+| `/api/matches/pending` | GET | Match con data_quality < 50% |
+| `/api/matches/partial` | GET | Match con data_quality 50-79% |
+| `/api/match/:id/momentum-svg` | POST | Upload SVG momentum (power rankings) |
+| `/api/matches/:id/mark-complete` | POST | Forza completamento |
+
+### ⚠️ NOTA IMPORTANTE: Point-by-Point vs SVG Momentum
+
+| Dato | Endpoint/Funzione | Tabella DB | Tab Frontend |
+|------|------------------|------------|--------------|
+| **SVG Momentum** | `POST /api/match/:id/momentum-svg` | `power_rankings` | MomentumTab |
+| **Point-by-Point** | Automatico via scraper/sync | `point_by_point` | PointByPointTab |
+
+**I dati Point-by-Point vengono salvati automaticamente durante lo scrape** tramite:
+- `Tennis-Scraper-Local/backend/db/matchRepository.js::insertPointByPoint()`
+- `backend/db/matchRepository.js::insertPointByPoint()`
+
+**Se il PointByPointTab mostra "0 points"**, significa che:
+1. L'API SofaScore non ha restituito dati PbP per questo match (match vecchio, minor tour)
+2. Il sync non ha incluso l'endpoint `/point-by-point`
+3. Forzare sync: `POST /api/sync-match/:eventId`
+
+---
+
+## 📚 MATCHBUNDLE META STANDARD (OBBLIGATORIO)
 
 > **Vedi**: [FILOSOFIA_LINEAGE_VERSIONING.md](10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md)
 

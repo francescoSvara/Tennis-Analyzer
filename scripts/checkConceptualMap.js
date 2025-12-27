@@ -106,7 +106,6 @@ const REFERENCES = {
   backendOther: [
     'backend/liveManager.js',
     'backend/scraper/sofascoreScraper.js',
-    'backend/importXlsx.js',
     'backend/server.js'
   ],
 

@@ -169,15 +169,28 @@ function extractMomentumFromSvgHtml(htmlString) {
       const vbParts = viewBox.trim().split(/\s+/).map(Number);
       const vbW = vbParts.length === 4 ? vbParts[2] : null;
 
-      // Trova tutti i path con class="game"
-      const pathGameRegex = /<path[^>]*class="[^"]*game[^"]*"[^>]*d="([^"]*)"[^>]*fill="([^"]*)"[^>]*>/gi;
+      // Trova tutti i path con class="game" - usa regex flessibile per ordine attributi
+      // Vecchio regex assumeva ordine: class -> d -> fill, ma SVG può avere ordine diverso
+      const pathGameRegex = /<path\s+([^>]*)>/gi;
       const games = [];
       let pathMatch;
       let gameIndex = 0;
 
       while ((pathMatch = pathGameRegex.exec(svgContent)) !== null) {
-        const d = pathMatch[1] || '';
-        const fill = pathMatch[2] || '';
+        const attrs = pathMatch[1] || '';
+        
+        // Verifica se ha class="...game..."
+        const classMatch = attrs.match(/class="([^"]*)"/i);
+        if (!classMatch || !classMatch[1].includes('game')) {
+          continue; // Skip path senza class="game"
+        }
+        
+        // Estrai d e fill indipendentemente dall'ordine
+        const dMatch = attrs.match(/\bd="([^"]*)"/i);
+        const fillMatch = attrs.match(/\bfill="([^"]*)"/i);
+        
+        const d = dMatch ? dMatch[1] : '';
+        const fill = fillMatch ? fillMatch[1] : '';
 
         const rawV = parseFirstV(d);
         const x = parseMx(d);

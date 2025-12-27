@@ -5,7 +5,7 @@
 > **Stato**: ATTIVA  
 > **Sostituisce**: `MAPPA_RETE_CONCETTUALE.md` (V1 – DEPRECATA)  
 > **Ultimo aggiornamento**: 26 Dicembre 2025  
-> **Novità V2.5**: dataQualityChecker, betDecisionsRepository, Surface Splits in StatsTab, useQualityAssessment hook  
+> **Novità V2.6**: **Statistics by Period** (ALL, SET1, SET2, SET3...) nel DB e frontend StatsTab con tabs periodo, dataQualityChecker, betDecisionsRepository, Surface Splits, useQualityAssessment hook  
 
 ---
 
@@ -34,7 +34,6 @@ React-Betfair/
 ├── backend/
 │   ├── server.js                      # 🌐 Express API principale (~5400 righe)
 │   ├── liveManager.js                 # ⚡ Gestione match live
-│   ├── importXlsx.js                  # 📥 Import dati XLSX
 │   ├── db/
 │   │   ├── supabase.js                # 🔌 Client Supabase
 │   │   ├── matchRepository.js         # 📦 CRUD matches_new
@@ -107,19 +106,9 @@ Nessun dominio **bypassa** il MatchBundle
 
 ---
 
-## ⚠️ LEZIONE APPRESA (24 Dic 2025)
+## ⚠️ LEZIONI APPRESE
 
-### Problema 1: Match Legacy Non Visualizzabili
-Match dalla tabella legacy (`matches` - import XLSX) non erano visualizzabili perché l'endpoint bundle cercava solo in `matches_new`.
-
-**Soluzione**: Fallback a cascata nell'endpoint `/api/match/:id/bundle`:
-1. `match_card_snapshot` (cache)
-2. `v_matches_with_players` (matches_new)
-3. `matches` (legacy) + `transformLegacyMatchToBundle()`
-
----
-
-### Problema 2: Feature Con Valori Fake/Uguali ⚡ IMPORTANTE
+### Problema 1: Feature Con Valori Fake/Uguali ⚡ IMPORTANTE
 
 **Sintomo**: Tutti i match mostravano gli stessi numeri (50%, 25%, 36%, 30%)
 
@@ -166,10 +155,9 @@ Match dalla tabella legacy (`matches` - import XLSX) non erano visualizzabili pe
 │   FONTI DATI (popolano DB)        CONSUMO DATI (frontend)      │
 │   ════════════════════════        ═══════════════════════       │
 │                                                                 │
-│   • XLSX Import                   Frontend fa UNA SOLA         │
-│   • SofaScore Scraper      →      chiamata a /bundle           │
-│   • SVG Momentum API              e riceve TUTTO               │
-│   • Future sources                                              │
+│   • SofaScore Scraper      →      Frontend fa UNA SOLA         │
+│   • SVG Momentum API              chiamata a /bundle            │
+│   • Future sources                e riceve TUTTO                │
 │                                                                 │
 │   ❌ Frontend NON chiama queste fonti direttamente              │
 │                                                                 │
@@ -185,7 +173,7 @@ Match dalla tabella legacy (`matches` - import XLSX) non erano visualizzabili pe
 | Documento | Link | Ruolo | 📁 File Codice Correlati |
 |-----------|------|-------|--------------------------|
 | FILOSOFIA_MADRE | [📄](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Costituzione tecnica | - |
-| FILOSOFIA_DB | [📄](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | DBA / Data Engineer | [`backend/db/`](../backend/db/), [`backend/importXlsx.js`](../backend/importXlsx.js) |
+| FILOSOFIA_DB | [📄](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | DBA / Data Engineer | [`backend/db/`](../backend/db/) |
 | FILOSOFIA_TEMPORAL | [📄](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | Time Architect | [`backend/liveManager.js`](../backend/liveManager.js) |
 | FILOSOFIA_REGISTRY_CANON | [📄](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | Data Architect | [`backend/services/dataNormalizer.js`](../backend/services/dataNormalizer.js) |
 | FILOSOFIA_LINEAGE_VERSIONING | [📄](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | Audit Architect | [`backend/services/matchCardService.js`](../backend/services/matchCardService.js) |
@@ -274,31 +262,31 @@ node scripts/generateTodoReport.js
 │                         FONTI DATI (Popolamento)                        │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │
-│  │ XLSX Import  │  │  SofaScore   │  │ SVG Momentum │  │   Future    │ │
-│  │ (storici)    │  │  Scraper     │  │    API       │  │   Sources   │ │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬──────┘ │
-│         │                 │                 │                  │        │
-│         │ importXlsx.js   │ sofascoreScraper│ svgMomentum     │        │
-│         │                 │ .js             │ Service.js       │        │
-│         ▼                 ▼                 ▼                  ▼        │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐                   │
+│  │  SofaScore   │  │ SVG Momentum │  │   Future    │                   │
+│  │  Scraper     │  │    API       │  │   Sources   │                   │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬──────┘                   │
+│         │                 │                  │                          │
+│         │ sofascoreScraper│ svgMomentum     │                          │
+│         │ .js             │ Service.js       │                          │
+│         ▼                 ▼                  ▼                          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                         SUPABASE DATABASE                               │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌────────────────────────┐│
-│  │     matches      │  │   matches_new    │  │  match_card_snapshot   ││
-│  │    (legacy)      │  │    (nuovo)       │  │       (cache)          ││
-│  │                  │  │                  │  │                        ││
-│  │ • winner_name    │  │ • home_player_id │  │ • bundle_json          ││
-│  │ • loser_name     │  │ • away_player_id │  │ • data_quality_int     ││
-│  │ • w1, l1, w2...  │  │ • statistics     │  │ • last_updated_at      ││
-│  │                  │  │ • pbp, odds      │  │                        ││
-│  └──────────────────┘  └──────────────────┘  └────────────────────────┘│
-│           │                    │                       │               │
-│           └────────────────────┼───────────────────────┘               │
-│                                │                                        │
-│                                ▼                                        │
+│  ┌──────────────────┐  ┌────────────────────────┐                      │
+│  │   matches_new    │  │  match_card_snapshot   │                      │
+│  │    (primary)     │  │       (cache)          │                      │
+│  │                  │  │                        │                      │
+│  │ • home_player_id │  │ • bundle_json          │                      │
+│  │ • away_player_id │  │ • data_quality_int     │                      │
+│  │ • statistics     │  │ • last_updated_at      │                      │
+│  │ • pbp, odds      │  │                        │                      │
+│  └──────────────────┘  └────────────────────────┘                      │
+│           │                       │                                     │
+│           └───────────────────────┘                                     │
+│                       │                                                 │
+│                       ▼                                                 │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                    BUNDLE ENDPOINT (server.js L3219)                    │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -307,7 +295,7 @@ node scripts/generateTodoReport.js
 │                                                                         │
 │  Logica:                                                                │
 │  1. matchCardService.getMatchCardFromSnapshot() → se trovato, return   │
-│  2. Se null → cerca in matches (legacy) via transformLegacyMatch...    │
+│  2. Se null → cerca in matches_new via v_matches_with_players          │
 │  3. Applica featureEngine.computeFeatures()                            │
 │  4. Applica strategyEngine.evaluateAll()                               │
 │  5. Return MatchBundle completo                                         │
@@ -333,7 +321,6 @@ node scripts/generateTodoReport.js
 │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘       │
 │                                                                         │
 │  ❌ NON chiama API SofaScore                                            │
-│  ❌ NON chiama API XLSX                                                 │
 │  ❌ NON chiama API SVG                                                  │
 │  ❌ NON ricalcola metriche                                              │
 │                                                                         │
@@ -396,7 +383,6 @@ node scripts/generateTodoReport.js
 | [`backend/services/dataNormalizer.js`](../backend/services/dataNormalizer.js) | Normalizzazione dati |
 | [`backend/services/dataQualityChecker.js`](../backend/services/dataQualityChecker.js) | Bundle quality evaluation |
 | [`backend/scraper/sofascoreScraper.js`](../backend/scraper/sofascoreScraper.js) | Scraper SofaScore |
-| [`backend/importXlsx.js`](../backend/importXlsx.js) | Import XLSX → matches (legacy) |
 
 ### 🧮 Backend - Utils Aggiuntive
 
@@ -427,7 +413,7 @@ node scripts/generateTodoReport.js
 | [`src/components/HomePage.jsx`](../src/components/HomePage.jsx) | Lista match, ricerca | Lista matches |
 | [`src/components/match/MatchPage.jsx`](../src/components/match/MatchPage.jsx) | Container tabs | bundle (intero) |
 | [`src/components/match/tabs/OverviewTab.jsx`](../src/components/match/tabs/OverviewTab.jsx) | QuickSignals, MiniMomentum | header, tabs.overview, tabs.strategies |
-| [`src/components/match/tabs/StatsTab.jsx`](../src/components/match/tabs/StatsTab.jsx) | Statistiche partita | tabs.stats |
+| [`src/components/match/tabs/StatsTab.jsx`](../src/components/match/tabs/StatsTab.jsx) | Statistiche partita con **tabs per periodo** (Match, Set 1, Set 2...) | tabs.stats.byPeriod |
 | [`src/components/match/tabs/MomentumTab.jsx`](../src/components/match/tabs/MomentumTab.jsx) | Grafico momentum | tabs.momentum |
 | [`src/components/match/tabs/StrategiesTab.jsx`](../src/components/match/tabs/StrategiesTab.jsx) | Panel strategie | tabs.strategies |
 | [`src/components/match/tabs/OddsTab.jsx`](../src/components/match/tabs/OddsTab.jsx) | Quote mercato | tabs.odds |
@@ -441,13 +427,12 @@ node scripts/generateTodoReport.js
 
 ### 🗄️ Database & Data Sources
 **Documento**: [FILOSOFIA_DB](../filosofie/10_data_platform/db/FILOSOFIA_DB.md)  
-**📁 Codice**: [`backend/db/`](../backend/db/), [`backend/importXlsx.js`](../backend/importXlsx.js), [`backend/services/matchCardService.js`](../backend/services/matchCardService.js)
+**📁 Codice**: [`backend/db/`](../backend/db/), [`backend/services/matchCardService.js`](../backend/services/matchCardService.js)
 
 Responsabilità:
-- **Acquisizione dati** da fonti esterne (XLSX, SofaScore, SVG)
+- **Acquisizione dati** da fonti esterne (SofaScore API, SVG Momentum)
 - Persistenza raw e canonical
 - Generazione `match_card_snapshot`
-- Fallback tra tabelle (`matches_new` → `matches`)
 - Versionamento schema
 
 Output:
@@ -540,7 +525,6 @@ Output:
 ```
 FONTI ESTERNE
  ┌─────────────────────────────┐
- │ • XLSX (storici)            │  📁 backend/importXlsx.js
  │ • SofaScore API (live/det.) │  📁 backend/scraper/sofascoreScraper.js
  │ • SVG Momentum              │  📁 backend/utils/svgMomentumExtractor.js
  │ • Future...                 │
@@ -588,14 +572,13 @@ FONTI ESTERNE
 ## 6️⃣ INVARIANTI GLOBALI (RIASSUNTO)
 
 - ❗ Frontend consuma **solo MatchBundle** (1 chiamata) → [`useMatchBundle.jsx`](../src/hooks/useMatchBundle.jsx)
-- ❗ Fonti dati (XLSX, SofaScore, SVG) → popolano DB, mai chiamate da FE
+- ❗ Fonti dati (SofaScore API, SVG Momentum) → popolano DB, mai chiamate da FE
 - ❗ Le strategie vivono **solo nel backend** → [`strategyEngine.js`](../backend/strategies/strategyEngine.js)
 - ❗ Le feature non decidono → [`featureEngine.js`](../backend/utils/featureEngine.js)
 - ❗ I segnali non sono metriche
 - ❗ Odds ≠ Predictor
 - ❗ Live aggiorna lo stato, non lo interpreta → [`liveManager.js`](../backend/liveManager.js)
 - ❗ DataQuality è backend-only
-- ❗ Fallback legacy trasparente al frontend
 
 Questi invarianti sono **verificati automaticamente** dai Concept Checks → [`runConceptChecks.js`](../scripts/runConceptChecks.js)
 
@@ -607,8 +590,7 @@ Questi invarianti sono **verificati automaticamente** dai Concept Checks → [`r
 
 | Tabella | Tipo | Fonte | Repository | Note |
 |---------|------|-------|------------|------|
-| `matches` | Legacy | XLSX Import | [`matchRepository.js`](../backend/db/matchRepository.js) | ~2600 match, schema (winner_name, loser_name) |
-| `matches_new` | Nuovo | SofaScore | [`matchRepository.js`](../backend/db/matchRepository.js) | Schema normalizzato (home_player_id, away_player_id) |
+| `matches_new` | Primaria | SofaScore API | [`matchRepository.js`](../backend/db/matchRepository.js) | Schema normalizzato (home_player_id, away_player_id) |
 | `match_card_snapshot` | Cache | Bundle Engine | [`matchCardService.js`](../backend/services/matchCardService.js) | Cache pre-calcolata del bundle |
 | `players` | Lookup | SofaScore | [`playerService.js`](../backend/services/playerService.js) | Dati giocatori |
 | `tournaments` | Lookup | SofaScore | - | Dati tornei |
@@ -693,7 +675,7 @@ Se un cambiamento **non è riflesso qui**,
 
 | Filosofia | File Codice Principali |
 |-----------|------------------------|
-| [DB](../filosofie/10_data_platform/db/FILOSOFIA_DB.md) | [`matchRepository.js`](../backend/db/matchRepository.js), [`importXlsx.js`](../backend/importXlsx.js), [`sofascoreScraper.js`](../backend/scraper/sofascoreScraper.js) |
+| [DB](../filosofie/10_data_platform/db/FILOSOFIA_DB.md) | [`matchRepository.js`](../backend/db/matchRepository.js), [`sofascoreScraper.js`](../backend/scraper/sofascoreScraper.js) |
 | [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [`featureEngine.js`](../backend/utils/featureEngine.js), [`strategyEngine.js`](../backend/strategies/strategyEngine.js), [`pressureCalculator.js`](../backend/utils/pressureCalculator.js) |
 | [LIVE_TRACKING](../filosofie/20_domain_tennis/live_tracking/FILOSOFIA_LIVE_TRACKING.md) | [`liveManager.js`](../backend/liveManager.js), [`liveTrackingRepository.js`](../backend/db/liveTrackingRepository.js) |
 | [ODDS](../filosofie/30_domain_odds_markets/odds/FILOSOFIA_ODDS.md) | [`server.js`](../backend/server.js) L3507-3590, [`OddsTab.jsx`](../src/components/match/tabs/OddsTab.jsx) |

@@ -661,22 +661,6 @@
           "antiPattern": false
         },
         {
-          "type": "PATTERN",
-          "file": "backend/server.js",
-          "pattern": "/transformLegacyMatchToBundle|legacy.*fallback/i",
-          "description": "server.js deve avere fallback legacy per match XLSX",
-          "passed": true,
-          "antiPattern": false
-        },
-        {
-          "type": "TABLE",
-          "name": "matches",
-          "description": "Tabella legacy con winner_name, loser_name",
-          "passed": true,
-          "migrationFile": "create-new-schema.sql",
-          "isTodo": false
-        },
-        {
           "type": "TABLE",
           "name": "matches_new",
           "description": "Tabella nuova con home_player_id, away_player_id",

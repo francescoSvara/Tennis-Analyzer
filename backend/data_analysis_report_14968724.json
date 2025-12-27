@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-12-26T21:51:45.857Z",
+  "matchId": 14968724,
+  "dataQuality": {
+    "pbpLoaded": true,
+    "svgLoaded": false,
+    "apiLoaded": false
+  },
+  "analysis": {
+    "counts": {
+      "pbpGames": 23,
+      "svgGames": 0,
+      "match": false
+    },
+    "setScores": {
+      "pbp": {
+        "1": {
+          "home": 6,
+          "away": 7
+        },
+        "2": {
+          "home": 5,
+          "away": 5
+        }
+      }
+    },
+    "gameWinners": {
+      "comparison": [],
+      "matches": 0,
+      "total": 0
+    },
+    "breaks": {
+      "pbpBreaks": 1
+    },
+    "momentum": {
+      "avgMomentumBreaks": 0,
+      "avgMomentumNormal": 0,
+      "difference": 0
+    }
+  }
+}

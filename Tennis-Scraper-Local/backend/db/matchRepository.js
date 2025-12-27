@@ -2,13 +2,14 @@ import { supabase } from './supabase.js';
 
 /**
  * Controlla se un match esiste già nel database
+ * NUOVO SCHEMA: usa player1_id/player2_id invece di home/away
  */
 export async function checkDuplicate(eventId) {
   if (!eventId) return null;
   
   const { data, error } = await supabase
-    .from('matches')
-    .select('id, home_player_id, away_player_id, refresh_count')
+    .from('matches_new')
+    .select('id, player1_id, player2_id')
     .eq('id', parseInt(eventId))
     .limit(1);
   
@@ -20,22 +21,22 @@ export async function checkDuplicate(eventId) {
   if (data && data.length > 0) {
     const match = data[0];
     // Ottieni nomi giocatori
-    const { data: homeName } = await supabase
-      .from('players')
+    const { data: p1Name } = await supabase
+      .from('players_new')
       .select('name')
-      .eq('id', match.home_player_id)
+      .eq('id', match.player1_id)
       .single();
-    const { data: awayName } = await supabase
-      .from('players')
+    const { data: p2Name } = await supabase
+      .from('players_new')
       .select('name')
-      .eq('id', match.away_player_id)
+      .eq('id', match.player2_id)
       .single();
     
     return {
       id: match.id,
-      home_player: homeName?.name || 'Unknown',
-      away_player: awayName?.name || 'Unknown',
-      refresh_count: match.refresh_count || 0
+      home_player: p1Name?.name || 'Unknown',
+      away_player: p2Name?.name || 'Unknown',
+      refresh_count: 0
     };
   }
   
@@ -44,58 +45,101 @@ export async function checkDuplicate(eventId) {
 
 /**
  * Inserisce o aggiorna un player nel database
+ * NUOVO SCHEMA: country_code invece di country_alpha2
  */
 export async function upsertPlayer(player) {
   if (!player?.id) return null;
   
   const playerData = {
-    id: player.id,
+    sofascore_id: player.id,
     name: player.name || player.shortName || 'Unknown',
     full_name: player.fullName || player.name || null,
-    short_name: player.shortName || null,
     slug: player.slug || null,
-    country_alpha2: player.country?.alpha2 || null,
+    country_code: player.country?.alpha2 || null,
     country_name: player.country?.name || null,
     current_ranking: player.ranking || null
   };
   
-  const { data, error } = await supabase
-    .from('players')
-    .upsert(playerData, { onConflict: 'id' })
-    .select()
+  // Prima cerca se esiste già per sofascore_id
+  const { data: existing } = await supabase
+    .from('players_new')
+    .select('id')
+    .eq('sofascore_id', player.id)
     .single();
   
-  if (error && error.code !== '23505') {
-    console.error('Error upserting player:', error.message);
+  if (existing) {
+    // Aggiorna
+    const { data, error } = await supabase
+      .from('players_new')
+      .update(playerData)
+      .eq('sofascore_id', player.id)
+      .select()
+      .single();
+    
+    if (error) console.error('Error updating player:', error.message);
+    return data;
+  } else {
+    // Inserisce
+    const { data, error } = await supabase
+      .from('players_new')
+      .insert(playerData)
+      .select()
+      .single();
+    
+    if (error && error.code !== '23505') {
+      console.error('Error inserting player:', error.message);
+    }
+    return data;
   }
-  return data;
 }
 
 /**
  * Inserisce o aggiorna un torneo nel database
+ * NUOVO SCHEMA: surface invece di ground_type
  */
 export async function upsertTournament(tournament) {
   if (!tournament?.id) return null;
   
   const tournamentData = {
-    id: tournament.id,
+    sofascore_id: tournament.id,
     name: tournament.name || 'Unknown Tournament',
     slug: tournament.slug || null,
     category: tournament.category?.name || null,
-    ground_type: tournament.groundType || null,
-    country: tournament.category?.country?.name || null
+    surface: tournament.groundType || null,
+    country_name: tournament.category?.country?.name || null
   };
   
-  const { data, error } = await supabase
-    .from('tournaments')
-    .upsert(tournamentData, { onConflict: 'id' })
-    .select()
+  // Prima cerca se esiste già per sofascore_id
+  const { data: existing } = await supabase
+    .from('tournaments_new')
+    .select('id')
+    .eq('sofascore_id', tournament.id)
     .single();
   
-  if (error && error.code !== '23505') {
-    console.error('Error upserting tournament:', error.message);
+  if (existing) {
+    // Aggiorna
+    const { data, error } = await supabase
+      .from('tournaments_new')
+      .update(tournamentData)
+      .eq('sofascore_id', tournament.id)
+      .select()
+      .single();
+    
+    if (error) console.error('Error updating tournament:', error.message);
+    return data;
+  } else {
+    // Inserisce
+    const { data, error } = await supabase
+      .from('tournaments_new')
+      .insert(tournamentData)
+      .select()
+      .single();
+    
+    if (error && error.code !== '23505') {
+      console.error('Error inserting tournament:', error.message);
+    }
+    return data;
   }
-  return data;
 }
 
 /**
@@ -119,90 +163,269 @@ function calculateSetsWon(homeScore, awayScore, player) {
 }
 
 /**
- * Inserisce punteggi set
+ * Estrae i punteggi set dal formato SofaScore
+ * NUOVO SCHEMA: i punteggi set sono colonne nella tabella matches_new
  */
-async function insertMatchScores(matchId, homeScore, awayScore) {
-  if (!homeScore || !awayScore) return 0;
-
-  const scores = [];
+function extractSetScores(homeScore, awayScore) {
+  const setData = {};
   
   for (let i = 1; i <= 5; i++) {
-    const hGames = homeScore[`period${i}`];
-    const aGames = awayScore[`period${i}`];
+    const hGames = homeScore?.[`period${i}`];
+    const aGames = awayScore?.[`period${i}`];
     if (hGames === undefined || aGames === undefined) break;
     
-    scores.push({
-      match_id: matchId,
-      set_number: i,
-      home_games: hGames,
-      away_games: aGames,
-      home_tiebreak: homeScore[`period${i}TieBreak`] || null,
-      away_tiebreak: awayScore[`period${i}TieBreak`] || null,
-      set_winner: hGames > aGames ? 'home' : aGames > hGames ? 'away' : null
-    });
-  }
-
-  if (scores.length > 0) {
-    await supabase.from('match_scores').delete().eq('match_id', matchId);
-    const { error } = await supabase.from('match_scores').insert(scores);
-    if (error) console.error('Error inserting scores:', error.message);
+    setData[`set${i}_p1`] = hGames;
+    setData[`set${i}_p2`] = aGames;
+    setData[`set${i}_tb`] = homeScore?.[`period${i}TieBreak`] || awayScore?.[`period${i}TieBreak`] || null;
   }
   
-  return scores.length;
+  return setData;
 }
 
 /**
- * Inserisce statistiche
+ * Calcola data_quality (0-100) basato sui dati disponibili
+ * 
+ * LOGICA COMPLETEZZA:
+ * - score base (6-4 7-5): +30 punti
+ * - player1_id e player2_id: +10 punti ciascuno
+ * - tournament_id: +10 punti
+ * - winner_code: +10 punti
+ * - statistics presenti: +20 punti
+ * - power_rankings presenti: +10 punti
+ * 
+ * Se < 50: match è "pending" (in sospeso)
+ * Se >= 50 e < 80: match è "partial" (parziale)
+ * Se >= 80: match è "complete" (completo)
+ */
+function calculateDataQuality(matchData, hasStats, hasPowerRankings, hasPointByPoint = false) {
+  let quality = 0;
+  
+  // Score base
+  if (matchData.score && matchData.score.length > 0) quality += 25;
+  
+  // Players
+  if (matchData.player1_id) quality += 10;
+  if (matchData.player2_id) quality += 10;
+  
+  // Tournament
+  if (matchData.tournament_id) quality += 10;
+  
+  // Winner
+  if (matchData.winner_code) quality += 5;
+  
+  // Statistics
+  if (hasStats) quality += 15;
+  
+  // Power Rankings / Momentum
+  if (hasPowerRankings) quality += 10;
+  
+  // Point By Point (NUOVO - importante per break detection)
+  if (hasPointByPoint) quality += 15;
+  
+  return Math.min(100, quality);
+}
+
+/**
+ * Determina lo status di completezza del match
+ */
+function getCompletenessStatus(dataQuality) {
+  if (dataQuality < 50) return 'pending';      // In attesa - dati insufficienti
+  if (dataQuality < 80) return 'partial';      // Parziale - usabile ma incompleto
+  return 'complete';                           // Completo - tutti i dati essenziali
+}
+
+/**
+ * Inserisce statistiche per TUTTI i periodi (ALL, SET1, SET2, SET3, ecc.)
+ * Usa le key dell'API SofaScore per mapping affidabile
  */
 async function insertStatistics(matchId, statistics) {
   if (!statistics || !Array.isArray(statistics)) return 0;
   
-  await supabase.from('match_statistics').delete().eq('match_id', matchId);
+  await supabase.from('match_statistics_new').delete().eq('match_id', matchId);
   
-  let count = 0;
-  for (const period of statistics) {
-    if (!period.groups) continue;
+  // Funzione helper per estrarre stats da un periodo
+  const extractStatsFromPeriod = (periodData) => {
+    const statMap = {
+      // Service stats
+      p1_aces: null,
+      p2_aces: null,
+      p1_double_faults: null,
+      p2_double_faults: null,
+      p1_first_serve_pct: null,
+      p2_first_serve_pct: null,
+      p1_first_serve_won: null,
+      p1_first_serve_total: null,
+      p2_first_serve_won: null,
+      p2_first_serve_total: null,
+    p1_second_serve_won: null,
+      p1_second_serve_total: null,
+      p2_second_serve_won: null,
+      p2_second_serve_total: null,
+      p1_service_points_won: null,
+      p1_service_points_total: null,
+      p2_service_points_won: null,
+      p2_service_points_total: null,
+      // Break points
+      p1_break_points_won: null,
+      p1_break_points_total: null,
+      p2_break_points_won: null,
+      p2_break_points_total: null,
+      // Points
+      p1_total_points_won: null,
+      p2_total_points_won: null,
+      // Winners/Errors (se disponibili)
+      p1_winners: null,
+      p2_winners: null,
+      p1_unforced_errors: null,
+      p2_unforced_errors: null
+    };
     
-    for (const group of period.groups) {
+    if (!periodData?.groups) return statMap;
+    
+    // Itera su tutti i gruppi e items usando la key per mapping affidabile
+    for (const group of periodData.groups) {
       for (const item of group.statisticsItems || []) {
-        const stat = {
-          match_id: matchId,
-          period: period.period || 'ALL',
-          group_name: group.groupName,
-          stat_name: item.name,
-          home_value: item.home,
-          away_value: item.away,
-          compare_code: item.compareCode
-        };
+        const key = item.key;
         
-        const { error } = await supabase.from('match_statistics').insert(stat);
-        if (!error) count++;
+        switch (key) {
+          case 'aces':
+            statMap.p1_aces = item.homeValue ?? parseInt(item.home) ?? null;
+            statMap.p2_aces = item.awayValue ?? parseInt(item.away) ?? null;
+            break;
+            
+          case 'doubleFaults':
+            statMap.p1_double_faults = item.homeValue ?? parseInt(item.home) ?? null;
+            statMap.p2_double_faults = item.awayValue ?? parseInt(item.away) ?? null;
+            break;
+            
+          case 'firstServeAccuracy':
+            // Percentuale primo servizio
+            if (item.homeTotal && item.awayTotal) {
+              statMap.p1_first_serve_pct = Math.round((item.homeValue / item.homeTotal) * 100);
+              statMap.p2_first_serve_pct = Math.round((item.awayValue / item.awayTotal) * 100);
+            }
+            break;
+            
+          case 'firstServePointsAccuracy':
+            // Punti vinti al primo servizio
+            statMap.p1_first_serve_won = item.homeValue ?? null;
+            statMap.p1_first_serve_total = item.homeTotal ?? null;
+            statMap.p2_first_serve_won = item.awayValue ?? null;
+            statMap.p2_first_serve_total = item.awayTotal ?? null;
+            break;
+            
+          case 'secondServePointsAccuracy':
+            // Punti vinti al secondo servizio
+            statMap.p1_second_serve_won = item.homeValue ?? null;
+            statMap.p1_second_serve_total = item.homeTotal ?? null;
+            statMap.p2_second_serve_won = item.awayValue ?? null;
+            statMap.p2_second_serve_total = item.awayTotal ?? null;
+            break;
+            
+          case 'breakPointsSaved':
+            // Break points total = break points faced dall'avversario
+            statMap.p1_break_points_total = item.awayTotal ?? null;
+            statMap.p2_break_points_total = item.homeTotal ?? null;
+            break;
+            
+          case 'breakPointsScored':
+            // Break points convertiti (dal receiver)
+            statMap.p1_break_points_won = item.homeValue ?? null;
+            statMap.p2_break_points_won = item.awayValue ?? null;
+            break;
+            
+          case 'pointsTotal':
+            statMap.p1_total_points_won = item.homeValue ?? parseInt(item.home) ?? null;
+            statMap.p2_total_points_won = item.awayValue ?? parseInt(item.away) ?? null;
+            break;
+            
+          case 'servicePointsScored':
+            statMap.p1_service_points_won = item.homeValue ?? null;
+            statMap.p2_service_points_won = item.awayValue ?? null;
+            break;
+            
+          case 'winners':
+            statMap.p1_winners = item.homeValue ?? parseInt(item.home) ?? null;
+            statMap.p2_winners = item.awayValue ?? parseInt(item.away) ?? null;
+            break;
+            
+          case 'unforcedErrors':
+            statMap.p1_unforced_errors = item.homeValue ?? parseInt(item.home) ?? null;
+            statMap.p2_unforced_errors = item.awayValue ?? parseInt(item.away) ?? null;
+            break;
+        }
       }
     }
+    
+    return statMap;
+  };
+  
+  // Normalizza il nome del periodo: "1ST" -> "SET1", "2ND" -> "SET2", ecc.
+  const normalizePeriod = (period) => {
+    const periodMap = {
+      'ALL': 'ALL',
+      '1ST': 'SET1',
+      '2ND': 'SET2', 
+      '3RD': 'SET3',
+      '4TH': 'SET4',
+      '5TH': 'SET5'
+    };
+    return periodMap[period] || period;
+  };
+  
+  // Processa TUTTI i periodi disponibili
+  const records = [];
+  
+  for (const periodData of statistics) {
+    const normalizedPeriod = normalizePeriod(periodData.period);
+    const statMap = extractStatsFromPeriod(periodData);
+    
+    records.push({
+      match_id: matchId,
+      period: normalizedPeriod,
+      ...statMap
+    });
   }
   
-  return count;
+  if (records.length === 0) return 0;
+  
+  // Inserisci tutti i record
+  const { error } = await supabase.from('match_statistics_new').insert(records);
+  if (error) {
+    console.error('Error inserting statistics:', error.message);
+    return 0;
+  }
+  
+  // Log dettagliato
+  const allStats = records.find(r => r.period === 'ALL');
+  console.log(`📊 Statistiche salvate per match ${matchId} (${records.length} periodi: ${records.map(r => r.period).join(', ')})`);
+  if (allStats) {
+    console.log(`   ALL: Aces ${allStats.p1_aces}-${allStats.p2_aces}, DF ${allStats.p1_double_faults}-${allStats.p2_double_faults}, Points ${allStats.p1_total_points_won}-${allStats.p2_total_points_won}`);
+  }
+  
+  return records.length;
 }
 
 /**
  * Inserisce i power rankings (momentum del match)
+ * NUOVO SCHEMA: usa zone e favored_player invece di status
  */
 async function insertPowerRankings(matchId, powerRankings) {
   if (!Array.isArray(powerRankings) || powerRankings.length === 0) return 0;
 
   // Prima elimina vecchi rankings
-  await supabase.from('power_rankings').delete().eq('match_id', matchId);
+  await supabase.from('match_power_rankings_new').delete().eq('match_id', matchId);
 
   const rankings = powerRankings.map(pr => {
     const value = pr.value || 0;
-    let zone = 'balanced_positive';
-    let status = 'neutral';
+    let zone = 'balanced';
+    let favored_player = null;
     
-    if (value > 60) { zone = 'strong_control'; status = 'positive'; }
-    else if (value >= 20) { zone = 'advantage'; status = 'positive'; }
-    else if (value > -20) { zone = 'balanced_positive'; status = 'neutral'; }
-    else if (value > -40) { zone = 'slight_pressure'; status = 'warning'; }
-    else { zone = 'strong_pressure'; status = 'critical'; }
+    if (value > 60) { zone = 'strong_control'; favored_player = 1; }
+    else if (value >= 20) { zone = 'advantage'; favored_player = 1; }
+    else if (value > -20) { zone = 'balanced'; favored_player = null; }
+    else if (value > -60) { zone = 'advantage'; favored_player = 2; }
+    else { zone = 'strong_control'; favored_player = 2; }
     
     return {
       match_id: matchId,
@@ -211,24 +434,104 @@ async function insertPowerRankings(matchId, powerRankings) {
       value: value,
       break_occurred: pr.breakOccurred || false,
       zone,
-      status
+      favored_player
     };
   });
 
-  const { error } = await supabase.from('power_rankings').insert(rankings);
+  const { error } = await supabase.from('match_power_rankings_new').insert(rankings);
   if (error) console.error('Error inserting power rankings:', error.message);
 
   return rankings.length;
 }
 
 /**
+ * Inserisce i dati point-by-point nel database
+ * FILOSOFIA: Salva serving/scoring per calcolo BREAK dal backend
+ * 
+ * Struttura SofaScore:
+ * pointByPoint: [{ set, games: [{ game, score: { serving, scoring }, points: [...] }] }]
+ * 
+ * @see docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md
+ */
+export async function insertPointByPoint(matchId, pointByPoint) {
+  if (!Array.isArray(pointByPoint) || pointByPoint.length === 0) return 0;
+
+  // Prima elimina vecchi punti
+  await supabase.from('point_by_point').delete().eq('match_id', matchId);
+
+  const points = [];
+  
+  for (const setItem of pointByPoint) {
+    const setNum = setItem.set || 1;
+    if (!Array.isArray(setItem.games)) continue;
+    
+    for (const game of setItem.games) {
+      if (!Array.isArray(game.points)) continue;
+      
+      let pointIndex = 0;
+      let prevHome = '0';
+      let prevAway = '0';
+      
+      for (const p of game.points) {
+        pointIndex++;
+        
+        const homePoint = String(p.homePoint ?? '0');
+        const awayPoint = String(p.awayPoint ?? '0');
+        
+        // Determina chi ha vinto il punto basandosi sui pointType
+        // pointType: 1 = won point, 3 = won game
+        let winner = null;
+        if (p.homePointType === 1 || p.homePointType === 3) winner = 'home';
+        else if (p.awayPointType === 1 || p.awayPointType === 3) winner = 'away';
+        
+        points.push({
+          match_id: matchId,
+          set_number: setNum,
+          game_number: game.game || 1,
+          point_index: pointIndex,
+          home_point: homePoint,
+          away_point: awayPoint,
+          score_before: `${prevHome}-${prevAway}`,
+          score_after: `${homePoint}-${awayPoint}`,
+          point_winner: winner,
+          serving: game.score?.serving || null,   // 1 = home serve, 2 = away serve
+          scoring: game.score?.scoring || null,   // 1 = home wins game, 2 = away wins game
+          home_point_type: p.homePointType || null,
+          away_point_type: p.awayPointType || null,
+          point_description: p.pointDescription || null,
+          is_ace: p.pointDescription === 'ace' || p.pointDescription === 1,
+          is_double_fault: p.pointDescription === 'double_fault' || p.pointDescription === 2
+        });
+        
+        prevHome = homePoint;
+        prevAway = awayPoint;
+      }
+    }
+  }
+
+  if (points.length > 0) {
+    // Inserisci in batch da 500 per evitare limiti API Supabase
+    const batchSize = 500;
+    for (let i = 0; i < points.length; i += batchSize) {
+      const batch = points.slice(i, i + batchSize);
+      const { error } = await supabase.from('point_by_point').insert(batch);
+      if (error) console.error('Error inserting points batch:', error.message);
+    }
+  }
+
+  return points.length;
+}
+
+/**
  * Inserisce un match nel database
+ * NUOVO SCHEMA: player1_id/player2_id, match_date, colonne set nel match stesso
  */
 export async function insertMatch(scrapeData) {
   try {
     let eventData = null;
     let statisticsData = null;
     let powerRankingsData = null;
+    let pointByPointData = null;
     
     if (scrapeData.api) {
       for (const [url, data] of Object.entries(scrapeData.api)) {
@@ -240,6 +543,9 @@ export async function insertMatch(scrapeData) {
         }
         if (url.includes('/tennis-power-rankings') && data?.tennisPowerRankings) {
           powerRankingsData = data.tennisPowerRankings;
+        }
+        if (url.includes('/point-by-point') && data?.pointByPoint) {
+          pointByPointData = data.pointByPoint;
         }
       }
     }
@@ -253,59 +559,137 @@ export async function insertMatch(scrapeData) {
     const awayPlayer = eventData.awayTeam;
     const tournament = eventData.tournament?.uniqueTournament;
     
-    // Upsert players
-    if (homePlayer?.id) await upsertPlayer(homePlayer);
-    if (awayPlayer?.id) await upsertPlayer(awayPlayer);
+    // Upsert players e ottieni gli ID interni
+    const player1 = homePlayer?.id ? await upsertPlayer(homePlayer) : null;
+    const player2 = awayPlayer?.id ? await upsertPlayer(awayPlayer) : null;
     
-    // Upsert tournament
-    if (tournament?.id) await upsertTournament(tournament);
+    // Upsert tournament e ottieni l'ID interno
+    const tournamentRecord = tournament?.id ? await upsertTournament(tournament) : null;
     
-    // Prepara match
-    const matchData = {
-      id: eventData.id,
-      slug: eventData.slug || null,
-      home_player_id: homePlayer?.id || null,
-      away_player_id: awayPlayer?.id || null,
-      home_seed: homePlayer?.seed || null,
-      away_seed: awayPlayer?.seed || null,
-      tournament_id: tournament?.id || null,
-      round_name: eventData.roundInfo?.name || null,
-      start_time: eventData.startTimestamp 
-        ? new Date(eventData.startTimestamp * 1000).toISOString() 
-        : null,
-      status_code: eventData.status?.code || null,
-      status_type: eventData.status?.type || null,
-      status_description: eventData.status?.description || null,
-      winner_code: eventData.winnerCode || null,
-      home_sets_won: calculateSetsWon(eventData.homeScore, eventData.awayScore, 'home'),
-      away_sets_won: calculateSetsWon(eventData.homeScore, eventData.awayScore, 'away'),
-      first_to_serve: eventData.firstToServe || null,
-      extracted_at: new Date().toISOString(),
-      is_live: eventData.status?.type === 'inprogress',
-      raw_json: scrapeData
-    };
+    // Estrai match_date dal timestamp
+    const matchDate = eventData.startTimestamp 
+      ? new Date(eventData.startTimestamp * 1000).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0];
     
-    const { data: insertedMatch, error: matchError } = await supabase
-      .from('matches')
-      .upsert(matchData, { onConflict: 'id' })
-      .select()
-      .single();
+    // Estrai punteggi set
+    const setScores = extractSetScores(eventData.homeScore, eventData.awayScore);
     
-    if (matchError) {
-      console.error('Error inserting match:', matchError);
-      return null;
+    // Calcola score string (es: "6-4 7-5")
+    let scoreString = '';
+    for (let i = 1; i <= 5; i++) {
+      const p1 = setScores[`set${i}_p1`];
+      const p2 = setScores[`set${i}_p2`];
+      if (p1 !== undefined && p2 !== undefined) {
+        if (scoreString) scoreString += ' ';
+        scoreString += `${p1}-${p2}`;
+      }
     }
     
-    // Inserisci scores, stats e power rankings
-    const scoresCount = await insertMatchScores(eventData.id, eventData.homeScore, eventData.awayScore);
-    const statsCount = await insertStatistics(eventData.id, statisticsData);
-    const prCount = await insertPowerRankings(eventData.id, powerRankingsData);
+    // Determina winner_id
+    let winnerId = null;
+    if (eventData.winnerCode === 1 && player1) winnerId = player1.id;
+    else if (eventData.winnerCode === 2 && player2) winnerId = player2.id;
+    
+    // Mappa status SofaScore -> nuovo schema
+    const statusMap = {
+      'finished': 'finished',
+      'inprogress': 'live',
+      'notstarted': 'scheduled'
+    };
+    
+    // Prepara match con nuovo schema
+    const matchData = {
+      player1_id: player1?.id || null,
+      player2_id: player2?.id || null,
+      winner_id: winnerId,
+      tournament_id: tournamentRecord?.id || null,
+      match_date: matchDate,
+      start_timestamp: eventData.startTimestamp || null,
+      round: eventData.roundInfo?.name || null,
+      surface: tournament?.groundType || null,
+      status: statusMap[eventData.status?.type] || 'finished',
+      winner_code: eventData.winnerCode || null,
+      score: scoreString || null,
+      sets_player1: calculateSetsWon(eventData.homeScore, eventData.awayScore, 'home'),
+      sets_player2: calculateSetsWon(eventData.homeScore, eventData.awayScore, 'away'),
+      player1_rank: homePlayer?.ranking || null,
+      player2_rank: awayPlayer?.ranking || null,
+      player1_seed: homePlayer?.seed || null,
+      player2_seed: awayPlayer?.seed || null,
+      ...setScores
+    };
+    
+    // Cerca se il match esiste già per sofascore event ID (salvato in una colonna custom o tramite altro metodo)
+    // Per ora usiamo l'ID sofascore come chiave (ID bigint)
+    // Il nuovo schema non usa direttamente l'event ID, quindi cerchiamo per giocatori e data
+    const { data: existingMatch } = await supabase
+      .from('matches_new')
+      .select('id')
+      .eq('player1_id', matchData.player1_id)
+      .eq('player2_id', matchData.player2_id)
+      .eq('match_date', matchData.match_date)
+      .single();
+    
+    let insertedMatch;
+    if (existingMatch) {
+      // Aggiorna match esistente
+      const { data, error: matchError } = await supabase
+        .from('matches_new')
+        .update(matchData)
+        .eq('id', existingMatch.id)
+        .select()
+        .single();
+      
+      if (matchError) {
+        console.error('Error updating match:', matchError);
+        return null;
+      }
+      insertedMatch = data;
+    } else {
+      // Inserisce nuovo match
+      const { data, error: matchError } = await supabase
+        .from('matches_new')
+        .insert(matchData)
+        .select()
+        .single();
+      
+      if (matchError) {
+        console.error('Error inserting match:', matchError);
+        return null;
+      }
+      insertedMatch = data;
+    }
+    
+    // Inserisci stats, power rankings e point-by-point (i punteggi set sono già nel match)
+    const statsCount = await insertStatistics(insertedMatch.id, statisticsData);
+    const prCount = await insertPowerRankings(insertedMatch.id, powerRankingsData);
+    const pbpCount = await insertPointByPoint(insertedMatch.id, pointByPointData);
+    
+    // Calcola data_quality basato sui dati disponibili (incluso PbP)
+    const dataQuality = calculateDataQuality(matchData, statsCount > 0, prCount > 0, pbpCount > 0);
+    const completenessStatus = getCompletenessStatus(dataQuality);
+    
+    // Aggiorna data_quality nel match
+    await supabase
+      .from('matches_new')
+      .update({ data_quality: dataQuality })
+      .eq('id', insertedMatch.id);
     
     const homeName = homePlayer?.name || homePlayer?.shortName || 'Unknown';
     const awayName = awayPlayer?.name || awayPlayer?.shortName || 'Unknown';
     
-    console.log(`✅ Match inserito: ${homeName} vs ${awayName}`);
-    console.log(`   Event ID: ${eventData.id}, Scores: ${scoresCount}, Stats: ${statsCount}, PowerRankings: ${prCount}`);
+    // Log con status completezza
+    const statusEmoji = completenessStatus === 'complete' ? '✅' : 
+                        completenessStatus === 'partial' ? '🟡' : '🔴';
+    
+    console.log(`${statusEmoji} Match inserito: ${homeName} vs ${awayName}`);
+    console.log(`   Match ID: ${insertedMatch.id}, Stats: ${statsCount}, PowerRankings: ${prCount}, PointByPoint: ${pbpCount}`);
+    console.log(`   Data Quality: ${dataQuality}% [${completenessStatus.toUpperCase()}]`);
+    
+    // Se pending, avvisa
+    if (completenessStatus === 'pending') {
+      console.log(`   ⚠️ PENDING: Match in attesa di dati aggiuntivi (stats/momentum/pbp)`);
+    }
     
     return insertedMatch;
   } catch (err) {
@@ -316,31 +700,26 @@ export async function insertMatch(scrapeData) {
 
 /**
  * Ottieni match dal database
+ * NUOVO SCHEMA: player1_id/player2_id, match_date, sets_player1/sets_player2
  */
 export async function getMatches(limit = 50) {
   const { data, error } = await supabase
-    .from('matches')
+    .from('matches_new')
     .select(`
       id,
-      slug,
-      home_player_id,
-      away_player_id,
+      player1_id,
+      player2_id,
       tournament_id,
-      round_name,
-      start_time,
-      status_description,
-      status_type,
+      round,
+      match_date,
+      status,
       winner_code,
-      home_sets_won,
-      away_sets_won,
-      extracted_at,
-      refresh_count,
-      force_completed,
-      home_player:players!matches_home_player_id_fkey(id, name, country_alpha2),
-      away_player:players!matches_away_player_id_fkey(id, name, country_alpha2),
-      tournament:tournaments(id, name, category, ground_type)
+      score,
+      sets_player1,
+      sets_player2,
+      created_at
     `)
-    .order('extracted_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(limit);
   
   if (error) {
@@ -348,29 +727,46 @@ export async function getMatches(limit = 50) {
     return [];
   }
   
-  return data || [];
+  // Arricchisci con info giocatori e torneo
+  const enriched = await Promise.all((data || []).map(async (match) => {
+    const [p1Res, p2Res, tournRes] = await Promise.all([
+      match.player1_id ? supabase.from('players_new').select('id, name, country_code').eq('id', match.player1_id).single() : { data: null },
+      match.player2_id ? supabase.from('players_new').select('id, name, country_code').eq('id', match.player2_id).single() : { data: null },
+      match.tournament_id ? supabase.from('tournaments_new').select('id, name, category, surface').eq('id', match.tournament_id).single() : { data: null }
+    ]);
+    
+    return {
+      ...match,
+      home_player: p1Res.data,
+      away_player: p2Res.data,
+      tournament: tournRes.data
+    };
+  }));
+  
+  return enriched;
 }
 
 /**
  * Statistiche
+ * NUOVO SCHEMA: usa match_date invece di extracted_at
  */
 export async function getStats() {
   try {
     const { count: totalMatches } = await supabase
-      .from('matches')
+      .from('matches_new')
       .select('*', { count: 'exact', head: true });
     
     const { count: totalPlayers } = await supabase
-      .from('players')
+      .from('players_new')
       .select('*', { count: 'exact', head: true });
     
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     
     const { count: recentMatches } = await supabase
-      .from('matches')
+      .from('matches_new')
       .select('*', { count: 'exact', head: true })
-      .gte('extracted_at', yesterday.toISOString());
+      .gte('created_at', yesterday.toISOString());
     
     return {
       totalMatches: totalMatches || 0,
@@ -385,70 +781,127 @@ export async function getStats() {
 
 /**
  * Calcola la percentuale di completamento di un match
- * Campi tracciati: player info, tournament, scores
- * NOTA: has_statistics è opzionale perché non tutti i match hanno stats su SofaScore
+ * NUOVO SCHEMA: include statistiche come parte della completezza
  */
 export async function getMatchCompleteness(matchId) {
   const fields = {
-    // Campi base match (dalla tabella matches)
-    home_player_id: false,
-    away_player_id: false,
+    // Dati base match
+    player1_id: false,
+    player2_id: false,
     tournament_id: false,
-    round_name: false,
-    start_time: false,
-    status_description: false,
+    round: false,
+    match_date: false,
+    status: false,
     winner_code: false,
-    home_sets_won: false,
-    away_sets_won: false,
-    // Dati correlati - scores è obbligatorio, statistics opzionale
-    has_scores: false
+    sets_player1: false,
+    sets_player2: false,
+    has_set_scores: false,
+    // Statistiche (ora obbligatorie per 100%)
+    has_statistics: false,
+    has_aces: false,
+    has_double_faults: false,
+    has_total_points: false
   };
   
-  // Campo opzionale (non conta per il 100%)
-  let hasStatistics = false;
+  const missingFields = [];
   
   // Ottieni dati match
   const { data: match } = await supabase
-    .from('matches')
+    .from('matches_new')
     .select('*')
     .eq('id', matchId)
     .single();
   
-  if (!match) return { percentage: 0, fields, hasStatistics: false };
+  if (!match) return { percentage: 0, fields, missingFields: ['match not found'] };
   
-  // Controlla campi base
-  if (match.home_player_id) fields.home_player_id = true;
-  if (match.away_player_id) fields.away_player_id = true;
-  if (match.tournament_id) fields.tournament_id = true;
-  if (match.round_name) fields.round_name = true;
-  if (match.start_time) fields.start_time = true;
-  if (match.status_description) fields.status_description = true;
-  if (match.winner_code) fields.winner_code = true;
-  if (match.home_sets_won !== null) fields.home_sets_won = true;
-  if (match.away_sets_won !== null) fields.away_sets_won = true;
+  // Controlla campi base (NUOVO SCHEMA)
+  if (match.player1_id) fields.player1_id = true; else missingFields.push('player1_id');
+  if (match.player2_id) fields.player2_id = true; else missingFields.push('player2_id');
+  if (match.tournament_id) fields.tournament_id = true; else missingFields.push('tournament_id');
+  if (match.round) fields.round = true; else missingFields.push('round');
+  if (match.match_date) fields.match_date = true; else missingFields.push('match_date');
+  if (match.status) fields.status = true; else missingFields.push('status');
+  if (match.winner_code) fields.winner_code = true; else missingFields.push('winner_code');
+  if (match.sets_player1 !== null) fields.sets_player1 = true; else missingFields.push('sets_player1');
+  if (match.sets_player2 !== null) fields.sets_player2 = true; else missingFields.push('sets_player2');
   
-  // Controlla scores (obbligatorio)
-  const { count: scoresCount } = await supabase
-    .from('match_scores')
-    .select('*', { count: 'exact', head: true })
-    .eq('match_id', matchId);
+  // Controlla se ci sono punteggi set
+  if (match.set1_p1 !== null && match.set1_p2 !== null) {
+    fields.has_set_scores = true;
+  } else {
+    missingFields.push('set_scores');
+  }
   
-  if (scoresCount > 0) fields.has_scores = true;
+  // Controlla statistics
+  const { data: stats } = await supabase
+    .from('match_statistics_new')
+    .select('*')
+    .eq('match_id', matchId)
+    .single();
   
-  // Controlla statistics (opzionale - bonus info)
-  const { count: statsCount } = await supabase
-    .from('match_statistics')
-    .select('*', { count: 'exact', head: true })
-    .eq('match_id', matchId);
+  if (stats) {
+    fields.has_statistics = true;
+    
+    if (stats.p1_aces !== null && stats.p2_aces !== null) {
+      fields.has_aces = true;
+    } else {
+      missingFields.push('aces');
+    }
+    
+    if (stats.p1_double_faults !== null && stats.p2_double_faults !== null) {
+      fields.has_double_faults = true;
+    } else {
+      missingFields.push('double_faults');
+    }
+    
+    if (stats.p1_total_points_won !== null && stats.p2_total_points_won !== null) {
+      fields.has_total_points = true;
+    } else {
+      missingFields.push('total_points');
+    }
+  } else {
+    missingFields.push('statistics (none)');
+  }
   
-  if (statsCount > 0) hasStatistics = true;
-  
-  // Calcola percentuale (10 campi obbligatori)
+  // Calcola percentuale
   const totalFields = Object.keys(fields).length;
   const completedFields = Object.values(fields).filter(v => v).length;
   const percentage = Math.round((completedFields / totalFields) * 100);
   
-  return { percentage, fields, completedFields, totalFields, hasStatistics };
+  return { 
+    percentage, 
+    fields, 
+    completedFields, 
+    totalFields, 
+    missingFields,
+    isComplete: percentage === 100
+  };
+}
+
+/**
+ * Ottieni partite problematiche (completezza < 100%)
+ */
+export async function getProblematicMatches(limit = 100) {
+  const matches = await getMatches(limit);
+  const problematic = [];
+  
+  for (const match of matches) {
+    const completeness = await getMatchCompleteness(match.id);
+    
+    if (completeness.percentage < 100) {
+      problematic.push({
+        ...match,
+        completeness: completeness.percentage,
+        missingFields: completeness.missingFields,
+        completenessDetails: completeness.fields
+      });
+    }
+  }
+  
+  // Ordina per completezza (le peggiori prima)
+  problematic.sort((a, b) => a.completeness - b.completeness);
+  
+  return problematic;
 }
 
 /**
@@ -474,31 +927,31 @@ export async function getMatchesWithCompleteness(limit = 50) {
 
 /**
  * Ottieni tornei recenti con partite (ultimi 7 giorni)
+ * NUOVO SCHEMA: usa match_date invece di extracted_at
  */
 export async function getRecentTournaments() {
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   
   const { data, error } = await supabase
-    .from('matches')
-    .select(`
-      tournament_id,
-      tournament:tournaments(id, name, category, ground_type)
-    `)
-    .gte('extracted_at', weekAgo.toISOString())
+    .from('matches_new')
+    .select(`tournament_id`)
+    .gte('match_date', weekAgo.toISOString().split('T')[0])
     .not('tournament_id', 'is', null);
   
   if (error || !data) return [];
   
-  // Raggruppa per torneo unico
-  const tournamentsMap = new Map();
-  for (const match of data) {
-    if (match.tournament && !tournamentsMap.has(match.tournament_id)) {
-      tournamentsMap.set(match.tournament_id, match.tournament);
-    }
-  }
+  // Raggruppa per torneo unico e carica info
+  const tournamentIds = [...new Set(data.map(m => m.tournament_id).filter(Boolean))];
   
-  return Array.from(tournamentsMap.values());
+  if (tournamentIds.length === 0) return [];
+  
+  const { data: tournaments } = await supabase
+    .from('tournaments_new')
+    .select('id, name, category, surface')
+    .in('id', tournamentIds);
+  
+  return tournaments || [];
 }
 
 /**
@@ -506,7 +959,7 @@ export async function getRecentTournaments() {
  */
 export async function getMatchIdsByTournament(tournamentId) {
   const { data, error } = await supabase
-    .from('matches')
+    .from('matches_new')
     .select('id')
     .eq('tournament_id', tournamentId);
   
@@ -570,7 +1023,7 @@ export async function upsertDetectedMatches(matches, tournamentId, tournamentNam
     
     // Controlla se è già nel DB matches (quindi acquisito)
     const { data: existingMatch } = await supabase
-      .from('matches')
+      .from('matches_new')
       .select('id')
       .eq('id', match.id)
       .single();
@@ -640,17 +1093,17 @@ export async function getAdvancedStats() {
   try {
     // Conta totale matches nel DB
     const { count: matchesCount } = await supabase
-      .from('matches')
+      .from('matches_new')
       .select('*', { count: 'exact', head: true });
     stats.totalInDb = matchesCount || 0;
     
-    // Conta matches ultime 24h
+    // Conta matches ultime 24h (usa created_at invece di extracted_at)
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const { count: recent } = await supabase
-      .from('matches')
+      .from('matches_new')
       .select('*', { count: 'exact', head: true })
-      .gte('extracted_at', yesterday.toISOString());
+      .gte('created_at', yesterday.toISOString());
     stats.acquiredLast24h = recent || 0;
     
     // Conta detected matches (se la tabella esiste)
@@ -758,7 +1211,7 @@ export async function syncAcquiredMatches() {
   try {
     // Ottieni tutti gli ID dalla tabella matches
     const { data: matchIds, error: matchError } = await supabase
-      .from('matches')
+      .from('matches_new')
       .select('id');
     
     if (matchError) {
@@ -826,7 +1279,7 @@ export async function massScanRecentTournaments(tournaments) {
  */
 export async function getUniqueTournaments() {
   const { data, error } = await supabase
-    .from('matches')
+    .from('matches_new')
     .select('tournament_id, tournament:tournaments(id, name)')
     .not('tournament_id', 'is', null);
   
@@ -914,7 +1367,7 @@ export async function findMatchingXlsxMatch(sofascoreMatch) {
   
   // Cerca sia xlsx_import che xlsx_2025 (diversi formati di import)
   const { data: xlsxMatches, error } = await supabase
-    .from('matches')
+    .from('matches_new')
     .select('*')
     .in('data_source', ['xlsx_import', 'xlsx_2025'])
     .gte('start_time', startDate.toISOString())
@@ -1002,7 +1455,7 @@ export async function mergeXlsxData(sofascoreMatchId, xlsxMatch) {
   }
   
   const { data, error } = await supabase
-    .from('matches')
+    .from('matches_new')
     .update(updateData)
     .eq('id', sofascoreMatchId)
     .select()
@@ -1022,7 +1475,7 @@ export async function mergeXlsxData(sofascoreMatchId, xlsxMatch) {
  */
 export async function deleteXlsxMatch(xlsxMatchId) {
   const { error } = await supabase
-    .from('matches')
+    .from('matches_new')
     .delete()
     .eq('id', xlsxMatchId);
   
@@ -1046,7 +1499,7 @@ export async function findExistingSofascoreMatch(matchData) {
   
   // Cerca match con lo stesso ID SofaScore
   const { data: existingMatch, error } = await supabase
-    .from('matches')
+    .from('matches_new')
     .select('*')
     .eq('id', eventId)
     .single();
@@ -1118,60 +1571,27 @@ export async function insertMatchWithXlsxMerge(scrapeData) {
 
 /**
  * Aggiorna il refresh_count di un match tramite event_id (SofaScore ID)
+ * NOTA: refresh_count non esiste nel nuovo schema - funzione no-op per compatibilità
  */
 export async function updateRefreshCount(eventId, count) {
-  try {
-    console.log(`   → DB update refresh_count=${count} for id=${eventId}`);
-    const { data, error } = await supabase
-      .from('matches')
-      .update({ refresh_count: count })
-      .eq('id', parseInt(eventId))
-      .select();
-    
-    if (error) {
-      console.error('Error updating refresh_count:', error);
-      return false;
-    }
-    console.log(`   → DB result:`, data?.length ? 'updated' : 'no rows affected');
-    return true;
-  } catch (err) {
-    console.error('Error in updateRefreshCount:', err);
-    return false;
-  }
+  console.log(`   → updateRefreshCount: no-op (colonna rimossa nel nuovo schema)`);
+  return true;
 }
 
 /**
  * Marca un match come "force complete" dopo 3 tentativi di refresh
- * Imposta refresh_count e force_completed
+ * NOTA: force_completed e refresh_count non esistono nel nuovo schema - funzione no-op
  */
 export async function markMatchAsForceComplete(eventId, refreshCount) {
-  try {
-    const { error } = await supabase
-      .from('matches')
-      .update({ 
-        refresh_count: refreshCount,
-        force_completed: true
-      })
-      .eq('id', parseInt(eventId));
-    
-    if (error) {
-      console.error('Error marking match as force complete:', error);
-      return false;
-    }
-    console.log(`✅ Match ${eventId} force completed after ${refreshCount} refreshes`);
-    return true;
-  } catch (err) {
-    console.error('Error in markMatchAsForceComplete:', err);
-    return false;
-  }
+  console.log(`   → markMatchAsForceComplete: no-op (colonne rimosse nel nuovo schema)`);
+  return true;
 }
 
 /**
  * Inserisce power rankings estratti da SVG DOM
- * IMPORTANTE: Aggiorna SOLO value_svg e source, NON tocca value (API)
- * Se il record non esiste, lo crea con value_svg (value resta NULL per API)
+ * NUOVO SCHEMA: Salva direttamente nel campo 'value' (non c'è value_svg separato)
  * @param {number} matchId - ID del match
- * @param {Array} powerRankings - Array di rankings con set, game, value_svg, source
+ * @param {Array} powerRankings - Array di rankings con set, game, value
  * @returns {number} Numero di righe inserite/aggiornate
  */
 export async function insertPowerRankingsSvg(matchId, powerRankings) {
@@ -1181,7 +1601,7 @@ export async function insertPowerRankingsSvg(matchId, powerRankings) {
   }
   
   const matchIdInt = parseInt(matchId);
-  console.log(`📊 [SVG] Aggiornamento SOLO value_svg per ${powerRankings.length} games, match ${matchIdInt}`);
+  console.log(`📊 [SVG] Inserimento ${powerRankings.length} power rankings per match ${matchIdInt}`);
   
   let updatedCount = 0;
   let insertedCount = 0;
@@ -1189,48 +1609,265 @@ export async function insertPowerRankingsSvg(matchId, powerRankings) {
   for (const pr of powerRankings) {
     const setNum = pr.set || 1;
     const gameNum = pr.game || 1;
-    const valueSvg = pr.value_svg ?? pr.value ?? 0;
+    const value = pr.value_svg ?? pr.value ?? 0;
+    
+    // Determina zone e favored_player
+    let zone = 'balanced';
+    let favored_player = null;
+    
+    if (value > 60) { zone = 'strong_control'; favored_player = 1; }
+    else if (value >= 20) { zone = 'advantage'; favored_player = 1; }
+    else if (value > -20) { zone = 'balanced'; favored_player = null; }
+    else if (value > -60) { zone = 'advantage'; favored_player = 2; }
+    else { zone = 'strong_control'; favored_player = 2; }
     
     // Prima controlla se esiste già un record per questo game
     const { data: existing } = await supabase
-      .from('power_rankings')
-      .select('id, value')
+      .from('match_power_rankings_new')
+      .select('id')
       .eq('match_id', matchIdInt)
       .eq('set_number', setNum)
       .eq('game_number', gameNum)
       .single();
     
     if (existing) {
-      // Record esiste: aggiorna SOLO value_svg e source, NON toccare value!
+      // Record esiste: aggiorna value
       const { error } = await supabase
-        .from('power_rankings')
-        .update({
-          value_svg: valueSvg,
-          source: existing.value ? 'api+svg' : 'svg_dom'  // Se ha value API, marca come combinato
-        })
+        .from('match_power_rankings_new')
+        .update({ value, zone, favored_player })
         .eq('id', existing.id);
       
       if (!error) updatedCount++;
     } else {
-      // Record non esiste: crea nuovo con SOLO value_svg (value resta NULL)
+      // Record non esiste: crea nuovo
       const { error } = await supabase
-        .from('power_rankings')
+        .from('match_power_rankings_new')
         .insert({
           match_id: matchIdInt,
           set_number: setNum,
           game_number: gameNum,
-          value: null,           // NON impostare value! Resta NULL per API
-          value_svg: valueSvg,   // Solo SVG
-          source: 'svg_dom',
+          value: value,
           break_occurred: false,
-          zone: 'balanced_positive',
-          status: 'neutral'
+          zone,
+          favored_player
         });
       
       if (!error) insertedCount++;
     }
   }
   
-  console.log(`✅ [SVG] Match ${matchIdInt}: ${updatedCount} aggiornati, ${insertedCount} nuovi (solo value_svg)`);
+  console.log(`✅ [SVG] Match ${matchIdInt}: ${updatedCount} aggiornati, ${insertedCount} nuovi`);
   return updatedCount + insertedCount;
+}
+
+/**
+ * Inserisce power rankings nella tabella PRINCIPALE power_rankings
+ * (usata dall'app React su porta 3001)
+ * @param {number} sofascoreId - ID SofaScore del match
+ * @param {Array} powerRankings - Array di rankings con set, game, value
+ * @returns {number} Numero di righe inserite/aggiornate
+ */
+export async function insertPowerRankingsMainTable(sofascoreId, powerRankings) {
+  if (!Array.isArray(powerRankings) || powerRankings.length === 0) {
+    console.log(`⚠️ [SVG-MAIN] Nessun power ranking da inserire per sofascoreId ${sofascoreId}`);
+    return 0;
+  }
+  
+  const matchIdInt = parseInt(sofascoreId);
+  console.log(`📊 [SVG-MAIN] Inserimento ${powerRankings.length} power rankings in tabella principale per sofascoreId ${matchIdInt}`);
+  
+  // Prima elimina eventuali record esistenti per evitare duplicati
+  await supabase
+    .from('power_rankings')
+    .delete()
+    .eq('match_id', matchIdInt);
+  
+  // Prepara i record da inserire
+  const records = powerRankings.map(pr => {
+    const setNum = pr.set || 1;
+    const gameNum = pr.game || 1;
+    const value = pr.value_svg ?? pr.value ?? 0;
+    
+    // Determina zone
+    let zone = 'balanced';
+    if (value > 60) zone = 'strong_control';
+    else if (value >= 20) zone = 'advantage';
+    else if (value > -20) zone = 'balanced';
+    else if (value > -60) zone = 'advantage';
+    else zone = 'strong_control';
+    
+    return {
+      match_id: matchIdInt,
+      set_number: setNum,
+      game_number: gameNum,
+      value: value,
+      value_svg: value,  // Salva anche in value_svg per tracciare la fonte
+      source: 'svg_manual',  // Indica che viene da inserimento manuale SVG
+      break_occurred: false,
+      zone: zone
+    };
+  });
+  
+  // Inserisci tutti i record
+  const { data, error } = await supabase
+    .from('power_rankings')
+    .insert(records)
+    .select();
+  
+  if (error) {
+    console.error(`❌ [SVG-MAIN] Errore inserimento:`, error);
+    throw error;
+  }
+  
+  console.log(`✅ [SVG-MAIN] Inseriti ${data?.length || 0} record in power_rankings`);
+  return data?.length || 0;
+}
+
+/**
+ * Ottieni match pendenti (data_quality < 50)
+ * Questi match hanno dati insufficienti e sono in attesa di completamento
+ */
+export async function getPendingMatches(limit = 50) {
+  const { data, error } = await supabase
+    .from('matches_new')
+    .select(`
+      id,
+      player1_id,
+      player2_id,
+      tournament_id,
+      match_date,
+      score,
+      data_quality,
+      status,
+      created_at
+    `)
+    .lt('data_quality', 50)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  
+  if (error) {
+    console.error('Error fetching pending matches:', error);
+    return [];
+  }
+  
+  // Arricchisci con nomi giocatori e torneo
+  const enriched = await Promise.all((data || []).map(async (match) => {
+    const [p1Res, p2Res, tournRes] = await Promise.all([
+      match.player1_id ? supabase.from('players_new').select('name').eq('id', match.player1_id).single() : { data: null },
+      match.player2_id ? supabase.from('players_new').select('name').eq('id', match.player2_id).single() : { data: null },
+      match.tournament_id ? supabase.from('tournaments_new').select('name').eq('id', match.tournament_id).single() : { data: null }
+    ]);
+    
+    return {
+      ...match,
+      player1_name: p1Res.data?.name || 'Unknown',
+      player2_name: p2Res.data?.name || 'Unknown',
+      tournament_name: tournRes.data?.name || 'Unknown',
+      completeness_status: 'pending'
+    };
+  }));
+  
+  return enriched;
+}
+
+/**
+ * Ottieni match parziali (data_quality >= 50 e < 80)
+ * Questi match hanno dati usabili ma incompleti
+ */
+export async function getPartialMatches(limit = 50) {
+  const { data, error } = await supabase
+    .from('matches_new')
+    .select(`
+      id,
+      player1_id,
+      player2_id,
+      tournament_id,
+      match_date,
+      score,
+      data_quality,
+      status,
+      created_at
+    `)
+    .gte('data_quality', 50)
+    .lt('data_quality', 80)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  
+  if (error) {
+    console.error('Error fetching partial matches:', error);
+    return [];
+  }
+  
+  // Arricchisci
+  const enriched = await Promise.all((data || []).map(async (match) => {
+    const [p1Res, p2Res, tournRes] = await Promise.all([
+      match.player1_id ? supabase.from('players_new').select('name').eq('id', match.player1_id).single() : { data: null },
+      match.player2_id ? supabase.from('players_new').select('name').eq('id', match.player2_id).single() : { data: null },
+      match.tournament_id ? supabase.from('tournaments_new').select('name').eq('id', match.tournament_id).single() : { data: null }
+    ]);
+    
+    return {
+      ...match,
+      player1_name: p1Res.data?.name || 'Unknown',
+      player2_name: p2Res.data?.name || 'Unknown',
+      tournament_name: tournRes.data?.name || 'Unknown',
+      completeness_status: 'partial'
+    };
+  }));
+  
+  return enriched;
+}
+
+/**
+ * Marca un match come completo manualmente (forza data_quality = 100)
+ * Usato quando l'utente decide che i dati sono sufficienti
+ */
+export async function markMatchAsComplete(matchId) {
+  const { error } = await supabase
+    .from('matches_new')
+    .update({ data_quality: 100 })
+    .eq('id', matchId);
+  
+  if (error) {
+    console.error('Error marking match as complete:', error);
+    return false;
+  }
+  
+  console.log(`✅ Match ${matchId} marcato come COMPLETO`);
+  return true;
+}
+
+/**
+ * Ottieni statistiche di completezza del database
+ */
+export async function getCompletenessStats() {
+  const { count: total } = await supabase
+    .from('matches_new')
+    .select('*', { count: 'exact', head: true });
+  
+  const { count: pending } = await supabase
+    .from('matches_new')
+    .select('*', { count: 'exact', head: true })
+    .lt('data_quality', 50);
+  
+  const { count: partial } = await supabase
+    .from('matches_new')
+    .select('*', { count: 'exact', head: true })
+    .gte('data_quality', 50)
+    .lt('data_quality', 80);
+  
+  const { count: complete } = await supabase
+    .from('matches_new')
+    .select('*', { count: 'exact', head: true })
+    .gte('data_quality', 80);
+  
+  return {
+    total: total || 0,
+    pending: pending || 0,
+    partial: partial || 0,
+    complete: complete || 0,
+    pendingPercentage: total ? Math.round((pending / total) * 100) : 0,
+    partialPercentage: total ? Math.round((partial / total) * 100) : 0,
+    completePercentage: total ? Math.round((complete / total) * 100) : 0
+  };
 }

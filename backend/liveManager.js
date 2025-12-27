@@ -532,11 +532,11 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
       graph: data.graph
     };
 
-    // 2. Salva su database (se disponibile) + AUTO-MERGE con dati xlsx
+    // 2. Salva su database (se disponibile)
     if (matchRepository) {
       try {
-        const savedMatch = await matchRepository.insertMatchWithXlsxMerge(matchForDB, `https://www.sofascore.com/event/${eventId}`);
-        console.log(`💾 [${saveType}] Match ${eventId} saved to database (with xlsx merge)`);
+        const savedMatch = await matchRepository.insertMatch(matchForDB, `https://www.sofascore.com/event/${eventId}`);
+        console.log(`💾 [${saveType}] Match ${eventId} saved to database`);
       } catch (dbError) {
         console.error(`❌ Database save failed for ${eventId}:`, dbError.message);
       }

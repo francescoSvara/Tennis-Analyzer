@@ -74,11 +74,15 @@ function parseMx(d) {
 
 ### 2. Determinazione Side (Home/Away)
 
+> ⚠️ **IMPORTANTE - Colori nel grafico SVG SofaScore**:
+> - **HOME = VERDE** (`home-primary`, barra verso l'alto)
+> - **AWAY = BLU** (`away-primary`, barra verso il basso)
+
 ```javascript
 function getSide(fill) {
   const f = fill.toLowerCase();
-  if (f.includes('home-primary') || f.includes('home')) return 'home';
-  if (f.includes('away-primary') || f.includes('away')) return 'away';
+  if (f.includes('home-primary') || f.includes('home')) return 'home';  // VERDE
+  if (f.includes('away-primary') || f.includes('away')) return 'away';  // BLU
   return 'unknown';
 }
 ```

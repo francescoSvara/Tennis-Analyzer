@@ -223,8 +223,11 @@ export function MomentumTab({ data, header }) {
             {powerRankings.length > 0 ? (
               powerRankings.slice(0, 5).map((rank, idx) => (
                 <div key={idx} className="ranking-item">
-                  <span className="rank-position">#{idx + 1}</span>
-                  <span className="rank-score">{rank.score || rank}</span>
+                  <span className="rank-position">S{rank.set_number || rank.set || 1} G{rank.game_number || rank.game || idx + 1}</span>
+                  <span className={`rank-score ${(rank.value || 0) >= 0 ? 'positive' : 'negative'}`}>
+                    {rank.value ?? rank.value_svg ?? 0}
+                  </span>
+                  {rank.break_occurred && <span className="break-badge">BREAK</span>}
                 </div>
               ))
             ) : (

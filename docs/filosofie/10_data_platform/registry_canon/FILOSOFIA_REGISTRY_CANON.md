@@ -11,7 +11,7 @@
 
 | ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
 |---------|-----------|----------------|
-| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Tutte le fonti (XLSX, SofaScore, Odds APIs) | [DB](../storage/FILOSOFIA_DB.md), [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Tutte le fonti (SofaScore API, SVG Momentum) | [DB](../storage/FILOSOFIA_DB.md), [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) |
 
 ### � Documenti Correlati (stesso layer)
 | Documento | Relazione |
@@ -26,8 +26,6 @@
 |------|-------------|----------------|
 | [`backend/services/dataNormalizer.js`](../../backend/services/dataNormalizer.js) | Normalizzazione e mapping | Resolve player/tournament names → canonical IDs |
 | [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js) | Persistenza match | Salva solo con canonical IDs |
-| [`backend/importXlsx.js`](../../backend/importXlsx.js) | Import legacy matches | Map winner_name/loser_name → player_id |
-| [`backend/merge-xlsx-sofascore.js`](../../backend/merge-xlsx-sofascore.js) | Cross-source linking | Legacy ↔ SofaScore |
 | [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Scraping SofaScore | Ottiene player_id nativo |
 
 ---
@@ -38,17 +36,16 @@
 
 Problema reale:
 ```text
-Legacy XLSX: "Carlos Alcaraz Garfia"
-SofaScore:   "Alcaraz C."
-Odds API:    "C. Alcaraz"
+SofaScore API: "Alcaraz C."
+Odds API:      "C. Alcaraz"
+Display Name:  "Carlos Alcaraz Garfia"
 
-Se non risolvi → 3 player diversi → stats sbagliate → edge finto.
+Se non risolvi → player diversi → stats sbagliate → edge finto.
 ```
 
-Il progetto ha **più fonti**:
-- XLSX legacy (~2600 match) con `winner_name`, `loser_name` (string)
-- SofaScore con `home_player_id`, `away_player_id` (int)
-- Odds provider con nomi variabili
+Il progetto ha **più fonti** potenziali:
+- SofaScore con `home_player_id`, `away_player_id` (int) - FONTE PRIMARIA
+- Odds provider con nomi variabili (potenziale futura integrazione)
 
 **Serve un "canon"**: una singola identità per ogni entità.
 
@@ -94,7 +91,6 @@ interface MatchCanonical {
   status: MatchStatus;
   sources: {
     sofascore_id?: number;
-    legacy_xlsx_row?: number;
     // ...
   };
 }
@@ -265,44 +261,7 @@ function resolvePlayers(rawPlayers) {
 
 ---
 
-### 3.4 Cross-Source Linking (Legacy ↔ SofaScore)
-
-**Problema**: legacy matches hanno `winner_name` (string), SofaScore ha `home_player_id` (int).
-
-**Strategia**:
-1. Normalizza `winner_name` / `loser_name`
-2. Match con `players.name_variants`
-3. Se match → `UPDATE matches SET winner_player_id = ...`
-4. Se no match → crea entry in `unresolved_players` per review
-
-**Pseudo-codice**:
-```javascript
-async function linkLegacyMatches() {
-  const legacyMatches = await db.query('SELECT * FROM matches WHERE winner_player_id IS NULL');
-  
-  for (const match of legacyMatches) {
-    const winnerId = await resolvePlayerName(match.winner_name);
-    const loserId = await resolvePlayerName(match.loser_name);
-    
-    if (winnerId && loserId) {
-      await db.query(`
-        UPDATE matches 
-        SET winner_player_id = $1, loser_player_id = $2 
-        WHERE match_id = $3
-      `, [winnerId, loserId, match.match_id]);
-    } else {
-      await db.query(`
-        INSERT INTO unresolved_players (match_id, name)
-        VALUES ($1, $2)
-      `, [match.match_id, match.winner_name]);
-    }
-  }
-}
-```
-
----
-
-### 3.5 Tournament Normalization
+### 3.4 Tournament Normalization
 
 **Campi da normalizzare**:
 - Nome: "Australian Open" vs "AO" vs "Aus Open"
@@ -392,7 +351,6 @@ async function validateMatch(match) {
 - normalizeName(name)
 - resolvePlayerName(name, dob?, country?)
 - resolveTournamentName(name, location?)
-- linkLegacyToCanonical(legacyMatch)
 - detectDuplicatePlayers()
 ```
 
@@ -552,35 +510,31 @@ async function detectDuplicatePlayers() {
 
 ## 8️⃣ ESEMPI PRATICI
 
-### Esempio 1: Import XLSX con Resolution
+### Esempio 1: Import SofaScore Match con Canonical IDs
 
 ```javascript
-async function importXlsxMatch(row) {
-  // 1. Resolve players
-  const winnerId = await resolvePlayerName(row.winner_name);
-  const loserId = await resolvePlayerName(row.loser_name);
-  
-  if (!winnerId || !loserId) {
-    throw new Error(`Cannot resolve players: ${row.winner_name}, ${row.loser_name}`);
-  }
+async function importSofaScoreMatch(sofascoreEvent) {
+  // 1. Players già con IDs canonici da SofaScore
+  const homePlayerId = sofascoreEvent.homeTeam.id;
+  const awayPlayerId = sofascoreEvent.awayTeam.id;
   
   // 2. Resolve tournament
-  const tournamentId = await resolveTournamentName(row.tourney_name);
+  const tournamentId = sofascoreEvent.tournament.uniqueTournament.id;
   
-  // 3. Normalize surface
-  const surface = normalizeSurface(row.surface);
+  // 3. Normalize surface from ground type
+  const surface = normalizeSurface(sofascoreEvent.groundType);
   
   // 4. Create canonical match
   const match = {
-    match_id: generateUUID(),
-    home_player_id: winnerId,   // NOTA: winner = home in legacy
-    away_player_id: loserId,
+    match_id: sofascoreEvent.id,
+    home_player_id: homePlayerId,
+    away_player_id: awayPlayerId,
     tournament_id: tournamentId,
     surface,
-    best_of: parseInt(row.best_of),
-    event_time: parseDate(row.tourney_date),
-    status: 'finished',
-    score: row.score
+    best_of: determineBestOf(sofascoreEvent),
+    event_time: new Date(sofascoreEvent.startTimestamp * 1000),
+    status: sofascoreEvent.status.type,
+    score: extractScore(sofascoreEvent)
   };
   
   // 5. Validate
@@ -588,55 +542,13 @@ async function importXlsxMatch(row) {
   if (!valid) return;
   
   // 6. Save
-  await matchRepository.saveMatch(match);
+  await matchRepository.insertMatch(match);
 }
 ```
 
 ---
 
-### Esempio 2: Merge SofaScore ↔ Legacy
-
-```javascript
-async function linkSofascoreToLegacy(sofascoreMatch) {
-  // 1. Cerca match legacy simile
-  const candidates = await db.query(`
-    SELECT * FROM matches
-    WHERE ABS(EXTRACT(EPOCH FROM (event_time - $1))) < 86400
-    AND (winner_name ILIKE $2 OR loser_name ILIKE $2)
-  `, [sofascoreMatch.event_time, sofascoreMatch.home_player.name]);
-  
-  // 2. Fuzzy match per conferma
-  for (const candidate of candidates) {
-    const scoreHome = fuzzyMatch(sofascoreMatch.home_player.name, candidate.winner_name);
-    const scoreAway = fuzzyMatch(sofascoreMatch.away_player.name, candidate.loser_name);
-    
-    if (scoreHome > 0.9 && scoreAway > 0.9) {
-      // 3. Link
-      await db.query(`
-        UPDATE matches
-        SET 
-          sofascore_id = $1,
-          home_player_id = $2,
-          away_player_id = $3
-        WHERE match_id = $4
-      `, [
-        sofascoreMatch.id,
-        sofascoreMatch.home_player_id,
-        sofascoreMatch.away_player_id,
-        candidate.match_id
-      ]);
-      
-      return { linked: true, legacy_id: candidate.match_id };
-    }
-  }
-  
-  return { linked: false };
-}
-```
-
----
-
-### Esempio 3: MatchBundle con Canonical
+### Esempio 2: MatchBundle con Canonical
 
 ```javascript
 async function buildMatchBundle(match_id) {
@@ -688,10 +600,8 @@ Per passare da legacy a canonical:
 
 - [ ] Crea `players` table con `player_id` + `name_variants`
 - [ ] Populate da SofaScore scraping
-- [ ] Crea mapping XLSX names → `player_id`
 - [ ] Script di migration: `UPDATE matches SET home_player_id = ...`
 - [ ] Valida: `SELECT * FROM matches WHERE home_player_id IS NULL`
-- [ ] Depreca campi `winner_name`, `loser_name`
 - [ ] Update tutti i consumer (featureEngine, strategyEngine, bundle)
 - [ ] Test: nessun bundle con player_id mancanti
 

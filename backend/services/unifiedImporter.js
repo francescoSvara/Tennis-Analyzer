@@ -2,7 +2,6 @@
  * UNIFIED IMPORTER SERVICE
  * 
  * Gateway unico per QUALSIASI dato in ingresso:
- * - File XLSX (storici ATP)
  * - Scrape Sofascore (JSON)
  * - API live
  * - Qualsiasi altra fonte
@@ -12,7 +11,6 @@
 
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
-const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
@@ -228,77 +226,6 @@ async function upsertMatch(matchData, source = 'unknown') {
 }
 
 // ============================================
-// IMPORT XLSX
-// ============================================
-
-/**
- * Importa un file XLSX nel database
- * @param {string} filePath - Path al file xlsx
- * @param {Object} options - Opzioni di import
- */
-async function importXlsx(filePath, options = {}) {
-  const { dryRun = false, limit = null, verbose = false } = options;
-  
-  logger.info('IMPORTING XLSX FILE');
-  logger.info(`File: ${filePath}, Dry Run: ${dryRun}`);
-  
-  resetStats();
-  stats.source = 'xlsx';
-  
-  // Leggi il file
-  if (!fs.existsSync(filePath)) {
-    logger.error(`File not found: ${filePath}`);
-    return stats;
-  }
-  
-  const workbook = XLSX.readFile(filePath);
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json(sheet);
-  
-  logger.info(`Found ${rows.length} rows`);
-  
-  const toProcess = limit ? rows.slice(0, limit) : rows;
-  
-  for (let i = 0; i < toProcess.length; i++) {
-    const row = toProcess[i];
-    
-    if (verbose) {
-      logger.debug(`[${i+1}/${toProcess.length}] ${row.Winner} vs ${row.Loser}`);
-    }
-    
-    if (dryRun) {
-      // Solo simula
-      const { fingerprint, normalized } = generateMatchFingerprint({
-        date: row.Date,
-        winner_name: row.Winner,
-        loser_name: row.Loser,
-        tournament: row.Tournament
-      });
-      
-      if (verbose) {
-        logger.debug(`Fingerprint: ${fingerprint}`);
-        logger.debug(`Winner: ${row.Winner} -> ${normalizePlayerName(row.Winner)}`);
-        logger.debug(`Loser: ${row.Loser} -> ${normalizePlayerName(row.Loser)}`);
-      }
-      
-      stats.processed++;
-    } else {
-      // Import reale
-      await upsertMatch(row, 'xlsx_2025');
-    }
-    
-    // Progress ogni 100
-    if ((i + 1) % 100 === 0) {
-      logger.info(`Progress: ${i+1}/${toProcess.length} (${stats.inserted} new, ${stats.updated} updated, ${stats.errors} errors)`);
-    }
-  }
-  
-  printStats();
-  return stats;
-}
-
-// ============================================
 // IMPORT SOFASCORE JSON
 // ============================================
 
@@ -414,7 +341,6 @@ module.exports = {
   findExistingMatch,
   
   // Import
-  importXlsx,
   importSofascoreJson,
   importSofascoreFolder,
   
@@ -436,15 +362,6 @@ if (require.main === module) {
   
   (async () => {
     switch (command) {
-      case 'xlsx':
-        const xlsxPath = args[1] || path.join(__dirname, '../../2025.xlsx');
-        const dryRun = args.includes('--dry-run');
-        const limit = args.includes('--limit') ? parseInt(args[args.indexOf('--limit') + 1]) : null;
-        const verbose = args.includes('--verbose') || args.includes('-v');
-        
-        await importXlsx(xlsxPath, { dryRun, limit, verbose });
-        break;
-        
       case 'sofascore':
         const sofaPath = args[1] || path.join(__dirname, '../../data/scrapes');
         await importSofascoreFolder(sofaPath, { 
@@ -460,20 +377,17 @@ if (require.main === module) {
         
       default:
         console.log(`
-UNIFIED IMPORTER - Import any tennis data
+UNIFIED IMPORTER - Import tennis data from SofaScore
 
 Usage:
-  node unifiedImporter.js xlsx [path] [options]    Import XLSX file
   node unifiedImporter.js sofascore [folder]       Import Sofascore JSONs
   node unifiedImporter.js count                    Count matches in DB
 
 Options:
   --dry-run     Simulate without writing to DB
-  --limit N     Process only first N rows
   --verbose     Show detailed output
 
 Examples:
-  node unifiedImporter.js xlsx ../2025.xlsx --dry-run --limit 10
   node unifiedImporter.js sofascore ../data/scrapes --dry-run
         `);
     }

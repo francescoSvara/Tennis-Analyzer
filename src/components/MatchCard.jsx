@@ -112,7 +112,7 @@ function TournamentWithLogo({ tournament, category }) {
   );
 }
 
-function MatchCard({ match, onClick, isSuggested = false, isDetected = false, onAddToDb, dataCompleteness = null, dataSources = null }) {
+function MatchCard({ match, onClick, isSuggested = false, isDetected = false, onAddToDb, dataCompleteness = null }) {
   const prefersReducedMotion = useReducedMotion();
   
   if (!match) return null;
@@ -121,21 +121,12 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
   const homeTeam = match.homeTeam || {};
   const awayTeam = match.awayTeam || {};
   
-  // Determina se è un match xlsx (storico)
-  const isXlsxMatch = match.dataSource === 'xlsx_import';
-  const isMergedMatch = match.dataSource === 'merged_sofascore_xlsx';
-  
-  // Ottieni dataSources dal match se non passato come prop
-  const sources = dataSources || match.dataSources || { sofascore: 50, xlsx: 50, hasBothSources: false };
-  
   // Card suggerita o rilevata: stile diverso e non cliccabile
   const cardClass = isDetected 
     ? 'match-card detected-card'
     : isSuggested 
       ? 'match-card suggested-card' 
-      : isXlsxMatch
-        ? 'match-card xlsx-card'
-        : 'match-card';
+      : 'match-card';
   
   const handleClick = () => {
     if (!isSuggested && !isDetected && onClick) {
@@ -170,14 +161,6 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
         <div className="suggested-badge">
           <DownloadSimple size={14} weight="bold" className="suggested-icon" />
           <span className="suggested-text">Da aggiungere</span>
-        </div>
-      )}
-      
-      {/* Badge per match xlsx (storici) */}
-      {isXlsxMatch && !isSuggested && !isDetected && (
-        <div className="xlsx-badge">
-          <ChartBar size={14} weight="duotone" className="xlsx-icon" />
-          <span className="xlsx-text">Storico</span>
         </div>
       )}
       
@@ -239,29 +222,6 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
           )}
         </div>
       </div>
-      
-      {/* Barra fonti dati - mostra proporzione Sofascore (blu) vs XLSX (verde) */}
-      {!isSuggested && !isDetected && sources && (
-        <div className="match-data-sources">
-          <div 
-            className="data-sources-bar"
-            title={`Sofascore: ${sources.sofascore}% | XLSX: ${sources.xlsx}%`}
-          >
-            {sources.sofascore > 0 && (
-              <div 
-                className="source-fill sofascore"
-                style={{ width: `${sources.sofascore}%` }}
-              />
-            )}
-            {sources.xlsx > 0 && (
-              <div 
-                className="source-fill xlsx"
-                style={{ width: `${sources.xlsx}%` }}
-              />
-            )}
-          </div>
-        </div>
-      )}
       
       {/* Footer: Status o Pulsante Aggiungi */}
       <div className="match-card-footer">

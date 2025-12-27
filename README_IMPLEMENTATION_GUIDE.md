@@ -362,7 +362,7 @@ Raw Event (SofaScore)
 ### 2. Player Stats Flow
 
 ```
-XLSX Historical Data
+SofaScore API Data
     → unifiedImporter (importa/deduplica)
     → playerStatsService (aggrega metriche)
     → playerProfileService (costruisce profilo)

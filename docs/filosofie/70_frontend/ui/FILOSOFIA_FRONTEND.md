@@ -279,7 +279,7 @@ header.features = {
 
 > **Feature Engine**: [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js)
 
-Quando un match non ha statistiche reali (es. match legacy XLSX), il backend ritorna:
+Quando un match non ha statistiche reali (es. match senza dati SofaScore), il backend ritorna:
 ```js
 features: {
   volatility: null,

@@ -171,7 +171,7 @@ Esempi:
 ### 2.1 Flusso Standard
 
 ```
-RawEvents (SofaScore/XLSX/Odds APIs)
+RawEvents (SofaScore API / SVG Momentum)
       │  data_version
       ▼
 Canonical Tables (matches_new, players, odds)
