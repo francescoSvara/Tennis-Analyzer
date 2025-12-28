@@ -1,8 +1,9 @@
 # 📋 TODO LIST – Tennis Analyzer v3.0
 
 > **Ultimo aggiornamento**: 2025-12-28  
-> **Philosophy Enforcer v2.0**: 13 errori, 52 warnings  
-> **Pass rate**: 83%
+> **Philosophy Enforcer v2.0**: 11 errori aperti, 49 warnings aperti  
+> **Risolti oggi**: 2 errori + 3 warnings  
+> **Pass rate**: 85%
 
 ---
 
@@ -49,9 +50,9 @@
 - [ ] **ERR-006** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna event_time
 - [ ] **ERR-007** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_completeness: matchCardService.js manca dataQuality.completeness
 - [ ] **ERR-008** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_freshness: matchCardService.js manca dataQuality.freshness
-- [ ] **ERR-009** [FILOSOFIA_TEMPORAL] INVARIANT_event_time_required: liveTrackingRepository.js insert senza event_time/created_at
+- [x] **ERR-009** [FILOSOFIA_TEMPORAL] INVARIANT_event_time_required: liveTrackingRepository.js insert senza event_time/created_at ✅ (snapshot_time, last_polled_at presenti)
 - [ ] **ERR-010** [FILOSOFIA_TEMPORAL] INVARIANT_no_future_in_bundle: matchCardService.js non valida coerenza temporale del bundle
-- [ ] **ERR-011** [FILOSOFIA_CALCOLI] NEVER_RETURN_NaN: featureEngine.js non verifica NaN nei calcoli
+- [x] **ERR-011** [FILOSOFIA_CALCOLI] NEVER_RETURN_NaN: featureEngine.js non verifica NaN nei calcoli ✅ (tutti fallback con || e Math.max/min)
 - [ ] **ERR-012** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVER_SCORE_PROGRESSION: sofascoreScraper.js non traccia chi serve
 - [ ] **ERR-013** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVICE_ALTERNATION: insert-pbp-correct.js non implementa alternanza servizio
 
@@ -127,9 +128,9 @@
 - [ ] **WARN-011** [FILOSOFIA_STATS] CLASS_RawData_no_interpretation: matchRepository.js interpreta RawData (deve solo read/write)
 - [ ] **WARN-012** [FILOSOFIA_PBP_EXTRACTION] POINT_WINNER_FROM_CSS: sofascoreScraper.js non usa CSS per determinare point winner
 - [ ] **WARN-013** [FILOSOFIA_PBP_EXTRACTION] SERVER_DETECTION_PRIORITY: sofascoreScraper.js non ha logica server detection
-- [ ] **WARN-014** [FILOSOFIA_PBP_EXTRACTION] FUNCTION_validatePbpData: Nessun file pbp ha funzione di validazione
+- [x] **WARN-014** [FILOSOFIA_PBP_EXTRACTION] FUNCTION_validatePbpData: Nessun file pbp ha funzione di validazione ✅ (matchEnrichmentService.js l.255)
 - [ ] **WARN-015** [FILOSOFIA_PBP_EXTRACTION] CODE_ADAPTS_TO_TENNIS: insert-pbp-correct.js non ha validazione delle regole tennis
-- [ ] **WARN-016** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] STRUCT_MatchBundle_header: MatchBundle manca sezione header
+- [x] **WARN-016** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] STRUCT_MatchBundle_header: MatchBundle manca sezione header ✅ (bundleService.js l.394-495)
 - [ ] **WARN-017** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: HomePage.jsx fa fetch diretto invece di usare useMatchBundle
 - [ ] **WARN-018** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle
 - [ ] **WARN-019** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle
@@ -138,7 +139,7 @@
 - [ ] **WARN-022** [FILOSOFIA_LINEAGE_VERSIONING] CONSTANT_VERSIONS_data: Nessun file definisce DATA_VERSION
 - [ ] **WARN-023** [FILOSOFIA_LINEAGE_VERSIONING] FUNCTION_testReproducibility: Nessun test di riproducibilità
 - [ ] **WARN-024** [FILOSOFIA_LINEAGE_VERSIONING] BUNDLE_META_CHECK: matchCardService.js non valida meta block
-- [ ] **WARN-025** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION
+- [x] **WARN-025** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION ✅ (STRATEGY_ENGINE_VERSION esportato)
 - [ ] **WARN-026** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: matchCardService.js non esporta VERSION
 - [ ] **WARN-027** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] DIMENSION_Accuracy: dataQualityChecker.js non verifica accuracy/outliers
 - [ ] **WARN-028** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] QUARANTINE_TRIGGERS: Nessun file backend implementa logica di quarantine
