@@ -253,6 +253,14 @@ Calcola features da dati disponibili (score, odds, rankings):
   - `index.js` - Central router mount point
 - **Services Extracted**
   - `bundleService.js` (~549 righe) - Core MatchBundle builder
+  - `bundleHelpers.js` (~600 righe) - Score/odds/PBP normalization, breaks calculation
+  - `statsTabBuilder.js` (~450 righe) - Statistics tab builder
+- **server.js** - Target: bootstrap + mount routes only (refactor completato)
+  - `scrapes.routes.js` + `scrapes.controller.js` - Scrapes management
+  - `stats.routes.js` + `stats.controller.js` - DB stats/health
+  - `index.js` - Central router mount point
+- **Services Extracted**
+  - `bundleService.js` (~549 righe) - Core MatchBundle builder
   - `bundleHelpers.js` - Score/odds/PBP normalization, breaks calculation
   - `statsTabBuilder.js` - Statistics tab builder
 - **server.js** - Target: bootstrap + mount routes only (refactor in progress)

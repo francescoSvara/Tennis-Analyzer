@@ -1,49 +1,8 @@
 # 📋 TODO LIST – Tennis Analyzer v3.0
 
-> **Ultimo aggiornamento**: 2025-12-28 (sera)  
-> **Server.js Refactoring**: ✅ COMPLETATO  
+> **Ultimo aggiornamento**: 2025-12-28  
 > **Philosophy Enforcer v2.0**: 13 errori, 52 warnings  
-> **Regole verificate**: 278 su 250 estratte  
 > **Pass rate**: 83%
-
----
-
-## ✅ COMPLETATO OGGI (28 Dic 2025)
-
-### Server.js Refactoring - COMPLETATO
-- [x] **Routes Architecture** - 10 route files creati e funzionanti
-- [x] **Controllers** - 9 controller files creati
-- [x] **bundleService.js** - Estratto da server.js (~549 righe)
-- [x] **bundleHelpers.js** - Utility functions estratte
-- [x] **statsTabBuilder.js** - Statistics builder estratto
-- [x] **Central Router** - `routes/index.js` mount point
-- [x] **Documentation** - Changelog README aggiornato
-
-### Files Creati
-| File | Descrizione | Righe |
-|------|-------------|-------|
-| `routes/index.js` | Central mount point | ~50 |
-| `routes/health.routes.js` | Root + Health | ~25 |
-| `routes/db.routes.js` | Database access | ~45 |
-| `routes/match.routes.js` | MatchBundle + CRUD | ~55 |
-| `routes/tracking.routes.js` | Live tracking | ~45 |
-| `routes/player.routes.js` | Player stats | ~25 |
-| `routes/event.routes.js` | SofaScore direct | ~25 |
-| `routes/value.routes.js` | Value interpret | ~25 |
-| `routes/scrapes.routes.js` | Scrapes management | ~25 |
-| `routes/stats.routes.js` | DB stats | ~20 |
-| `controllers/health.controller.js` | Health logic | ~45 |
-| `controllers/db.controller.js` | DB access logic | ~300+ |
-| `controllers/match.controller.js` | Match logic | ~500+ |
-| `controllers/tracking.controller.js` | Tracking logic | ~200 |
-| `controllers/player.controller.js` | Player logic | ~170 |
-| `controllers/event.controller.js` | Event logic | ~150 |
-| `controllers/value.controller.js` | Value logic | ~60 |
-| `controllers/scrapes.controller.js` | Scrapes logic | ~150 |
-| `controllers/stats.controller.js` | Stats logic | ~250 |
-| `services/bundleService.js` | Bundle builder | ~549 |
-| `utils/bundleHelpers.js` | Bundle utilities | ~600 |
-| `utils/statsTabBuilder.js` | Stats builder | ~450 |
 
 ---
 
