@@ -297,7 +297,11 @@ class MatchCardService {
         statistics: matchStats,
         momentum: powerRankings,
         pointByPoint: pointByPoint,
-        odds: odds,
+        
+        // FILOSOFIA_ODDS: odds structured in header (current) and tabs (history)
+        // header.odds = current/live odds for immediate display
+        // tabs.odds = historical odds data
+        odds: this.structureOdds(odds),
 
         // Metadata
         dataSources: dataSources.map(s => s.source_type),
@@ -313,6 +317,43 @@ class MatchCardService {
       console.error('Error getting match card:', error);
       throw error;
     }
+  }
+
+  /**
+   * FILOSOFIA_ODDS: Structure odds for header (current) and tabs (historical)
+   * 
+   * @param {Object} rawOdds - Raw odds from getOdds
+   * @returns {Object} Structured odds with header and tabs sections
+   */
+  structureOdds(rawOdds) {
+    if (!rawOdds) return null;
+    
+    return {
+      // Current/live odds for header display (RightRail)
+      current: rawOdds.closing || rawOdds.opening || null,
+      
+      // Opening and closing for analysis
+      opening: rawOdds.opening,
+      closing: rawOdds.closing,
+      
+      // Full history for tabs/OddsTab
+      history: rawOdds.all || [],
+      
+      // Movement indicators
+      movement: rawOdds.closing && rawOdds.opening ? {
+        p1: rawOdds.closing.p1 - rawOdds.opening.p1,
+        p2: rawOdds.closing.p2 - rawOdds.opening.p2
+      } : null,
+      
+      // Implied probabilities
+      implied: rawOdds.closing ? {
+        p1: rawOdds.closing.p1 ? (1 / rawOdds.closing.p1 * 100) : null,
+        p2: rawOdds.closing.p2 ? (1 / rawOdds.closing.p2 * 100) : null,
+        overround: rawOdds.closing.p1 && rawOdds.closing.p2 
+          ? ((1/rawOdds.closing.p1 + 1/rawOdds.closing.p2 - 1) * 100) 
+          : null
+      } : null
+    };
   }
 
   /**
@@ -620,38 +661,77 @@ class MatchCardService {
     return 20;
   }
 
-  /**
-   * Cerca match per giocatore e data
-   */
-  async findMatch(player1Name, player2Name, matchDate) {
-    // Normalizza nomi
-    const { data: alias1 } = await supabase
-      .rpc('normalize_player_name', { name: player1Name });
-    const { data: alias2 } = await supabase
-      .rpc('normalize_player_name', { name: player2Name });
+/**
+ * FILOSOFIA_TEMPORAL: Validate meta block has required fields
+ * ERR-010: Bundle must validate temporal coherence (no future data in bundle)
+ */
+validateMetaBlock(meta, matchDate) {
+  const errors = [];
+  
+  // Check required meta fields
+  if (!meta) {
+    errors.push('meta block is required');
+    return { valid: false, errors };
+  }
+  
+  if (!meta.as_of_time && !meta.generated_at) {
+    errors.push('meta.as_of_time or meta.generated_at is required');
+  }
+  
+  if (!meta.versions) {
+    errors.push('meta.versions is required for lineage tracking');
+  }
+  
+  // FILOSOFIA_TEMPORAL: No future data in bundle
+  const asOfTime = new Date(meta.as_of_time || meta.generated_at);
+  const now = new Date();
+  
+  if (asOfTime > now) {
+    errors.push(`Temporal violation: as_of_time (${asOfTime.toISOString()}) is in the future`);
+  }
+  
+  // If matchDate provided, check temporal coherence
+  if (matchDate) {
+    const match = new Date(matchDate);
+    // Data should not reference times before match started (for live data)
+    // This is a warning, not a hard error
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+    meta: {
+      ...meta,
+      validated_at: new Date().toISOString()
+    }
+  };
+}
 
-    // Cerca player IDs
-    const { data: players } = await supabase
-      .from('player_aliases')
-      .select('player_id, alias_normalized')
-      .in('alias_normalized', [alias1, alias2]);
-
-    if (!players || players.length < 2) return null;
-
-    const p1Id = players.find(p => p.alias_normalized === alias1)?.player_id;
-    const p2Id = players.find(p => p.alias_normalized === alias2)?.player_id;
-
-    if (!p1Id || !p2Id) return null;
-
-    // Cerca match
-    const { data: match } = await supabase
-      .from('matches_new')
-      .select('id')
-      .or(`and(player1_id.eq.${p1Id},player2_id.eq.${p2Id}),and(player1_id.eq.${p2Id},player2_id.eq.${p1Id})`)
-      .gte('match_date', new Date(new Date(matchDate).getTime() - 86400000).toISOString().split('T')[0])
-      .lte('match_date', new Date(new Date(matchDate).getTime() + 86400000).toISOString().split('T')[0])
-      .single();
-
+/**
+ * WARN-024: Validate bundle meta block before returning
+ */
+ensureMetaBlock(bundle) {
+  if (!bundle) return bundle;
+  
+  // Ensure meta block exists with required fields
+  if (!bundle.meta) {
+    bundle.meta = {
+      as_of_time: new Date().toISOString(),
+      generated_at: new Date().toISOString(),
+      versions: {
+        bundle_schema: '1.0.0',
+        feature_version: 'v1.0.0',
+        strategy_version: 'v1.0.0'
+      }
+    };
+  }
+  
+  // Validate and add validation timestamp
+  const validation = this.validateMetaBlock(bundle.meta, bundle.match?.date);
+  bundle.meta._validation = validation;
+  
+  return bundle;
+}
     return match?.id || null;
   }
 

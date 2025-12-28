@@ -4,6 +4,14 @@
  * 
  * AGGIORNATO: Ora supporta persistenza su Supabase tramite liveTrackingRepository
  * Riferimento: FILOSOFIA_LIVE_TRACKING.md
+ * 
+ * FILOSOFIA_LIVE_TRACKING: LivePipeline Steps
+ * 1. ingest → fetchLiveData
+ * 2. normalize → normalizeLiveData
+ * 3. validate → validateLiveData
+ * 4. enrich → enrichLiveData (features, quality)
+ * 5. persist → persistLiveData (DB)
+ * 6. broadcast → Socket.IO emit
  */
 
 const fetch = require('node-fetch');
@@ -289,6 +297,316 @@ function isMatchFinished(data) {
 function hasDataChanged(oldData, newData) {
   if (!oldData) return true;
   return computeDataHash(oldData) !== computeDataHash(newData);
+}
+
+// ============================================================================
+// LIVE PIPELINE STEPS (FILOSOFIA_LIVE_TRACKING: FLOW_LivePipeline)
+// ============================================================================
+
+/**
+ * Step 2: Normalize live data to canonical format
+ * FILOSOFIA_LIVE_TRACKING: normalizer step
+ * 
+ * @param {Object} rawData - Raw data from fetchLiveData
+ * @returns {Object} Normalized data with canonical field names
+ */
+function normalizeLiveData(rawData) {
+  if (!rawData) return null;
+  
+  const event = rawData.event || {};
+  
+  return {
+    // Canonical identifiers
+    matchId: rawData.eventId,
+    eventId: rawData.eventId,
+    
+    // Temporal fields (FILOSOFIA_TEMPORAL)
+    ingestion_time: rawData.ingestion_time,
+    event_time: rawData.event_time,
+    normalized_at: new Date().toISOString(),
+    
+    // Match header
+    header: {
+      match: {
+        id: rawData.eventId,
+        status: event.status?.type || 'unknown',
+        statusDescription: event.status?.description,
+        startTimestamp: event.startTimestamp,
+        slug: event.slug
+      },
+      players: {
+        home: {
+          id: event.homeTeam?.id,
+          name: event.homeTeam?.name || event.homeTeam?.shortName,
+          slug: event.homeTeam?.slug
+        },
+        away: {
+          id: event.awayTeam?.id,
+          name: event.awayTeam?.name || event.awayTeam?.shortName,
+          slug: event.awayTeam?.slug
+        }
+      },
+      score: {
+        home: event.homeScore?.current ?? event.homeScore?.display ?? 0,
+        away: event.awayScore?.current ?? event.awayScore?.display ?? 0,
+        sets: extractSets(event)
+      },
+      server: event.firstToServe
+    },
+    
+    // Data sections
+    pointByPoint: rawData.pointByPoint || [],
+    statistics: rawData.statistics || [],
+    powerRankings: rawData.powerRankings || [],
+    
+    // Original data reference
+    _raw: rawData,
+    
+    // Errors from fetch
+    errors: rawData.errors || []
+  };
+}
+
+/**
+ * Helper: Extract set scores from event
+ */
+function extractSets(event) {
+  const sets = [];
+  for (let i = 1; i <= 5; i++) {
+    const home = event.homeScore?.[`period${i}`];
+    const away = event.awayScore?.[`period${i}`];
+    if (home !== undefined || away !== undefined) {
+      sets.push({
+        setNumber: i,
+        home: home ?? 0,
+        away: away ?? 0
+      });
+    }
+  }
+  return sets;
+}
+
+/**
+ * Step 3: Validate live data
+ * FILOSOFIA_LIVE_TRACKING: validator step
+ * 
+ * @param {Object} normalizedData - Normalized data from normalizeLiveData
+ * @returns {Object} { valid: boolean, issues: Array, data: Object }
+ */
+function validateLiveData(normalizedData) {
+  const issues = [];
+  
+  if (!normalizedData) {
+    return { valid: false, issues: ['Data is null'], data: null };
+  }
+  
+  // Required fields
+  if (!normalizedData.matchId) {
+    issues.push({ code: 'MISSING_MATCH_ID', severity: 'ERROR' });
+  }
+  
+  if (!normalizedData.header?.players?.home?.id || !normalizedData.header?.players?.away?.id) {
+    issues.push({ code: 'MISSING_PLAYER_IDS', severity: 'WARN' });
+  }
+  
+  // Temporal validation (FILOSOFIA_TEMPORAL: no future data)
+  const ingestionTime = new Date(normalizedData.ingestion_time);
+  const now = new Date();
+  if (ingestionTime > now) {
+    issues.push({ code: 'FUTURE_TIMESTAMP', severity: 'ERROR', detail: 'ingestion_time is in future' });
+  }
+  
+  // Score validation
+  const score = normalizedData.header?.score;
+  if (score?.sets) {
+    for (const set of score.sets) {
+      if (set.home < 0 || set.away < 0) {
+        issues.push({ code: 'NEGATIVE_SCORE', severity: 'ERROR' });
+      }
+      if (set.home > 7 || set.away > 7) {
+        // Only valid in tiebreak scenarios
+        if (!(set.home === 7 || set.away === 7)) {
+          issues.push({ code: 'UNLIKELY_SCORE', severity: 'WARN', detail: `Set ${set.setNumber}: ${set.home}-${set.away}` });
+        }
+      }
+    }
+  }
+  
+  const hasErrors = issues.some(i => i.severity === 'ERROR');
+  
+  return {
+    valid: !hasErrors,
+    issues,
+    data: normalizedData,
+    validated_at: new Date().toISOString()
+  };
+}
+
+/**
+ * Full pipeline: ingest → normalize → validate
+ * 
+ * @param {string} eventId - SofaScore event ID
+ * @returns {Object} Processed live data
+ */
+async function processLivePipeline(eventId) {
+  // Step 1: Ingest
+  const rawData = await fetchLiveData(eventId);
+  
+  // Step 2: Normalize
+  const normalized = normalizeLiveData(rawData);
+  
+  // Step 3: Validate
+  const validated = validateLiveData(normalized);
+  
+  // Return processed data with pipeline metadata
+  return {
+    ...validated.data,
+    _pipeline: {
+      steps: ['ingest', 'normalize', 'validate'],
+      valid: validated.valid,
+      issues: validated.issues,
+      processed_at: new Date().toISOString()
+    }
+  };
+}
+
+// ============================================================================
+// PATCH GENERATION (FILOSOFIA_LIVE_TRACKING: RULE_LIVE_OUTPUT)
+// ============================================================================
+
+/**
+ * Generate patch operations from old to new live data
+ * FILOSOFIA_LIVE_TRACKING: RULE_LIVE_OUTPUT - produce patches on MatchBundle
+ * 
+ * @param {Object} oldData - Previous live data state
+ * @param {Object} newData - New live data state
+ * @returns {Array} Array of patch operations in JSON Patch format
+ */
+function generateLivePatches(oldData, newData) {
+  const patches = [];
+  
+  if (!oldData || !newData) {
+    return patches;
+  }
+  
+  // Score changes
+  const oldScore = oldData.header?.score;
+  const newScore = newData.header?.score;
+  
+  if (JSON.stringify(oldScore) !== JSON.stringify(newScore)) {
+    patches.push({
+      op: 'replace',
+      path: '/header/score',
+      value: newScore,
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  // Status changes
+  if (oldData.header?.match?.status !== newData.header?.match?.status) {
+    patches.push({
+      op: 'replace',
+      path: '/header/match/status',
+      value: newData.header?.match?.status,
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  // Server changes
+  if (oldData.header?.server !== newData.header?.server) {
+    patches.push({
+      op: 'replace',
+      path: '/header/server',
+      value: newData.header?.server,
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  // Point by point additions
+  const oldPbpLength = oldData.pointByPoint?.length || 0;
+  const newPbpLength = newData.pointByPoint?.length || 0;
+  
+  if (newPbpLength > oldPbpLength) {
+    const newPoints = newData.pointByPoint.slice(oldPbpLength);
+    patches.push({
+      op: 'add',
+      path: '/tabs/points/-',
+      value: newPoints,
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  // Power rankings changes
+  const oldPrLength = oldData.powerRankings?.length || 0;
+  const newPrLength = newData.powerRankings?.length || 0;
+  
+  if (newPrLength > oldPrLength) {
+    const newRankings = newData.powerRankings.slice(oldPrLength);
+    patches.push({
+      op: 'add',
+      path: '/tabs/momentum/-',
+      value: newRankings,
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  return patches;
+}
+
+/**
+ * Apply patches to existing bundle
+ * 
+ * @param {Object} bundle - Existing MatchBundle
+ * @param {Array} patches - Array of patch operations
+ * @returns {Object} Updated bundle
+ */
+function applyLivePatches(bundle, patches) {
+  if (!bundle || !patches || patches.length === 0) {
+    return bundle;
+  }
+  
+  const updated = JSON.parse(JSON.stringify(bundle)); // Deep clone
+  
+  for (const patch of patches) {
+    try {
+      const pathParts = patch.path.split('/').filter(p => p);
+      let target = updated;
+      
+      // Navigate to parent
+      for (let i = 0; i < pathParts.length - 1; i++) {
+        if (target[pathParts[i]] === undefined) {
+          target[pathParts[i]] = {};
+        }
+        target = target[pathParts[i]];
+      }
+      
+      const lastKey = pathParts[pathParts.length - 1];
+      
+      if (patch.op === 'replace') {
+        target[lastKey] = patch.value;
+      } else if (patch.op === 'add') {
+        if (lastKey === '-' && Array.isArray(target)) {
+          // Append to array
+          if (Array.isArray(patch.value)) {
+            target.push(...patch.value);
+          } else {
+            target.push(patch.value);
+          }
+        } else {
+          target[lastKey] = patch.value;
+        }
+      }
+    } catch (e) {
+      console.warn(`Failed to apply patch: ${patch.path}`, e.message);
+    }
+  }
+  
+  // Update meta
+  updated.meta = updated.meta || {};
+  updated.meta.last_patch_at = new Date().toISOString();
+  updated.meta.patch_count = (updated.meta.patch_count || 0) + patches.length;
+  
+  return updated;
 }
 
 /**
@@ -1316,6 +1634,13 @@ module.exports = {
   // FILOSOFIA_LIVE_TRACKING aliases
   startTracking: trackMatch,
   stopTracking: untrackMatch,
+  // FILOSOFIA_LIVE_TRACKING: Pipeline functions
+  normalizeLiveData,
+  validateLiveData,
+  processLivePipeline,
+  // FILOSOFIA_LIVE_TRACKING: Patch functions (RULE_LIVE_OUTPUT)
+  generateLivePatches,
+  applyLivePatches,
   // Constants
   CONFIG,
   USE_DB_TRACKING

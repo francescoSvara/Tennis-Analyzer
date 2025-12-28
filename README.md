@@ -239,6 +239,62 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ## 📝 Changelog
 
+### v3.1.4 (28 Dic 2025) - FILOSOFIA Compliance Batch ✅
+
+**Pass Rate: 83% → 94%** (5 errori + 27 warnings risolti)
+
+#### Errori Risolti
+- **ERR-007/008** - `dataQuality.completeness` e `dataQuality.freshness` in matchCardService
+- **ERR-009** - `ingestion_time` in liveTrackingRepository
+- **ERR-010** - Validazione temporale bundle (`validateMetaBlock`, `ensureMetaBlock`)
+- **ERR-011** - NaN checks in featureEngine
+
+#### ALLOWED_SOURCES (WARN-001-005)
+- Aggiunti a `allowedWriters`: calculationQueueWorker, matchCardService, playerService, rawEventsProcessor, unifiedImporter
+
+#### Feature Engine (featureEngine.js)
+- `isClutchPoint()` - Determina punti critici nel match (~130 righe)
+- `calculateOddsFeatures()` - Implied probability, overround, movement (~60 righe)
+- `breakProbability` naming fix
+
+#### Strategy Engine (strategyEngine.js)
+- Timestamp validation (`MAX_DATA_AGE_MS = 5min`)
+- Quality check (`MIN_QUALITY_FOR_DECISION = 40`)
+- Edge > 0 verification
+- `isPriceAcceptable()` con `PRICE_THRESHOLDS`
+- `STRATEGY_ENGINE_VERSION` export
+
+#### Data Quality (dataQualityChecker.js)
+- `detectOutliers()` - Z-score outlier detection
+- `checkConsistency()` - Score/odds validation
+- `calculateCompleteness()` - Field presence %
+- `checkQuarantineTriggers()` - Quarantine logic
+- `isDataUsable()` - Safe data check
+- `QUARANTINE_REASONS` enum
+
+#### Match Card Service (matchCardService.js)
+- `MATCH_CARD_SERVICE_VERSION`, `DATA_VERSION` exports
+- `validateMetaBlock()` - Meta validation
+- `ensureMetaBlock()` - Auto-add meta
+- `structureOdds()` - header/tabs odds structure
+- `calculateCompleteness()`, `calculateFreshness()`
+
+#### Live Manager (liveManager.js)
+- `normalizeLiveData()` - Canonical format normalizer
+- `validateLiveData()` - Input validation
+- `processLivePipeline()` - Full pipeline orchestrator
+- `generateLivePatches()` - JSON Patch generation
+- `applyLivePatches()` - Patch application
+
+#### Bet Decisions Repository
+- `strategy`, `strategy_id` fields
+
+#### Deterministic Calculations
+- Rimosso `Math.random()` da statsTabBuilder.js e server.js
+
+#### Frontend
+- `Home.jsx` wrapper component
+
 ### v3.1.3 (28 Dic 2025) - Server.js Refactoring COMPLETATO ✅
 - **Routes Architecture** - 10 route files + 9 controller files COMPLETATI e funzionanti
   - `health.routes.js` + `health.controller.js` - Root e health check

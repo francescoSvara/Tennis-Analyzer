@@ -588,6 +588,123 @@ function calculateCompleteness(bundle) {
 }
 
 // ============================================================================
+// QUARANTINE LOGIC (FILOSOFIA_OBSERVABILITY_DATAQUALITY: QUARANTINE_TRIGGERS)
+// ============================================================================
+
+/**
+ * Quarantine reasons enum
+ */
+const QUARANTINE_REASONS = {
+  LOW_QUALITY_SCORE: 'LOW_QUALITY_SCORE',
+  CRITICAL_OUTLIER: 'CRITICAL_OUTLIER',
+  CONSISTENCY_FAILURE: 'CONSISTENCY_FAILURE',
+  MISSING_CANONICAL_IDS: 'MISSING_CANONICAL_IDS',
+  TEMPORAL_VIOLATION: 'TEMPORAL_VIOLATION'
+};
+
+/**
+ * Check if bundle should be quarantined
+ * 
+ * FILOSOFIA_OBSERVABILITY_DATAQUALITY: QUARANTINE_TRIGGERS
+ * 
+ * Triggers:
+ * - overall_score < 40 → QUARANTINE
+ * - outlier.critical (odds < 1.01) → QUARANTINE
+ * - consistency.grave_issue → QUARANTINE
+ * - canonical_ids.missing → QUARANTINE
+ * 
+ * @param {Object} bundle - MatchBundle to check
+ * @returns {Object} { quarantined: boolean, reasons: Array, timestamp: string }
+ */
+function checkQuarantineTriggers(bundle) {
+  const reasons = [];
+  const now = new Date();
+  
+  // 1. Evaluate quality score
+  const quality = evaluateBundleQuality(bundle);
+  if (quality.score < 40) {
+    reasons.push({
+      code: QUARANTINE_REASONS.LOW_QUALITY_SCORE,
+      detail: `Quality score ${quality.score} is below threshold (40)`,
+      severity: 'CRITICAL'
+    });
+  }
+  
+  // 2. Check for critical outliers (odds < 1.01)
+  const odds = bundle?.header?.odds || bundle?.odds;
+  if (odds?.matchWinner) {
+    const homeOdds = odds.matchWinner.home?.value || odds.matchWinner.home;
+    const awayOdds = odds.matchWinner.away?.value || odds.matchWinner.away;
+    
+    if ((homeOdds && homeOdds < 1.01) || (awayOdds && awayOdds < 1.01)) {
+      reasons.push({
+        code: QUARANTINE_REASONS.CRITICAL_OUTLIER,
+        detail: `Invalid odds detected: home=${homeOdds}, away=${awayOdds}`,
+        severity: 'CRITICAL'
+      });
+    }
+  }
+  
+  // 3. Check consistency
+  const consistency = checkConsistency(bundle);
+  if (!consistency.consistent && consistency.issues.length >= 2) {
+    reasons.push({
+      code: QUARANTINE_REASONS.CONSISTENCY_FAILURE,
+      detail: `Multiple consistency issues: ${consistency.issues.join('; ')}`,
+      severity: 'CRITICAL'
+    });
+  }
+  
+  // 4. Check for missing canonical IDs
+  const matchId = bundle?.matchId || bundle?.header?.match?.id;
+  const homeId = bundle?.header?.players?.home?.id || bundle?.player1?.id;
+  const awayId = bundle?.header?.players?.away?.id || bundle?.player2?.id;
+  
+  if (!matchId || !homeId || !awayId) {
+    reasons.push({
+      code: QUARANTINE_REASONS.MISSING_CANONICAL_IDS,
+      detail: `Missing canonical IDs: match=${!!matchId}, home=${!!homeId}, away=${!!awayId}`,
+      severity: 'CRITICAL'
+    });
+  }
+  
+  // 5. Check temporal violations (future data)
+  const asOfTime = bundle?.meta?.as_of_time || bundle?.meta?.generated_at;
+  if (asOfTime) {
+    const dataTime = new Date(asOfTime);
+    if (dataTime > now) {
+      reasons.push({
+        code: QUARANTINE_REASONS.TEMPORAL_VIOLATION,
+        detail: `Data timestamp ${asOfTime} is in the future`,
+        severity: 'CRITICAL'
+      });
+    }
+  }
+  
+  return {
+    quarantined: reasons.length > 0,
+    reasons,
+    quality_score: quality.score,
+    timestamp: now.toISOString(),
+    meta: {
+      checker_version: DATA_QUALITY_CHECKER_VERSION,
+      triggers_checked: 5
+    }
+  };
+}
+
+/**
+ * Check if bundle is safe to use (not quarantined)
+ * 
+ * @param {Object} bundle - MatchBundle
+ * @returns {boolean} true if safe to use
+ */
+function isDataUsable(bundle) {
+  const result = checkQuarantineTriggers(bundle);
+  return !result.quarantined;
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -599,6 +716,7 @@ module.exports = {
   ISSUE_CODES,
   SEVERITY,
   THRESHOLDS,
+  QUARANTINE_REASONS,
   
   // Main functions
   evaluateBundleQuality,
@@ -609,6 +727,10 @@ module.exports = {
   detectOutliers,
   checkConsistency,
   calculateCompleteness,
+  
+  // FILOSOFIA_OBSERVABILITY: Quarantine functions
+  checkQuarantineTriggers,
+  isDataUsable,
   
   // Helpers (exported for testing)
   isValidOdds,
