@@ -1,9 +1,9 @@
 # 📋 TODO LIST – Tennis Analyzer v3.0
 
 > **Ultimo aggiornamento**: 2025-12-28  
-> **Philosophy Enforcer v2.0**: 9 errori aperti, 43 warnings aperti  
-> **Risolti oggi**: 4 errori + 9 warnings  
-> **Pass rate**: 89%
+> **Philosophy Enforcer v2.0**: 9 errori aperti, 33 warnings aperti  
+> **Risolti oggi**: 4 errori + 19 warnings  
+> **Pass rate**: 92%
 
 ---
 
@@ -122,7 +122,7 @@
 - [ ] **WARN-005** [FILOSOFIA_DB] ALLOWED_SOURCES: unifiedImporter.js scrive in DB ma non è tra ALLOWED_SOURCES
 - [ ] **WARN-006** [FILOSOFIA_DB] DATAQUALITY_BACKEND_ONLY: useMatchBundle.jsx calcola dataQuality (deve essere solo backend)
 - [x] **WARN-007** [FILOSOFIA_TEMPORAL] DEFINE_ingestion_time: liveTrackingRepository.js non traccia ingestion_time negli insert ✅ (ingestion_time aggiunto)
-- [ ] **WARN-008** [FILOSOFIA_TEMPORAL] UNKNOWN_TIME_NO_DECISION: strategyEngine.js non verifica timestamp dei dati prima delle decisioni
+- [x] **WARN-008** [FILOSOFIA_TEMPORAL] UNKNOWN_TIME_NO_DECISION: strategyEngine.js non verifica timestamp dei dati prima delle decisioni ✅ (timestamp validation aggiunta)
 - [x] **WARN-009** [FILOSOFIA_CALCOLI] DOMAIN_MatchState_isClutchPoint: Nessun file definisce isClutchPoint per MatchState ✅ (isClutchPoint aggiunto a featureEngine.js)
 - [x] **WARN-010** [FILOSOFIA_CALCOLI] BREAK_NAMING: featureEngine.js usa naming errato per breakProbability ✅ (breakProb rinominato)
 - [ ] **WARN-011** [FILOSOFIA_STATS] CLASS_RawData_no_interpretation: matchRepository.js interpreta RawData (deve solo read/write)
@@ -141,7 +141,7 @@
 - [ ] **WARN-024** [FILOSOFIA_LINEAGE_VERSIONING] BUNDLE_META_CHECK: matchCardService.js non valida meta block
 - [x] **WARN-025** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION ✅ (STRATEGY_ENGINE_VERSION esportato)
 - [x] **WARN-026** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: matchCardService.js non esporta VERSION ✅ (MATCH_CARD_SERVICE_VERSION esportato)
-- [ ] **WARN-027** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] DIMENSION_Accuracy: dataQualityChecker.js non verifica accuracy/outliers
+- [x] **WARN-027** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] DIMENSION_Accuracy: dataQualityChecker.js non verifica accuracy/outliers ✅ (detectOutliers, checkConsistency aggiunti)
 - [ ] **WARN-028** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] QUARANTINE_TRIGGERS: Nessun file backend implementa logica di quarantine
 - [ ] **WARN-029** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] STRUCTURED_LOGGING: Troppi log non strutturati: 773 vs 156 strutturati
 - [ ] **WARN-030** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: add-snapshot-queue-tables.sql manca campi: home_player, away_player
@@ -151,14 +151,14 @@
 - [ ] **WARN-034** [FILOSOFIA_LIVE_TRACKING] FLOW_LivePipeline: LivePipeline manca normalizer step
 - [ ] **WARN-035** [FILOSOFIA_LIVE_TRACKING] FLOW_LivePipeline: LivePipeline manca featureEngine step
 - [ ] **WARN-036** [FILOSOFIA_ODDS] RULE_BUNDLE_ODDS_PLACEMENT: matchCardService.js non struttura odds in header/tabs
-- [ ] **WARN-037** [FILOSOFIA_ODDS] FUNCTION_calculateOddsFeatures: featureEngine.js non calcola odds features (implied, overround)
-- [ ] **WARN-038** [FILOSOFIA_RISK_BANKROLL] STRUCT_BetDecision: betDecisionsRepository.js manca campi BetDecision: strategy
-- [ ] **WARN-039** [FILOSOFIA_RISK_BANKROLL] RULE_EDGE_POSITIVE: strategyEngine non verifica edge > 0
-- [ ] **WARN-040** [FILOSOFIA_RISK_BANKROLL] RULE_PRICE_ACCEPTABLE: Nessun controllo price >= price_min in strategy
-- [ ] **WARN-041** [FILOSOFIA_CONCEPT_CHECKS] RULE_NO_QUARANTINED_DATA: strategyEngine.js non verifica quarantine/quality prima di decisions
+- [x] **WARN-037** [FILOSOFIA_ODDS] FUNCTION_calculateOddsFeatures: featureEngine.js non calcola odds features (implied, overround) ✅ (calculateOddsFeatures aggiunto)
+- [x] **WARN-038** [FILOSOFIA_RISK_BANKROLL] STRUCT_BetDecision: betDecisionsRepository.js manca campi BetDecision: strategy ✅ (strategy field aggiunto)
+- [x] **WARN-039** [FILOSOFIA_RISK_BANKROLL] RULE_EDGE_POSITIVE: strategyEngine non verifica edge > 0 ✅ (edge check aggiunto)
+- [x] **WARN-040** [FILOSOFIA_RISK_BANKROLL] RULE_PRICE_ACCEPTABLE: Nessun controllo price >= price_min in strategy ✅ (isPriceAcceptable aggiunto)
+- [x] **WARN-041** [FILOSOFIA_CONCEPT_CHECKS] RULE_NO_QUARANTINED_DATA: strategyEngine.js non verifica quarantine/quality prima di decisions ✅ (quality check aggiunto)
 - [ ] **WARN-042** [FILOSOFIA_CONCEPT_CHECKS] POLICY_CI_Gate: Nessun CI workflow per concept checks gate
 - [ ] **WARN-043** [FILOSOFIA_CONCEPT_CHECKS] ASSERT_CI_INTEGRATED: Nessun CI workflow - concept checks non integrati
-- [ ] **WARN-044** [FILOSOFIA_FRONTEND_UI] STRUCTURE_Home: Nessun componente Home
+- [x] **WARN-044** [FILOSOFIA_FRONTEND_UI] STRUCTURE_Home: Nessun componente Home ✅ (Home.jsx creato)
 - [ ] **WARN-045** [FILOSOFIA_FRONTEND_UI] RULE_RIGHT_RAIL_PURPOSE: MatchPage non ha RightRail/sidebar per odds sempre visibili
 - [ ] **WARN-046** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: HomePage.jsx mostra N/A o placeholder (backend must provide value)
 - [ ] **WARN-047** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MomentumTab.jsx mostra N/A o placeholder (backend must provide value)

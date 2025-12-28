@@ -443,6 +443,151 @@ function getQualitySummary(bundle) {
 }
 
 // ============================================================================
+// ACCURACY & OUTLIER DETECTION (FILOSOFIA_OBSERVABILITY_DATAQUALITY: DIMENSION_Accuracy)
+// ============================================================================
+
+/**
+ * Detect outliers in numeric data
+ * 
+ * FILOSOFIA_OBSERVABILITY: DIMENSION_Accuracy verification
+ * 
+ * @param {Array} values - Array of numeric values
+ * @param {number} threshold - Z-score threshold (default 3)
+ * @returns {Object} { outliers: Array, mean: number, std: number }
+ */
+function detectOutliers(values, threshold = 3) {
+  if (!Array.isArray(values) || values.length < 3) {
+    return { outliers: [], mean: null, std: null };
+  }
+  
+  // Filter to only numbers
+  const nums = values.filter(v => typeof v === 'number' && !isNaN(v) && isFinite(v));
+  if (nums.length < 3) return { outliers: [], mean: null, std: null };
+  
+  // Calculate mean
+  const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+  
+  // Calculate standard deviation
+  const squaredDiffs = nums.map(v => Math.pow(v - mean, 2));
+  const variance = squaredDiffs.reduce((a, b) => a + b, 0) / nums.length;
+  const std = Math.sqrt(variance);
+  
+  if (std === 0) return { outliers: [], mean, std: 0 };
+  
+  // Find outliers (values with z-score > threshold)
+  const outliers = nums.filter(v => Math.abs((v - mean) / std) > threshold);
+  
+  return {
+    outliers,
+    mean: Math.round(mean * 100) / 100,
+    std: Math.round(std * 100) / 100
+  };
+}
+
+/**
+ * Check data consistency
+ * 
+ * FILOSOFIA_OBSERVABILITY: verify internal consistency of bundle data
+ * 
+ * @param {Object} bundle - MatchBundle to check
+ * @returns {Object} { consistent: boolean, issues: Array }
+ */
+function checkConsistency(bundle) {
+  const issues = [];
+  
+  if (!bundle) return { consistent: false, issues: ['Bundle is null'] };
+  
+  // Check score consistency
+  const header = bundle.header || bundle;
+  const score = header?.match?.score || header?.score;
+  
+  if (score?.sets && Array.isArray(score.sets)) {
+    for (let i = 0; i < score.sets.length; i++) {
+      const set = score.sets[i];
+      const home = set.home || 0;
+      const away = set.away || 0;
+      
+      // Tennis set can't exceed reasonable limits
+      if (home > 7 || away > 7) {
+        // Could be valid in tiebreak, but check
+        if (!(home === 7 && away >= 5) && !(away === 7 && home >= 5)) {
+          issues.push(`Set ${i+1} has unlikely score: ${home}-${away}`);
+        }
+      }
+      
+      // Neither can be negative
+      if (home < 0 || away < 0) {
+        issues.push(`Set ${i+1} has negative score`);
+      }
+    }
+  }
+  
+  // Check odds consistency
+  const odds = header?.odds || bundle?.odds;
+  if (odds?.matchWinner) {
+    const homeOdds = odds.matchWinner.home?.value || odds.matchWinner.home;
+    const awayOdds = odds.matchWinner.away?.value || odds.matchWinner.away;
+    
+    if (homeOdds && awayOdds) {
+      // Both odds should sum to more than 100% implied prob (bookmaker margin)
+      const totalImplied = (1/homeOdds) + (1/awayOdds);
+      if (totalImplied < 0.95) {
+        issues.push('Odds implied probability too low - data may be incorrect');
+      }
+      if (totalImplied > 1.20) {
+        issues.push('Odds overround too high (>20%)');
+      }
+    }
+  }
+  
+  // Check player consistency
+  const homePlayer = header?.players?.home || bundle?.player1;
+  const awayPlayer = header?.players?.away || bundle?.player2;
+  
+  if (homePlayer?.id && awayPlayer?.id && homePlayer.id === awayPlayer.id) {
+    issues.push('Home and away player have same ID');
+  }
+  
+  return {
+    consistent: issues.length === 0,
+    issues
+  };
+}
+
+/**
+ * Calculate data completeness percentage
+ * 
+ * @param {Object} bundle - MatchBundle
+ * @returns {number} Completeness 0-100
+ */
+function calculateCompleteness(bundle) {
+  if (!bundle) return 0;
+  
+  let present = 0;
+  let total = 0;
+  
+  // Check key fields
+  const fieldsToCheck = [
+    'header.match.id',
+    'header.match.status',
+    'header.players.home.id',
+    'header.players.away.id',
+    'header.score',
+    'header.odds',
+    'tabs.stats',
+    'tabs.momentum',
+    'tabs.points'
+  ];
+  
+  for (const field of fieldsToCheck) {
+    total++;
+    if (getNestedValue(bundle, field)) present++;
+  }
+  
+  return Math.round((present / total) * 100);
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -459,6 +604,11 @@ module.exports = {
   evaluateBundleQuality,
   passesMinimumQuality,
   getQualitySummary,
+  
+  // FILOSOFIA_OBSERVABILITY: Accuracy/outlier functions
+  detectOutliers,
+  checkConsistency,
+  calculateCompleteness,
   
   // Helpers (exported for testing)
   isValidOdds,

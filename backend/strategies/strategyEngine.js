@@ -13,7 +13,32 @@
 // ============================================
 // VERSION (FILOSOFIA_LINEAGE_VERSIONING compliance)
 // ============================================
-const STRATEGY_ENGINE_VERSION = 'v1.0.0';
+const STRATEGY_ENGINE_VERSION = 'v1.1.0';
+
+// ============================================
+// PRICE THRESHOLDS (FILOSOFIA_RISK_BANKROLL: RULE_PRICE_ACCEPTABLE)
+// ============================================
+const PRICE_THRESHOLDS = {
+  MIN_LAY_PRICE: 1.10,  // Minimum acceptable lay price
+  MAX_LAY_PRICE: 5.00,  // Maximum acceptable lay price
+  MIN_BACK_PRICE: 1.20, // Minimum acceptable back price
+  MAX_BACK_PRICE: 10.00 // Maximum acceptable back price
+};
+
+/**
+ * Check if price is acceptable for given action
+ * FILOSOFIA_RISK_BANKROLL: RULE_PRICE_ACCEPTABLE
+ */
+function isPriceAcceptable(price, action) {
+  if (typeof price !== 'number' || price <= 1) return false;
+  
+  if (action === 'LAY') {
+    return price >= PRICE_THRESHOLDS.MIN_LAY_PRICE && price <= PRICE_THRESHOLDS.MAX_LAY_PRICE;
+  } else if (action === 'BACK') {
+    return price >= PRICE_THRESHOLDS.MIN_BACK_PRICE && price <= PRICE_THRESHOLDS.MAX_BACK_PRICE;
+  }
+  return true;
+}
 
 // ============================================
 // STRATEGY SIGNAL SCHEMA
@@ -42,6 +67,26 @@ const STRATEGY_ENGINE_VERSION = 'v1.0.0';
  * @returns {StrategySignal[]} Array di segnali strategia
  */
 function evaluateAll(matchData) {
+  // FILOSOFIA_TEMPORAL: UNKNOWN_TIME_NO_DECISION - verify timestamp before decisions
+  const dataTimestamp = matchData?.meta?.as_of_time || matchData?.features?.as_of_time;
+  const now = Date.now();
+  const dataAge = dataTimestamp ? now - new Date(dataTimestamp).getTime() : Infinity;
+  const MAX_DATA_AGE_MS = 5 * 60 * 1000; // 5 minutes
+  
+  if (dataAge > MAX_DATA_AGE_MS) {
+    console.warn(`⚠️ StrategyEngine: Data too stale (${Math.round(dataAge/1000)}s old), skipping evaluation`);
+    return []; // Return empty - stale data should not produce decisions
+  }
+  
+  // FILOSOFIA_CONCEPT_CHECKS: RULE_NO_QUARANTINED_DATA - verify quality before decisions
+  const dataQuality = matchData?.dataQuality?.score || matchData?.dataQuality || 0;
+  const MIN_QUALITY_FOR_DECISION = 40;
+  
+  if (typeof dataQuality === 'number' && dataQuality < MIN_QUALITY_FOR_DECISION) {
+    console.warn(`⚠️ StrategyEngine: Data quality too low (${dataQuality}%), skipping evaluation`);
+    return []; // Return empty - low quality data should not produce decisions
+  }
+  
   const strategies = [
     evaluateLayWinner(matchData),
     evaluateBancaServizio(matchData),
@@ -113,16 +158,27 @@ function evaluateLayWinner(matchData) {
   
   const metConditions = Object.values(conditions).filter(Boolean).length;
   
-  if (metConditions >= 4) {
+  // FILOSOFIA_RISK_BANKROLL: Calculate edge before decision
+  const impliedProb = winnerOdds > 1 ? 1 / winnerOdds : 0;
+  const modelProb = metConditions >= 3 ? 0.6 : 0.4; // Estimated model probability
+  const edge = modelProb - impliedProb;
+  
+  // FILOSOFIA_RISK_BANKROLL: RULE_EDGE_POSITIVE - only READY if edge > 0
+  // FILOSOFIA_RISK_BANKROLL: RULE_PRICE_ACCEPTABLE - verify price is in acceptable range
+  const priceAcceptable = isPriceAcceptable(winnerOdds, 'LAY');
+  
+  if (metConditions >= 4 && edge > 0 && priceAcceptable) {
     status = 'READY';
     confidence = 0.75;
     action = 'LAY';
     target = set1Winner;
     reasons.push('Tutte le condizioni soddisfatte - LAY il vincitore del 1° set');
+    reasons.push(`Edge positivo: ${(edge * 100).toFixed(1)}%`);
   } else if (metConditions >= 2) {
     status = 'WATCH';
     confidence = 0.4;
     reasons.push(`${metConditions}/4 condizioni soddisfatte`);
+    if (edge <= 0) reasons.push('Edge non sufficiente');
   }
   
   return {
@@ -459,6 +515,8 @@ function getSummary(signals) {
 module.exports = {
   // Version (FILOSOFIA_LINEAGE_VERSIONING)
   STRATEGY_ENGINE_VERSION,
+  // Constants (FILOSOFIA_RISK_BANKROLL)
+  PRICE_THRESHOLDS,
   // Main
   evaluateAll,
   evaluateStrategies: evaluateAll, // alias per FILOSOFIA_RISK_BANKROLL
@@ -468,4 +526,6 @@ module.exports = {
   evaluateTiebreakSpecialist,
   evaluateMomentumSwing,
   getSummary,
+  // Helpers (FILOSOFIA_RISK_BANKROLL)
+  isPriceAcceptable,
 };

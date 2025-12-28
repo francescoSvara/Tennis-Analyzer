@@ -82,6 +82,10 @@ async function insertDecision(decision) {
     player_b_id: decision.playerBId || null,
     tournament_id: decision.tournamentId || null,
     
+    // FILOSOFIA_RISK_BANKROLL: strategy field for BetDecision
+    strategy: decision.strategy || null,
+    strategy_id: decision.strategyId || null,
+    
     // Temporal (critical for audit)
     as_of_time: decision.asOfTime || now,
     generated_at: now,
