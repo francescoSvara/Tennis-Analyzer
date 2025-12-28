@@ -73,4 +73,23 @@ Il sistema accetta qualsiasi alias, ritorna sempre il canonical.
 
 ---
 
+## 📚 Riferimenti
+
+### 🧭 Navigazione
+| ⬆️ Padre | ⬅️ Correlati | ➡️ Usato da |
+|---------|-------------|-------------|
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FILOSOFIA_DB](../storage/FILOSOFIA_DB.md) | [FILOSOFIA_LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) |
+| [INDEX_FILOSOFIE](../../INDEX_FILOSOFIE.md) | | [FILOSOFIA_OBSERVABILITY](../quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) |
+
+### 📁 File Codice Principali
+
+| File | Descrizione |
+|------|-------------|
+| [`backend/utils/dataNormalizer.js`](../../../../backend/utils/dataNormalizer.js) | Normalizzazione nomi e ID |
+| [`data/mappings/`](../../../../data/mappings/) | Mapping files (players, tournaments) |
+| [`backend/routes/player.routes.js`](../../../../backend/routes/player.routes.js) | Route player endpoints |
+| [`backend/controllers/player.controller.js`](../../../../backend/controllers/player.controller.js) | Controller player search |
+
+---
+
 **Fine FILOSOFIA_REGISTRY_CANON – Concetto**

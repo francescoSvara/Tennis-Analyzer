@@ -189,7 +189,7 @@ export function StatsTab({ data, header }) {
           <MotionCard className="stats-card">
             <h3 className="card-title">
               <TennisBall size={18} weight="duotone" />
-              Serve Statistics
+              Servizio
             </h3>
             <div className="stats-players">
               <span className="player-name">{players.home?.name || 'Player 1'}</span>
@@ -203,40 +203,40 @@ export function StatsTab({ data, header }) {
                 format="number" 
               />
               <StatBar 
-                label="Double Faults" 
+                label="Doppi Falli" 
                 homeValue={homeServe.doubleFaults || 0} 
                 awayValue={awayServe.doubleFaults || 0} 
                 format="number" 
               />
               <StatBarFraction 
-                label="1st Serve %" 
+                label="Primo Servizio %" 
                 homeWon={homeServe.firstServeIn || 0}
                 homeTotal={homeServe.firstServeTotal || 0}
                 awayWon={awayServe.firstServeIn || 0}
                 awayTotal={awayServe.firstServeTotal || 0}
               />
               <StatBarFraction 
-                label="1st Serve Points" 
+                label="Punti Primo Servizio" 
                 homeWon={homeServe.firstServePointsWon || 0}
                 homeTotal={homeServe.firstServePointsIn || homeServe.firstServeIn || 0}
                 awayWon={awayServe.firstServePointsWon || 0}
                 awayTotal={awayServe.firstServePointsIn || awayServe.firstServeIn || 0}
               />
               <StatBarFraction 
-                label="2nd Serve Points" 
+                label="Punti Secondo Servizio" 
                 homeWon={homeServe.secondServePointsWon || 0}
                 homeTotal={homeServe.secondServeTotal || 0}
                 awayWon={awayServe.secondServePointsWon || 0}
                 awayTotal={awayServe.secondServeTotal || 0}
               />
               <StatBar 
-                label="Service Games" 
+                label="Servizio" 
                 homeValue={homeServe.serviceGamesPlayed || 0} 
                 awayValue={awayServe.serviceGamesPlayed || 0} 
                 format="number" 
               />
               <StatBarFraction 
-                label="Break Points Saved" 
+                label="Break Points Salvati" 
                 homeWon={homeServe.breakPointsSaved || 0}
                 homeTotal={homeServe.breakPointsFaced || 0}
                 awayWon={awayServe.breakPointsSaved || 0}
@@ -249,31 +249,31 @@ export function StatsTab({ data, header }) {
           <MotionCard className="stats-card">
             <h3 className="card-title">
               <Target size={18} weight="duotone" />
-              Return Statistics
+              Ritorno
             </h3>
             <div className="stats-list">
               <StatBarFraction 
-                label="1st Return Points" 
+                label="Punti Primo Ritorno" 
                 homeWon={homeReturn.firstReturnPointsWon || 0}
                 homeTotal={homeReturn.firstReturnPointsTotal || 0}
                 awayWon={awayReturn.firstReturnPointsWon || 0}
                 awayTotal={awayReturn.firstReturnPointsTotal || 0}
               />
               <StatBarFraction 
-                label="2nd Return Points" 
+                label="Punti Secondo Ritorno" 
                 homeWon={homeReturn.secondReturnPointsWon || 0}
                 homeTotal={homeReturn.secondReturnPointsTotal || 0}
                 awayWon={awayReturn.secondReturnPointsWon || 0}
                 awayTotal={awayReturn.secondReturnPointsTotal || 0}
               />
               <StatBar 
-                label="Return Games Played" 
+                label="Games di Ritorno" 
                 homeValue={homeReturn.returnGamesPlayed || 0} 
                 awayValue={awayReturn.returnGamesPlayed || 0} 
                 format="number" 
               />
               <StatBarFraction 
-                label="Break Points Converted" 
+                label="Break Points Convertiti" 
                 homeWon={homeReturn.breakPointsWon || 0}
                 homeTotal={homeReturn.breakPointsTotal || 0}
                 awayWon={awayReturn.breakPointsWon || 0}
@@ -286,29 +286,29 @@ export function StatsTab({ data, header }) {
           <MotionCard className="stats-card">
             <h3 className="card-title">
               <Pulse size={18} weight="duotone" />
-              Points Statistics
+              Punti
             </h3>
             <div className="stats-list">
               <StatBar 
-                label="Total Points Won" 
+                label="Punti Totali Vinti" 
                 homeValue={homePoints.totalWon || 0} 
                 awayValue={awayPoints.totalWon || 0} 
                 format="number"
               />
               <StatBar 
-                label="Service Points Won" 
+                label="Punti Servizio Vinti" 
                 homeValue={homePoints.servicePointsWon || 0} 
                 awayValue={awayPoints.servicePointsWon || 0} 
                 format="number"
               />
               <StatBar 
-                label="Return Points Won" 
+                label="Punti Ritorno Vinti" 
                 homeValue={homePoints.returnPointsWon || 0} 
                 awayValue={awayPoints.returnPointsWon || 0} 
                 format="number"
               />
               <StatBar 
-                label="Max Consec. Points" 
+                label="Max Punti Consecutivi" 
                 homeValue={homePoints.maxConsecutivePointsWon || 0} 
                 awayValue={awayPoints.maxConsecutivePointsWon || 0} 
                 format="number"
@@ -320,17 +320,17 @@ export function StatsTab({ data, header }) {
           <MotionCard className="stats-card">
             <h3 className="card-title">
               <Trophy size={18} weight="duotone" />
-              Game Statistics
+              Game
             </h3>
             <div className="stats-list">
               <StatBar 
-                label="Games Won" 
+                label="Games Vinti" 
                 homeValue={homeGames.gamesWon || 0} 
                 awayValue={awayGames.gamesWon || 0} 
                 format="number"
               />
               <StatBar 
-                label="Service Games Won" 
+                label="Servizi Vinti" 
                 homeValue={homeServe.serviceGamesWon || 0} 
                 awayValue={awayServe.serviceGamesWon || 0} 
                 format="number"
@@ -342,7 +342,7 @@ export function StatsTab({ data, header }) {
                 format="number"
               />
               <StatBar 
-                label="Tiebreaks Won" 
+                label="Tiebreaks Vinti" 
                 homeValue={homeGames.tiebreaksWon || 0} 
                 awayValue={awayGames.tiebreaksWon || 0} 
                 format="number"

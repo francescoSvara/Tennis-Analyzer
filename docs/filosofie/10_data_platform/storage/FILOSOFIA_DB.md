@@ -96,4 +96,26 @@ Il frontend **mostra**, non interpreta.
 
 ---
 
+## 📚 Riferimenti
+
+### 🧭 Navigazione
+| ⬆️ Padre | ⬅️ Correlati | ➡️ Consumato da |
+|---------|-------------|-----------------|
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FILOSOFIA_TEMPORAL](../temporal/FILOSOFIA_TEMPORAL.md) | [FILOSOFIA_LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) |
+| [INDEX_FILOSOFIE](../../INDEX_FILOSOFIE.md) | [FILOSOFIA_REGISTRY](../registry_canon/FILOSOFIA_REGISTRY_CANON.md) | [FILOSOFIA_OBSERVABILITY](../quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) |
+
+### 📁 File Codice Principali
+
+| File | Descrizione |
+|------|-------------|
+| [`backend/db/supabase.js`](../../../../backend/db/supabase.js) | Client Supabase |
+| [`backend/db/matchRepository.js`](../../../../backend/db/matchRepository.js) | Repository match queries |
+| [`backend/db/liveTrackingRepository.js`](../../../../backend/db/liveTrackingRepository.js) | Repository live tracking |
+| [`backend/routes/db.routes.js`](../../../../backend/routes/db.routes.js) | Route DB endpoints |
+| [`backend/controllers/db.controller.js`](../../../../backend/controllers/db.controller.js) | Controller DB |
+| [`backend/routes/match.routes.js`](../../../../backend/routes/match.routes.js) | Route MatchBundle endpoint |
+| [`backend/controllers/match.controller.js`](../../../../backend/controllers/match.controller.js) | Controller MatchBundle |
+
+---
+
 **Fine FILOSOFIA_DB – Concetto**

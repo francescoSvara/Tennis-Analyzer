@@ -233,35 +233,6 @@ function StrategyCard({ strategy, onExecute }) {
   );
 }
 
-/**
- * Strategy Event Log - Log eventi strategie
- */
-function StrategyEventLog({ events }) {
-  if (!events || events.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="strategy-event-log">
-      <h4 className="log-title">
-        <Clock size={16} weight="duotone" />
-        Strategy Event Log
-      </h4>
-      <MotionRowList>
-        {events.slice(0, 10).map((event, idx) => (
-          <MotionRow
-            key={idx}
-            status={event.status === 'READY' ? 'success' : event.status === 'WATCH' ? 'warning' : 'default'}
-          >
-            <span className="event-time">{event.time}</span>
-            <span className={`event-dot ${(event.status || 'off').toLowerCase()}`}></span>
-            <span className="event-text">{event.message}</span>
-          </MotionRow>
-        ))}
-      </MotionRowList>
-    </div>
-  );
-}
 
 /**
  * StrategiesTab Component
@@ -456,8 +427,6 @@ export function StrategiesTab({ data, header }) {
         </AnimatePresence>
       </motion.div>
 
-      {/* Event Log */}
-      <StrategyEventLog events={events} />
     </motion.div>
   );
 }

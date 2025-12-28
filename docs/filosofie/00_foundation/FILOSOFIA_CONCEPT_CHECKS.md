@@ -1,183 +1,98 @@
 # 🧪 FILOSOFIA CONCEPT CHECKS
-## Sistema Immunitario Architetturale
 
-> **Dominio**: Governance · Qualità · Guardrails  
-> **Stato**: ATTIVA  
-> **Ultimo aggiornamento**: 27 Dicembre 2025  
+> Ogni pezzo di codice deve sapere chi è, cosa può fare, cosa non deve fare.  
+> I Concept Checks sono il sistema immunitario dell'architettura.
 
 ---
 
-## 0️⃣ Principio Costituzionale
+## 1️⃣ Cosa Proteggono
 
-> **Ogni pezzo di codice deve sapere chi è, cosa può fare, cosa non deve fare.**
-
-I Concept Checks proteggono:
-- MatchBundle integrity
-- Feature Engine purity
-- Strategy Engine boundaries
+- **MatchBundle integrity**: il bundle è l'unica verità
+- **Feature Engine purity**: calcoli deterministici
+- **Strategy Engine boundaries**: segnali, non metriche
+- **Frontend statelessness**: solo display, mai calcoli
 
 ---
 
-## 1️⃣ Invarianti Non Negoziabili
+## 2️⃣ Invarianti Non Negoziabili
 
-```
-INVARIANT MATCHBUNDLE_ONLY_FE
-  Frontend consuma SOLO MatchBundle
-  fetch FE verso /stats, /momentum → ❌ ERROR
-END
-
-INVARIANT BACKEND_INTERPRETATION
-  Solo backend interpreta dati
-  calcoli pressure/edge in FE → ❌ ERROR
-END
-
-INVARIANT FEATURE_VS_STRATEGY
-  Feature Engine → calcola numeri
-  Strategy Engine → decide READY/WATCH/OFF
-  Frontend → visualizza segnali
-END
-
-INVARIANT SIGNAL_NOT_METRIC
-  Segnali NON sono metriche
-  persistenza READY/WATCH in DB → ❌ ERROR
-END
-
-INVARIANT DATAQUALITY_BACKEND
-  DataQuality calcolata solo backend
-  FE con calculateCompleteness → ❌ ERROR
-END
-```
+| Invariante | Descrizione |
+|------------|-------------|
+| MATCHBUNDLE_ONLY_FE | Frontend consuma solo MatchBundle |
+| BACKEND_INTERPRETATION | Solo backend interpreta dati |
+| FEATURE_VS_STRATEGY | Feature calcola, Strategy decide, FE visualizza |
+| SIGNAL_NOT_METRIC | Segnali non sono metriche (no persist) |
+| DATAQUALITY_BACKEND | DataQuality calcolata solo backend |
 
 ---
 
-## 2️⃣ Regole Temporali
+## 3️⃣ Regole Temporali
 
-```
-RULE TEMPORAL_ASOF
-  feature_snapshot.as_of_time <= match.event_time (pre-match)
-  feature_snapshot.as_of_time <= now() (live)
-END
+- **as_of_time**: feature snapshot non può essere nel futuro
+- **no_future_data**: nessuna query usa righe con `event_time > as_of_time`
 
-RULE NO_FUTURE_DATA
-  Nessuna query usa righe con event_time > as_of_time
-  Violazione = edge finto
-END
-```
+Violazione = edge finto.
 
 ---
 
-## 3️⃣ Regole Identità
+## 4️⃣ Regole Identità
 
-```
-RULE CANONICAL_IDS_REQUIRED
-  Bundle DEVE avere:
-    - header.home_player.player_id
-    - header.away_player.player_id  
-    - header.tournament.tournament_id
-END
-
-RULE MATCHBUNDLE_META_REQUIRED
-  meta DEVE includere:
-    - generated_at
-    - as_of_time
-    - versions.bundle_schema
-    - versions.data
-    - versions.features
-    - versions.strategies
-END
-```
+Il bundle DEVE avere:
+- `header.home_player.player_id` (canonical)
+- `header.away_player.player_id` (canonical)
+- `header.tournament.tournament_id` (canonical)
+- `meta.versions.*` (tutte le versioni)
 
 ---
 
-## 4️⃣ Regole Qualità
+## 5️⃣ Regole Qualità
 
-```
-RULE DATA_QUALITY_THRESHOLD
-  bundle.meta.data_quality.overall_score >= 60
-  score < 40 → ERROR
-  score < 60 → WARNING
-END
-
-RULE ODDS_STALENESS_WARNING
-  Threshold pre-match: 10 min
-  Threshold live: 30 sec
-  Oltre → WARNING
-END
-
-RULE NO_QUARANTINED_DATA
-  Match in quarantine → ERROR
-  Non usare per decisioni
-END
-```
-
----
-
-## 5️⃣ Check Architetturali
-
-| ID | Regola | Target |
-|----|--------|--------|
-| `LIN-001` | featureEngine esporta VERSION | `featureEngine.js` |
-| `LIN-002` | strategyEngine esporta VERSION | `strategyEngine.js` |
-| `STATS-001` | Feature Engine esiste | `featureEngine.js` |
-| `STATS-002` | Strategy Engine esiste | `strategyEngine.js` |
-| `CALC-001` | featureEngine MAI null | `featureEngine.js` |
-| `FE-001` | App.jsx NO featureEngine import | `App.jsx` |
-| `DB-001` | Supabase client centralizzato | `supabase.js` |
+| Regola | Soglia | Azione |
+|--------|--------|--------|
+| Data quality score | < 40 | ERROR (blocca) |
+| Data quality score | < 60 | WARNING |
+| Odds staleness (live) | > 30s | WARNING |
+| Odds staleness (pre-match) | > 10min | WARNING |
+| Match quarantined | true | ERROR |
 
 ---
 
 ## 6️⃣ Severità e CI
 
 ```
-POLICY CI_Gate
-  IF errors > 0
-    THEN FAIL
-  ELSE
-    PASS
-END
-
-SEVERITY_LEVELS:
-  ERROR  → blocca CI
-  WARN   → report + TODO
-  INFO   → solo documentazione
+ERROR  → blocca CI (merge denied)
+WARN   → report + TODO (merge allowed)
+INFO   → documentazione only
 ```
 
 ---
 
-## 7️⃣ File di Riferimento
+## 7️⃣ Eccezioni
 
-| File | Scopo |
-|------|-------|
-| `scripts/runConceptChecks.js` | Runner checks |
-| `scripts/checkConceptualMap.js` | Verifica esistenza file |
-| `docs/concept/rules.v2.json` | Regole semantic |
+Annotazione `// philosophy:allow RULE_ID reason="..."`
+
+Se una regola ha troppi falsi positivi o non è legata a filosofia, va rimossa o semplificata.
 
 ---
 
-## 8️⃣ Eccezioni
+## 8️⃣ Regola Finale
 
-```
-ANNOTATION philosophy:allow
-  // philosophy:allow RULE_ID reason="motivazione"
-  
-  IF rule in allowlist
-    THEN downgrade severity
-END
-```
+> Disciplina architetturale > tooling.
+>
+> I check devono essere spiegabili e legati alla filosofia.
+> Se non lo sono, non servono.
 
 ---
 
-## 9️⃣ Regola Finale
+**Documenti Correlati**:
+- [FILOSOFIA_MADRE_TENNIS](./FILOSOFIA_MADRE_TENNIS.md) – principi fondanti
+- [FILOSOFIA_OBSERVABILITY](../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) – quality checks
+- [FILOSOFIA_LINEAGE](../10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) – version checks
 
-```
-IF check produce troppi falsi positivi
-OR check difficile da spiegare
-OR check non legato a filosofia
-  THEN rimuovi o semplifica
+### 📁 File Codice Principali
 
-Disciplina architetturale > tooling
-```
-
----
-
-**Fine FILOSOFIA_CONCEPT_CHECKS**
+| File | Descrizione |
+|------|-------------|
+| [`scripts/philosophyEnforcer.js`](../../../scripts/philosophyEnforcer.js) | CI enforcer principale |
+| [`scripts/checkConceptualMap.js`](../../../scripts/checkConceptualMap.js) | Concept map checker |
+| [`scripts/runConceptChecks.js`](../../../scripts/runConceptChecks.js) | Runner concept checks |

@@ -72,4 +72,22 @@ Nessuna eccezione.
 
 ---
 
+## 📚 Riferimenti
+
+### 🧭 Navigazione
+| ⬆️ Padre | ⬅️ Dipende da | ➡️ Usato da |
+|---------|---------------|-------------|
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FILOSOFIA_DB](../storage/FILOSOFIA_DB.md) | [FILOSOFIA_LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) |
+| [INDEX_FILOSOFIE](../../INDEX_FILOSOFIE.md) | | [FILOSOFIA_LIVE_TRACKING](../../20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) |
+
+### 📁 File Codice Principali
+
+| File | Descrizione |
+|------|-------------|
+| [`backend/liveManager.js`](../../../../backend/liveManager.js) | Gestione live polling adattivo |
+| [`backend/services/matchCardService.js`](../../../../backend/services/matchCardService.js) | Meta block temporali |
+| [`backend/utils/dataQualityChecker.js`](../../../../backend/utils/dataQualityChecker.js) | Staleness checks |
+
+---
+
 **Fine FILOSOFIA_TEMPORAL – Concetto**

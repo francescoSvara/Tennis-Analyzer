@@ -1,11 +1,11 @@
 # 🗺️ MAPPA RETE CONCETTUALE  
-## Versione V2.8 – MatchBundle-Centric Architecture + Complete API Reference
+## Versione V2.9 – MatchBundle-Centric Architecture + Complete API Reference
 
 > **Scopo**: fornire una visione unificata e navigabile dell'architettura concettuale del progetto.  
 > **Stato**: ATTIVA  
 > **Sostituisce**: `MAPPA_RETE_CONCETTUALE.md` (V1 – DEPRECATA)  
 > **Ultimo aggiornamento**: 28 Dicembre 2025  
-> **Novità V2.8**: Aggiornamento completo tabelle API Routes con tutti gli endpoints, sincronizzato con route files reali  
+> **Novità V2.9**: Aggiunti riferimenti bidirezionali INDEX_FILOSOFIE + SCHEDE_UI_TAB + script verifica  
 
 ---
 
@@ -190,34 +190,35 @@ Nessun dominio **bypassa** il MatchBundle
 
 > Ogni filosofia ha DUE file: **Concetto** (narrativo) + **Pseudocode** (regole formali)
 
-| Documento | Concetto | Pseudocode | Ruolo | 📁 File Codice |
-|-----------|----------|------------|-------|----------------|
-| FILOSOFIA_MADRE | [📄](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [📜](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS_PSEUDOCODE.md) | Costituzione tecnica | - |
-| FILOSOFIA_CONCEPT_CHECKS | [📄](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | [📜](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS_PSEUDOCODE.md) | Architecture Guardrail | [`scripts/`](../../scripts/) |
-| FILOSOFIA_DB | [📄](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [📜](../filosofie/10_data_platform/storage/FILOSOFIA_DB_PSEUDOCODE.md) | DBA / Data Engineer | [`backend/db/`](../../backend/db/) |
-| FILOSOFIA_TEMPORAL | [📄](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | [📜](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL_PSEUDOCODE.md) | Time Architect | [`backend/liveManager.js`](../../backend/liveManager.js) |
-| FILOSOFIA_REGISTRY_CANON | [📄](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | [📜](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON_PSEUDOCODE.md) | Data Architect | [`backend/services/dataNormalizer.js`](../../backend/services/dataNormalizer.js) |
-| FILOSOFIA_LINEAGE_VERSIONING | [📄](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | [📜](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING_PSEUDOCODE.md) | Audit Architect | [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) |
-| FILOSOFIA_OBSERVABILITY | [📄](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | [📜](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY_PSEUDOCODE.md) | Data Quality Engineer | [`backend/services/dataQualityChecker.js`](../../backend/services/dataQualityChecker.js) |
-| FILOSOFIA_PBP_EXTRACTION | [📄](../filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md) | [📜](../filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION_PSEUDOCODE.md) | Tennis Data Engineer | [`backend/utils/pbpExtractor.cjs`](../../backend/utils/pbpExtractor.cjs) |
-| FILOSOFIA_LIVE_TRACKING | [📄](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [📜](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING_PSEUDOCODE.md) | Real-time Engineer | [`backend/liveManager.js`](../../backend/liveManager.js) |
-| FILOSOFIA_ODDS | [📄](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [📜](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS_PSEUDOCODE.md) | Quant / Market Data | [`backend/server.js`](../../backend/server.js) |
-| FILOSOFIA_STATS | [📄](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [📜](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS_PSEUDOCODE.md) | Feature & Strategy Engine | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
-| FILOSOFIA_CALCOLI | [📄](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | [📜](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI_PSEUDOCODE.md) | Feature Library | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
-| FILOSOFIA_RISK_BANKROLL | [📄](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | [📜](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL_PSEUDOCODE.md) | Risk Manager / Quant | [`backend/services/riskEngine.js`](../../backend/services/riskEngine.js) |
-| FILOSOFIA_FRONTEND_DATA | [📄](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [📜](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_PSEUDOCODE.md) | FE Data Consumer | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) |
-| FILOSOFIA_FRONTEND | [📄](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [📜](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND_PSEUDOCODE.md) | Frontend UI/UX | [`src/components/`](../../src/components/) |
+| Documento | Concetto | Pseudocode | Ruolo | 📁 File Codice Principali |
+|-----------|----------|------------|-------|---------------------------|
+| FILOSOFIA_MADRE | [📄](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [📜](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS_PSEUDOCODE.md) | Costituzione tecnica | (tutti i figli) |
+| FILOSOFIA_CONCEPT_CHECKS | [📄](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | [📜](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS_PSEUDOCODE.md) | Architecture Guardrail | [`philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js), [`checkConceptualMap.js`](../../scripts/checkConceptualMap.js), [`runConceptChecks.js`](../../scripts/runConceptChecks.js) |
+| FILOSOFIA_DB | [📄](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [📜](../filosofie/10_data_platform/storage/FILOSOFIA_DB_PSEUDOCODE.md) | DBA / Data Engineer | [`supabase.js`](../../backend/db/supabase.js), [`matchRepository.js`](../../backend/db/matchRepository.js), [`db.routes.js`](../../backend/routes/db.routes.js), [`match.routes.js`](../../backend/routes/match.routes.js) |
+| FILOSOFIA_TEMPORAL | [📄](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | [📜](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL_PSEUDOCODE.md) | Time Architect | [`liveManager.js`](../../backend/liveManager.js), [`matchCardService.js`](../../backend/services/matchCardService.js), [`dataQualityChecker.js`](../../backend/utils/dataQualityChecker.js) |
+| FILOSOFIA_REGISTRY_CANON | [📄](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | [📜](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON_PSEUDOCODE.md) | Data Architect | [`dataNormalizer.js`](../../backend/utils/dataNormalizer.js), [`player.routes.js`](../../backend/routes/player.routes.js), [`data/mappings/`](../../data/mappings/) |
+| FILOSOFIA_LINEAGE_VERSIONING | [📄](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | [📜](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING_PSEUDOCODE.md) | Audit Architect | [`matchCardService.js`](../../backend/services/matchCardService.js), [`dataQualityChecker.js`](../../backend/utils/dataQualityChecker.js) |
+| FILOSOFIA_OBSERVABILITY | [📄](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | [📜](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY_PSEUDOCODE.md) | Data Quality Engineer | [`dataQualityChecker.js`](../../backend/utils/dataQualityChecker.js), [`matchCardService.js`](../../backend/services/matchCardService.js), [`philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js) |
+| FILOSOFIA_PBP_EXTRACTION | [📄](../filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md) | [📜](../filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION_PSEUDOCODE.md) | Tennis Data Engineer | [`pbpExtractor.cjs`](../../backend/scraper/pbpExtractor.cjs), [`event.routes.js`](../../backend/routes/event.routes.js), [`event.controller.js`](../../backend/controllers/event.controller.js) |
+| FILOSOFIA_LIVE_TRACKING | [📄](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [📜](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING_PSEUDOCODE.md) | Real-time Engineer | [`liveManager.js`](../../backend/liveManager.js), [`liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js), [`tracking.routes.js`](../../backend/routes/tracking.routes.js) |
+| FILOSOFIA_ODDS | [📄](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [📜](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS_PSEUDOCODE.md) | Quant / Market Data | [`value.routes.js`](../../backend/routes/value.routes.js), [`value.controller.js`](../../backend/controllers/value.controller.js), [`matchCardService.js`](../../backend/services/matchCardService.js) |
+| FILOSOFIA_STATS | [📄](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [📜](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS_PSEUDOCODE.md) | Feature & Strategy Engine | [`featureEngine.js`](../../backend/utils/featureEngine.js), [`strategyEngine.js`](../../backend/strategies/strategyEngine.js), [`stats.routes.js`](../../backend/routes/stats.routes.js) |
+| FILOSOFIA_CALCOLI | [📄](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | [📜](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI_PSEUDOCODE.md) | Feature Library | [`pressureCalculator.js`](../../backend/utils/pressureCalculator.js), [`featureEngine.js`](../../backend/utils/featureEngine.js), [`dataQualityChecker.js`](../../backend/utils/dataQualityChecker.js) |
+| FILOSOFIA_RISK_BANKROLL | [📄](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | [📜](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL_PSEUDOCODE.md) | Risk Manager / Quant | [`strategies/`](../../backend/strategies/), [`betDecisionsRepository.js`](../../backend/db/betDecisionsRepository.js), [`value.routes.js`](../../backend/routes/value.routes.js) |
+| FILOSOFIA_FRONTEND_DATA | [📄](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [📜](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_PSEUDOCODE.md) | FE Data Consumer | [`useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`src/components/`](../../src/components/), [`config.js`](../../src/config.js) |
+| FILOSOFIA_FRONTEND | [📄](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [📜](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND_PSEUDOCODE.md) | Frontend UI/UX | [`src/components/`](../../src/components/), [`src/styles/`](../../src/styles/), [`src/motion/`](../../src/motion/), [`App.jsx`](../../src/App.jsx) |
 | INDEX_FILOSOFIE | [📄](../filosofie/INDEX_FILOSOFIE.md) | [📜](../filosofie/INDEX_FILOSOFIE_PSEUDOCODE.md) | Mappa navigazione | - |
 
 ### Specifications (docs/specs/)
 
 | Documento | Link | Scopo | 📁 File Codice Correlati |
 |-----------|------|-------|--------------------------|
-| HPI_RESILIENCE | [📄](../specs/HPI_RESILIENCE.md) | Feature pressione/resilienza | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js), [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) |
+| HPI_RESILIENCE | [📄](../specs/HPI_RESILIENCE.md) | Feature pressione/resilienza | [`pressureCalculator.js`](../../backend/utils/pressureCalculator.js), [`featureEngine.js`](../../backend/utils/featureEngine.js) |
 | SPEC_FRONTEND_MOTION_UI | [📄](../specs/SPEC_FRONTEND_MOTION_UI.md) | Animazioni e motion | [`src/motion/`](../../src/motion/) |
-| SPEC_VALUE_SVG | [📄](../specs/SPEC_VALUE_SVG.md) | Visualizzazioni SVG | [`backend/utils/svgMomentumExtractor.js`](../../backend/utils/svgMomentumExtractor.js) |
+| SPEC_VALUE_SVG | [📄](../specs/SPEC_VALUE_SVG.md) | Visualizzazioni SVG | [`svgMomentumExtractor.js`](../../backend/utils/svgMomentumExtractor.js) |
 | FRONTEND_MIGRATION | [📄](../specs/FRONTEND_MIGRATION.md) | Guida migrazione frontend | [`src/components/`](../../src/components/) |
 | DEPRECATION_FRONTEND_UTILS | [📄](../specs/DEPRECATION_FRONTEND_UTILS.md) | Deprecazioni frontend | [`src/utils.js`](../../src/utils.js) |
+| SCHEDE_UI_TAB | [📄](../specs/SCHEDE_UI_TAB.md) | Visual design pagine/tab | [`HomePage.jsx`](../../src/components/home/HomePage.jsx), [`MatchPage.jsx`](../../src/components/match/MatchPage.jsx), [`tabs/`](../../src/components/match/tabs/) |
 
 ### Documenti DEPRECATED
 - tutte le versioni V1 precedenti non elencate sopra
@@ -826,14 +827,43 @@ Se un cambiamento **non è riflesso qui**,
 
 | Filosofia | File Codice Principali |
 |-----------|------------------------|
-| [DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [`matchRepository.js`](../../backend/db/matchRepository.js), [`sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) |
-| [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [`featureEngine.js`](../../backend/utils/featureEngine.js), [`strategyEngine.js`](../../backend/strategies/strategyEngine.js), [`pressureCalculator.js`](../../backend/utils/pressureCalculator.js) |
-| [LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [`liveManager.js`](../../backend/liveManager.js), [`tracking.routes.js`](../../backend/routes/tracking.routes.js), [`tracking.controller.js`](../../backend/controllers/tracking.controller.js) |
-| [ODDS](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [`match.routes.js`](../../backend/routes/match.routes.js), [`bundleService.js`](../../backend/services/bundleService.js), [`OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) |
-| [FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [`src/components/match/tabs/`](../../src/components/match/tabs/), [`src/motion/`](../../src/motion/) |
-| [FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [`useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`match.controller.js`](../../backend/controllers/match.controller.js) |
-| [CONCEPT_CHECKS](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | [`runConceptChecks.js`](../../scripts/runConceptChecks.js), [`checkConceptualMap.js`](../../scripts/checkConceptualMap.js) |
+| [MADRE](../filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md) | Documento padre, riferimenti a tutti i figli |
+| [CONCEPT_CHECKS](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | [`philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js), [`checkConceptualMap.js`](../../scripts/checkConceptualMap.js), [`runConceptChecks.js`](../../scripts/runConceptChecks.js) |
+| [DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [`supabase.js`](../../backend/db/supabase.js), [`matchRepository.js`](../../backend/db/matchRepository.js), [`db.routes.js`](../../backend/routes/db.routes.js), [`match.routes.js`](../../backend/routes/match.routes.js) |
+| [TEMPORAL](../filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | [`liveManager.js`](../../backend/liveManager.js), [`matchCardService.js`](../../backend/services/matchCardService.js), [`dataQualityChecker.js`](../../backend/utils/dataQualityChecker.js) |
+| [REGISTRY_CANON](../filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md) | [`dataNormalizer.js`](../../backend/utils/dataNormalizer.js), [`player.routes.js`](../../backend/routes/player.routes.js) |
+| [LINEAGE](../filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) | [`matchCardService.js`](../../backend/services/matchCardService.js), [`dataQualityChecker.js`](../../backend/utils/dataQualityChecker.js) |
+| [OBSERVABILITY](../filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | [`dataQualityChecker.js`](../../backend/utils/dataQualityChecker.js), [`philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js) |
+| [PBP_EXTRACTION](../filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md) | [`pbpExtractor.cjs`](../../backend/scraper/pbpExtractor.cjs), [`event.routes.js`](../../backend/routes/event.routes.js), [`event.controller.js`](../../backend/controllers/event.controller.js) |
+| [LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [`liveManager.js`](../../backend/liveManager.js), [`liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js), [`tracking.routes.js`](../../backend/routes/tracking.routes.js) |
+| [ODDS](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [`value.routes.js`](../../backend/routes/value.routes.js), [`value.controller.js`](../../backend/controllers/value.controller.js), [`matchCardService.js`](../../backend/services/matchCardService.js) |
+| [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [`featureEngine.js`](../../backend/utils/featureEngine.js), [`strategyEngine.js`](../../backend/strategies/strategyEngine.js), [`stats.routes.js`](../../backend/routes/stats.routes.js) |
+| [CALCOLI](../filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) | [`pressureCalculator.js`](../../backend/utils/pressureCalculator.js), [`featureEngine.js`](../../backend/utils/featureEngine.js) |
+| [RISK_BANKROLL](../filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | [`strategies/`](../../backend/strategies/), [`betDecisionsRepository.js`](../../backend/db/betDecisionsRepository.js), [`value.routes.js`](../../backend/routes/value.routes.js) |
+| [FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [`useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`src/components/`](../../src/components/), [`config.js`](../../src/config.js) |
+| [FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [`src/components/`](../../src/components/), [`src/styles/`](../../src/styles/), [`src/motion/`](../../src/motion/), [SCHEDE_UI_TAB](../specs/SCHEDE_UI_TAB.md) |
 
 ---
 
-**Fine documento – MAPPA_RETE_CONCETTUALE_V2.6**
+## 📚 Riferimenti
+
+### 🧭 Navigazione Architettura
+| ⬆️ Index | ⬅️ Correlati | ➡️ Scripts Verifica |
+|----------|-------------|---------------------|
+| [INDEX_FILOSOFIE](../filosofie/INDEX_FILOSOFIE.md) | [TODO_LIST](../TODO_LIST.md) | [`checkConceptualMap.js`](../../scripts/checkConceptualMap.js) |
+| [INDEX_FILOSOFIE_PSEUDOCODE](../filosofie/INDEX_FILOSOFIE_PSEUDOCODE.md) | [SCHEDE_UI_TAB](../specs/SCHEDE_UI_TAB.md) | [`runConceptChecks.js`](../../scripts/runConceptChecks.js) |
+| | | [`philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js) |
+
+### 📁 Script di Verifica
+
+| Script | Comando | Descrizione |
+|--------|---------|-------------|
+| [`checkConceptualMap.js`](../../scripts/checkConceptualMap.js) | `node scripts/checkConceptualMap.js` | Verifica esistenza file |
+| [`runConceptChecks.js`](../../scripts/runConceptChecks.js) | `node scripts/runConceptChecks.js` | Verifica pattern architetturali |
+| [`deepPhilosophyCheck.js`](../../scripts/deepPhilosophyCheck.js) | `node scripts/deepPhilosophyCheck.js` | Verifica funzioni/export |
+| [`philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js) | `node scripts/philosophyEnforcer.js` | Verifica semantica filosofie |
+| [`generateTodoReport.js`](../../scripts/generateTodoReport.js) | `node scripts/generateTodoReport.js` | Genera report TODO unificato |
+
+---
+
+**Fine documento – MAPPA_RETE_CONCETTUALE_V2.9**

@@ -66,9 +66,11 @@
 =========================================== */
 
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-rows: repeat(2, 1fr) !important;
   gap: var(--space-5);
+  width: 100%;
 }
 
 .stats-grid > .stats-card {
@@ -153,6 +155,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.stat-values-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-align: center;
+  width: 100%;
+  order: 3;
+  margin-top: var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 var(--space-1);
 }
 
 .stat-value {
@@ -160,32 +183,21 @@
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   min-width: 0;
-  flex-shrink: 1;
+  flex: 0 1 auto;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  order: 1;
 }
 
 .stat-value.home {
   color: var(--color-primary);
-  text-align: left;
+  order: 1;
 }
 
 .stat-value.away {
   color: var(--color-accent);
-  text-align: right;
-}
-
-.stat-label {
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-  text-align: center;
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0 var(--space-1);
+  order: 2;
 }
 
 .stat-bar__track {
@@ -269,10 +281,11 @@
    RESPONSIVE
 =========================================== */
 
-/* Tablet - mantiene 2 colonne */
+/* Tablet - mantiene 2x2 layout */
 @media (max-width: 1024px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: var(--space-4);
   }
 }

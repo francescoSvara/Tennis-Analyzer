@@ -142,7 +142,7 @@ function Scoreboard({ header }) {
 /**
  * QuickSignals - Features pre-calcolate dal backend
  * 
- * Dati da bundle.header.features (FILOSOFIA_STATS_V3):
+ * Dati da bundle.header.features (FILOSOFIA_STATS):
  * - volatility: 0-100 (null se N/A)
  * - pressure: 0-100 (null se N/A)
  * - dominance: 0-100 (null se N/A)
@@ -178,13 +178,13 @@ function QuickSignals({ header }) {
     <MotionCard className="quick-signals">
       <h3 className="section-title">
         <Gauge size={18} weight="duotone" />
-        Quick Signals
+        Segnali
         {!hasRealData && <span className="no-data-badge">Dati non disponibili</span>}
       </h3>
 
       <div className="signals-grid">
         <div className="signal-item">
-          <span className="signal-label">Volatility</span>
+          <span className="signal-label">Volatilità</span>
           <span className="signal-value" style={{ color: getSignalColor(features.volatility) }}>
             {formatValue(features.volatility)}
             {features.volatility !== null && features.volatility !== undefined && (
@@ -194,7 +194,7 @@ function QuickSignals({ header }) {
         </div>
 
         <div className="signal-item">
-          <span className="signal-label">Pressure</span>
+          <span className="signal-label">Pressione</span>
           <span className="signal-value" style={{ color: getSignalColor(features.pressure) }}>
             {formatValue(features.pressure)}
           </span>

@@ -1,9 +1,9 @@
 # 📋 TODO LIST – Tennis Analyzer v3.0
 
 > **Ultimo aggiornamento**: 2025-12-28  
-> **Philosophy Enforcer v2.0**: 8 errori aperti, 25 warnings aperti  
-> **Risolti oggi**: 5 errori + 27 warnings  
-> **Pass rate**: 94%
+> **Philosophy Enforcer v2.0**: 10 errori, 28 warnings  
+> **Regole verificate**: 278 su 250 estratte  
+> **Pass rate**: 91%
 
 ---
 
@@ -18,11 +18,11 @@
 |---------|--------|
 | Regole estratte | 250 |
 | Verifiche eseguite | 278 |
-| ✅ Passate | 240 |
-| ❌ Errori | 8 |
-| ⚠️ Warning | 25 |
+| ✅ Passate | 253 |
+| ❌ Errori | 10 |
+| ⚠️ Warning | 28 |
 
-### ❌ ERRORI CRITICI (8)
+### ❌ ERRORI CRITICI (10)
 
 | # | Filosofia | Regola | Problema |
 |---|-----------|--------|----------|
@@ -32,8 +32,10 @@
 | 4 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna home_player_id |
 | 5 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna away_player_id |
 | 6 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna event_time |
-| 7 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVER_SCORE_PROGRESSION | sofascoreScraper.js non traccia chi serve |
-| 8 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVICE_ALTERNATION | insert-pbp-correct.js non implementa alternanza servizio |
+| 7 | FILOSOFIA_TEMPORAL | INVARIANT_event_time_required | liveTrackingRepository.js insert senza event_time/created_at |
+| 8 | FILOSOFIA_CALCOLI | NEVER_RETURN_NaN | featureEngine.js non verifica NaN nei calcoli |
+| 9 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVER_SCORE_PROGRESSION | sofascoreScraper.js non traccia chi serve |
+| 10 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVICE_ALTERNATION | insert-pbp-correct.js non implementa alternanza servizio |
 
 #### Checklist Errori da Correggere
 
@@ -43,84 +45,93 @@
 - [ ] **ERR-004** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna home_player_id
 - [ ] **ERR-005** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna away_player_id
 - [ ] **ERR-006** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna event_time
-- [ ] **ERR-012** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVER_SCORE_PROGRESSION: sofascoreScraper.js non traccia chi serve
-- [ ] **ERR-013** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVICE_ALTERNATION: insert-pbp-correct.js non implementa alternanza servizio
+- [ ] **ERR-007** [FILOSOFIA_TEMPORAL] INVARIANT_event_time_required: liveTrackingRepository.js insert senza event_time/created_at
+- [ ] **ERR-008** [FILOSOFIA_CALCOLI] NEVER_RETURN_NaN: featureEngine.js non verifica NaN nei calcoli
+- [ ] **ERR-009** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVER_SCORE_PROGRESSION: sofascoreScraper.js non traccia chi serve
+- [ ] **ERR-010** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVICE_ALTERNATION: insert-pbp-correct.js non implementa alternanza servizio
 
-### ⚠️ WARNINGS (25)
+### ⚠️ WARNINGS (28)
 
 | # | Filosofia | Regola | Problema |
 |---|-----------|--------|----------|
-| 6 | FILOSOFIA_DB | DATAQUALITY_BACKEND_ONLY | useMatchBundle.jsx calcola dataQuality (deve essere solo backend) |
-| 11 | FILOSOFIA_STATS | CLASS_RawData_no_interpretation | matchRepository.js interpreta RawData (deve solo read/write) |
-| 12 | FILOSOFIA_PBP_EXTRACTION | POINT_WINNER_FROM_CSS | sofascoreScraper.js non usa CSS per determinare point winner |
-| 13 | FILOSOFIA_PBP_EXTRACTION | SERVER_DETECTION_PRIORITY | sofascoreScraper.js non ha logica server detection |
-| 15 | FILOSOFIA_PBP_EXTRACTION | CODE_ADAPTS_TO_TENNIS | insert-pbp-correct.js non ha validazione delle regole tennis |
-| 17 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | HomePage.jsx fa fetch diretto invece di usare useMatchBundle |
-| 18 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle |
-| 19 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle |
-| 20 | FILOSOFIA_MADRE_TENNIS | ROLE_REPOSITORY | matchRepository.js ha logica di calcolo (repo deve solo read/write) |
-| 21 | FILOSOFIA_MADRE_TENNIS | ROLE_FRONTEND | PointByPointTab.jsx ha logica di dominio (frontend deve solo render) |
-| 23 | FILOSOFIA_LINEAGE_VERSIONING | FUNCTION_testReproducibility | Nessun test di riproducibilità |
-| 29 | FILOSOFIA_OBSERVABILITY_DATAQUALITY | STRUCTURED_LOGGING | Troppi log non strutturati: 773 vs 156 strutturati |
-| 30 | FILOSOFIA_REGISTRY_CANON | ENTITY_MatchCanonical | add-snapshot-queue-tables.sql manca campi: home_player, away_player |
-| 31 | FILOSOFIA_REGISTRY_CANON | ENTITY_MatchCanonical | create-new-schema.sql manca campi: home_player, away_player |
-| 42 | FILOSOFIA_CONCEPT_CHECKS | POLICY_CI_Gate | Nessun CI workflow per concept checks gate |
-| 43 | FILOSOFIA_CONCEPT_CHECKS | ASSERT_CI_INTEGRATED | Nessun CI workflow - concept checks non integrati |
-| 45 | FILOSOFIA_FRONTEND_UI | RULE_RIGHT_RAIL_PURPOSE | MatchPage non ha RightRail/sidebar per odds sempre visibili |
-| 46 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | HomePage.jsx mostra N/A o placeholder (backend must provide value) |
-| 47 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MomentumTab.jsx mostra N/A o placeholder (backend must provide value) |
-| 48 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | OverviewTab.jsx mostra N/A o placeholder (backend must provide value) |
-| 49 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | PredictorTab.jsx mostra N/A o placeholder (backend must provide value) |
-| 50 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MatchCard.jsx mostra N/A o placeholder (backend must provide value) |
-| 51 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MonitoringDashboard.jsx mostra N/A o placeholder (backend must provide value) |
-| 52 | FILOSOFIA_FRONTEND_UI | ASSERT_DESIGN_SERVES_DECISION | Nessun componente Strategy - design non serve decisions |
+| 1 | FILOSOFIA_DB | DATAQUALITY_BACKEND_ONLY | useMatchBundle.jsx calcola dataQuality (deve essere solo backend) |
+| 2 | FILOSOFIA_STATS | CLASS_RawData_no_interpretation | matchRepository.js interpreta RawData (deve solo read/write) |
+| 3 | FILOSOFIA_PBP_EXTRACTION | POINT_WINNER_FROM_CSS | sofascoreScraper.js non usa CSS per determinare point winner |
+| 4 | FILOSOFIA_PBP_EXTRACTION | SERVER_DETECTION_PRIORITY | sofascoreScraper.js non ha logica server detection |
+| 5 | FILOSOFIA_PBP_EXTRACTION | FUNCTION_validatePbpData | Nessun file pbp ha funzione di validazione |
+| 6 | FILOSOFIA_PBP_EXTRACTION | CODE_ADAPTS_TO_TENNIS | insert-pbp-correct.js non ha validazione delle regole tennis |
+| 7 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | HomePage.jsx fa fetch diretto invece di usare useMatchBundle |
+| 8 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle |
+| 9 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle |
+| 10 | FILOSOFIA_MADRE_TENNIS | ROLE_REPOSITORY | matchRepository.js ha logica di calcolo (repo deve solo read/write) |
+| 11 | FILOSOFIA_MADRE_TENNIS | ROLE_FRONTEND | PointByPointTab.jsx ha logica di dominio (frontend deve solo render) |
+| 12 | FILOSOFIA_LINEAGE_VERSIONING | FUNCTION_testReproducibility | Nessun test di riproducibilità |
+| 13 | FILOSOFIA_LINEAGE_VERSIONING | MODULE_VERSION_EXPORT | strategyEngine.js non esporta VERSION |
+| 14 | FILOSOFIA_OBSERVABILITY_DATAQUALITY | STRUCTURED_LOGGING | Troppi log non strutturati: 773 vs 156 strutturati |
+| 15 | FILOSOFIA_REGISTRY_CANON | ENTITY_MatchCanonical | add-snapshot-queue-tables.sql manca campi: home_player, away_player |
+| 16 | FILOSOFIA_REGISTRY_CANON | ENTITY_MatchCanonical | create-new-schema.sql manca campi: home_player, away_player |
+| 17 | FILOSOFIA_REGISTRY_CANON | ASSERT_RESOLUTION_IS_DETERMINISTIC | Resolution function usa Math.random - non deterministica |
+| 18 | FILOSOFIA_CONCEPT_CHECKS | POLICY_CI_Gate | Nessun CI workflow per concept checks gate |
+| 19 | FILOSOFIA_CONCEPT_CHECKS | ASSERT_CI_INTEGRATED | Nessun CI workflow - concept checks non integrati |
+| 20 | FILOSOFIA_FRONTEND_UI | STRUCTURE_Home | Nessun componente Home |
+| 21 | FILOSOFIA_FRONTEND_UI | RULE_RIGHT_RAIL_PURPOSE | MatchPage non ha RightRail/sidebar per odds sempre visibili |
+| 22 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | HomePage.jsx mostra N/A o placeholder (backend must provide value) |
+| 23 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MomentumTab.jsx mostra N/A o placeholder (backend must provide value) |
+| 24 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | OverviewTab.jsx mostra N/A o placeholder (backend must provide value) |
+| 25 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | PredictorTab.jsx mostra N/A o placeholder (backend must provide value) |
+| 26 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MatchCard.jsx mostra N/A o placeholder (backend must provide value) |
+| 27 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MonitoringDashboard.jsx mostra N/A o placeholder (backend must provide value) |
+| 28 | FILOSOFIA_FRONTEND_UI | ASSERT_DESIGN_SERVES_DECISION | Nessun componente Strategy - design non serve decisions |
 
 #### Checklist Warning da Valutare
 
-- [ ] **WARN-006** [FILOSOFIA_DB] DATAQUALITY_BACKEND_ONLY: useMatchBundle.jsx calcola dataQuality (deve essere solo backend)
-- [ ] **WARN-011** [FILOSOFIA_STATS] CLASS_RawData_no_interpretation: matchRepository.js interpreta RawData (deve solo read/write)
-- [ ] **WARN-012** [FILOSOFIA_PBP_EXTRACTION] POINT_WINNER_FROM_CSS: sofascoreScraper.js non usa CSS per determinare point winner
-- [ ] **WARN-013** [FILOSOFIA_PBP_EXTRACTION] SERVER_DETECTION_PRIORITY: sofascoreScraper.js non ha logica server detection
-- [ ] **WARN-015** [FILOSOFIA_PBP_EXTRACTION] CODE_ADAPTS_TO_TENNIS: insert-pbp-correct.js non ha validazione delle regole tennis
-- [ ] **WARN-017** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: HomePage.jsx fa fetch diretto invece di usare useMatchBundle
-- [ ] **WARN-018** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle
-- [ ] **WARN-019** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle
-- [ ] **WARN-020** [FILOSOFIA_MADRE_TENNIS] ROLE_REPOSITORY: matchRepository.js ha logica di calcolo (repo deve solo read/write)
-- [ ] **WARN-021** [FILOSOFIA_MADRE_TENNIS] ROLE_FRONTEND: PointByPointTab.jsx ha logica di dominio (frontend deve solo render)
-- [ ] **WARN-023** [FILOSOFIA_LINEAGE_VERSIONING] FUNCTION_testReproducibility: Nessun test di riproducibilità
-- [ ] **WARN-029** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] STRUCTURED_LOGGING: Troppi log non strutturati: 773 vs 156 strutturati
-- [ ] **WARN-030** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: add-snapshot-queue-tables.sql manca campi: home_player, away_player
-- [ ] **WARN-031** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: create-new-schema.sql manca campi: home_player, away_player
-- [ ] **WARN-035** [FILOSOFIA_LIVE_TRACKING] FLOW_LivePipeline: LivePipeline manca featureEngine step
-- [ ] **WARN-042** [FILOSOFIA_CONCEPT_CHECKS] POLICY_CI_Gate: Nessun CI workflow per concept checks gate
-- [ ] **WARN-043** [FILOSOFIA_CONCEPT_CHECKS] ASSERT_CI_INTEGRATED: Nessun CI workflow - concept checks non integrati
-- [ ] **WARN-045** [FILOSOFIA_FRONTEND_UI] RULE_RIGHT_RAIL_PURPOSE: MatchPage non ha RightRail/sidebar per odds sempre visibili
-- [ ] **WARN-046** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: HomePage.jsx mostra N/A o placeholder (backend must provide value)
-- [ ] **WARN-047** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MomentumTab.jsx mostra N/A o placeholder (backend must provide value)
-- [ ] **WARN-048** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: OverviewTab.jsx mostra N/A o placeholder (backend must provide value)
-- [ ] **WARN-049** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: PredictorTab.jsx mostra N/A o placeholder (backend must provide value)
-- [ ] **WARN-050** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MatchCard.jsx mostra N/A o placeholder (backend must provide value)
-- [ ] **WARN-051** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MonitoringDashboard.jsx mostra N/A o placeholder (backend must provide value)
-- [ ] **WARN-052** [FILOSOFIA_FRONTEND_UI] ASSERT_DESIGN_SERVES_DECISION: Nessun componente Strategy - design non serve decisions
+- [ ] **WARN-001** [FILOSOFIA_DB] DATAQUALITY_BACKEND_ONLY: useMatchBundle.jsx calcola dataQuality (deve essere solo backend)
+- [ ] **WARN-002** [FILOSOFIA_STATS] CLASS_RawData_no_interpretation: matchRepository.js interpreta RawData (deve solo read/write)
+- [ ] **WARN-003** [FILOSOFIA_PBP_EXTRACTION] POINT_WINNER_FROM_CSS: sofascoreScraper.js non usa CSS per determinare point winner
+- [ ] **WARN-004** [FILOSOFIA_PBP_EXTRACTION] SERVER_DETECTION_PRIORITY: sofascoreScraper.js non ha logica server detection
+- [ ] **WARN-005** [FILOSOFIA_PBP_EXTRACTION] FUNCTION_validatePbpData: Nessun file pbp ha funzione di validazione
+- [ ] **WARN-006** [FILOSOFIA_PBP_EXTRACTION] CODE_ADAPTS_TO_TENNIS: insert-pbp-correct.js non ha validazione delle regole tennis
+- [ ] **WARN-007** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: HomePage.jsx fa fetch diretto invece di usare useMatchBundle
+- [ ] **WARN-008** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle
+- [ ] **WARN-009** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle
+- [ ] **WARN-010** [FILOSOFIA_MADRE_TENNIS] ROLE_REPOSITORY: matchRepository.js ha logica di calcolo (repo deve solo read/write)
+- [ ] **WARN-011** [FILOSOFIA_MADRE_TENNIS] ROLE_FRONTEND: PointByPointTab.jsx ha logica di dominio (frontend deve solo render)
+- [ ] **WARN-012** [FILOSOFIA_LINEAGE_VERSIONING] FUNCTION_testReproducibility: Nessun test di riproducibilità
+- [ ] **WARN-013** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION
+- [ ] **WARN-014** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] STRUCTURED_LOGGING: Troppi log non strutturati: 773 vs 156 strutturati
+- [ ] **WARN-015** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: add-snapshot-queue-tables.sql manca campi: home_player, away_player
+- [ ] **WARN-016** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: create-new-schema.sql manca campi: home_player, away_player
+- [ ] **WARN-017** [FILOSOFIA_REGISTRY_CANON] ASSERT_RESOLUTION_IS_DETERMINISTIC: Resolution function usa Math.random - non deterministica
+- [ ] **WARN-018** [FILOSOFIA_CONCEPT_CHECKS] POLICY_CI_Gate: Nessun CI workflow per concept checks gate
+- [ ] **WARN-019** [FILOSOFIA_CONCEPT_CHECKS] ASSERT_CI_INTEGRATED: Nessun CI workflow - concept checks non integrati
+- [ ] **WARN-020** [FILOSOFIA_FRONTEND_UI] STRUCTURE_Home: Nessun componente Home
+- [ ] **WARN-021** [FILOSOFIA_FRONTEND_UI] RULE_RIGHT_RAIL_PURPOSE: MatchPage non ha RightRail/sidebar per odds sempre visibili
+- [ ] **WARN-022** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: HomePage.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-023** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MomentumTab.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-024** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: OverviewTab.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-025** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: PredictorTab.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-026** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MatchCard.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-027** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MonitoringDashboard.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-028** [FILOSOFIA_FRONTEND_UI] ASSERT_DESIGN_SERVES_DECISION: Nessun componente Strategy - design non serve decisions
 
 ### 📈 Statistiche per Filosofia
 
 | Filosofia | Pass | Errori | Warning | Rate |
 |-----------|------|--------|---------|------|
-| FILOSOFIA_DB | 15 | 8 | 6 | 🟡 52% |
-| FILOSOFIA_TEMPORAL | 13 | 2 | 2 | 🟡 76% |
-| FILOSOFIA_CALCOLI | 19 | 1 | 2 | 🟢 86% |
+| FILOSOFIA_DB | 18 | 6 | 1 | 🟡 72% |
+| FILOSOFIA_TEMPORAL | 16 | 1 | 0 | 🟢 94% |
+| FILOSOFIA_CALCOLI | 21 | 1 | 0 | 🟢 95% |
 | FILOSOFIA_STATS | 17 | 0 | 1 | 🟢 94% |
 | FILOSOFIA_PBP_EXTRACTION | 8 | 2 | 4 | 🟡 57% |
-| FILOSOFIA_FRONTEND_DATA_CONSUMPTION | 15 | 0 | 4 | 🟡 79% |
+| FILOSOFIA_FRONTEND_DATA_CONSUMPTION | 16 | 0 | 3 | 🟢 84% |
 | FILOSOFIA_MADRE_TENNIS | 15 | 0 | 2 | 🟢 88% |
-| FILOSOFIA_LINEAGE_VERSIONING | 12 | 0 | 5 | 🟡 71% |
-| FILOSOFIA_OBSERVABILITY_DATAQUALITY | 1 | 0 | 3 | 🔴 25% |
+| FILOSOFIA_LINEAGE_VERSIONING | 14 | 0 | 2 | 🟢 88% |
+| FILOSOFIA_OBSERVABILITY_DATAQUALITY | 3 | 0 | 1 | 🟡 75% |
 | FILOSOFIA_REGISTRY_CANON | 14 | 0 | 3 | 🟢 82% |
-| FILOSOFIA_LIVE_TRACKING | 16 | 0 | 3 | 🟢 84% |
-| FILOSOFIA_ODDS | 18 | 0 | 2 | 🟢 90% |
-| FILOSOFIA_RISK_BANKROLL | 24 | 0 | 3 | 🟢 89% |
-| FILOSOFIA_CONCEPT_CHECKS | 24 | 0 | 3 | 🟢 89% |
+| FILOSOFIA_LIVE_TRACKING | 18 | 0 | 0 | 🟢 100% |
+| FILOSOFIA_ODDS | 20 | 0 | 0 | 🟢 100% |
+| FILOSOFIA_RISK_BANKROLL | 27 | 0 | 0 | 🟢 100% |
+| FILOSOFIA_CONCEPT_CHECKS | 25 | 0 | 2 | 🟢 93% |
 | FILOSOFIA_FRONTEND_UI | 21 | 0 | 9 | 🟡 70% |
 
 ---

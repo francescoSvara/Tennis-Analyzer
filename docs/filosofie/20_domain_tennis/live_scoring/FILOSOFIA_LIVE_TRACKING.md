@@ -1,168 +1,110 @@
-# ⚡ FILOSOFIA LIVE TRACKING  
-## Versione V2 – Runtime → MatchBundle Updates
+# ⚡ FILOSOFIA LIVE TRACKING
 
-> **Dominio**: Live Runtime · Streaming · Snapshot Sync  
-> **Stato**: ATTIVA  
-> **Sostituisce**: `FILOSOFIA_LIVE_TRACKING.md` (V1 – DEPRECATA)  
-> **Ultimo aggiornamento**: Dicembre 2025  
+> Il live non produce dati. Mantiene aggiornato uno stato.  
+> Lo stato è il MatchBundle.
 
 ---
 
-## 🧭 NAVIGAZIONE ARCHITETTURA
+## 1️⃣ Principio Fondante
 
-| ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
-|---------|-----------|----------------|
-| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [DB](../../10_data_platform/storage/FILOSOFIA_DB.md), [TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | [STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) (runtime features) |
+Il Live Tracking è un **runtime engine**, non una sorgente dati.
 
-### 📚 Documenti Correlati
-| Documento | Relazione |
-|-----------|-----------|
-| [TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) | `event_time` vs `ingestion_time` per live events |
-| [OBSERVABILITY](../../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Latency monitoring, staleness alerts |
-| [ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | Live odds sync con live score |
+Cosa fa:
+- Osserva eventi in tempo reale
+- Aggiorna feature runtime
+- Rigenera segnali strategie
+- Invia patch incrementali
 
-### 📁 File Codice Principali
-| File | Descrizione | Entry Point |
-|------|-------------|---------------|
-| [`backend/liveManager.js`](../../backend/liveManager.js) | Live manager: WebSocket handlers & runtime tracking | `/ws/match/:id` |
-| [`backend/routes/tracking.routes.js`](../../backend/routes/tracking.routes.js) | Routes: track, untrack, discover, stats | `POST /:eventId`, `GET /stats` |
-| [`backend/controllers/tracking.controller.js`](../../backend/controllers/tracking.controller.js) | Controller tracking operations | `track()`, `untrack()`, `listTracked()` |
-| [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) | Repository live tracking | DB operations |
-| [`backend/services/svgMomentumService.js`](../../backend/services/svgMomentumService.js) | SVG momentum parsing | `extractMomentum()` |
+Cosa NON fa:
+- Esporre raw data al frontend
+- Decidere strategie autonomamente
+- Produrre nuovi dati persistenti
 
 ---
 
-## 0️⃣ PRINCIPIO FONDANTE
+## 2️⃣ Output Ufficiale
 
-> **Il live non produce dati.  
-> Mantiene aggiornato uno stato.**
+Il live produce **solo patch** sul MatchBundle:
+- Patch su `header` (score, status)
+- Patch su `tabs.*` (features, strategies)
+- Patch su `dataQuality`
 
-Lo stato è il **MatchBundle**.
-
-Il Live Tracking:
-- osserva eventi
-- aggiorna feature runtime
-- rigenera segnali
-- invia patch incrementali
-
-❌ Non espone raw data al frontend  
-❌ Non decide strategie  
+Formato: JSON Patch o BundleDelta strutturato.
 
 ---
 
-## 1️⃣ SCOPO DEL LIVE TRACKING
-
-- mantenere il MatchBundle coerente in tempo reale
-- ridurre latenza sui segnali READY
-- garantire consistenza tra REST snapshot e WS live
-
-Il live è **un runtime engine**, non una sorgente dati.
-
----
-
-## 2️⃣ OUTPUT UFFICIALE
-
-### MatchBundle Patch
-
-Il live produce **solo**:
-- patch su `bundle.header`
-- patch su `bundle.tabs.*`
-- patch su `bundle.dataQuality`
-
-Formato consigliato:
-- JSON Patch
-- oppure BundleDelta (diff strutturato)
-
----
-
-## 3️⃣ PIPELINE LIVE (V2)
+## 3️⃣ Pipeline Live
 
 ```
-LIVE EVENTS (API / polling)
-        │
-        ▼
-LIVE NORMALIZER
-        │
-        ▼
-FEATURE ENGINE (runtime)
-        │
-        ▼
-STRATEGY ENGINE
-        │
-        ▼
-BUNDLE PATCH
-        │
-        ▼
-WS / Cache Refresh
+Live Events (API / polling)
+     ↓
+Live Normalizer
+     ↓
+Feature Engine (runtime)
+     ↓
+Strategy Engine
+     ↓
+Bundle Patch
+     ↓
+WebSocket / Cache Refresh
 ```
 
 ---
 
-## 4️⃣ POLLING ADATTIVO (POLICY)
+## 4️⃣ Polling Adattivo
 
-Il polling non è fisso.
+Il polling non è fisso. Si adatta al contesto di trading:
 
-### Regole consigliate
-- score change → polling FAST
-- nessun cambiamento N volte → backoff
-- strategy READY → polling BOOST
-- match idle → polling SLOW
-
-Il live risponde al **contesto di trading**.
+| Condizione | Azione |
+|------------|--------|
+| Score change | Polling FAST |
+| Nessun cambiamento N volte | Backoff |
+| Strategy READY | Polling BOOST |
+| Match idle | Polling SLOW |
 
 ---
 
-## 5️⃣ DATA QUALITY LIVE
+## 5️⃣ Data Quality Live
 
 Il live aggiorna:
-- freshness
-- completeness
-- staleness
+- **Freshness**: quanto sono recenti i dati
+- **Staleness**: se i dati sono scaduti
+- **Completeness**: se manca qualcosa
 
-Per sezione:
-```json
-dataQuality.tabs.pointByPoint = 0.9
-```
-
-Il frontend **mostra**, non interpreta.
+Il frontend mostra questi indicatori, non li interpreta.
 
 ---
 
-## 6️⃣ SNAPSHOT & CONSOLIDAMENTO
+## 6️⃣ Consolidamento a Fine Match
 
-- a match concluso → rigenera `match_bundle_snapshot`
-- nessun snapshot parziale
-- nessuna card legacy
-
-Il bundle è l’unica verità persistita.
-
----
-
-## 7️⃣ COSA È STATO RIMOSSO
-
-❌ push di raw events al frontend  
-❌ snapshot multipli  
-❌ frontend fallback logic  
-❌ polling non contestuale  
+Quando il match finisce:
+- Si rigenera `match_bundle_snapshot` completo
+- Nessun snapshot parziale
+- Il bundle è l'unica verità persistita
 
 ---
 
-## 8️⃣ REGOLA FINALE
+## 7️⃣ Regola Finale
 
-Se un update live:
-- non modifica il MatchBundle
-- non migliora la latenza decisionale
-
-➡️ **non serve**.
-
----
-
-## 📍 NAVIGAZIONE RAPIDA
-
-| ⬅️ Precedente | 🏠 Index | ➡️ Successivo |
-|--------------|--------|---------------|
-| [ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [📚 INDEX](../../INDEX_FILOSOFIE.md) | [DB](../../10_data_platform/storage/FILOSOFIA_DB.md) |
+> Se un update live:
+> - Non modifica il MatchBundle
+> - Non migliora la latenza decisionale
+>
+> **→ Non serve.**
 
 ---
 
-**Fine documento – FILOSOFIA_LIVE_TRACKING**
+**Documenti Correlati**:
+- [FILOSOFIA_TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) – `event_time` vs `ingestion_time`
+- [FILOSOFIA_ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) – sync live odds
+- [FILOSOFIA_OBSERVABILITY](../../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) – latency monitoring
+- [FILOSOFIA_PBP_EXTRACTION](../FILOSOFIA_PBP_EXTRACTION.md) – Point-by-point parsing
+
+### 📁 File Codice Principali
+
+| File | Descrizione |
+|------|-------------|
+| [`backend/liveManager.js`](../../../../backend/liveManager.js) | Engine live tracking principale |
+| [`backend/db/liveTrackingRepository.js`](../../../../backend/db/liveTrackingRepository.js) | Repository live data |
+| [`backend/routes/tracking.routes.js`](../../../../backend/routes/tracking.routes.js) | Route tracking endpoints |
+| [`backend/controllers/tracking.controller.js`](../../../../backend/controllers/tracking.controller.js) | Controller tracking |
