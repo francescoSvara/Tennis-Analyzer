@@ -1,9 +1,9 @@
 # 📋 TODO LIST – Tennis Analyzer v3.0
 
 > **Ultimo aggiornamento**: 2025-12-28  
-> **Philosophy Enforcer v2.0**: 11 errori aperti, 49 warnings aperti  
-> **Risolti oggi**: 2 errori + 3 warnings  
-> **Pass rate**: 85%
+> **Philosophy Enforcer v2.0**: 9 errori aperti, 46 warnings aperti  
+> **Risolti oggi**: 4 errori + 6 warnings  
+> **Pass rate**: 87%
 
 ---
 
@@ -48,8 +48,8 @@
 - [ ] **ERR-004** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna home_player_id
 - [ ] **ERR-005** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna away_player_id
 - [ ] **ERR-006** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna event_time
-- [ ] **ERR-007** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_completeness: matchCardService.js manca dataQuality.completeness
-- [ ] **ERR-008** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_freshness: matchCardService.js manca dataQuality.freshness
+- [x] **ERR-007** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_completeness: matchCardService.js manca dataQuality.completeness ✅ (calculateCompleteness aggiunto)
+- [x] **ERR-008** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_freshness: matchCardService.js manca dataQuality.freshness ✅ (calculateFreshness aggiunto)
 - [x] **ERR-009** [FILOSOFIA_TEMPORAL] INVARIANT_event_time_required: liveTrackingRepository.js insert senza event_time/created_at ✅ (snapshot_time, last_polled_at presenti)
 - [ ] **ERR-010** [FILOSOFIA_TEMPORAL] INVARIANT_no_future_in_bundle: matchCardService.js non valida coerenza temporale del bundle
 - [x] **ERR-011** [FILOSOFIA_CALCOLI] NEVER_RETURN_NaN: featureEngine.js non verifica NaN nei calcoli ✅ (tutti fallback con || e Math.max/min)
@@ -123,7 +123,7 @@
 - [ ] **WARN-006** [FILOSOFIA_DB] DATAQUALITY_BACKEND_ONLY: useMatchBundle.jsx calcola dataQuality (deve essere solo backend)
 - [ ] **WARN-007** [FILOSOFIA_TEMPORAL] DEFINE_ingestion_time: liveTrackingRepository.js non traccia ingestion_time negli insert
 - [ ] **WARN-008** [FILOSOFIA_TEMPORAL] UNKNOWN_TIME_NO_DECISION: strategyEngine.js non verifica timestamp dei dati prima delle decisioni
-- [ ] **WARN-009** [FILOSOFIA_CALCOLI] DOMAIN_MatchState_isClutchPoint: Nessun file definisce isClutchPoint per MatchState
+- [x] **WARN-009** [FILOSOFIA_CALCOLI] DOMAIN_MatchState_isClutchPoint: Nessun file definisce isClutchPoint per MatchState ✅ (isClutchPoint aggiunto a featureEngine.js)
 - [ ] **WARN-010** [FILOSOFIA_CALCOLI] BREAK_NAMING: featureEngine.js usa naming errato per breakProbability
 - [ ] **WARN-011** [FILOSOFIA_STATS] CLASS_RawData_no_interpretation: matchRepository.js interpreta RawData (deve solo read/write)
 - [ ] **WARN-012** [FILOSOFIA_PBP_EXTRACTION] POINT_WINNER_FROM_CSS: sofascoreScraper.js non usa CSS per determinare point winner
@@ -136,11 +136,11 @@
 - [ ] **WARN-019** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle
 - [ ] **WARN-020** [FILOSOFIA_MADRE_TENNIS] ROLE_REPOSITORY: matchRepository.js ha logica di calcolo (repo deve solo read/write)
 - [ ] **WARN-021** [FILOSOFIA_MADRE_TENNIS] ROLE_FRONTEND: PointByPointTab.jsx ha logica di dominio (frontend deve solo render)
-- [ ] **WARN-022** [FILOSOFIA_LINEAGE_VERSIONING] CONSTANT_VERSIONS_data: Nessun file definisce DATA_VERSION
+- [x] **WARN-022** [FILOSOFIA_LINEAGE_VERSIONING] CONSTANT_VERSIONS_data: Nessun file definisce DATA_VERSION ✅ (DATA_VERSION in matchCardService.js)
 - [ ] **WARN-023** [FILOSOFIA_LINEAGE_VERSIONING] FUNCTION_testReproducibility: Nessun test di riproducibilità
 - [ ] **WARN-024** [FILOSOFIA_LINEAGE_VERSIONING] BUNDLE_META_CHECK: matchCardService.js non valida meta block
 - [x] **WARN-025** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION ✅ (STRATEGY_ENGINE_VERSION esportato)
-- [ ] **WARN-026** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: matchCardService.js non esporta VERSION
+- [x] **WARN-026** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: matchCardService.js non esporta VERSION ✅ (MATCH_CARD_SERVICE_VERSION esportato)
 - [ ] **WARN-027** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] DIMENSION_Accuracy: dataQualityChecker.js non verifica accuracy/outliers
 - [ ] **WARN-028** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] QUARANTINE_TRIGGERS: Nessun file backend implementa logica di quarantine
 - [ ] **WARN-029** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] STRUCTURED_LOGGING: Troppi log non strutturati: 773 vs 156 strutturati

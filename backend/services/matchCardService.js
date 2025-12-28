@@ -24,6 +24,10 @@ const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('MatchCardService');
 
+// FILOSOFIA_LINEAGE_VERSIONING: Module version exports
+const MATCH_CARD_SERVICE_VERSION = '1.1.0';
+const DATA_VERSION = 'canonical_v2'; // Schema DB + origine dati
+
 class MatchCardService {
   
   /**
@@ -297,7 +301,12 @@ class MatchCardService {
 
         // Metadata
         dataSources: dataSources.map(s => s.source_type),
-        dataQuality: dataQuality
+        // FILOSOFIA_DB: dataQuality MUST have completeness and freshness
+        dataQuality: {
+          score: dataQuality,
+          completeness: this.calculateCompleteness(dataSources, matchStats, powerRankings, pointByPoint),
+          freshness: this.calculateFreshness(dataSources)
+        }
       };
 
     } catch (error) {
@@ -555,6 +564,63 @@ class MatchCardService {
   }
 
   /**
+   * FILOSOFIA_DB: Calculate data completeness (0-100)
+   * Measures how much data is available vs expected
+   */
+  calculateCompleteness(sources, stats, momentum, pointByPoint) {
+    let completeness = 0;
+    const expectedFields = 5; // sources, stats, momentum, pbp, odds
+    let presentFields = 0;
+
+    if (sources && sources.length > 0) presentFields++;
+    if (stats && Object.keys(stats).length > 0) presentFields++;
+    if (momentum && momentum.length > 0) presentFields++;
+    if (pointByPoint && pointByPoint.length > 0) presentFields++;
+    
+    // Calculate percentage
+    completeness = Math.round((presentFields / expectedFields) * 100);
+
+    // Bonus for having multiple sources
+    if (sources && sources.length > 1) completeness = Math.min(100, completeness + 10);
+
+    return completeness;
+  }
+
+  /**
+   * FILOSOFIA_DB: Calculate data freshness (0-100)
+   * Measures how recent the data is
+   */
+  calculateFreshness(sources) {
+    if (!sources || sources.length === 0) return 0;
+
+    const now = new Date();
+    let newestTimestamp = null;
+
+    for (const source of sources) {
+      const timestamp = source.scraped_at || source.created_at || source.updated_at;
+      if (timestamp) {
+        const sourceDate = new Date(timestamp);
+        if (!newestTimestamp || sourceDate > newestTimestamp) {
+          newestTimestamp = sourceDate;
+        }
+      }
+    }
+
+    if (!newestTimestamp) return 50; // Default if no timestamps
+
+    const ageMs = now - newestTimestamp;
+    const ageHours = ageMs / (1000 * 60 * 60);
+
+    // Freshness degrades over time
+    // < 1 hour = 100, < 6 hours = 80, < 24 hours = 60, < 48 hours = 40, else 20
+    if (ageHours < 1) return 100;
+    if (ageHours < 6) return 80;
+    if (ageHours < 24) return 60;
+    if (ageHours < 48) return 40;
+    return 20;
+  }
+
+  /**
    * Cerca match per giocatore e data
    */
   async findMatch(player1Name, player2Name, matchDate) {
@@ -635,4 +701,9 @@ class MatchCardService {
   }
 }
 
-module.exports = new MatchCardService();
+// FILOSOFIA_LINEAGE_VERSIONING: Export module instance and version constants
+const matchCardService = new MatchCardService();
+
+module.exports = matchCardService;
+module.exports.MATCH_CARD_SERVICE_VERSION = MATCH_CARD_SERVICE_VERSION;
+module.exports.DATA_VERSION = DATA_VERSION;
