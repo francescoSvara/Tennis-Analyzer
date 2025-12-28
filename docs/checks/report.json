@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-12-27T06:37:25.467Z",
+  "timestamp": "2025-12-28T00:47:08.503Z",
   "mode": "full",
-  "duration_ms": 137,
+  "duration_ms": 121,
   "summary": {
     "errors": 0,
     "warns": 6,
-    "infos": 21
+    "infos": 29
   },
   "findings": [
     {
@@ -73,6 +73,86 @@
       "match": "PATTERN_MISSING",
       "remediation": "Implementare: adaptivePolling|backoff|pollingInterval|FAST|SLOW|BOOST",
       "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 4 - Polling Adattivo"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 177,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 182,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 207,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 211,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 236,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 240,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 265,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
+    },
+    {
+      "severity": "INFO",
+      "ruleId": "INV-007",
+      "file": "backend/services/bundleService.js",
+      "line": 533,
+      "domain": "backend_services",
+      "message": "Console.log in production code",
+      "match": "console.log(",
+      "remediation": "Usare logger strutturato o rimuovere"
     },
     {
       "severity": "INFO",
@@ -188,7 +268,7 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/playerStatsService.js",
-      "line": 205,
+      "line": 203,
       "domain": "backend_services",
       "message": "Console.log in production code",
       "match": "console.log(",
@@ -198,7 +278,7 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/playerStatsService.js",
-      "line": 438,
+      "line": 436,
       "domain": "backend_services",
       "message": "Console.log in production code",
       "match": "console.log(",
@@ -208,7 +288,7 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/playerStatsService.js",
-      "line": 450,
+      "line": 448,
       "domain": "backend_services",
       "message": "Console.log in production code",
       "match": "console.log(",
@@ -218,7 +298,7 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/playerStatsService.js",
-      "line": 610,
+      "line": 631,
       "domain": "backend_services",
       "message": "Console.log in production code",
       "match": "console.log(",
@@ -228,7 +308,7 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/playerStatsService.js",
-      "line": 756,
+      "line": 753,
       "domain": "backend_services",
       "message": "Console.log in production code",
       "match": "console.log(",
@@ -248,7 +328,7 @@
       "severity": "INFO",
       "ruleId": "INV-007",
       "file": "backend/services/strategyStatsService.js",
-      "line": 473,
+      "line": 482,
       "domain": "backend_services",
       "message": "Console.log in production code",
       "match": "console.log(",

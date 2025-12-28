@@ -23,12 +23,14 @@
 | [RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) | Consuma features per edge calculation |
 
 ### 📁 File Codice Principali
-| File | Descrizione | Linee chiave |
+| File | Descrizione | Entry Point |
 |------|-------------|---------------|
-| [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Feature Engine - calcoli | L44-674 |
-| [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Strategy Engine - segnali | L39-443 |
-| [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Calcolo pressure index | - |
-| [`backend/server.js`](../../backend/server.js) | Bundle endpoint | L2920-3374 |
+| [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Feature Engine - calcoli | `computeFeatures()` |
+| [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Strategy Engine - segnali | `evaluateAll()` |
+| [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Calcolo pressure index | `calculatePressure()` |
+| [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) | Route bundle | `GET /:eventId/bundle` |
+| [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | Controller bundle | `getBundle()` |
+| [`backend/services/bundleService.js`](../../backend/services/bundleService.js) | Business logic | `buildBundle()` |
 
 ---
 
@@ -356,7 +358,7 @@ Per ogni feature:
 | **MomentumSwing** | [`evaluateMomentumSwing()`](../../backend/strategies/strategyEngine.js#L378) | L378 | momentum shift + volatile + close score → READY |
 
 ### Bundle Endpoint
-**File**: [`backend/server.js`](../../backend/server.js) (L3220-3430)
+**File**: [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) + [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) (Bundle endpoint; feature calculations live in `backend/utils/featureEngine.js`) 
 
 ```
 GET /api/match/:eventId/bundle

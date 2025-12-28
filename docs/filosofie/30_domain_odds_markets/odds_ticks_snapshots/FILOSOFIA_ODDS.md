@@ -23,11 +23,13 @@
 | [OBSERVABILITY](../../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) | Staleness odds alerts |
 
 ### 📁 File Codice Principali
-| File | Descrizione | Linee chiave |
+| File | Descrizione | Entry Point |
 |------|-------------|---------------|
-| [`backend/server.js`](../../backend/server.js) | `normalizeOddsForBundle()` | L3507-3590 |
-| [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Fetch odds da SofaScore | `/api/v1/event/:id/odds` |
-| [`src/components/match/tabs/OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) | UI display odds | - |
+| [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) | Route bundle con odds | `GET /:eventId/bundle` |
+| [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | `normalizeOddsForBundle()` | `getBundle()` |
+| [`backend/services/bundleService.js`](../../backend/services/bundleService.js) | Business logic odds nel bundle | `buildBundle()` |
+| [`backend/scraper/sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) | Fetch odds da SofaScore | `fetchOdds()` |
+| [`src/components/match/tabs/OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) | UI display odds | React Component |
 
 ---
 

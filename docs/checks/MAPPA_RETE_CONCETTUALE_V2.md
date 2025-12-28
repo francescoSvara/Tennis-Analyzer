@@ -1,11 +1,11 @@
 # 🗺️ MAPPA RETE CONCETTUALE  
-## Versione V2.7 – MatchBundle-Centric Architecture + Philosophy Enforcement
+## Versione V2.8 – MatchBundle-Centric Architecture + Complete API Reference
 
 > **Scopo**: fornire una visione unificata e navigabile dell'architettura concettuale del progetto.  
 > **Stato**: ATTIVA  
 > **Sostituisce**: `MAPPA_RETE_CONCETTUALE.md` (V1 – DEPRECATA)  
-> **Ultimo aggiornamento**: 27 Dicembre 2025  
-> **Novità V2.7**: Aggiunto philosophyEnforcer.js per verifica SEMANTICA filosofie, dual-file pattern (Concetto + Pseudocode)  
+> **Ultimo aggiornamento**: 28 Dicembre 2025  
+> **Novità V2.8**: Aggiornamento completo tabelle API Routes con tutti gli endpoints, sincronizzato con route files reali  
 
 ---
 
@@ -19,11 +19,13 @@
 ### 🎯 Quick Access - File Codice Chiave
 | Area | File | Entry Point |
 |------|------|-------------|
-| **Feature Engine** | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | `computeFeatures()` L353 |
-| **Strategy Engine** | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | `evaluateAll()` L44 |
+| **Feature Engine** | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | `computeFeatures()` |
+| **Strategy Engine** | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | `evaluateAll()` |
 | **Data Quality** | [`backend/services/dataQualityChecker.js`](../../backend/services/dataQualityChecker.js) | `evaluateBundleQuality()` |
-| **Bundle Endpoint** | [`backend/server.js`](../../backend/server.js) | L2920-3374 `/api/match/:id/bundle` |
-| **Frontend Hook** | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` L44 |
+| **Bundle Route** | [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) | `GET /:eventId/bundle` |
+| **Bundle Controller** | [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | `getBundle()` |
+| **Bundle Service** | [`backend/services/bundleService.js`](../../backend/services/bundleService.js) | `buildBundle()` |
+| **Frontend Hook** | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | `useMatchBundle()` |
 | **Philosophy Enforcer** | [`scripts/philosophyEnforcer.js`](../../scripts/philosophyEnforcer.js) | Verifica SEMANTICA filosofie |
 ---
 
@@ -32,14 +34,27 @@
 ```
 React-Betfair/
 ├── backend/
-│   ├── server.js                      # 🌐 Express API principale (~5400 righe)
+│   ├── server.js                      # 🌐 Bootstrap + mount (~4850 righe, target ~300)
 │   ├── liveManager.js                 # ⚡ Gestione match live
+│   ├── routes/                        # 📍 Route definitions (10 files)
+│   │   ├── index.js                   # Central router mount
+│   │   ├── match.routes.js            # MatchBundle, suggested, detected
+│   │   ├── player.routes.js           # Player stats, H2H
+│   │   ├── tracking.routes.js         # Live tracking
+│   │   ├── stats.routes.js            # DB statistics
+│   │   └── ...
+│   ├── controllers/                   # 🎮 Request handlers (9 files)
+│   │   ├── match.controller.js        # getBundle, getSuggested
+│   │   ├── player.controller.js       # getStats, getH2H
+│   │   ├── stats.controller.js        # getDbStats, getHealth
+│   │   └── ...
 │   ├── db/
 │   │   ├── supabase.js                # 🔌 Client Supabase
 │   │   ├── matchRepository.js         # 📦 CRUD matches_new
 │   │   ├── liveTrackingRepository.js  # 📦 CRUD live tracking
 │   │   └── betDecisionsRepository.js  # 📦 CRUD bet_decisions audit
 │   ├── services/
+│   │   ├── bundleService.js           # 🎴 MatchBundle builder (~549 righe)
 │   │   ├── matchCardService.js        # 🎴 MatchBundle snapshot
 │   │   ├── playerStatsService.js      # 👤 Stats giocatori + Surface Splits
 │   │   ├── playerProfileService.js    # 👤 Profili giocatori
@@ -336,12 +351,12 @@ node scripts/generateTodoReport.js
 │                       │                                                 │
 │                       ▼                                                 │
 ├─────────────────────────────────────────────────────────────────────────┤
-│                    BUNDLE ENDPOINT (server.js L3219)                    │
+│          BUNDLE ENDPOINT (match.routes.js → match.controller.js)        │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │  GET /api/match/:id/bundle                                              │
 │                                                                         │
-│  Logica:                                                                │
+│  Logica (bundleService.buildBundle):                                    │
 │  1. matchCardService.getMatchCardFromSnapshot() → se trovato, return   │
 │  2. Se null → cerca in matches_new via v_matches_with_players          │
 │  3. Applica featureEngine.computeFeatures()                            │
@@ -379,15 +394,92 @@ node scripts/generateTodoReport.js
 
 ## 3️⃣ RIFERIMENTI CODICE DETTAGLIATI
 
-### 🔌 Backend - Server Principale
+### 🔌 Backend - API Layer Complete Reference (Routes → Controllers)
 
-| File | Righe | Funzione | Endpoint |
-|------|-------|----------|----------|
-| [`backend/server.js`](../../backend/server.js) | ~5900 | Server Express principale | - |
-| [`backend/server.js`](../../backend/server.js) | L1048-1170 | Lista match con ricerca | `GET /api/matches/db` |
-| [`backend/server.js`](../../backend/server.js) | L2920-3374 | Bundle completo | `GET /api/match/:id/bundle` |
-| [`backend/server.js`](../../backend/server.js) | L3380-3450 | Trasforma legacy | `transformLegacyMatchToBundle()` |
-| [`backend/server.js`](../../backend/server.js) | L3500-3540 | Estrae score | `extractScore()` |
+> **Aggiornato**: 28 Dicembre 2025  
+> **Source**: `backend/routes/index.js` + individual route files
+
+#### Core Match APIs
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `match.routes.js` | `match.controller.js` | `GET /api/match/:id/bundle` | MatchBundle completo ⭐ |
+| `match.routes.js` | `match.controller.js` | `GET /api/match/:id` | Dati match singolo |
+| `match.routes.js` | `match.controller.js` | `GET /api/matches/db` | Lista match database |
+| `match.routes.js` | `match.controller.js` | `GET /api/matches/suggested` | Match suggeriti |
+| `match.routes.js` | `match.controller.js` | `GET /api/matches/detected` | Match rilevati |
+| `match.routes.js` | `match.controller.js` | `GET /api/matches/search` | Ricerca match |
+| `match.routes.js` | `match.controller.js` | `GET /api/matches/tournaments` | Lista tornei |
+| `match.routes.js` | `match.controller.js` | `GET /api/match/tournament/:id/events` | Match di un torneo |
+| `match.routes.js` | `match.controller.js` | `POST /api/match/sync/:id` | Sync manuale |
+| `match.routes.js` | `match.controller.js` | `GET /api/match/check-data/:id` | Verifica completezza |
+
+#### Player APIs
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `player.routes.js` | `player.controller.js` | `GET /api/player/:name/stats` | Stats giocatore |
+| `player.routes.js` | `player.controller.js` | `GET /api/player/:name/matches` | Match giocatore |
+| `player.routes.js` | `player.controller.js` | `GET /api/player/search` | Ricerca autocomplete |
+| `player.routes.js` | `player.controller.js` | `GET /api/player/h2h` | Head to Head |
+| `match.routes.js` | `player.controller.js` | `GET /api/match/strategy-context/:home/:away` | Contesto strategie |
+
+#### Tracking & Live APIs
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `tracking.routes.js` | `tracking.controller.js` | `POST /api/track/:eventId` | Aggiungi tracking |
+| `tracking.routes.js` | `tracking.controller.js` | `DELETE /api/track/:eventId` | Rimuovi tracking |
+| `tracking.routes.js` | `tracking.controller.js` | `GET /api/tracked` | Lista tracked |
+| `tracking.routes.js` | `tracking.controller.js` | `POST /api/track/:id/priority` | Cambia priorità |
+| `tracking.routes.js` | `tracking.controller.js` | `POST /api/track/:id/resume` | Riprendi tracking |
+| `tracking.routes.js` | `tracking.controller.js` | `GET /api/tracking/stats` | Stats tracking |
+| `tracking.routes.js` | `tracking.controller.js` | `GET /api/tracking/live/discover` | Scopri match live |
+| `tracking.routes.js` | `tracking.controller.js` | `GET /api/tracking/live/status` | Status sistema |
+| `tracking.routes.js` | `tracking.controller.js` | `POST /api/tracking/scheduler/start` | Avvia scheduler |
+| `tracking.routes.js` | `tracking.controller.js` | `POST /api/tracking/scheduler/stop` | Ferma scheduler |
+
+#### Event APIs (Direct SofaScore)
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `event.routes.js` | `event.controller.js` | `GET /api/event/:id/point-by-point` | PBP diretto |
+| `event.routes.js` | `event.controller.js` | `GET /api/event/:id/statistics` | Stats dirette |
+| `event.routes.js` | `event.controller.js` | `GET /api/event/:id/power-rankings` | Rankings diretti |
+| `event.routes.js` | `event.controller.js` | `GET /api/event/:id/live` | Dati live diretti |
+
+#### Database APIs
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `db.routes.js` | `db.controller.js` | `GET /api/db/test` | Test connessione |
+| `db.routes.js` | `db.controller.js` | `GET /api/db/matches` | Lista match DB |
+| `db.routes.js` | `db.controller.js` | `GET /api/db/matches/summary` | Summary HomePage |
+| `db.routes.js` | `db.controller.js` | `GET /api/db/matches/:id` | Match singolo |
+| `db.routes.js` | `db.controller.js` | `GET /api/db/tournaments` | Lista tornei |
+| `db.routes.js` | `db.controller.js` | `GET /api/db/players/search` | Cerca giocatori |
+| `db.routes.js` | `db.controller.js` | `GET /api/db/logs` | Extraction logs |
+| `stats.routes.js` | `stats.controller.js` | `GET /api/stats/db` | Statistiche DB |
+| `stats.routes.js` | `stats.controller.js` | `GET /api/stats/health` | Health check |
+
+#### Value Interpretation APIs
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `value.routes.js` | `value.controller.js` | `POST /api/interpret-value` | Interpreta valore |
+| `value.routes.js` | `value.controller.js` | `POST /api/analyze-power-rankings` | Analizza rankings |
+| `value.routes.js` | `value.controller.js` | `GET /api/value-thresholds` | Soglie default |
+| `value.routes.js` | `value.controller.js` | `GET /api/value-zone/:value` | Zona valore |
+
+#### Scrapes APIs
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `scrapes.routes.js` | `scrapes.controller.js` | `GET /api/scrapes` | Lista scrapes |
+| `scrapes.routes.js` | `scrapes.controller.js` | `GET /api/scrapes/:id` | Singolo scrape |
+| `index.js` | `scrapes.controller.js` | `POST /api/scrape` | Avvia scrape |
+| `index.js` | `scrapes.controller.js` | `GET /api/status/:id` | Status scrape |
+| `index.js` | `scrapes.controller.js` | `GET /api/data/:id` | Dati scrape |
+| `index.js` | `scrapes.controller.js` | `POST /api/lookup-name` | Lookup URL |
+
+#### Health & System APIs
+| Route File | Controller File | Endpoint | Descrizione |
+|------------|-----------------|----------|-------------|
+| `health.routes.js` | `health.controller.js` | `GET /api/` | Root info |
+| `health.routes.js` | `health.controller.js` | `GET /api/health` | Health check |
 
 ### 🧮 Backend - Feature Engine
 
@@ -598,7 +690,7 @@ FONTI ESTERNE
                │
                ▼
       ┌────────────────┐
-      │  MATCH BUNDLE  │          📁 backend/services/matchCardService.js
+      │  MATCH BUNDLE  │          📁 backend/services/bundleService.js
       │   SNAPSHOT     │
       └────────┬───────┘
                │
@@ -606,7 +698,7 @@ FONTI ESTERNE
        │               │
        ▼               ▼
    REST API        WS PATCH
-  (load init)       (live)      📁 backend/server.js (L3219 /api/match/:id/bundle)
+  (load init)       (live)      📁 backend/routes/match.routes.js → controllers/match.controller.js
        │               │        📁 backend/liveManager.js
        └───────┬───────┘
                │
@@ -653,7 +745,7 @@ Questi invarianti sono **verificati automaticamente** dai Concept Checks → [`r
 
 1. `match_card_snapshot` (più veloce, cache) → [`matchCardService.js`](../backend/services/matchCardService.js)
 2. `v_matches_with_players` (matches_new + join) → [`matchRepository.js`](../backend/db/matchRepository.js)
-3. `matches` (legacy) + transform → [`server.js`](../backend/server.js) L3431 `transformLegacyMatchToBundle()`
+3. `matches` (legacy) + transform → [`bundleService.js`](../backend/services/bundleService.js) `transformLegacyMatchToBundle()`
 
 ---
 
@@ -663,7 +755,7 @@ Questi invarianti sono **verificati automaticamente** dai Concept Checks → [`r
 1. Creare script/service in [`backend/services/`](../backend/services/)
 2. Popolare tabelle DB via [`backend/db/matchRepository.js`](../backend/db/matchRepository.js)
 3. **NON** creare endpoint frontend separato
-4. Integrare nel flow del bundle in [`backend/services/matchCardService.js`](../backend/services/matchCardService.js)
+4. Integrare nel flow del bundle in [`backend/services/bundleService.js`](../backend/services/bundleService.js)
 
 ### Aggiungere una nuova feature
 1. Dichiararla in [`backend/utils/featureEngine.js`](../backend/utils/featureEngine.js)
@@ -689,23 +781,32 @@ Questi invarianti sono **verificati automaticamente** dai Concept Checks → [`r
 ## 9️⃣ API ENDPOINTS PRINCIPALI
 
 ### Match Bundle (Core)
-| Metodo | Endpoint | File | Linea |
-|--------|----------|------|-------|
-| GET | `/api/match/:id/bundle` | [`server.js`](../backend/server.js) | L3219 |
-| GET | `/api/matches/db` | [`server.js`](../backend/server.js) | L1131 |
+| Metodo | Endpoint | Route File | Controller |
+|--------|----------|------------|------------|
+| GET | `/api/match/:id/bundle` | `match.routes.js` | `getBundle()` |
+| GET | `/api/matches/db` | `match.routes.js` | `getFromDb()` |
+| GET | `/api/matches/suggested` | `match.routes.js` | `getSuggested()` |
+| GET | `/api/matches/detected` | `match.routes.js` | `getDetected()` |
 
-### Statistiche & Momentum
-| Metodo | Endpoint | Descrizione |
-|--------|----------|-------------|
-| GET | `/api/match/:id/stats` | Statistiche match |
-| GET | `/api/match/:id/momentum` | Dati momentum |
-| GET | `/api/match/:id/odds` | Quote match |
+### Player
+| Metodo | Endpoint | Route File | Controller |
+|--------|----------|------------|------------|
+| GET | `/api/player/:name/stats` | `player.routes.js` | `getStats()` |
+| GET | `/api/player/search` | `player.routes.js` | `search()` |
+| GET | `/api/player/h2h` | `player.routes.js` | `getH2H()` |
 
-### Giocatori
-| Metodo | Endpoint | Descrizione |
-|--------|----------|-------------|
-| GET | `/api/player/:id` | Profilo giocatore |
-| GET | `/api/player/:id/stats` | Statistiche giocatore |
+### Tracking
+| Metodo | Endpoint | Route File | Controller |
+|--------|----------|------------|------------|
+| POST | `/api/track/:eventId` | `tracking.routes.js` | `track()` |
+| DELETE | `/api/track/:eventId` | `tracking.routes.js` | `untrack()` |
+| GET | `/api/tracked` | `tracking.routes.js` | `listTracked()` |
+
+### Stats & Health
+| Metodo | Endpoint | Route File | Controller |
+|--------|----------|------------|------------|
+| GET | `/api/stats/db` | `stats.routes.js` | `getDbStats()` |
+| GET | `/api/stats/health` | `stats.routes.js` | `getHealth()` |
 
 ---
 
@@ -727,10 +828,10 @@ Se un cambiamento **non è riflesso qui**,
 |-----------|------------------------|
 | [DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | [`matchRepository.js`](../../backend/db/matchRepository.js), [`sofascoreScraper.js`](../../backend/scraper/sofascoreScraper.js) |
 | [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | [`featureEngine.js`](../../backend/utils/featureEngine.js), [`strategyEngine.js`](../../backend/strategies/strategyEngine.js), [`pressureCalculator.js`](../../backend/utils/pressureCalculator.js) |
-| [LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [`liveManager.js`](../../backend/liveManager.js), [`liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) |
-| [ODDS](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [`server.js`](../../backend/server.js) L2920-3374, [`OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) |
+| [LIVE_TRACKING](../filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) | [`liveManager.js`](../../backend/liveManager.js), [`tracking.routes.js`](../../backend/routes/tracking.routes.js), [`tracking.controller.js`](../../backend/controllers/tracking.controller.js) |
+| [ODDS](../filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | [`match.routes.js`](../../backend/routes/match.routes.js), [`bundleService.js`](../../backend/services/bundleService.js), [`OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) |
 | [FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [`src/components/match/tabs/`](../../src/components/match/tabs/), [`src/motion/`](../../src/motion/) |
-| [FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [`useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`MatchPage.jsx`](../../src/components/match/MatchPage.jsx) |
+| [FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | [`useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx), [`match.controller.js`](../../backend/controllers/match.controller.js) |
 | [CONCEPT_CHECKS](../filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md) | [`runConceptChecks.js`](../../scripts/runConceptChecks.js), [`checkConceptualMap.js`](../../scripts/checkConceptualMap.js) |
 
 ---

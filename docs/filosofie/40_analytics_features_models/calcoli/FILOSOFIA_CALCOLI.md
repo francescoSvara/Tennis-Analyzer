@@ -29,6 +29,8 @@
 | [`backend/utils/pressureCalculator.js`](../../backend/utils/pressureCalculator.js) | Calcoli pressure/HPI | `calculatePressure()` |
 | [`backend/utils/breakDetector.js`](../../backend/utils/breakDetector.js) | Rilevamento break | `detectBreaks()` |
 | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Consumer delle features | `evaluateAll()` |
+| [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) | Bundle route (integra features) | `GET /:eventId/bundle` |
+| [`backend/services/bundleService.js`](../../backend/services/bundleService.js) | Orchestrazione bundle | `buildBundle()` |
 
 ---
 

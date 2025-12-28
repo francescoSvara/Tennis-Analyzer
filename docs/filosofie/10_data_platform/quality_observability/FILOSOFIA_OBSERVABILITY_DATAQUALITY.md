@@ -28,7 +28,9 @@
 | [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) | Bundle builder | Include dataQuality in bundle |
 | [`backend/liveManager.js`](../../backend/liveManager.js) | Live tracking | Latency monitoring |
 | [`backend/utils/logger.js`](../../backend/utils/logger.js) | Logging (TODO) | Structured logging |
-| [`backend/server.js`](../../backend/server.js) | API endpoints | Request/response logging |
+| [`backend/server.js`](../../backend/server.js) | Bootstrap + mount routes; global middleware (logging, CORS) | Mounts logging middleware and routes |
+| [`backend/routes/*.routes.js`](../../backend/routes/*.routes.js) | Route definitions | URL + middleware (per-endpoint tagging) |
+| [`backend/controllers/*.controller.js`](../../backend/controllers/*.controller.js) | Controllers | req → service → response (instrumentation points) |
 
 ---
 

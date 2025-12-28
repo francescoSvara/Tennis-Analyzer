@@ -48,6 +48,13 @@ Il frontend chiede **uno stato**, non dati.
 GET /api/match/:id/bundle
 ```
 
+### API Architecture (2025-12-28)
+| File | Ruolo |
+|------|-------|
+| `backend/routes/match.routes.js` | Route definition |
+| `backend/controllers/match.controller.js` | Controller: `getBundle()` |
+| `backend/services/bundleService.js` | Business logic bundle |
+
 Questo endpoint:
 - cerca in cache (match_card_snapshot)
 - fallback su matches_new

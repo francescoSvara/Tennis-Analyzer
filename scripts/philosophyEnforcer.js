@@ -203,7 +203,7 @@ const DB_CHECKS = {
   
   // RULE SINGLE_ENDPOINT: Frontend CALLS /api/match/:id/bundle ONLY
   'SINGLE_ENDPOINT': () => {
-    const frontendHooks = findFiles('src/hooks/*.js');
+    const frontendHooks = findFiles('src/hooks/*.{js,jsx}');
     const violations = [];
     
     for (const f of frontendHooks) {
@@ -510,7 +510,7 @@ const TEMPORAL_CHECKS = {
   
   // RULE NO_FUTURE_DATA: FOR EACH query ASSERT data.event_time <= as_of_time
   'NO_FUTURE_DATA': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     const violations = [];
     
@@ -573,7 +573,7 @@ const TEMPORAL_CHECKS = {
   
   // RULE FEATURE_CALCULATION: computeFeatures(match, as_of_time) FILTER odds/stats WHERE event_time <= as_of_time
   'FEATURE_CALCULATION_temporal_filter': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -660,7 +660,7 @@ const TEMPORAL_CHECKS = {
   
   // ASSERT LEAKAGE_IS_PREVENTED
   'ASSERT_LEAKAGE_IS_PREVENTED': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste (leakage non può essere prevenuto)'];
@@ -688,7 +688,7 @@ const TEMPORAL_CHECKS = {
 const CALCOLI_CHECKS = {
   // RULE NEVER_RETURN_NULL: FOR EACH feature NEVER return null | undefined | NaN | 0 as "missing"
   'NEVER_RETURN_NULL': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     const violations = [];
     
@@ -704,7 +704,7 @@ const CALCOLI_CHECKS = {
   },
   
   'NEVER_RETURN_NaN': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -716,7 +716,7 @@ const CALCOLI_CHECKS = {
   
   // RULE FALLBACK_HIERARCHY: ORDER by precision - powerRankings → statistics → score → odds → rankings
   'FALLBACK_HIERARCHY': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     const violations = [];
     
@@ -884,7 +884,7 @@ const CALCOLI_CHECKS = {
   
   // RULE DETERMINISTIC_CALCULATION: GIVEN same_inputs AND same_as_of_time THEN output MUST be identical, NO random, NO side effects
   'DETERMINISTIC_CALCULATION_no_random': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     const violations = [];
     
@@ -895,7 +895,7 @@ const CALCOLI_CHECKS = {
   },
   
   'DETERMINISTIC_CALCULATION_no_date_now': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     const violations = [];
     
@@ -906,7 +906,7 @@ const CALCOLI_CHECKS = {
   },
   
   'DETERMINISTIC_CALCULATION_no_side_effects': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     const violations = [];
     
@@ -918,7 +918,7 @@ const CALCOLI_CHECKS = {
   
   // TEMPLATE FeatureCard: Nome, Livello, Tipo, Input_richiesti, Output, Formula, Fallback_chain, Usata_da, Persistenza, dataSource
   'TEMPLATE_FeatureCard': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -997,7 +997,7 @@ const CALCOLI_CHECKS = {
   
   // RULE OUTPUT_VALIDATION: features devono avere range validati
   'OUTPUT_VALIDATION': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -1012,7 +1012,7 @@ const CALCOLI_CHECKS = {
 const STATS_CHECKS = {
   // FLOW DataToSignals: RawData → FeatureEngine → StrategyEngine → Signals (READY | WATCH | OFF)
   'FLOW_DataToSignals': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const strategyEngine = path.join(BACKEND_DIR, 'strategies', 'strategyEngine.js');
     const violations = [];
     
@@ -1058,7 +1058,7 @@ const STATS_CHECKS = {
   
   // CLASS Features: pure functions, deterministic, contextual
   'CLASS_Features_pure_functions': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -1128,7 +1128,7 @@ const STATS_CHECKS = {
   
   // RULE FEATURE_DECLARATION: FOR EACH feature MUST declare name, level, type, inputs, output, fallback_chain, used_by, persistence
   'FEATURE_DECLARATION': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     const violations = [];
     
@@ -1147,7 +1147,7 @@ const STATS_CHECKS = {
   
   // FUNCTION FeatureEngine.compute(rawData, options) → { match_id, as_of_time, features, feature_version }
   'FUNCTION_FeatureEngine_compute': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -1219,7 +1219,7 @@ const STATS_CHECKS = {
   
   // RULE DETERMINISTIC_FEATURES: GIVEN same_inputs AND same_as_of_time THEN output MUST be identical
   'DETERMINISTIC_FEATURES': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -1243,7 +1243,7 @@ const STATS_CHECKS = {
   
   // RULE FEATURES_PROPERTIES: Features MUST be Deterministic, Contextual, Documented
   'FEATURES_PROPERTIES_documented': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -1610,7 +1610,7 @@ const FRONTEND_DATA_CHECKS = {
   
   // RULE INCREMENTAL_PATCHES: Frontend RECEIVES patches, DOES NOT refetch full bundle
   'INCREMENTAL_PATCHES': () => {
-    const hooks = findFiles('src/hooks/*.js');
+    const hooks = findFiles('src/hooks/*.{js,jsx}');
     let hasPatchLogic = false;
     
     for (const f of hooks) {
@@ -1660,7 +1660,7 @@ const FRONTEND_DATA_CHECKS = {
   
   // HOOK useMatchBundle(matchId): STATE bundle, loading, error
   'HOOK_useMatchBundle': () => {
-    const hooks = findFiles('src/hooks/*.js');
+    const hooks = findFiles('src/hooks/*.{js,jsx}');
     const violations = [];
     
     let hasMatchBundleHook = false;
@@ -1777,7 +1777,7 @@ const MADRE_CHECKS = {
   
   // RULE FRONTEND_CONSUMPTION: IF consumer == FRONTEND ASSERT input.TYPE == MatchBundle
   'FRONTEND_CONSUMPTION': () => {
-    const hooks = findFiles('src/hooks/*.js');
+    const hooks = findFiles('src/hooks/*.{js,jsx}');
     let consumesBundle = false;
     
     for (const f of hooks) {
@@ -1808,7 +1808,7 @@ const MADRE_CHECKS = {
   
   // ROLE CALCULATION: ALLOW pure_function, REQUIRE deterministic, DENY data_access
   'ROLE_CALCULATION_pure': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -1952,7 +1952,7 @@ const MADRE_CHECKS = {
   
   // ASSERT ARCHITECTURE_IS_GOVERNED
   'ASSERT_ARCHITECTURE_IS_GOVERNED': () => {
-    const mappaFile = path.join(ROOT_DIR, 'docs', 'filosofie', 'MAPPA_RETE_CONCETTUALE_V2.md');
+    const mappaFile = path.join(ROOT_DIR, 'docs', 'checks', 'MAPPA_RETE_CONCETTUALE_V2.md');
     if (!fileExists(mappaFile)) {
       return ['MAPPA_RETE_CONCETTUALE_V2.md non esiste (architettura non documentata)'];
     }
@@ -1990,7 +1990,7 @@ const LINEAGE_CHECKS = {
   },
   
   'CONSTANT_VERSIONS_feature': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -2014,7 +2014,7 @@ const LINEAGE_CHECKS = {
   // RULE SEMANTIC_VERSIONING: FORMAT "major.minor.patch"
   'SEMANTIC_VERSIONING': () => {
     const versionedFiles = [
-      path.join(BACKEND_DIR, 'services', 'featureEngine.js'),
+      path.join(BACKEND_DIR, 'utils', 'featureEngine.js'),
       path.join(BACKEND_DIR, 'strategies', 'strategyEngine.js'),
       path.join(BACKEND_DIR, 'services', 'matchCardService.js')
     ];
@@ -2101,7 +2101,7 @@ const LINEAGE_CHECKS = {
   
   // RULE REPRODUCIBILITY_CONTRACT: GIVEN match_id + versions + as_of_time MUST be able to regenerate same bundle
   'REPRODUCIBILITY_CONTRACT': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -2918,7 +2918,7 @@ const ODDS_CHECKS = {
   
   // FUNCTION calculateOddsFeatures: implied_home, implied_away, overround, spread, trend, liquidity
   'FUNCTION_calculateOddsFeatures': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return null;
@@ -3379,7 +3379,7 @@ const CONCEPT_CHECKS_CHECKS = {
   'RULE_EVERY_CODE_KNOWS_ITSELF': () => {
     // Verifica che file chiave abbiano commenti/descrizioni
     const keyFiles = [
-      path.join(BACKEND_DIR, 'services', 'featureEngine.js'),
+      path.join(BACKEND_DIR, 'utils', 'featureEngine.js'),
       path.join(BACKEND_DIR, 'strategies', 'strategyEngine.js'),
       path.join(BACKEND_DIR, 'services', 'matchCardService.js')
     ];
@@ -3426,7 +3426,7 @@ const CONCEPT_CHECKS_CHECKS = {
   
   // INVARIANT FEATURE_VS_STRATEGY: Feature → numbers, Strategy → READY/WATCH/OFF, Frontend → visualize
   'INVARIANT_FEATURE_VS_STRATEGY': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return null;
@@ -3557,7 +3557,7 @@ const CONCEPT_CHECKS_CHECKS = {
   
   // CHECK LIN-001: featureEngine.js exports VERSION
   'CHECK_LIN-001': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];
@@ -3581,7 +3581,7 @@ const CONCEPT_CHECKS_CHECKS = {
   
   // CHECK CALC-001: computeFeatures() NEVER returns null
   'CHECK_CALC-001': () => {
-    const featureEngine = path.join(BACKEND_DIR, 'services', 'featureEngine.js');
+    const featureEngine = path.join(BACKEND_DIR, 'utils', 'featureEngine.js');
     const content = readFileSync(featureEngine);
     
     if (!content) return ['featureEngine.js non esiste'];

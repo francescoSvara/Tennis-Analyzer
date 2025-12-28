@@ -132,6 +132,12 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN Register/Lookup APIs needed
+  - implement via routes/controllers calling repository functions
+  - server.js must not contain lookup logic
+ END
+
 END FILOSOFIA_REGISTRY_CANON
 
 --------------------------------------------------

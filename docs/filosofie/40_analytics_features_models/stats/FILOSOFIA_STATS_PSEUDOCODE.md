@@ -244,6 +244,13 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN exposing computed signals/features to consumers
+  - use backend/routes/*.routes.js + backend/controllers/*.controller.js
+  - keep feature computations in backend/utils/featureEngine.js
+  - server.js remains bootstrap only
+ END
+
 END FILOSOFIA_STATS
 
 --------------------------------------------------

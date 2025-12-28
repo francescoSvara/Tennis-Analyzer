@@ -233,6 +233,13 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN exposing quality metrics
+  - controllers should surface dataQuality through bundle meta
+  - logging hooks belong to routes/controllers and utils/logger
+  - server.js only mounts logging middleware
+ END
+
 END FILOSOFIA_OBSERVABILITY_DATAQUALITY
 
 --------------------------------------------------

@@ -22,12 +22,13 @@
 | [ODDS](../../30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md) | Live odds sync con live score |
 
 ### 📁 File Codice Principali
-| File | Descrizione | Linee chiave |
+| File | Descrizione | Entry Point |
 |------|-------------|---------------|
-| [`backend/liveManager.js`](../../backend/liveManager.js) | Gestione live tracking | `syncMatch()` L1132 |
-| [`backend/server.js`](../../backend/server.js) | WebSocket endpoint | L4950+ `/ws/match/:id` |
-| [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) | Repository live tracking | - |
-| [`backend/services/svgMomentumService.js`](../../backend/services/svgMomentumService.js) | SVG momentum parsing | - |
+| [`backend/liveManager.js`](../../backend/liveManager.js) | Live manager: WebSocket handlers & runtime tracking | `/ws/match/:id` |
+| [`backend/routes/tracking.routes.js`](../../backend/routes/tracking.routes.js) | Routes: track, untrack, discover, stats | `POST /:eventId`, `GET /stats` |
+| [`backend/controllers/tracking.controller.js`](../../backend/controllers/tracking.controller.js) | Controller tracking operations | `track()`, `untrack()`, `listTracked()` |
+| [`backend/db/liveTrackingRepository.js`](../../backend/db/liveTrackingRepository.js) | Repository live tracking | DB operations |
+| [`backend/services/svgMomentumService.js`](../../backend/services/svgMomentumService.js) | SVG momentum parsing | `extractMomentum()` |
 
 ---
 

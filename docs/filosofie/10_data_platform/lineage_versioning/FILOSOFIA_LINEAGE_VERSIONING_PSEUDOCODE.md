@@ -220,6 +220,12 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN exposing lineage/versioning info
+  - include versions in bundle.meta via controllers/services
+  - server.js must not compute lineage metadata inline
+ END
+
 END FILOSOFIA_LINEAGE_VERSIONING
 
 --------------------------------------------------

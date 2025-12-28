@@ -181,6 +181,15 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN defining API endpoints
+  - CREATE routes: backend/routes/*.routes.js → define URL + middleware
+  - CREATE controllers: backend/controllers/*.controller.js → handle req → service → res
+  - IMPLEMENT services in backend/services/* (business logic, composition)
+  - server.js MUST only bootstrap, mount routes and sockets (NO domain logic)
+  - Controllers MUST be thin; move calculations to utils/services and DB to repositories
+ END
+
 END FILOSOFIA_ODDS
 
 --------------------------------------------------

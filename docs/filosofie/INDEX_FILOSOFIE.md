@@ -49,17 +49,23 @@ Il MatchBundle è:
 ```
 UI Layer (React)
 └─ Rendering + UX
+└─ src/components/
 
 API Layer (Express)
-└─ Routing / Orchestrazione
+└─ Routes: backend/routes/*.routes.js
+└─ Controllers: backend/controllers/*.controller.js
+└─ server.js (SOLO bootstrap + mount)
 
 Service Layer (Business)
+└─ backend/services/*
 └─ Composizione MatchBundle
 
 Calculation Layer (Analytics)
+└─ backend/utils/*
 └─ Funzioni pure
 
 Data Layer (Repository)
+└─ backend/db/*Repository.js
 └─ DB + fonti esterne
 ```
 
@@ -68,6 +74,8 @@ Data Layer (Repository)
 * UI che calcola
 * Service con SQL
 * Repository con business logic
+* Controller con logica di dominio
+* server.js con logica tennis
 
 ---
 
@@ -75,13 +83,39 @@ Data Layer (Repository)
 
 ### 🗄️ Data Platform (Backend)
 
-| Documento                              | Scopo                         | Codice Principale       |
-| -------------------------------------- | ----------------------------- | ----------------------- |
-| FILOSOFIA_DB.md                        | Schema, snapshot, persistenza | `backend/db/*`          |
-| FILOSOFIA_TEMPORAL.md                  | Time semantics                | `liveManager.js`        |
-| FILOSOFIA_REGISTRY_CANON.md            | Canon IDs                     | `dataNormalizer.js`     |
-| FILOSOFIA_LINEAGE_VERSIONING.md        | Versioning                    | `matchCardService.js`   |
-| FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | Data Quality                  | `dataQualityChecker.js` |
+| Documento                              | Scopo                         | Codice Principale                       |
+| -------------------------------------- | ----------------------------- | --------------------------------------- |
+| FILOSOFIA_DB.md                        | Schema, snapshot, persistenza | `backend/db/*`                          |
+| FILOSOFIA_TEMPORAL.md                  | Time semantics                | `liveManager.js`                        |
+| FILOSOFIA_REGISTRY_CANON.md            | Canon IDs                     | `dataNormalizer.js`                     |
+| FILOSOFIA_LINEAGE_VERSIONING.md        | Versioning                    | `matchCardService.js`                   |
+| FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | Data Quality                  | `dataQualityChecker.js`                 |
+
+### 🔀 API Layer (Refactored)
+
+| Struttura        | Scopo                        | File Principali                         |
+| ---------------- | ---------------------------- | --------------------------------------- |
+| Routes           | URL + middleware             | `backend/routes/*.routes.js`            |
+| Controllers      | req → service → res          | `backend/controllers/*.controller.js`   |
+| server.js        | SOLO bootstrap + mount       | `backend/server.js` (target ~300)       |
+
+📌 Vedi: `guida refactor server.js`
+
+#### Route Files Complete Reference
+
+| File                   | Mount Path                   | Endpoints Principali                                      |
+| ---------------------- | ---------------------------- | --------------------------------------------------------- |
+| `health.routes.js`     | `/api/`                      | `GET /`, `GET /health`                                    |
+| `db.routes.js`         | `/api/db`                    | `GET /test`, `GET /matches`, `GET /matches/summary`, etc. |
+| `match.routes.js`      | `/api/match`, `/api/matches` | `GET /:eventId/bundle` ⭐, `GET /db`, `GET /suggested`    |
+| `tracking.routes.js`   | `/api/track`, `/api/tracked` | `POST /:eventId`, `DELETE /:eventId`, `GET /stats`        |
+| `player.routes.js`     | `/api/player`                | `GET /:name/stats`, `GET /search`, `GET /h2h`             |
+| `event.routes.js`      | `/api/event`                 | `GET /:eventId/point-by-point` (SofaScore direct)         |
+| `value.routes.js`      | `/api/`                      | `POST /interpret-value`, `POST /analyze-power-rankings`   |
+| `scrapes.routes.js`    | `/api/scrapes`               | `GET /`, `GET /:id`, `POST /scrape`                       |
+| `stats.routes.js`      | `/api/stats`                 | `GET /db`, `GET /health`                                  |
+
+⭐ **MatchBundle endpoint principale**: `GET /api/match/:eventId/bundle`
 
 ---
 
@@ -188,10 +222,12 @@ FONTI → RAW EVENTS
 ## 9️⃣ Regole per Copilot / AI
 
 ```
-IF devi leggere dati → Repository
-IF devi calcolare → Calculation Layer
-IF devi comporre → Service Layer
-IF devi mostrare → Frontend
+IF devi definire URL → Routes (*.routes.js)
+IF devi gestire req/res → Controllers (*.controller.js)
+IF devi leggere dati → Repository (db/*Repository.js)
+IF devi calcolare → Calculation Layer (utils/*)
+IF devi comporre → Service Layer (services/*)
+IF devi mostrare → Frontend (src/components/*)
 IF non sai → STOP + ARCH_DECISION
 ```
 

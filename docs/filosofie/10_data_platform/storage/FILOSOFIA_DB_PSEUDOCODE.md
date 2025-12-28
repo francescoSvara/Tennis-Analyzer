@@ -12,6 +12,11 @@ SET PRIMARY_TABLE        = matches_new
 SET CACHE_TABLE          = match_card_snapshot
 SET CONSUMPTION_ENDPOINT = /api/match/:id/bundle
 
+# API Architecture (as of 2025-12-28)
+SET ROUTE_FILE      = backend/routes/match.routes.js
+SET CONTROLLER_FILE = backend/controllers/match.controller.js
+SET SERVICE_FILE    = backend/services/bundleService.js
+
 --------------------------------------------------
 # SEPARAZIONE FONTI / CONSUMO
 --------------------------------------------------
@@ -124,6 +129,13 @@ RULE NO_DATA_NO_FRONTEND
   IF data NOT in DB
     THEN data NOT exists for frontend
 END
+
+RULE API_LAYER_IMPLEMENTATION
+ WHEN defining API endpoints
+  - Routes: backend/routes/*.routes.js define URL + middleware
+  - Controllers: backend/controllers/*.controller.js handle req -> service -> res
+  - server.js MUST only bootstrap and mount routes/sockets (no domain logic)
+ END
 
 --------------------------------------------------
 

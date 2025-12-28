@@ -51,6 +51,25 @@ ENDPOINT /api/match/:matchId/bundle
   NO other endpoint needed
 END
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN implementing this endpoint
+  - Route: backend/routes/match.routes.js → GET /:eventId/bundle
+  - Controller: backend/controllers/match.controller.js → getBundle()
+  - Service: backend/services/bundleService.js → buildBundle()
+  - Features: backend/utils/featureEngine.js → computeFeatures()
+  - Strategies: backend/strategies/strategyEngine.js → evaluateAll()
+  - server.js only bootstraps and mounts routes (NO domain logic)
+ END
+
+# Related Routes Reference (2025-12-28)
+ROUTES:
+  GET /api/match/:eventId/bundle    → matchController.getBundle (MAIN)
+  GET /api/matches/db               → matchController.getFromDb
+  GET /api/matches/suggested        → matchController.getSuggested
+  GET /api/player/:name/stats       → playerController.getStats
+  GET /api/stats/db                 → statsController.getDbStats
+END
+
 STRUCT MatchBundle
   header: {
     match_id, players, tournament, score, status, odds

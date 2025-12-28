@@ -58,14 +58,70 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ---
 
-## 🔌 API Principali
+## 🔌 API Completa
 
-| Endpoint | Descrizione |
-|----------|-------------|
-| `/api/match/:id/bundle` | MatchBundle completo |
-| `/api/matches/db` | Lista match (SofaScore) |
-| `/api/player/:id` | Profilo giocatore |
-| `/api/live` | Match live + WebSocket |
+### Endpoint Principali
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/match/:id/bundle` | GET | ⭐ **MatchBundle completo** (endpoint principale) |
+| `/api/matches/db` | GET | Lista match da database |
+| `/api/matches/suggested` | GET | Match suggeriti per acquisizione |
+| `/api/matches/detected` | GET | Match rilevati da SofaScore |
+| `/api/player/:name/stats` | GET | Statistiche giocatore |
+| `/api/stats/db` | GET | Statistiche database |
+
+### Health & Status
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check |
+| `/api/stats/health` | GET | Database health |
+
+### Live Tracking
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/track/:eventId` | POST | Aggiungi a tracking |
+| `/api/track/:eventId` | DELETE | Rimuovi da tracking |
+| `/api/tracked` | GET | Lista match tracciati |
+| `/api/tracking/stats` | GET | Statistiche tracking |
+| `/api/tracking/live/discover` | GET | Scopri match live |
+
+### Player
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/player/search` | GET | Ricerca autocomplete |
+| `/api/player/h2h` | GET | Head to Head |
+| `/api/player/:name/matches` | GET | Lista match giocatore |
+
+### Database Access
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/db/test` | GET | Test connessione |
+| `/api/db/matches` | GET | Match dal DB |
+| `/api/db/matches/summary` | GET | Summary per HomePage |
+| `/api/db/matches/:id/point-by-point` | GET | PBP dal DB |
+| `/api/db/tournaments` | GET | Lista tornei |
+
+### Value Interpretation
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/interpret-value` | POST | Interpreta game value |
+| `/api/analyze-power-rankings` | POST | Analizza power rankings |
+| `/api/value-thresholds` | GET | Soglie di default |
+
+### SofaScore Direct (Event)
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/api/event/:id/point-by-point` | GET | PBP da SofaScore |
+| `/api/event/:id/statistics` | GET | Stats da SofaScore |
+| `/api/event/:id/power-rankings` | GET | Momentum da SofaScore |
+| `/api/event/:id/live` | GET | Tutti i dati live |
 
 ---
 
@@ -85,10 +141,23 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ```
 ├── backend/
-│   ├── server.js              # API + bundle
+│   ├── server.js              # Bootstrap + mount (target ~300 righe)
+│   ├── routes/                # URL definitions (10 files)
+│   │   ├── index.js           # Central router
+│   │   ├── match.routes.js    # MatchBundle endpoint
+│   │   ├── player.routes.js   # Player stats/H2H
+│   │   ├── tracking.routes.js # Live tracking
+│   │   └── ...
+│   ├── controllers/           # req → service → res (9 files)
+│   │   ├── match.controller.js
+│   │   ├── stats.controller.js
+│   │   └── ...
 │   ├── services/              # Business logic
+│   │   ├── bundleService.js   # MatchBundle composer (~549 righe)
+│   │   └── ...
 │   ├── strategies/            # 5 strategie trading
-│   ├── utils/featureEngine.js # Feature calculations
+│   ├── utils/                 # Feature calculations
+│   └── db/                    # Repositories
 ├── src/
 │   ├── components/            # React UI
 │   ├── hooks/useMatchBundle.jsx
@@ -170,6 +239,33 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ## 📝 Changelog
 
+### v3.1.3 (28 Dic 2025) - Server.js Refactoring COMPLETATO ✅
+- **Routes Architecture** - 10 route files + 9 controller files COMPLETATI e funzionanti
+  - `health.routes.js` + `health.controller.js` - Root e health check
+  - `db.routes.js` + `db.controller.js` - Database access endpoints
+  - `match.routes.js` + `match.controller.js` - MatchBundle + CRUD match
+  - `tracking.routes.js` + `tracking.controller.js` - Live tracking system
+  - `player.routes.js` + `player.controller.js` - Player stats/H2H
+  - `event.routes.js` + `event.controller.js` - SofaScore direct fetch
+  - `value.routes.js` + `value.controller.js` - Value interpretation
+  - `scrapes.routes.js` + `scrapes.controller.js` - Scrapes management
+  - `stats.routes.js` + `stats.controller.js` - DB stats/health
+  - `index.js` - Central router mount point
+- **Services Extracted**
+  - `bundleService.js` (~549 righe) - Core MatchBundle builder
+  - `bundleHelpers.js` - Score/odds/PBP normalization, breaks calculation
+  - `statsTabBuilder.js` - Statistics tab builder
+- **server.js** - Target: bootstrap + mount routes only (refactor in progress)
+- **Documentation** - INDEX_FILOSOFIE.md con API routes table completa
+
+### v3.1.2 (28 Dic 2025) - Server.js Refactoring Start
+- **Routes Architecture** - 10 route files + 9 controller files completati
+- **server.js** - Ridotto da 6996 a 4850 righe (-31%)
+- **Stats Controller** - `getDbStats` e `getHealth` con power score
+- **Match Controller** - `getSuggested` e `getDetected` fully implemented
+- **bundleService** - Verificato completo (~549 righe)
+- **Documentation** - INDEX_FILOSOFIE.md con API routes table completa
+
 ### v3.1.1 (28 Dic 2025) - Stats Fix & Responsive UI
 - **SofaScore Stats** - Mapping completo JSON: secondServeAccuracy, maxPointsInRow, gamesWon, tiebreaks
 - **mergeValue** - Fix logica fallback (0 è valore valido)
@@ -227,7 +323,10 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 - [TODO List](docs/TODO_LIST.md)
 - [Filosofie](docs/filosofie/)
+  - [INDEX FILOSOFIE](docs/filosofie/INDEX_FILOSOFIE.md) - Mappa navigazione
+  - [INDEX PSEUDOCODE](docs/filosofie/INDEX_FILOSOFIE_PSEUDOCODE.md) - API routes reference
 - [Mappa Concettuale](docs/MAPPA_RETE_CONCETTUALE_V2.md)
+- [Guida Refactor server.js](guida%20refactor%20server.js) - Status migrazione routes/controllers
 
 ---
 

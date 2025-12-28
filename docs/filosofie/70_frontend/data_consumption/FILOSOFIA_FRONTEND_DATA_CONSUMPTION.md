@@ -27,7 +27,9 @@
 | File | Descrizione |
 |------|-------------|
 | [`backend/utils/featureEngine.js`](../../backend/utils/featureEngine.js) | Calcola TUTTE le features |
-| [`backend/server.js`](../../backend/server.js) L3220-3430 | Endpoint `/api/match/:id/bundle` |
+| [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) | Route: `GET /:eventId/bundle` |
+| [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | Controller: `getBundle()` |
+| [`backend/services/bundleService.js`](../../backend/services/bundleService.js) | Business logic MatchBundle |
 | [`src/components/match/tabs/OverviewTab.jsx`](../../src/components/match/tabs/OverviewTab.jsx) | Consuma `header.features` |
 | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | Hook per fetch bundle |
 
@@ -327,18 +329,18 @@ Tutte le tab leggono da qui.
 
 | Endpoint | File | Descrizione |
 |----------|------|-------------|
-| `GET /api/matches/db` | [`backend/server.js`](../../backend/server.js) L1131-1210 | Lista match dal database Supabase |
-| `GET /api/match/:id/bundle` | [`backend/server.js`](../../backend/server.js) L2920-3374 | Bundle completo per MatchPage |
-| `WS /ws/match/:id` | [`backend/server.js`](../../backend/server.js) L4950+ | WebSocket per live updates |
+| `GET /api/matches/db` | [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) + [`backend/controllers/db.controller.js`](../../backend/controllers/db.controller.js) | Lista match dal database Supabase |
+| `GET /api/match/:id/bundle` | [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) + [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | Bundle completo per MatchPage |
+| `WS /ws/match/:id` | [`backend/liveManager.js`](../../backend/liveManager.js) (WebSocket handlers; mounted in `server.js`) | WebSocket per live updates |
 
 ### Helper Functions Backend
 
 | Funzione | File | Descrizione |
 |----------|------|-------------|
-| `extractScore()` | [`backend/server.js`](../../backend/server.js) L3591-3640 | Estrae score da matchData (supporta player1/player2 e home/away) |
-| `buildSetsFromDbFields()` | [`backend/server.js`](../../backend/server.js) L3630-3640 | Costruisce sets da campi DB (set1_p1, set1_p2, etc.) |
-| `normalizeOddsForBundle()` | [`backend/server.js`](../../backend/server.js) L3507-3590 | Normalizza odds per frontend |
-| `buildOverviewTab()` | [`backend/server.js`](../../backend/server.js) L3650+ | Costruisce dati per tabs.overview |
+| `extractScore()` | [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | Estrae score da matchData (supporta player1/player2 e home/away) |
+| `buildSetsFromDbFields()` | [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | Costruisce sets da campi DB (set1_p1, set1_p2, etc.) |
+| `normalizeOddsForBundle()` | [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | Normalizza odds per frontend |
+| `buildOverviewTab()` | [`backend/services/bundleService.js`](../../backend/services/bundleService.js) | Costruisce dati per tabs.overview |
 
 ### Mapping Bundle → Tab
 
@@ -445,7 +447,7 @@ GET /api/match/:eventId/bundle
 ## 1️⃣6️⃣ NORMALIZZAZIONE DATI – HELPER FUNCTIONS
 
 ### `normalizeOddsForBundle(oddsData, matchData)`
-**File**: `backend/server.js` L3370-3420
+**File**: `backend/controllers/match.controller.js` o `backend/services/bundleService.js`
 
 Normalizza le odds dal formato database al formato frontend:
 ```js
@@ -462,7 +464,7 @@ Normalizza le odds dal formato database al formato frontend:
 Logica trend: `trend = current - opening > 0.05 ? 1 : (< -0.05 ? -1 : 0)`
 
 ### `normalizePointsForBundle(pointsData)`
-**File**: `backend/server.js` L3425-3480
+**File**: `backend/controllers/match.controller.js` o `backend/services/bundleService.js`
 
 Normalizza point-by-point dal formato database:
 ```js
@@ -634,10 +636,11 @@ Il break viene calcolato dalla tabella `point_by_point`:
 
 | File | Funzione | Descrizione |
 |------|----------|-------------|
-| `backend/server.js` L3305-3380 | Bundle endpoint | Sync automatico se mancante |
-| `backend/server.js` L3685-3800 | `normalizePointsForBundle()` | Calcola gameIsBreak |
-| `backend/db/matchRepository.js` L366-425 | `insertPointByPoint()` | Salva serving/scoring |
-| `backend/liveManager.js` L1132-1150 | `syncMatch()` | Fetch + save da SofaScore |
+| `backend/routes/match.routes.js` | Route | `GET /:eventId/bundle` |
+| `backend/controllers/match.controller.js` | Controller | `getBundle()` - sync se mancante |
+| `backend/services/bundleService.js` | Service | `buildBundle()` - business logic |
+| `backend/db/matchRepository.js` | Repository | `insertPointByPoint()` - salva PBP |
+| `backend/liveManager.js` | LiveManager | `syncMatch()` - fetch da SofaScore |
 | `src/components/match/tabs/PointByPointTab.jsx` | Frontend | Mostra break games e break points |
 
 ---

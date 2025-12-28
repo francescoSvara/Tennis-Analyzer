@@ -251,6 +251,13 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN risk outputs are exposed (stake recommendations)
+  - controllers must call riskEngine services
+  - logging/audit persists via repositories, not in server.js
+  - server.js only mounts routes
+ END
+
 END FILOSOFIA_RISK_BANKROLL
 
 --------------------------------------------------

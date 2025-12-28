@@ -223,6 +223,116 @@ END
 
 ---
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN defining API endpoints
+  - CREATE routes: backend/routes/*.routes.js → define URL + middleware
+  - CREATE controllers: backend/controllers/*.controller.js → handle req → service → res
+  - IMPLEMENT services in backend/services/* (business logic, composition)
+  - server.js MUST only bootstrap, mount routes and sockets (NO domain logic)
+  - Controllers MUST be thin; move calculations to utils/services and DB to repositories
+ END
+
+RULE API_ROUTES_REFERENCE
+  # Complete route mapping (as of 2025-12-28)
+  # Source: backend/routes/index.js + individual route files
+  
+  ROUTE health.routes.js
+    MOUNT /api/
+    GET /         → healthController.root
+    GET /health   → healthController.check
+  END
+  
+  ROUTE match.routes.js
+    MOUNT /api/match, /api/matches
+    # STATIC ROUTES (first)
+    GET /search            → matchController.search
+    GET /tournaments       → matchController.getTournaments
+    GET /db                → matchController.getFromDb
+    GET /suggested         → matchController.getSuggested
+    GET /detected          → matchController.getDetected
+    GET /strategy-context/:home/:away → playerController.getStrategyContext
+    GET /tournament/:tournamentId/events → matchController.getTournamentEvents
+    POST /sync/:eventId    → matchController.syncMatch
+    POST /sync-match/:eventId → matchController.syncMatchFull
+    GET /check-data/:eventId → matchController.checkData
+    # DYNAMIC ROUTES (last)
+    GET /:eventId/bundle   → matchController.getBundle  # ⭐ MAIN ENDPOINT
+    GET /:eventId          → matchController.getMatch
+    GET /                  → matchController.listFromFiles
+  END
+  
+  ROUTE player.routes.js
+    MOUNT /api/player
+    GET /search        → playerController.search
+    GET /h2h           → playerController.getH2H
+    GET /:name/stats   → playerController.getStats
+    GET /:name/matches → playerController.getMatches
+  END
+  
+  ROUTE tracking.routes.js
+    MOUNT /api/track, /api/tracked, /api/tracking
+    POST /:eventId          → trackingController.track
+    DELETE /:eventId        → trackingController.untrack
+    GET /                   → trackingController.listTracked
+    POST /:eventId/priority → trackingController.setPriority
+    POST /:eventId/resume   → trackingController.resume
+    GET /stats              → trackingController.getStats
+    POST /reconcile         → trackingController.reconcile
+    GET /live/discover      → trackingController.discover
+    GET /live/status        → trackingController.getStatus
+    GET /live/stats         → trackingController.getLiveStats
+    POST /scheduler/start   → trackingController.startScheduler
+    POST /scheduler/stop    → trackingController.stopScheduler
+  END
+  
+  ROUTE stats.routes.js
+    MOUNT /api/stats
+    GET /db     → statsController.getDbStats
+    GET /health → statsController.getHealth
+  END
+  
+  ROUTE value.routes.js
+    MOUNT /api/
+    POST /interpret-value        → valueController.interpret
+    POST /analyze-power-rankings → valueController.analyzePowerRankings
+    GET /value-thresholds        → valueController.getThresholds
+    GET /value-zone/:value       → valueController.getZone
+  END
+  
+  ROUTE event.routes.js
+    MOUNT /api/event
+    GET /:eventId/point-by-point  → eventController.getPointByPoint
+    GET /:eventId/statistics      → eventController.getStatistics
+    GET /:eventId/power-rankings  → eventController.getPowerRankings
+    GET /:eventId/live            → eventController.getLive
+  END
+  
+  ROUTE db.routes.js
+    MOUNT /api/db
+    GET -stats                    → dbController.getDbStats  # alias /api/db-stats
+    GET /test                     → dbController.testConnection
+    GET /matches/summary          → dbController.getMatchesSummary
+    GET /matches/by-month/:yearMonth → dbController.getMatchesByMonth
+    GET /matches/:id/point-by-point → dbController.getPointByPoint
+    GET /matches/:id/statistics   → dbController.getStatistics
+    GET /matches/:id              → dbController.getMatchById
+    GET /matches                  → dbController.getMatches
+    GET /tournaments              → dbController.getTournaments
+    GET /players/search           → dbController.searchPlayers
+    GET /logs                     → dbController.getLogs
+  END
+  
+  ROUTE scrapes.routes.js
+    MOUNT /api/scrapes
+    GET /      → scrapesController.list
+    GET /:id   → scrapesController.get
+    # Root-level (via index.js):
+    POST /scrape     → scrapesController.scrape
+    GET /status/:id  → scrapesController.getStatus
+    GET /data/:id    → scrapesController.getData
+    POST /lookup-name → scrapesController.lookupName
+  END
+
 END Index_Filosofie_PseudoCode
 ASSERT System_Is_Governed
 ASSERT AI_Is_Aligned

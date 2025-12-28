@@ -129,6 +129,12 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN exposing temporal semantics (as_of_time, ingestion_time)
+  - include them in bundle meta via controllers/services
+  - DO NOT compute or inject time semantics in server.js routing logic
+ END
+
 END FILOSOFIA_TEMPORAL
 
 --------------------------------------------------

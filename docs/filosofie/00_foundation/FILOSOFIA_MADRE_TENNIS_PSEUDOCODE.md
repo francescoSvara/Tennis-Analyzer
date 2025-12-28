@@ -130,6 +130,27 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN exposing constitutional endpoints
+  - ensure they are implemented via routes/controllers and services
+  - server.js MUST remain an entrypoint only (bootstrap + mount)
+  
+  CONSTITUTIONAL_ENDPOINTS:
+    - GET /api/match/:id/bundle     # MatchBundle - SINGLE SOURCE OF TRUTH for FE
+    - GET /api/stats/db             # Database statistics
+    - GET /api/matches/suggested    # Match suggestions
+    - GET /api/matches/detected     # Detected matches
+    - GET /api/player/:name/stats   # Player statistics
+    - GET /api/tracking/*           # Live tracking operations
+  
+  ARCHITECTURE:
+    backend/routes/*.routes.js     → URL + middleware
+    backend/controllers/*.js       → req → service → res (thin)
+    backend/services/*.js          → business logic, bundle composition
+    backend/utils/*.js             → calculations (pure functions)
+    backend/db/*Repository.js      → data access (no business logic)
+ END
+
 END FILOSOFIA_MADRE
 
 --------------------------------------------------

@@ -222,6 +222,13 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN calculations are exposed via API
+  - expose via controllers/services not directly in server.js
+  - controllers call calculation utils, not embed calculation logic
+  - server.js must only bootstrap and mount
+ END
+
 END FILOSOFIA_CALCOLI
 
 --------------------------------------------------

@@ -168,6 +168,25 @@ RULE LIVE_UPDATE_JUSTIFICATION
       THEN update IS unnecessary
 END
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN defining live endpoints
+  - WebSocket: backend/liveManager.js (mounted by server.js)
+  - Routes: backend/routes/tracking.routes.js
+  - Controller: backend/controllers/tracking.controller.js
+  - server.js MUST only bootstrap/mount; NO domain logic
+ END
+
+# Tracking Routes Reference (2025-12-28)
+ROUTES:
+  POST /api/track/:eventId          → trackingController.track
+  DELETE /api/track/:eventId        → trackingController.untrack
+  GET /api/tracked                  → trackingController.listTracked
+  GET /api/tracking/stats           → trackingController.getStats
+  GET /api/tracking/live/discover   → trackingController.discover
+  GET /api/tracking/live/status     → trackingController.getStatus
+  POST /api/tracking/scheduler/start → trackingController.startScheduler
+END
+
 --------------------------------------------------
 
 END FILOSOFIA_LIVE_TRACKING

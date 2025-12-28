@@ -1,389 +1,272 @@
-# 📋 TODO LIST UNIFICATA – Tennis Analyzer v3.1
+# 📋 TODO LIST – Tennis Analyzer v3.0
 
-> **Ultimo aggiornamento**: 2025-12-28  
-> **QUESTO È L'UNICO DOCUMENTO AUTORIZZATO PER LE LISTE DI COSE DA FARE**
-> 
-> ⚠️ Le checklist dai file di filosofie/specs sono state consolidate qui.
-> I documenti originali ora puntano a questa lista.
+> **Ultimo aggiornamento**: 2025-12-28 (sera)  
+> **Server.js Refactoring**: ✅ COMPLETATO  
+> **Philosophy Enforcer v2.0**: 13 errori, 52 warnings  
+> **Regole verificate**: 278 su 250 estratte  
+> **Pass rate**: 83%
 
 ---
 
 ## ✅ COMPLETATO OGGI (28 Dic 2025)
 
-### v3.1.1 - Fix Statistiche SofaScore + UI Responsive
+### Server.js Refactoring - COMPLETATO
+- [x] **Routes Architecture** - 10 route files creati e funzionanti
+- [x] **Controllers** - 9 controller files creati
+- [x] **bundleService.js** - Estratto da server.js (~549 righe)
+- [x] **bundleHelpers.js** - Utility functions estratte
+- [x] **statsTabBuilder.js** - Statistics builder estratto
+- [x] **Central Router** - `routes/index.js` mount point
+- [x] **Documentation** - Changelog README aggiornato
 
-| # | Task | Dettaglio | Stato |
-|---|------|-----------|-------|
-| 1 | Stats SofaScore Match JSON | Tutte le statistiche ora corrispondono esattamente al JSON SofaScore | ✅ |
-| 2 | mergeValue fix | `mergeValue` ora tratta 0 come valore valido (non trigger fallback) | ✅ |
-| 3 | convertSofaScoreArrayFormat | Mappatura completa: secondServeAccuracy, maxPointsInRow, gamesWon, maxGamesInRow, tiebreaks, serviceGamesTotal | ✅ |
-| 4 | Duplicato "Service Points Won" | Rimosso da Serve Statistics (resta solo in Points Statistics) | ✅ |
-| 5 | Stats Cards 2x2 Grid | Layout responsive con Bootstrap col-6 + CSS Grid | ✅ |
-| 6 | Font Responsive Globale | CSS clamp() per scaling automatico su tutti i tab | ✅ |
-| 7 | Overflow Prevention | min-width:0 globale + text-overflow:ellipsis + scrollable filters | ✅ |
-| 8 | Dead Code Removal | Rimossa funzione `countBreakPointsFromPBP` (93 righe mai chiamate) | ✅ |
-| 9 | Architectural Compliance | Verificata conformità con tutti i documenti FILOSOFIA | ✅ |
-
-**File Modificati:**
-- `backend/server.js` - Fix stats conversion, mergeValue, dead code removal
-- `src/components/match/tabs/StatsTab.jsx` - Rimozione duplicato stat
-- `src/components/match/tabs/StatsTab.css` - Grid 2x2 responsive
-- `src/index.css` - Global responsive + utility classes
-- `src/components/match/tabs/PointByPointTab.css` - Responsive fixes
-- `src/components/match/tabs/OverviewTab.css` - Responsive fixes
-- `src/components/match/tabs/MomentumTab.css` - Responsive fixes
-- `src/components/match/tabs/StrategiesTab.css` - Responsive fixes
-- `src/components/match/tabs/OddsTab.css` - Responsive fixes
-- `src/components/match/tabs/JournalTab.css` - Responsive fixes
-- `src/components/match/tabs/PredictorTab.css` - Responsive fixes
-
----
-
-## 📊 SOMMARIO GLOBALE
-
-| Categoria | Da Fare | Fatti | Totale |
-|-----------|---------|-------|--------|
-| Philosophy Enforcer Errori | 16 | 0 | 16 |
-| Philosophy Enforcer Warning | 68 | 1 | 69 |
-| Deep Philosophy TODO | 4 | 0 | 4 |
-| Concept Checks Warning | 6 | 0 | 6 |
-| Mappa Concettuale | 1 | 0 | 1 |
-| Checklist Frontend | 12 | 8 | 20 |
-| Checklist Motion UI | 6 | 0 | 6 |
-| Checklist PBP Validation | 6 | 0 | 6 |
-| Checklist Lineage/Versioning | 8 | 0 | 8 |
-| TODO nel Codice | 5 | 0 | 5 |
-| TODO nelle Filosofie | 6 | 0 | 6 |
-| **TOTALE** | **138** | **9** | **147** |
+### Files Creati
+| File | Descrizione | Righe |
+|------|-------------|-------|
+| `routes/index.js` | Central mount point | ~50 |
+| `routes/health.routes.js` | Root + Health | ~25 |
+| `routes/db.routes.js` | Database access | ~45 |
+| `routes/match.routes.js` | MatchBundle + CRUD | ~55 |
+| `routes/tracking.routes.js` | Live tracking | ~45 |
+| `routes/player.routes.js` | Player stats | ~25 |
+| `routes/event.routes.js` | SofaScore direct | ~25 |
+| `routes/value.routes.js` | Value interpret | ~25 |
+| `routes/scrapes.routes.js` | Scrapes management | ~25 |
+| `routes/stats.routes.js` | DB stats | ~20 |
+| `controllers/health.controller.js` | Health logic | ~45 |
+| `controllers/db.controller.js` | DB access logic | ~300+ |
+| `controllers/match.controller.js` | Match logic | ~500+ |
+| `controllers/tracking.controller.js` | Tracking logic | ~200 |
+| `controllers/player.controller.js` | Player logic | ~170 |
+| `controllers/event.controller.js` | Event logic | ~150 |
+| `controllers/value.controller.js` | Value logic | ~60 |
+| `controllers/scrapes.controller.js` | Scrapes logic | ~150 |
+| `controllers/stats.controller.js` | Stats logic | ~250 |
+| `services/bundleService.js` | Bundle builder | ~549 |
+| `utils/bundleHelpers.js` | Bundle utilities | ~600 |
+| `utils/statsTabBuilder.js` | Stats builder | ~450 |
 
 ---
 
-# 🔴 SEZIONE 1: ERRORI CRITICI (Da risolvere PRIMA)
-
-## 1.1 Philosophy Enforcer – ERRORI (16)
-
-| # | Filosofia | Regola | Problema | Stato |
-|---|-----------|--------|----------|-------|
-| 1 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna home_player_id | ⬜ |
-| 2 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna away_player_id | ⬜ |
-| 3 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna event_time | ⬜ |
-| 4 | FILOSOFIA_DB | DATAQUALITY_REQUIRED_completeness | matchCardService.js manca dataQuality.completeness | ⬜ |
-| 5 | FILOSOFIA_DB | DATAQUALITY_REQUIRED_freshness | matchCardService.js manca dataQuality.freshness | ⬜ |
-| 6 | FILOSOFIA_TEMPORAL | INVARIANT_event_time_required | liveTrackingRepository.js insert senza event_time/created_at | ⬜ |
-| 7 | FILOSOFIA_TEMPORAL | INVARIANT_no_future_in_bundle | matchCardService.js non valida coerenza temporale del bundle | ⬜ |
-| 8 | FILOSOFIA_CALCOLI | NEVER_RETURN_NULL | featureEngine.js non esiste | ⬜ |
-| 9 | FILOSOFIA_CALCOLI | NEVER_RETURN_NaN | featureEngine.js non esiste | ⬜ |
-| 10 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVER_SCORE_PROGRESSION | sofascoreScraper.js non traccia chi serve | ⬜ |
-| 11 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVICE_ALTERNATION | insert-pbp-correct.js non implementa alternanza servizio | ⬜ |
-| 12 | FILOSOFIA_CONCEPT_CHECKS | CHECK_LIN-001 | featureEngine.js non esiste | ⬜ |
-| 13 | FILOSOFIA_CONCEPT_CHECKS | CHECK_CALC-001 | featureEngine.js non esiste | ⬜ |
-
-### Checklist Errori Critici
-
-- [ ] **ERR-001** Creare colonna `home_player_id` in schema matches_new
-- [ ] **ERR-002** Creare colonna `away_player_id` in schema matches_new
-- [ ] **ERR-003** Creare colonna `event_time` in schema matches_new
-- [ ] **ERR-004** Aggiungere `dataQuality.completeness` in matchCardService.js
-- [ ] **ERR-005** Aggiungere `dataQuality.freshness` in matchCardService.js
-- [ ] **ERR-006** Aggiungere `event_time/created_at` negli insert di liveTrackingRepository.js
-- [ ] **ERR-007** Validare coerenza temporale del bundle in matchCardService.js
-- [ ] **ERR-008** Creare `backend/utils/featureEngine.js` con logica NEVER_RETURN_NULL
-- [ ] **ERR-009** Implementare NEVER_RETURN_NaN in featureEngine.js
-- [ ] **ERR-010** Tracciare chi serve in sofascoreScraper.js
-- [ ] **ERR-011** Implementare alternanza servizio in insert-pbp-correct.js
-
----
-
-## 1.2 Deep Philosophy Check – ERRORI (1)
-
-- [ ] **DEEP-001** `backend/server.js` deve avere fallback legacy per match XLSX
-
----
-
-## 1.3 Concept Checks – WARNING (6)
-
-- [ ] **CC-001** `src/hooks/useMatchBundle.jsx` - Deve esporre meta dal bundle
-- [ ] **CC-002** `backend/db/matchRepository.js` - Repository deve avere event_time
-- [ ] **CC-003** `src/components/MatchCard.jsx` - Deve usare useMemo per rendering pesanti
-- [ ] **CC-004** `src/App.jsx` - Deve importare useMatchBundle
-- [ ] **CC-005** `backend/services/matchCardService.js` - Odds devono avere timestamp
-- [ ] **CC-006** `backend/liveManager.js` - Deve avere polling adattivo
-
----
-
-## 1.4 Mappa Concettuale – File Non Documentati (1)
-
-> Questi file esistono ma non sono documentati in `MAPPA_RETE_CONCETTUALE_V2.md`
-
-- [ ] **MAP-001** `backend/services/matchEnrichmentService.js` - Aggiungere alla mappa concettuale
-
----
-
-# 🟡 SEZIONE 2: WARNING (Da valutare)
-
-## 2.1 Philosophy Enforcer – WARNING (68 + 1 risolto)
-
-### Database & Sources
-- [ ] **WARN-001** calculationQueueWorker.js scrive in DB ma non è tra ALLOWED_SOURCES
-- [ ] **WARN-002** matchCardService.js scrive in DB ma non è tra ALLOWED_SOURCES
-- [ ] **WARN-003** playerService.js scrive in DB ma non è tra ALLOWED_SOURCES
-- [ ] **WARN-004** rawEventsProcessor.js scrive in DB ma non è tra ALLOWED_SOURCES
-- [ ] **WARN-005** unifiedImporter.js scrive in DB ma non è tra ALLOWED_SOURCES
-- [ ] **WARN-006** useMatchBundle.jsx calcola dataQuality (deve essere solo backend)
-
-### Temporal
-- [ ] **WARN-007** liveTrackingRepository.js non traccia ingestion_time negli insert
-- [ ] **WARN-008** featureEngine.js non esiste (temporal filter)
-- [ ] **WARN-009** strategyEngine.js non verifica timestamp dei dati prima delle decisioni
-- [ ] **WARN-010** featureEngine.js non esiste (leakage non può essere prevenuto)
-
-### Calcoli & Features
-- [ ] **WARN-011** featureEngine.js non esiste (FALLBACK_HIERARCHY)
-- [ ] **WARN-012** Nessun file definisce isClutchPoint per MatchState
-- [ ] **WARN-013** featureEngine.js usa naming errato per breakProbability
-- [ ] **WARN-014** featureEngine.js non esiste (TEMPLATE_FeatureCard)
-- [ ] **WARN-015** featureEngine.js non esiste (OUTPUT_VALIDATION)
-
-### Stats
-- [ ] **WARN-016** featureEngine.js non esiste (FLOW DataToSignals incompleto)
-- [ ] **WARN-017** matchRepository.js interpreta RawData (deve solo read/write)
-- [ ] **WARN-018** featureEngine.js non esiste (CLASS_Features_pure_functions)
-- [ ] **WARN-019** featureEngine.js non esiste (FEATURE_DECLARATION)
-- [ ] **WARN-020** featureEngine.js non esiste (FUNCTION_FeatureEngine_compute)
-- [ ] **WARN-021** featureEngine.js non esiste (DETERMINISTIC_FEATURES)
-- [ ] **WARN-022** featureEngine.js non esiste (FEATURES_PROPERTIES_documented)
-
-### PBP Extraction
-- [ ] **WARN-023** sofascoreScraper.js non usa CSS per determinare point winner
-- [ ] **WARN-024** sofascoreScraper.js non ha logica server detection
-- [ ] **WARN-025** Nessun file pbp ha funzione di validazione
-- [ ] **WARN-026** insert-pbp-correct.js non ha validazione delle regole tennis
-
-### Frontend Data
-- [ ] **WARN-027** MatchBundle manca sezione header
-- [ ] **WARN-028** Frontend non ha logica incremental patches
-- [ ] **WARN-029** Non esiste hook useMatchBundle
-- [ ] **WARN-030** HomePage.jsx fa fetch diretto invece di usare useMatchBundle
-- [ ] **WARN-031** MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle
-- [ ] **WARN-032** MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle
-
-### Madre Tennis
-- [ ] **WARN-033** Frontend non consuma MatchBundle
-- [ ] **WARN-034** matchRepository.js ha logica di calcolo (repo deve solo read/write)
-- [ ] **WARN-035** featureEngine.js non esiste (ROLE_CALCULATION_pure)
-- [ ] **WARN-036** PointByPointTab.jsx ha logica di dominio (frontend deve solo render)
-- [x] **WARN-037** ~~MAPPA_RETE_CONCETTUALE_V2.md non esiste~~ → ORA ESISTE ✅
-
-### Lineage & Versioning
-- [ ] **WARN-038** Nessun file definisce DATA_VERSION
-- [ ] **WARN-039** featureEngine.js non esiste (CONSTANT_VERSIONS_feature)
-- [ ] **WARN-040** featureEngine.js non esiste (REPRODUCIBILITY_CONTRACT)
-- [ ] **WARN-041** Nessun test di riproducibilità
-- [ ] **WARN-042** matchCardService.js non valida meta block
-- [ ] **WARN-043** strategyEngine.js non esporta VERSION
-- [ ] **WARN-044** matchCardService.js non esporta VERSION
-
-### Observability & Data Quality
-- [ ] **WARN-045** dataQualityChecker.js non verifica accuracy/outliers
-- [ ] **WARN-046** Nessun file backend implementa logica di quarantine
-- [ ] **WARN-047** Troppi log non strutturati: 757 vs 156 strutturati
-
-### Registry & Canon
-- [ ] **WARN-048** add-snapshot-queue-tables.sql manca campi: home_player, away_player
-- [ ] **WARN-049** create-new-schema.sql manca campi: home_player, away_player
-- [ ] **WARN-050** Resolution function usa Math.random - non deterministica
-
-### Live Tracking
-- [ ] **WARN-051** liveManager.js non produce patches su MatchBundle
-- [ ] **WARN-052** LivePipeline manca normalizer step
-- [ ] **WARN-053** LivePipeline manca featureEngine step
-
-### Odds
-- [ ] **WARN-054** matchCardService.js non struttura odds in header/tabs
-
-### Risk & Bankroll
-- [ ] **WARN-055** betDecisionsRepository.js manca campi BetDecision: strategy
-- [ ] **WARN-056** strategyEngine non verifica edge > 0
-- [ ] **WARN-057** Nessun controllo price >= price_min in strategy
-
-### Concept Checks
-- [ ] **WARN-058** strategyEngine.js non verifica quarantine/quality prima di decisions
-- [ ] **WARN-059** Nessun CI workflow per concept checks gate
-- [ ] **WARN-060** Nessun CI workflow - concept checks non integrati
-
-### Frontend UI
-- [ ] **WARN-061** Nessun componente Home
-- [ ] **WARN-062** MatchPage non ha RightRail/sidebar per odds sempre visibili
-- [ ] **WARN-063** HomePage.jsx mostra N/A o placeholder
-- [ ] **WARN-064** MomentumTab.jsx mostra N/A o placeholder
-- [ ] **WARN-065** OverviewTab.jsx mostra N/A o placeholder
-- [ ] **WARN-066** PredictorTab.jsx mostra N/A o placeholder
-- [ ] **WARN-067** MatchCard.jsx mostra N/A o placeholder
-- [ ] **WARN-068** MonitoringDashboard.jsx mostra N/A o placeholder
-- [ ] **WARN-069** Nessun componente Strategy - design non serve decisions
-
----
-
-# 📋 SEZIONE 3: CHECKLIST DA DOCUMENTI
-
-## 3.1 Checklist Frontend (FILOSOFIA_FRONTEND.md)
-
-### Visual/UX
-- [ ] Card modulari
-- [ ] Stato semaforico (🟢🟡🔴)
-- [ ] Azione unica per strategia
-- [ ] Dati minimi ma decisivi
-- [ ] Psicologia > numeri
-
-### Backend
-- [x] Strategy Engine → `backend/strategies/strategyEngine.js`
-- [x] Feature Engine → `backend/utils/featureEngine.js`
-- [ ] Odds Service con edge calculation
-- [x] Momentum da powerRankings → `backend/server.js`
-- [ ] Predictor Service con win probability avanzata
-- [x] Scraping solo backend → `backend/scraper/sofascoreScraper.js`
-- [x] Pressure calculator backend → `backend/utils/pressureCalculator.js`
-
-### Motion
-- [x] `src/motion/tokens.js` con durations/easings/variants
-- [x] MotionCard, MotionButton, MotionTab, MotionRow
-- [ ] AnimatePresence per mount/unmount
-- [ ] prefers-reduced-motion rispettato
-- [ ] Phosphor Icons con weight coerente
-
-### Performance
-- [ ] UNA sola strategia attiva per match (evita overload)
-- [ ] Notifiche solo 🟢 READY (niente spam)
-- [ ] Cooldown segnali (anti-flap)
-- [ ] Data completeness badge
-
----
-
-## 3.2 Checklist Motion UI (SPEC_FRONTEND_MOTION_UI.md)
-
-- [ ] `motion/tokens.js` con durations, easings, variants
-- [ ] `MotionCard.jsx`, `MotionButton.jsx`, `MotionTab.jsx`
-- [ ] Almeno 1 empty state animato
-- [ ] Almeno 1 loading state animato
-- [ ] Verifica coerenza (no over-animation)
-- [ ] Test `prefers-reduced-motion`
-
----
-
-## 3.3 Checklist PBP Validation (FILOSOFIA_PBP_EXTRACTION.md)
-
-- [ ] **S1G1**: Chi serve? Lo score del server aumenta quando vince?
-- [ ] **Break detection**: I break sono sul servizio dell'avversario?
-- [ ] **Score progression**: Lo score segue la sequenza 0→15→30→40→game?
-- [ ] **Tiebreak**: Il servizio ruota ogni 2 punti?
-- [ ] **Point winners**: Il winner corrisponde a chi ha aumentato lo score?
-- [ ] **Row mapping**: row1=HOME, row2=AWAY sempre?
-
----
-
-## 3.4 Checklist Lineage & Versioning (FILOSOFIA_LINEAGE_VERSIONING.md)
-
-### Versioning Rules
-- [ ] Cambio formula feature → bump `feature_version`
-- [ ] Nuova strategia → bump `strategy_version`
-- [ ] Fix bug calcolo → bump `feature_version` (patch)
-- [ ] Cambio struttura bundle → bump `bundle_schema_version`
-
-### Pre-Commit Checklist
-- [ ] Ho cambiato una feature calculation? → Bump `FEATURE_ENGINE_VERSION`
-- [ ] Ho cambiato una strategia? → Bump `STRATEGY_ENGINE_VERSION`
-- [ ] Ho cambiato il contratto MatchBundle? → Bump `BUNDLE_SCHEMA_VERSION`
-- [ ] Ho fatto migration DB? → Bump `DATA_VERSION`
-
----
-
-# 📝 SEZIONE 4: TODO DAL CODICE
-
-## 4.1 TODO nei File Sorgente
-
-| # | File | Linea | TODO |
-|---|------|-------|------|
-| 1 | `src/components/match/tabs/OddsTab.jsx` | 258 | Implementare logica |
-| 2 | `src/components/match/tabs/OddsTab.jsx` | 262 | Implementare logica |
-| 3 | `src/components/match/tabs/StrategiesTab.jsx` | 389 | Implementare logica di esecuzione |
-| 4 | `backend/server.js` | 4801 | Get full history |
-| 5 | `backend/services/dataNormalizer.js` | 765 | Integrare con database player registry |
-
-### Checklist TODO Codice
-- [ ] **CODE-001** `OddsTab.jsx:258` - Implementare logica
-- [ ] **CODE-002** `OddsTab.jsx:262` - Implementare logica
-- [ ] **CODE-003** `StrategiesTab.jsx:389` - Implementare logica di esecuzione
-- [ ] **CODE-004** `server.js:4801` - Get full history
-- [ ] **CODE-005** `dataNormalizer.js:765` - Integrare con database player registry
-
----
-
-## 4.2 TODO nelle Filosofie
-
-| # | Documento | TODO |
-|---|-----------|------|
-| 1 | FILOSOFIA_RISK_BANKROLL.md | `riskEngine.js` (TODO) - Risk layer completo |
-| 2 | FILOSOFIA_RISK_BANKROLL.md | integrate predictor nel model_prob |
-| 3 | FILOSOFIA_FRONTEND.md | `oddsService.js` - Implied prob, fair odds, edge |
-| 4 | FILOSOFIA_FRONTEND.md | `predictorService.js` - Win prob avanzata, edge vs market |
-| 5 | FILOSOFIA_OBSERVABILITY.md | send to logging service (CloudWatch, Datadog) |
-| 6 | FILOSOFIA_OBSERVABILITY.md | send to alert service |
-
-### Checklist TODO Filosofie
-- [ ] **PHIL-001** Creare `backend/services/riskEngine.js` con kellyFractional
-- [ ] **PHIL-002** Integrare predictor nel model_prob di strategyEngine
-- [ ] **PHIL-003** Creare `backend/services/oddsService.js`
-- [ ] **PHIL-004** Creare `backend/services/predictorService.js`
-- [ ] **PHIL-005** Implementare logging service strutturato
-- [ ] **PHIL-006** Implementare alert service
-
----
-
-## 4.3 Deep Philosophy TODO (Dichiarati nelle filosofie)
-
-| # | Filosofia | Tipo | Dettaglio | Descrizione |
-|---|-----------|------|-----------|-------------|
-| 1 | BANKROLL | EXPORT_TODO | `riskEngine.js` | kellyFractional |
-| 2 | OBSERVABILITY | EXPORT_TODO | `dataQualityChecker.js` | calculateCompleteness |
-| 3 | OBSERVABILITY | EXPORT_TODO | `dataQualityChecker.js` | detectOutliers |
-| 4 | OBSERVABILITY | EXPORT_TODO | `dataQualityChecker.js` | checkConsistency |
-
-### Checklist Deep TODO
-- [ ] **DTODO-001** Implementare `kellyFractional` in riskEngine.js
-- [ ] **DTODO-002** Implementare `calculateCompleteness` in dataQualityChecker.js
-- [ ] **DTODO-003** Implementare `detectOutliers` in dataQualityChecker.js
-- [ ] **DTODO-004** Implementare `checkConsistency` in dataQualityChecker.js
-
----
-
-# 📈 SEZIONE 5: STATISTICHE
-
-## 5.1 Statistiche per Filosofia (Philosophy Enforcer)
+## 🔬 PHILOSOPHY ENFORCER V2.0 (Auto-generato)
+
+> Ultimo check: 2025-12-28  
+> Esegui: `node scripts/philosophyEnforcer.js`
+
+### 📊 Sommario
+
+| Metrica | Valore |
+|---------|--------|
+| Regole estratte | 250 |
+| Verifiche eseguite | 278 |
+| ✅ Passate | 232 |
+| ❌ Errori | 13 |
+| ⚠️ Warning | 52 |
+
+### ❌ ERRORI CRITICI (13)
+
+| # | Filosofia | Regola | Problema |
+|---|-----------|--------|----------|
+| 1 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna home_player_id |
+| 2 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna away_player_id |
+| 3 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna event_time |
+| 4 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna home_player_id |
+| 5 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna away_player_id |
+| 6 | FILOSOFIA_DB | CANONICAL_SCHEMA | Schema matches_new manca colonna event_time |
+| 7 | FILOSOFIA_DB | DATAQUALITY_REQUIRED_completeness | matchCardService.js manca dataQuality.completeness |
+| 8 | FILOSOFIA_DB | DATAQUALITY_REQUIRED_freshness | matchCardService.js manca dataQuality.freshness |
+| 9 | FILOSOFIA_TEMPORAL | INVARIANT_event_time_required | liveTrackingRepository.js insert senza event_time/created_at |
+| 10 | FILOSOFIA_TEMPORAL | INVARIANT_no_future_in_bundle | matchCardService.js non valida coerenza temporale del bundle |
+| 11 | FILOSOFIA_CALCOLI | NEVER_RETURN_NaN | featureEngine.js non verifica NaN nei calcoli |
+| 12 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVER_SCORE_PROGRESSION | sofascoreScraper.js non traccia chi serve |
+| 13 | FILOSOFIA_PBP_EXTRACTION | INVARIANT_SERVICE_ALTERNATION | insert-pbp-correct.js non implementa alternanza servizio |
+
+#### Checklist Errori da Correggere
+
+- [ ] **ERR-001** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna home_player_id
+- [ ] **ERR-002** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna away_player_id
+- [ ] **ERR-003** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna event_time
+- [ ] **ERR-004** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna home_player_id
+- [ ] **ERR-005** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna away_player_id
+- [ ] **ERR-006** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna event_time
+- [ ] **ERR-007** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_completeness: matchCardService.js manca dataQuality.completeness
+- [ ] **ERR-008** [FILOSOFIA_DB] DATAQUALITY_REQUIRED_freshness: matchCardService.js manca dataQuality.freshness
+- [ ] **ERR-009** [FILOSOFIA_TEMPORAL] INVARIANT_event_time_required: liveTrackingRepository.js insert senza event_time/created_at
+- [ ] **ERR-010** [FILOSOFIA_TEMPORAL] INVARIANT_no_future_in_bundle: matchCardService.js non valida coerenza temporale del bundle
+- [ ] **ERR-011** [FILOSOFIA_CALCOLI] NEVER_RETURN_NaN: featureEngine.js non verifica NaN nei calcoli
+- [ ] **ERR-012** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVER_SCORE_PROGRESSION: sofascoreScraper.js non traccia chi serve
+- [ ] **ERR-013** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVICE_ALTERNATION: insert-pbp-correct.js non implementa alternanza servizio
+
+### ⚠️ WARNINGS (52)
+
+| # | Filosofia | Regola | Problema |
+|---|-----------|--------|----------|
+| 1 | FILOSOFIA_DB | ALLOWED_SOURCES | calculationQueueWorker.js scrive in DB ma non è tra ALLOWED_SOURCES |
+| 2 | FILOSOFIA_DB | ALLOWED_SOURCES | matchCardService.js scrive in DB ma non è tra ALLOWED_SOURCES |
+| 3 | FILOSOFIA_DB | ALLOWED_SOURCES | playerService.js scrive in DB ma non è tra ALLOWED_SOURCES |
+| 4 | FILOSOFIA_DB | ALLOWED_SOURCES | rawEventsProcessor.js scrive in DB ma non è tra ALLOWED_SOURCES |
+| 5 | FILOSOFIA_DB | ALLOWED_SOURCES | unifiedImporter.js scrive in DB ma non è tra ALLOWED_SOURCES |
+| 6 | FILOSOFIA_DB | DATAQUALITY_BACKEND_ONLY | useMatchBundle.jsx calcola dataQuality (deve essere solo backend) |
+| 7 | FILOSOFIA_TEMPORAL | DEFINE_ingestion_time | liveTrackingRepository.js non traccia ingestion_time negli insert |
+| 8 | FILOSOFIA_TEMPORAL | UNKNOWN_TIME_NO_DECISION | strategyEngine.js non verifica timestamp dei dati prima delle decisioni |
+| 9 | FILOSOFIA_CALCOLI | DOMAIN_MatchState_isClutchPoint | Nessun file definisce isClutchPoint per MatchState |
+| 10 | FILOSOFIA_CALCOLI | BREAK_NAMING | featureEngine.js usa naming errato per breakProbability |
+| 11 | FILOSOFIA_STATS | CLASS_RawData_no_interpretation | matchRepository.js interpreta RawData (deve solo read/write) |
+| 12 | FILOSOFIA_PBP_EXTRACTION | POINT_WINNER_FROM_CSS | sofascoreScraper.js non usa CSS per determinare point winner |
+| 13 | FILOSOFIA_PBP_EXTRACTION | SERVER_DETECTION_PRIORITY | sofascoreScraper.js non ha logica server detection |
+| 14 | FILOSOFIA_PBP_EXTRACTION | FUNCTION_validatePbpData | Nessun file pbp ha funzione di validazione |
+| 15 | FILOSOFIA_PBP_EXTRACTION | CODE_ADAPTS_TO_TENNIS | insert-pbp-correct.js non ha validazione delle regole tennis |
+| 16 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | STRUCT_MatchBundle_header | MatchBundle manca sezione header |
+| 17 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | HomePage.jsx fa fetch diretto invece di usare useMatchBundle |
+| 18 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle |
+| 19 | FILOSOFIA_FRONTEND_DATA_CONSUMPTION | SINGLE_SOURCE_OF_TRUTH | MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle |
+| 20 | FILOSOFIA_MADRE_TENNIS | ROLE_REPOSITORY | matchRepository.js ha logica di calcolo (repo deve solo read/write) |
+| 21 | FILOSOFIA_MADRE_TENNIS | ROLE_FRONTEND | PointByPointTab.jsx ha logica di dominio (frontend deve solo render) |
+| 22 | FILOSOFIA_LINEAGE_VERSIONING | CONSTANT_VERSIONS_data | Nessun file definisce DATA_VERSION |
+| 23 | FILOSOFIA_LINEAGE_VERSIONING | FUNCTION_testReproducibility | Nessun test di riproducibilità |
+| 24 | FILOSOFIA_LINEAGE_VERSIONING | BUNDLE_META_CHECK | matchCardService.js non valida meta block |
+| 25 | FILOSOFIA_LINEAGE_VERSIONING | MODULE_VERSION_EXPORT | strategyEngine.js non esporta VERSION |
+| 26 | FILOSOFIA_LINEAGE_VERSIONING | MODULE_VERSION_EXPORT | matchCardService.js non esporta VERSION |
+| 27 | FILOSOFIA_OBSERVABILITY_DATAQUALITY | DIMENSION_Accuracy | dataQualityChecker.js non verifica accuracy/outliers |
+| 28 | FILOSOFIA_OBSERVABILITY_DATAQUALITY | QUARANTINE_TRIGGERS | Nessun file backend implementa logica di quarantine |
+| 29 | FILOSOFIA_OBSERVABILITY_DATAQUALITY | STRUCTURED_LOGGING | Troppi log non strutturati: 773 vs 156 strutturati |
+| 30 | FILOSOFIA_REGISTRY_CANON | ENTITY_MatchCanonical | add-snapshot-queue-tables.sql manca campi: home_player, away_player |
+| 31 | FILOSOFIA_REGISTRY_CANON | ENTITY_MatchCanonical | create-new-schema.sql manca campi: home_player, away_player |
+| 32 | FILOSOFIA_REGISTRY_CANON | ASSERT_RESOLUTION_IS_DETERMINISTIC | Resolution function usa Math.random - non deterministica |
+| 33 | FILOSOFIA_LIVE_TRACKING | RULE_LIVE_OUTPUT | liveManager.js non produce patches su MatchBundle |
+| 34 | FILOSOFIA_LIVE_TRACKING | FLOW_LivePipeline | LivePipeline manca normalizer step |
+| 35 | FILOSOFIA_LIVE_TRACKING | FLOW_LivePipeline | LivePipeline manca featureEngine step |
+| 36 | FILOSOFIA_ODDS | RULE_BUNDLE_ODDS_PLACEMENT | matchCardService.js non struttura odds in header/tabs |
+| 37 | FILOSOFIA_ODDS | FUNCTION_calculateOddsFeatures | featureEngine.js non calcola odds features (implied, overround) |
+| 38 | FILOSOFIA_RISK_BANKROLL | STRUCT_BetDecision | betDecisionsRepository.js manca campi BetDecision: strategy |
+| 39 | FILOSOFIA_RISK_BANKROLL | RULE_EDGE_POSITIVE | strategyEngine non verifica edge > 0 |
+| 40 | FILOSOFIA_RISK_BANKROLL | RULE_PRICE_ACCEPTABLE | Nessun controllo price >= price_min in strategy |
+| 41 | FILOSOFIA_CONCEPT_CHECKS | RULE_NO_QUARANTINED_DATA | strategyEngine.js non verifica quarantine/quality prima di decisions |
+| 42 | FILOSOFIA_CONCEPT_CHECKS | POLICY_CI_Gate | Nessun CI workflow per concept checks gate |
+| 43 | FILOSOFIA_CONCEPT_CHECKS | ASSERT_CI_INTEGRATED | Nessun CI workflow - concept checks non integrati |
+| 44 | FILOSOFIA_FRONTEND_UI | STRUCTURE_Home | Nessun componente Home |
+| 45 | FILOSOFIA_FRONTEND_UI | RULE_RIGHT_RAIL_PURPOSE | MatchPage non ha RightRail/sidebar per odds sempre visibili |
+| 46 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | HomePage.jsx mostra N/A o placeholder (backend must provide value) |
+| 47 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MomentumTab.jsx mostra N/A o placeholder (backend must provide value) |
+| 48 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | OverviewTab.jsx mostra N/A o placeholder (backend must provide value) |
+| 49 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | PredictorTab.jsx mostra N/A o placeholder (backend must provide value) |
+| 50 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MatchCard.jsx mostra N/A o placeholder (backend must provide value) |
+| 51 | FILOSOFIA_FRONTEND_UI | RULE_NO_NULL_DISPLAY | MonitoringDashboard.jsx mostra N/A o placeholder (backend must provide value) |
+| 52 | FILOSOFIA_FRONTEND_UI | ASSERT_DESIGN_SERVES_DECISION | Nessun componente Strategy - design non serve decisions |
+
+#### Checklist Warning da Valutare
+
+- [ ] **WARN-001** [FILOSOFIA_DB] ALLOWED_SOURCES: calculationQueueWorker.js scrive in DB ma non è tra ALLOWED_SOURCES
+- [ ] **WARN-002** [FILOSOFIA_DB] ALLOWED_SOURCES: matchCardService.js scrive in DB ma non è tra ALLOWED_SOURCES
+- [ ] **WARN-003** [FILOSOFIA_DB] ALLOWED_SOURCES: playerService.js scrive in DB ma non è tra ALLOWED_SOURCES
+- [ ] **WARN-004** [FILOSOFIA_DB] ALLOWED_SOURCES: rawEventsProcessor.js scrive in DB ma non è tra ALLOWED_SOURCES
+- [ ] **WARN-005** [FILOSOFIA_DB] ALLOWED_SOURCES: unifiedImporter.js scrive in DB ma non è tra ALLOWED_SOURCES
+- [ ] **WARN-006** [FILOSOFIA_DB] DATAQUALITY_BACKEND_ONLY: useMatchBundle.jsx calcola dataQuality (deve essere solo backend)
+- [ ] **WARN-007** [FILOSOFIA_TEMPORAL] DEFINE_ingestion_time: liveTrackingRepository.js non traccia ingestion_time negli insert
+- [ ] **WARN-008** [FILOSOFIA_TEMPORAL] UNKNOWN_TIME_NO_DECISION: strategyEngine.js non verifica timestamp dei dati prima delle decisioni
+- [ ] **WARN-009** [FILOSOFIA_CALCOLI] DOMAIN_MatchState_isClutchPoint: Nessun file definisce isClutchPoint per MatchState
+- [ ] **WARN-010** [FILOSOFIA_CALCOLI] BREAK_NAMING: featureEngine.js usa naming errato per breakProbability
+- [ ] **WARN-011** [FILOSOFIA_STATS] CLASS_RawData_no_interpretation: matchRepository.js interpreta RawData (deve solo read/write)
+- [ ] **WARN-012** [FILOSOFIA_PBP_EXTRACTION] POINT_WINNER_FROM_CSS: sofascoreScraper.js non usa CSS per determinare point winner
+- [ ] **WARN-013** [FILOSOFIA_PBP_EXTRACTION] SERVER_DETECTION_PRIORITY: sofascoreScraper.js non ha logica server detection
+- [ ] **WARN-014** [FILOSOFIA_PBP_EXTRACTION] FUNCTION_validatePbpData: Nessun file pbp ha funzione di validazione
+- [ ] **WARN-015** [FILOSOFIA_PBP_EXTRACTION] CODE_ADAPTS_TO_TENNIS: insert-pbp-correct.js non ha validazione delle regole tennis
+- [ ] **WARN-016** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] STRUCT_MatchBundle_header: MatchBundle manca sezione header
+- [ ] **WARN-017** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: HomePage.jsx fa fetch diretto invece di usare useMatchBundle
+- [ ] **WARN-018** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MatchGrid.jsx fa fetch diretto invece di usare useMatchBundle
+- [ ] **WARN-019** [FILOSOFIA_FRONTEND_DATA_CONSUMPTION] SINGLE_SOURCE_OF_TRUTH: MonitoringDashboard.jsx fa fetch diretto invece di usare useMatchBundle
+- [ ] **WARN-020** [FILOSOFIA_MADRE_TENNIS] ROLE_REPOSITORY: matchRepository.js ha logica di calcolo (repo deve solo read/write)
+- [ ] **WARN-021** [FILOSOFIA_MADRE_TENNIS] ROLE_FRONTEND: PointByPointTab.jsx ha logica di dominio (frontend deve solo render)
+- [ ] **WARN-022** [FILOSOFIA_LINEAGE_VERSIONING] CONSTANT_VERSIONS_data: Nessun file definisce DATA_VERSION
+- [ ] **WARN-023** [FILOSOFIA_LINEAGE_VERSIONING] FUNCTION_testReproducibility: Nessun test di riproducibilità
+- [ ] **WARN-024** [FILOSOFIA_LINEAGE_VERSIONING] BUNDLE_META_CHECK: matchCardService.js non valida meta block
+- [ ] **WARN-025** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION
+- [ ] **WARN-026** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: matchCardService.js non esporta VERSION
+- [ ] **WARN-027** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] DIMENSION_Accuracy: dataQualityChecker.js non verifica accuracy/outliers
+- [ ] **WARN-028** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] QUARANTINE_TRIGGERS: Nessun file backend implementa logica di quarantine
+- [ ] **WARN-029** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] STRUCTURED_LOGGING: Troppi log non strutturati: 773 vs 156 strutturati
+- [ ] **WARN-030** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: add-snapshot-queue-tables.sql manca campi: home_player, away_player
+- [ ] **WARN-031** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: create-new-schema.sql manca campi: home_player, away_player
+- [ ] **WARN-032** [FILOSOFIA_REGISTRY_CANON] ASSERT_RESOLUTION_IS_DETERMINISTIC: Resolution function usa Math.random - non deterministica
+- [ ] **WARN-033** [FILOSOFIA_LIVE_TRACKING] RULE_LIVE_OUTPUT: liveManager.js non produce patches su MatchBundle
+- [ ] **WARN-034** [FILOSOFIA_LIVE_TRACKING] FLOW_LivePipeline: LivePipeline manca normalizer step
+- [ ] **WARN-035** [FILOSOFIA_LIVE_TRACKING] FLOW_LivePipeline: LivePipeline manca featureEngine step
+- [ ] **WARN-036** [FILOSOFIA_ODDS] RULE_BUNDLE_ODDS_PLACEMENT: matchCardService.js non struttura odds in header/tabs
+- [ ] **WARN-037** [FILOSOFIA_ODDS] FUNCTION_calculateOddsFeatures: featureEngine.js non calcola odds features (implied, overround)
+- [ ] **WARN-038** [FILOSOFIA_RISK_BANKROLL] STRUCT_BetDecision: betDecisionsRepository.js manca campi BetDecision: strategy
+- [ ] **WARN-039** [FILOSOFIA_RISK_BANKROLL] RULE_EDGE_POSITIVE: strategyEngine non verifica edge > 0
+- [ ] **WARN-040** [FILOSOFIA_RISK_BANKROLL] RULE_PRICE_ACCEPTABLE: Nessun controllo price >= price_min in strategy
+- [ ] **WARN-041** [FILOSOFIA_CONCEPT_CHECKS] RULE_NO_QUARANTINED_DATA: strategyEngine.js non verifica quarantine/quality prima di decisions
+- [ ] **WARN-042** [FILOSOFIA_CONCEPT_CHECKS] POLICY_CI_Gate: Nessun CI workflow per concept checks gate
+- [ ] **WARN-043** [FILOSOFIA_CONCEPT_CHECKS] ASSERT_CI_INTEGRATED: Nessun CI workflow - concept checks non integrati
+- [ ] **WARN-044** [FILOSOFIA_FRONTEND_UI] STRUCTURE_Home: Nessun componente Home
+- [ ] **WARN-045** [FILOSOFIA_FRONTEND_UI] RULE_RIGHT_RAIL_PURPOSE: MatchPage non ha RightRail/sidebar per odds sempre visibili
+- [ ] **WARN-046** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: HomePage.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-047** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MomentumTab.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-048** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: OverviewTab.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-049** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: PredictorTab.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-050** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MatchCard.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-051** [FILOSOFIA_FRONTEND_UI] RULE_NO_NULL_DISPLAY: MonitoringDashboard.jsx mostra N/A o placeholder (backend must provide value)
+- [ ] **WARN-052** [FILOSOFIA_FRONTEND_UI] ASSERT_DESIGN_SERVES_DECISION: Nessun componente Strategy - design non serve decisions
+
+### 📈 Statistiche per Filosofia
 
 | Filosofia | Pass | Errori | Warning | Rate |
 |-----------|------|--------|---------|------|
 | FILOSOFIA_DB | 15 | 8 | 6 | 🟡 52% |
-| FILOSOFIA_TEMPORAL | 11 | 2 | 4 | 🟡 65% |
-| FILOSOFIA_CALCOLI | 15 | 2 | 5 | 🟡 68% |
-| FILOSOFIA_STATS | 11 | 0 | 7 | 🟡 61% |
+| FILOSOFIA_TEMPORAL | 13 | 2 | 2 | 🟡 76% |
+| FILOSOFIA_CALCOLI | 19 | 1 | 2 | 🟢 86% |
+| FILOSOFIA_STATS | 17 | 0 | 1 | 🟢 94% |
 | FILOSOFIA_PBP_EXTRACTION | 8 | 2 | 4 | 🟡 57% |
-| FILOSOFIA_FRONTEND_DATA | 13 | 0 | 6 | 🟡 68% |
-| FILOSOFIA_MADRE_TENNIS | 12 | 0 | 5 | 🟡 71% |
-| FILOSOFIA_LINEAGE | 10 | 0 | 7 | 🟡 59% |
-| FILOSOFIA_OBSERVABILITY | 1 | 0 | 3 | 🔴 25% |
+| FILOSOFIA_FRONTEND_DATA_CONSUMPTION | 15 | 0 | 4 | 🟡 79% |
+| FILOSOFIA_MADRE_TENNIS | 15 | 0 | 2 | 🟢 88% |
+| FILOSOFIA_LINEAGE_VERSIONING | 12 | 0 | 5 | 🟡 71% |
+| FILOSOFIA_OBSERVABILITY_DATAQUALITY | 1 | 0 | 3 | 🔴 25% |
 | FILOSOFIA_REGISTRY_CANON | 14 | 0 | 3 | 🟢 82% |
 | FILOSOFIA_LIVE_TRACKING | 16 | 0 | 3 | 🟢 84% |
-| FILOSOFIA_ODDS | 19 | 0 | 1 | 🟢 95% |
+| FILOSOFIA_ODDS | 18 | 0 | 2 | 🟢 90% |
 | FILOSOFIA_RISK_BANKROLL | 24 | 0 | 3 | 🟢 89% |
-| FILOSOFIA_CONCEPT_CHECKS | 22 | 2 | 3 | 🟢 81% |
+| FILOSOFIA_CONCEPT_CHECKS | 24 | 0 | 3 | 🟢 89% |
 | FILOSOFIA_FRONTEND_UI | 21 | 0 | 9 | 🟡 70% |
 
 ---
 
-# 🛠️ SEZIONE 6: COMANDI UTILI
+## 📝 TODO CONSOLIDATI DA ALTRI DOCUMENTI
+
+### TODO dal Codice
+
+| # | File | Linea | TODO |
+|---|------|-------|------|
+| 1 | `src/components/match/tabs/OddsTab.jsx` | 258, 262 | Implementare logica |
+| 2 | `src/components/match/tabs/StrategiesTab.jsx` | 389 | Implementare logica di esecuzione |
+| 3 | `backend/server.js` | 4801 | Get full history |
+| 4 | `backend/services/dataNormalizer.js` | 765 | Integrare con database player registry |
+
+### TODO dalle Filosofie
+
+| # | Documento | TODO |
+|---|-----------|------|
+| 1 | FILOSOFIA_RISK_BANKROLL.md | riskEngine.js (TODO) - Risk layer completo |
+| 2 | FILOSOFIA_RISK_BANKROLL.md | integrate predictor nel model_prob |
+| 3 | FILOSOFIA_FRONTEND.md | oddsService.js - Implied prob, fair odds, edge |
+| 4 | FILOSOFIA_FRONTEND.md | predictorService.js - Win prob avanzata, edge vs market |
+| 5 | FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | send to logging service (CloudWatch, Datadog) |
+| 6 | FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | send to alert service |
+
+### TODO da Deep Philosophy Check
+
+| # | Filosofia | Tipo | File | Descrizione |
+|---|-----------|------|------|-------------|
+| 1 | BANKROLL | EXPORT_TODO | riskEngine.js | kellyFractional |
+| 2 | OBSERVABILITY | EXPORT_TODO | dataQualityChecker.js | calculateCompleteness |
+| 3 | OBSERVABILITY | EXPORT_TODO | dataQualityChecker.js | detectOutliers |
+| 4 | OBSERVABILITY | EXPORT_TODO | dataQualityChecker.js | checkConsistency |
+
+---
+
+## 🛠️ Comandi Utili
 
 ```bash
-# Verifica Philosophy Enforcer (genera report errori/warning)
+# Verifica Philosophy Enforcer (questo script)
 node scripts/philosophyEnforcer.js
 
 # Verifica DEEP (implementazione funzioni vs filosofie)  
@@ -392,22 +275,16 @@ node scripts/deepPhilosophyCheck.js
 # Verifica pattern architetturali
 node scripts/runConceptChecks.js
 
-# Verifica esistenza file nella mappa
+# Verifica esistenza file
 node scripts/checkConceptualMap.js
-
-# Genera report unificato
-node scripts/generateTodoReport.js
 ```
 
 ---
 
-# 📜 PRINCIPIO FONDAMENTALE
+## 📜 Principio Fondamentale
 
 > **Le filosofie dichiarano cosa DEVE esistere → Il codice si adatta alle filosofie, MAI il contrario.**
-> 
-> **Questo è l'UNICO documento TODO autorizzato. Tutti gli altri TODO devono essere consolidati qui.**
 
 ---
 
-*Ultimo aggiornamento: 2025-12-27*
-*Prossimo check: Esegui `node scripts/philosophyEnforcer.js`*
+*Generato automaticamente da `philosophyEnforcer.js` - 2025-12-28*

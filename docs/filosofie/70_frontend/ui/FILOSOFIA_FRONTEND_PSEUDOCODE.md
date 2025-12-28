@@ -98,6 +98,13 @@ RULE RIGHT_RAIL_PURPOSE
   Odds + action button ALWAYS visible
 END
 
+# API LAYER IMPLEMENTATION (UX NOTE)
+RULE API_LAYER_IMPLEMENTATION
+  Frontend MUST call only MatchBundle endpoint (`/api/match/:id/bundle`)
+  All endpoints MUST be provided by backend routes/controllers
+  Frontend MUST NOT rely on server.js internal files
+END
+
 --------------------------------------------------
 # TAB SPECIFICATIONS
 --------------------------------------------------

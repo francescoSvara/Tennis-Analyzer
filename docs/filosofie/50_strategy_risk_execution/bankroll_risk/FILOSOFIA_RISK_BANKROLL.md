@@ -26,8 +26,10 @@
 | File | Descrizione | Responsabilità |
 |------|-------------|----------------|
 | [`backend/strategies/strategyEngine.js`](../../backend/strategies/strategyEngine.js) | Strategy signals | Produce edge + confidence |
-| [`backend/services/riskEngine.js`](../../backend/services/riskEngine.js) | Risk layer (TODO) | Edge → stake suggestion |
-| [`backend/services/matchCardService.js`](../../backend/services/matchCardService.js) | Bundle builder | Include risk output in bundle |
+| [`backend/services/riskEngine.js`](../../backend/services/riskEngine.js) | Risk layer | Edge → stake suggestion |
+| [`backend/services/bundleService.js`](../../backend/services/bundleService.js) | Bundle builder | Include risk output in bundle |
+| [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) | Bundle route | `GET /:eventId/bundle` |
+| [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) | Bundle controller | `getBundle()` |
 | [`src/components/match/tabs/JournalTab.jsx`](../../src/components/match/tabs/JournalTab.jsx) | FE bet journal | Display bet decisions |
 
 ---

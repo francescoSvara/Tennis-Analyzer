@@ -1,8 +1,8 @@
 # 🧪 Concept Checks Report
 
-> Generato: 2025-12-27T06:37:25.467Z  
+> Generato: 2025-12-28T00:47:08.503Z  
 > Modalità: full  
-> Durata: 137ms
+> Durata: 121ms
 
 ---
 
@@ -12,7 +12,7 @@
 |----------|-------|
 | 🔴 ERROR | 0 |
 | 🟡 WARN | 6 |
-| 🔵 INFO | 21 |
+| 🔵 INFO | 29 |
 
 ---
 
@@ -62,7 +62,63 @@
 - **Match:** `PATTERN_MISSING`
 - **Rimedio:** Implementare: adaptivePolling|backoff|pollingInterval|FAST|SLOW|BOOST
 
-### 🔵 INFO (21)
+### 🔵 INFO (29)
+
+#### `INV-007` - backend/services/bundleService.js:177
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
+
+#### `INV-007` - backend/services/bundleService.js:182
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
+
+#### `INV-007` - backend/services/bundleService.js:207
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
+
+#### `INV-007` - backend/services/bundleService.js:211
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
+
+#### `INV-007` - backend/services/bundleService.js:236
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
+
+#### `INV-007` - backend/services/bundleService.js:240
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
+
+#### `INV-007` - backend/services/bundleService.js:265
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
+
+#### `INV-007` - backend/services/bundleService.js:533
+
+- **Dominio:** backend_services
+- **Problema:** Console.log in production code
+- **Match:** `console.log(`
+- **Rimedio:** Usare logger strutturato o rimuovere
 
 #### `INV-007` - backend/services/calculationQueueWorker.js:158
 
@@ -141,35 +197,35 @@
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/playerStatsService.js:205
+#### `INV-007` - backend/services/playerStatsService.js:203
 
 - **Dominio:** backend_services
 - **Problema:** Console.log in production code
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/playerStatsService.js:438
+#### `INV-007` - backend/services/playerStatsService.js:436
 
 - **Dominio:** backend_services
 - **Problema:** Console.log in production code
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/playerStatsService.js:450
+#### `INV-007` - backend/services/playerStatsService.js:448
 
 - **Dominio:** backend_services
 - **Problema:** Console.log in production code
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/playerStatsService.js:610
+#### `INV-007` - backend/services/playerStatsService.js:631
 
 - **Dominio:** backend_services
 - **Problema:** Console.log in production code
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/playerStatsService.js:756
+#### `INV-007` - backend/services/playerStatsService.js:753
 
 - **Dominio:** backend_services
 - **Problema:** Console.log in production code
@@ -183,7 +239,7 @@
 - **Match:** `console.log(`
 - **Rimedio:** Usare logger strutturato o rimuovere
 
-#### `INV-007` - backend/services/strategyStatsService.js:473
+#### `INV-007` - backend/services/strategyStatsService.js:482
 
 - **Dominio:** backend_services
 - **Problema:** Console.log in production code

@@ -27,7 +27,9 @@
 | Hooks | [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) |
 | Components | [`src/components/match/tabs/`](../../src/components/match/tabs/) |
 | Motion | [`src/motion/`](../../src/motion/) |
-| Backend API | [`backend/server.js`](../../backend/server.js) L3219-3430 |
+| Routes | [`backend/routes/match.routes.js`](../../backend/routes/match.routes.js) |
+| Controllers | [`backend/controllers/match.controller.js`](../../backend/controllers/match.controller.js) |
+| Bundle Service | [`backend/services/bundleService.js`](../../backend/services/bundleService.js) |
 
 ---
 
@@ -175,10 +177,19 @@ WS   /ws/match/:id → push: scoreboard, odds, pbp, strategy signals, momentum
 
 ---
 
-# � IMPLEMENTAZIONE REALE BUNDLE ENDPOINT (Dicembre 2025)
+# 📋 IMPLEMENTAZIONE REALE BUNDLE ENDPOINT (Dicembre 2025)
 
 > **Stato**: ✅ IMPLEMENTATO
-> **File**: `backend/server.js` (L3170-3370)
+> **Architettura**: Routes → Controllers → Services (vedi `guida refactor server.js`)
+
+### File Coinvolti
+| File | Ruolo |
+|------|-------|
+| `backend/routes/match.routes.js` | Route: `GET /:eventId/bundle` |
+| `backend/controllers/match.controller.js` | Controller: `getBundle()` |
+| `backend/services/bundleService.js` | Business logic: `buildBundle()` (~549 righe) |
+| `backend/utils/featureEngine.js` | Calcolo features |
+| `backend/strategies/strategyEngine.js` | Valutazione strategie |
 
 ## Endpoint Unico per tutti i Tab
 
@@ -372,7 +383,9 @@ bundle.header.features.momentum.last5avg    → MiniMomentum (number)
 ```
 GET /api/match/:eventId/bundle → bundle.tabs.overview + bundle.header.features
 ```
-**File**: [`backend/server.js`](../../backend/server.js) L3219-3430
+**Route**: `backend/routes/match.routes.js`  
+**Controller**: `backend/controllers/match.controller.js` → `getBundle()`  
+**Service**: `backend/services/bundleService.js` → `buildBundle()`
 
 ### Funzioni Backend da usare:
 

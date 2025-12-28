@@ -196,6 +196,12 @@ END
 
 --------------------------------------------------
 
+RULE API_LAYER_IMPLEMENTATION
+ WHEN PBPs are served through API
+  - expose via controllers calling repositories/processors
+  - server.js must not embed pbp parsing logic
+ END
+
 END FILOSOFIA_PBP_EXTRACTION
 
 --------------------------------------------------
