@@ -59,7 +59,9 @@ async function addTracking(sourceEventId, options = {}) {
     tournament_name: options.tournamentName || null,
     match_status: options.matchStatus || 'inprogress',
     current_score: options.currentScore || null,
-    next_poll_at: new Date().toISOString()
+    next_poll_at: new Date().toISOString(),
+    // FILOSOFIA_TEMPORAL: ingestion_time = when our system received the data
+    ingestion_time: new Date().toISOString()
   };
 
   const { data, error } = await supabase

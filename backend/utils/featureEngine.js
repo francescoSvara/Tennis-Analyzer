@@ -783,7 +783,7 @@ function calculateServeDominanceFromRankings(player1, player2, serving) {
  * Stima break probability da odds/rankings
  */
 function calculateBreakProbabilityFromOddsRankings(odds, player1, player2, serving) {
-  let breakProb = 25; // Base tennis
+  let breakProbability = 25; // Base tennis
   
   // Da odds: underdog ha più chance di breakare
   if (odds.matchWinner || (Array.isArray(odds) && odds.length > 0)) {
@@ -803,10 +803,10 @@ function calculateBreakProbabilityFromOddsRankings(odds, player1, player2, servi
     
     if (serverOdds < returnerOdds) {
       // Server favorito: break meno probabile
-      breakProb = 20;
+      breakProbability = 20;
     } else if (serverOdds > returnerOdds) {
       // Server sfavorito: break più probabile
-      breakProb = 35;
+      breakProbability = 35;
     }
   }
   
@@ -818,10 +818,10 @@ function calculateBreakProbabilityFromOddsRankings(odds, player1, player2, servi
   
   if (returnerRank < serverRank) {
     // Returner con ranking migliore: break più probabile
-    breakProb += 5;
+    breakProbability += 5;
   }
   
-  return Math.min(50, Math.max(15, breakProb));
+  return Math.min(50, Math.max(15, breakProbability));
 }
 
 /**

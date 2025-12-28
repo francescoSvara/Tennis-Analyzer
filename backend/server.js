@@ -2771,12 +2771,14 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = []) {
       home: {
         returnPointsWonPct: Math.round(35 + (gameRatio * 20)), // 35-55%
         breakPointsWon: homeBreaksConverted,
-        breakPointsTotal: homeBreaksConverted + Math.round(Math.random() * 2) // estimate attempts
+        // FILOSOFIA_CALCOLI: deterministic calculation, estimate attempts as won + 1
+        breakPointsTotal: homeBreaksConverted + 1
       },
       away: {
         returnPointsWonPct: Math.round(35 + ((1 - gameRatio) * 20)),
         breakPointsWon: awayBreaksConverted,
-        breakPointsTotal: awayBreaksConverted + Math.round(Math.random() * 2)
+        // FILOSOFIA_CALCOLI: deterministic calculation, estimate attempts as won + 1
+        breakPointsTotal: awayBreaksConverted + 1
       }
     },
     points: {

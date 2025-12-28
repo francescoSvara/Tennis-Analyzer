@@ -1,9 +1,9 @@
 # 📋 TODO LIST – Tennis Analyzer v3.0
 
 > **Ultimo aggiornamento**: 2025-12-28  
-> **Philosophy Enforcer v2.0**: 9 errori aperti, 46 warnings aperti  
-> **Risolti oggi**: 4 errori + 6 warnings  
-> **Pass rate**: 87%
+> **Philosophy Enforcer v2.0**: 9 errori aperti, 43 warnings aperti  
+> **Risolti oggi**: 4 errori + 9 warnings  
+> **Pass rate**: 89%
 
 ---
 
@@ -121,10 +121,10 @@
 - [ ] **WARN-004** [FILOSOFIA_DB] ALLOWED_SOURCES: rawEventsProcessor.js scrive in DB ma non è tra ALLOWED_SOURCES
 - [ ] **WARN-005** [FILOSOFIA_DB] ALLOWED_SOURCES: unifiedImporter.js scrive in DB ma non è tra ALLOWED_SOURCES
 - [ ] **WARN-006** [FILOSOFIA_DB] DATAQUALITY_BACKEND_ONLY: useMatchBundle.jsx calcola dataQuality (deve essere solo backend)
-- [ ] **WARN-007** [FILOSOFIA_TEMPORAL] DEFINE_ingestion_time: liveTrackingRepository.js non traccia ingestion_time negli insert
+- [x] **WARN-007** [FILOSOFIA_TEMPORAL] DEFINE_ingestion_time: liveTrackingRepository.js non traccia ingestion_time negli insert ✅ (ingestion_time aggiunto)
 - [ ] **WARN-008** [FILOSOFIA_TEMPORAL] UNKNOWN_TIME_NO_DECISION: strategyEngine.js non verifica timestamp dei dati prima delle decisioni
 - [x] **WARN-009** [FILOSOFIA_CALCOLI] DOMAIN_MatchState_isClutchPoint: Nessun file definisce isClutchPoint per MatchState ✅ (isClutchPoint aggiunto a featureEngine.js)
-- [ ] **WARN-010** [FILOSOFIA_CALCOLI] BREAK_NAMING: featureEngine.js usa naming errato per breakProbability
+- [x] **WARN-010** [FILOSOFIA_CALCOLI] BREAK_NAMING: featureEngine.js usa naming errato per breakProbability ✅ (breakProb rinominato)
 - [ ] **WARN-011** [FILOSOFIA_STATS] CLASS_RawData_no_interpretation: matchRepository.js interpreta RawData (deve solo read/write)
 - [ ] **WARN-012** [FILOSOFIA_PBP_EXTRACTION] POINT_WINNER_FROM_CSS: sofascoreScraper.js non usa CSS per determinare point winner
 - [ ] **WARN-013** [FILOSOFIA_PBP_EXTRACTION] SERVER_DETECTION_PRIORITY: sofascoreScraper.js non ha logica server detection
@@ -146,7 +146,7 @@
 - [ ] **WARN-029** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] STRUCTURED_LOGGING: Troppi log non strutturati: 773 vs 156 strutturati
 - [ ] **WARN-030** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: add-snapshot-queue-tables.sql manca campi: home_player, away_player
 - [ ] **WARN-031** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: create-new-schema.sql manca campi: home_player, away_player
-- [ ] **WARN-032** [FILOSOFIA_REGISTRY_CANON] ASSERT_RESOLUTION_IS_DETERMINISTIC: Resolution function usa Math.random - non deterministica
+- [x] **WARN-032** [FILOSOFIA_REGISTRY_CANON] ASSERT_RESOLUTION_IS_DETERMINISTIC: Resolution function usa Math.random - non deterministica ✅ (Math.random rimosso da statsTabBuilder e server.js)
 - [ ] **WARN-033** [FILOSOFIA_LIVE_TRACKING] RULE_LIVE_OUTPUT: liveManager.js non produce patches su MatchBundle
 - [ ] **WARN-034** [FILOSOFIA_LIVE_TRACKING] FLOW_LivePipeline: LivePipeline manca normalizer step
 - [ ] **WARN-035** [FILOSOFIA_LIVE_TRACKING] FLOW_LivePipeline: LivePipeline manca featureEngine step
