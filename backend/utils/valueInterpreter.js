@@ -1,6 +1,6 @@
 /**
  * Modulo per interpretare il campo `value` delle API SofaScore
- * 
+ *
  * Il campo `value` rappresenta il momentum/vantaggio di un giocatore nel game corrente.
  * Valori positivi = vantaggio, valori negativi = pressione/svantaggio.
  */
@@ -9,9 +9,9 @@
  * Soglie di default per l'interpretazione del value
  */
 const DEFAULT_THRESHOLDS = {
-  strongControl: 60,    // Controllo netto o break effettuato
-  advantage: 20,        // Vantaggio chiaro nel game
-  negativePressure: -20 // Pressione significativa
+  strongControl: 60, // Controllo netto o break effettuato
+  advantage: 20, // Vantaggio chiaro nel game
+  negativePressure: -20, // Pressione significativa
 };
 
 /**
@@ -21,30 +21,30 @@ const DEFAULT_THRESHOLDS = {
  * - Grass: soglie più alte, match più volatili (65/25/-25)
  */
 const SURFACE_THRESHOLDS = {
-  'Hard': { 
-    strongControl: 60, 
-    advantage: 20, 
+  Hard: {
+    strongControl: 60,
+    advantage: 20,
     negativePressure: -20,
-    description: 'Standard - campo neutro'
+    description: 'Standard - campo neutro',
   },
-  'Clay': { 
-    strongControl: 55, 
-    advantage: 18, 
+  Clay: {
+    strongControl: 55,
+    advantage: 18,
     negativePressure: -18,
-    description: 'Più equilibrato - scambi lunghi favoriti'
+    description: 'Più equilibrato - scambi lunghi favoriti',
   },
-  'Grass': { 
-    strongControl: 65, 
-    advantage: 25, 
+  Grass: {
+    strongControl: 65,
+    advantage: 25,
     negativePressure: -25,
-    description: 'Più volatile - servizio dominante'
+    description: 'Più volatile - servizio dominante',
   },
-  'Indoor Hard': { 
-    strongControl: 62, 
-    advantage: 22, 
+  'Indoor Hard': {
+    strongControl: 62,
+    advantage: 22,
     negativePressure: -22,
-    description: 'Leggermente più veloce del hard outdoor'
-  }
+    description: 'Leggermente più veloce del hard outdoor',
+  },
 };
 
 /**
@@ -54,15 +54,15 @@ const SURFACE_THRESHOLDS = {
  */
 function getThresholdsForSurface(surface) {
   if (!surface) return DEFAULT_THRESHOLDS;
-  
+
   // Normalizza il nome della superficie
   const normalizedSurface = surface.trim();
-  
+
   // Match esatto
   if (SURFACE_THRESHOLDS[normalizedSurface]) {
     return SURFACE_THRESHOLDS[normalizedSurface];
   }
-  
+
   // Match parziale (case-insensitive)
   const surfaceLower = normalizedSurface.toLowerCase();
   if (surfaceLower.includes('clay') || surfaceLower.includes('terra')) {
@@ -77,13 +77,13 @@ function getThresholdsForSurface(surface) {
   if (surfaceLower.includes('hard') || surfaceLower.includes('cemento')) {
     return SURFACE_THRESHOLDS['Hard'];
   }
-  
+
   return DEFAULT_THRESHOLDS;
 }
 
 /**
  * Interpreta il campo value di un game di tennis
- * 
+ *
  * @param {Object} gameData - Dati del game dall'API
  * @param {string} gameData.serving - Chi sta servendo (home/away)
  * @param {string} gameData.scoring - Chi ha segnato l'ultimo punto
@@ -96,18 +96,12 @@ function getThresholdsForSurface(surface) {
  * @returns {Object} Interpretazione del game
  */
 function interpretGameValue(gameData, options = {}) {
-  const {
-    serving,
-    scoring,
-    value,
-    breakOccurred,
-    description,
-    homeScore,
-    awayScore
-  } = gameData;
+  const { serving, scoring, value, breakOccurred, description, homeScore, awayScore } = gameData;
 
   // Usa soglie dinamiche per superficie se disponibile, altrimenti personalizzate o default
-  const surfaceThresholds = options.surface ? getThresholdsForSurface(options.surface) : DEFAULT_THRESHOLDS;
+  const surfaceThresholds = options.surface
+    ? getThresholdsForSurface(options.surface)
+    : DEFAULT_THRESHOLDS;
   const thresholds = Object.assign({}, surfaceThresholds, options.thresholds || {});
 
   let tags = [];
@@ -184,7 +178,7 @@ function interpretGameValue(gameData, options = {}) {
     status,
     numericState,
     thresholds,
-    interpretation: getValueZone(value, thresholds)
+    interpretation: getValueZone(value, thresholds),
   };
 }
 
@@ -204,18 +198,18 @@ function getValueZone(value, thresholds = DEFAULT_THRESHOLDS) {
  */
 function getSpecialPointDescription(code) {
   const descriptions = {
-    'ace': { en: 'Ace', it: 'Ace' },
-    'double_fault': { en: 'Double Fault', it: 'Doppio fallo' },
-    'unforced_error': { en: 'Unforced Error', it: 'Errore non forzato' },
-    'winner': { en: 'Winner', it: 'Vincente' },
-    'service_winner': { en: 'Service Winner', it: 'Servizio vincente' },
-    'return_winner': { en: 'Return Winner', it: 'Risposta vincente' },
-    'net_point': { en: 'Net Point', it: 'Punto a rete' },
-    'break_point': { en: 'Break Point', it: 'Palla break' },
-    'set_point': { en: 'Set Point', it: 'Set point' },
-    'match_point': { en: 'Match Point', it: 'Match point' }
+    ace: { en: 'Ace', it: 'Ace' },
+    double_fault: { en: 'Double Fault', it: 'Doppio fallo' },
+    unforced_error: { en: 'Unforced Error', it: 'Errore non forzato' },
+    winner: { en: 'Winner', it: 'Vincente' },
+    service_winner: { en: 'Service Winner', it: 'Servizio vincente' },
+    return_winner: { en: 'Return Winner', it: 'Risposta vincente' },
+    net_point: { en: 'Net Point', it: 'Punto a rete' },
+    break_point: { en: 'Break Point', it: 'Palla break' },
+    set_point: { en: 'Set Point', it: 'Set point' },
+    match_point: { en: 'Match Point', it: 'Match point' },
   };
-  
+
   return descriptions[code] || null;
 }
 
@@ -242,17 +236,17 @@ function analyzePowerRankings(powerRankings, options = {}) {
     dominantGames: [],
     pressureGames: [],
     surface: options.surface || 'Unknown',
-    thresholdsUsed: thresholds
+    thresholdsUsed: thresholds,
   };
 
   let sum = 0;
   for (const item of powerRankings) {
     const value = item.value || 0;
     sum += value;
-    
+
     if (value > analysis.maxValue) analysis.maxValue = value;
     if (value < analysis.minValue) analysis.minValue = value;
-    
+
     if (item.breakOccurred) {
       analysis.breakGames.push({ set: item.set, game: item.game, value });
     }
@@ -277,10 +271,10 @@ function analyzePowerRankings(powerRankings, options = {}) {
  * Soglie per classificazione volatilità
  */
 const VOLATILITY_THRESHOLDS = {
-  stable: 15,      // delta medio < 15 = match controllato
-  moderate: 25,    // 15-25 = normale alternanza
-  volatile: 40,    // 25-40 = alti e bassi frequenti
-  extreme: 40      // > 40 = match caotico/emotivo
+  stable: 15, // delta medio < 15 = match controllato
+  moderate: 25, // 15-25 = normale alternanza
+  volatile: 40, // 25-40 = alti e bassi frequenti
+  extreme: 40, // > 40 = match caotico/emotivo
 };
 
 /**
@@ -301,7 +295,7 @@ function calculateVolatility(powerRankings) {
   }
 
   const avgDelta = deltas.reduce((a, b) => a + b, 0) / deltas.length;
-  
+
   let volatilityClass;
   if (avgDelta < VOLATILITY_THRESHOLDS.stable) {
     volatilityClass = 'STABILE';
@@ -318,7 +312,7 @@ function calculateVolatility(powerRankings) {
     class: volatilityClass,
     deltas,
     maxSwing: Math.max(...deltas),
-    minSwing: Math.min(...deltas)
+    minSwing: Math.min(...deltas),
   };
 }
 
@@ -339,7 +333,7 @@ function calculateElasticity(powerRankings) {
 
   for (let i = 0; i < powerRankings.length; i++) {
     const value = powerRankings[i].value || 0;
-    
+
     if (value < -15 && !inNegativePhase) {
       // Entrato in fase negativa
       inNegativePhase = true;
@@ -352,13 +346,12 @@ function calculateElasticity(powerRankings) {
     }
   }
 
-  const avgRecovery = recoveryGames.length > 0 
-    ? recoveryGames.reduce((a, b) => a + b, 0) / recoveryGames.length 
-    : 0;
-  
+  const avgRecovery =
+    recoveryGames.length > 0 ? recoveryGames.reduce((a, b) => a + b, 0) / recoveryGames.length : 0;
+
   // Elasticità = 1 / avgRecovery (più veloce a recuperare = più elastico)
   const elasticityValue = avgRecovery > 0 ? Math.min(1, 1 / avgRecovery) : 0.5;
-  
+
   let elasticityClass;
   if (elasticityValue >= 0.5) {
     elasticityClass = 'RESILIENTE';
@@ -372,7 +365,7 @@ function calculateElasticity(powerRankings) {
     value: Math.round(elasticityValue * 100) / 100,
     class: elasticityClass,
     negative_phases: negativePhases,
-    avg_recovery_games: Math.round(avgRecovery * 10) / 10
+    avg_recovery_games: Math.round(avgRecovery * 10) / 10,
   };
 }
 
@@ -386,9 +379,9 @@ function calculateElasticity(powerRankings) {
 function classifyMatchCharacter(volatility, elasticity, breakCount = 0) {
   const v = volatility?.class || 'STABILE';
   const e = elasticity?.class || 'NORMALE';
-  
+
   let character, description;
-  
+
   if (v === 'MOLTO_VOLATILE' && breakCount >= 4) {
     character = 'BATTAGLIA_EMOTIVA';
     description = 'Match con grandi oscillazioni e molti break, emotivamente intenso';
@@ -422,17 +415,18 @@ function analyzeMomentumTrend(powerRankings, windowSize = 3) {
 
   // Media totale match
   const matchAvg = powerRankings.reduce((sum, g) => sum + (g.value || 0), 0) / powerRankings.length;
-  
+
   // Media ultimi N game
   const recentGames = powerRankings.slice(-windowSize);
   const recentAvg = recentGames.reduce((sum, g) => sum + (g.value || 0), 0) / recentGames.length;
-  
+
   // Media N game precedenti (per confronto)
   const previousGames = powerRankings.slice(-windowSize * 2, -windowSize);
-  const previousAvg = previousGames.length > 0 
-    ? previousGames.reduce((sum, g) => sum + (g.value || 0), 0) / previousGames.length 
-    : matchAvg;
-  
+  const previousAvg =
+    previousGames.length > 0
+      ? previousGames.reduce((sum, g) => sum + (g.value || 0), 0) / previousGames.length
+      : matchAvg;
+
   // Determina trend
   const diff = recentAvg - previousAvg;
   let trend;
@@ -443,7 +437,7 @@ function analyzeMomentumTrend(powerRankings, windowSize = 3) {
   } else {
     trend = 'STABLE';
   }
-  
+
   // Detect momentum shift (cambio significativo rispetto alla media)
   const momentumShift = Math.abs(recentAvg - matchAvg) > 20;
 
@@ -452,7 +446,7 @@ function analyzeMomentumTrend(powerRankings, windowSize = 3) {
     recent_avg: Math.round(recentAvg * 10) / 10,
     match_avg: Math.round(matchAvg * 10) / 10,
     momentum_shift_detected: momentumShift,
-    trend_strength: Math.abs(diff)
+    trend_strength: Math.abs(diff),
   };
 }
 
@@ -470,41 +464,45 @@ function analyzePowerRankingsEnhanced(powerRankings, matchContext = {}) {
   const volatility = calculateVolatility(powerRankings);
   const elasticity = calculateElasticity(powerRankings);
   const trend = analyzeMomentumTrend(powerRankings);
-  const breakCount = powerRankings.filter(g => g.breakOccurred).length;
+  const breakCount = powerRankings.filter((g) => g.breakOccurred).length;
   const matchCharacter = classifyMatchCharacter(volatility, elasticity, breakCount);
 
   // Usa la funzione helper per ottenere le soglie
   const thresholds = getThresholdsForSurface(matchContext.surface);
 
   // === NUOVE METRICHE AVANZATE ===
-  
+
   // Analisi per set
   const setAnalysis = analyzeBySet(powerRankings, thresholds);
-  
+
   // Momentum per giocatore (positivo = home advantage, negativo = away advantage)
   const playerMomentum = analyzePlayerMomentum(powerRankings, matchContext);
-  
+
   // Calcola percentuali normalizzate (0-100)
   const volatilityPercent = Math.min(100, Math.round((volatility.value / 60) * 100));
   const elasticityPercent = Math.round(elasticity.value * 100);
-  
+
   // Adatta soglie per formato Bo3/Bo5
   const formatAdjustment = getFormatAdjustment(matchContext.bestOf);
-  
+
   // Indicatori per trading
   const tradingIndicators = calculateTradingIndicators(
-    volatility, elasticity, trend, breakCount, matchContext
+    volatility,
+    elasticity,
+    trend,
+    breakCount,
+    matchContext
   );
 
   return {
     ...basic,
     volatility: {
       ...volatility,
-      percent: volatilityPercent
+      percent: volatilityPercent,
     },
     elasticity: {
       ...elasticity,
-      percent: elasticityPercent
+      percent: elasticityPercent,
     },
     trend,
     matchCharacter,
@@ -517,11 +515,11 @@ function analyzePowerRankingsEnhanced(powerRankings, matchContext = {}) {
     tradingIndicators,
     surfaceInfo: {
       name: matchContext.surface || 'Unknown',
-      thresholdDescription: thresholds.description || 'Default thresholds'
+      thresholdDescription: thresholds.description || 'Default thresholds',
     },
     context: matchContext,
     // Timestamp analisi
-    analyzedAt: new Date().toISOString()
+    analyzedAt: new Date().toISOString(),
   };
 }
 
@@ -533,7 +531,7 @@ function analyzePowerRankingsEnhanced(powerRankings, matchContext = {}) {
  */
 function analyzeBySet(powerRankings, thresholds) {
   const sets = {};
-  
+
   for (const item of powerRankings) {
     const setNum = item.set || 1;
     if (!sets[setNum]) {
@@ -542,23 +540,21 @@ function analyzeBySet(powerRankings, thresholds) {
     sets[setNum].games.push(item);
     sets[setNum].values.push(item.value || 0);
   }
-  
+
   return Object.entries(sets).map(([setNum, data]) => {
     const values = data.values;
     const avg = values.reduce((a, b) => a + b, 0) / values.length;
     const max = Math.max(...values);
     const min = Math.min(...values);
-    const breaks = data.games.filter(g => g.breakOccurred).length;
-    
+    const breaks = data.games.filter((g) => g.breakOccurred).length;
+
     // Volatilità del set
     const deltas = [];
     for (let i = 1; i < values.length; i++) {
-      deltas.push(Math.abs(values[i] - values[i-1]));
+      deltas.push(Math.abs(values[i] - values[i - 1]));
     }
-    const setVolatility = deltas.length > 0 
-      ? deltas.reduce((a, b) => a + b, 0) / deltas.length 
-      : 0;
-    
+    const setVolatility = deltas.length > 0 ? deltas.reduce((a, b) => a + b, 0) / deltas.length : 0;
+
     return {
       set: parseInt(setNum),
       games: values.length,
@@ -567,7 +563,8 @@ function analyzeBySet(powerRankings, thresholds) {
       minValue: min,
       breaks,
       volatility: Math.round(setVolatility * 10) / 10,
-      dominant: avg > thresholds.advantage ? 'home' : avg < -thresholds.advantage ? 'away' : 'balanced'
+      dominant:
+        avg > thresholds.advantage ? 'home' : avg < -thresholds.advantage ? 'away' : 'balanced',
     };
   });
 }
@@ -579,41 +576,41 @@ function analyzeBySet(powerRankings, thresholds) {
  * @returns {Object} Momentum per giocatore
  */
 function analyzePlayerMomentum(powerRankings, matchContext) {
-  const values = powerRankings.map(g => g.value || 0);
-  const positiveGames = values.filter(v => v > 10).length;
-  const negativeGames = values.filter(v => v < -10).length;
+  const values = powerRankings.map((g) => g.value || 0);
+  const positiveGames = values.filter((v) => v > 10).length;
+  const negativeGames = values.filter((v) => v < -10).length;
   const neutralGames = values.length - positiveGames - negativeGames;
-  
+
   const homeControl = Math.round((positiveGames / values.length) * 100);
   const awayControl = Math.round((negativeGames / values.length) * 100);
-  
+
   // Chi ha avuto più momentum complessivo
   const totalMomentum = values.reduce((a, b) => a + b, 0);
   const currentOwner = totalMomentum > 20 ? 'home' : totalMomentum < -20 ? 'away' : 'balanced';
-  
+
   // Trend ultimi 5 game
   const last5 = values.slice(-5);
   const last5Avg = last5.length > 0 ? last5.reduce((a, b) => a + b, 0) / last5.length : 0;
   const recentOwner = last5Avg > 10 ? 'home' : last5Avg < -10 ? 'away' : 'balanced';
-  
+
   return {
     home: {
       name: matchContext.homeName || 'Home',
       controlPercent: homeControl,
-      gamesWithAdvantage: positiveGames
+      gamesWithAdvantage: positiveGames,
     },
     away: {
       name: matchContext.awayName || 'Away',
       controlPercent: awayControl,
-      gamesWithAdvantage: negativeGames
+      gamesWithAdvantage: negativeGames,
     },
     neutral: {
       percent: Math.round((neutralGames / values.length) * 100),
-      games: neutralGames
+      games: neutralGames,
     },
     currentOwner,
     recentOwner,
-    totalMomentum: Math.round(totalMomentum)
+    totalMomentum: Math.round(totalMomentum),
   };
 }
 
@@ -626,10 +623,10 @@ function getFormatAdjustment(bestOf) {
   if (bestOf === 5) {
     return {
       format: 'Best of 5',
-      volatilityWeight: 0.8,  // Meno peso alla volatilità (più game = normalizza)
-      elasticityWeight: 1.2,  // Più peso all'elasticità (più tempo per recuperare)
-      breakImportance: 0.7,   // Single break meno decisivo
-      description: 'Match lungo - più opportunità di recupero'
+      volatilityWeight: 0.8, // Meno peso alla volatilità (più game = normalizza)
+      elasticityWeight: 1.2, // Più peso all'elasticità (più tempo per recuperare)
+      breakImportance: 0.7, // Single break meno decisivo
+      description: 'Match lungo - più opportunità di recupero',
     };
   }
   return {
@@ -637,7 +634,7 @@ function getFormatAdjustment(bestOf) {
     volatilityWeight: 1.0,
     elasticityWeight: 1.0,
     breakImportance: 1.0,
-    description: 'Match corto - ogni break è cruciale'
+    description: 'Match corto - ogni break è cruciale',
   };
 }
 
@@ -657,24 +654,26 @@ function calculateTradingIndicators(volatility, elasticity, trend, breakCount, c
   } else {
     riskLevel = 'LOW';
   }
-  
+
   // Confidence per lay strategies (più bassa se volatile)
-  const layConfidence = Math.max(20, 100 - (volatility.value * 2));
-  
+  const layConfidence = Math.max(20, 100 - volatility.value * 2);
+
   // Opportunità per back the comeback
-  const comebackOpportunity = elasticity.class === 'RESILIENTE' && trend.current_trend === 'FALLING';
-  
+  const comebackOpportunity =
+    elasticity.class === 'RESILIENTE' && trend.current_trend === 'FALLING';
+
   // Break probability indicator
-  const breakProbability = breakCount > 0 
-    ? Math.min(100, Math.round((breakCount / context.totalGames || 10) * 100 * 1.5))
-    : 30; // Default se no data
-  
+  const breakProbability =
+    breakCount > 0
+      ? Math.min(100, Math.round((breakCount / context.totalGames || 10) * 100 * 1.5))
+      : 30; // Default se no data
+
   return {
     riskLevel,
     layConfidence: Math.round(layConfidence),
     comebackOpportunity,
     breakProbability,
-    recommendedStrategy: getRecommendedStrategy(volatility, elasticity, trend, breakCount)
+    recommendedStrategy: getRecommendedStrategy(volatility, elasticity, trend, breakCount),
   };
 }
 
@@ -716,5 +715,5 @@ module.exports = {
   // Costanti
   DEFAULT_THRESHOLDS,
   SURFACE_THRESHOLDS,
-  VOLATILITY_THRESHOLDS
+  VOLATILITY_THRESHOLDS,
 };

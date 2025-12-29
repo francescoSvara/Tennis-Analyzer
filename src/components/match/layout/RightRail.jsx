@@ -1,11 +1,11 @@
 /**
  * RightRail - Pannello destro sempre visibile
- * 
+ *
  * Contiene:
  * - Strategy CTA attiva
  * - Odds Quick View
  * - Risk Controls
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
@@ -59,10 +59,7 @@ function StrategyCTA({ strategy }) {
       transition={{ duration: durations.normal, ease: easings.premium }}
     >
       <div className="strategy-cta__header">
-        <span
-          className="status-badge"
-          style={{ background: statusColors[status] }}
-        >
+        <span className="status-badge" style={{ background: statusColors[status] }}>
           <span className={`status-dot ${status.toLowerCase()}`}></span>
           {status}
         </span>
@@ -80,7 +77,9 @@ function StrategyCTA({ strategy }) {
         </div>
         <div className="strategy-detail">
           <span className="label">Confidence:</span>
-          <span className="value">{strategy.confidence ? (strategy.confidence * 100).toFixed(0) + '%' : '-'}</span>
+          <span className="value">
+            {strategy.confidence ? (strategy.confidence * 100).toFixed(0) + '%' : '-'}
+          </span>
         </div>
       </div>
 
@@ -97,9 +96,7 @@ function StrategyCTA({ strategy }) {
       )}
 
       <div className="strategy-cta__footer">
-        <span className="exit-rule">
-          Exit: {strategy.exitRule || 'Break o Hold'}
-        </span>
+        <span className="exit-rule">Exit: {strategy.exitRule || 'Break o Hold'}</span>
       </div>
     </motion.div>
   );
@@ -147,13 +144,13 @@ function OddsQuickView({ odds }) {
  * Risk Controls - Controlli rischio
  */
 function RiskControls({ exposure, dailyStop }) {
-  const exposurePercent = exposure?.current && exposure?.max
-    ? (exposure.current / exposure.max) * 100
-    : 0;
+  const exposurePercent =
+    exposure?.current && exposure?.max ? (exposure.current / exposure.max) * 100 : 0;
 
-  const dailyPercent = dailyStop?.current && dailyStop?.limit
-    ? Math.abs((dailyStop.current / dailyStop.limit) * 100)
-    : 0;
+  const dailyPercent =
+    dailyStop?.current && dailyStop?.limit
+      ? Math.abs((dailyStop.current / dailyStop.limit) * 100)
+      : 0;
 
   const getProgressColor = (percent) => {
     if (percent >= 80) return '#ef4444';
@@ -189,7 +186,10 @@ function RiskControls({ exposure, dailyStop }) {
       <div className="risk-item">
         <div className="risk-header">
           <span className="risk-label">Daily stop</span>
-          <span className="risk-value" style={{ color: dailyStop?.current < 0 ? '#ef4444' : '#10b981' }}>
+          <span
+            className="risk-value"
+            style={{ color: dailyStop?.current < 0 ? '#ef4444' : '#10b981' }}
+          >
             €{dailyStop?.current || 0} / -€{Math.abs(dailyStop?.limit) || 50}
           </span>
         </div>
@@ -224,33 +224,41 @@ function RiskControls({ exposure, dailyStop }) {
 export function RightRail({ strategies, odds, header }) {
   // Bundle structure: strategies = { signals: [], summary: {} }
   const signals = strategies?.signals || [];
-  
+
   // Trova la strategia READY con più alta confidence
   const readyStrategy = signals
-    .filter(s => s.status === 'READY')
+    .filter((s) => s.status === 'READY')
     .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0];
 
   // Fallback a WATCH se nessuna READY
   const watchStrategy = signals
-    .filter(s => s.status === 'WATCH')
+    .filter((s) => s.status === 'WATCH')
     .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0];
 
   const activeStrategy = readyStrategy || watchStrategy;
-  
+
   // Normalizza odds per OddsQuickView
   // Bundle structure: odds = { matchWinner: {...}, history: [...] }
-  const normalizedOdds = odds?.matchWinner ? {
-    home: { 
-      name: header?.players?.home?.name,
-      value: typeof odds.matchWinner.home === 'object' ? odds.matchWinner.home.value : odds.matchWinner.home,
-      trend: typeof odds.matchWinner.home === 'object' ? odds.matchWinner.home.trend : 0
-    },
-    away: {
-      name: header?.players?.away?.name,
-      value: typeof odds.matchWinner.away === 'object' ? odds.matchWinner.away.value : odds.matchWinner.away,
-      trend: typeof odds.matchWinner.away === 'object' ? odds.matchWinner.away.trend : 0
-    }
-  } : null;
+  const normalizedOdds = odds?.matchWinner
+    ? {
+        home: {
+          name: header?.players?.home?.name,
+          value:
+            typeof odds.matchWinner.home === 'object'
+              ? odds.matchWinner.home.value
+              : odds.matchWinner.home,
+          trend: typeof odds.matchWinner.home === 'object' ? odds.matchWinner.home.trend : 0,
+        },
+        away: {
+          name: header?.players?.away?.name,
+          value:
+            typeof odds.matchWinner.away === 'object'
+              ? odds.matchWinner.away.value
+              : odds.matchWinner.away,
+          trend: typeof odds.matchWinner.away === 'object' ? odds.matchWinner.away.trend : 0,
+        },
+      }
+    : null;
 
   return (
     <aside className="right-rail">
@@ -269,7 +277,9 @@ export function RightRail({ strategies, odds, header }) {
             >
               <Gauge size={32} weight="duotone" className="icon" />
               <p>Nessuna strategia attiva</p>
-              <span className="hint">Le strategie appariranno qui quando saranno READY o WATCH</span>
+              <span className="hint">
+                Le strategie appariranno qui quando saranno READY o WATCH
+              </span>
             </motion.div>
           )}
         </AnimatePresence>

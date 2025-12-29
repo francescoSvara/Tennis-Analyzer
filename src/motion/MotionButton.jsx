@@ -1,6 +1,6 @@
 /**
  * MotionButton - Button con micro-interazioni
- * 
+ *
  * Ref: docs/specs/SPEC_FRONTEND_MOTION_UI.md
  * Ref: src/motion/tokens.js
  */
@@ -10,7 +10,7 @@ import { durations, easings } from './tokens';
 
 /**
  * Button animato con tap/hover feedback
- * 
+ *
  * @param {Object} props
  * @param {React.ReactNode} props.children - Contenuto del button
  * @param {string} [props.className] - Classi CSS aggiuntive
@@ -20,33 +20,33 @@ import { durations, easings } from './tokens';
  * @param {'sm'|'md'|'lg'} [props.size] - Dimensione
  * @param {Object} [props.style] - Stili inline
  */
-export function MotionButton({ 
-  children, 
-  className = '', 
+export function MotionButton({
+  children,
+  className = '',
   onClick,
   disabled = false,
   variant = 'primary',
   size = 'md',
   style = {},
-  ...props 
+  ...props
 }) {
   const buttonVariants = {
-    initial: { 
+    initial: {
       scale: 1,
     },
-    hover: { 
+    hover: {
       scale: 1.02,
       transition: {
         duration: durations.fast,
         ease: easings.premium,
-      }
+      },
     },
-    tap: { 
+    tap: {
       scale: 0.97,
       transition: {
         duration: durations.fast / 2,
-      }
-    }
+      },
+    },
   };
 
   const sizeStyles = {
@@ -78,8 +78,8 @@ export function MotionButton({
       className={`motion-button motion-button--${variant} motion-button--${size} ${className}`}
       variants={buttonVariants}
       initial="initial"
-      whileHover={disabled ? undefined : "hover"}
-      whileTap={disabled ? undefined : "tap"}
+      whileHover={disabled ? undefined : 'hover'}
+      whileTap={disabled ? undefined : 'tap'}
       onClick={onClick}
       disabled={disabled}
       style={{

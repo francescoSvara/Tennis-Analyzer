@@ -1,10 +1,10 @@
 /**
  * Health & Root Routes
- * 
+ *
  * Endpoints:
  * - GET / - Root info
  * - GET /health - Health check
- * 
+ *
  * @see docs/filosofie/guida refactor server.js
  */
 

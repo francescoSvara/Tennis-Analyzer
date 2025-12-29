@@ -1,10 +1,10 @@
 /**
  * SVG Momentum Extractor
- * 
- * Estrae i valori di momentum tennis dal codice HTML/SVG delle barre 
- * visualizzate su SofaScore. Usato come fallback quando l'API non 
+ *
+ * Estrae i valori di momentum tennis dal codice HTML/SVG delle barre
+ * visualizzate su SofaScore. Usato come fallback quando l'API non
  * restituisce tennisPowerRankings.
- * 
+ *
  * @see docs/filosofie/filosofia_value_svg.md
  */
 
@@ -44,11 +44,11 @@ function parseMx(d) {
 function getSide(fill) {
   if (!fill) return 'unknown';
   const f = fill.toLowerCase();
-  
+
   // Pattern più specifico per SofaScore:
   // "var(--colors-home-away-away-primary)" -> away
   // "var(--colors-home-away-home-primary)" -> home
-  
+
   // Cerca "away-primary" prima (più specifico)
   if (f.includes('away-primary') || f.includes('away-away')) {
     return 'away';
@@ -57,7 +57,7 @@ function getSide(fill) {
   if (f.includes('home-primary') || f.includes('away-home')) {
     return 'home';
   }
-  
+
   return 'unknown';
 }
 
@@ -89,11 +89,11 @@ function getSignedValue(rawV, side) {
 function percentile(arr, p) {
   const sorted = [...arr].sort((a, b) => a - b);
   if (!sorted.length) return 0;
-  
+
   const idx = (sorted.length - 1) * p;
   const lo = Math.floor(idx);
   const hi = Math.ceil(idx);
-  
+
   if (lo === hi) return sorted[lo];
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
 }
@@ -113,24 +113,20 @@ function clamp(value, min, max) {
  * @returns {Array} Array con campo 'value' normalizzato aggiunto
  */
 function normalizeMomentumSeries(points, options = {}) {
-  const {
-    signedField = 'signed_raw',
-    pAbs = 0.95,
-    outAbs = 100
-  } = options;
+  const { signedField = 'signed_raw', pAbs = 0.95, outAbs = 100 } = options;
 
   // Estrai valori assoluti per calcolare la scala
-  const absValues = points.map(p => Math.abs(Number(p[signedField]) || 0));
+  const absValues = points.map((p) => Math.abs(Number(p[signedField]) || 0));
   const scale = Math.max(percentile(absValues, pAbs), 1); // evita divisione per 0
 
-  return points.map(p => {
+  return points.map((p) => {
     const v = Number(p[signedField]) || 0;
     const normalized = clamp(Math.round((v / scale) * outAbs), -outAbs, outAbs);
-    
+
     return {
       ...p,
       value: normalized,
-      normScale: scale
+      normScale: scale,
     };
   });
 }
@@ -141,10 +137,10 @@ function normalizeMomentumSeries(points, options = {}) {
 
 /**
  * Estrae momentum tennis da stringa HTML contenente SVG delle barre
- * 
+ *
  * @param {string} htmlString - HTML contenente gli SVG delle barre momentum
  * @returns {Object} { ok: boolean, sets: Array, error?: string }
- * 
+ *
  * @example
  * const result = extractMomentumFromSvgHtml(svgHtmlString);
  * // result.sets[0].games = [{ set: 1, game: 1, value: -65, side: 'away', ... }]
@@ -156,7 +152,8 @@ function extractMomentumFromSvgHtml(htmlString) {
 
   try {
     // Trova tutti gli SVG con class="set"
-    const svgSetRegex = /<svg[^>]*class="[^"]*set[^"]*"[^>]*viewBox="([^"]*)"[^>]*>([\s\S]*?)<\/svg>/gi;
+    const svgSetRegex =
+      /<svg[^>]*class="[^"]*set[^"]*"[^>]*viewBox="([^"]*)"[^>]*>([\s\S]*?)<\/svg>/gi;
     const sets = [];
     let svgMatch;
     let setIndex = 0;
@@ -164,13 +161,14 @@ function extractMomentumFromSvgHtml(htmlString) {
     while ((svgMatch = svgSetRegex.exec(htmlString)) !== null) {
       const viewBox = svgMatch[1] || '';
       const svgContent = svgMatch[2] || '';
-      
+
       // Parse viewBox per ottenere width (usato per calcolare pos01)
       const vbParts = viewBox.trim().split(/\s+/).map(Number);
       const vbW = vbParts.length === 4 ? vbParts[2] : null;
 
       // Trova tutti i path con class="game"
-      const pathGameRegex = /<path[^>]*class="[^"]*game[^"]*"[^>]*d="([^"]*)"[^>]*fill="([^"]*)"[^>]*>/gi;
+      const pathGameRegex =
+        /<path[^>]*class="[^"]*game[^"]*"[^>]*d="([^"]*)"[^>]*fill="([^"]*)"[^>]*>/gi;
       const games = [];
       let pathMatch;
       let gameIndex = 0;
@@ -183,7 +181,7 @@ function extractMomentumFromSvgHtml(htmlString) {
         const x = parseMx(d);
         const side = getSide(fill);
         const signedRaw = getSignedValue(rawV, side);
-        const pos01 = (vbW && x != null) ? x / vbW : null;
+        const pos01 = vbW && x != null ? x / vbW : null;
 
         games.push({
           set: setIndex + 1,
@@ -193,7 +191,7 @@ function extractMomentumFromSvgHtml(htmlString) {
           side,
           raw_v: rawV,
           signed_raw: signedRaw,
-          fill
+          fill,
         });
 
         gameIndex++;
@@ -203,7 +201,7 @@ function extractMomentumFromSvgHtml(htmlString) {
         set: setIndex + 1,
         viewBox,
         vbW,
-        games
+        games,
       });
 
       setIndex++;
@@ -214,7 +212,6 @@ function extractMomentumFromSvgHtml(htmlString) {
     }
 
     return { ok: true, sets };
-
   } catch (err) {
     return { ok: false, error: `Parse error: ${err.message}`, sets: [] };
   }
@@ -233,10 +230,10 @@ function normalizeMomentumPerSet(extracted) {
 
   return {
     ...extracted,
-    sets: extracted.sets.map(s => ({
+    sets: extracted.sets.map((s) => ({
       ...s,
-      games: normalizeMomentumSeries(s.games, { signedField: 'signed_raw' })
-    }))
+      games: normalizeMomentumSeries(s.games, { signedField: 'signed_raw' }),
+    })),
   };
 }
 
@@ -251,12 +248,12 @@ function normalizeMomentumMatch(extracted) {
   }
 
   // Appiattisci tutti i game
-  const allGames = extracted.sets.flatMap(s => s.games);
+  const allGames = extracted.sets.flatMap((s) => s.games);
   const normalizedAll = normalizeMomentumSeries(allGames, { signedField: 'signed_raw' });
 
   // Rimappa nei set
   let k = 0;
-  const sets = extracted.sets.map(s => {
+  const sets = extracted.sets.map((s) => {
     const games = s.games.map(() => normalizedAll[k++]);
     return { ...s, games };
   });
@@ -275,17 +272,17 @@ function toPowerRankingsFormat(normalizedData) {
   }
 
   const rankings = [];
-  
+
   for (const s of normalizedData.sets) {
     for (const g of s.games) {
       rankings.push({
         set: g.set,
         game: g.game,
-        value: g.value,           // -100 to +100 (normalizzato)
-        value_svg: g.value,       // stesso valore, sarà salvato in colonna separata
+        value: g.value, // -100 to +100 (normalizzato)
+        value_svg: g.value, // stesso valore, sarà salvato in colonna separata
         side: g.side,
         raw_v: g.raw_v,
-        source: 'svg_dom'
+        source: 'svg_dom',
       });
     }
   }
@@ -309,9 +306,10 @@ function processSvgMomentum(htmlString, options = {}) {
   }
 
   // 2. Normalizza
-  const normalized = normalizeBy === 'match' 
-    ? normalizeMomentumMatch(extracted)
-    : normalizeMomentumPerSet(extracted);
+  const normalized =
+    normalizeBy === 'match'
+      ? normalizeMomentumMatch(extracted)
+      : normalizeMomentumPerSet(extracted);
 
   // 3. Formatta per DB
   const powerRankings = toPowerRankingsFormat(normalized);
@@ -320,7 +318,7 @@ function processSvgMomentum(htmlString, options = {}) {
     ok: true,
     powerRankings,
     setsCount: normalized.sets.length,
-    gamesCount: powerRankings.length
+    gamesCount: powerRankings.length,
   };
 }
 
@@ -334,16 +332,16 @@ module.exports = {
   parseMx,
   getSide,
   getSignedValue,
-  
+
   // Normalization
   percentile,
   clamp,
   normalizeMomentumSeries,
-  
+
   // Main functions
   extractMomentumFromSvgHtml,
   normalizeMomentumPerSet,
   normalizeMomentumMatch,
   toPowerRankingsFormat,
-  processSvgMomentum
+  processSvgMomentum,
 };

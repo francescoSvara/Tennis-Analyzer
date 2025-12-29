@@ -1,12 +1,12 @@
 /**
  * Value Routes
- * 
+ *
  * Endpoints per interpretazione valori tennis:
  * - POST /interpret-value - Interpreta singolo game value
  * - POST /analyze-power-rankings - Analizza array power rankings
  * - GET /value-thresholds - Soglie di default
  * - GET /value-zone/:value - Zona di un valore
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_CALCOLI.md
  */
 

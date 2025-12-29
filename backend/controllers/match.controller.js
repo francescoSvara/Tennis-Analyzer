@@ -1,12 +1,12 @@
 /**
  * Match Controller
- * 
+ *
  * Controller per match singoli e bundle.
  * Zero logica di dominio - delega a services e repositories.
- * 
+ *
  * FILOSOFIA MATCHBUNDLE_ONLY_FE:
  * Il bundle è l'unica interfaccia Frontend ↔ Backend
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
  */
 
@@ -57,36 +57,38 @@ try {
 
 /**
  * GET /api/match/:eventId/bundle - UNIFIED MATCH BUNDLE
- * 
+ *
  * Single endpoint that returns ALL data needed for MatchPage.
  * Frontend does NOT compute - just displays this pre-computed state.
- * 
+ *
  * FILOSOFIA: SofaScore → DB → Frontend (mai fetch diretto nel bundle)
  */
 exports.getBundle = async (req, res) => {
   const { eventId } = req.params;
-  
+  const { forceRefresh } = req.query;
+
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   try {
     // Se bundleService è disponibile, usalo
     if (bundleService) {
-      const bundle = await bundleService.buildBundle(parseInt(eventId));
+      const bundle = await bundleService.buildBundle(parseInt(eventId), { 
+        forceRefresh: forceRefresh === 'true' 
+      });
       if (!bundle) {
         return res.status(404).json({ error: 'Match not found' });
       }
       return res.json(bundle);
     }
-    
+
     // Fallback: redirect alla logica esistente in server.js
     // Questo verrà rimosso quando bundleService sarà completo
-    return res.status(503).json({ 
+    return res.status(503).json({
       error: 'Bundle service not available',
-      hint: 'Bundle logic is still in server.js during migration'
+      hint: 'Bundle logic is still in server.js during migration',
     });
-    
   } catch (err) {
     console.error(`Error building bundle for ${eventId}:`, err);
     res.status(500).json({ error: err.message });
@@ -99,11 +101,11 @@ exports.getBundle = async (req, res) => {
 exports.getMatch = async (req, res) => {
   const { eventId } = req.params;
   const { forceRefresh } = req.query;
-  
+
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   try {
     // 1. Prova prima dal database
     if (matchRepository && !forceRefresh) {
@@ -115,17 +117,17 @@ exports.getMatch = async (req, res) => {
             source: 'database',
             eventId,
             ...dbMatch,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
         }
       } catch (dbErr) {
         console.log(`⚠️ DB fetch failed for ${eventId}:`, dbErr.message);
       }
     }
-    
+
     // 2. Prova dai file salvati
     if (!forceRefresh && fs.existsSync(SCRAPES_DIR)) {
-      const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+      const files = fs.readdirSync(SCRAPES_DIR).filter((f) => f.endsWith('.json'));
       for (const file of files) {
         try {
           const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
@@ -140,30 +142,31 @@ exports.getMatch = async (req, res) => {
                   api: content.api,
                   liveData: content.liveData,
                   lastSync: content.lastSync,
-                  timestamp: new Date().toISOString()
+                  timestamp: new Date().toISOString(),
                 });
               }
             }
           }
-        } catch (e) { /* skip */ }
+        } catch (e) {
+          /* skip */
+        }
       }
     }
-    
+
     // 3. Fetch da SofaScore via liveManager
     if (liveManager) {
       console.log(`🌐 Match ${eventId} fetching from SofaScore...`);
       const liveData = await liveManager.fetchCompleteData(eventId);
-      
+
       return res.json({
         source: 'sofascore',
         eventId,
         ...liveData,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
-    
+
     return res.status(404).json({ error: 'Match not found' });
-    
   } catch (err) {
     console.error(`Error fetching match ${eventId}:`, err.message);
     res.status(500).json({ error: err.message });
@@ -177,7 +180,7 @@ exports.search = async (req, res) => {
   if (!matchRepository) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  
+
   try {
     const {
       status,
@@ -187,22 +190,22 @@ exports.search = async (req, res) => {
       dateFrom,
       dateTo,
       page = 1,
-      limit = 20
+      limit = 20,
     } = req.query;
-    
+
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = Math.min(parseInt(limit, 10) || 20, 100);
     const offset = (pageNum - 1) * limitNum;
-    
+
     const totalCount = await matchRepository.countMatches({
       status,
       tournamentId: tournamentId ? parseInt(tournamentId, 10) : undefined,
       tournamentCategory,
       playerSearch,
       dateFrom,
-      dateTo
+      dateTo,
     });
-    
+
     const matches = await matchRepository.getMatches({
       status,
       tournamentId: tournamentId ? parseInt(tournamentId, 10) : undefined,
@@ -211,21 +214,20 @@ exports.search = async (req, res) => {
       dateFrom,
       dateTo,
       limit: limitNum,
-      offset
+      offset,
     });
-    
+
     res.json({
-      matches: matches.map(m => transformMatch(m)),
+      matches: matches.map((m) => transformMatch(m)),
       pagination: {
         page: pageNum,
         limit: limitNum,
         total: totalCount,
         totalPages: Math.ceil(totalCount / limitNum),
         hasNext: pageNum * limitNum < totalCount,
-        hasPrev: pageNum > 1
-      }
+        hasPrev: pageNum > 1,
+      },
     });
-    
   } catch (err) {
     console.error('Error searching matches:', err.message);
     res.status(500).json({ error: err.message });
@@ -239,7 +241,7 @@ exports.getTournaments = async (req, res) => {
   if (!matchRepository) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  
+
   try {
     const tournaments = await matchRepository.getDistinctTournaments();
     res.json({ tournaments });
@@ -256,42 +258,45 @@ exports.getFromDb = async (req, res) => {
   if (!supabaseClient?.supabase) {
     return res.status(503).json({ error: 'Database not available', matches: [] });
   }
-  
+
   try {
     const { limit = 20, search, surface, series, dateFrom, dateTo } = req.query;
     const limitNum = parseInt(limit);
-    
+
     let query = supabaseClient.supabase
       .from('v_matches_with_players')
-      .select(`
+      .select(
+        `
         id, player1_name, player2_name, player1_rank, player2_rank,
         set1_p1, set1_p2, set2_p1, set2_p2, set3_p1, set3_p2,
         surface, round, tournament_name, tournament_category,
         start_timestamp, best_of, winner_code, status, data_quality
-      `)
+      `
+      )
       .not('player1_name', 'is', null)
       .not('player2_name', 'is', null);
-    
+
     if (search?.trim()) {
       const term = search.trim().toLowerCase();
       query = query.or(`player1_name.ilike.%${term}%,player2_name.ilike.%${term}%`);
     }
     if (surface) query = query.ilike('surface', `%${surface}%`);
-    if (series) query = query.or(`tournament_name.ilike.%${series}%,tournament_category.ilike.%${series}%`);
+    if (series)
+      query = query.or(`tournament_name.ilike.%${series}%,tournament_category.ilike.%${series}%`);
     if (dateFrom) query = query.gte('start_timestamp', new Date(dateFrom).getTime() / 1000);
     if (dateTo) query = query.lte('start_timestamp', new Date(dateTo).getTime() / 1000);
-    
+
     query = query.order('start_timestamp', { ascending: false }).limit(limitNum);
-    
+
     const { data, error } = await query;
     if (error) throw error;
-    
-    const matches = (data || []).map(m => {
+
+    const matches = (data || []).map((m) => {
       const sets = [];
       if (m.set1_p1 != null) sets.push(`${m.set1_p1}-${m.set1_p2}`);
       if (m.set2_p1 != null) sets.push(`${m.set2_p1}-${m.set2_p2}`);
       if (m.set3_p1 != null) sets.push(`${m.set3_p1}-${m.set3_p2}`);
-      
+
       return {
         id: m.id,
         eventId: m.id,
@@ -306,12 +311,11 @@ exports.getFromDb = async (req, res) => {
         date: m.start_timestamp ? new Date(m.start_timestamp * 1000).toISOString() : null,
         winnerCode: m.winner_code,
         source: 'sofascore',
-        dataQuality: m.data_quality || 50
+        dataQuality: m.data_quality || 50,
       };
     });
-    
+
     res.json({ matches, count: matches.length, hasSearch: !!search?.trim() });
-    
   } catch (err) {
     console.error('Error in /api/matches/db:', err);
     res.status(500).json({ error: err.message, matches: [] });
@@ -324,19 +328,19 @@ exports.getFromDb = async (req, res) => {
 exports.listFromFiles = async (req, res) => {
   try {
     const { sport } = req.query;
-    
+
     if (!fs.existsSync(SCRAPES_DIR)) {
       return res.json({ matches: [], count: 0 });
     }
-    
-    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+
+    const files = fs.readdirSync(SCRAPES_DIR).filter((f) => f.endsWith('.json'));
     const matches = [];
     const seenEventIds = new Set();
-    
+
     for (const file of files) {
       try {
         const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
-        
+
         let eventData = null;
         if (content.api) {
           for (const [url, data] of Object.entries(content.api)) {
@@ -346,37 +350,39 @@ exports.listFromFiles = async (req, res) => {
             }
           }
         }
-        
+
         if (eventData && !seenEventIds.has(String(eventData.id))) {
           seenEventIds.add(String(eventData.id));
           const sportSlug = eventData.tournament?.category?.sport?.slug || 'unknown';
-          
+
           if (sport && sportSlug !== sport) continue;
-          
+
           matches.push({
             id: file.replace('.json', ''),
             eventId: eventData.id,
             sport: sportSlug,
-            tournament: eventData.tournament?.uniqueTournament?.name || eventData.tournament?.name || '',
+            tournament:
+              eventData.tournament?.uniqueTournament?.name || eventData.tournament?.name || '',
             homeTeam: {
               name: eventData.homeTeam?.name || '',
-              ranking: eventData.homeTeam?.ranking || null
+              ranking: eventData.homeTeam?.ranking || null,
             },
             awayTeam: {
               name: eventData.awayTeam?.name || '',
-              ranking: eventData.awayTeam?.ranking || null
+              ranking: eventData.awayTeam?.ranking || null,
             },
             status: eventData.status,
             startTimestamp: eventData.startTimestamp,
-            winnerCode: eventData.winnerCode
+            winnerCode: eventData.winnerCode,
           });
         }
-      } catch (e) { /* skip */ }
+      } catch (e) {
+        /* skip */
+      }
     }
-    
+
     matches.sort((a, b) => (a.startTimestamp || 0) - (b.startTimestamp || 0));
     res.json({ matches, count: matches.length });
-    
   } catch (err) {
     console.error('Error fetching matches:', err.message);
     res.status(500).json({ error: err.message });
@@ -392,19 +398,19 @@ exports.getSuggested = async (req, res) => {
     if (!fs.existsSync(SCRAPES_DIR)) {
       return res.json({ matches: [], count: 0, sources: { related: 0, tournament: 0 } });
     }
-    
-    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+
+    const files = fs.readdirSync(SCRAPES_DIR).filter((f) => f.endsWith('.json'));
     const existingEventIds = new Set();
     const tournamentIds = new Set();
     const relatedMatchesMap = new Map();
-    
+
     // Prima pass: raccogli tutti gli eventId esistenti, tournamentId e partite correlate
     for (const file of files) {
       try {
         const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
         if (content.api) {
           let currentEventId = null;
-          
+
           for (const [url, data] of Object.entries(content.api)) {
             if (url.match(/\/api\/v1\/event\/\d+$/) && data?.event) {
               currentEventId = data.event.id;
@@ -414,22 +420,27 @@ exports.getSuggested = async (req, res) => {
               }
             }
           }
-          
+
           // Estrai partite correlate da H2H e pregame-form
           if (currentEventId) {
             const related = extractRelatedMatches(content.api, currentEventId);
             for (const match of related) {
-              if (!existingEventIds.has(String(match.eventId)) && !relatedMatchesMap.has(String(match.eventId))) {
+              if (
+                !existingEventIds.has(String(match.eventId)) &&
+                !relatedMatchesMap.has(String(match.eventId))
+              ) {
                 relatedMatchesMap.set(String(match.eventId), match);
               }
             }
           }
         }
-      } catch (e) { /* skip */ }
+      } catch (e) {
+        /* skip */
+      }
     }
-    
+
     // Converti partite correlate in array con formato corretto
-    const relatedMatches = Array.from(relatedMatchesMap.values()).map(match => ({
+    const relatedMatches = Array.from(relatedMatchesMap.values()).map((match) => ({
       eventId: match.eventId,
       sport: match.tournament?.category?.sport?.slug || 'tennis',
       sportName: match.tournament?.category?.sport?.name || 'Tennis',
@@ -439,13 +450,13 @@ exports.getSuggested = async (req, res) => {
         name: match.homeTeam?.name || '',
         shortName: match.homeTeam?.shortName || '',
         country: match.homeTeam?.country?.alpha2 || '',
-        ranking: match.homeTeam?.ranking || null
+        ranking: match.homeTeam?.ranking || null,
       },
       awayTeam: {
         name: match.awayTeam?.name || '',
         shortName: match.awayTeam?.shortName || '',
         country: match.awayTeam?.country?.alpha2 || '',
-        ranking: match.awayTeam?.ranking || null
+        ranking: match.awayTeam?.ranking || null,
       },
       homeScore: match.homeScore || null,
       awayScore: match.awayScore || null,
@@ -453,19 +464,19 @@ exports.getSuggested = async (req, res) => {
       startTimestamp: match.startTimestamp || null,
       winnerCode: match.winnerCode || null,
       isSuggested: true,
-      suggestedFrom: match.type
+      suggestedFrom: match.type,
     }));
-    
+
     // Fetch partite dai tornei trovati (opzionale)
     const suggestedMatches = [...relatedMatches];
-    
+
     if (relatedMatches.length < 20) {
       const headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
-        'Referer': 'https://www.sofascore.com/'
+        Accept: 'application/json',
+        Referer: 'https://www.sofascore.com/',
       };
-      
+
       for (const tournamentId of [...tournamentIds].slice(0, 3)) {
         try {
           const response = await fetch(
@@ -476,29 +487,33 @@ exports.getSuggested = async (req, res) => {
             const data = await response.json();
             if (data.events) {
               for (const event of data.events) {
-                if (!existingEventIds.has(String(event.id)) && !relatedMatchesMap.has(String(event.id))) {
+                if (
+                  !existingEventIds.has(String(event.id)) &&
+                  !relatedMatchesMap.has(String(event.id))
+                ) {
                   suggestedMatches.push({
                     eventId: event.id,
                     sport: event.tournament?.category?.sport?.slug || 'tennis',
                     sportName: event.tournament?.category?.sport?.name || 'Tennis',
-                    tournament: event.tournament?.uniqueTournament?.name || event.tournament?.name || '',
+                    tournament:
+                      event.tournament?.uniqueTournament?.name || event.tournament?.name || '',
                     category: event.tournament?.category?.name || '',
                     homeTeam: {
                       name: event.homeTeam?.name || '',
                       shortName: event.homeTeam?.shortName || '',
                       country: event.homeTeam?.country?.alpha2 || '',
-                      ranking: event.homeTeam?.ranking || null
+                      ranking: event.homeTeam?.ranking || null,
                     },
                     awayTeam: {
                       name: event.awayTeam?.name || '',
                       shortName: event.awayTeam?.shortName || '',
                       country: event.awayTeam?.country?.alpha2 || '',
-                      ranking: event.awayTeam?.ranking || null
+                      ranking: event.awayTeam?.ranking || null,
                     },
                     status: event.status || null,
                     startTimestamp: event.startTimestamp || null,
                     isSuggested: true,
-                    suggestedFrom: 'tournament'
+                    suggestedFrom: 'tournament',
                   });
                 }
               }
@@ -509,17 +524,17 @@ exports.getSuggested = async (req, res) => {
         }
       }
     }
-    
+
     // Ordina per data (più recenti prima)
     suggestedMatches.sort((a, b) => (b.startTimestamp || 0) - (a.startTimestamp || 0));
-    
-    res.json({ 
-      matches: suggestedMatches.slice(0, 50), 
+
+    res.json({
+      matches: suggestedMatches.slice(0, 50),
       count: suggestedMatches.length,
       sources: {
         related: relatedMatches.length,
-        tournament: suggestedMatches.length - relatedMatches.length
-      }
+        tournament: suggestedMatches.length - relatedMatches.length,
+      },
     });
   } catch (err) {
     console.error('Error fetching suggested matches:', err.message);
@@ -533,9 +548,9 @@ exports.getSuggested = async (req, res) => {
 function extractRelatedMatches(apiData, currentEventId) {
   const relatedMatches = [];
   const seenIds = new Set([String(currentEventId)]);
-  
+
   if (!apiData) return relatedMatches;
-  
+
   for (const [url, data] of Object.entries(apiData)) {
     // H2H contiene partite precedenti tra i due giocatori
     if (url.includes('/h2h') && data?.teamDuel?.events) {
@@ -552,12 +567,12 @@ function extractRelatedMatches(apiData, currentEventId) {
             status: event.status,
             homeScore: event.homeScore,
             awayScore: event.awayScore,
-            winnerCode: event.winnerCode
+            winnerCode: event.winnerCode,
           });
         }
       }
     }
-    
+
     // Pregame form contiene partite recenti di entrambi i giocatori
     if (url.includes('/pregame-form') && data) {
       const formTypes = ['homeTeam', 'awayTeam'];
@@ -576,14 +591,14 @@ function extractRelatedMatches(apiData, currentEventId) {
               status: event.status,
               homeScore: event.homeScore,
               awayScore: event.awayScore,
-              winnerCode: event.winnerCode
+              winnerCode: event.winnerCode,
             });
           }
         }
       }
     }
   }
-  
+
   return relatedMatches;
 }
 
@@ -594,7 +609,7 @@ exports.getDetected = async (req, res) => {
   if (!supabaseClient?.supabase) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  
+
   try {
     const { data, error, count } = await supabaseClient.supabase
       .from('detected_matches')
@@ -602,21 +617,20 @@ exports.getDetected = async (req, res) => {
       .eq('is_acquired', false)
       .order('start_time', { ascending: true })
       .limit(100);
-    
+
     if (error) throw error;
-    
-    const matches = (data || []).map(m => ({
+
+    const matches = (data || []).map((m) => ({
       eventId: m.id,
       homeTeam: { name: m.home_team_name },
       awayTeam: { name: m.away_team_name },
       tournament: { name: m.tournament_name },
       status: m.status,
       startTimestamp: m.start_time ? new Date(m.start_time).getTime() / 1000 : null,
-      isDetected: true
+      isDetected: true,
     }));
-    
+
     res.json({ matches, count: matches.length, totalCount: count || matches.length });
-    
   } catch (err) {
     console.error('Error fetching detected matches:', err.message);
     res.status(500).json({ error: err.message });
@@ -629,35 +643,34 @@ exports.getDetected = async (req, res) => {
 exports.getTournamentEvents = async (req, res) => {
   const { tournamentId } = req.params;
   const { seasonId } = req.query;
-  
+
   try {
     const existingMatches = [];
-    
+
     if (matchRepository) {
-      const dbMatches = await matchRepository.getMatches({ 
-        tournamentId: seasonId || tournamentId, 
-        limit: 1000 
+      const dbMatches = await matchRepository.getMatches({
+        tournamentId: seasonId || tournamentId,
+        limit: 1000,
       });
-      
-      (dbMatches || []).forEach(m => {
+
+      (dbMatches || []).forEach((m) => {
         existingMatches.push({
           eventId: m.id,
           homeTeam: m.home_name || '',
           awayTeam: m.away_name || '',
           status: m.status_type || 'unknown',
           startTimestamp: m.start_time ? Math.floor(new Date(m.start_time).getTime() / 1000) : null,
-          winnerCode: m.winner_code
+          winnerCode: m.winner_code,
         });
       });
     }
-    
+
     res.json({
       tournamentId,
       seasonId: seasonId || tournamentId,
       events: existingMatches,
-      stats: { total: existingMatches.length, inDatabase: existingMatches.length }
+      stats: { total: existingMatches.length, inDatabase: existingMatches.length },
     });
-    
   } catch (err) {
     console.error(`Error fetching tournament ${tournamentId}:`, err.message);
     res.status(500).json({ error: err.message });
@@ -669,15 +682,15 @@ exports.getTournamentEvents = async (req, res) => {
  */
 exports.syncMatch = async (req, res) => {
   const { eventId } = req.params;
-  
+
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   if (!liveManager) {
     return res.status(503).json({ error: 'Live manager not available' });
   }
-  
+
   try {
     const result = await liveManager.syncMatch(eventId);
     res.json(result);
@@ -691,23 +704,23 @@ exports.syncMatch = async (req, res) => {
  */
 exports.syncMatchFull = async (req, res) => {
   const { eventId } = req.params;
-  
+
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   if (!liveManager) {
     return res.status(503).json({ error: 'Live manager not available' });
   }
-  
+
   try {
     const completeData = await liveManager.fetchCompleteData(eventId);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'Dati recuperati',
       data: completeData,
-      dataCompleteness: completeData.dataCompleteness
+      dataCompleteness: completeData.dataCompleteness,
     });
   } catch (err) {
     console.error(`Sync error for event ${eventId}:`, err.message);
@@ -720,19 +733,19 @@ exports.syncMatchFull = async (req, res) => {
  */
 exports.checkData = async (req, res) => {
   const { eventId } = req.params;
-  
+
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   try {
     // Check in files
     if (!fs.existsSync(SCRAPES_DIR)) {
       return res.json({ found: false, message: 'No scrapes directory' });
     }
-    
-    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
-    
+
+    const files = fs.readdirSync(SCRAPES_DIR).filter((f) => f.endsWith('.json'));
+
     for (const file of files) {
       try {
         const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
@@ -743,32 +756,38 @@ exports.checkData = async (req, res) => {
                 event: false,
                 pointByPoint: false,
                 statistics: false,
-                powerRankings: false
+                powerRankings: false,
               };
-              
+
               for (const [u, d] of Object.entries(content.api)) {
                 if (u.includes('/event/') && d?.event) completeness.event = true;
-                if (u.includes('point-by-point') && d?.pointByPoint?.length > 0) completeness.pointByPoint = true;
-                if (u.includes('statistics') && d?.statistics?.length > 0) completeness.statistics = true;
-                if (u.includes('power-rankings') && d?.tennisPowerRankings?.length > 0) completeness.powerRankings = true;
+                if (u.includes('point-by-point') && d?.pointByPoint?.length > 0)
+                  completeness.pointByPoint = true;
+                if (u.includes('statistics') && d?.statistics?.length > 0)
+                  completeness.statistics = true;
+                if (u.includes('power-rankings') && d?.tennisPowerRankings?.length > 0)
+                  completeness.powerRankings = true;
               }
-              
+
               const fields = Object.values(completeness);
-              completeness.total = Math.round((fields.filter(Boolean).length / fields.length) * 100);
-              
+              completeness.total = Math.round(
+                (fields.filter(Boolean).length / fields.length) * 100
+              );
+
               return res.json({
                 found: true,
                 fileName: file,
-                dataCompleteness: completeness
+                dataCompleteness: completeness,
               });
             }
           }
         }
-      } catch (e) { /* skip */ }
+      } catch (e) {
+        /* skip */
+      }
     }
-    
+
     res.json({ found: false, message: 'Match non trovato nei dati salvati' });
-    
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -783,6 +802,6 @@ function transformMatch(m) {
     tournament: m.tournament_name || 'Unknown',
     status: m.status_type || 'unknown',
     startTime: m.start_time,
-    winnerCode: m.winner_code
+    winnerCode: m.winner_code,
   };
 }

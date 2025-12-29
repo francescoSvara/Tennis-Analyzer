@@ -1,11 +1,11 @@
 /**
  * Logger utility per il backend
- * 
+ *
  * Centralizza il logging per:
  * 1. Disabilitare facilmente i log in production
  * 2. Aggiungere timestamp e contesto
  * 3. Supportare futuri log strutturati (JSON)
- * 
+ *
  * @file backend/utils/logger.js
  * @version 1.0.0
  */
@@ -28,7 +28,7 @@ const currentLevel = LEVELS[LOG_LEVEL] || LEVELS.info;
 function formatMessage(level, context, message, data) {
   const timestamp = new Date().toISOString();
   const prefix = context ? `[${context}]` : '';
-  
+
   if (IS_PRODUCTION) {
     // JSON structured logging per production
     return JSON.stringify({
@@ -39,7 +39,7 @@ function formatMessage(level, context, message, data) {
       ...(data ? { data } : {}),
     });
   }
-  
+
   // Human-readable per development
   return `${timestamp} ${level.toUpperCase()} ${prefix} ${message}`;
 }
@@ -57,21 +57,21 @@ function createLogger(context = '') {
         if (data && !IS_PRODUCTION) console.log(data);
       }
     },
-    
+
     info(message, data) {
       if (currentLevel <= LEVELS.info) {
         console.log(formatMessage('info', context, message, data));
         if (data && !IS_PRODUCTION) console.log(data);
       }
     },
-    
+
     warn(message, data) {
       if (currentLevel <= LEVELS.warn) {
         console.warn(formatMessage('warn', context, message, data));
         if (data && !IS_PRODUCTION) console.warn(data);
       }
     },
-    
+
     error(message, data) {
       if (currentLevel <= LEVELS.error) {
         console.error(formatMessage('error', context, message, data));

@@ -1,11 +1,11 @@
 /**
  * Event Controller
- * 
+ *
  * Controller per fetch diretto da SofaScore.
  * Zero logica di dominio - solo fetch e forward.
- * 
+ *
  * NOTA: Per dati da DB usare /api/match/:eventId/bundle (FILOSOFIA MATCHBUNDLE_ONLY_FE)
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_LIVE_TRACKING.md
  */
 
@@ -14,7 +14,7 @@ const fetch = require('node-fetch');
 const SOFASCORE_BASE_URL = 'https://www.sofascore.com/api/v1/event';
 const SOFASCORE_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-  'Accept': 'application/json'
+  Accept: 'application/json',
 };
 
 /**
@@ -25,18 +25,18 @@ exports.getPointByPoint = async (req, res) => {
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   try {
     const url = `${SOFASCORE_BASE_URL}/${eventId}/point-by-point`;
     const response = await fetch(url, { headers: SOFASCORE_HEADERS });
-    
+
     if (!response.ok) {
-      return res.status(response.status).json({ 
+      return res.status(response.status).json({
         error: `SofaScore API returned ${response.status}`,
-        pointByPoint: []
+        pointByPoint: [],
       });
     }
-    
+
     const data = await response.json();
     res.json(data);
   } catch (err) {
@@ -53,18 +53,18 @@ exports.getStatistics = async (req, res) => {
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   try {
     const url = `${SOFASCORE_BASE_URL}/${eventId}/statistics`;
     const response = await fetch(url, { headers: SOFASCORE_HEADERS });
-    
+
     if (!response.ok) {
-      return res.status(response.status).json({ 
+      return res.status(response.status).json({
         error: `SofaScore API returned ${response.status}`,
-        statistics: []
+        statistics: [],
       });
     }
-    
+
     const data = await response.json();
     res.json(data);
   } catch (err) {
@@ -81,18 +81,18 @@ exports.getPowerRankings = async (req, res) => {
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   try {
     const url = `${SOFASCORE_BASE_URL}/${eventId}/tennis-power-rankings`;
     const response = await fetch(url, { headers: SOFASCORE_HEADERS });
-    
+
     if (!response.ok) {
-      return res.status(response.status).json({ 
+      return res.status(response.status).json({
         error: `SofaScore API returned ${response.status}`,
-        tennisPowerRankings: []
+        tennisPowerRankings: [],
       });
     }
-    
+
     const data = await response.json();
     res.json(data);
   } catch (err) {
@@ -109,10 +109,10 @@ exports.getLive = async (req, res) => {
   if (!eventId) {
     return res.status(400).json({ error: 'Missing eventId' });
   }
-  
+
   const baseUrl = SOFASCORE_BASE_URL;
   const headers = SOFASCORE_HEADERS;
-  
+
   const result = {
     eventId,
     timestamp: new Date().toISOString(),
@@ -120,32 +120,40 @@ exports.getLive = async (req, res) => {
     pointByPoint: [],
     statistics: [],
     powerRankings: [],
-    errors: []
+    errors: [],
   };
-  
+
   // Fetch in parallelo per velocità
   const fetches = [
     fetch(`${baseUrl}/${eventId}`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { result.event = data?.event || data; })
-      .catch(e => result.errors.push({ endpoint: 'event', error: e.message })),
-    
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        result.event = data?.event || data;
+      })
+      .catch((e) => result.errors.push({ endpoint: 'event', error: e.message })),
+
     fetch(`${baseUrl}/${eventId}/point-by-point`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { result.pointByPoint = data?.pointByPoint || []; })
-      .catch(e => result.errors.push({ endpoint: 'point-by-point', error: e.message })),
-    
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        result.pointByPoint = data?.pointByPoint || [];
+      })
+      .catch((e) => result.errors.push({ endpoint: 'point-by-point', error: e.message })),
+
     fetch(`${baseUrl}/${eventId}/statistics`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { result.statistics = data?.statistics || []; })
-      .catch(e => result.errors.push({ endpoint: 'statistics', error: e.message })),
-    
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        result.statistics = data?.statistics || [];
+      })
+      .catch((e) => result.errors.push({ endpoint: 'statistics', error: e.message })),
+
     fetch(`${baseUrl}/${eventId}/tennis-power-rankings`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { result.powerRankings = data?.tennisPowerRankings || []; })
-      .catch(e => result.errors.push({ endpoint: 'power-rankings', error: e.message }))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        result.powerRankings = data?.tennisPowerRankings || [];
+      })
+      .catch((e) => result.errors.push({ endpoint: 'power-rankings', error: e.message })),
   ];
-  
+
   try {
     await Promise.all(fetches);
     res.json(result);

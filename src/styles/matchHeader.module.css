@@ -77,8 +77,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .live {
@@ -274,46 +279,46 @@
   .matchHeader {
     padding: 16px;
   }
-  
+
   .matchup {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .player {
     width: 100%;
   }
-  
+
   .player.home,
   .player.away {
     text-align: center;
   }
-  
+
   .player.home .playerInfo,
   .player.away .playerInfo {
     justify-content: center;
     flex-direction: row;
   }
-  
+
   .player.home .scoreSection,
   .player.away .scoreSection {
     justify-content: center;
     flex-direction: row;
   }
-  
+
   .player.home .setsContainer,
   .player.away .setsContainer {
     flex-direction: row;
   }
-  
+
   .vs {
     display: none;
   }
-  
+
   .playerName {
     font-size: 17px;
   }
-  
+
   .setScore {
     font-size: 16px;
     padding: 4px 10px;

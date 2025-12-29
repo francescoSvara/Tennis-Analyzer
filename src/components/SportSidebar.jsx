@@ -4,28 +4,23 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  TennisBall,
-  SoccerBall,
-  Basketball,
-  Trophy
-} from '@phosphor-icons/react';
+import { TennisBall, SoccerBall, Basketball, Trophy } from '@phosphor-icons/react';
 import './SportSidebar.css';
 
 const SPORTS = [
   { id: 'tennis', icon: TennisBall, label: 'Tennis' },
   { id: 'football', icon: SoccerBall, label: 'Football' },
   { id: 'basketball', icon: Basketball, label: 'Basketball' },
-  { id: 'rugby-union', icon: Trophy, label: 'Rugby' }
+  { id: 'rugby-union', icon: Trophy, label: 'Rugby' },
 ];
 
 export default function SportSidebar({ selectedSport, onSelectSport }) {
   return (
     <nav className="sport-sidebar">
-      {SPORTS.map(sport => {
+      {SPORTS.map((sport) => {
         const Icon = sport.icon;
         const isSelected = selectedSport === sport.id;
-        
+
         return (
           <motion.button
             key={sport.id}
@@ -35,10 +30,7 @@ export default function SportSidebar({ selectedSport, onSelectSport }) {
             whileTap={{ scale: 0.95 }}
             title={sport.label}
           >
-            <Icon 
-              size={24} 
-              weight={isSelected ? 'fill' : 'duotone'} 
-            />
+            <Icon size={24} weight={isSelected ? 'fill' : 'duotone'} />
           </motion.button>
         );
       })}

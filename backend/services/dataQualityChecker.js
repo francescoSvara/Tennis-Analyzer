@@ -1,14 +1,14 @@
 /**
  * 📊 DATA QUALITY CHECKER
- * 
+ *
  * Servizio di validazione qualità per MatchBundle.
  * Produce metriche deterministiche, issues con codici stabili,
  * e uno score complessivo 0-100.
- * 
+ *
  * Output standard: { status, score, metrics, issues }
- * 
+ *
  * Ref: docs/filosofie/FILOSOFIA_OBSERVABILITY.md
- * 
+ *
  * @module dataQualityChecker
  */
 
@@ -26,23 +26,23 @@ const ISSUE_CODES = {
   MISSING_PLAYER_ID: 'MISSING_PLAYER_ID',
   MISSING_STATUS: 'MISSING_STATUS',
   ODDS_INVALID: 'ODDS_INVALID',
-  
+
   // Warning
   ODDS_STALE: 'ODDS_STALE',
   LIVE_STALE: 'LIVE_STALE',
   STATS_PARTIAL: 'STATS_PARTIAL',
   HIGH_MISSING_RATIO: 'HIGH_MISSING_RATIO',
-  
+
   // Info
   NO_FUTURE_DATA: 'NO_FUTURE_DATA',
   FEATURES_ESTIMATED: 'FEATURES_ESTIMATED',
-  LOW_DATA_COMPLETENESS: 'LOW_DATA_COMPLETENESS'
+  LOW_DATA_COMPLETENESS: 'LOW_DATA_COMPLETENESS',
 };
 
 const SEVERITY = {
   FAIL: 'FAIL',
   WARN: 'WARN',
-  INFO: 'INFO'
+  INFO: 'INFO',
 };
 
 // ============================================================================
@@ -51,19 +51,19 @@ const SEVERITY = {
 const THRESHOLDS = {
   // Pre-match thresholds (in seconds)
   prematch: {
-    odds_stale_warn: 15 * 60,   // 15 minuti
-    odds_stale_fail: 60 * 60,   // 60 minuti
+    odds_stale_warn: 15 * 60, // 15 minuti
+    odds_stale_fail: 60 * 60, // 60 minuti
   },
   // Live match thresholds (in seconds)
   live: {
-    live_stale_warn: 30,        // 30 secondi
-    live_stale_fail: 120,       // 2 minuti
-    odds_stale_warn: 60,        // 1 minuto
-    odds_stale_fail: 300,       // 5 minuti
+    live_stale_warn: 30, // 30 secondi
+    live_stale_fail: 120, // 2 minuti
+    odds_stale_warn: 60, // 1 minuto
+    odds_stale_fail: 300, // 5 minuti
   },
   // Generic thresholds
-  missing_ratio_warn: 0.15,     // 15% campi mancanti
-  missing_ratio_fail: 0.40,     // 40% campi mancanti
+  missing_ratio_warn: 0.15, // 15% campi mancanti
+  missing_ratio_fail: 0.4, // 40% campi mancanti
   features_estimated_warn: 0.5, // 50% features stimate
 };
 
@@ -86,8 +86,12 @@ const CRITICAL_FIELDS = [
  * Safely get nested property from object
  */
 function getNestedValue(obj, path) {
-  return path.split('.').reduce((current, key) => 
-    current && current[key] !== undefined ? current[key] : undefined, obj);
+  return path
+    .split('.')
+    .reduce(
+      (current, key) => (current && current[key] !== undefined ? current[key] : undefined),
+      obj
+    );
 }
 
 /**
@@ -131,9 +135,16 @@ function calculateStaleness(timestamp, now) {
 function isLiveMatch(status) {
   if (!status) return false;
   const s = String(status).toLowerCase();
-  return s === 'live' || s === 'inprogress' || s === 'in_progress' || 
-         s === '1st set' || s === '2nd set' || s === '3rd set' ||
-         s.includes('set') || s.includes('live');
+  return (
+    s === 'live' ||
+    s === 'inprogress' ||
+    s === 'in_progress' ||
+    s === '1st set' ||
+    s === '2nd set' ||
+    s === '3rd set' ||
+    s.includes('set') ||
+    s.includes('live')
+  );
 }
 
 /**
@@ -142,7 +153,7 @@ function isLiveMatch(status) {
 function countMissingFields(obj, fieldList) {
   let missing = 0;
   let total = 0;
-  
+
   for (const field of fieldList) {
     total++;
     const value = getNestedValue(obj, field);
@@ -150,7 +161,7 @@ function countMissingFields(obj, fieldList) {
       missing++;
     }
   }
-  
+
   return { missing, total, ratio: total > 0 ? missing / total : 0 };
 }
 
@@ -160,7 +171,7 @@ function countMissingFields(obj, fieldList) {
 
 /**
  * Evaluate bundle quality
- * 
+ *
  * @param {Object} bundle - MatchBundle to evaluate
  * @param {number} now - Current timestamp (ms), default Date.now()
  * @returns {Object} { status, score, metrics, issues }
@@ -168,134 +179,143 @@ function countMissingFields(obj, fieldList) {
 function evaluateBundleQuality(bundle, now = Date.now()) {
   const issues = [];
   let score = 100;
-  
+
   // Determine if live match
   const matchStatus = bundle?.header?.match?.status;
   const isLive = isLiveMatch(matchStatus);
   const thresholds = isLive ? THRESHOLDS.live : THRESHOLDS.prematch;
-  
+
   // =========================================================================
   // A) COMPLETENESS - Check critical fields
   // =========================================================================
   const missingCritical = [];
-  
+
   for (const field of CRITICAL_FIELDS) {
     const value = getNestedValue(bundle, field);
     if (!isValid(value)) {
       missingCritical.push(field);
     }
   }
-  
+
   if (missingCritical.length > 0) {
     // Check specific critical failures
     if (missingCritical.includes('matchId') || missingCritical.includes('header.match.id')) {
       issues.push({
         code: ISSUE_CODES.MISSING_MATCH_ID,
         severity: SEVERITY.FAIL,
-        detail: 'Match ID is required'
+        detail: 'Match ID is required',
       });
       score -= 50;
     }
-    
-    if (missingCritical.includes('header.players.home.id') || missingCritical.includes('header.players.away.id')) {
+
+    if (
+      missingCritical.includes('header.players.home.id') ||
+      missingCritical.includes('header.players.away.id')
+    ) {
       issues.push({
         code: ISSUE_CODES.MISSING_PLAYER_ID,
         severity: SEVERITY.FAIL,
-        detail: `Missing player IDs: ${missingCritical.filter(f => f.includes('player')).join(', ')}`
+        detail: `Missing player IDs: ${missingCritical
+          .filter((f) => f.includes('player'))
+          .join(', ')}`,
       });
       score -= 30;
     }
-    
+
     if (missingCritical.includes('header.match.status')) {
       issues.push({
         code: ISSUE_CODES.MISSING_STATUS,
         severity: SEVERITY.FAIL,
-        detail: 'Match status is required'
+        detail: 'Match status is required',
       });
       score -= 20;
     }
   }
-  
+
   // Calculate overall missing ratio for non-critical fields
   const tabFields = [
-    'tabs.overview', 'tabs.stats', 'tabs.odds', 'tabs.momentum',
-    'tabs.pointByPoint', 'tabs.strategies', 'tabs.predictor'
+    'tabs.overview',
+    'tabs.stats',
+    'tabs.odds',
+    'tabs.momentum',
+    'tabs.pointByPoint',
+    'tabs.strategies',
+    'tabs.predictor',
   ];
   const { ratio: missingRatio } = countMissingFields(bundle, tabFields);
-  
+
   if (missingRatio > THRESHOLDS.missing_ratio_fail) {
     issues.push({
       code: ISSUE_CODES.HIGH_MISSING_RATIO,
       severity: SEVERITY.FAIL,
-      detail: `Missing ratio ${(missingRatio * 100).toFixed(1)}% exceeds threshold`
+      detail: `Missing ratio ${(missingRatio * 100).toFixed(1)}% exceeds threshold`,
     });
     score -= 25;
   } else if (missingRatio > THRESHOLDS.missing_ratio_warn) {
     issues.push({
       code: ISSUE_CODES.HIGH_MISSING_RATIO,
       severity: SEVERITY.WARN,
-      detail: `Missing ratio ${(missingRatio * 100).toFixed(1)}% is high`
+      detail: `Missing ratio ${(missingRatio * 100).toFixed(1)}% is high`,
     });
     score -= 10;
   }
-  
+
   // =========================================================================
   // B) FRESHNESS / STALENESS
   // =========================================================================
-  
+
   // Live staleness (from meta.as_of_time or bundle timestamp)
   const liveTimestamp = bundle?.meta?.as_of_time || bundle?.timestamp;
   const liveStaleness = calculateStaleness(liveTimestamp, now);
-  
+
   // Odds staleness (from tabs.odds.matchWinner.event_time)
-  const oddsTimestamp = bundle?.tabs?.odds?.matchWinner?.event_time || 
-                        bundle?.meta?.as_of_time;
+  const oddsTimestamp = bundle?.tabs?.odds?.matchWinner?.event_time || bundle?.meta?.as_of_time;
   const oddsStaleness = calculateStaleness(oddsTimestamp, now);
-  
+
   // Check live staleness (only for live matches)
   if (isLive) {
     if (liveStaleness > thresholds.live_stale_fail) {
       issues.push({
         code: ISSUE_CODES.LIVE_STALE,
         severity: SEVERITY.FAIL,
-        detail: `Live data stale by ${Math.round(liveStaleness)}s (threshold: ${thresholds.live_stale_fail}s)`
+        detail: `Live data stale by ${Math.round(liveStaleness)}s (threshold: ${
+          thresholds.live_stale_fail
+        }s)`,
       });
       score -= 25;
     } else if (liveStaleness > thresholds.live_stale_warn) {
       issues.push({
         code: ISSUE_CODES.LIVE_STALE,
         severity: SEVERITY.WARN,
-        detail: `Live data stale by ${Math.round(liveStaleness)}s`
+        detail: `Live data stale by ${Math.round(liveStaleness)}s`,
       });
       score -= 10;
     }
   }
-  
+
   // Check odds staleness
   if (oddsStaleness > (thresholds.odds_stale_fail || THRESHOLDS.prematch.odds_stale_fail)) {
     issues.push({
       code: ISSUE_CODES.ODDS_STALE,
       severity: SEVERITY.FAIL,
-      detail: `Odds stale by ${Math.round(oddsStaleness)}s`
+      detail: `Odds stale by ${Math.round(oddsStaleness)}s`,
     });
     score -= 20;
   } else if (oddsStaleness > (thresholds.odds_stale_warn || THRESHOLDS.prematch.odds_stale_warn)) {
     issues.push({
       code: ISSUE_CODES.ODDS_STALE,
       severity: SEVERITY.WARN,
-      detail: `Odds stale by ${Math.round(oddsStaleness)}s`
+      detail: `Odds stale by ${Math.round(oddsStaleness)}s`,
     });
     score -= 8;
   }
-  
+
   // =========================================================================
   // C) CONSISTENCY - Validate odds
   // =========================================================================
-  const homeOdds = bundle?.tabs?.odds?.matchWinner?.home?.value || 
-                   bundle?.header?.odds?.home;
-  const awayOdds = bundle?.tabs?.odds?.matchWinner?.away?.value || 
-                   bundle?.header?.odds?.away;
-  
+  const homeOdds = bundle?.tabs?.odds?.matchWinner?.home?.value || bundle?.header?.odds?.home;
+  const awayOdds = bundle?.tabs?.odds?.matchWinner?.away?.value || bundle?.header?.odds?.away;
+
   const oddsInvalid = [];
   if (homeOdds !== undefined && !isValidOdds(homeOdds)) {
     oddsInvalid.push(`home: ${homeOdds}`);
@@ -303,31 +323,31 @@ function evaluateBundleQuality(bundle, now = Date.now()) {
   if (awayOdds !== undefined && !isValidOdds(awayOdds)) {
     oddsInvalid.push(`away: ${awayOdds}`);
   }
-  
+
   if (oddsInvalid.length > 0) {
     issues.push({
       code: ISSUE_CODES.ODDS_INVALID,
       severity: SEVERITY.FAIL,
-      detail: `Invalid odds values: ${oddsInvalid.join(', ')}`
+      detail: `Invalid odds values: ${oddsInvalid.join(', ')}`,
     });
     score -= 25;
   }
-  
+
   // =========================================================================
   // D) Check for future data (anti-leakage)
   // =========================================================================
   const asOfTime = parseTimestamp(bundle?.meta?.as_of_time);
   const eventTime = parseTimestamp(bundle?.tabs?.odds?.matchWinner?.event_time);
-  
+
   if (asOfTime && eventTime && eventTime > asOfTime) {
     issues.push({
       code: ISSUE_CODES.NO_FUTURE_DATA,
       severity: SEVERITY.WARN,
-      detail: 'Event time is after as_of_time (potential time leakage)'
+      detail: 'Event time is after as_of_time (potential time leakage)',
     });
     score -= 15;
   }
-  
+
   // =========================================================================
   // E) Stats completeness
   // =========================================================================
@@ -335,17 +355,17 @@ function evaluateBundleQuality(bundle, now = Date.now()) {
   if (stats) {
     const hasServeStats = stats.serve?.home?.firstServe !== undefined;
     const hasPointsStats = stats.points?.home?.winners !== undefined;
-    
+
     if (!hasServeStats && !hasPointsStats) {
       issues.push({
         code: ISSUE_CODES.STATS_PARTIAL,
         severity: SEVERITY.WARN,
-        detail: 'Statistics data is incomplete'
+        detail: 'Statistics data is incomplete',
       });
       score -= 5;
     }
   }
-  
+
   // =========================================================================
   // F) Features estimation check
   // =========================================================================
@@ -354,10 +374,16 @@ function evaluateBundleQuality(bundle, now = Date.now()) {
     const estimatedSources = ['estimated', 'score', 'odds'];
     let estimatedCount = 0;
     let totalFeatures = 0;
-    
-    const sourceFields = ['volatilitySource', 'pressureSource', 'dominanceSource', 
-                          'serveDominanceSource', 'breakProbabilitySource', 'momentumSource'];
-    
+
+    const sourceFields = [
+      'volatilitySource',
+      'pressureSource',
+      'dominanceSource',
+      'serveDominanceSource',
+      'breakProbabilitySource',
+      'momentumSource',
+    ];
+
     for (const field of sourceFields) {
       if (features[field]) {
         totalFeatures++;
@@ -366,19 +392,19 @@ function evaluateBundleQuality(bundle, now = Date.now()) {
         }
       }
     }
-    
+
     const estimatedRatio = totalFeatures > 0 ? estimatedCount / totalFeatures : 0;
-    
+
     if (estimatedRatio > THRESHOLDS.features_estimated_warn) {
       issues.push({
         code: ISSUE_CODES.FEATURES_ESTIMATED,
         severity: SEVERITY.INFO,
-        detail: `${Math.round(estimatedRatio * 100)}% of features are estimated`
+        detail: `${Math.round(estimatedRatio * 100)}% of features are estimated`,
       });
       score -= 3;
     }
   }
-  
+
   // =========================================================================
   // G) Data quality from bundle
   // =========================================================================
@@ -387,26 +413,26 @@ function evaluateBundleQuality(bundle, now = Date.now()) {
     issues.push({
       code: ISSUE_CODES.LOW_DATA_COMPLETENESS,
       severity: SEVERITY.INFO,
-      detail: `Bundle data quality is ${bundleQuality}%`
+      detail: `Bundle data quality is ${bundleQuality}%`,
     });
     score -= 5;
   }
-  
+
   // =========================================================================
   // FINAL STATUS
   // =========================================================================
   score = Math.max(0, Math.min(100, Math.round(score)));
-  
-  const hasFail = issues.some(i => i.severity === SEVERITY.FAIL);
-  const hasWarn = issues.some(i => i.severity === SEVERITY.WARN);
-  
+
+  const hasFail = issues.some((i) => i.severity === SEVERITY.FAIL);
+  const hasWarn = issues.some((i) => i.severity === SEVERITY.WARN);
+
   let status = 'OK';
   if (hasFail || score < 40) {
     status = 'FAIL';
   } else if (hasWarn || score < 70) {
     status = 'WARN';
   }
-  
+
   return {
     status,
     score,
@@ -414,14 +440,14 @@ function evaluateBundleQuality(bundle, now = Date.now()) {
       missing_ratio: Math.round(missingRatio * 100) / 100,
       live_staleness_sec: Math.round(liveStaleness),
       odds_staleness_sec: Math.round(oddsStaleness),
-      is_live: isLive
+      is_live: isLive,
     },
     issues,
     meta: {
       version: DATA_QUALITY_CHECKER_VERSION,
       evaluated_at: new Date(now).toISOString(),
-      thresholds_used: isLive ? 'live' : 'prematch'
-    }
+      thresholds_used: isLive ? 'live' : 'prematch',
+    },
   };
 }
 
@@ -438,7 +464,7 @@ function passesMinimumQuality(bundle) {
  */
 function getQualitySummary(bundle) {
   const result = evaluateBundleQuality(bundle);
-  const issuesSummary = result.issues.map(i => i.code).join(', ') || 'none';
+  const issuesSummary = result.issues.map((i) => i.code).join(', ') || 'none';
   return `[Quality: ${result.status} score=${result.score}] Issues: ${issuesSummary}`;
 }
 
@@ -448,9 +474,9 @@ function getQualitySummary(bundle) {
 
 /**
  * Detect outliers in numeric data
- * 
+ *
  * FILOSOFIA_OBSERVABILITY: DIMENSION_Accuracy verification
- * 
+ *
  * @param {Array} values - Array of numeric values
  * @param {number} threshold - Z-score threshold (default 3)
  * @returns {Object} { outliers: Array, mean: number, std: number }
@@ -459,113 +485,113 @@ function detectOutliers(values, threshold = 3) {
   if (!Array.isArray(values) || values.length < 3) {
     return { outliers: [], mean: null, std: null };
   }
-  
+
   // Filter to only numbers
-  const nums = values.filter(v => typeof v === 'number' && !isNaN(v) && isFinite(v));
+  const nums = values.filter((v) => typeof v === 'number' && !isNaN(v) && isFinite(v));
   if (nums.length < 3) return { outliers: [], mean: null, std: null };
-  
+
   // Calculate mean
   const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
-  
+
   // Calculate standard deviation
-  const squaredDiffs = nums.map(v => Math.pow(v - mean, 2));
+  const squaredDiffs = nums.map((v) => Math.pow(v - mean, 2));
   const variance = squaredDiffs.reduce((a, b) => a + b, 0) / nums.length;
   const std = Math.sqrt(variance);
-  
+
   if (std === 0) return { outliers: [], mean, std: 0 };
-  
+
   // Find outliers (values with z-score > threshold)
-  const outliers = nums.filter(v => Math.abs((v - mean) / std) > threshold);
-  
+  const outliers = nums.filter((v) => Math.abs((v - mean) / std) > threshold);
+
   return {
     outliers,
     mean: Math.round(mean * 100) / 100,
-    std: Math.round(std * 100) / 100
+    std: Math.round(std * 100) / 100,
   };
 }
 
 /**
  * Check data consistency
- * 
+ *
  * FILOSOFIA_OBSERVABILITY: verify internal consistency of bundle data
- * 
+ *
  * @param {Object} bundle - MatchBundle to check
  * @returns {Object} { consistent: boolean, issues: Array }
  */
 function checkConsistency(bundle) {
   const issues = [];
-  
+
   if (!bundle) return { consistent: false, issues: ['Bundle is null'] };
-  
+
   // Check score consistency
   const header = bundle.header || bundle;
   const score = header?.match?.score || header?.score;
-  
+
   if (score?.sets && Array.isArray(score.sets)) {
     for (let i = 0; i < score.sets.length; i++) {
       const set = score.sets[i];
       const home = set.home || 0;
       const away = set.away || 0;
-      
+
       // Tennis set can't exceed reasonable limits
       if (home > 7 || away > 7) {
         // Could be valid in tiebreak, but check
         if (!(home === 7 && away >= 5) && !(away === 7 && home >= 5)) {
-          issues.push(`Set ${i+1} has unlikely score: ${home}-${away}`);
+          issues.push(`Set ${i + 1} has unlikely score: ${home}-${away}`);
         }
       }
-      
+
       // Neither can be negative
       if (home < 0 || away < 0) {
-        issues.push(`Set ${i+1} has negative score`);
+        issues.push(`Set ${i + 1} has negative score`);
       }
     }
   }
-  
+
   // Check odds consistency
   const odds = header?.odds || bundle?.odds;
   if (odds?.matchWinner) {
     const homeOdds = odds.matchWinner.home?.value || odds.matchWinner.home;
     const awayOdds = odds.matchWinner.away?.value || odds.matchWinner.away;
-    
+
     if (homeOdds && awayOdds) {
       // Both odds should sum to more than 100% implied prob (bookmaker margin)
-      const totalImplied = (1/homeOdds) + (1/awayOdds);
+      const totalImplied = 1 / homeOdds + 1 / awayOdds;
       if (totalImplied < 0.95) {
         issues.push('Odds implied probability too low - data may be incorrect');
       }
-      if (totalImplied > 1.20) {
+      if (totalImplied > 1.2) {
         issues.push('Odds overround too high (>20%)');
       }
     }
   }
-  
+
   // Check player consistency
   const homePlayer = header?.players?.home || bundle?.player1;
   const awayPlayer = header?.players?.away || bundle?.player2;
-  
+
   if (homePlayer?.id && awayPlayer?.id && homePlayer.id === awayPlayer.id) {
     issues.push('Home and away player have same ID');
   }
-  
+
   return {
     consistent: issues.length === 0,
-    issues
+    issues,
   };
 }
 
 /**
  * Calculate data completeness percentage
- * 
+ *
  * @param {Object} bundle - MatchBundle
  * @returns {number} Completeness 0-100
  */
 function calculateCompleteness(bundle) {
   if (!bundle) return 0;
-  
+
   let present = 0;
   let total = 0;
-  
+
   // Check key fields
   const fieldsToCheck = [
     'header.match.id',
@@ -576,14 +602,14 @@ function calculateCompleteness(bundle) {
     'header.odds',
     'tabs.stats',
     'tabs.momentum',
-    'tabs.points'
+    'tabs.points',
   ];
-  
+
   for (const field of fieldsToCheck) {
     total++;
     if (getNestedValue(bundle, field)) present++;
   }
-  
+
   return Math.round((present / total) * 100);
 }
 
@@ -599,75 +625,75 @@ const QUARANTINE_REASONS = {
   CRITICAL_OUTLIER: 'CRITICAL_OUTLIER',
   CONSISTENCY_FAILURE: 'CONSISTENCY_FAILURE',
   MISSING_CANONICAL_IDS: 'MISSING_CANONICAL_IDS',
-  TEMPORAL_VIOLATION: 'TEMPORAL_VIOLATION'
+  TEMPORAL_VIOLATION: 'TEMPORAL_VIOLATION',
 };
 
 /**
  * Check if bundle should be quarantined
- * 
+ *
  * FILOSOFIA_OBSERVABILITY_DATAQUALITY: QUARANTINE_TRIGGERS
- * 
+ *
  * Triggers:
  * - overall_score < 40 → QUARANTINE
  * - outlier.critical (odds < 1.01) → QUARANTINE
  * - consistency.grave_issue → QUARANTINE
  * - canonical_ids.missing → QUARANTINE
- * 
+ *
  * @param {Object} bundle - MatchBundle to check
  * @returns {Object} { quarantined: boolean, reasons: Array, timestamp: string }
  */
 function checkQuarantineTriggers(bundle) {
   const reasons = [];
   const now = new Date();
-  
+
   // 1. Evaluate quality score
   const quality = evaluateBundleQuality(bundle);
   if (quality.score < 40) {
     reasons.push({
       code: QUARANTINE_REASONS.LOW_QUALITY_SCORE,
       detail: `Quality score ${quality.score} is below threshold (40)`,
-      severity: 'CRITICAL'
+      severity: 'CRITICAL',
     });
   }
-  
+
   // 2. Check for critical outliers (odds < 1.01)
   const odds = bundle?.header?.odds || bundle?.odds;
   if (odds?.matchWinner) {
     const homeOdds = odds.matchWinner.home?.value || odds.matchWinner.home;
     const awayOdds = odds.matchWinner.away?.value || odds.matchWinner.away;
-    
+
     if ((homeOdds && homeOdds < 1.01) || (awayOdds && awayOdds < 1.01)) {
       reasons.push({
         code: QUARANTINE_REASONS.CRITICAL_OUTLIER,
         detail: `Invalid odds detected: home=${homeOdds}, away=${awayOdds}`,
-        severity: 'CRITICAL'
+        severity: 'CRITICAL',
       });
     }
   }
-  
+
   // 3. Check consistency
   const consistency = checkConsistency(bundle);
   if (!consistency.consistent && consistency.issues.length >= 2) {
     reasons.push({
       code: QUARANTINE_REASONS.CONSISTENCY_FAILURE,
       detail: `Multiple consistency issues: ${consistency.issues.join('; ')}`,
-      severity: 'CRITICAL'
+      severity: 'CRITICAL',
     });
   }
-  
+
   // 4. Check for missing canonical IDs
   const matchId = bundle?.matchId || bundle?.header?.match?.id;
   const homeId = bundle?.header?.players?.home?.id || bundle?.player1?.id;
   const awayId = bundle?.header?.players?.away?.id || bundle?.player2?.id;
-  
+
   if (!matchId || !homeId || !awayId) {
     reasons.push({
       code: QUARANTINE_REASONS.MISSING_CANONICAL_IDS,
       detail: `Missing canonical IDs: match=${!!matchId}, home=${!!homeId}, away=${!!awayId}`,
-      severity: 'CRITICAL'
+      severity: 'CRITICAL',
     });
   }
-  
+
   // 5. Check temporal violations (future data)
   const asOfTime = bundle?.meta?.as_of_time || bundle?.meta?.generated_at;
   if (asOfTime) {
@@ -676,11 +702,11 @@ function checkQuarantineTriggers(bundle) {
       reasons.push({
         code: QUARANTINE_REASONS.TEMPORAL_VIOLATION,
         detail: `Data timestamp ${asOfTime} is in the future`,
-        severity: 'CRITICAL'
+        severity: 'CRITICAL',
       });
     }
   }
-  
+
   return {
     quarantined: reasons.length > 0,
     reasons,
@@ -688,14 +714,14 @@ function checkQuarantineTriggers(bundle) {
     timestamp: now.toISOString(),
     meta: {
       checker_version: DATA_QUALITY_CHECKER_VERSION,
-      triggers_checked: 5
-    }
+      triggers_checked: 5,
+    },
   };
 }
 
 /**
  * Check if bundle is safe to use (not quarantined)
- * 
+ *
  * @param {Object} bundle - MatchBundle
  * @returns {boolean} true if safe to use
  */
@@ -711,29 +737,29 @@ function isDataUsable(bundle) {
 module.exports = {
   // Version
   DATA_QUALITY_CHECKER_VERSION,
-  
+
   // Constants
   ISSUE_CODES,
   SEVERITY,
   THRESHOLDS,
   QUARANTINE_REASONS,
-  
+
   // Main functions
   evaluateBundleQuality,
   passesMinimumQuality,
   getQualitySummary,
-  
+
   // FILOSOFIA_OBSERVABILITY: Accuracy/outlier functions
   detectOutliers,
   checkConsistency,
   calculateCompleteness,
-  
+
   // FILOSOFIA_OBSERVABILITY: Quarantine functions
   checkQuarantineTriggers,
   isDataUsable,
-  
+
   // Helpers (exported for testing)
   isValidOdds,
   isLiveMatch,
-  calculateStaleness
+  calculateStaleness,
 };

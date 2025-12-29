@@ -1,15 +1,6 @@
 /**
  * useMatchBundle Hook
- * 
- * Hook unificato per consumo MatchBundle come da FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
- * 
- * Principi:
- * - Il frontend non interpreta il match
- * - Il frontend visualizza uno stato già interpretato
- * - Una chiamata iniziale, un solo schema dati
- * - Live update a patch (non rifetch completo)
- * 
- * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
+ * @see docs/comments/use-match-bundle-explanations.md#header
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -22,21 +13,21 @@ export const BundleState = {
   SUCCESS: 'success',
   ERROR: 'error',
   REFRESHING: 'refreshing',
-  LIVE: 'live'
+  LIVE: 'live',
 };
 
 // Configurazione di default
 const DEFAULT_CONFIG = {
-  pollInterval: 10000,        // 10 secondi per polling fallback
-  wsReconnectDelay: 3000,     // 3 secondi per riconnessione WS
+  pollInterval: 10000, // 10 secondi per polling fallback
+  wsReconnectDelay: 3000, // 3 secondi per riconnessione WS
   cacheEnabled: true,
-  cacheTtlMs: 30000,          // 30 secondi TTL cache
+  cacheTtlMs: 30000, // 30 secondi TTL cache
   autoConnect: true,
 };
 
 /**
  * Hook per caricare e consumare MatchBundle
- * 
+ *
  * @param {string} matchId - ID del match
  * @param {object} options - Opzioni di configurazione
  * @returns {object} - { bundle, state, error, isLive, tabs, header, dataQuality, actions }
@@ -73,103 +64,109 @@ export function useMatchBundle(matchId, options = {}) {
   /**
    * Fetch iniziale del bundle completo
    */
-  const fetchBundle = useCallback(async (forceRefresh = false) => {
-    if (!matchIdRef.current) {
-      setError('Missing matchId');
-      return null;
-    }
+  const fetchBundle = useCallback(
+    async (forceRefresh = false) => {
+      if (!matchIdRef.current) {
+        setError('Missing matchId');
+        return null;
+      }
 
-    const cacheKey = `bundle-${matchIdRef.current}`;
-    
-    // Check cache (se non forceRefresh)
-    if (cacheEnabled && !forceRefresh) {
-      const cached = cacheRef.current.get(cacheKey);
-      if (cached && (Date.now() - cached.timestamp) < cacheTtlMs) {
-        setBundle(cached.data);
+      const cacheKey = `bundle-${matchIdRef.current}`;
+
+      // Check cache (se non forceRefresh)
+      if (cacheEnabled && !forceRefresh) {
+        const cached = cacheRef.current.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < cacheTtlMs) {
+          setBundle(cached.data);
+          setState(BundleState.SUCCESS);
+          return cached.data;
+        }
+      }
+
+      const isRefreshing = bundle !== null;
+      setState(isRefreshing ? BundleState.REFRESHING : BundleState.LOADING);
+      setError(null);
+
+      try {
+        // Endpoint unico per bundle completo
+        const url = apiUrl(`/api/match/${matchIdRef.current}/bundle`);
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Salva in cache
+        if (cacheEnabled) {
+          cacheRef.current.set(cacheKey, {
+            data,
+            timestamp: Date.now(),
+          });
+        }
+
+        setBundle(data);
+        setLastUpdate(new Date());
         setState(BundleState.SUCCESS);
-        return cached.data;
+
+        if (onBundleUpdate) {
+          onBundleUpdate(data);
+        }
+
+        return data;
+      } catch (err) {
+        setError(err.message);
+        setState(BundleState.ERROR);
+
+        if (onError) {
+          onError(err);
+        }
+
+        return null;
       }
-    }
-
-    const isRefreshing = bundle !== null;
-    setState(isRefreshing ? BundleState.REFRESHING : BundleState.LOADING);
-    setError(null);
-
-    try {
-      // Endpoint unico per bundle completo
-      const url = apiUrl(`/api/match/${matchIdRef.current}/bundle`);
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`API returned ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Salva in cache
-      if (cacheEnabled) {
-        cacheRef.current.set(cacheKey, {
-          data,
-          timestamp: Date.now(),
-        });
-      }
-
-      setBundle(data);
-      setLastUpdate(new Date());
-      setState(BundleState.SUCCESS);
-
-      if (onBundleUpdate) {
-        onBundleUpdate(data);
-      }
-
-      return data;
-    } catch (err) {
-      setError(err.message);
-      setState(BundleState.ERROR);
-      
-      if (onError) {
-        onError(err);
-      }
-      
-      return null;
-    }
-  }, [bundle, cacheEnabled, cacheTtlMs, onBundleUpdate, onError]);
+    },
+    [bundle, cacheEnabled, cacheTtlMs, onBundleUpdate, onError]
+  );
 
   /**
    * Applica patch incrementale al bundle
    */
-  const applyPatch = useCallback((patch) => {
-    if (!patch || !bundle) return;
+  const applyPatch = useCallback(
+    (patch) => {
+      if (!patch || !bundle) return;
 
-    setBundle(prevBundle => {
-      const newBundle = { ...prevBundle };
+      setBundle((prevBundle) => {
+        const newBundle = { ...prevBundle };
 
-      // Applica patch per sezione
-      if (patch.header) {
-        newBundle.header = { ...newBundle.header, ...patch.header };
+        // Applica patch per sezione
+        if (patch.header) {
+          newBundle.header = { ...newBundle.header, ...patch.header };
+        }
+        if (patch.tabs) {
+          newBundle.tabs = { ...newBundle.tabs };
+          Object.keys(patch.tabs).forEach((tabKey) => {
+            newBundle.tabs[tabKey] = {
+              ...newBundle.tabs[tabKey],
+              ...patch.tabs[tabKey],
+            };
+          });
+        }
+        if (patch.dataQuality) {
+          newBundle.dataQuality = { ...newBundle.dataQuality, ...patch.dataQuality };
+        }
+
+        return newBundle;
+      });
+
+      setLastUpdate(new Date());
+
+      if (onLiveEvent) {
+        onLiveEvent(patch);
       }
-      if (patch.tabs) {
-        newBundle.tabs = { ...newBundle.tabs };
-        Object.keys(patch.tabs).forEach(tabKey => {
-          newBundle.tabs[tabKey] = { 
-            ...newBundle.tabs[tabKey], 
-            ...patch.tabs[tabKey] 
-          };
-        });
-      }
-      if (patch.dataQuality) {
-        newBundle.dataQuality = { ...newBundle.dataQuality, ...patch.dataQuality };
-      }
-
-      return newBundle;
-    });
-
-    setLastUpdate(new Date());
-
-    if (onLiveEvent) {
-      onLiveEvent(patch);
-    }
-  }, [bundle, onLiveEvent]);
+    },
+    [bundle, onLiveEvent]
+  );
 
   /**
    * Avvia polling (fallback quando WS non disponibile)
@@ -178,12 +175,13 @@ export function useMatchBundle(matchId, options = {}) {
   const startPolling = useCallback(() => {
     // NON avviare polling se già attivo
     if (pollRef.current) return;
-    
+
     // FILOSOFIA: NON fare polling per match finiti
     // Controlla lo status dal bundle corrente
     const matchStatus = bundle?.header?.match?.status;
-    const isFinished = matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
-    
+    const isFinished =
+      matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
+
     if (isFinished) {
       console.log('[MatchBundle] Match finished, no polling needed');
       return;
@@ -220,12 +218,13 @@ export function useMatchBundle(matchId, options = {}) {
    */
   const connectWebSocket = useCallback(() => {
     if (!matchIdRef.current) return;
-    
+
     // FILOSOFIA: NON connettersi a WS per match finiti
     // Il bundle ha già tutti i dati necessari
     const matchStatus = bundle?.header?.match?.status;
-    const isFinished = matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
-    
+    const isFinished =
+      matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
+
     if (isFinished) {
       console.log('[MatchBundle] Match finished, no WebSocket needed');
       return;
@@ -233,7 +232,7 @@ export function useMatchBundle(matchId, options = {}) {
 
     // Costruisci URL WebSocket usando WS_URL da config
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    
+
     // Usa WS_URL da config (già include fallback appropriato)
     let wsHost;
     try {
@@ -249,7 +248,7 @@ export function useMatchBundle(matchId, options = {}) {
       // Fallback sicuro
       wsHost = window.location.host;
     }
-    
+
     const wsUrl = `${wsProtocol}//${wsHost}/ws/match/${matchIdRef.current}`;
 
     try {
@@ -273,7 +272,7 @@ export function useMatchBundle(matchId, options = {}) {
       wsRef.current.onclose = () => {
         console.log('[MatchBundle] WS disconnected');
         setIsLive(false);
-        
+
         // Fallback a polling SOLO se match non finito
         if (matchIdRef.current) {
           startPolling();
@@ -311,17 +310,18 @@ export function useMatchBundle(matchId, options = {}) {
       // Fetch iniziale
       fetchBundle().then((data) => {
         if (!data) return;
-        
+
         // FILOSOFIA: Controlla se il match è finito
         const matchStatus = data?.header?.match?.status;
-        const isFinished = matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
-        
+        const isFinished =
+          matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
+
         if (isFinished) {
           // Match finito: NON serve WS né polling
           console.log('[MatchBundle] Match finished, single fetch completed');
           return;
         }
-        
+
         // Match live: tenta connessione WS se autoConnect
         if (autoConnect) {
           connectWebSocket();
@@ -351,14 +351,17 @@ export function useMatchBundle(matchId, options = {}) {
   const meta = useMemo(() => bundle?.meta || null, [bundle]);
 
   // Actions esposte
-  const actions = useMemo(() => ({
-    refresh,
-    invalidateCache,
-    connectWebSocket,
-    disconnectWebSocket,
-    startPolling,
-    stopPolling,
-  }), [refresh, invalidateCache, connectWebSocket, disconnectWebSocket, startPolling, stopPolling]);
+  const actions = useMemo(
+    () => ({
+      refresh,
+      invalidateCache,
+      connectWebSocket,
+      disconnectWebSocket,
+      startPolling,
+      stopPolling,
+    }),
+    [refresh, invalidateCache, connectWebSocket, disconnectWebSocket, startPolling, stopPolling]
+  );
 
   return {
     // Data
@@ -368,19 +371,19 @@ export function useMatchBundle(matchId, options = {}) {
     dataQuality,
     // DEEP-006: Esporre meta (versions, source, as_of_time)
     meta,
-    
+
     // State
     state,
     error,
     isLive,
     lastUpdate,
-    
+
     // Loading states
     isLoading: state === BundleState.LOADING,
     isRefreshing: state === BundleState.REFRESHING,
     isError: state === BundleState.ERROR,
     isSuccess: state === BundleState.SUCCESS || state === BundleState.LIVE,
-    
+
     // Actions
     actions,
   };
@@ -389,7 +392,7 @@ export function useMatchBundle(matchId, options = {}) {
 /**
  * Hook per selezionare una singola tab dal bundle
  * Utile per componenti che usano solo una tab specifica
- * 
+ *
  * @param {object} bundle - Bundle dal useMatchBundle
  * @param {string} tabKey - Nome della tab (overview, strategies, odds, etc.)
  */

@@ -1,6 +1,6 @@
 /**
  * MotionTab - Tab con underline animata
- * 
+ *
  * Ref: docs/filosofie/FILOSOFIA_FRONTEND.md
  * Ref: src/motion/tokens.js
  */
@@ -10,7 +10,7 @@ import { durations, easings } from './tokens';
 
 /**
  * Tab animato con underline indicator
- * 
+ *
  * @param {Object} props
  * @param {React.ReactNode} props.children - Contenuto del tab
  * @param {boolean} props.isActive - Se il tab è selezionato
@@ -18,31 +18,31 @@ import { durations, easings } from './tokens';
  * @param {string} [props.className] - Classi CSS aggiuntive
  * @param {boolean} [props.disabled] - Disabilita il tab
  */
-export function MotionTab({ 
-  children, 
+export function MotionTab({
+  children,
   isActive = false,
   onClick,
-  className = '', 
+  className = '',
   disabled = false,
-  ...props 
+  ...props
 }) {
   const tabVariants = {
-    initial: { 
+    initial: {
       opacity: 0.7,
     },
-    active: { 
+    active: {
       opacity: 1,
       transition: {
         duration: durations.fast,
         ease: easings.premium,
-      }
+      },
     },
-    hover: { 
+    hover: {
       opacity: 0.9,
       transition: {
         duration: durations.fast,
         ease: easings.premium,
-      }
+      },
     },
   };
 
@@ -70,7 +70,7 @@ export function MotionTab({
       {...props}
     >
       {children}
-      
+
       {/* Underline animata */}
       {isActive && (
         <motion.div

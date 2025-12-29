@@ -9,10 +9,10 @@
 ## 📊 Riepilogo
 
 | Severità | Count |
-|----------|-------|
-| 🔴 ERROR | 0 |
-| 🟡 WARN | 6 |
-| 🔵 INFO | 29 |
+| -------- | ----- |
+| 🔴 ERROR | 0     |
+| 🟡 WARN  | 6     |
+| 🔵 INFO  | 29    |
 
 ---
 
@@ -25,7 +25,7 @@
 - **Dominio:** architecture
 - **Problema:** useMatchBundle deve esporre meta dal bundle
 - **Match:** `PATTERN_MISSING`
-- **Rimedio:** Implementare: bundle\.meta|meta:\s*bundle
+- **Rimedio:** Implementare: bundle\.meta|meta:\s\*bundle
 
 #### `TEMP-001` - backend/db/matchRepository.js:0
 
@@ -46,14 +46,14 @@
 - **Dominio:** architecture
 - **Problema:** App.jsx deve importare useMatchBundle
 - **Match:** `PATTERN_MISSING`
-- **Rimedio:** Implementare: useMatchBundle|import.*useMatchBundle
+- **Rimedio:** Implementare: useMatchBundle|import.\*useMatchBundle
 
 #### `ODDS-001` - backend/services/matchCardService.js:0
 
 - **Dominio:** architecture
 - **Problema:** Odds devono avere timestamp per tracciare movimento
 - **Match:** `PATTERN_MISSING`
-- **Rimedio:** Implementare: odds.*time|oddsTimestamp|odds_at
+- **Rimedio:** Implementare: odds.\*time|oddsTimestamp|odds_at
 
 #### `LIVE-003` - backend/liveManager.js:0
 
@@ -269,4 +269,4 @@
 
 ---
 
-*Report generato da `scripts/runConceptChecks.js`*
+_Report generato da `scripts/runConceptChecks.js`_

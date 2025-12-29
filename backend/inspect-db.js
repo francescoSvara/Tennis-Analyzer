@@ -4,15 +4,13 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 
 async function inspectTables() {
   console.log('=== STRUTTURA TABELLE SUPABASE ===\n');
-  
+
   // Prendi un record da matches per vedere le colonne
   console.log('--- Tabella MATCHES (1 record esempio) ---');
   const { data: match, error: e1 } = await supabase.from('matches').select('*').limit(1);
@@ -23,7 +21,7 @@ async function inspectTables() {
   } else {
     console.log('Nessun record');
   }
-  
+
   console.log('\n--- Tabella PLAYERS (1 record esempio) ---');
   const { data: player, error: e2 } = await supabase.from('players').select('*').limit(1);
   if (e2) console.log('Errore:', e2.message);
@@ -33,7 +31,7 @@ async function inspectTables() {
   } else {
     console.log('Nessun record');
   }
-  
+
   console.log('\n--- Tabella MATCH_STATISTICS (1 record esempio) ---');
   const { data: stat, error: e3 } = await supabase.from('match_statistics').select('*').limit(1);
   if (e3) console.log('Errore:', e3.message);
@@ -42,7 +40,7 @@ async function inspectTables() {
   } else {
     console.log('Nessun record');
   }
-  
+
   console.log('\n=== FINE ===');
 }
 

@@ -1,6 +1,6 @@
 /**
  * SCRIPT: Genera mapping completi giocatori
- * 
+ *
  * Legge l'xlsx e il DB per creare mapping automatici
  * tra nomi abbreviati (Albot R.) e nomi completi
  */
@@ -10,10 +10,7 @@ const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 // Nomi completi noti (presi da xlsx o altre fonti)
 // Formato: 'Cognome X.' -> 'Nome Cognome'
@@ -58,7 +55,7 @@ const MANUAL_MAPPINGS = {
   'Nishikori K.': 'Kei Nishikori',
   'Wawrinka S.': 'Stan Wawrinka',
   'Monfils G.': 'Gael Monfils',
-  
+
   // === NUOVI MAPPING DA AGGIUNGERE ===
   'Albot R.': 'Radu Albot',
   'Altmaier D.': 'Daniel Altmaier',
@@ -216,7 +213,7 @@ const MANUAL_MAPPINGS = {
   'Wong C.': 'Coleman Wong',
   'Wu Y.': 'Yibing Wu',
   'Zeppieri G.': 'Giulio Zeppieri',
-  
+
   // Nomi con formato strano nel DB
   'Cerundolo J.m.': 'Juan Manuel Cerundolo',
   'Ficovich J.p.': 'Juan Pablo Ficovich',
@@ -231,39 +228,37 @@ const MANUAL_MAPPINGS = {
 
 async function generateMappings() {
   console.log('📊 Generazione mapping giocatori...\n');
-  
+
   // Ottieni tutti i nomi dal DB
-  const { data: matches, error } = await supabase
-    .from('matches')
-    .select('winner_name, loser_name');
-  
+  const { data: matches, error } = await supabase.from('matches').select('winner_name, loser_name');
+
   if (error) {
     console.error('Errore DB:', error);
     return;
   }
-  
+
   const allNames = new Set();
-  matches.forEach(m => {
+  matches.forEach((m) => {
     if (m.winner_name) allNames.add(m.winner_name);
     if (m.loser_name) allNames.add(m.loser_name);
   });
-  
+
   const names = Array.from(allNames).sort();
-  
+
   // Trova nomi abbreviati senza mapping
-  const shortNames = names.filter(n => n && /\s[A-Z]\.$/.test(n));
-  const missingMappings = shortNames.filter(n => !MANUAL_MAPPINGS[n]);
-  
+  const shortNames = names.filter((n) => n && /\s[A-Z]\.$/.test(n));
+  const missingMappings = shortNames.filter((n) => !MANUAL_MAPPINGS[n]);
+
   console.log('Totale giocatori unici:', names.length);
   console.log('Nomi abbreviati:', shortNames.length);
   console.log('Mapping disponibili:', Object.keys(MANUAL_MAPPINGS).length);
   console.log('Mapping mancanti:', missingMappings.length);
-  
+
   if (missingMappings.length > 0) {
     console.log('\n⚠️  MAPPING MANCANTI:');
-    missingMappings.forEach(n => console.log(`  '${n}': '???',`));
+    missingMappings.forEach((n) => console.log(`  '${n}': '???',`));
   }
-  
+
   // Genera output per dataNormalizer.js
   console.log('\n\n=== CODICE DA INSERIRE IN dataNormalizer.js ===\n');
   console.log('const PLAYER_NAME_MAPPINGS = {');
@@ -273,7 +268,7 @@ async function generateMappings() {
       console.log(`  '${short}': '${full}',`);
     });
   console.log('};');
-  
+
   return MANUAL_MAPPINGS;
 }
 

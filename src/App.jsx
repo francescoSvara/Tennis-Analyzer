@@ -1,6 +1,6 @@
 /**
  * App.jsx - Main Application
- * 
+ *
  * New architecture based on FILOSOFIA_FRONTEND.md
  * Clean, minimal routing between Home and Match views
  */
@@ -24,7 +24,7 @@ import './index.css';
 const View = {
   HOME: 'home',
   MATCH: 'match',
-  PLAYER: 'player'
+  PLAYER: 'player',
 };
 
 export default function App() {
@@ -97,12 +97,7 @@ export default function App() {
           />
         )}
 
-        {currentView === View.PLAYER && (
-          <PlayerPage
-            key="player"
-            onBack={handleBackFromPlayer}
-          />
-        )}
+        {currentView === View.PLAYER && <PlayerPage key="player" onBack={handleBackFromPlayer} />}
       </AnimatePresence>
     </ErrorBoundary>
   );

@@ -1,18 +1,17 @@
 /**
  * MatchPage - Layout principale della pagina match
- * 
+ *
  * Struttura a 3 zone come da FILOSOFIA_FRONTEND.md:
  * - Header sticky
  * - Sidebar + Main Tabs
  * - Right Rail
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
-  ArrowLeft,
   House,
   ChartLineUp,
   ListBullets,
@@ -23,8 +22,6 @@ import {
   ClipboardText,
   TrendUp,
   Scales,
-  Bell,
-  Gear,
 } from '@phosphor-icons/react';
 
 import { useMatchBundle, BundleState } from '../../hooks/useMatchBundle';
@@ -191,11 +188,7 @@ export function MatchPage({ matchId, onBack }) {
         </main>
 
         {/* Right Rail */}
-        <RightRail
-          strategies={tabs.strategies}
-          odds={tabs.odds}
-          header={header}
-        />
+        <RightRail strategies={tabs.strategies} odds={tabs.odds} header={header} />
       </div>
     </motion.div>
   );

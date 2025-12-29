@@ -1,21 +1,6 @@
 /**
  * OverviewTab - Tab principale operativa
- * 
- * Struttura da FILOSOFIA_FRONTEND.md:
- * - Scoreboard completo
- * - Quick Signals (features dal bundle)
- * - Strategy Mini Panel (riassunto strategie)
- * - Mini Momentum
- * 
- * Data Sources (FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2):
- * - header: players, score, odds, features, match
- * - tabs.overview: features (volatility, pressure, momentum)
- * - tabs.strategies: signals, summary
- * 
- * Il frontend NON ricalcola, visualizza solo dati pre-computati dal backend.
- * 
- * @see docs/filosofie/FILOSOFIA_FRONTEND.md
- * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
+ * @see docs/comments/overview-tab-explanations.md#header
  */
 
 import React from 'react';
@@ -35,7 +20,7 @@ import './OverviewTab.css';
 
 /**
  * Scoreboard - Mostra stato match dal bundle.header
- * 
+ *
  * Dati da bundle.header:
  * - header.players.home/away: { name, ranking, country }
  * - header.score: { sets: [{home, away}], game: {home, away}, serving }
@@ -61,7 +46,7 @@ function Scoreboard({ header }) {
           </span>
         )}
       </h3>
-      
+
       <div className="scoreboard__players">
         {/* Home Player */}
         <div className={`scoreboard__player ${score.serving === 'home' ? 'serving' : ''}`}>
@@ -75,7 +60,9 @@ function Scoreboard({ header }) {
           <div className="player-sets">
             {(score.sets || []).length > 0 ? (
               score.sets.map((set, idx) => (
-                <span key={idx} className="set-score">{set.home ?? '-'}</span>
+                <span key={idx} className="set-score">
+                  {set.home ?? '-'}
+                </span>
               ))
             ) : (
               <span className="set-score">-</span>
@@ -105,7 +92,9 @@ function Scoreboard({ header }) {
           <div className="player-sets">
             {(score.sets || []).length > 0 ? (
               score.sets.map((set, idx) => (
-                <span key={idx} className="set-score">{set.away ?? '-'}</span>
+                <span key={idx} className="set-score">
+                  {set.away ?? '-'}
+                </span>
               ))
             ) : (
               <span className="set-score">-</span>
@@ -141,7 +130,7 @@ function Scoreboard({ header }) {
 
 /**
  * QuickSignals - Features pre-calcolate dal backend
- * 
+ *
  * Dati da bundle.header.features (FILOSOFIA_STATS):
  * - volatility: 0-100 (null se N/A)
  * - pressure: 0-100 (null se N/A)
@@ -209,7 +198,10 @@ function QuickSignals({ header }) {
 
         <div className="signal-item">
           <span className="signal-label">Break Prob.</span>
-          <span className="signal-value" style={{ color: getSignalColor(features.breakProbability) }}>
+          <span
+            className="signal-value"
+            style={{ color: getSignalColor(features.breakProbability) }}
+          >
             {formatValue(features.breakProbability)}
           </span>
         </div>
@@ -223,7 +215,10 @@ function QuickSignals({ header }) {
 
         <div className="signal-item">
           <span className="signal-label">Return Dom.</span>
-          <span className="signal-value" style={{ color: getSignalColor(features.returnDominance) }}>
+          <span
+            className="signal-value"
+            style={{ color: getSignalColor(features.returnDominance) }}
+          >
             {formatValue(features.returnDominance)}
           </span>
         </div>
@@ -234,7 +229,7 @@ function QuickSignals({ header }) {
 
 /**
  * StrategyMiniPanel - Riassunto strategie
- * 
+ *
  * Dati da bundle.tabs.strategies:
  * - signals: array di { id, name, status, confidence, target, reasons }
  * - summary: { ready, watch, off }
@@ -284,7 +279,12 @@ function StrategyMiniPanel({ strategies }) {
               {strategy.confidence > 0 && (
                 <div className="strategy-mini-details">
                   <span>Confidence: {Math.round(strategy.confidence * 100)}%</span>
-                  {strategy.target && <><span>•</span><span>Target: {strategy.target}</span></>}
+                  {strategy.target && (
+                    <>
+                      <span>•</span>
+                      <span>Target: {strategy.target}</span>
+                    </>
+                  )}
                 </div>
               )}
               {strategy.reasons?.length > 0 && (
@@ -300,7 +300,7 @@ function StrategyMiniPanel({ strategies }) {
 
 /**
  * MiniMomentum - Trend momentum
- * 
+ *
  * Dati da bundle.features.momentum:
  * - trend: 'stable' | 'home_rising' | 'away_rising'
  * - recentSwing: number
@@ -312,14 +312,14 @@ function MiniMomentum({ header, data }) {
   const features = header?.features || data?.features || {};
   const momentum = features.momentum || {};
   const players = header?.players || {};
-  
+
   // Verifica se ci sono dati reali di momentum
-  const hasRealData = features.hasRealData !== false && (
-    momentum.recentSwing !== undefined ||
-    momentum.breakCount !== undefined ||
-    momentum.last5avg !== undefined ||
-    (momentum.trend && momentum.trend !== 'stable' && momentum.trend !== 'unknown')
-  );
+  const hasRealData =
+    features.hasRealData !== false &&
+    (momentum.recentSwing !== undefined ||
+      momentum.breakCount !== undefined ||
+      momentum.last5avg !== undefined ||
+      (momentum.trend && momentum.trend !== 'stable' && momentum.trend !== 'unknown'));
 
   const getTrendIcon = (trend) => {
     if (!hasRealData) return <ArrowRight size={16} weight="bold" className="trend-icon na" />;
@@ -340,7 +340,7 @@ function MiniMomentum({ header, data }) {
     if (trend === 'falling') return 'Falling';
     return 'Stable';
   };
-  
+
   const formatValue = (value) => {
     if (!hasRealData || value === undefined || value === null) return 'N/A';
     return value;
@@ -357,12 +357,16 @@ function MiniMomentum({ header, data }) {
       <div className={`momentum-info ${!hasRealData ? 'no-data' : ''}`}>
         <div className="momentum-row">
           <span className="momentum-label">Trend</span>
-          <span className={`momentum-value ${hasRealData ? `trend-${momentum.trend || 'stable'}` : 'na'}`}>
+          <span
+            className={`momentum-value ${
+              hasRealData ? `trend-${momentum.trend || 'stable'}` : 'na'
+            }`}
+          >
             {getTrendIcon(momentum.trend)}
             <span>{getTrendLabel(momentum.trend)}</span>
           </span>
         </div>
-        
+
         <div className="momentum-row">
           <span className="momentum-label">Recent Swing</span>
           <span className={`momentum-value mono ${!hasRealData ? 'na' : ''}`}>
@@ -380,8 +384,8 @@ function MiniMomentum({ header, data }) {
         <div className="momentum-row">
           <span className="momentum-label">Last 5 Avg</span>
           <span className={`momentum-value mono ${!hasRealData ? 'na' : ''}`}>
-            {hasRealData && typeof momentum.last5avg === 'number' 
-              ? momentum.last5avg.toFixed(1) 
+            {hasRealData && typeof momentum.last5avg === 'number'
+              ? momentum.last5avg.toFixed(1)
               : 'N/A'}
           </span>
         </div>
@@ -402,7 +406,7 @@ function MiniMomentum({ header, data }) {
 
 /**
  * OverviewTab Component
- * 
+ *
  * Props dal MatchPage (useMatchBundle):
  * - data: bundle.tabs.overview
  * - header: bundle.header (players, score, odds, features, match)

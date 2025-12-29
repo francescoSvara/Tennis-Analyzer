@@ -132,8 +132,13 @@
 }
 
 @keyframes pulse-live {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* ===========================================
@@ -379,7 +384,7 @@
   .match-header__center {
     gap: var(--space-3);
   }
-  
+
   .compact-scoreboard {
     min-width: 160px;
   }
@@ -402,7 +407,7 @@
   .quick-indicators {
     display: none;
   }
-  
+
   .players-name {
     font-size: var(--font-size-md);
   }
@@ -443,12 +448,12 @@
   .data-quality-badge {
     display: none;
   }
-  
+
   .icon-button {
     width: 36px;
     height: 36px;
   }
-  
+
   .icon-button svg {
     width: 18px;
     height: 18px;
@@ -496,12 +501,12 @@
   .match-meta {
     display: none;
   }
-  
+
   .players-name {
     font-size: var(--font-size-sm);
     max-width: 150px;
   }
-  
+
   .header-actions {
     gap: var(--space-1);
   }

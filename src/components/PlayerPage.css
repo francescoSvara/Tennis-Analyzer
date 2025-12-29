@@ -47,7 +47,7 @@
   .player-page-header .back-button {
     display: none;
   }
-  
+
   .player-page-header .close-button-mobile {
     display: inline-flex;
   }
@@ -86,7 +86,8 @@
   background: var(--bg-secondary, #1a1f2e);
   color: var(--text-primary, #ffffff);
   font-size: 1rem;
-  transition: all var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .player-search-input:focus {
@@ -121,7 +122,8 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: all var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
   border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.05));
 }
 
@@ -180,7 +182,8 @@
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -226,7 +229,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
@@ -249,7 +254,11 @@
    ============================================================================ */
 
 .player-header-card {
-  background: linear-gradient(135deg, var(--card, rgba(30, 41, 59, 0.95)) 0%, var(--bg, #0f172a) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--card, rgba(30, 41, 59, 0.95)) 0%,
+    var(--bg, #0f172a) 100%
+  );
   border-radius: var(--radius-lg, 14px);
   padding: 24px 28px;
   margin-bottom: 24px;
@@ -326,7 +335,8 @@
   border-radius: var(--radius-md, 10px);
   padding: 16px;
   border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  transition: all var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .stat-card:hover {
@@ -419,7 +429,8 @@
 .percent-bar-fill {
   height: 100%;
   border-radius: var(--radius-sm, 6px);
-  transition: width var(--motion-normal, 0.32s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: width var(--motion-normal, 0.32s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
   box-shadow: 0 0 8px currentColor;
 }
 
@@ -439,7 +450,8 @@
   padding: 16px;
   border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
   border-left-width: 4px;
-  transition: all var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .surface-card:hover {
@@ -527,7 +539,8 @@
   border-radius: var(--radius-md, 10px);
   padding: 16px;
   border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  transition: all var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .series-card:hover {
@@ -597,7 +610,8 @@
   border-radius: var(--radius-sm, 6px);
   font-weight: 600;
   font-size: 0.85rem;
-  transition: transform var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .form-result:hover {
@@ -621,7 +635,11 @@
    ============================================================================ */
 
 .roi-section {
-  background: linear-gradient(135deg, var(--card, rgba(30, 41, 59, 0.95)) 0%, var(--bg, #0f172a) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--card, rgba(30, 41, 59, 0.95)) 0%,
+    var(--bg, #0f172a) 100%
+  );
 }
 
 .roi-container {
@@ -687,7 +705,8 @@
   padding: 14px 18px;
   color: var(--text-secondary, #8b95a5);
   cursor: pointer;
-  transition: all var(--motion-fast, 0.18s) var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--motion-fast, 0.18s)
+    var(--motion-ease-premium, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .raw-data-section summary:hover {
@@ -720,23 +739,23 @@
   .player-page {
     padding: 12px;
   }
-  
+
   .player-page-header h1 {
     font-size: 1.5rem;
   }
-  
+
   .player-search-form {
     flex-direction: column;
   }
-  
+
   .stat-value {
     font-size: 1.5rem;
   }
-  
+
   .roi-value {
     font-size: 2.5rem;
   }
-  
+
   .roi-details {
     flex-direction: column;
     gap: 8px;

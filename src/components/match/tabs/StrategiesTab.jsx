@@ -1,11 +1,11 @@
 /**
  * StrategiesTab - Hub Trading per strategie live
- * 
+ *
  * Contiene:
  * - Filtri (Tutte, READY, WATCH, Preferite)
  * - Card strategie (Lay Winner, Banca Servizio, Super Break)
  * - Strategy Event Log
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
@@ -156,9 +156,7 @@ function StrategyCard({ strategy, onExecute }) {
           <span className="confidence">
             Confidence: {strategy.confidence ? (strategy.confidence * 100).toFixed(0) + '%' : '-'}
           </span>
-          <span className="risk">
-            Risk: {strategy.risk?.level || 'MED'}
-          </span>
+          <span className="risk">Risk: {strategy.risk?.level || 'MED'}</span>
         </div>
       </div>
 
@@ -187,11 +185,7 @@ function StrategyCard({ strategy, onExecute }) {
             <span className="conditions-label">Conditions:</span>
             <div className="conditions-list">
               {strategy.conditions.map((cond, idx) => (
-                <ConditionItem
-                  key={idx}
-                  condition={cond.text}
-                  met={cond.met}
-                />
+                <ConditionItem key={idx} condition={cond.text} met={cond.met} />
               ))}
             </div>
           </div>
@@ -223,16 +217,11 @@ function StrategyCard({ strategy, onExecute }) {
           <Timer size={14} weight="duotone" />
           Exit: {strategy.exitRule || '-'}
         </span>
-        {strategy.why && (
-          <p className="strategy-why">
-            "{strategy.why}"
-          </p>
-        )}
+        {strategy.why && <p className="strategy-why">&quot;{strategy.why}&quot;</p>}
       </div>
     </motion.div>
   );
 }
-
 
 /**
  * StrategiesTab Component
@@ -245,33 +234,36 @@ export function StrategiesTab({ data, header }) {
   const strategies = useMemo(() => {
     // Use real data from bundle if available
     const signals = data?.signals || [];
-    
+
     if (signals.length > 0) {
-      return signals.map(signal => ({
+      return signals.map((signal) => ({
         id: signal.id,
         name: signal.name || formatStrategyName(signal.id),
         status: signal.status || 'OFF',
-        target: signal.target === 'home' ? header?.players?.home?.name : 
-                signal.target === 'away' ? header?.players?.away?.name : 
-                signal.target || '-',
+        target:
+          signal.target === 'home'
+            ? header?.players?.home?.name
+            : signal.target === 'away'
+            ? header?.players?.away?.name
+            : signal.target || '-',
         score: header?.score?.game || '-',
         confidence: signal.confidence || 0,
         risk: {
           level: signal.confidence > 0.7 ? 'MED' : signal.confidence > 0.5 ? 'LOW' : 'HIGH',
           stakeSuggested: 10,
-          liabilityCap: 30
+          liabilityCap: 30,
         },
         action: signal.action || null,
         exitRule: signal.exitRule || '-',
         waitingFor: signal.status === 'WATCH' ? signal.reasons?.[0] : null,
         conditions: Object.entries(signal.conditions || {}).map(([key, met]) => ({
           text: formatConditionText(key),
-          met: !!met
+          met: !!met,
         })),
         why: signal.reasons?.length > 0 ? signal.reasons.join('. ') : null,
       }));
     }
-    
+
     // Fallback mock data for demo
     return [
       {
@@ -333,9 +325,12 @@ export function StrategiesTab({ data, header }) {
     // For now, generate from current strategy states
     const now = new Date();
     return strategies.map((s, idx) => ({
-      time: new Date(now.getTime() - idx * 60000).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+      time: new Date(now.getTime() - idx * 60000).toLocaleTimeString('it-IT', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
       status: s.status,
-      message: `${s.name} ${s.status}${s.status === 'READY' ? ` → ${s.action} ${s.target}` : ''}`
+      message: `${s.name} ${s.status}${s.status === 'READY' ? ` → ${s.action} ${s.target}` : ''}`,
     }));
   }, [strategies]);
 
@@ -343,30 +338,28 @@ export function StrategiesTab({ data, header }) {
   const filteredStrategies = useMemo(() => {
     if (activeFilter === 'all') return strategies;
     if (activeFilter === 'favorites') {
-      return strategies.filter(s => favorites.has(s.id));
+      return strategies.filter((s) => favorites.has(s.id));
     }
-    return strategies.filter(s => s.status === activeFilter);
+    return strategies.filter((s) => s.status === activeFilter);
   }, [strategies, activeFilter, favorites]);
 
   // Conteggi per filtri
-  const counts = useMemo(() => ({
-    all: strategies.length,
-    READY: strategies.filter(s => s.status === 'READY').length,
-    WATCH: strategies.filter(s => s.status === 'WATCH').length,
-    favorites: favorites.size,
-  }), [strategies, favorites]);
+  const counts = useMemo(
+    () => ({
+      all: strategies.length,
+      READY: strategies.filter((s) => s.status === 'READY').length,
+      WATCH: strategies.filter((s) => s.status === 'WATCH').length,
+      favorites: favorites.size,
+    }),
+    [strategies, favorites]
+  );
 
   const handleExecute = (strategy) => {
     // TODO: Implementare logica di esecuzione
   };
 
   return (
-    <motion.div
-      className="strategies-tab"
-      variants={fadeUp}
-      initial="initial"
-      animate="animate"
-    >
+    <motion.div className="strategies-tab" variants={fadeUp} initial="initial" animate="animate">
       {/* Header */}
       <div className="strategies-tab__header">
         <h2 className="tab-title">
@@ -389,9 +382,7 @@ export function StrategiesTab({ data, header }) {
             onClick={() => setActiveFilter(filter.id)}
           >
             {filter.label}
-            {counts[filter.id] > 0 && (
-              <span className="filter-count">{counts[filter.id]}</span>
-            )}
+            {counts[filter.id] > 0 && <span className="filter-count">{counts[filter.id]}</span>}
           </button>
         ))}
       </div>
@@ -417,16 +408,11 @@ export function StrategiesTab({ data, header }) {
             </motion.div>
           ) : (
             filteredStrategies.map((strategy) => (
-              <StrategyCard
-                key={strategy.id}
-                strategy={strategy}
-                onExecute={handleExecute}
-              />
+              <StrategyCard key={strategy.id} strategy={strategy} onExecute={handleExecute} />
             ))
           )}
         </AnimatePresence>
       </motion.div>
-
     </motion.div>
   );
 }

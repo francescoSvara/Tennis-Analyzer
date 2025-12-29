@@ -1,13 +1,13 @@
-/**
+﻿/**
  * Raw Events Processor
- * 
+ *
  * Pipeline per processare eventi raw e canonicalizzarli nelle tabelle standard.
- * 
+ *
  * Flusso:
  * 1. ingest() - Inserisce payload originale in raw_events (status=PENDING)
  * 2. processRawEvents() - Worker che processa eventi PENDING
  * 3. canonicalize() - Normalizza e inserisce in tabelle canoniche
- * 
+ *
  * Vantaggi:
  * - Dati originali sempre disponibili per reprocessing
  * - Audit trail completo
@@ -31,7 +31,7 @@ class RawEventsProcessor {
       ingested: 0,
       processed: 0,
       errors: 0,
-      startedAt: null
+      startedAt: null,
     };
   }
 
@@ -55,20 +55,23 @@ class RawEventsProcessor {
 
     const { data, error } = await supabase
       .from('raw_events')
-      .upsert({
-        source_type: sourceType,
-        source_entity: sourceEntity,
-        source_key: String(sourceKey),
-        payload_json: payload,
-        processing_status: 'PENDING',
-        processed_at: null,
-        error_text: null,
-        retry_count: 0,
-        ingested_at: new Date().toISOString()
-      }, { 
-        onConflict: 'source_type,source_entity,source_key',
-        ignoreDuplicates: false
-      })
+      .upsert(
+        {
+          source_type: sourceType,
+          source_entity: sourceEntity,
+          source_key: String(sourceKey),
+          payload_json: payload,
+          processing_status: 'PENDING',
+          processed_at: null,
+          error_text: null,
+          retry_count: 0,
+          ingested_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'source_type,source_entity,source_key',
+          ignoreDuplicates: false,
+        }
+      )
       .select('id')
       .single();
 
@@ -87,30 +90,30 @@ class RawEventsProcessor {
   async ingestBatch(events) {
     if (!supabase || !events?.length) return [];
 
-    const records = events.map(e => ({
+    const records = events.map((e) => ({
       source_type: e.sourceType,
       source_entity: e.sourceEntity,
       source_key: String(e.sourceKey),
       payload_json: e.payload,
       processing_status: 'PENDING',
-      ingested_at: new Date().toISOString()
+      ingested_at: new Date().toISOString(),
     }));
 
     const { data, error } = await supabase
       .from('raw_events')
-      .upsert(records, { 
+      .upsert(records, {
         onConflict: 'source_type,source_entity,source_key',
-        ignoreDuplicates: false
+        ignoreDuplicates: false,
       })
       .select('id');
 
     if (error) {
-      console.error('❌ Batch ingest error:', error.message);
+      console.error('âŒ Batch ingest error:', error.message);
       return [];
     }
 
     this.stats.ingested += data?.length || 0;
-    return data?.map(d => d.id) || [];
+    return data?.map((d) => d.id) || [];
   }
 
   // ============================================================================
@@ -129,7 +132,7 @@ class RawEventsProcessor {
     this.isRunning = true;
     this.stats.startedAt = new Date();
     logger.info('Raw Events Processor started');
-    
+
     this.poll();
   }
 
@@ -143,7 +146,9 @@ class RawEventsProcessor {
       this.pollTimer = null;
     }
     logger.info('Raw Events Processor stopped');
-    logger.info(`Stats: Ingested=${this.stats.ingested}, Processed=${this.stats.processed}, Errors=${this.stats.errors}`);
+    logger.info(
+      `Stats: Ingested=${this.stats.ingested}, Processed=${this.stats.processed}, Errors=${this.stats.errors}`
+    );
   }
 
   /**
@@ -154,7 +159,7 @@ class RawEventsProcessor {
 
     try {
       const processed = await this.processBatch();
-      
+
       // If we processed something, poll immediately; otherwise wait
       if (processed > 0) {
         setImmediate(() => this.poll());
@@ -199,25 +204,24 @@ class RawEventsProcessor {
         // Mark as done
         await supabase
           .from('raw_events')
-          .update({ 
-            processing_status: 'DONE', 
+          .update({
+            processing_status: 'DONE',
             processed_at: new Date().toISOString(),
-            error_text: null
+            error_text: null,
           })
           .eq('id', event.id);
 
         this.stats.processed++;
         processed++;
-
       } catch (err) {
-        console.error(`❌ Error processing event ${event.id}:`, err.message);
-        
+        console.error(`âŒ Error processing event ${event.id}:`, err.message);
+
         await supabase
           .from('raw_events')
-          .update({ 
-            processing_status: 'ERROR', 
+          .update({
+            processing_status: 'ERROR',
             error_text: err.message,
-            retry_count: (event.retry_count || 0) + 1
+            retry_count: (event.retry_count || 0) + 1,
           })
           .eq('id', event.id);
 
@@ -271,7 +275,7 @@ class RawEventsProcessor {
         break;
 
       default:
-        console.warn(`⚠️ Unknown event type: ${source_type}:${source_entity}`);
+        console.warn(`âš ï¸ Unknown event type: ${source_type}:${source_entity}`);
     }
   }
 
@@ -286,7 +290,7 @@ class RawEventsProcessor {
     // Normalize player names
     const winner = payload.Winner || payload.winner;
     const loser = payload.Loser || payload.loser;
-    
+
     if (!winner || !loser) {
       throw new Error('Missing Winner or Loser in XLSX payload');
     }
@@ -328,7 +332,7 @@ class RawEventsProcessor {
       set4_p1: parseInt(payload.W4) || null,
       set4_p2: parseInt(payload.L4) || null,
       set5_p1: parseInt(payload.W5) || null,
-      set5_p2: parseInt(payload.L5) || null
+      set5_p2: parseInt(payload.L5) || null,
     };
 
     // Calculate sets won
@@ -360,7 +364,7 @@ class RawEventsProcessor {
       { prefix: 'B365', name: 'Bet365' },
       { prefix: 'PS', name: 'Pinnacle' },
       { prefix: 'Max', name: 'MaxOdds' },
-      { prefix: 'Avg', name: 'Average' }
+      { prefix: 'Avg', name: 'Average' },
     ];
 
     for (const bm of oddsBookmakers) {
@@ -368,9 +372,8 @@ class RawEventsProcessor {
       const odds2 = parseFloat(payload[`${bm.prefix}L`]);
 
       if (odds1 && odds2 && odds1 > 1 && odds2 > 1) {
-        await supabase
-          .from('match_odds')
-          .upsert({
+        await supabase.from('match_odds').upsert(
+          {
             match_id: matchId,
             bookmaker: bm.name,
             odds_type: 'match_winner',
@@ -378,7 +381,9 @@ class RawEventsProcessor {
             odds_player2: odds2,
             is_opening: bm.prefix === 'B365', // Use Bet365 as opening
             is_closing: bm.prefix === 'Avg', // Use Average as closing
-          }, { onConflict: 'match_id,bookmaker,odds_type' });
+          },
+          { onConflict: 'match_id,bookmaker,odds_type' }
+        );
       }
     }
   }
@@ -392,11 +397,11 @@ class RawEventsProcessor {
    */
   async canonicalizeSofascoreMatch(payload) {
     const event = payload.event || payload;
-    
+
     // Extract players
     const homePlayer = event.homeTeam || event.home;
     const awayPlayer = event.awayTeam || event.away;
-    
+
     if (!homePlayer || !awayPlayer) {
       throw new Error('Missing home or away player in SofaScore payload');
     }
@@ -410,7 +415,7 @@ class RawEventsProcessor {
     const tournamentId = await this.findOrCreateTournamentSofascore(tournament);
 
     // Parse timestamp
-    const matchDate = event.startTimestamp 
+    const matchDate = event.startTimestamp
       ? new Date(event.startTimestamp * 1000).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0];
 
@@ -455,7 +460,7 @@ class RawEventsProcessor {
       set4_p1: homeScore.period4,
       set4_p2: awayScore.period4,
       set5_p1: homeScore.period5,
-      set5_p2: awayScore.period5
+      set5_p2: awayScore.period5,
     };
 
     // Calculate sets won
@@ -481,7 +486,7 @@ class RawEventsProcessor {
    */
   async canonicalizeSofascoreStats(payload) {
     const { matchId, statistics } = payload;
-    
+
     if (!matchId || !statistics) {
       throw new Error('Missing matchId or statistics in payload');
     }
@@ -493,7 +498,7 @@ class RawEventsProcessor {
 
       const statsData = {
         match_id: matchId,
-        period: period
+        period: period,
       };
 
       // Parse stats groups
@@ -501,7 +506,7 @@ class RawEventsProcessor {
         for (const item of group.statisticsItems || []) {
           const home = item.home;
           const away = item.away;
-          
+
           switch (item.name?.toLowerCase()) {
             case 'aces':
               statsData.p1_aces = parseInt(home);
@@ -515,7 +520,7 @@ class RawEventsProcessor {
               statsData.p1_first_serve_pct = parseFloat(home);
               statsData.p2_first_serve_pct = parseFloat(away);
               break;
-            case 'break points won':
+            case 'break points won': {
               const bpHome = this.parseWonTotal(home);
               const bpAway = this.parseWonTotal(away);
               statsData.p1_break_points_won = bpHome.won;
@@ -523,6 +528,7 @@ class RawEventsProcessor {
               statsData.p2_break_points_won = bpAway.won;
               statsData.p2_break_points_total = bpAway.total;
               break;
+            }
             case 'total points won':
               statsData.p1_total_points_won = parseInt(home);
               statsData.p2_total_points_won = parseInt(away);
@@ -541,7 +547,7 @@ class RawEventsProcessor {
 
       // Upsert statistics
       await supabase
-        .from('match_statistics_new')
+        .from('match_statistics')
         .upsert(statsData, { onConflict: 'match_id,period' });
     }
 
@@ -557,13 +563,13 @@ class RawEventsProcessor {
    */
   async canonicalizeSofascoreMomentum(payload) {
     const { matchId, powerRankings } = payload;
-    
+
     if (!matchId || !powerRankings?.length) {
       throw new Error('Missing matchId or powerRankings in payload');
     }
 
     const records = [];
-    
+
     for (const pr of powerRankings) {
       records.push({
         match_id: matchId,
@@ -572,19 +578,14 @@ class RawEventsProcessor {
         value: pr.value,
         zone: this.getValueZone(pr.value),
         favored_player: pr.value > 0 ? 1 : pr.value < 0 ? 2 : null,
-        break_occurred: pr.breakOccurred || false
+        break_occurred: pr.breakOccurred || false,
       });
     }
 
     // Delete existing and insert new
-    await supabase
-      .from('match_power_rankings_new')
-      .delete()
-      .eq('match_id', matchId);
+    await supabase.from('match_power_rankings').delete().eq('match_id', matchId);
 
-    await supabase
-      .from('match_power_rankings_new')
-      .insert(records);
+    await supabase.from('match_power_rankings').insert(records);
 
     // Update data source
     await this.updateDataSource(matchId, 'sofascore', { has_power_rankings: true });
@@ -598,23 +599,23 @@ class RawEventsProcessor {
    */
   async canonicalizeSofascorePoints(payload) {
     const { matchId, pointByPoint } = payload;
-    
+
     if (!matchId || !pointByPoint) {
       throw new Error('Missing matchId or pointByPoint in payload');
     }
 
     const records = [];
-    
+
     // Parse point-by-point structure
-    for (const setData of (pointByPoint.sets || [])) {
+    for (const setData of pointByPoint.sets || []) {
       const setNumber = setData.set || 1;
-      
-      for (const gameData of (setData.games || [])) {
+
+      for (const gameData of setData.games || []) {
         const gameNumber = gameData.game || 1;
-        
+
         for (let i = 0; i < (gameData.points || []).length; i++) {
           const point = gameData.points[i];
-          
+
           records.push({
             match_id: matchId,
             set_number: setNumber,
@@ -626,7 +627,7 @@ class RawEventsProcessor {
             point_winner: point.winner,
             is_ace: point.isAce || false,
             is_double_fault: point.isDoubleFault || false,
-            is_break_point: point.isBreakPoint || false
+            is_break_point: point.isBreakPoint || false,
           });
         }
       }
@@ -634,16 +635,13 @@ class RawEventsProcessor {
 
     if (records.length > 0) {
       // Delete existing and insert new
-      await supabase
-        .from('match_point_by_point_new')
-        .delete()
-        .eq('match_id', matchId);
+      await supabase.from('match_point_by_point').delete().eq('match_id', matchId);
 
       // Insert in batches
       const batchSize = 500;
       for (let i = 0; i < records.length; i += batchSize) {
         const batch = records.slice(i, i + batchSize);
-        await supabase.from('match_point_by_point_new').insert(batch);
+        await supabase.from('match_point_by_point').insert(batch);
       }
 
       // Update data source
@@ -659,7 +657,7 @@ class RawEventsProcessor {
    */
   async canonicalizeSofascorePlayer(payload) {
     const player = payload.player || payload;
-    
+
     if (!player.id) {
       throw new Error('Missing player id');
     }
@@ -673,25 +671,20 @@ class RawEventsProcessor {
       country_code: player.country?.alpha2,
       country_name: player.country?.name,
       current_ranking: player.ranking,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     // Find by sofascore_id or insert
     const { data: existing } = await supabase
-      .from('players_new')
+      .from('players')
       .select('id')
       .eq('sofascore_id', player.id)
       .single();
 
     if (existing) {
-      await supabase
-        .from('players_new')
-        .update(playerData)
-        .eq('id', existing.id);
+      await supabase.from('players').update(playerData).eq('id', existing.id);
     } else {
-      await supabase
-        .from('players_new')
-        .insert(playerData);
+      await supabase.from('players').insert(playerData);
     }
   }
 
@@ -700,7 +693,7 @@ class RawEventsProcessor {
    */
   async canonicalizeSofascoreTournament(payload) {
     const tournament = payload.tournament || payload;
-    
+
     if (!tournament.id) {
       throw new Error('Missing tournament id');
     }
@@ -712,25 +705,20 @@ class RawEventsProcessor {
       category: tournament.category?.name,
       surface: tournament.groundType,
       country_name: tournament.category?.country?.name,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     // Find by sofascore_id or insert
     const { data: existing } = await supabase
-      .from('tournaments_new')
+      .from('tournaments')
       .select('id')
       .eq('sofascore_id', tournament.id)
       .single();
 
     if (existing) {
-      await supabase
-        .from('tournaments_new')
-        .update(tournamentData)
-        .eq('id', existing.id);
+      await supabase.from('tournaments').update(tournamentData).eq('id', existing.id);
     } else {
-      await supabase
-        .from('tournaments_new')
-        .insert(tournamentData);
+      await supabase.from('tournaments').insert(tournamentData);
     }
   }
 
@@ -742,7 +730,7 @@ class RawEventsProcessor {
     if (!name) return null;
 
     const normalized = this.normalizeName(name);
-    
+
     // Check aliases
     const { data: alias } = await supabase
       .from('player_aliases')
@@ -754,10 +742,10 @@ class RawEventsProcessor {
 
     // Create new player
     const { data: newPlayer, error } = await supabase
-      .from('players_new')
+      .from('players')
       .insert({
         name: name,
-        current_ranking: ranking ? parseInt(ranking) : null
+        current_ranking: ranking ? parseInt(ranking) : null,
       })
       .select('id')
       .single();
@@ -774,7 +762,7 @@ class RawEventsProcessor {
         player_id: newPlayer.id,
         alias_name: name,
         alias_normalized: normalized,
-        source: 'xlsx'
+        source: 'xlsx',
       })
       .select();
 
@@ -785,11 +773,11 @@ class RawEventsProcessor {
     if (!playerData) return null;
 
     const sofascoreId = playerData.id;
-    
+
     // Check by sofascore_id
     if (sofascoreId) {
       const { data: existing } = await supabase
-        .from('players_new')
+        .from('players')
         .select('id')
         .eq('sofascore_id', sofascoreId)
         .single();
@@ -800,7 +788,7 @@ class RawEventsProcessor {
     // Create new
     const name = playerData.name || playerData.fullName || playerData.shortName;
     const { data: newPlayer, error } = await supabase
-      .from('players_new')
+      .from('players')
       .insert({
         sofascore_id: sofascoreId,
         name: name,
@@ -809,7 +797,7 @@ class RawEventsProcessor {
         slug: playerData.slug,
         country_code: playerData.country?.alpha2,
         country_name: playerData.country?.name,
-        current_ranking: playerData.ranking
+        current_ranking: playerData.ranking,
       })
       .select('id')
       .single();
@@ -821,14 +809,12 @@ class RawEventsProcessor {
 
     // Create alias
     if (name) {
-      await supabase
-        .from('player_aliases')
-        .insert({
-          player_id: newPlayer.id,
-          alias_name: name,
-          alias_normalized: this.normalizeName(name),
-          source: 'sofascore'
-        });
+      await supabase.from('player_aliases').insert({
+        player_id: newPlayer.id,
+        alias_name: name,
+        alias_normalized: this.normalizeName(name),
+        source: 'sofascore',
+      });
     }
 
     return newPlayer.id;
@@ -838,10 +824,10 @@ class RawEventsProcessor {
     if (!name) return null;
 
     const normalized = this.normalizeName(name);
-    
+
     // Try to find existing
     const { data: existing } = await supabase
-      .from('tournaments_new')
+      .from('tournaments')
       .select('id')
       .ilike('name', `%${name}%`)
       .single();
@@ -850,10 +836,10 @@ class RawEventsProcessor {
 
     // Create new
     const { data: newTournament, error } = await supabase
-      .from('tournaments_new')
+      .from('tournaments')
       .insert({
         name: name,
-        surface: surface
+        surface: surface,
       })
       .select('id')
       .single();
@@ -870,10 +856,10 @@ class RawEventsProcessor {
     if (!tournamentData) return null;
 
     const sofascoreId = tournamentData.id || tournamentData.uniqueTournament?.id;
-    
+
     if (sofascoreId) {
       const { data: existing } = await supabase
-        .from('tournaments_new')
+        .from('tournaments')
         .select('id')
         .eq('sofascore_id', sofascoreId)
         .single();
@@ -883,13 +869,13 @@ class RawEventsProcessor {
 
     // Create new
     const { data: newTournament, error } = await supabase
-      .from('tournaments_new')
+      .from('tournaments')
       .insert({
         sofascore_id: sofascoreId,
         name: tournamentData.name || tournamentData.uniqueTournament?.name,
         slug: tournamentData.slug,
         category: tournamentData.category?.name,
-        surface: tournamentData.groundType
+        surface: tournamentData.groundType,
       })
       .select('id')
       .single();
@@ -905,7 +891,7 @@ class RawEventsProcessor {
   async upsertMatch(matchData, sourceType, sourceId = null) {
     // Try to find existing match by players + date
     const { data: existing } = await supabase
-      .from('matches_new')
+      .from('matches')
       .select('id')
       .eq('player1_id', matchData.player1_id)
       .eq('player2_id', matchData.player2_id)
@@ -917,17 +903,17 @@ class RawEventsProcessor {
     if (existing) {
       // Update existing
       await supabase
-        .from('matches_new')
+        .from('matches')
         .update({
           ...matchData,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', existing.id);
       matchId = existing.id;
     } else {
       // Also check with players swapped
       const { data: existingSwapped } = await supabase
-        .from('matches_new')
+        .from('matches')
         .select('id')
         .eq('player1_id', matchData.player2_id)
         .eq('player2_id', matchData.player1_id)
@@ -939,7 +925,7 @@ class RawEventsProcessor {
       } else {
         // Insert new
         const { data: newMatch, error } = await supabase
-          .from('matches_new')
+          .from('matches')
           .insert(matchData)
           .select('id')
           .single();
@@ -955,7 +941,7 @@ class RawEventsProcessor {
     // Update data sources
     await this.updateDataSource(matchId, sourceType, {
       source_id: sourceId,
-      has_score: true
+      has_score: true,
     });
 
     return matchId;
@@ -975,17 +961,15 @@ class RawEventsProcessor {
         .update({
           ...existing,
           ...updates,
-          imported_at: new Date().toISOString()
+          imported_at: new Date().toISOString(),
         })
         .eq('id', existing.id);
     } else {
-      await supabase
-        .from('match_data_sources')
-        .insert({
-          match_id: matchId,
-          source_type: sourceType,
-          ...updates
-        });
+      await supabase.from('match_data_sources').insert({
+        match_id: matchId,
+        source_type: sourceType,
+        ...updates,
+      });
     }
   }
 
@@ -1018,16 +1002,18 @@ class RawEventsProcessor {
 
   parseXlsxDate(dateValue) {
     if (!dateValue) return new Date().toISOString().split('T')[0];
-    
+
     // Handle Excel serial date
     if (typeof dateValue === 'number') {
       const date = new Date((dateValue - 25569) * 86400 * 1000);
       return date.toISOString().split('T')[0];
     }
-    
+
     // Handle string date
     const date = new Date(dateValue);
-    return isNaN(date.getTime()) ? new Date().toISOString().split('T')[0] : date.toISOString().split('T')[0];
+    return isNaN(date.getTime())
+      ? new Date().toISOString().split('T')[0]
+      : date.toISOString().split('T')[0];
   }
 
   countSetsWon(matchData, playerNum) {
@@ -1036,7 +1022,7 @@ class RawEventsProcessor {
       const p1Score = matchData[`set${i}_p1`];
       const p2Score = matchData[`set${i}_p2`];
       if (p1Score == null || p2Score == null) continue;
-      
+
       if (playerNum === 1 && p1Score > p2Score) sets++;
       if (playerNum === 2 && p2Score > p1Score) sets++;
     }
@@ -1058,10 +1044,16 @@ class RawEventsProcessor {
   normalizeRound(round) {
     if (!round) return null;
     const normalized = round.toLowerCase();
-    
-    if (normalized.includes('final') && !normalized.includes('semi') && !normalized.includes('quarter')) return 'Final';
+
+    if (
+      normalized.includes('final') &&
+      !normalized.includes('semi') &&
+      !normalized.includes('quarter')
+    )
+      return 'Final';
     if (normalized.includes('semifinal') || normalized.includes('semi-final')) return 'Semifinal';
-    if (normalized.includes('quarterfinal') || normalized.includes('quarter-final')) return 'Quarterfinal';
+    if (normalized.includes('quarterfinal') || normalized.includes('quarter-final'))
+      return 'Quarterfinal';
     if (normalized.includes('round of 16') || normalized === 'r16') return 'Round of 16';
     if (normalized.includes('round of 32') || normalized === 'r32') return 'Round of 32';
     if (normalized.includes('round of 64') || normalized === 'r64') return 'Round of 64';
@@ -1070,18 +1062,18 @@ class RawEventsProcessor {
     if (normalized.includes('2nd round') || normalized === '2r') return '2nd Round';
     if (normalized.includes('3rd round') || normalized === '3r') return '3rd Round';
     if (normalized.includes('4th round') || normalized === '4r') return '4th Round';
-    
+
     return round;
   }
 
   mapSofascoreStatus(status) {
     const map = {
-      'finished': 'finished',
-      'notstarted': 'scheduled',
-      'inprogress': 'live',
-      'cancelled': 'cancelled',
-      'postponed': 'postponed',
-      'interrupted': 'suspended'
+      finished: 'finished',
+      notstarted: 'scheduled',
+      inprogress: 'live',
+      cancelled: 'cancelled',
+      postponed: 'postponed',
+      interrupted: 'suspended',
     };
     return map[status?.toLowerCase()] || status || 'unknown';
   }
@@ -1112,9 +1104,9 @@ class RawEventsProcessor {
     return {
       ...this.stats,
       isRunning: this.isRunning,
-      uptime: this.stats.startedAt 
+      uptime: this.stats.startedAt
         ? Math.floor((Date.now() - this.stats.startedAt.getTime()) / 1000)
-        : 0
+        : 0,
     };
   }
 
@@ -1122,25 +1114,23 @@ class RawEventsProcessor {
    * Reprocess all raw events (for schema changes)
    */
   async reprocessAll(sourceType = null, sourceEntity = null) {
-    let query = supabase
-      .from('raw_events')
-      .update({ 
-        processing_status: 'PENDING',
-        processed_at: null,
-        error_text: null
-      });
+    let query = supabase.from('raw_events').update({
+      processing_status: 'PENDING',
+      processed_at: null,
+      error_text: null,
+    });
 
     if (sourceType) query = query.eq('source_type', sourceType);
     if (sourceEntity) query = query.eq('source_entity', sourceEntity);
 
     const { error } = await query;
-    
+
     if (error) {
       console.error('Error resetting events:', error.message);
       return false;
     }
 
-    console.log('✅ Events reset to PENDING for reprocessing');
+    console.log('âœ… Events reset to PENDING for reprocessing');
     return true;
   }
 }
@@ -1152,11 +1142,14 @@ module.exports = {
   RawEventsProcessor,
   processor,
   // Convenience methods
-  ingest: (sourceType, sourceEntity, sourceKey, payload) => 
+  ingest: (sourceType, sourceEntity, sourceKey, payload) =>
     processor.ingest(sourceType, sourceEntity, sourceKey, payload),
   ingestBatch: (events) => processor.ingestBatch(events),
   startProcessor: () => processor.start(),
   stopProcessor: () => processor.stop(),
   getProcessorStats: () => processor.getStats(),
-  reprocessAll: (sourceType, sourceEntity) => processor.reprocessAll(sourceType, sourceEntity)
+  reprocessAll: (sourceType, sourceEntity) => processor.reprocessAll(sourceType, sourceEntity),
 };
+
+
+

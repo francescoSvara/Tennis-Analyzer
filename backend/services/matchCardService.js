@@ -1,22 +1,6 @@
-/**
+﻿/**
  * Match Card Service
- * 
- * Assembla i dati per le card match da multiple fonti:
- * - Dati base match (matches_new)
- * - Dati giocatori (players_new + stats)
- * - Statistiche match (match_statistics_new)
- * - Momentum (match_power_rankings_new)
- * - Point by Point
- * - Odds
- * - H2H
- * 
- * NOTA: Per performance ottimali, usare prima getMatchCardFromSnapshot()
- * che legge dalla tabella match_card_snapshot (single query).
- * Il metodo getMatchCard() originale è mantenuto come fallback.
- * 
- * FILOSOFIA_TEMPORAL compliance: includes meta.as_of_time (generated_at) in bundle
- * FILOSOFIA_LINEAGE_VERSIONING compliance: includes meta.versions (feature_version, strategy_version)
- * FILOSOFIA_RISK_BANKROLL compliance: integrates risk/edge/stake data when available
+ * @see docs/comments/match-card-service-explanations.md#header
  */
 
 const { supabase } = require('../db/supabase');
@@ -29,7 +13,6 @@ const MATCH_CARD_SERVICE_VERSION = '1.1.0';
 const DATA_VERSION = 'canonical_v2'; // Schema DB + origine dati
 
 class MatchCardService {
-  
   /**
    * Ottiene la card da snapshot (FAST - single query)
    * Se lo snapshot non esiste, costruisce e restituisce
@@ -57,14 +40,14 @@ class MatchCardService {
       if (error?.code === 'PGRST116') {
         logger.info(`Building snapshot for match ${matchId}...`);
         const card = await this.getMatchCard(matchId);
-        
+
         if (card) {
           // Save snapshot in background (don't block response)
-          this.saveSnapshot(matchId, card).catch(err => 
+          this.saveSnapshot(matchId, card).catch((err) =>
             console.error('Error saving snapshot:', err.message)
           );
         }
-        
+
         return card;
       }
 
@@ -78,7 +61,7 @@ class MatchCardService {
 
   /**
    * Format snapshot data into API response format
-   * 
+   *
    * FILOSOFIA_TEMPORAL: generated_at / as_of_time for temporal tracking
    * FILOSOFIA_LINEAGE_VERSIONING: meta.versions for bundle versioning
    * FILOSOFIA_RISK_BANKROLL: risk/edge/stake placeholder for integration
@@ -90,27 +73,31 @@ class MatchCardService {
       player1: {
         ...(snapshot.players_json?.player1 || {}),
         stats: null, // Stats per player not in snapshot, load lazy if needed
-        recentForm: []
+        recentForm: [],
       },
       player2: {
         ...(snapshot.players_json?.player2 || {}),
         stats: null,
-        recentForm: []
+        recentForm: [],
       },
-      h2h: snapshot.h2h_json ? {
-        total: `${snapshot.h2h_json.player1_wins}-${snapshot.h2h_json.player2_wins}`,
-        player1Wins: snapshot.h2h_json.player1_wins,
-        player2Wins: snapshot.h2h_json.player2_wins,
-        onHard: `${snapshot.h2h_json.hard_p1_wins || 0}-${snapshot.h2h_json.hard_p2_wins || 0}`,
-        onClay: `${snapshot.h2h_json.clay_p1_wins || 0}-${snapshot.h2h_json.clay_p2_wins || 0}`,
-        onGrass: `${snapshot.h2h_json.grass_p1_wins || 0}-${snapshot.h2h_json.grass_p2_wins || 0}`,
-        lastMatch: snapshot.h2h_json.last_match_date
-      } : null,
+      h2h: snapshot.h2h_json
+        ? {
+            total: `${snapshot.h2h_json.player1_wins}-${snapshot.h2h_json.player2_wins}`,
+            player1Wins: snapshot.h2h_json.player1_wins,
+            player2Wins: snapshot.h2h_json.player2_wins,
+            onHard: `${snapshot.h2h_json.hard_p1_wins || 0}-${snapshot.h2h_json.hard_p2_wins || 0}`,
+            onClay: `${snapshot.h2h_json.clay_p1_wins || 0}-${snapshot.h2h_json.clay_p2_wins || 0}`,
+            onGrass: `${snapshot.h2h_json.grass_p1_wins || 0}-${
+              snapshot.h2h_json.grass_p2_wins || 0
+            }`,
+            lastMatch: snapshot.h2h_json.last_match_date,
+          }
+        : null,
       statistics: snapshot.stats_json,
       momentum: snapshot.momentum_json || [],
       pointByPoint: [], // Not in snapshot, load lazy via /api/match/:id/points
       odds: snapshot.odds_json,
-      dataSources: (snapshot.data_sources_json || []).map(s => s.source_type),
+      dataSources: (snapshot.data_sources_json || []).map((s) => s.source_type),
       dataQuality: snapshot.data_quality_int,
       fromSnapshot: true,
       snapshotUpdatedAt: snapshot.last_updated_at,
@@ -122,11 +109,11 @@ class MatchCardService {
         versions: {
           bundle_schema: '1.0.0',
           feature_version: snapshot.core_json?.feature_version || 'v1.0.0',
-          strategy_version: snapshot.core_json?.strategy_version || 'v1.0.0'
+          strategy_version: snapshot.core_json?.strategy_version || 'v1.0.0',
         },
         // FILOSOFIA_RISK_BANKROLL: risk/edge/stake when available
-        risk: snapshot.core_json?.risk || null
-      }
+        risk: snapshot.core_json?.risk || null,
+      },
     };
   }
 
@@ -146,7 +133,7 @@ class MatchCardService {
           country: card.player1?.country,
           currentRanking: card.player1?.currentRanking,
           rankingAtMatch: card.player1?.rankingAtMatch,
-          seed: card.player1?.seed
+          seed: card.player1?.seed,
         },
         player2: {
           id: card.player2?.id,
@@ -154,26 +141,28 @@ class MatchCardService {
           country: card.player2?.country,
           currentRanking: card.player2?.currentRanking,
           rankingAtMatch: card.player2?.rankingAtMatch,
-          seed: card.player2?.seed
-        }
+          seed: card.player2?.seed,
+        },
       },
-      h2h_json: card.h2h ? {
-        player1_wins: card.h2h.player1Wins,
-        player2_wins: card.h2h.player2Wins,
-        hard_p1_wins: parseInt(card.h2h.onHard?.split('-')[0]) || 0,
-        hard_p2_wins: parseInt(card.h2h.onHard?.split('-')[1]) || 0,
-        clay_p1_wins: parseInt(card.h2h.onClay?.split('-')[0]) || 0,
-        clay_p2_wins: parseInt(card.h2h.onClay?.split('-')[1]) || 0,
-        grass_p1_wins: parseInt(card.h2h.onGrass?.split('-')[0]) || 0,
-        grass_p2_wins: parseInt(card.h2h.onGrass?.split('-')[1]) || 0,
-        last_match_date: card.h2h.lastMatch
-      } : null,
+      h2h_json: card.h2h
+        ? {
+            player1_wins: card.h2h.player1Wins,
+            player2_wins: card.h2h.player2Wins,
+            hard_p1_wins: parseInt(card.h2h.onHard?.split('-')[0]) || 0,
+            hard_p2_wins: parseInt(card.h2h.onHard?.split('-')[1]) || 0,
+            clay_p1_wins: parseInt(card.h2h.onClay?.split('-')[0]) || 0,
+            clay_p2_wins: parseInt(card.h2h.onClay?.split('-')[1]) || 0,
+            grass_p1_wins: parseInt(card.h2h.onGrass?.split('-')[0]) || 0,
+            grass_p2_wins: parseInt(card.h2h.onGrass?.split('-')[1]) || 0,
+            last_match_date: card.h2h.lastMatch,
+          }
+        : null,
       stats_json: card.statistics,
       momentum_json: card.momentum || [],
       odds_json: card.odds,
-      data_sources_json: (card.dataSources || []).map(s => ({ source_type: s })),
+      data_sources_json: (card.dataSources || []).map((s) => ({ source_type: s })),
       data_quality_int: card.dataQuality || 0,
-      last_updated_at: new Date().toISOString()
+      last_updated_at: new Date().toISOString(),
     };
 
     const { error } = await supabase
@@ -215,7 +204,7 @@ class MatchCardService {
         powerRankings,
         pointByPoint,
         odds,
-        dataSources
+        dataSources,
       ] = await Promise.all([
         this.getPlayerStats(matchData.player1_id, matchData.surface),
         this.getPlayerStats(matchData.player2_id, matchData.surface),
@@ -226,11 +215,16 @@ class MatchCardService {
         this.getPowerRankings(matchId),
         this.getPointByPoint(matchId),
         this.getOdds(matchId),
-        this.getDataSources(matchId)
+        this.getDataSources(matchId),
       ]);
 
       // 3. Calcola data quality
-      const dataQuality = this.calculateDataQuality(dataSources, matchStats, powerRankings, pointByPoint);
+      const dataQuality = this.calculateDataQuality(
+        dataSources,
+        matchStats,
+        powerRankings,
+        pointByPoint
+      );
 
       // 4. Assembla card
       return {
@@ -247,7 +241,7 @@ class MatchCardService {
           setsPlayer1: matchData.sets_player1,
           setsPlayer2: matchData.sets_player2,
           sets: this.formatSets(matchData),
-          winner: matchData.winner_code
+          winner: matchData.winner_code,
         },
 
         // Tournament
@@ -255,7 +249,7 @@ class MatchCardService {
           id: matchData.tournament_id,
           name: matchData.tournament_name,
           category: matchData.tournament_category,
-          surface: matchData.surface
+          surface: matchData.surface,
         },
 
         // Player 1
@@ -267,7 +261,7 @@ class MatchCardService {
           rankingAtMatch: matchData.player1_rank,
           seed: matchData.player1_seed,
           stats: player1Stats,
-          recentForm: player1RecentForm
+          recentForm: player1RecentForm,
         },
 
         // Player 2
@@ -279,40 +273,46 @@ class MatchCardService {
           rankingAtMatch: matchData.player2_rank,
           seed: matchData.player2_seed,
           stats: player2Stats,
-          recentForm: player2RecentForm
+          recentForm: player2RecentForm,
         },
 
         // H2H
-        h2h: h2h ? {
-          total: `${h2h.player1_wins}-${h2h.player2_wins}`,
-          player1Wins: h2h.player1_wins,
-          player2Wins: h2h.player2_wins,
-          onHard: `${h2h.hard_p1_wins}-${h2h.hard_p2_wins}`,
-          onClay: `${h2h.clay_p1_wins}-${h2h.clay_p2_wins}`,
-          onGrass: `${h2h.grass_p1_wins}-${h2h.grass_p2_wins}`,
-          lastMatch: h2h.last_match_date
-        } : null,
+        h2h: h2h
+          ? {
+              total: `${h2h.player1_wins}-${h2h.player2_wins}`,
+              player1Wins: h2h.player1_wins,
+              player2Wins: h2h.player2_wins,
+              onHard: `${h2h.hard_p1_wins}-${h2h.hard_p2_wins}`,
+              onClay: `${h2h.clay_p1_wins}-${h2h.clay_p2_wins}`,
+              onGrass: `${h2h.grass_p1_wins}-${h2h.grass_p2_wins}`,
+              lastMatch: h2h.last_match_date,
+            }
+          : null,
 
         // Match details
         statistics: matchStats,
         momentum: powerRankings,
         pointByPoint: pointByPoint,
-        
+
         // FILOSOFIA_ODDS: odds structured in header (current) and tabs (history)
         // header.odds = current/live odds for immediate display
         // tabs.odds = historical odds data
         odds: this.structureOdds(odds),
 
         // Metadata
-        dataSources: dataSources.map(s => s.source_type),
+        dataSources: dataSources.map((s) => s.source_type),
         // FILOSOFIA_DB: dataQuality MUST have completeness and freshness
         dataQuality: {
           score: dataQuality,
-          completeness: this.calculateCompleteness(dataSources, matchStats, powerRankings, pointByPoint),
-          freshness: this.calculateFreshness(dataSources)
-        }
+          completeness: this.calculateCompleteness(
+            dataSources,
+            matchStats,
+            powerRankings,
+            pointByPoint
+          ),
+          freshness: this.calculateFreshness(dataSources),
+        },
       };
-
     } catch (error) {
       console.error('Error getting match card:', error);
       throw error;
@@ -321,38 +321,44 @@ class MatchCardService {
 
   /**
    * FILOSOFIA_ODDS: Structure odds for header (current) and tabs (historical)
-   * 
+   *
    * @param {Object} rawOdds - Raw odds from getOdds
    * @returns {Object} Structured odds with header and tabs sections
    */
   structureOdds(rawOdds) {
     if (!rawOdds) return null;
-    
+
     return {
       // Current/live odds for header display (RightRail)
       current: rawOdds.closing || rawOdds.opening || null,
-      
+
       // Opening and closing for analysis
       opening: rawOdds.opening,
       closing: rawOdds.closing,
-      
+
       // Full history for tabs/OddsTab
       history: rawOdds.all || [],
-      
+
       // Movement indicators
-      movement: rawOdds.closing && rawOdds.opening ? {
-        p1: rawOdds.closing.p1 - rawOdds.opening.p1,
-        p2: rawOdds.closing.p2 - rawOdds.opening.p2
-      } : null,
-      
+      movement:
+        rawOdds.closing && rawOdds.opening
+          ? {
+              p1: rawOdds.closing.p1 - rawOdds.opening.p1,
+              p2: rawOdds.closing.p2 - rawOdds.opening.p2,
+            }
+          : null,
+
       // Implied probabilities
-      implied: rawOdds.closing ? {
-        p1: rawOdds.closing.p1 ? (1 / rawOdds.closing.p1 * 100) : null,
-        p2: rawOdds.closing.p2 ? (1 / rawOdds.closing.p2 * 100) : null,
-        overround: rawOdds.closing.p1 && rawOdds.closing.p2 
-          ? ((1/rawOdds.closing.p1 + 1/rawOdds.closing.p2 - 1) * 100) 
-          : null
-      } : null
+      implied: rawOdds.closing
+        ? {
+            p1: rawOdds.closing.p1 ? (1 / rawOdds.closing.p1) * 100 : null,
+            p2: rawOdds.closing.p2 ? (1 / rawOdds.closing.p2) * 100 : null,
+            overround:
+              rawOdds.closing.p1 && rawOdds.closing.p2
+                ? (1 / rawOdds.closing.p1 + 1 / rawOdds.closing.p2 - 1) * 100
+                : null,
+          }
+        : null,
     };
   }
 
@@ -391,8 +397,8 @@ class MatchCardService {
     }
 
     // Prendi stats specifiche per superficie se disponibili, altrimenti overall
-    const surfaceStats = data.find(s => s.surface === surface);
-    const overallStats = data.find(s => s.surface === 'all');
+    const surfaceStats = data.find((s) => s.surface === surface);
+    const overallStats = data.find((s) => s.surface === 'all');
 
     return {
       surface: surfaceStats || null,
@@ -402,7 +408,7 @@ class MatchCardService {
       winPercentage: (surfaceStats || overallStats)?.win_percentage || 0,
       firstServePct: (surfaceStats || overallStats)?.first_serve_pct || 0,
       firstServeWonPct: (surfaceStats || overallStats)?.first_serve_won_pct || 0,
-      returnGamesWonPct: (surfaceStats || overallStats)?.return_games_won_pct || 0
+      returnGamesWonPct: (surfaceStats || overallStats)?.return_games_won_pct || 0,
     };
   }
 
@@ -413,12 +419,14 @@ class MatchCardService {
     if (!playerId) return [];
 
     const { data, error } = await supabase
-      .from('matches_new')
-      .select(`
+      .from('matches')
+      .select(
+        `
         id, match_date, round, surface, score, winner_id,
         player1_id, player2_id,
         tournament:tournaments_new(name)
-      `)
+      `
+      )
       .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
       .eq('status', 'finished')
       .order('match_date', { ascending: false })
@@ -426,13 +434,13 @@ class MatchCardService {
 
     if (error || !data) return [];
 
-    return data.map(m => ({
+    return data.map((m) => ({
       date: m.match_date,
       tournament: m.tournament?.name,
       round: m.round,
       surface: m.surface,
       result: m.winner_id === playerId ? 'W' : 'L',
-      score: m.score
+      score: m.score,
     }));
   }
 
@@ -443,9 +451,7 @@ class MatchCardService {
     if (!player1Id || !player2Id) return null;
 
     // Ordina IDs per consistenza
-    const [p1, p2] = player1Id < player2Id 
-      ? [player1Id, player2Id] 
-      : [player2Id, player1Id];
+    const [p1, p2] = player1Id < player2Id ? [player1Id, player2Id] : [player2Id, player1Id];
 
     const { data, error } = await supabase
       .from('head_to_head')
@@ -456,7 +462,7 @@ class MatchCardService {
 
     if (error) return null;
 
-    // Se l'ordine nel DB è diverso, inverti i risultati
+    // Se l'ordine nel DB Ã¨ diverso, inverti i risultati
     if (player1Id !== p1) {
       return {
         ...data,
@@ -467,7 +473,7 @@ class MatchCardService {
         clay_p1_wins: data.clay_p2_wins,
         clay_p2_wins: data.clay_p1_wins,
         grass_p1_wins: data.grass_p2_wins,
-        grass_p2_wins: data.grass_p1_wins
+        grass_p2_wins: data.grass_p1_wins,
       };
     }
 
@@ -479,7 +485,7 @@ class MatchCardService {
    */
   async getMatchStatistics(matchId) {
     const { data, error } = await supabase
-      .from('match_statistics_new')
+      .from('match_statistics')
       .select('*')
       .eq('match_id', matchId)
       .order('period');
@@ -500,7 +506,7 @@ class MatchCardService {
    */
   async getPowerRankings(matchId) {
     const { data, error } = await supabase
-      .from('match_power_rankings_new')
+      .from('match_power_rankings')
       .select('*')
       .eq('match_id', matchId)
       .order('set_number')
@@ -515,7 +521,7 @@ class MatchCardService {
    */
   async getPointByPoint(matchId) {
     const { data, error } = await supabase
-      .from('match_point_by_point_new')
+      .from('match_point_by_point')
       .select('*')
       .eq('match_id', matchId)
       .order('set_number')
@@ -539,13 +545,13 @@ class MatchCardService {
     if (error || !data || data.length === 0) return null;
 
     // Trova opening e closing
-    const opening = data.find(o => o.is_opening) || data[0];
-    const closing = data.find(o => o.is_closing) || data[data.length - 1];
+    const opening = data.find((o) => o.is_opening) || data[0];
+    const closing = data.find((o) => o.is_closing) || data[data.length - 1];
 
     return {
       opening: opening ? { p1: opening.odds_player1, p2: opening.odds_player2 } : null,
       closing: closing ? { p1: closing.odds_player1, p2: closing.odds_player2 } : null,
-      all: data
+      all: data,
     };
   }
 
@@ -575,7 +581,7 @@ class MatchCardService {
           setNumber: i,
           player1: p1,
           player2: p2,
-          tiebreak: match[`set${i}_tb`]
+          tiebreak: match[`set${i}_tb`],
         });
       }
     }
@@ -583,7 +589,7 @@ class MatchCardService {
   }
 
   /**
-   * Calcola qualità dati (0-100)
+   * Calcola qualitÃ  dati (0-100)
    */
   calculateDataQuality(sources, stats, momentum, pointByPoint) {
     let quality = 0;
@@ -617,7 +623,7 @@ class MatchCardService {
     if (stats && Object.keys(stats).length > 0) presentFields++;
     if (momentum && momentum.length > 0) presentFields++;
     if (pointByPoint && pointByPoint.length > 0) presentFields++;
-    
+
     // Calculate percentage
     completeness = Math.round((presentFields / expectedFields) * 100);
 
@@ -661,78 +667,76 @@ class MatchCardService {
     return 20;
   }
 
-/**
- * FILOSOFIA_TEMPORAL: Validate meta block has required fields
- * ERR-010: Bundle must validate temporal coherence (no future data in bundle)
- */
-validateMetaBlock(meta, matchDate) {
-  const errors = [];
-  
-  // Check required meta fields
-  if (!meta) {
-    errors.push('meta block is required');
-    return { valid: false, errors };
-  }
-  
-  if (!meta.as_of_time && !meta.generated_at) {
-    errors.push('meta.as_of_time or meta.generated_at is required');
-  }
-  
-  if (!meta.versions) {
-    errors.push('meta.versions is required for lineage tracking');
-  }
-  
-  // FILOSOFIA_TEMPORAL: No future data in bundle
-  const asOfTime = new Date(meta.as_of_time || meta.generated_at);
-  const now = new Date();
-  
-  if (asOfTime > now) {
-    errors.push(`Temporal violation: as_of_time (${asOfTime.toISOString()}) is in the future`);
-  }
-  
-  // If matchDate provided, check temporal coherence
-  if (matchDate) {
-    const match = new Date(matchDate);
-    // Data should not reference times before match started (for live data)
-    // This is a warning, not a hard error
-  }
-  
-  return {
-    valid: errors.length === 0,
-    errors,
-    meta: {
-      ...meta,
-      validated_at: new Date().toISOString()
-    }
-  };
-}
+  /**
+   * FILOSOFIA_TEMPORAL: Validate meta block has required fields
+   * ERR-010: Bundle must validate temporal coherence (no future data in bundle)
+   */
+  validateMetaBlock(meta, matchDate) {
+    const errors = [];
 
-/**
- * WARN-024: Validate bundle meta block before returning
- */
-ensureMetaBlock(bundle) {
-  if (!bundle) return bundle;
-  
-  // Ensure meta block exists with required fields
-  if (!bundle.meta) {
-    bundle.meta = {
-      as_of_time: new Date().toISOString(),
-      generated_at: new Date().toISOString(),
-      versions: {
-        bundle_schema: '1.0.0',
-        feature_version: 'v1.0.0',
-        strategy_version: 'v1.0.0'
-      }
+    // Check required meta fields
+    if (!meta) {
+      errors.push('meta block is required');
+      return { valid: false, errors };
+    }
+
+    if (!meta.as_of_time && !meta.generated_at) {
+      errors.push('meta.as_of_time or meta.generated_at is required');
+    }
+
+    if (!meta.versions) {
+      errors.push('meta.versions is required for lineage tracking');
+    }
+
+    // FILOSOFIA_TEMPORAL: No future data in bundle
+    const asOfTime = new Date(meta.as_of_time || meta.generated_at);
+    const now = new Date();
+
+    if (asOfTime > now) {
+      errors.push(`Temporal violation: as_of_time (${asOfTime.toISOString()}) is in the future`);
+    }
+
+    // If matchDate provided, check temporal coherence
+    if (matchDate) {
+      const match = new Date(matchDate);
+      // Data should not reference times before match started (for live data)
+      // This is a warning, not a hard error
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      meta: {
+        ...meta,
+        validated_at: new Date().toISOString(),
+      },
     };
   }
-  
-  // Validate and add validation timestamp
-  const validation = this.validateMetaBlock(bundle.meta, bundle.match?.date);
-  bundle.meta._validation = validation;
-  
-  return bundle;
-}
-    return match?.id || null;
+
+  /**
+   * WARN-024: Validate bundle meta block before returning
+   */
+  ensureMetaBlock(bundle) {
+    if (!bundle) return bundle;
+
+    // Ensure meta block exists with required fields
+    if (!bundle.meta) {
+      bundle.meta = {
+        as_of_time: new Date().toISOString(),
+        generated_at: new Date().toISOString(),
+        versions: {
+          bundle_schema: '1.0.0',
+          feature_version: 'v1.0.0',
+          strategy_version: 'v1.0.0',
+        },
+      };
+    }
+
+    // Validate and add validation timestamp
+    const validation = this.validateMetaBlock(bundle.meta, bundle.match?.date);
+    bundle.meta._validation = validation;
+
+    return bundle;
   }
 
   /**
@@ -759,7 +763,7 @@ ensureMetaBlock(bundle) {
 
     if (error) return [];
 
-    return data.map(m => ({
+    return data.map((m) => ({
       id: m.id,
       date: m.match_date,
       tournament: m.tournament_name,
@@ -768,15 +772,15 @@ ensureMetaBlock(bundle) {
       player1: {
         name: m.player1_name,
         country: m.player1_country,
-        ranking: m.player1_rank
+        ranking: m.player1_rank,
       },
       player2: {
         name: m.player2_name,
         country: m.player2_country,
-        ranking: m.player2_rank
+        ranking: m.player2_rank,
       },
       score: m.score,
-      winner: m.winner_code
+      winner: m.winner_code,
     }));
   }
 }
@@ -787,3 +791,6 @@ const matchCardService = new MatchCardService();
 module.exports = matchCardService;
 module.exports.MATCH_CARD_SERVICE_VERSION = MATCH_CARD_SERVICE_VERSION;
 module.exports.DATA_VERSION = DATA_VERSION;
+
+
+

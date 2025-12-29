@@ -2,11 +2,11 @@
 
 > **Source of Truth documentale** allineato a:
 >
-> * **Architettura Unificata & Copilot Guide**
-> * **MatchBundle-Centric Design**
-> * **Pseudo-codice AI-ready**
+> - **Architettura Unificata & Copilot Guide**
+> - **MatchBundle-Centric Design**
+> - **Pseudo-codice AI-ready**
 >
-> Questo indice non descrive *tutto*.
+> Questo indice non descrive _tutto_.
 > Descrive **come orientarsi senza sbagliare**.
 
 ---
@@ -17,9 +17,9 @@
 
 Il MatchBundle è:
 
-* l’unica interfaccia Frontend ↔ Backend
-* l’unico snapshot persistito
-* l’unico contenitore di dati, feature, strategie e segnali
+- l’unica interfaccia Frontend ↔ Backend
+- l’unico snapshot persistito
+- l’unico contenitore di dati, feature, strategie e segnali
 
 🚫 Nessun dominio bypassa il MatchBundle
 
@@ -71,11 +71,11 @@ Data Layer (Repository)
 
 🚫 Divieti assoluti:
 
-* UI che calcola
-* Service con SQL
-* Repository con business logic
-* Controller con logica di dominio
-* server.js con logica tennis
+- UI che calcola
+- Service con SQL
+- Repository con business logic
+- Controller con logica di dominio
+- server.js con logica tennis
 
 ---
 
@@ -83,37 +83,37 @@ Data Layer (Repository)
 
 ### 🗄️ Data Platform (Backend)
 
-| Documento                              | Scopo                         | Codice Principale                       |
-| -------------------------------------- | ----------------------------- | --------------------------------------- |
-| FILOSOFIA_DB.md                        | Schema, snapshot, persistenza | `backend/db/*`                          |
-| FILOSOFIA_TEMPORAL.md                  | Time semantics                | `liveManager.js`                        |
-| FILOSOFIA_REGISTRY_CANON.md            | Canon IDs                     | `dataNormalizer.js`                     |
-| FILOSOFIA_LINEAGE_VERSIONING.md        | Versioning                    | `matchCardService.js`                   |
-| FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | Data Quality                  | `dataQualityChecker.js`                 |
+| Documento                              | Scopo                         | Codice Principale       |
+| -------------------------------------- | ----------------------------- | ----------------------- |
+| FILOSOFIA_DB.md                        | Schema, snapshot, persistenza | `backend/db/*`          |
+| FILOSOFIA_TEMPORAL.md                  | Time semantics                | `liveManager.js`        |
+| FILOSOFIA_REGISTRY_CANON.md            | Canon IDs                     | `dataNormalizer.js`     |
+| FILOSOFIA_LINEAGE_VERSIONING.md        | Versioning                    | `matchCardService.js`   |
+| FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | Data Quality                  | `dataQualityChecker.js` |
 
 ### 🔀 API Layer (Refactored)
 
-| Struttura        | Scopo                        | File Principali                         |
-| ---------------- | ---------------------------- | --------------------------------------- |
-| Routes           | URL + middleware             | `backend/routes/*.routes.js`            |
-| Controllers      | req → service → res          | `backend/controllers/*.controller.js`   |
-| server.js        | SOLO bootstrap + mount       | `backend/server.js` (target ~300)       |
+| Struttura   | Scopo                  | File Principali                       |
+| ----------- | ---------------------- | ------------------------------------- |
+| Routes      | URL + middleware       | `backend/routes/*.routes.js`          |
+| Controllers | req → service → res    | `backend/controllers/*.controller.js` |
+| server.js   | SOLO bootstrap + mount | `backend/server.js` (target ~300)     |
 
 📌 Vedi: `guida refactor server.js`
 
 #### Route Files Complete Reference
 
-| File                   | Mount Path                   | Endpoints Principali                                      |
-| ---------------------- | ---------------------------- | --------------------------------------------------------- |
-| `health.routes.js`     | `/api/`                      | `GET /`, `GET /health`                                    |
-| `db.routes.js`         | `/api/db`                    | `GET /test`, `GET /matches`, `GET /matches/summary`, etc. |
-| `match.routes.js`      | `/api/match`, `/api/matches` | `GET /:eventId/bundle` ⭐, `GET /db`, `GET /suggested`    |
-| `tracking.routes.js`   | `/api/track`, `/api/tracked` | `POST /:eventId`, `DELETE /:eventId`, `GET /stats`        |
-| `player.routes.js`     | `/api/player`                | `GET /:name/stats`, `GET /search`, `GET /h2h`             |
-| `event.routes.js`      | `/api/event`                 | `GET /:eventId/point-by-point` (SofaScore direct)         |
-| `value.routes.js`      | `/api/`                      | `POST /interpret-value`, `POST /analyze-power-rankings`   |
-| `scrapes.routes.js`    | `/api/scrapes`               | `GET /`, `GET /:id`, `POST /scrape`                       |
-| `stats.routes.js`      | `/api/stats`                 | `GET /db`, `GET /health`                                  |
+| File                 | Mount Path                   | Endpoints Principali                                      |
+| -------------------- | ---------------------------- | --------------------------------------------------------- |
+| `health.routes.js`   | `/api/`                      | `GET /`, `GET /health`                                    |
+| `db.routes.js`       | `/api/db`                    | `GET /test`, `GET /matches`, `GET /matches/summary`, etc. |
+| `match.routes.js`    | `/api/match`, `/api/matches` | `GET /:eventId/bundle` ⭐, `GET /db`, `GET /suggested`    |
+| `tracking.routes.js` | `/api/track`, `/api/tracked` | `POST /:eventId`, `DELETE /:eventId`, `GET /stats`        |
+| `player.routes.js`   | `/api/player`                | `GET /:name/stats`, `GET /search`, `GET /h2h`             |
+| `event.routes.js`    | `/api/event`                 | `GET /:eventId/point-by-point` (SofaScore direct)         |
+| `value.routes.js`    | `/api/`                      | `POST /interpret-value`, `POST /analyze-power-rankings`   |
+| `scrapes.routes.js`  | `/api/scrapes`               | `GET /`, `GET /:id`, `POST /scrape`                       |
+| `stats.routes.js`    | `/api/stats`                 | `GET /db`, `GET /health`                                  |
 
 ⭐ **MatchBundle endpoint principale**: `GET /api/match/:eventId/bundle`
 
@@ -167,13 +167,13 @@ Data Layer (Repository)
 
 Ogni MatchBundle **DEVE** includere:
 
-* dati match
-* players
-* statistics
-* momentum
-* odds
-* analytics
-* **meta standard** (temporal, lineage, data_quality)
+- dati match
+- players
+- statistics
+- momentum
+- odds
+- analytics
+- **meta standard** (temporal, lineage, data_quality)
 
 📌 Vedi: `FILOSOFIA_LINEAGE_VERSIONING.md`
 
@@ -235,11 +235,11 @@ IF non sai → STOP + ARCH_DECISION
 
 ## 🔟 Checklist Pre-Sviluppo
 
-* [ ] Ho letto FILOSOFIA_MADRE
-* [ ] So il mio layer
-* [ ] Conosco input/output
-* [ ] Rispetto gli invarianti
-* [ ] Non duplico logica
+- [ ] Ho letto FILOSOFIA_MADRE
+- [ ] So il mio layer
+- [ ] Conosco input/output
+- [ ] Rispetto gli invarianti
+- [ ] Non duplico logica
 
 ---
 

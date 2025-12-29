@@ -1,7 +1,7 @@
 /**
  * JournalTab.jsx
  * Trading journal - Log trades, track outcomes, export history
- * 
+ *
  * Ref: FILOSOFIA_FRONTEND.md - Tab: Journal
  * - Log trade (manual)
  * - Entry/Exit, strategy used, outcome
@@ -23,22 +23,24 @@ import {
   Strategy,
   CalendarBlank,
   Trash,
-  PencilSimple
+  PencilSimple,
 } from '@phosphor-icons/react';
 import { MotionCard, MotionButton, MotionRow } from '../../../motion';
 import './JournalTab.css';
 
 // Trade entry form component
 function TradeForm({ onSubmit, onCancel, initialData = null }) {
-  const [form, setForm] = useState(initialData || {
-    strategy: '',
-    side: 'back', // back o lay
-    entry: '',
-    exit: '',
-    stake: '',
-    outcome: 'pending', // win, loss, pending, void
-    notes: ''
-  });
+  const [form, setForm] = useState(
+    initialData || {
+      strategy: '',
+      side: 'back', // back o lay
+      entry: '',
+      exit: '',
+      stake: '',
+      outcome: 'pending', // win, loss, pending, void
+      notes: '',
+    }
+  );
 
   const strategies = [
     'Double Break Strategy',
@@ -48,7 +50,7 @@ function TradeForm({ onSubmit, onCancel, initialData = null }) {
     'Fatigue Factor',
     'Surface Edge',
     'H2H Pattern',
-    'Other'
+    'Other',
   ];
 
   const handleSubmit = (e) => {
@@ -58,7 +60,7 @@ function TradeForm({ onSubmit, onCancel, initialData = null }) {
       entry: parseFloat(form.entry),
       exit: parseFloat(form.exit),
       stake: parseFloat(form.stake),
-      timestamp: initialData?.timestamp || Date.now()
+      timestamp: initialData?.timestamp || Date.now(),
     });
   };
 
@@ -73,18 +75,17 @@ function TradeForm({ onSubmit, onCancel, initialData = null }) {
             required
           >
             <option value="">Select strategy...</option>
-            {strategies.map(s => (
-              <option key={s} value={s}>{s}</option>
+            {strategies.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
         </label>
 
         <label className="form-label">
           Side
-          <select
-            value={form.side}
-            onChange={(e) => setForm({ ...form, side: e.target.value })}
-          >
+          <select value={form.side} onChange={(e) => setForm({ ...form, side: e.target.value })}>
             <option value="back">Back</option>
             <option value="lay">Lay</option>
           </select>
@@ -176,14 +177,10 @@ function TradeRow({ trade, onEdit, onDelete }) {
       return null;
     }
     if (trade.side === 'back') {
-      return trade.outcome === 'win'
-        ? trade.stake * (trade.entry - 1)
-        : -trade.stake;
+      return trade.outcome === 'win' ? trade.stake * (trade.entry - 1) : -trade.stake;
     } else {
       // Lay
-      return trade.outcome === 'win'
-        ? trade.stake
-        : -trade.stake * (trade.entry - 1);
+      return trade.outcome === 'win' ? trade.stake : -trade.stake * (trade.entry - 1);
     }
   }, [trade]);
 
@@ -191,7 +188,7 @@ function TradeRow({ trade, onEdit, onDelete }) {
     win: { icon: <Check weight="bold" />, color: '#10b981', label: 'Win' },
     loss: { icon: <X weight="bold" />, color: '#ef4444', label: 'Loss' },
     pending: { icon: <Clock weight="bold" />, color: '#f59e0b', label: 'Pending' },
-    void: { icon: <X weight="bold" />, color: '#6b7280', label: 'Void' }
+    void: { icon: <X weight="bold" />, color: '#6b7280', label: 'Void' },
   };
 
   const config = outcomeConfig[trade.outcome];
@@ -210,9 +207,7 @@ function TradeRow({ trade, onEdit, onDelete }) {
       <div className="trade-strategy">
         <Strategy size={16} />
         {trade.strategy}
-        <span className={`trade-side ${trade.side}`}>
-          {trade.side.toUpperCase()}
-        </span>
+        <span className={`trade-side ${trade.side}`}>{trade.side.toUpperCase()}</span>
       </div>
 
       <div className="trade-odds">
@@ -238,7 +233,8 @@ function TradeRow({ trade, onEdit, onDelete }) {
       <div className="trade-pnl">
         {profitLoss !== null ? (
           <span className={profitLoss >= 0 ? 'profit' : 'loss'}>
-            {profitLoss >= 0 ? '+' : ''}{profitLoss.toFixed(2)}€
+            {profitLoss >= 0 ? '+' : ''}
+            {profitLoss.toFixed(2)}€
           </span>
         ) : (
           <span className="pending">—</span>
@@ -260,12 +256,12 @@ function TradeRow({ trade, onEdit, onDelete }) {
 // Summary stats card
 function JournalStats({ trades }) {
   const stats = useMemo(() => {
-    const completed = trades.filter(t => t.outcome === 'win' || t.outcome === 'loss');
-    const wins = completed.filter(t => t.outcome === 'win');
-    const losses = completed.filter(t => t.outcome === 'loss');
+    const completed = trades.filter((t) => t.outcome === 'win' || t.outcome === 'loss');
+    const wins = completed.filter((t) => t.outcome === 'win');
+    const losses = completed.filter((t) => t.outcome === 'loss');
 
     let totalPnL = 0;
-    completed.forEach(t => {
+    completed.forEach((t) => {
       if (t.side === 'back') {
         totalPnL += t.outcome === 'win' ? t.stake * (t.entry - 1) : -t.stake;
       } else {
@@ -274,24 +270,32 @@ function JournalStats({ trades }) {
     });
 
     const winRate = completed.length > 0 ? (wins.length / completed.length) * 100 : 0;
-    const avgWin = wins.length > 0
-      ? wins.reduce((acc, t) => acc + (t.side === 'back' ? t.stake * (t.entry - 1) : t.stake), 0) / wins.length
-      : 0;
-    const avgLoss = losses.length > 0
-      ? losses.reduce((acc, t) => acc + (t.side === 'back' ? t.stake : t.stake * (t.entry - 1)), 0) / losses.length
-      : 0;
+    const avgWin =
+      wins.length > 0
+        ? wins.reduce(
+            (acc, t) => acc + (t.side === 'back' ? t.stake * (t.entry - 1) : t.stake),
+            0
+          ) / wins.length
+        : 0;
+    const avgLoss =
+      losses.length > 0
+        ? losses.reduce(
+            (acc, t) => acc + (t.side === 'back' ? t.stake : t.stake * (t.entry - 1)),
+            0
+          ) / losses.length
+        : 0;
 
     return {
       total: trades.length,
       completed: completed.length,
       wins: wins.length,
       losses: losses.length,
-      pending: trades.filter(t => t.outcome === 'pending').length,
+      pending: trades.filter((t) => t.outcome === 'pending').length,
       winRate,
       totalPnL,
       avgWin,
       avgLoss,
-      riskReward: avgLoss > 0 ? avgWin / avgLoss : 0
+      riskReward: avgLoss > 0 ? avgWin / avgLoss : 0,
     };
   }, [trades]);
 
@@ -308,7 +312,8 @@ function JournalStats({ trades }) {
       <div className="stat-box">
         <span className="stat-label">Total P&L</span>
         <span className={`stat-value ${stats.totalPnL >= 0 ? 'profit' : 'loss'}`}>
-          {stats.totalPnL >= 0 ? '+' : ''}{stats.totalPnL.toFixed(2)}€
+          {stats.totalPnL >= 0 ? '+' : ''}
+          {stats.totalPnL.toFixed(2)}€
         </span>
       </div>
       <div className="stat-box">
@@ -330,7 +335,7 @@ function JournalStats({ trades }) {
 export default function JournalTab({ bundle }) {
   const [showForm, setShowForm] = useState(false);
   const [editingTrade, setEditingTrade] = useState(null);
-  
+
   // In a real app, this would be persisted in localStorage or backend
   const [trades, setTrades] = useState([
     // Demo data
@@ -343,39 +348,39 @@ export default function JournalTab({ bundle }) {
       stake: 100,
       outcome: 'win',
       notes: 'Strong momentum after first break',
-      timestamp: Date.now() - 86400000 * 2
+      timestamp: Date.now() - 86400000 * 2,
     },
     {
       id: 2,
       strategy: 'Momentum Shift',
       side: 'lay',
-      entry: 2.10,
-      exit: 2.50,
+      entry: 2.1,
+      exit: 2.5,
       stake: 50,
       outcome: 'loss',
       notes: 'Entered too early, momentum reversed',
-      timestamp: Date.now() - 86400000
+      timestamp: Date.now() - 86400000,
     },
     {
       id: 3,
       strategy: 'Serve Dominance',
       side: 'back',
-      entry: 1.80,
+      entry: 1.8,
       exit: null,
       stake: 75,
       outcome: 'pending',
       notes: 'Strong serve stats, waiting for close',
-      timestamp: Date.now()
-    }
+      timestamp: Date.now(),
+    },
   ]);
 
   const handleSubmitTrade = (tradeData) => {
     if (editingTrade) {
-      setTrades(prev => prev.map(t => 
-        t.id === editingTrade.id ? { ...tradeData, id: t.id } : t
-      ));
+      setTrades((prev) =>
+        prev.map((t) => (t.id === editingTrade.id ? { ...tradeData, id: t.id } : t))
+      );
     } else {
-      setTrades(prev => [...prev, { ...tradeData, id: Date.now() }]);
+      setTrades((prev) => [...prev, { ...tradeData, id: Date.now() }]);
     }
     setShowForm(false);
     setEditingTrade(null);
@@ -388,13 +393,23 @@ export default function JournalTab({ bundle }) {
 
   const handleDeleteTrade = (id) => {
     if (window.confirm('Delete this trade?')) {
-      setTrades(prev => prev.filter(t => t.id !== id));
+      setTrades((prev) => prev.filter((t) => t.id !== id));
     }
   };
 
   const handleExportCSV = () => {
-    const headers = ['Date', 'Strategy', 'Side', 'Entry', 'Exit', 'Stake', 'Outcome', 'P&L', 'Notes'];
-    const rows = trades.map(t => {
+    const headers = [
+      'Date',
+      'Strategy',
+      'Side',
+      'Entry',
+      'Exit',
+      'Stake',
+      'Outcome',
+      'P&L',
+      'Notes',
+    ];
+    const rows = trades.map((t) => {
       let pnl = '';
       if (t.outcome === 'win' || t.outcome === 'loss') {
         if (t.side === 'back') {
@@ -412,7 +427,7 @@ export default function JournalTab({ bundle }) {
         t.stake,
         t.outcome,
         pnl,
-        `"${(t.notes || '').replace(/"/g, '""')}"`
+        `"${(t.notes || '').replace(/"/g, '""')}"`,
       ].join(',');
     });
 
@@ -456,7 +471,10 @@ export default function JournalTab({ bundle }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => { setShowForm(false); setEditingTrade(null); }}
+            onClick={() => {
+              setShowForm(false);
+              setEditingTrade(null);
+            }}
           >
             <motion.div
               className="form-modal"
@@ -465,12 +483,13 @@ export default function JournalTab({ bundle }) {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="form-title">
-                {editingTrade ? 'Edit Trade' : 'Log New Trade'}
-              </h3>
+              <h3 className="form-title">{editingTrade ? 'Edit Trade' : 'Log New Trade'}</h3>
               <TradeForm
                 onSubmit={handleSubmitTrade}
-                onCancel={() => { setShowForm(false); setEditingTrade(null); }}
+                onCancel={() => {
+                  setShowForm(false);
+                  setEditingTrade(null);
+                }}
                 initialData={editingTrade}
               />
             </motion.div>
@@ -497,15 +516,14 @@ export default function JournalTab({ bundle }) {
           <div className="trades-list">
             {trades
               .sort((a, b) => b.timestamp - a.timestamp)
-              .map(trade => (
+              .map((trade) => (
                 <TradeRow
                   key={trade.id}
                   trade={trade}
                   onEdit={handleEditTrade}
                   onDelete={handleDeleteTrade}
                 />
-              ))
-            }
+              ))}
           </div>
         )}
       </MotionCard>

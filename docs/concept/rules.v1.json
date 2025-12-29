@@ -2,7 +2,7 @@
   "version": 1,
   "description": "Regole architetturali Tennis Analyzer v4.0",
   "lastUpdated": "2025-12-22",
-  
+
   "domains": {
     "frontend_ui": {
       "description": "Componenti React di presentazione",
@@ -13,91 +13,63 @@
         "liveTrackingRepository",
         "sofascoreScraper"
       ],
-      "forbiddenPatterns": [
-        "createClient",
-        "supabase.from",
-        "fetch.*sofascore"
-      ]
+      "forbiddenPatterns": ["createClient", "supabase.from", "fetch.*sofascore"]
     },
-    
+
     "frontend_hooks": {
       "description": "Custom hooks React",
       "allowedPaths": ["src/hooks/**/*.js"],
-      "forbiddenImports": [
-        "supabase",
-        "matchRepository"
-      ],
+      "forbiddenImports": ["supabase", "matchRepository"],
       "forbiddenPatterns": []
     },
-    
+
     "frontend_utils": {
       "description": "Utility frontend",
       "allowedPaths": ["src/utils/**/*.js", "src/utils.js"],
-      "forbiddenImports": [
-        "supabase",
-        "express"
-      ],
-      "forbiddenPatterns": [
-        "impliedProbability.*=.*1.*/"
-      ],
+      "forbiddenImports": ["supabase", "express"],
+      "forbiddenPatterns": ["impliedProbability.*=.*1.*/"],
       "note": "Calcoli odds devono stare nel backend"
     },
-    
+
     "backend_api": {
       "description": "Express routes e server",
       "allowedPaths": ["backend/server.js"],
-      "forbiddenImports": [
-        "react",
-        "jsx"
-      ],
+      "forbiddenImports": ["react", "jsx"],
       "forbiddenPatterns": []
     },
-    
+
     "backend_services": {
       "description": "Business logic layer",
       "allowedPaths": ["backend/services/**/*.js"],
-      "forbiddenImports": [
-        "react",
-        "express"
-      ],
+      "forbiddenImports": ["react", "express"],
       "forbiddenPatterns": [],
       "note": "I services non devono conoscere Express direttamente"
     },
-    
+
     "backend_db": {
       "description": "Data access layer",
       "allowedPaths": ["backend/db/**/*.js"],
-      "forbiddenImports": [
-        "react",
-        "express",
-        "sofascoreScraper"
-      ],
+      "forbiddenImports": ["react", "express", "sofascoreScraper"],
       "forbiddenPatterns": [],
       "note": "Repository non devono fare scraping"
     },
-    
+
     "backend_utils": {
       "description": "Calculation utilities",
       "allowedPaths": ["backend/utils/**/*.js"],
-      "forbiddenImports": [
-        "react",
-        "express",
-        "supabase"
-      ],
+      "forbiddenImports": ["react", "express", "supabase"],
       "forbiddenPatterns": [],
       "note": "Utils di calcolo devono essere pure functions"
     },
-    
+
     "backend_scraper": {
       "description": "External data fetching",
       "allowedPaths": ["backend/scraper/**/*.js"],
-      "forbiddenImports": [
-        "react"
-      ],
+      "forbiddenImports": ["react"],
       "forbiddenPatterns": []
     }
   },
-  
+
   "invariants": [
     {
       "id": "INV-001",
@@ -111,7 +83,7 @@
       "remediation": "Usare API backend invece di accesso diretto DB"
     },
     {
-      "id": "INV-002", 
+      "id": "INV-002",
       "severity": "ERROR",
       "description": "Frontend non deve fare scraping diretto",
       "domains": ["frontend_ui", "frontend_hooks", "frontend_utils"],
@@ -210,7 +182,7 @@
       "remediation": "Estrarre costanti con nomi significativi"
     }
   ],
-  
+
   "allowlist": [
     {
       "file": "src/config.js",

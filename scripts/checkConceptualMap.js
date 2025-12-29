@@ -1,6 +1,6 @@
 /**
  * 🔍 CHECK MAPPA CONCETTUALE
- * 
+ *
  * Script per verificare tutti i riferimenti nella mappa concettuale.
  * Controlla:
  * - Esistenza file referenziati
@@ -8,7 +8,7 @@
  * - Documenti filosofie
  * - Tabelle database
  * - Violazioni architetturali (MatchBundle-Centric)
- * 
+ *
  * Uso: node scripts/checkConceptualMap.js
  * Output: docs/CHECK_MAPPA_CONCETTUALE.md
  */
@@ -84,7 +84,7 @@ const REFERENCES = {
     'docs/checks/MAPPA_RETE_CONCETTUALE_V2.md',
     'docs/checks/CHECK_MAPPA_CONCETTUALE.md',
     // Root docs
-    'docs/TODO_LIST.md'
+    'docs/TODO_LIST.md',
   ],
 
   // Backend Services
@@ -99,13 +99,11 @@ const REFERENCES = {
     'backend/services/unifiedImporter.js',
     'backend/services/strategyStatsService.js',
     'backend/services/dataQualityChecker.js',
-    'backend/services/riskEngine.js'
+    'backend/services/riskEngine.js',
   ],
 
   // Backend Strategies
-  backendStrategies: [
-    'backend/strategies/strategyEngine.js'
-  ],
+  backendStrategies: ['backend/strategies/strategyEngine.js'],
 
   // Backend Utils (tutti i file .js esistenti)
   backendUtils: [
@@ -115,7 +113,7 @@ const REFERENCES = {
     'backend/utils/matchSegmenter.js',
     'backend/utils/pressureCalculator.js',
     'backend/utils/svgMomentumExtractor.js',
-    'backend/utils/logger.js'
+    'backend/utils/logger.js',
   ],
 
   // Backend DB
@@ -123,21 +121,21 @@ const REFERENCES = {
     'backend/db/matchRepository.js',
     'backend/db/liveTrackingRepository.js',
     'backend/db/betDecisionsRepository.js',
-    'backend/db/supabase.js'
+    'backend/db/supabase.js',
   ],
 
   // Backend Other
   backendOther: [
     'backend/liveManager.js',
     'backend/scraper/sofascoreScraper.js',
-    'backend/server.js'
+    'backend/server.js',
   ],
 
   // Migrations
   migrations: [
     'backend/migrations/create-new-schema.sql',
     'backend/migrations/add-snapshot-queue-tables.sql',
-    'backend/migrations/add-live-tracking-table.sql'
+    'backend/migrations/add-live-tracking-table.sql',
   ],
 
   // Frontend - Components esistenti
@@ -162,12 +160,12 @@ const REFERENCES = {
     'src/components/match/tabs/OddsTab.jsx',
     'src/components/match/tabs/PredictorTab.jsx',
     'src/components/match/tabs/PointByPointTab.jsx',
-    'src/components/match/tabs/JournalTab.jsx'
+    'src/components/match/tabs/JournalTab.jsx',
   ],
 
   // Frontend - Hooks (solo esistenti)
   frontendHooks: [
-    'src/hooks/useMatchBundle.jsx'
+    'src/hooks/useMatchBundle.jsx',
     // Note: useMatchCard.jsx, useMatchData.jsx, useLiveMatch.jsx non esistono ancora
     // La funzionalità live è gestita da useMatchBundle con WebSocket
   ],
@@ -179,7 +177,7 @@ const REFERENCES = {
     'src/motion/MotionCard.jsx',
     'src/motion/MotionButton.jsx',
     'src/motion/MotionTab.jsx',
-    'src/motion/MotionRow.jsx'
+    'src/motion/MotionRow.jsx',
   ],
 
   // Note: src/utils.js eliminato il 25 Dic 2025 (era dead code)
@@ -192,8 +190,8 @@ const REFERENCES = {
     'scripts/deepPhilosophyCheck.js',
     'scripts/philosophyEnforcer.js',
     'scripts/cleanDuplicates.js',
-    'scripts/generateTodoReport.js'
-  ]
+    'scripts/generateTodoReport.js',
+  ],
 };
 
 // Funzioni da verificare con linea approssimativa
@@ -205,65 +203,97 @@ const FUNCTIONS_TO_CHECK = [
   { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbability', expectedLine: 205 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateRecentMomentum', expectedLine: 293 },
   { file: 'backend/utils/featureEngine.js', func: 'computeFeatures', expectedLine: 353 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateVolatilityFromScore', expectedLine: 523 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromScore', expectedLine: 554 },
+  {
+    file: 'backend/utils/featureEngine.js',
+    func: 'calculateVolatilityFromScore',
+    expectedLine: 523,
+  },
+  {
+    file: 'backend/utils/featureEngine.js',
+    func: 'calculateDominanceFromScore',
+    expectedLine: 554,
+  },
   { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromOdds', expectedLine: 589 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominanceFromRankings', expectedLine: 624 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbabilityFromOddsRankings', expectedLine: 649 },
+  {
+    file: 'backend/utils/featureEngine.js',
+    func: 'calculateServeDominanceFromRankings',
+    expectedLine: 624,
+  },
+  {
+    file: 'backend/utils/featureEngine.js',
+    func: 'calculateBreakProbabilityFromOddsRankings',
+    expectedLine: 649,
+  },
   { file: 'backend/utils/featureEngine.js', func: 'calculatePressureFromScore', expectedLine: 694 },
   { file: 'backend/utils/featureEngine.js', func: 'calculateMomentumFromScore', expectedLine: 725 },
-  
+
   // Backend - strategyEngine.js - AGGIORNATO 27 Dic 2025
   { file: 'backend/strategies/strategyEngine.js', func: 'evaluateAll', expectedLine: 44 },
   { file: 'backend/strategies/strategyEngine.js', func: 'evaluateLayWinner', expectedLine: 68 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateBancaServizio', expectedLine: 153 },
+  {
+    file: 'backend/strategies/strategyEngine.js',
+    func: 'evaluateBancaServizio',
+    expectedLine: 153,
+  },
   { file: 'backend/strategies/strategyEngine.js', func: 'evaluateSuperBreak', expectedLine: 227 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateTiebreakSpecialist', expectedLine: 312 },
-  { file: 'backend/strategies/strategyEngine.js', func: 'evaluateMomentumSwing', expectedLine: 383 },
-  
+  {
+    file: 'backend/strategies/strategyEngine.js',
+    func: 'evaluateTiebreakSpecialist',
+    expectedLine: 312,
+  },
+  {
+    file: 'backend/strategies/strategyEngine.js',
+    func: 'evaluateMomentumSwing',
+    expectedLine: 383,
+  },
+
   // Backend - valueInterpreter.js (legacy)
   { file: 'backend/utils/valueInterpreter.js', func: 'getThresholdsForSurface', expectedLine: 55 },
   { file: 'backend/utils/valueInterpreter.js', func: 'interpretGameValue', expectedLine: 98 },
-  
+
   // Backend - playerStatsService.js
   { file: 'backend/services/playerStatsService.js', func: 'getPlayerStats', expectedLine: 437 },
-  { file: 'backend/services/playerStatsService.js', func: 'calculateComebackRate', expectedLine: 214 },
+  {
+    file: 'backend/services/playerStatsService.js',
+    func: 'calculateComebackRate',
+    expectedLine: 214,
+  },
   { file: 'backend/services/playerStatsService.js', func: 'calculateROI', expectedLine: 252 },
-  
+
   // Backend - liveManager.js
   { file: 'backend/liveManager.js', func: 'initLiveManager', expectedLine: 297 },
   { file: 'backend/liveManager.js', func: 'syncMatch', expectedLine: 1242 },
-  
+
   // Frontend - useMatchBundle.jsx (NUOVO - principale) - AGGIORNATO 27 Dic 2025
   { file: 'src/hooks/useMatchBundle.jsx', func: 'useMatchBundle', expectedLine: 44 },
   { file: 'src/hooks/useMatchBundle.jsx', func: 'useTabData', expectedLine: 359 },
-  { file: 'src/hooks/useMatchBundle.jsx', func: 'useHeaderData', expectedLine: 369 }
+  { file: 'src/hooks/useMatchBundle.jsx', func: 'useHeaderData', expectedLine: 369 },
 ];
 
 // Tabelle DB da verificare nei file SQL
 const DB_TABLES = [
-  // create-new-schema.sql
-  { table: 'players_new', migration: 'create-new-schema.sql' },
-  { table: 'player_aliases', migration: 'create-new-schema.sql' },
-  { table: 'player_rankings', migration: 'create-new-schema.sql' },
-  { table: 'player_career_stats', migration: 'create-new-schema.sql' },
-  { table: 'tournaments_new', migration: 'create-new-schema.sql' },
-  { table: 'matches_new', migration: 'create-new-schema.sql' },
-  { table: 'match_data_sources', migration: 'create-new-schema.sql' },
-  { table: 'match_statistics_new', migration: 'create-new-schema.sql' },
-  { table: 'match_power_rankings_new', migration: 'create-new-schema.sql' },
-  { table: 'match_point_by_point_new', migration: 'create-new-schema.sql' },
-  { table: 'match_odds', migration: 'create-new-schema.sql' },
-  { table: 'head_to_head', migration: 'create-new-schema.sql' },
-  
+  // Schema attuale (migrazione completata 2025-12-29)
+  { table: 'players', migration: 'schema-final.sql' },
+  { table: 'player_aliases', migration: 'schema-final.sql' },
+  { table: 'player_rankings', migration: 'schema-final.sql' },
+  { table: 'player_career_stats', migration: 'schema-final.sql' },
+  { table: 'tournaments', migration: 'schema-final.sql' },
+  { table: 'matches', migration: 'schema-final.sql' },
+  { table: 'match_data_sources', migration: 'schema-final.sql' },
+  { table: 'match_statistics', migration: 'schema-final.sql' },
+  { table: 'match_power_rankings', migration: 'schema-final.sql' },
+  { table: 'match_point_by_point', migration: 'schema-final.sql' },
+  { table: 'match_odds', migration: 'schema-final.sql' },
+  { table: 'head_to_head', migration: 'schema-final.sql' },
+
   // add-snapshot-queue-tables.sql
   { table: 'match_card_snapshot', migration: 'add-snapshot-queue-tables.sql' },
   { table: 'raw_events', migration: 'add-snapshot-queue-tables.sql' },
   { table: 'calculation_queue', migration: 'add-snapshot-queue-tables.sql' },
-  
+
   // add-live-tracking-table.sql
   { table: 'live_tracking', migration: 'add-live-tracking-table.sql' },
-  { table: 'live_snapshots', migration: 'add-live-tracking-table.sql' }
+  { table: 'live_snapshots', migration: 'add-live-tracking-table.sql' },
 ];
 
 // ============================================================================
@@ -279,7 +309,7 @@ const ARCHITECTURAL_CHECKS = [
     file: 'backend/server.js',
     pattern: /app\.(get|post)\s*\(\s*['"`]\/api\/match\/:.*\/bundle/i,
     severity: 'ERROR',
-    reference: 'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md#sezione-3'
+    reference: 'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md#sezione-3',
   },
   // 2. Hook useMatchBundle deve esistere
   {
@@ -288,7 +318,8 @@ const ARCHITECTURAL_CHECKS = [
     file: 'src/hooks/useMatchBundle.jsx',
     mustExist: true,
     severity: 'ERROR',
-    reference: 'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md#sezione-3'
+    reference:
+      'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md#sezione-3',
   },
   // 3. Strategy Engine deve esistere e avere evaluateAll
   {
@@ -297,7 +328,7 @@ const ARCHITECTURAL_CHECKS = [
     file: 'backend/strategies/strategyEngine.js',
     pattern: /function\s+evaluateAll|exports\.evaluateAll|evaluateAll\s*=/,
     severity: 'ERROR',
-    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-6'
+    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-6',
   },
   // 4. Feature Engine deve esistere e avere computeFeatures
   {
@@ -306,7 +337,7 @@ const ARCHITECTURAL_CHECKS = [
     file: 'backend/utils/featureEngine.js',
     pattern: /function\s+computeFeatures|exports\.computeFeatures|computeFeatures\s*=/,
     severity: 'ERROR',
-    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-5'
+    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-5',
   },
   // 5. Frontend non deve calcolare strategie
   // Note: src/utils.js eliminato, check ora solo su componenti residui
@@ -317,7 +348,7 @@ const ARCHITECTURAL_CHECKS = [
     pattern: /export\s+function\s+(analyzeLayTheWinner|analyzeBancaServizio|analyzeSuperBreak)/,
     shouldNotExist: true,
     severity: 'WARN',
-    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-2'
+    reference: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md#sezione-2',
   },
   // 6. Frontend non deve calcolare DataCompleteness
   // Note: src/utils.js eliminato il 25 Dic 2025 - check non più necessario
@@ -329,7 +360,7 @@ const ARCHITECTURAL_CHECKS = [
     pattern: /export\s+function\s+calculateDataCompleteness/,
     shouldNotExist: true,
     severity: 'WARN',
-    reference: 'docs/filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md#invariante-35'
+    reference: 'docs/filosofie/00_foundation/FILOSOFIA_CONCEPT_CHECKS.md#invariante-35',
   },
   // 7. Struttura cartelle filosofie (CI sulla struttura)
   {
@@ -349,12 +380,12 @@ const ARCHITECTURAL_CHECKS = [
       'docs/filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md',
       'docs/filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md',
       'docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md',
-      'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md'
+      'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md',
     ],
     mustAllExist: true,
     severity: 'ERROR',
-    reference: 'docs/filosofie/INDEX_FILOSOFIE.md#struttura-cartelle'
-  }
+    reference: 'docs/filosofie/INDEX_FILOSOFIE.md#struttura-cartelle',
+  },
 ];
 
 // ============================================================================
@@ -366,7 +397,7 @@ function checkFileExists(relativePath) {
   return {
     exists: fs.existsSync(fullPath),
     path: relativePath,
-    fullPath
+    fullPath,
   };
 }
 
@@ -375,11 +406,11 @@ function findFunctionLine(filePath, funcName) {
   if (!fs.existsSync(fullPath)) {
     return { found: false, line: null, error: 'File non trovato' };
   }
-  
+
   try {
     const content = fs.readFileSync(fullPath, 'utf8');
     const lines = content.split('\n');
-    
+
     // Pattern per trovare DICHIARAZIONI di funzione (non chiamate)
     // Ordine importante: pattern più specifici prima
     const patterns = [
@@ -400,23 +431,23 @@ function findFunctionLine(filePath, funcName) {
       // name: function - metodo oggetto
       new RegExp(`^\\s*['"]?${funcName}['"]?\\s*:\\s*function`),
       // name: async function - metodo oggetto async
-      new RegExp(`^\\s*['"]?${funcName}['"]?\\s*:\\s*async\\s+function`)
+      new RegExp(`^\\s*['"]?${funcName}['"]?\\s*:\\s*async\\s+function`),
     ];
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       // Skip linee che sono chiamate (contengono await/return prima della funzione)
       if (/^\s*(await|return|\.)/.test(line) && line.includes(`${funcName}(`)) {
         continue;
       }
-      
+
       for (const pattern of patterns) {
         if (pattern.test(line)) {
           return { found: true, line: i + 1, content: line.trim() };
         }
       }
     }
-    
+
     return { found: false, line: null, error: 'Funzione non trovata' };
   } catch (err) {
     return { found: false, line: null, error: err.message };
@@ -428,7 +459,7 @@ function checkTableInMigration(tableName, migrationFile) {
   if (!fs.existsSync(fullPath)) {
     return { found: false, error: 'File migration non trovato' };
   }
-  
+
   try {
     const content = fs.readFileSync(fullPath, 'utf8');
     const pattern = new RegExp(`CREATE\\s+TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?${tableName}`, 'i');
@@ -444,9 +475,9 @@ function checkTableInMigration(tableName, migrationFile) {
 
 function runArchitecturalChecks() {
   const violations = [];
-  
+
   console.log('\n🏗️  Verifica architetturale (MatchBundle-Centric)...');
-  
+
   for (const check of ARCHITECTURAL_CHECKS) {
     // Check file must exist
     if (check.mustExist) {
@@ -458,7 +489,7 @@ function runArchitecturalChecks() {
           description: check.description,
           file: check.file,
           issue: 'FILE_MISSING',
-          reference: check.reference
+          reference: check.reference,
         });
         console.log(`  ❌ ${check.id}: ${check.file} non esiste`);
       } else {
@@ -466,14 +497,14 @@ function runArchitecturalChecks() {
       }
       continue;
     }
-    
+
     // Check single file for pattern
     if (check.file && check.pattern) {
       const fullPath = path.join(ROOT_DIR, check.file);
       if (fs.existsSync(fullPath)) {
         const content = fs.readFileSync(fullPath, 'utf8');
         const found = check.pattern.test(content);
-        
+
         if (check.shouldNotExist && found) {
           violations.push({
             id: check.id,
@@ -481,7 +512,7 @@ function runArchitecturalChecks() {
             description: check.description,
             file: check.file,
             issue: 'PATTERN_SHOULD_NOT_EXIST',
-            reference: check.reference
+            reference: check.reference,
           });
           console.log(`  ❌ ${check.id}: Pattern trovato in ${check.file} (non dovrebbe esserci)`);
         } else if (!check.shouldNotExist && !found) {
@@ -491,7 +522,7 @@ function runArchitecturalChecks() {
             description: check.description,
             file: check.file,
             issue: 'PATTERN_MISSING',
-            reference: check.reference
+            reference: check.reference,
           });
           console.log(`  ❌ ${check.id}: Pattern non trovato in ${check.file}`);
         } else {
@@ -500,14 +531,14 @@ function runArchitecturalChecks() {
       }
       continue;
     }
-    
+
     // Check antiPattern (should NOT exist)
     if (check.file && check.antiPattern) {
       const fullPath = path.join(ROOT_DIR, check.file);
       if (fs.existsSync(fullPath)) {
         const content = fs.readFileSync(fullPath, 'utf8');
         const found = check.antiPattern.test(content);
-        
+
         if (found) {
           violations.push({
             id: check.id,
@@ -515,7 +546,7 @@ function runArchitecturalChecks() {
             description: check.description,
             file: check.file,
             issue: 'ANTI_PATTERN_FOUND',
-            reference: check.reference
+            reference: check.reference,
           });
           console.log(`  ❌ ${check.id}: Anti-pattern trovato in ${check.file}`);
         } else {
@@ -524,12 +555,12 @@ function runArchitecturalChecks() {
       }
       continue;
     }
-    
+
     // Check multiple files
     if (check.files && check.pattern) {
       let foundInAny = false;
       let foundFiles = [];
-      
+
       for (const file of check.files) {
         const fullPath = path.join(ROOT_DIR, file);
         if (fs.existsSync(fullPath)) {
@@ -540,7 +571,7 @@ function runArchitecturalChecks() {
           }
         }
       }
-      
+
       if (check.shouldNotExist && foundInAny) {
         violations.push({
           id: check.id,
@@ -548,7 +579,7 @@ function runArchitecturalChecks() {
           description: check.description,
           file: foundFiles.join(', '),
           issue: 'PATTERN_SHOULD_NOT_EXIST',
-          reference: check.reference
+          reference: check.reference,
         });
         console.log(`  ❌ ${check.id}: Pattern trovato in ${foundFiles.join(', ')}`);
       } else if (!check.shouldNotExist && !foundInAny) {
@@ -558,7 +589,7 @@ function runArchitecturalChecks() {
           description: check.description,
           file: check.files.join(', '),
           issue: 'PATTERN_MISSING',
-          reference: check.reference
+          reference: check.reference,
         });
         console.log(`  ❌ ${check.id}: Pattern non trovato`);
       } else {
@@ -566,18 +597,18 @@ function runArchitecturalChecks() {
       }
       continue;
     }
-    
+
     // Check mustAllExist - tutti i file devono esistere
     if (check.files && check.mustAllExist) {
       let missingFiles = [];
-      
+
       for (const file of check.files) {
         const fullPath = path.join(ROOT_DIR, file);
         if (!fs.existsSync(fullPath)) {
           missingFiles.push(file);
         }
       }
-      
+
       if (missingFiles.length > 0) {
         violations.push({
           id: check.id,
@@ -585,7 +616,7 @@ function runArchitecturalChecks() {
           description: check.description,
           file: missingFiles.join(', '),
           issue: 'FILES_MISSING',
-          reference: check.reference
+          reference: check.reference,
         });
         console.log(`  ❌ ${check.id}: ${missingFiles.length} file mancanti`);
         for (const f of missingFiles.slice(0, 3)) {
@@ -599,7 +630,7 @@ function runArchitecturalChecks() {
       }
     }
   }
-  
+
   return violations;
 }
 
@@ -614,7 +645,7 @@ function runCheck() {
       totalChecks: 0,
       passed: 0,
       failed: 0,
-      warnings: 0
+      warnings: 0,
     },
     missingFiles: [],
     missingFunctions: [],
@@ -622,7 +653,7 @@ function runCheck() {
     missingTables: [],
     newFilesDetected: [],
     architecturalViolations: [],
-    warnings: []
+    warnings: [],
   };
 
   console.log('🔍 Avvio verifica mappa concettuale...\n');
@@ -641,7 +672,7 @@ function runCheck() {
     ...REFERENCES.frontendHooks,
     ...REFERENCES.frontendMotion,
     ...REFERENCES.frontendUtils,
-    ...REFERENCES.scripts
+    ...REFERENCES.scripts,
   ];
 
   for (const file of allFiles) {
@@ -661,13 +692,13 @@ function runCheck() {
   for (const funcRef of FUNCTIONS_TO_CHECK) {
     results.summary.totalChecks++;
     const result = findFunctionLine(funcRef.file, funcRef.func);
-    
+
     if (!result.found) {
       results.summary.failed++;
       results.missingFunctions.push({
         file: funcRef.file,
         func: funcRef.func,
-        error: result.error
+        error: result.error,
       });
       console.log(`  ❌ ${funcRef.func} in ${funcRef.file}`);
     } else if (Math.abs(result.line - funcRef.expectedLine) > 20) {
@@ -678,7 +709,7 @@ function runCheck() {
         func: funcRef.func,
         expected: funcRef.expectedLine,
         actual: result.line,
-        diff: result.line - funcRef.expectedLine
+        diff: result.line - funcRef.expectedLine,
       });
       console.log(`  ⚠️ ${funcRef.func}: expected L${funcRef.expectedLine}, found L${result.line}`);
     } else {
@@ -691,13 +722,13 @@ function runCheck() {
   for (const tableRef of DB_TABLES) {
     results.summary.totalChecks++;
     const result = checkTableInMigration(tableRef.table, tableRef.migration);
-    
+
     if (!result.found) {
       results.summary.failed++;
       results.missingTables.push({
         table: tableRef.table,
         migration: tableRef.migration,
-        error: result.error
+        error: result.error,
       });
       console.log(`  ❌ ${tableRef.table} in ${tableRef.migration}`);
     } else {
@@ -711,13 +742,13 @@ function runCheck() {
     { dir: 'backend/services', pattern: '.js' },
     { dir: 'backend/utils', pattern: '.js' },
     { dir: 'src/components', pattern: '.jsx' },
-    { dir: 'src/hooks', pattern: '.jsx' }
+    { dir: 'src/hooks', pattern: '.jsx' },
   ];
 
   for (const scan of dirsToScan) {
     const dirPath = path.join(ROOT_DIR, scan.dir);
     if (fs.existsSync(dirPath)) {
-      const files = fs.readdirSync(dirPath).filter(f => f.endsWith(scan.pattern));
+      const files = fs.readdirSync(dirPath).filter((f) => f.endsWith(scan.pattern));
       for (const file of files) {
         const relativePath = `${scan.dir}/${file}`;
         const isDocumented = allFiles.includes(relativePath);
@@ -732,7 +763,7 @@ function runCheck() {
   // 5. Verifica architetturale (MatchBundle-Centric)
   const archViolations = runArchitecturalChecks();
   results.architecturalViolations = archViolations;
-  
+
   for (const v of archViolations) {
     results.summary.totalChecks++;
     if (v.severity === 'ERROR') {
@@ -755,7 +786,7 @@ function generateCheckMarkdown(results) {
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 
   let md = `# 🔍 CHECK MAPPA CONCETTUALE
@@ -822,7 +853,9 @@ Le seguenti funzioni hanno linee diverse da quelle documentate (diff > 20):
 `;
     results.lineMismatches.forEach((m, i) => {
       const sign = m.diff > 0 ? '+' : '';
-      md += `| ${i + 1} | \`${m.func}()\` | \`${m.file}\` | L${m.expected} | L${m.actual} | ${sign}${m.diff} | [ ] Aggiornare mappa |\n`;
+      md += `| ${i + 1} | \`${m.func}()\` | \`${m.file}\` | L${m.expected} | L${
+        m.actual
+      } | ${sign}${m.diff} | [ ] Aggiornare mappa |\n`;
     });
     md += '\n---\n\n';
   }
@@ -868,14 +901,20 @@ Le seguenti violazioni rispetto alle filosofie sono state rilevate:
 `;
     results.architecturalViolations.forEach((v, i) => {
       const icon = v.severity === 'ERROR' ? '🔴' : '🟡';
-      md += `| ${i + 1} | \`${v.id}\` | ${icon} ${v.severity} | ${v.description} | \`${v.file}\` | ${v.reference || ''} |\n`;
+      md += `| ${i + 1} | \`${v.id}\` | ${icon} ${v.severity} | ${v.description} | \`${
+        v.file
+      }\` | ${v.reference || ''} |\n`;
     });
     md += '\n---\n\n';
   }
 
   // Se tutto OK
-  if (results.summary.failed === 0 && results.summary.warnings === 0 && 
-      results.newFilesDetected.length === 0 && results.architecturalViolations.length === 0) {
+  if (
+    results.summary.failed === 0 &&
+    results.summary.warnings === 0 &&
+    results.newFilesDetected.length === 0 &&
+    results.architecturalViolations.length === 0
+  ) {
     md += `## ✅ Tutto OK!
 
 Nessun problema rilevato. La mappa concettuale è allineata con il codice.
@@ -889,9 +928,13 @@ Nessun problema rilevato. La mappa concettuale è allineata con il codice.
 ## 📌 Prossime Azioni
 
 `;
-  
-  if (results.summary.failed > 0 || results.summary.warnings > 0 || 
-      results.newFilesDetected.length > 0 || results.architecturalViolations.length > 0) {
+
+  if (
+    results.summary.failed > 0 ||
+    results.summary.warnings > 0 ||
+    results.newFilesDetected.length > 0 ||
+    results.architecturalViolations.length > 0
+  ) {
     md += `1. Correggi i problemi elencati sopra
 2. Aggiorna \`docs/checks/MAPPA_RETE_CONCETTUALE_V2.md\`
 3. Ri-esegui: \`node scripts/checkConceptualMap.js\`
@@ -917,16 +960,16 @@ Nessun problema rilevato. La mappa concettuale è allineata con il codice.
 
 function updateTodoList(results) {
   console.log('📋 Report generato in CHECK_MAPPA_CONCETTUALE.md');
-  
+
   // Aggiorna sezione Check Mappa in TODO_LIST.md
   if (!fs.existsSync(TODO_LIST_FILE)) {
     console.warn('⚠️ TODO_LIST.md non trovato');
     return;
   }
-  
+
   try {
     let content = fs.readFileSync(TODO_LIST_FILE, 'utf8');
-    
+
     // Genera nuova sezione Check Mappa
     const date = new Date().toISOString().split('T')[0];
     let section = `## 🔍 Report Check Mappa (Auto-generato)
@@ -935,7 +978,7 @@ function updateTodoList(results) {
 > Esegui: \`node scripts/checkConceptualMap.js\`
 
 `;
-    
+
     section += `| Metrica | Valore |\n|---------|--------|\n`;
     section += `| Check totali | ${results.summary.totalChecks} |\n`;
     section += `| ✅ Passati | ${results.summary.passed} |\n`;
@@ -943,7 +986,7 @@ function updateTodoList(results) {
     section += `| ⚠️ Warning | ${results.summary.warnings} |\n`;
     section += `| 📄 Non doc | ${results.newFilesDetected.length} |\n`;
     section += `| 🏗️ Arch viol | ${results.architecturalViolations.length} |\n\n`;
-    
+
     // Dettagli violazioni architetturali
     if (results.architecturalViolations.length > 0) {
       section += `### Violazioni Architetturali\n\n`;
@@ -955,7 +998,7 @@ function updateTodoList(results) {
       }
       section += '\n';
     }
-    
+
     // File mancanti
     if (results.missingFiles.length > 0) {
       section += `### File Mancanti (${results.missingFiles.length})\n\n`;
@@ -967,7 +1010,7 @@ function updateTodoList(results) {
       }
       section += '\n';
     }
-    
+
     // File non documentati
     if (results.newFilesDetected.length > 0) {
       section += `### File Non Documentati (${results.newFilesDetected.length})\n\n`;
@@ -979,12 +1022,12 @@ function updateTodoList(results) {
       }
       section += '\n';
     }
-    
+
     section += '\n';
-    
+
     // Sostituisce o aggiunge sezione
     const sectionRegex = /## 🔍 Report Check Mappa \(Auto-generato\)[\s\S]*?(?=\n## |$)/;
-    
+
     if (sectionRegex.test(content)) {
       content = content.replace(sectionRegex, section);
     } else {
@@ -996,13 +1039,13 @@ function updateTodoList(results) {
         content += '\n---\n\n' + section;
       }
     }
-    
+
     fs.writeFileSync(TODO_LIST_FILE, content, 'utf8');
     console.log('📋 Sezione Check Mappa aggiornata in TODO_LIST.md');
   } catch (err) {
     console.error('❌ Errore aggiornamento TODO_LIST:', err.message);
   }
-  
+
   // Log summary
   if (results.architecturalViolations.length > 0) {
     console.log('\n🏗️  VIOLAZIONI ARCHITETTURALI DA RISOLVERE:');
@@ -1024,7 +1067,7 @@ function main() {
   console.log('═══════════════════════════════════════════════════════════\n');
 
   const results = runCheck();
-  
+
   console.log('\n═══════════════════════════════════════════════════════════');
   console.log('   📊 RIEPILOGO');
   console.log('═══════════════════════════════════════════════════════════');

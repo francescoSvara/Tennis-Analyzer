@@ -139,7 +139,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-} 
+}
 
 /* Lista indicatori */
 .indicators-list {
@@ -225,7 +225,12 @@
 .indicator-track {
   position: relative;
   height: 28px;
-  background: linear-gradient(90deg, rgba(96, 165, 250, 0.15) 0%, rgba(30, 41, 59, 0.5) 50%, rgba(248, 113, 113, 0.15) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(96, 165, 250, 0.15) 0%,
+    rgba(30, 41, 59, 0.5) 50%,
+    rgba(248, 113, 113, 0.15) 100%
+  );
   border-radius: 14px;
   overflow: visible;
   display: flex;
@@ -270,7 +275,6 @@
   align-items: center;
   transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 /* Zone distribution */
 .zone-distribution {
@@ -366,7 +370,12 @@
 .thermometer-track {
   position: relative;
   height: 28px;
-  background: linear-gradient(90deg, rgba(96, 165, 250, 0.15) 0%, rgba(30, 41, 59, 0.5) 50%, rgba(248, 113, 113, 0.15) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(96, 165, 250, 0.15) 0%,
+    rgba(30, 41, 59, 0.5) 50%,
+    rgba(248, 113, 113, 0.15) 100%
+  );
   border-radius: 14px;
   overflow: visible;
   display: flex;
@@ -702,7 +711,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -881,60 +890,60 @@
     padding: 16px;
     margin-bottom: 16px;
   }
-  
+
   .chart-header {
     margin-bottom: 16px;
     padding-bottom: 12px;
   }
-  
+
   .chart-icon {
     font-size: 20px;
     padding: 8px;
   }
-  
+
   .chart-title {
     font-size: 16px;
   }
-  
+
   .momentum-stats {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
-  
+
   .momentum-stat-card {
     padding: 12px;
   }
-  
+
   .momentum-stat-card .stat-value {
     font-size: 18px;
   }
-  
+
   .indicator-bar {
     height: 20px;
   }
-  
+
   .indicator-value {
     font-size: 13px;
     min-width: 28px;
   }
-  
+
   .momentum-legend {
     gap: 12px;
   }
-  
+
   .zone-bars {
     gap: 8px;
   }
-  
+
   .zone-bar-wrapper {
     width: 18px;
     height: 50px;
   }
-  
+
   .momentum-set-indicators {
     gap: 8px;
   }
-  
+
   .set-indicator-badge {
     padding: 6px 10px;
     gap: 6px;
@@ -946,24 +955,33 @@
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .momentum-stats {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .momentum-legend {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
   }
-  
+
   .zone-bars {
     gap: 6px;
     flex-wrap: wrap;
   }
 
   /* responsive adjustments for indicators thermometers */
-  .indicator-label { width: 110px; min-width: 90px; font-size: 12px; }
-  .indicator-side-value { width: 44px; font-size: 13px; }
-  .indicator-row { gap: 8px; }
+  .indicator-label {
+    width: 110px;
+    min-width: 90px;
+    font-size: 12px;
+  }
+  .indicator-side-value {
+    width: 44px;
+    font-size: 13px;
+  }
+  .indicator-row {
+    gap: 8px;
+  }
 }

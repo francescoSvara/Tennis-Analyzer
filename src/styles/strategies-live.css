@@ -157,8 +157,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* ============================================
@@ -738,12 +743,12 @@
   .match-status-bar {
     flex-wrap: wrap;
   }
-  
+
   .perf-grid {
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  
+
   .perf-item {
     flex-direction: row;
     justify-content: space-between;

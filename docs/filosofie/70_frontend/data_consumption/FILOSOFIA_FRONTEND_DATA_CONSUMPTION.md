@@ -8,6 +8,7 @@
 ## 1️⃣ Principio Fondante
 
 Il frontend:
+
 - Riceve **un solo payload** (MatchBundle)
 - Non conosce DB, pipeline o fonti
 - Non ricalcola metriche
@@ -35,6 +36,7 @@ GET /api/match/:matchId/bundle
 ```
 
 Il MatchBundle contiene **tutto** per:
+
 - Overview, Strategie, Odds
 - Point-by-Point, Stats, Momentum
 - Predictor, Journal, Data Quality
@@ -60,6 +62,7 @@ MatchBundle
 ```
 
 Ogni tab:
+
 - Legge solo la sua sezione
 - Non dipende dalle altre
 - Non ricalcola nulla
@@ -73,6 +76,7 @@ Ogni tab:
 3. Render completo quando bundle è pronto
 
 Regole:
+
 - Niente spinner globali
 - Skeleton per layout, non per dato
 - Errore solo se bundle fallisce
@@ -84,12 +88,14 @@ Regole:
 Il frontend **non rifetcha** il bundle intero.
 
 Riceve **patch incrementali**:
+
 - Score changes
 - Odds updates
 - Point-by-point append
 - Strategy signals update
 
 Regole:
+
 - Aggiornare solo componenti impattati
 - Non bloccare la UI
 - Indicare sempre che il dato è live
@@ -99,6 +105,7 @@ Regole:
 ## 7️⃣ Data Quality (Solo Visiva)
 
 Il frontend:
+
 - Legge `bundle.dataQuality`
 - Mostra badge / warning / tooltip
 - **Non applica fallback logici**
@@ -120,14 +127,21 @@ Se `dataQuality.completeness.odds < 80%`:
 ---
 
 **Documenti Correlati**:
+
 - [FILOSOFIA_FRONTEND_UI](../ui/FILOSOFIA_FRONTEND.md) – visual design
 - [FILOSOFIA_STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) – bundle producer
 - [FILOSOFIA_CALCOLI](../../40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md) – features
 
-### 📁 File Codice Principali
+### � Pseudocode
 
-| File | Descrizione |
-|------|-------------|
+| Documento                                                                                              | Descrizione                    |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| [FILOSOFIA_FRONTEND_DATA_CONSUMPTION_PSEUDOCODE](./FILOSOFIA_FRONTEND_DATA_CONSUMPTION_PSEUDOCODE.md)  | Regole formali data consumption|
+
+### �📁 File Codice Principali
+
+| File                                                                       | Descrizione                  |
+| -------------------------------------------------------------------------- | ---------------------------- |
 | [`src/hooks/useMatchBundle.jsx`](../../../../src/hooks/useMatchBundle.jsx) | Hook principale fetch bundle |
-| [`src/components/`](../../../../src/components/) | UI components |
-| [`src/config.js`](../../../../src/config.js) | API configuration |
+| [`src/components/`](../../../../src/components/)                           | UI components                |
+| [`src/config.js`](../../../../src/config.js)                               | API configuration            |

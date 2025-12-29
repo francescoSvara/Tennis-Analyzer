@@ -1,7 +1,7 @@
 /**
  * Script per pulire i match duplicati
  * Mantiene solo il file più recente per ogni eventId
- * 
+ *
  * Esegui con: node scripts/cleanDuplicates.js
  * Aggiungi --dry-run per vedere cosa verrebbe eliminato senza eliminare
  */
@@ -20,7 +20,7 @@ const eventMap = new Map();
 let filesWithoutEventId = [];
 let totalFiles = 0;
 
-const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
+const files = fs.readdirSync(SCRAPES_DIR).filter((f) => f.endsWith('.json'));
 totalFiles = files.length;
 
 console.log(`📁 Trovati ${totalFiles} file JSON\n`);
@@ -28,10 +28,10 @@ console.log(`📁 Trovati ${totalFiles} file JSON\n`);
 for (const file of files) {
   const filePath = path.join(SCRAPES_DIR, file);
   const stats = fs.statSync(filePath);
-  
+
   try {
     const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    
+
     // Cerca eventId nel JSON
     let eventId = null;
     if (content.api) {
@@ -42,7 +42,7 @@ for (const file of files) {
         }
       }
     }
-    
+
     if (eventId) {
       if (!eventMap.has(eventId)) {
         eventMap.set(eventId, []);
@@ -51,7 +51,7 @@ for (const file of files) {
         file,
         filePath,
         mtime: stats.mtime,
-        size: stats.size
+        size: stats.size,
       });
     } else {
       filesWithoutEventId.push({ file, filePath, mtime: stats.mtime });
@@ -71,18 +71,18 @@ for (const [eventId, fileList] of eventMap) {
   if (fileList.length > 1) {
     // Ordina per data (più recente prima)
     fileList.sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
-    
+
     // Mantieni il primo (più recente), elimina gli altri
     const keep = fileList[0];
     const toDelete = fileList.slice(1);
-    
+
     duplicatesCount += toDelete.length;
-    
+
     for (const dup of toDelete) {
       bytesToFree += dup.size;
       filesToDelete.push(dup);
     }
-    
+
     if (toDelete.length > 0) {
       console.log(`🔄 EventId ${eventId}: ${fileList.length} file`);
       console.log(`   ✅ Mantieni: ${keep.file} (${new Date(keep.mtime).toLocaleString()})`);
@@ -108,7 +108,7 @@ console.log('═'.repeat(50));
 if (!isDryRun && filesToDelete.length > 0) {
   console.log('\n🗑️  Eliminazione in corso...');
   let deleted = 0;
-  
+
   for (const { filePath, file } of filesToDelete) {
     try {
       fs.unlinkSync(filePath);
@@ -117,7 +117,7 @@ if (!isDryRun && filesToDelete.length > 0) {
       console.error(`❌ Errore eliminazione ${file}: ${e.message}`);
     }
   }
-  
+
   console.log(`\n✅ Eliminati ${deleted} file duplicati!`);
   console.log(`📁 File rimanenti: ${totalFiles - deleted}`);
 } else if (isDryRun && filesToDelete.length > 0) {

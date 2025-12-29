@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Player Service
- * 
+ *
  * Gestisce i dati dei tennisti:
  * - Trova o crea giocatori
  * - Gestisce alias per matching nomi
@@ -10,7 +10,6 @@
 const { supabase } = require('../db/supabase');
 
 class PlayerService {
-
   /**
    * Normalizza un nome per matching
    */
@@ -20,8 +19,8 @@ class PlayerService {
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Rimuove accenti
-      .replace(/[^a-z\s]/g, '')        // Solo lettere e spazi
-      .replace(/\s+/g, ' ')            // Normalizza spazi
+      .replace(/[^a-z\s]/g, '') // Solo lettere e spazi
+      .replace(/\s+/g, ' ') // Normalizza spazi
       .trim();
   }
 
@@ -46,7 +45,7 @@ class PlayerService {
 
     // Cerca per nome diretto (case insensitive)
     const { data: player } = await supabase
-      .from('players_new')
+      .from('players')
       .select('*')
       .ilike('name', `%${name}%`)
       .limit(1)
@@ -62,7 +61,7 @@ class PlayerService {
     if (!supabase || !sofascoreId) return null;
 
     const { data } = await supabase
-      .from('players_new')
+      .from('players')
       .select('*')
       .eq('sofascore_id', sofascoreId)
       .single();
@@ -76,11 +75,7 @@ class PlayerService {
   async getById(playerId) {
     if (!supabase || !playerId) return null;
 
-    const { data } = await supabase
-      .from('players_new')
-      .select('*')
-      .eq('id', playerId)
-      .single();
+    const { data } = await supabase.from('players').select('*').eq('id', playerId).single();
 
     return data;
   }
@@ -109,7 +104,7 @@ class PlayerService {
       // Aggiorna sofascore_id se mancava
       if (sofascoreId && !byName.sofascore_id) {
         await supabase
-          .from('players_new')
+          .from('players')
           .update({ sofascore_id: sofascoreId, updated_at: new Date().toISOString() })
           .eq('id', byName.id);
       }
@@ -132,7 +127,7 @@ class PlayerService {
 
     // Inserisci player
     const { data: newPlayer, error } = await supabase
-      .from('players_new')
+      .from('players')
       .insert({
         name: name,
         full_name: fullName || name,
@@ -143,7 +138,7 @@ class PlayerService {
         country_code: country?.alpha2 || country,
         country_name: country?.name,
         current_ranking: ranking,
-        ranking_updated_at: ranking ? new Date().toISOString().split('T')[0] : null
+        ranking_updated_at: ranking ? new Date().toISOString().split('T')[0] : null,
       })
       .select()
       .single();
@@ -156,7 +151,7 @@ class PlayerService {
     // Aggiungi alias
     await this.addAlias(newPlayer.id, name, 'auto');
 
-    console.log(`✅ Created player: ${name} (ID: ${newPlayer.id})`);
+    console.log(`âœ… Created player: ${name} (ID: ${newPlayer.id})`);
     return newPlayer;
   }
 
@@ -167,7 +162,7 @@ class PlayerService {
     if (!supabase || !playerId) return;
 
     const updates = {};
-    
+
     if (newData.ranking && newData.ranking > 0) {
       updates.current_ranking = newData.ranking;
       updates.ranking_updated_at = new Date().toISOString().split('T')[0];
@@ -182,13 +177,10 @@ class PlayerService {
 
     if (Object.keys(updates).length > 0) {
       updates.updated_at = new Date().toISOString();
-      await supabase
-        .from('players_new')
-        .update(updates)
-        .eq('id', playerId);
+      await supabase.from('players').update(updates).eq('id', playerId);
     }
 
-    // Aggiungi alias se il nome è diverso
+    // Aggiungi alias se il nome Ã¨ diverso
     if (newData.name) {
       await this.addAlias(playerId, newData.name, newData.source || 'auto');
     }
@@ -203,14 +195,15 @@ class PlayerService {
     const normalized = this.normalizeName(aliasName);
     if (!normalized) return;
 
-    await supabase
-      .from('player_aliases')
-      .upsert({
+    await supabase.from('player_aliases').upsert(
+      {
         player_id: playerId,
         alias_name: aliasName,
         alias_normalized: normalized,
-        source: source
-      }, { onConflict: 'alias_normalized' });
+        source: source,
+      },
+      { onConflict: 'alias_normalized' }
+    );
   }
 
   /**
@@ -219,31 +212,30 @@ class PlayerService {
   async updateRanking(playerId, ranking, points, date = new Date()) {
     if (!supabase || !playerId || !ranking) return;
 
-    const rankingDate = date instanceof Date 
-      ? date.toISOString().split('T')[0] 
-      : date;
+    const rankingDate = date instanceof Date ? date.toISOString().split('T')[0] : date;
 
     // Aggiorna ranking corrente
     await supabase
-      .from('players_new')
+      .from('players')
       .update({
         current_ranking: ranking,
         current_points: points,
         ranking_updated_at: rankingDate,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', playerId);
 
     // Aggiungi a storico
-    await supabase
-      .from('player_rankings')
-      .upsert({
+    await supabase.from('player_rankings').upsert(
+      {
         player_id: playerId,
         ranking_date: rankingDate,
         ranking: ranking,
         points: points,
-        ranking_type: 'ATP'
-      }, { onConflict: 'player_id,ranking_date,ranking_type' });
+        ranking_type: 'ATP',
+      },
+      { onConflict: 'player_id,ranking_date,ranking_type' }
+    );
   }
 
   /**
@@ -268,17 +260,15 @@ class PlayerService {
   async updateCareerStats(playerId, surface, stats) {
     if (!supabase || !playerId) return;
 
-    await supabase
-      .from('player_career_stats')
-      .upsert({
+    await supabase.from('player_career_stats').upsert(
+      {
         player_id: playerId,
         surface: surface || 'all',
         year: stats.year || null,
         matches_played: stats.matchesPlayed,
         matches_won: stats.matchesWon,
-        win_percentage: stats.matchesPlayed > 0 
-          ? (stats.matchesWon / stats.matchesPlayed * 100).toFixed(2) 
-          : 0,
+        win_percentage:
+          stats.matchesPlayed > 0 ? ((stats.matchesWon / stats.matchesPlayed) * 100).toFixed(2) : 0,
         aces_total: stats.aces,
         double_faults_total: stats.doubleFaults,
         first_serve_pct: stats.firstServePct,
@@ -289,8 +279,10 @@ class PlayerService {
         break_points_converted_pct: stats.breakPointsConvertedPct,
         tiebreaks_won: stats.tiebreaksWon,
         tiebreaks_played: stats.tiebreaksPlayed,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'player_id,surface,year' });
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'player_id,surface,year' }
+    );
   }
 
   /**
@@ -326,7 +318,7 @@ class PlayerService {
     if (!supabase || !query) return [];
 
     const { data } = await supabase
-      .from('players_new')
+      .from('players')
       .select('id, name, country_code, current_ranking')
       .or(`name.ilike.%${query}%,full_name.ilike.%${query}%`)
       .order('current_ranking', { ascending: true, nullsFirst: false })
@@ -356,38 +348,26 @@ class PlayerService {
     if (!supabase || !keepId || !mergeId || keepId === mergeId) return false;
 
     // Sposta tutti gli alias
-    await supabase
-      .from('player_aliases')
-      .update({ player_id: keepId })
-      .eq('player_id', mergeId);
+    await supabase.from('player_aliases').update({ player_id: keepId }).eq('player_id', mergeId);
 
     // Sposta match (player1)
-    await supabase
-      .from('matches_new')
-      .update({ player1_id: keepId })
-      .eq('player1_id', mergeId);
+    await supabase.from('matches').update({ player1_id: keepId }).eq('player1_id', mergeId);
 
     // Sposta match (player2)
-    await supabase
-      .from('matches_new')
-      .update({ player2_id: keepId })
-      .eq('player2_id', mergeId);
+    await supabase.from('matches').update({ player2_id: keepId }).eq('player2_id', mergeId);
 
     // Sposta match (winner)
-    await supabase
-      .from('matches_new')
-      .update({ winner_id: keepId })
-      .eq('winner_id', mergeId);
+    await supabase.from('matches').update({ winner_id: keepId }).eq('winner_id', mergeId);
 
     // Elimina player duplicato
-    await supabase
-      .from('players_new')
-      .delete()
-      .eq('id', mergeId);
+    await supabase.from('players').delete().eq('id', mergeId);
 
-    console.log(`✅ Merged player ${mergeId} into ${keepId}`);
+    console.log(`âœ… Merged player ${mergeId} into ${keepId}`);
     return true;
   }
 }
 
 module.exports = new PlayerService();
+
+
+

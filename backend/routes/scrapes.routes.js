@@ -1,16 +1,16 @@
 /**
  * Scrapes Routes
- * 
+ *
  * Endpoints per gestione scrapes salvati:
  * - GET /scrapes - Lista scrapes salvati
  * - GET /scrapes/:id - Singolo scrape
- * 
+ *
  * NOTE: Some endpoints need to be at root level - mounted via index.js:
- * - POST /scrape - Avvia scrape (DISABILITATO in produzione) 
+ * - POST /scrape - Avvia scrape (DISABILITATO in produzione)
  * - GET /status/:id - Status scrape
  * - GET /data/:id - Dati scrape
  * - POST /lookup-name - Quick lookup URL
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_DB.md
  */
 

@@ -1,6 +1,6 @@
 /**
  * MotionRow - Row tabella/lista con fade slide animation
- * 
+ *
  * Ref: docs/filosofie/FILOSOFIA_FRONTEND.md
  * Ref: src/motion/tokens.js
  */
@@ -10,7 +10,7 @@ import { durations, easings, staggerItem } from './tokens';
 
 /**
  * Row animata per tabelle e liste
- * 
+ *
  * @param {Object} props
  * @param {React.ReactNode} props.children - Contenuto della row
  * @param {string} [props.className] - Classi CSS aggiuntive
@@ -18,13 +18,13 @@ import { durations, easings, staggerItem } from './tokens';
  * @param {boolean} [props.isHighlighted] - Evidenzia la row
  * @param {'default'|'success'|'warning'|'error'} [props.status] - Stato visivo
  */
-export function MotionRow({ 
-  children, 
-  className = '', 
+export function MotionRow({
+  children,
+  className = '',
   onClick,
   isHighlighted = false,
   status = 'default',
-  ...props 
+  ...props
 }) {
   const statusColors = {
     default: 'transparent',

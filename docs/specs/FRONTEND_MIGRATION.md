@@ -1,17 +1,18 @@
 # 🔄 FRONTEND MIGRATION GUIDE
+
 ## Nuova Struttura Componenti
 
 > **Dominio**: Frontend · Migration · Structure  
 > **Stato**: ATTIVA  
 > **Tipo**: Guida Migrazione  
-> **Ultimo aggiornamento**: 27 Dicembre 2025  
+> **Ultimo aggiornamento**: 27 Dicembre 2025
 
 ---
 
 ## 🧭 NAVIGAZIONE ARCHITETTURA
 
-| ⬆️ Padre | ➡️ Correlato |
-|---------|--------------|
+| ⬆️ Padre                                                                | ➡️ Correlato                                                                                      |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) |
 
 ---
@@ -73,19 +74,19 @@ src/
 
 Questi file in `src/components/` sono sostituiti dalla nuova struttura:
 
-| Old File | Replaced By | Note |
-|----------|-------------|------|
-| `HomePage.jsx` | `home/HomePage.jsx` | Nuova lobby |
-| `MatchHeader.jsx` | `match/layout/MatchHeader.jsx` | Nuovo design |
-| `MomentumTab.jsx` | `match/tabs/MomentumTab.jsx` | Trend analysis |
-| `PredictorTab.jsx` | `match/tabs/PredictorTab.jsx` | Win probability |
-| `QuotesTab.jsx` | `match/tabs/OddsTab.jsx` | Renamed + redesigned |
-| `PointByPoint.jsx` | `match/tabs/PointByPointTab.jsx` | Timeline view |
-| `PointRow.jsx` | (integrated) | In PointByPointTab |
-| `PointByPointWidget.jsx` | (integrated) | In MatchHeader |
-| `StrategiesPanel.jsx` | `match/tabs/StrategiesTab.jsx` | Full strategies tab |
-| `StrategiesLivePanel.jsx` | `match/layout/RightRail.jsx` | Quick strategy CTA |
-| `StrategyHistoricalPanel.jsx` | (integrated) | In StrategiesTab |
+| Old File                      | Replaced By                      | Note                 |
+| ----------------------------- | -------------------------------- | -------------------- |
+| `HomePage.jsx`                | `home/HomePage.jsx`              | Nuova lobby          |
+| `MatchHeader.jsx`             | `match/layout/MatchHeader.jsx`   | Nuovo design         |
+| `MomentumTab.jsx`             | `match/tabs/MomentumTab.jsx`     | Trend analysis       |
+| `PredictorTab.jsx`            | `match/tabs/PredictorTab.jsx`    | Win probability      |
+| `QuotesTab.jsx`               | `match/tabs/OddsTab.jsx`         | Renamed + redesigned |
+| `PointByPoint.jsx`            | `match/tabs/PointByPointTab.jsx` | Timeline view        |
+| `PointRow.jsx`                | (integrated)                     | In PointByPointTab   |
+| `PointByPointWidget.jsx`      | (integrated)                     | In MatchHeader       |
+| `StrategiesPanel.jsx`         | `match/tabs/StrategiesTab.jsx`   | Full strategies tab  |
+| `StrategiesLivePanel.jsx`     | `match/layout/RightRail.jsx`     | Quick strategy CTA   |
+| `StrategyHistoricalPanel.jsx` | (integrated)                     | In StrategiesTab     |
 
 ---
 
@@ -93,20 +94,20 @@ Questi file in `src/components/` sono sostituiti dalla nuova struttura:
 
 Questi componenti sono ancora usati:
 
-| File | Scopo |
-|------|-------|
-| `ErrorBoundary.jsx` | Error boundary wrapper |
-| `GameBlock.jsx` | Game block display |
-| `SetBlock.jsx` | Set block display |
-| `MatchCard.jsx` | Card per match list |
-| `MatchGrid.jsx` | Grid layout matches |
-| `MonitoringDashboard.jsx` | Database monitoring |
-| `SportSidebar.jsx` | Sport selection |
-| `PlayerPage.jsx` | Player profiles |
-| `Statistics.jsx` | Stats display |
-| `StatGroup.jsx` | Stats grouping |
-| `StatRow.jsx` | Stats row |
-| `MomentumChart.jsx` | Momentum visualization |
+| File                      | Scopo                  |
+| ------------------------- | ---------------------- |
+| `ErrorBoundary.jsx`       | Error boundary wrapper |
+| `GameBlock.jsx`           | Game block display     |
+| `SetBlock.jsx`            | Set block display      |
+| `MatchCard.jsx`           | Card per match list    |
+| `MatchGrid.jsx`           | Grid layout matches    |
+| `MonitoringDashboard.jsx` | Database monitoring    |
+| `SportSidebar.jsx`        | Sport selection        |
+| `PlayerPage.jsx`          | Player profiles        |
+| `Statistics.jsx`          | Stats display          |
+| `StatGroup.jsx`           | Stats grouping         |
+| `StatRow.jsx`             | Stats row              |
+| `MomentumChart.jsx`       | Momentum visualization |
 
 ---
 
@@ -144,12 +145,12 @@ La nuova architettura usa `useMatchBundle` hook che segue la filosofia V2:
 
 ### Principi
 
-| Principio | Implementazione |
-|-----------|-----------------|
-| **Single endpoint** | `/api/match/:id/bundle` |
-| **No tab-specific fetches** | Tutti i dati in un payload |
-| **WebSocket + polling** | Real-time updates con fallback |
-| **Cache management** | SWR-like pattern |
+| Principio                   | Implementazione                |
+| --------------------------- | ------------------------------ |
+| **Single endpoint**         | `/api/match/:id/bundle`        |
+| **No tab-specific fetches** | Tutti i dati in un payload     |
+| **WebSocket + polling**     | Real-time updates con fallback |
+| **Cache management**        | SWR-like pattern               |
 
 ### Esempio
 
@@ -158,10 +159,10 @@ import { useMatchBundle } from '../hooks/useMatchBundle';
 
 const MatchPage = ({ matchId }) => {
   const { bundle, loading, error } = useMatchBundle(matchId);
-  
+
   if (loading) return <LoadingSkeleton />;
   if (error) return <ErrorState error={error} />;
-  
+
   return (
     <div>
       <MatchHeader data={bundle.header} />
@@ -199,11 +200,11 @@ END
 
 ## 📚 RIFERIMENTI
 
-| Documento | Scopo |
-|-----------|-------|
-| [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | Visual design e UI |
+| Documento                                                                                         | Scopo                         |
+| ------------------------------------------------------------------------------------------------- | ----------------------------- |
+| [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md)                           | Visual design e UI            |
 | [FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | Data consumption architecture |
-| [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx) | Hook implementation |
+| [`src/hooks/useMatchBundle.jsx`](../../src/hooks/useMatchBundle.jsx)                              | Hook implementation           |
 
 ---
 

@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { 
-  DownloadSimple, 
-  ChartBar, 
-  Broadcast, 
+import {
+  DownloadSimple,
+  Broadcast,
   PlusCircle,
   MapPin,
   Calendar,
   Trophy,
-  User,
-  ArrowRight,
   Circle,
-  FlagBanner
+  FlagBanner,
 } from '@phosphor-icons/react';
 import { getTournamentLogo, getSuggestedFileName } from '../utils/tournamentLogos';
 import { durations, easings } from '../motion/tokens';
@@ -26,11 +23,11 @@ function formatDate(timestamp, fileDate) {
   } else {
     return 'N/A';
   }
-  
+
   const now = new Date();
   const diffMs = now - date;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
+
   // Se è nel futuro
   if (diffMs < 0) {
     const futureDays = Math.abs(diffDays);
@@ -38,34 +35,43 @@ function formatDate(timestamp, fileDate) {
     if (futureDays === 1) return 'Domani';
     return date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
   }
-  
+
   // Passato
   if (diffDays === 0) return 'Oggi';
   if (diffDays === 1) return 'Ieri';
   if (diffDays < 7) return `${diffDays}g fa`;
-  
-  return date.toLocaleDateString('it-IT', { 
-    day: '2-digit', 
-    month: 'short'
+
+  return date.toLocaleDateString('it-IT', {
+    day: '2-digit',
+    month: 'short',
   });
 }
 
 // Badge di stato
 function getStatusBadge(status) {
   // Handle status as object (from SofaScore API) or string
-  const statusType = typeof status === 'object' && status !== null
-    ? (status.type || status.description || 'unknown')
-    : (status || 'unknown');
-  
+  const statusType =
+    typeof status === 'object' && status !== null
+      ? status.type || status.description || 'unknown'
+      : status || 'unknown';
+
   const statusStr = String(statusType).toLowerCase();
-  
+
   const statusMap = {
-    'notstarted': { label: 'Scheduled', color: '#6b7280', pulse: false },
-    'inprogress': { label: <><Circle size={8} weight="fill" style={{ color: '#ef4444', marginRight: 4 }} /> LIVE</>, color: '#ef4444', pulse: true },
-    'finished': { label: 'Finished', color: '#10b981', pulse: false },
-    'canceled': { label: 'Canceled', color: '#f59e0b', pulse: false },
-    'postponed': { label: 'Postponed', color: '#f59e0b', pulse: false },
-    'interrupted': { label: 'Interrupted', color: '#f97316', pulse: false },
+    notstarted: { label: 'Scheduled', color: '#6b7280', pulse: false },
+    inprogress: {
+      label: (
+        <>
+          <Circle size={8} weight="fill" style={{ color: '#ef4444', marginRight: 4 }} /> LIVE
+        </>
+      ),
+      color: '#ef4444',
+      pulse: true,
+    },
+    finished: { label: 'Finished', color: '#10b981', pulse: false },
+    canceled: { label: 'Canceled', color: '#f59e0b', pulse: false },
+    postponed: { label: 'Postponed', color: '#f59e0b', pulse: false },
+    interrupted: { label: 'Interrupted', color: '#f97316', pulse: false },
   };
   return statusMap[statusStr] || { label: statusType || 'Unknown', color: '#6b7280', pulse: false };
 }
@@ -76,7 +82,7 @@ function countryToFlag(countryCode) {
   const codePoints = countryCode
     .toUpperCase()
     .split('')
-    .map(char => 127397 + char.charCodeAt(0));
+    .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
 }
 
@@ -84,20 +90,16 @@ function countryToFlag(countryCode) {
 function TournamentWithLogo({ tournament, category }) {
   const [logoError, setLogoError] = useState(false);
   const logoPath = getTournamentLogo(tournament, category);
-  
+
   // Se non c'è logo o c'è stato errore, mostra solo il testo
   if (!logoPath || logoError) {
-    return (
-      <div className="match-tournament">
-        {tournament || 'Unknown Tournament'}
-      </div>
-    );
+    return <div className="match-tournament">{tournament || 'Unknown Tournament'}</div>;
   }
-  
+
   return (
     <div className="match-tournament with-logo">
-      <img 
-        src={logoPath} 
+      <img
+        src={logoPath}
         alt={`${tournament} logo`}
         className="tournament-logo"
         onError={() => setLogoError(true)}
@@ -107,40 +109,50 @@ function TournamentWithLogo({ tournament, category }) {
   );
 }
 
-function MatchCard({ match, onClick, isSuggested = false, isDetected = false, onAddToDb, dataCompleteness = null }) {
+function MatchCard({
+  match,
+  onClick,
+  isSuggested = false,
+  isDetected = false,
+  onAddToDb,
+  dataCompleteness = null,
+}) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   if (!match) return null;
-  
+
   const statusBadge = getStatusBadge(match.status);
   const homeTeam = match.homeTeam || {};
   const awayTeam = match.awayTeam || {};
-  
+
   // Card suggerita o rilevata: stile diverso e non cliccabile
-  const cardClass = isDetected 
+  const cardClass = isDetected
     ? 'match-card detected-card'
-    : isSuggested 
-      ? 'match-card suggested-card' 
-      : 'match-card';
-  
+    : isSuggested
+    ? 'match-card suggested-card'
+    : 'match-card';
+
   const handleClick = () => {
     if (!isSuggested && !isDetected && onClick) {
       onClick(match);
     }
   };
-  
+
   // Configurazione animazioni
-  const hoverAnimation = !prefersReducedMotion && !isSuggested && !isDetected ? {
-    whileHover: { 
-      y: -4, 
-      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
-    },
-    whileTap: { scale: 0.99 },
-  } : {};
-  
+  const hoverAnimation =
+    !prefersReducedMotion && !isSuggested && !isDetected
+      ? {
+          whileHover: {
+            y: -4,
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
+          },
+          whileTap: { scale: 0.99 },
+        }
+      : {};
+
   return (
-    <motion.div 
-      className={cardClass} 
+    <motion.div
+      className={cardClass}
       onClick={handleClick}
       initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -158,19 +170,19 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
           <span className="suggested-text">Da aggiungere</span>
         </div>
       )}
-      
+
       {/* Header: Superficie/Categoria e Data */}
       <div className="match-card-header">
         <span className="match-category">
           <MapPin size={12} weight="bold" style={{ marginRight: 4, opacity: 0.7 }} />
-          {match.surface ? match.surface : (match.category || match.sport || 'Tennis')}
+          {match.surface ? match.surface : match.category || match.sport || 'Tennis'}
         </span>
         <span className="match-date">
           <Calendar size={12} weight="bold" style={{ marginRight: 4, opacity: 0.7 }} />
           {formatDate(match.startTimestamp, match.fileDate)}
         </span>
       </div>
-      
+
       {/* Round info per detected */}
       {isDetected && match.round && (
         <div className="match-round">
@@ -178,46 +190,31 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
           {match.round}
         </div>
       )}
-      
+
       {/* Torneo con Logo - nascosto per detected (già nel gruppo) */}
       {!isDetected && (
-        <TournamentWithLogo 
-          tournament={match.tournament} 
-          category={match.category}
-        />
+        <TournamentWithLogo tournament={match.tournament} category={match.category} />
       )}
-      
+
       {/* Teams/Players */}
       <div className="match-teams">
         <div className="team home">
-          <span className="team-flag">
-            {countryToFlag(homeTeam.country)}
-          </span>
-          <span className="team-name">
-            {homeTeam.shortName || homeTeam.name || 'Player 1'}
-          </span>
-          {homeTeam.ranking && (
-            <span className="team-ranking">#{homeTeam.ranking}</span>
-          )}
+          <span className="team-flag">{countryToFlag(homeTeam.country)}</span>
+          <span className="team-name">{homeTeam.shortName || homeTeam.name || 'Player 1'}</span>
+          {homeTeam.ranking && <span className="team-ranking">#{homeTeam.ranking}</span>}
         </div>
-        
+
         <div className="vs-container">
           <span className="vs">VS</span>
         </div>
-        
+
         <div className="team away">
-          <span className="team-flag">
-            {countryToFlag(awayTeam.country)}
-          </span>
-          <span className="team-name">
-            {awayTeam.shortName || awayTeam.name || 'Player 2'}
-          </span>
-          {awayTeam.ranking && (
-            <span className="team-ranking">#{awayTeam.ranking}</span>
-          )}
+          <span className="team-flag">{countryToFlag(awayTeam.country)}</span>
+          <span className="team-name">{awayTeam.shortName || awayTeam.name || 'Player 2'}</span>
+          {awayTeam.ranking && <span className="team-ranking">#{awayTeam.ranking}</span>}
         </div>
       </div>
-      
+
       {/* Footer: Status o Pulsante Aggiungi */}
       <div className="match-card-footer">
         {isDetected ? (
@@ -227,7 +224,7 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
             <span>Rilevata</span>
           </div>
         ) : isSuggested ? (
-          <motion.button 
+          <motion.button
             className="add-to-db-btn"
             onClick={(e) => {
               e.stopPropagation();
@@ -241,7 +238,7 @@ function MatchCard({ match, onClick, isSuggested = false, isDetected = false, on
             Aggiungi al Database
           </motion.button>
         ) : (
-          <span 
+          <span
             className={`match-status ${statusBadge.pulse ? 'pulse' : ''}`}
             style={{ backgroundColor: statusBadge.color }}
           >

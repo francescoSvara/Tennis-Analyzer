@@ -19,7 +19,7 @@
 - **Design Tokens CSS**: Introdotte variabili CSS per animazioni (`--duration-fast`, `--duration-normal`, `--ease-premium`), colori e spacing conformi alle filosofie del progetto.
 - **Motion sottile su hover**: Bottoni e card ora hanno animazioni di hover premium (`translateY(-1px)`, `box-shadow` transizione).
 
-**Principio rispettato**: *"Visualizzazione = sempre da DB (zero chiamate API). Acquisizione = solo su richiesta esplicita."*
+**Principio rispettato**: _"Visualizzazione = sempre da DB (zero chiamate API). Acquisizione = solo su richiesta esplicita."_
 
 ---
 
@@ -30,8 +30,9 @@ Questo progetto è **l'UNICO** che può fare scraping da SofaScore!
 ### Perché?
 
 SofaScore blocca le richieste provenienti da server cloud (errore 409/403):
+
 - ❌ Railway → BLOCCATO
-- ❌ Vercel → BLOCCATO  
+- ❌ Vercel → BLOCCATO
 - ❌ Heroku → BLOCCATO
 - ✅ **Il tuo PC locale** → FUNZIONA
 
@@ -58,23 +59,23 @@ SofaScore blocca le richieste provenienti da server cloud (errore 409/403):
 
 ### Divisione Responsabilità
 
-| Progetto | Scraping | Lettura DB | Dove gira |
-|----------|----------|------------|-----------|
-| **Tennis-Scraper-Local** | ✅ SÌ | ✅ SÌ | PC Locale |
-| **React-Betfair (questo repo)** | ❌ NO | ✅ SÌ | Railway + Vercel |
+| Progetto                        | Scraping | Lettura DB | Dove gira        |
+| ------------------------------- | -------- | ---------- | ---------------- |
+| **Tennis-Scraper-Local**        | ✅ SÌ    | ✅ SÌ      | PC Locale        |
+| **React-Betfair (questo repo)** | ❌ NO    | ✅ SÌ      | Railway + Vercel |
 
 ---
 
 ## 🧠 FILOSOFIA PRIMARIA: Acquisizione Ossessiva dei Dati
 
-> **Ogni azione dell'utente deve contribuire all'accumulo di dati nel database.**
-> **Ogni link inserito = SCRAPE COMPLETO + AGGIORNAMENTO DATI**
+> **Ogni azione dell'utente deve contribuire all'accumulo di dati nel database.** > **Ogni link inserito = SCRAPE COMPLETO + AGGIORNAMENTO DATI**
 
-Questo progetto segue un principio fondamentale: **acquisizione spasmodica e ossessiva dei dati**. 
+Questo progetto segue un principio fondamentale: **acquisizione spasmodica e ossessiva dei dati**.
 
 ### ⚡ REGOLA D'ORO: MAI "duplicato", SEMPRE aggiorna
 
 Quando inserisci un link nella barra di acquisizione:
+
 - **NON** viene mai restituito "match già esistente"
 - **SEMPRE** viene fatto scrape completo di tutti i dati
 - **SEMPRE** vengono aggiornati: match, players, tournament, scores, statistics
@@ -82,12 +83,12 @@ Quando inserisci un link nella barra di acquisizione:
 
 ### Principi Operativi
 
-| Azione Utente | Processo Scatenato |
-|---------------|-------------------|
-| **Inserisce link match** | → Scrape COMPLETO → Upsert match/players/tournament → Scansiona INTERO torneo → Salva in `detected_matches` |
-| **Click su match esistente** | → Ri-scrape COMPLETO → Aggiorna TUTTI i dati → Ri-scansiona torneo |
-| **Click su "Partite Mancanti"** | → Apre modale → Inserisci link → Scrape completo (stesso flow) |
-| **Visualizza statistiche** | → Query diretta al DB → Mai calcoli client-side |
+| Azione Utente                   | Processo Scatenato                                                                                          |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Inserisce link match**        | → Scrape COMPLETO → Upsert match/players/tournament → Scansiona INTERO torneo → Salva in `detected_matches` |
+| **Click su match esistente**    | → Ri-scrape COMPLETO → Aggiorna TUTTI i dati → Ri-scansiona torneo                                          |
+| **Click su "Partite Mancanti"** | → Apre modale → Inserisci link → Scrape completo (stesso flow)                                              |
+| **Visualizza statistiche**      | → Query diretta al DB → Mai calcoli client-side                                                             |
 
 ### Perché questa filosofia?
 
@@ -101,24 +102,28 @@ Quando inserisci un link nella barra di acquisizione:
 ## ✨ Funzionalità UI
 
 ### Dashboard Statistiche
+
 - **Contatori animati flip-clock** - I numeri si aggiornano con effetto orologio sveglia
 - **Acquisiti** - Match nel database con dati completi
 - **Mancanti** - Partite rilevate dai tornei ma non ancora acquisite
 - **Totale** - Somma di acquisiti + mancanti
 
 ### Status Badge con Colori
-| Status | Colore | Descrizione |
-|--------|--------|-------------|
-| **Not started** | 🔴 Rosso | Partita non ancora iniziata |
-| **Live** | 🔴 Rosso pulsante | Partita in corso |
-| **Ended** | 🟢 Verde | Partita terminata normalmente |
-| **Retired** | ⚫ Grigio | Giocatore ritirato |
-| **Walkover/Cancelled** | ⚫ Grigio | Partita annullata |
+
+| Status                 | Colore            | Descrizione                   |
+| ---------------------- | ----------------- | ----------------------------- |
+| **Not started**        | 🔴 Rosso          | Partita non ancora iniziata   |
+| **Live**               | 🔴 Rosso pulsante | Partita in corso              |
+| **Ended**              | 🟢 Verde          | Partita terminata normalmente |
+| **Retired**            | ⚫ Grigio         | Giocatore ritirato            |
+| **Walkover/Cancelled** | ⚫ Grigio         | Partita annullata             |
 
 ### Filtri Automatici
+
 Le partite con status **Ended**, **Retired**, **Walkover**, **Cancelled**, **Postponed** vengono automaticamente nascoste dalla lista "Partite Recenti" per mostrare solo quelle da completare.
 
 ### Paginazione
+
 - **20 match per pagina** sia per Partite Recenti che Partite Mancanti
 - Navigazione con pulsanti Prec/Succ
 
@@ -127,6 +132,7 @@ Le partite con status **Ended**, **Retired**, **Walkover**, **Cancelled**, **Pos
 ### Tabella `detected_matches`: Il Cuore del Sistema
 
 Questa tabella traccia **OGNI** partita mai rilevata da SofaScore:
+
 - Quando viene vista per la prima volta → `detected_at`
 - Se è stata acquisita → `is_acquired = true`
 - Quando è stata acquisita → `acquired_at`
@@ -138,6 +144,7 @@ Questa tabella traccia **OGNI** partita mai rilevata da SofaScore:
 ## 📋 Panoramica
 
 SofaScore blocca le richieste provenienti da IP di data center cloud. Questo tool permette di:
+
 - Effettuare scraping usando il proprio IP locale (non bloccato)
 - Salvare i dati nel database Supabase condiviso con la produzione
 - Rilevare automaticamente le partite mancanti di un torneo
@@ -169,12 +176,14 @@ PORT=3002
 ### 3. Avvio
 
 **Terminale 1 - Backend:**
+
 ```bash
 cd backend
 node server.js
 ```
 
 **Terminale 2 - Frontend:**
+
 ```bash
 npm run client
 ```
@@ -190,12 +199,14 @@ Apri http://localhost:5174
 3. Clicca "🔄 Scrape"
 
 **Il sistema SEMPRE:**
+
 - Fa scrape completo di match, players, tournament
 - Aggiorna scores e statistics
 - Scansiona l'intero torneo per partite mancanti
 - Mostra messaggio: "✅ Acquisito" (nuovo) o "♻️ Aggiornato" (esistente)
 
 **Formati URL supportati:**
+
 - `/event/12345`
 - `#id:12345`
 - `#12345`
@@ -212,13 +223,14 @@ Il sistema rileva automaticamente le partite mancanti dai tornei acquisiti.
 
 Ogni match mostra una badge con la % di completamento:
 
-| Colore | Significato |
-|--------|-------------|
-| 🟢 Verde (100%) | Tutti i campi compilati |
-| 🟠 Arancione (70-99%) | Quasi completo |
-| 🔴 Rosso (<70%) | Incompleto |
+| Colore                | Significato             |
+| --------------------- | ----------------------- |
+| 🟢 Verde (100%)       | Tutti i campi compilati |
+| 🟠 Arancione (70-99%) | Quasi completo          |
+| 🔴 Rosso (<70%)       | Incompleto              |
 
 **Campi tracciati:**
+
 - Player info (home/away)
 - Tournament, Round, Start time
 - Status, Winner code
@@ -229,6 +241,7 @@ Ogni match mostra una badge con la % di completamento:
 ### Partite Complete (100%)
 
 Le partite con completamento 100%:
+
 - **Non appaiono** nella lista "Partite Recenti"
 - **Non si possono aggiornare** (click disabilitato)
 - Sono considerate "acquisite completamente"
@@ -240,11 +253,13 @@ Le partite finite ("Ended") con un risultato completo vengono automaticamente na
 Sopra i tab è visibile un riepilogo con due righe:
 
 **Riga 1 - Stats tornei rilevati:**
+
 - **Nel Database**: Partite già acquisite (tracked in `detected_matches`)
 - **Da Acquisire**: Partite mancanti da acquisire
 - **Totale Rilevati**: Tutte le partite rilevate dai tornei
 
 **Riga 2 - Contatori DB:**
+
 - **Totale nel DB**: Totale partite nella tabella `matches`
 - **In lista**: Partite visibili nelle tab
 - **Ultime 24h**: Acquisite nelle ultime 24 ore
@@ -292,27 +307,32 @@ CREATE INDEX IF NOT EXISTS idx_detected_at ON detected_matches(detected_at);
 Tutte le future funzionalità seguono la filosofia di **acquisizione ossessiva**:
 
 ### 🔄 Acquisizione Automatica
+
 - **Cron Job Locale**: Scansione periodica (ogni 15 min) di tutti i tornei attivi
 - **Watch Mode**: Monitora tornei in corso e rileva nuove partite in tempo reale
 - **Batch Acquisition**: Acquisizione automatica di tutte le partite mancanti con un click
 
 ### 📊 Analisi Dati Avanzate
+
 - **Coverage Report**: % di partite acquisite per torneo/giocatore/periodo
 - **Gap Analysis**: Identificare "buchi" nei dati storici
 - **Trend Detection**: Quali tornei hanno più partite mancanti
 
 ### 🗄️ Espansione Database
+
 - **Giocatori**: Tabella separata con statistiche aggregate
 - **H2H**: Storico head-to-head tra giocatori
 - **Odds History**: Integrazione con dati quote (se disponibili)
 - **Surface Stats**: Performance per superficie
 
 ### 🔗 Integrazioni
+
 - **Import da CSV/JSON**: Caricamento batch di dati esterni
 - **Export schedulato**: Backup automatico dei dati
 - **API pubblica**: Esporre i dati per altri servizi
 
 ### 🎯 Ottimizzazione Acquisizione
+
 - **Smart Priority**: Acquisire prima partite di giocatori top-ranked
 - **Completeness Score**: Dare priorità a match quasi completi
 - **Retry automatico**: Riprovare match falliti dopo N minuti
@@ -320,31 +340,34 @@ Tutte le future funzionalità seguono la filosofia di **acquisizione ossessiva**
 ## 🔧 API Endpoints
 
 ### Endpoints Base
-| Endpoint | Metodo | Descrizione |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check |
-| `/api/stats` | GET | Statistiche base (totale match, match 24h) |
-| `/api/matches` | GET | Lista match recenti |
-| `/api/matches?completeness=true` | GET | Match con % completamento |
-| `/api/match/:id/completeness` | GET | Completamento singolo match |
-| `/api/scrape` | POST | Acquisisce un match (body: `{ url }`) |
+
+| Endpoint                         | Metodo | Descrizione                                |
+| -------------------------------- | ------ | ------------------------------------------ |
+| `/api/health`                    | GET    | Health check                               |
+| `/api/stats`                     | GET    | Statistiche base (totale match, match 24h) |
+| `/api/matches`                   | GET    | Lista match recenti                        |
+| `/api/matches?completeness=true` | GET    | Match con % completamento                  |
+| `/api/match/:id/completeness`    | GET    | Completamento singolo match                |
+| `/api/scrape`                    | POST   | Acquisisce un match (body: `{ url }`)      |
 
 ### Endpoints detected_matches (Nuovo Sistema)
-| Endpoint | Metodo | Descrizione |
-|----------|--------|-------------|
-| `/api/advanced-stats` | GET | Stats complete dal sistema detected_matches |
-| `/api/detected-matches` | POST | Salva partite rilevate (body: `{ matches, tournamentId, tournamentName }`) |
-| `/api/detected-missing` | GET | Partite rilevate ma non acquisite |
-| `/api/detected-matches/:tournamentId` | GET | Partite di un torneo specifico |
-| `/api/scan-tournament/:id` | POST | Scansiona torneo e salva in DB |
-| `/api/mark-acquired/:matchId` | POST | Segna partita come acquisita |
+
+| Endpoint                              | Metodo | Descrizione                                                                |
+| ------------------------------------- | ------ | -------------------------------------------------------------------------- |
+| `/api/advanced-stats`                 | GET    | Stats complete dal sistema detected_matches                                |
+| `/api/detected-matches`               | POST   | Salva partite rilevate (body: `{ matches, tournamentId, tournamentName }`) |
+| `/api/detected-missing`               | GET    | Partite rilevate ma non acquisite                                          |
+| `/api/detected-matches/:tournamentId` | GET    | Partite di un torneo specifico                                             |
+| `/api/scan-tournament/:id`            | POST   | Scansiona torneo e salva in DB                                             |
+| `/api/mark-acquired/:matchId`         | POST   | Segna partita come acquisita                                               |
 
 ### Endpoints Tornei
-| Endpoint | Metodo | Descrizione |
-|----------|--------|-------------|
-| `/api/missing-matches` | GET | Partite mancanti (vecchio sistema) |
-| `/api/recent-tournaments` | GET | Tornei con partite recenti |
-| `/api/tournament-events/:id` | GET | Eventi di un torneo da SofaScore |
+
+| Endpoint                     | Metodo | Descrizione                        |
+| ---------------------------- | ------ | ---------------------------------- |
+| `/api/missing-matches`       | GET    | Partite mancanti (vecchio sistema) |
+| `/api/recent-tournaments`    | GET    | Tornei con partite recenti         |
+| `/api/tournament-events/:id` | GET    | Eventi di un torneo da SofaScore   |
 
 ## 📁 Struttura Progetto
 
@@ -366,6 +389,7 @@ Tennis-Scraper-Local/
 ## 🗄️ Database Schema
 
 ### Tabella `matches`
+
 - `id` (PK) - SofaScore event ID
 - `home_player_id`, `away_player_id` - FK a players
 - `tournament_id` - FK a tournaments
@@ -374,6 +398,7 @@ Tennis-Scraper-Local/
 - `extracted_at`, `is_live`, `raw_json`
 
 ### Tabella `detected_matches` (Nuovo!)
+
 - `id` (PK) - SofaScore event ID
 - `tournament_id`, `tournament_name`
 - `home_team_name`, `away_team_name`
@@ -382,11 +407,13 @@ Tennis-Scraper-Local/
 - `detected_at`, `is_acquired`, `acquired_at`
 
 ### Tabella `match_scores`
+
 - `match_id`, `set_number`
 - `home_games`, `away_games`
 - `home_tiebreak`, `away_tiebreak`
 
 ### Tabella `match_statistics`
+
 - `match_id`, `period`, `group_name`
 - `stat_name`, `home_value`, `away_value`
 
@@ -408,15 +435,18 @@ Tennis-Scraper-Local/
 Se la tabella `detected_matches` non esiste, esegui la query SQL nella sezione "Sistema detected_matches" sopra.
 
 ### "Server Offline"
+
 - Verifica che il backend sia in esecuzione (`node server.js`)
 - Controlla che la porta 3002 sia libera
 
 ### "SofaScore ha bloccato la richiesta"
+
 - Attendi qualche minuto e riprova
 - Usa una VPN se il problema persiste
 - Il tuo IP potrebbe essere stato temporaneamente bloccato
 
 ### "Errore database"
+
 - Verifica le credenziali Supabase in `.env`
 - Controlla che le tabelle esistano nel database
 

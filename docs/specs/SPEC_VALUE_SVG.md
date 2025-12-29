@@ -1,33 +1,34 @@
 # 📊 SPEC VALUE SVG
+
 ## Estrazione Momentum da DOM SofaScore
 
 > **Dominio**: Data Extraction · Momentum · SVG Parsing  
 > **Stato**: ATTIVA  
 > **Tipo**: Specifica Tecnica  
-> **Ultimo aggiornamento**: 27 Dicembre 2025  
+> **Ultimo aggiornamento**: 27 Dicembre 2025
 
 ---
 
 ## 🧭 NAVIGAZIONE ARCHITETTURA
 
-| ⬆️ Padre | ⬅️ Input da | ➡️ Output verso |
-|---------|-----------|-----------------|
+| ⬆️ Padre                                                              | ⬅️ Input da   | ➡️ Output verso                                                                        |
+| --------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------- |
 | [FILOSOFIA_DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | DOM SofaScore | [STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) (Momentum) |
 
 ### 📚 Documenti Correlati
 
-| Documento | Relazione |
-|-----------|-----------|
-| [FILOSOFIA_DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md) | Schema power_rankings |
-| [MAPPA_RETE_CONCETTUALE](../checks/MAPPA_RETE_CONCETTUALE_V2.md) | Funzioni SVG |
-| [FILOSOFIA_STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | Dati derivati |
+| Documento                                                                             | Relazione             |
+| ------------------------------------------------------------------------------------- | --------------------- |
+| [FILOSOFIA_DB](../filosofie/10_data_platform/storage/FILOSOFIA_DB.md)                 | Schema power_rankings |
+| [MAPPA_RETE_CONCETTUALE](../checks/MAPPA_RETE_CONCETTUALE_V2.md)                      | Funzioni SVG          |
+| [FILOSOFIA_STATS](../filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md) | Dati derivati         |
 
 ### 📁 File Codice Principali
 
-| File | Descrizione | Linee |
-|------|-------------|-------|
+| File                                                                                   | Descrizione    | Linee      |
+| -------------------------------------------------------------------------------------- | -------------- | ---------- |
 | [`backend/utils/svgMomentumExtractor.js`](../../backend/utils/svgMomentumExtractor.js) | Estrazione SVG | L152, L302 |
-| [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js) | Insert/Read DB | L400, L770 |
+| [`backend/db/matchRepository.js`](../../backend/db/matchRepository.js)                 | Insert/Read DB | L400, L770 |
 
 ---
 
@@ -55,35 +56,39 @@ Strategia per estrarre i valori di momentum tennis dal **codice SVG** delle barr
 ```html
 <svg class="set" viewBox="0 -40 115.2 80">
   <g>
-    <path class="game" d="M1,0 v25.84 h8 v-25.84 z" 
-          fill="var(--colors-home-away-away-primary)">
-    </path>
+    <path
+      class="game"
+      d="M1,0 v25.84 h8 v-25.84 z"
+      fill="var(--colors-home-away-away-primary)"
+    ></path>
   </g>
   <g>
-    <path class="game" d="M9.6,0 v-15.95 h8 v15.95 z" 
-          fill="var(--colors-home-away-home-primary)">
-    </path>
+    <path
+      class="game"
+      d="M9.6,0 v-15.95 h8 v15.95 z"
+      fill="var(--colors-home-away-home-primary)"
+    ></path>
   </g>
 </svg>
 ```
 
 ### 2.2 Elementi Chiave
 
-| Elemento | Significato |
-|----------|-------------|
-| `svg.set` | Un set completo |
-| `path.game` | Un singolo game |
-| `d="M<x>,0 v<value> h8 v-<value> z"` | Path SVG della barra |
-| `v<value>` | **Intensità del momentum** (altezza barra) |
-| `fill="home-primary"` | Game vinto dal giocatore HOME |
-| `fill="away-primary"` | Game vinto dal giocatore AWAY |
+| Elemento                             | Significato                                |
+| ------------------------------------ | ------------------------------------------ |
+| `svg.set`                            | Un set completo                            |
+| `path.game`                          | Un singolo game                            |
+| `d="M<x>,0 v<value> h8 v-<value> z"` | Path SVG della barra                       |
+| `v<value>`                           | **Intensità del momentum** (altezza barra) |
+| `fill="home-primary"`                | Game vinto dal giocatore HOME              |
+| `fill="away-primary"`                | Game vinto dal giocatore AWAY              |
 
 ### 2.3 Interpretazione Valore `v`
 
-| Segno | Direzione | Giocatore |
-|-------|-----------|-----------|
-| **v positivo** (es: `v25.84`) | Barra verso il **basso** | AWAY |
-| **v negativo** (es: `v-15.95`) | Barra verso l'**alto** | HOME |
+| Segno                          | Direzione                | Giocatore |
+| ------------------------------ | ------------------------ | --------- |
+| **v positivo** (es: `v25.84`)  | Barra verso il **basso** | AWAY      |
+| **v negativo** (es: `v-15.95`) | Barra verso l'**alto**   | HOME      |
 
 **ViewBox**: `"0 -40 width 80"` → range verticale da -40 a +40
 
@@ -110,6 +115,7 @@ function parseMx(d) {
 ### 3.2 Determinazione Side
 
 > ⚠️ **IMPORTANTE – Colori SVG SofaScore**:
+>
 > - **HOME = VERDE** (`home-primary`, barra verso l'alto)
 > - **AWAY = BLU** (`away-primary`, barra verso il basso)
 
@@ -128,8 +134,8 @@ function getSide(fill) {
 // Il segno semantico dipende dal side, non dal segno SVG
 function getSignedValue(rawV, side) {
   const magnitude = Math.abs(rawV || 0);
-  if (side === 'home') return +magnitude;   // Home positivo
-  if (side === 'away') return -magnitude;   // Away negativo
+  if (side === 'home') return +magnitude; // Home positivo
+  if (side === 'away') return -magnitude; // Away negativo
   return rawV || 0;
 }
 ```
@@ -164,18 +170,18 @@ function normalizeValue(signedRaw, scale) {
 
 ```sql
 -- Tabella: power_rankings / match_power_rankings_new
-ALTER TABLE power_rankings 
+ALTER TABLE power_rankings
 ADD COLUMN value_svg INTEGER DEFAULT NULL;
 ADD COLUMN source VARCHAR(20) DEFAULT 'api';
 ```
 
 ### 5.2 Significato Colonne
 
-| Colonna | Descrizione |
-|---------|-------------|
-| `value` | Valore da API SofaScore (PRIORITARIO) |
+| Colonna     | Descrizione                           |
+| ----------- | ------------------------------------- |
+| `value`     | Valore da API SofaScore (PRIORITARIO) |
 | `value_svg` | Valore estratto da DOM SVG (FALLBACK) |
-| `source` | `'api'` o `'svg_dom'` |
+| `source`    | `'api'` o `'svg_dom'`                 |
 
 ---
 
@@ -208,24 +214,24 @@ Frontend: usa value se presente, altrimenti value_svg
 
 ### 7.1 Estrazione
 
-| Funzione | File | Linea |
-|----------|------|-------|
-| `extractMomentumFromSvgHtml()` | `backend/utils/svgMomentumExtractor.js` | L152 |
-| `processSvgMomentum()` | `backend/utils/svgMomentumExtractor.js` | L302 |
-| `normalizeMomentumPerSet()` | `backend/utils/svgMomentumExtractor.js` | L262 |
+| Funzione                       | File                                    | Linea |
+| ------------------------------ | --------------------------------------- | ----- |
+| `extractMomentumFromSvgHtml()` | `backend/utils/svgMomentumExtractor.js` | L152  |
+| `processSvgMomentum()`         | `backend/utils/svgMomentumExtractor.js` | L302  |
+| `normalizeMomentumPerSet()`    | `backend/utils/svgMomentumExtractor.js` | L262  |
 
 ### 7.2 Database
 
-| Funzione | File | Linea |
-|----------|------|-------|
-| `insertPowerRankingsSvg()` | `backend/db/matchRepository.js` | L400 |
-| `getPowerRankings()` | `backend/db/matchRepository.js` | L770 |
+| Funzione                   | File                            | Linea |
+| -------------------------- | ------------------------------- | ----- |
+| `insertPowerRankingsSvg()` | `backend/db/matchRepository.js` | L400  |
+| `getPowerRankings()`       | `backend/db/matchRepository.js` | L770  |
 
 ### 7.3 API Endpoint
 
-| Endpoint | Server | File | Linea |
-|----------|--------|------|-------|
-| `POST /api/match/:eventId/momentum-svg` | Tennis-Scraper (3002) | `server.js` | L897 |
+| Endpoint                                | Server                | File        | Linea |
+| --------------------------------------- | --------------------- | ----------- | ----- |
+| `POST /api/match/:eventId/momentum-svg` | Tennis-Scraper (3002) | `server.js` | L897  |
 
 ---
 
@@ -233,7 +239,7 @@ Frontend: usa value se presente, altrimenti value_svg
 
 ```javascript
 // matchRepository.js L784
-value: pr.value ?? pr.value_svg ?? 0  // API → SVG → 0
+value: pr.value ?? pr.value_svg ?? 0; // API → SVG → 0
 ```
 
 ---
@@ -242,21 +248,21 @@ value: pr.value ?? pr.value_svg ?? 0  // API → SVG → 0
 
 ### ⚠️ Limitazioni
 
-| Limitazione | Descrizione |
-|-------------|-------------|
-| Precisione | Valore SVG è rappresentazione grafica |
-| Disponibilità | Richiede widget momentum renderizzato |
-| Variazioni DOM | SofaScore può cambiare struttura SVG |
-| Normalizzazione | Scala può variare tra match |
+| Limitazione     | Descrizione                           |
+| --------------- | ------------------------------------- |
+| Precisione      | Valore SVG è rappresentazione grafica |
+| Disponibilità   | Richiede widget momentum renderizzato |
+| Variazioni DOM  | SofaScore può cambiare struttura SVG  |
+| Normalizzazione | Scala può variare tra match           |
 
 ### ✅ Vantaggi
 
-| Vantaggio | Descrizione |
-|-----------|-------------|
+| Vantaggio           | Descrizione                        |
+| ------------------- | ---------------------------------- |
 | Fallback affidabile | Recupera momentum anche post-match |
-| Dati separati | Non sovrascrive mai dati API |
-| Comparabilità | Normalizzazione consente confronto |
-| Tracciabilità | Campo `source` indica origine |
+| Dati separati       | Non sovrascrive mai dati API       |
+| Comparabilità       | Normalizzazione consente confronto |
+| Tracciabilità       | Campo `source` indica origine      |
 
 ---
 

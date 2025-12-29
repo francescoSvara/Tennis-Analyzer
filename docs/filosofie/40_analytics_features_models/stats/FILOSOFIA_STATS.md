@@ -33,15 +33,18 @@ Il frontend consuma solo il risultato.
 ## 3️⃣ Classi di Dati
 
 ### Raw Data
+
 - Dati canonici DB, nessuna interpretazione, persistiti
-- Esempi: `match_statistics_new`, `match_point_by_point_new`
+- Esempi: `match_statistics`, `match_point_by_point`
 
 ### Features
+
 - Funzioni pure, deterministiche, contestuali
 - Esempi: `volatility`, `pressure`, `breakProbability`
 - Possono essere persistite solo se utili storicamente
 
 ### Signals
+
 - Discreti, orientati all'azione, temporanei
 - Esempi: READY, WATCH, OFF, BACK/LAY
 - **NON** sono metriche, **NON** sono persistibili come verità storica
@@ -51,15 +54,21 @@ Il frontend consuma solo il risultato.
 ## 4️⃣ Livelli di Analisi
 
 ### Player-Level
+
 Contesto storico del giocatore, usato come **prior**.
+
 - Win rate superficie, comeback rate, ROI storico
 
 ### Match-Level
+
 Stato corrente del match, usato come **likelihood**.
+
 - Pressure, momentum, volatility, dominance
 
 ### Combined-Level
+
 Player + Match. Qui nascono le strategie.
+
 - "Giocatore resiliente + pressione alta sull'avversario"
 
 ---
@@ -89,6 +98,7 @@ Puoi persistere il **bundle snapshot** per audit, ma non creare tabelle `strateg
 ## 7️⃣ Feature Engine Rules
 
 Ogni feature deve dichiarare:
+
 - Nome, Livello (Player/Match/Combined)
 - Input richiesti, Output type e range
 - Fallback chain
@@ -100,11 +110,13 @@ Ogni feature deve dichiarare:
 ## 8️⃣ Regola Finale
 
 > Le features devono essere:
+>
 > - Deterministiche (stessi input → stesso output)
 > - Contestuali (sanno cosa rappresentano)
 > - Documentate (scheda feature obbligatoria)
 >
 > I signals devono essere:
+>
 > - Azionabili (READY = si può agire)
 > - Temporanei (valgono per questo momento)
 > - Non persistibili come storia
@@ -112,16 +124,23 @@ Ogni feature deve dichiarare:
 ---
 
 **Documenti Correlati**:
+
 - [FILOSOFIA_CALCOLI](../calcoli/FILOSOFIA_CALCOLI.md) – tassonomia features, fallback
 - [FILOSOFIA_TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) – `as_of_time`
 - [FILOSOFIA_FRONTEND_DATA](../../70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) – consumer
 - [FILOSOFIA_RISK_BANKROLL](../../50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md) – conversion signals → decisions
 
-### 📁 File Codice Principali
+### � Pseudocode
 
-| File | Descrizione |
-|------|-------------|
-| [`backend/utils/featureEngine.js`](../../../../backend/utils/featureEngine.js) | Feature Engine principale |
-| [`backend/strategies/`](../../../../backend/strategies/) | Strategy implementations |
-| [`backend/routes/stats.routes.js`](../../../../backend/routes/stats.routes.js) | Route stats endpoints |
-| [`backend/controllers/stats.controller.js`](../../../../backend/controllers/stats.controller.js) | Controller stats |
+| Documento                                                        | Descrizione              |
+| ---------------------------------------------------------------- | ------------------------ |
+| [FILOSOFIA_STATS_PSEUDOCODE](./FILOSOFIA_STATS_PSEUDOCODE.md)    | Regole formali stats     |
+
+### �📁 File Codice Principali
+
+| File                                                                                             | Descrizione               |
+| ------------------------------------------------------------------------------------------------ | ------------------------- |
+| [`backend/utils/featureEngine.js`](../../../../backend/utils/featureEngine.js)                   | Feature Engine principale |
+| [`backend/strategies/`](../../../../backend/strategies/)                                         | Strategy implementations  |
+| [`backend/routes/stats.routes.js`](../../../../backend/routes/stats.routes.js)                   | Route stats endpoints     |
+| [`backend/controllers/stats.controller.js`](../../../../backend/controllers/stats.controller.js) | Controller stats          |

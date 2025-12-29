@@ -1,7 +1,7 @@
 /**
  * PointByPointTab - Feed punti con filtri e highlight
  * UI/UX migliorata con icone chiare e identificazione game importanti
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
@@ -51,7 +51,7 @@ const FILTERS = [
 function calculateServer(point, setNumber) {
   const game = point.game || 1;
   const pointNumber = point.pointNumber || 1;
-  
+
   // Tiebreak (game 7 in un set, o game 13 in alcuni formati)
   if (game === 7 || game === 13) {
     // Tiebreak: primo punto serve chi doveva servire, poi alterna ogni 2 punti
@@ -64,13 +64,13 @@ function calculateServer(point, setNumber) {
     const firstServer = setNumber % 2 === 1 ? 'home' : 'away';
     return serveBlock % 2 === 0 ? (firstServer === 'home' ? 'away' : 'home') : firstServer;
   }
-  
+
   // Game normali: alterna ogni game, considerando il set
   // Nel set 1: game dispari = home, game pari = away
   // Nel set 2: invertito, etc.
   const homeServesFirst = setNumber % 2 === 1;
   const isOddGame = game % 2 === 1;
-  
+
   if (homeServesFirst) {
     return isOddGame ? 'home' : 'away';
   } else {
@@ -80,13 +80,13 @@ function calculateServer(point, setNumber) {
 
 /**
  * Determina se un punteggio è un break point
- * 
+ *
  * REGOLA TENNIS FONDAMENTALE:
  * Break Point = il RECEIVER (chi riceve) è a UN PUNTO dal vincere il game
- * 
+ *
  * Il punteggio è sempre mostrato come HOME-AWAY.
  * Il break point esiste SOLO quando il RECEIVER ha 40 o AD e il server NO.
- * 
+ *
  * - Se server=home e away ha 40/AD (e home non ha 40/AD) → BP per away ✓
  * - Se server=away e home ha 40/AD (e away non ha 40/AD) → BP per home ✓
  * - Se il SERVER ha 40/AD → NON è un break point (è game point per il server)
@@ -95,20 +95,21 @@ function isBreakPointScore(score, server) {
   if (!score || !server) return false;
   const parts = score.split('-');
   if (parts.length !== 2) return false;
-  
+
   const [homeScore, awayScore] = parts;
-  
+
   // Il receiver è l'opposto del server
   const receiver = server === 'home' ? 'away' : 'home';
   const receiverScore = receiver === 'home' ? homeScore : awayScore;
   const serverScore = server === 'home' ? homeScore : awayScore;
-  
+
   // Break point SOLO se:
   // 1. Il receiver ha 40 o AD
   // 2. Il server NON ha 40 o AD (altrimenti è deuce o vantaggio server)
-  const receiverHasGamePoint = receiverScore === '40' || receiverScore === 'AD' || receiverScore === 'A';
+  const receiverHasGamePoint =
+    receiverScore === '40' || receiverScore === 'AD' || receiverScore === 'A';
   const serverHasGamePoint = serverScore === '40' || serverScore === 'AD' || serverScore === 'A';
-  
+
   // BP solo se receiver ha game point E server non ce l'ha
   return receiverHasGamePoint && !serverHasGamePoint;
 }
@@ -118,25 +119,25 @@ function isBreakPointScore(score, server) {
  */
 function getPointImportance(point, server) {
   const score = point.score || '';
-  
+
   // Match point
   if (point.isMatchPoint) return 'matchpoint';
-  
+
   // Set point
   if (point.isSetPoint) return 'setpoint';
-  
+
   // Break point (dal flag o calcolato)
   if (point.isBreakPoint || isBreakPointScore(score, server)) return 'breakpoint';
-  
+
   // Ace
   if (point.type === 'ace' || point.description === '1') return 'ace';
-  
+
   // Double fault
   if (point.type === 'double_fault' || point.description === '2') return 'doublefault';
-  
+
   // Winner
   if (point.type === 'winner' || point.isWinner) return 'winner';
-  
+
   return null;
 }
 
@@ -152,19 +153,19 @@ function PointBadge({ type }) {
     doublefault: { icon: X, label: 'DF', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)' },
     winner: { icon: Star, label: 'W', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)' },
   };
-  
+
   const badge = badges[type];
   if (!badge) return null;
-  
+
   const Icon = badge.icon;
-  
+
   return (
-    <span 
-      className="point-badge" 
-      style={{ 
-        color: badge.color, 
+    <span
+      className="point-badge"
+      style={{
+        color: badge.color,
         backgroundColor: badge.bg,
-        border: `1px solid ${badge.color}40`
+        border: `1px solid ${badge.color}40`,
       }}
     >
       <Icon size={12} weight="bold" />
@@ -180,7 +181,7 @@ function ServerIndicator({ server, homeName, awayName }) {
   const isHome = server === 'home';
   const name = isHome ? homeName : awayName;
   const shortName = name?.split(' ').pop() || (isHome ? 'P1' : 'P2');
-  
+
   return (
     <div className={`server-indicator ${isHome ? 'home' : 'away'}`}>
       <TennisBall size={14} weight="fill" />
@@ -194,10 +195,10 @@ function ServerIndicator({ server, homeName, awayName }) {
  */
 function PointWinner({ winner, homeName, awayName }) {
   if (!winner) return null;
-  
+
   const isHome = winner === 'home';
   const shortName = (isHome ? homeName : awayName)?.split(' ').pop() || (isHome ? 'P1' : 'P2');
-  
+
   return (
     <span className={`point-winner ${isHome ? 'home' : 'away'}`}>
       <ArrowFatUp size={12} weight="fill" />
@@ -208,16 +209,16 @@ function PointWinner({ winner, homeName, awayName }) {
 
 /**
  * Single Point Row
- * 
+ *
  * REGOLA TENNIS: Il break point è SEMPRE e SOLO del receiver.
  * Se il server tiene il servizio, non c'è mai stato un break point da mostrare.
  */
 function PointRow({ point, homeName, awayName, isFirst, showGameHeader }) {
   const server = point.server !== 'unknown' ? point.server : calculateServer(point, point.set || 1);
   const importance = getPointImportance(point, server);
-  
+
   const rowClass = `point-row ${importance ? `point-row--${importance}` : ''}`;
-  
+
   return (
     <>
       {showGameHeader && (
@@ -227,21 +228,19 @@ function PointRow({ point, homeName, awayName, isFirst, showGameHeader }) {
           <ServerIndicator server={server} homeName={homeName} awayName={awayName} />
         </div>
       )}
-      <motion.div 
+      <motion.div
         className={rowClass}
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <div className="point-row__score">
-          {point.score || '0-0'}
-        </div>
-        
+        <div className="point-row__score">{point.score || '0-0'}</div>
+
         <div className="point-row__details">
           {importance && <PointBadge type={importance} />}
           <PointWinner winner={point.pointWinner} homeName={homeName} awayName={awayName} />
         </div>
-        
+
         <div className="point-row__meta">
           {point.rallyLength && point.rallyLength > 8 && (
             <span className="rally-badge">
@@ -261,27 +260,33 @@ function PointRow({ point, homeName, awayName, isFirst, showGameHeader }) {
 function GameGroup({ game, points, homeName, awayName, isExpanded, onToggle }) {
   // Server: usa gameServer dal backend (SofaScore) se disponibile, altrimenti calcola
   const firstPoint = points[0];
-  const server = firstPoint?.gameServer || 
-                 (firstPoint?.server !== 'unknown' ? firstPoint?.server : calculateServer(firstPoint, firstPoint?.set || 1));
-  
+  const server =
+    firstPoint?.gameServer ||
+    (firstPoint?.server !== 'unknown'
+      ? firstPoint?.server
+      : calculateServer(firstPoint, firstPoint?.set || 1));
+
   // Calcola statistiche del game
-  const hasBreakPoint = points.some(p => getPointImportance(p, server) === 'breakpoint');
-  const hasSetPoint = points.some(p => p.isSetPoint);
-  const hasMatchPoint = points.some(p => p.isMatchPoint);
-  const aces = points.filter(p => getPointImportance(p, server) === 'ace').length;
-  const dfs = points.filter(p => getPointImportance(p, server) === 'doublefault').length;
-  
+  const hasBreakPoint = points.some((p) => getPointImportance(p, server) === 'breakpoint');
+  const hasSetPoint = points.some((p) => p.isSetPoint);
+  const hasMatchPoint = points.some((p) => p.isMatchPoint);
+  const aces = points.filter((p) => getPointImportance(p, server) === 'ace').length;
+  const dfs = points.filter((p) => getPointImportance(p, server) === 'doublefault').length;
+
   // BREAK detection:
   // 1. Se abbiamo gameIsBreak dal backend (SofaScore), usa quello (più affidabile)
   // 2. Altrimenti calcola: chi ha vinto il game (ultimo punto) !== chi serviva
   const gameIsBreakFromBackend = firstPoint?.gameIsBreak;
   const gameWinner = firstPoint?.gameWinner || points[points.length - 1]?.pointWinner;
-  const isBreak = gameIsBreakFromBackend !== undefined 
-    ? gameIsBreakFromBackend 
-    : (gameWinner && gameWinner !== server);
-  
-  const gameClass = `game-group ${hasBreakPoint ? 'game-group--bp' : ''} ${hasSetPoint ? 'game-group--sp' : ''} ${hasMatchPoint ? 'game-group--mp' : ''} ${isBreak ? 'game-group--break' : ''}`;
-  
+  const isBreak =
+    gameIsBreakFromBackend !== undefined
+      ? gameIsBreakFromBackend
+      : gameWinner && gameWinner !== server;
+
+  const gameClass = `game-group ${hasBreakPoint ? 'game-group--bp' : ''} ${
+    hasSetPoint ? 'game-group--sp' : ''
+  } ${hasMatchPoint ? 'game-group--mp' : ''} ${isBreak ? 'game-group--break' : ''}`;
+
   return (
     <div className={gameClass}>
       <button className="game-group__header" onClick={onToggle}>
@@ -291,7 +296,7 @@ function GameGroup({ game, points, homeName, awayName, isExpanded, onToggle }) {
           </span>
           <ServerIndicator server={server} homeName={homeName} awayName={awayName} />
         </div>
-        
+
         <div className="game-group__badges">
           {isBreak && (
             <span className="break-badge">
@@ -313,7 +318,7 @@ function GameGroup({ game, points, homeName, awayName, isExpanded, onToggle }) {
             </span>
           )}
         </div>
-        
+
         <div className="game-group__result">
           {gameWinner && (
             <span className={`winner-indicator ${gameWinner === 'home' ? 'home' : 'away'}`}>
@@ -321,18 +326,15 @@ function GameGroup({ game, points, homeName, awayName, isExpanded, onToggle }) {
             </span>
           )}
           <span className="points-count">{points.length} pts</span>
-          <motion.span 
-            className="expand-icon"
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-          >
+          <motion.span className="expand-icon" animate={{ rotate: isExpanded ? 180 : 0 }}>
             <CaretDown size={14} weight="bold" />
           </motion.span>
         </div>
       </button>
-      
+
       <AnimatePresence>
         {isExpanded && (
-          <motion.div 
+          <motion.div
             className="game-group__points"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -340,10 +342,10 @@ function GameGroup({ game, points, homeName, awayName, isExpanded, onToggle }) {
             transition={{ duration: 0.2 }}
           >
             {points.map((point, idx) => (
-              <PointRow 
-                key={idx} 
-                point={point} 
-                homeName={homeName} 
+              <PointRow
+                key={idx}
+                point={point}
+                homeName={homeName}
                 awayName={awayName}
                 isFirst={idx === 0}
                 showGameHeader={false}
@@ -373,8 +375,9 @@ export function PointByPointTab({ data, header }) {
 
   // Calcola server per tutti i punti e arricchisci i dati
   const enrichedPoints = useMemo(() => {
-    return points.map(p => {
-      const server = p.gameServer || (p.server !== 'unknown' ? p.server : calculateServer(p, p.set || 1));
+    return points.map((p) => {
+      const server =
+        p.gameServer || (p.server !== 'unknown' ? p.server : calculateServer(p, p.set || 1));
       const importance = getPointImportance(p, server);
       return { ...p, server, importance };
     });
@@ -383,7 +386,7 @@ export function PointByPointTab({ data, header }) {
   // Raggruppa per set/game PRIMA di filtrare (per contare i break games)
   const allGroupedByGame = useMemo(() => {
     const groups = {};
-    enrichedPoints.forEach(p => {
+    enrichedPoints.forEach((p) => {
       const key = `${p.set}-${p.game}`;
       if (!groups[key]) {
         groups[key] = { set: p.set, game: p.game, points: [], key };
@@ -395,48 +398,53 @@ export function PointByPointTab({ data, header }) {
 
   // Calcola quali game sono break
   const breakGames = useMemo(() => {
-    return allGroupedByGame.filter(group => {
+    return allGroupedByGame.filter((group) => {
       const firstPoint = group.points[0];
       const server = firstPoint?.gameServer || firstPoint?.server;
       const gameIsBreakFromBackend = firstPoint?.gameIsBreak;
-      const gameWinner = firstPoint?.gameWinner || group.points[group.points.length - 1]?.pointWinner;
-      return gameIsBreakFromBackend !== undefined 
-        ? gameIsBreakFromBackend 
-        : (gameWinner && gameWinner !== server);
+      const gameWinner =
+        firstPoint?.gameWinner || group.points[group.points.length - 1]?.pointWinner;
+      return gameIsBreakFromBackend !== undefined
+        ? gameIsBreakFromBackend
+        : gameWinner && gameWinner !== server;
     });
   }, [allGroupedByGame]);
 
   // Conta per filtri
-  const filterCounts = useMemo(() => ({
-    all: enrichedPoints.length,
-    breakgames: breakGames.length, // Numero di BREAK (game vinti da chi riceve)
-    break: enrichedPoints.filter(p => p.importance === 'breakpoint').length,
-    setpoint: enrichedPoints.filter(p => p.isSetPoint).length,
-    matchpoint: enrichedPoints.filter(p => p.isMatchPoint).length,
-    ace: enrichedPoints.filter(p => p.importance === 'ace').length,
-    df: enrichedPoints.filter(p => p.importance === 'doublefault').length,
-  }), [enrichedPoints, breakGames]);
+  const filterCounts = useMemo(
+    () => ({
+      all: enrichedPoints.length,
+      breakgames: breakGames.length, // Numero di BREAK (game vinti da chi riceve)
+      break: enrichedPoints.filter((p) => p.importance === 'breakpoint').length,
+      setpoint: enrichedPoints.filter((p) => p.isSetPoint).length,
+      matchpoint: enrichedPoints.filter((p) => p.isMatchPoint).length,
+      ace: enrichedPoints.filter((p) => p.importance === 'ace').length,
+      df: enrichedPoints.filter((p) => p.importance === 'doublefault').length,
+    }),
+    [enrichedPoints, breakGames]
+  );
 
   // Filtra - per breakgames filtriamo i gruppi, non i punti
   const filteredPoints = useMemo(() => {
     if (activeFilter === 'all') return enrichedPoints;
     if (activeFilter === 'breakgames') {
       // Per breakgames, restituisci tutti i punti dei game che sono break
-      const breakKeys = new Set(breakGames.map(g => g.key));
-      return enrichedPoints.filter(p => breakKeys.has(`${p.set}-${p.game}`));
+      const breakKeys = new Set(breakGames.map((g) => g.key));
+      return enrichedPoints.filter((p) => breakKeys.has(`${p.set}-${p.game}`));
     }
-    if (activeFilter === 'break') return enrichedPoints.filter(p => p.importance === 'breakpoint');
-    if (activeFilter === 'setpoint') return enrichedPoints.filter(p => p.isSetPoint);
-    if (activeFilter === 'matchpoint') return enrichedPoints.filter(p => p.isMatchPoint);
-    if (activeFilter === 'ace') return enrichedPoints.filter(p => p.importance === 'ace');
-    if (activeFilter === 'df') return enrichedPoints.filter(p => p.importance === 'doublefault');
+    if (activeFilter === 'break')
+      return enrichedPoints.filter((p) => p.importance === 'breakpoint');
+    if (activeFilter === 'setpoint') return enrichedPoints.filter((p) => p.isSetPoint);
+    if (activeFilter === 'matchpoint') return enrichedPoints.filter((p) => p.isMatchPoint);
+    if (activeFilter === 'ace') return enrichedPoints.filter((p) => p.importance === 'ace');
+    if (activeFilter === 'df') return enrichedPoints.filter((p) => p.importance === 'doublefault');
     return enrichedPoints;
   }, [enrichedPoints, activeFilter, breakGames]);
 
   // Raggruppa per set/game (dopo filtro)
   const groupedByGame = useMemo(() => {
     const groups = {};
-    filteredPoints.forEach(p => {
+    filteredPoints.forEach((p) => {
       const key = `${p.set}-${p.game}`;
       if (!groups[key]) {
         groups[key] = { set: p.set, game: p.game, points: [] };
@@ -447,7 +455,7 @@ export function PointByPointTab({ data, header }) {
   }, [filteredPoints]);
 
   const toggleGame = (key) => {
-    setExpandedGames(prev => {
+    setExpandedGames((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
         next.delete(key);
@@ -459,7 +467,7 @@ export function PointByPointTab({ data, header }) {
   };
 
   const expandAll = () => {
-    setExpandedGames(new Set(groupedByGame.map(g => `${g.set}-${g.game}`)));
+    setExpandedGames(new Set(groupedByGame.map((g) => `${g.set}-${g.game}`)));
   };
 
   const collapseAll = () => {
@@ -467,12 +475,7 @@ export function PointByPointTab({ data, header }) {
   };
 
   return (
-    <motion.div
-      className="pbp-tab"
-      variants={fadeUp}
-      initial="initial"
-      animate="animate"
-    >
+    <motion.div className="pbp-tab" variants={fadeUp} initial="initial" animate="animate">
       {/* Header */}
       <div className="pbp-tab__header">
         <div className="pbp-tab__title">
@@ -481,8 +484,12 @@ export function PointByPointTab({ data, header }) {
           <span className="pbp-tab__count">{total} points</span>
         </div>
         <div className="pbp-tab__actions">
-          <button className="action-btn" onClick={expandAll}>Expand All</button>
-          <button className="action-btn" onClick={collapseAll}>Collapse All</button>
+          <button className="action-btn" onClick={expandAll}>
+            Expand All
+          </button>
+          <button className="action-btn" onClick={collapseAll}>
+            Collapse All
+          </button>
         </div>
       </div>
 
@@ -506,19 +513,27 @@ export function PointByPointTab({ data, header }) {
           const count = filterCounts[filter.id] || 0;
           const isActive = activeFilter === filter.id;
           const isDisabled = count === 0 && filter.id !== 'all';
-          
+
           return (
             <button
               key={filter.id}
               className={`filter-chip ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
               onClick={() => !isDisabled && setActiveFilter(filter.id)}
               disabled={isDisabled}
-              style={isActive && filter.color ? { 
-                borderColor: filter.color,
-                backgroundColor: `${filter.color}15`
-              } : {}}
+              style={
+                isActive && filter.color
+                  ? {
+                      borderColor: filter.color,
+                      backgroundColor: `${filter.color}15`,
+                    }
+                  : {}
+              }
             >
-              <Icon size={14} weight={isActive ? 'fill' : 'regular'} style={filter.color ? { color: filter.color } : {}} />
+              <Icon
+                size={14}
+                weight={isActive ? 'fill' : 'regular'}
+                style={filter.color ? { color: filter.color } : {}}
+              />
               <span>{filter.label}</span>
               <span className="filter-count">{count}</span>
             </button>
@@ -532,7 +547,11 @@ export function PointByPointTab({ data, header }) {
           <div className="no-points">
             <Funnel size={48} weight="duotone" />
             <h3>No data available</h3>
-            <p>{total === 0 ? 'Point-by-point data is not available for this match' : 'No points match the selected filter'}</p>
+            <p>
+              {total === 0
+                ? 'Point-by-point data is not available for this match'
+                : 'No points match the selected filter'}
+            </p>
           </div>
         ) : (
           <div className="games-list">

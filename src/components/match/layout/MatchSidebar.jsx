@@ -1,6 +1,6 @@
 /**
  * MatchSidebar - Sidebar navigazione tabs
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
@@ -28,9 +28,7 @@ function SidebarItem({ tab, isActive, onClick, collapsed }) {
       <span className="sidebar-item__icon">
         <Icon size={20} weight={isActive ? 'duotone' : 'regular'} />
       </span>
-      {!collapsed && (
-        <span className="sidebar-item__label">{tab.label}</span>
-      )}
+      {!collapsed && <span className="sidebar-item__label">{tab.label}</span>}
       {isActive && (
         <motion.div
           className="sidebar-item__indicator"
@@ -45,13 +43,7 @@ function SidebarItem({ tab, isActive, onClick, collapsed }) {
 /**
  * MatchSidebar Component
  */
-export function MatchSidebar({
-  tabs,
-  activeTab,
-  onTabChange,
-  collapsed,
-  onToggleCollapse,
-}) {
+export function MatchSidebar({ tabs, activeTab, onTabChange, collapsed, onToggleCollapse }) {
   return (
     <aside className={`match-sidebar ${collapsed ? 'match-sidebar--collapsed' : ''}`}>
       <nav className="match-sidebar__nav">

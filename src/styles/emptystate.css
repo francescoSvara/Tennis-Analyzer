@@ -48,7 +48,11 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, var(--home-accent, #3b82f6) 0%, var(--home-accent-hover, #2563eb) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--home-accent, #3b82f6) 0%,
+    var(--home-accent-hover, #2563eb) 100%
+  );
   color: white;
   border: none;
   border-radius: 10px;

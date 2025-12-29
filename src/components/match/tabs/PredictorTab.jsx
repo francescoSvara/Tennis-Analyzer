@@ -1,6 +1,6 @@
 /**
  * PredictorTab - Probabilità e Edge
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
@@ -25,10 +25,7 @@ function ProbabilityGauge({ home, away, homeLabel, awayLabel, confidence }) {
     <div className="probability-gauge">
       <div className="gauge-header">
         <span className="gauge-title">Win Probability (model)</span>
-        <span 
-          className="confidence-badge"
-          style={{ color: getConfidenceColor(confidence) }}
-        >
+        <span className="confidence-badge" style={{ color: getConfidenceColor(confidence) }}>
           Confidence: {confidence}
         </span>
       </div>
@@ -70,17 +67,11 @@ function MarketComparison({ model, market, edge, liquidity }) {
       </div>
       <div className="comparison-row edge">
         <span className="comparison-label">Edge:</span>
-        <span 
-          className="comparison-value"
-          style={{ color: getEdgeColor(edge.value) }}
-        >
-          {edge.value > 0 ? '+' : ''}{edge.value}% su {edge.player}
+        <span className="comparison-value" style={{ color: getEdgeColor(edge.value) }}>
+          {edge.value > 0 ? '+' : ''}
+          {edge.value}% su {edge.player}
         </span>
-        {liquidity && (
-          <span className="liquidity-warning">
-            (WARNING: liquidity {liquidity})
-          </span>
-        )}
+        {liquidity && <span className="liquidity-warning">(WARNING: liquidity {liquidity})</span>}
       </div>
     </div>
   );
@@ -148,20 +139,27 @@ export function PredictorTab({ data, header }) {
 
   // Estrai features per mostrare drivers
   const features = header?.features || {};
-  
-  const drivers = keyFactors.length > 0 ? keyFactors : [
-    { text: `Volatility: ${features.volatility || 50}%`, direction: features.volatility > 50 ? 'up' : 'down' },
-    { text: `Pressure: ${features.pressure || 50}%`, direction: features.pressure > 50 ? 'up' : 'down' },
-    { text: `Dominance: ${features.dominance || 50}%`, direction: features.dominance > 50 ? 'up' : 'down' },
-  ];
+
+  const drivers =
+    keyFactors.length > 0
+      ? keyFactors
+      : [
+          {
+            text: `Volatility: ${features.volatility || 50}%`,
+            direction: features.volatility > 50 ? 'up' : 'down',
+          },
+          {
+            text: `Pressure: ${features.pressure || 50}%`,
+            direction: features.pressure > 50 ? 'up' : 'down',
+          },
+          {
+            text: `Dominance: ${features.dominance || 50}%`,
+            direction: features.dominance > 50 ? 'up' : 'down',
+          },
+        ];
 
   return (
-    <motion.div
-      className="predictor-tab"
-      variants={fadeUp}
-      initial="initial"
-      animate="animate"
-    >
+    <motion.div className="predictor-tab" variants={fadeUp} initial="initial" animate="animate">
       {/* Header */}
       <div className="predictor-tab__header">
         <h2 className="tab-title">
@@ -178,7 +176,9 @@ export function PredictorTab({ data, header }) {
             away={winProb.away}
             homeLabel={homeLabel}
             awayLabel={awayLabel}
-            confidence={features.volatility > 60 ? 'LOW' : features.volatility > 40 ? 'MED' : 'HIGH'}
+            confidence={
+              features.volatility > 60 ? 'LOW' : features.volatility > 40 ? 'MED' : 'HIGH'
+            }
           />
         </MotionCard>
 
@@ -200,9 +200,13 @@ export function PredictorTab({ data, header }) {
         <MotionCard className="predictor-card break-card">
           <BreakProbability
             value={breakProb}
-            nextServer={features.serverPlayerId ? 
-              (features.serverPlayerId === players.home?.id ? awayLabel : homeLabel) : 
-              'N/A'}
+            nextServer={
+              features.serverPlayerId
+                ? features.serverPlayerId === players.home?.id
+                  ? awayLabel
+                  : homeLabel
+                : 'N/A'
+            }
           />
         </MotionCard>
 

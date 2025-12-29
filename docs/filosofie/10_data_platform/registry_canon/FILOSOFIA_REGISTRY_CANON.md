@@ -9,8 +9,9 @@
 ## 1️⃣ Perché esiste questo documento
 
 Problema reale:
+
 - SofaScore: "Alcaraz C."
-- Odds API: "C. Alcaraz"  
+- Odds API: "C. Alcaraz"
 - Display: "Carlos Alcaraz Garfia"
 
 Se non risolvi → player diversi → stats sbagliate → edge finto.
@@ -22,6 +23,7 @@ Se non risolvi → player diversi → stats sbagliate → edge finto.
 > **Ogni entità ha un canonical_id stabile.**
 
 Il canonical_id:
+
 - non cambia nel tempo
 - è unico nel sistema
 - mappa tutte le varianti
@@ -30,11 +32,11 @@ Il canonical_id:
 
 ## 3️⃣ Entità Canoniche
 
-| Entità | ID Format | Esempio |
-|--------|-----------|---------|
-| Player | `sof_123456` | `sof_12345` |
-| Match | `sof_14968724` | `sof_14968724` |
-| Tournament | `sof_2345` | `sof_2345` |
+| Entità     | ID Format      | Esempio        |
+| ---------- | -------------- | -------------- |
+| Player     | `sof_123456`   | `sof_12345`    |
+| Match      | `sof_14968724` | `sof_14968724` |
+| Tournament | `sof_2345`     | `sof_2345`     |
 
 Il prefisso indica la fonte primaria.
 
@@ -47,6 +49,7 @@ Nome grezzo → dataNormalizer → canonical_id
 ```
 
 Ordine di priorità:
+
 1. ID nativo SofaScore (se disponibile)
 2. Mapping da players.json
 3. Fuzzy match + conferma manuale
@@ -76,19 +79,26 @@ Il sistema accetta qualsiasi alias, ritorna sempre il canonical.
 ## 📚 Riferimenti
 
 ### 🧭 Navigazione
-| ⬆️ Padre | ⬅️ Correlati | ➡️ Usato da |
-|---------|-------------|-------------|
-| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FILOSOFIA_DB](../storage/FILOSOFIA_DB.md) | [FILOSOFIA_LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) |
-| [INDEX_FILOSOFIE](../../INDEX_FILOSOFIE.md) | | [FILOSOFIA_OBSERVABILITY](../quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) |
 
-### 📁 File Codice Principali
+| ⬆️ Padre                                                         | ⬅️ Correlati                               | ➡️ Usato da                                                                                |
+| ---------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FILOSOFIA_DB](../storage/FILOSOFIA_DB.md) | [FILOSOFIA_LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md)                 |
+| [INDEX_FILOSOFIE](../../INDEX_FILOSOFIE.md)                      |                                            | [FILOSOFIA_OBSERVABILITY](../quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) |
 
-| File | Descrizione |
-|------|-------------|
-| [`backend/utils/dataNormalizer.js`](../../../../backend/utils/dataNormalizer.js) | Normalizzazione nomi e ID |
-| [`data/mappings/`](../../../../data/mappings/) | Mapping files (players, tournaments) |
-| [`backend/routes/player.routes.js`](../../../../backend/routes/player.routes.js) | Route player endpoints |
-| [`backend/controllers/player.controller.js`](../../../../backend/controllers/player.controller.js) | Controller player search |
+### � Pseudocode
+
+| Documento                                                                              | Descrizione                 |
+| -------------------------------------------------------------------------------------- | --------------------------- |
+| [FILOSOFIA_REGISTRY_CANON_PSEUDOCODE](./FILOSOFIA_REGISTRY_CANON_PSEUDOCODE.md)        | Regole formali registry     |
+
+### �📁 File Codice Principali
+
+| File                                                                                               | Descrizione                          |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| [`backend/utils/dataNormalizer.js`](../../../../backend/utils/dataNormalizer.js)                   | Normalizzazione nomi e ID            |
+| [`data/mappings/`](../../../../data/mappings/)                                                     | Mapping files (players, tournaments) |
+| [`backend/routes/player.routes.js`](../../../../backend/routes/player.routes.js)                   | Route player endpoints               |
+| [`backend/controllers/player.controller.js`](../../../../backend/controllers/player.controller.js) | Controller player search             |
 
 ---
 

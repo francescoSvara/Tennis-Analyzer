@@ -1,12 +1,12 @@
 /**
  * OddsTab - Tab Mercato + Esecuzione
- * 
+ *
  * Contiene:
  * - Market selector (Match Odds, Set Winner, Next Game)
  * - Odds con trend
  * - Quick Tickets (BACK/LAY)
  * - Strategy context
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
@@ -61,7 +61,7 @@ function MarketSelector({ active, onChange }) {
 function OddsDisplay({ odds, header }) {
   const players = header?.players || {};
   const matchWinner = odds?.matchWinner || {};
-  
+
   const getTrendIcon = (trend) => {
     if (trend > 0) return <TrendUp size={16} weight="bold" className="trend-up" />;
     if (trend < 0) return <TrendDown size={16} weight="bold" className="trend-down" />;
@@ -108,7 +108,7 @@ function OddsDisplay({ odds, header }) {
 function QuickTickets({ odds, header, stake, onBack, onLay }) {
   const players = header?.players || {};
   const matchWinner = odds?.matchWinner || {};
-  
+
   return (
     <div className="quick-tickets">
       <h4 className="section-title">
@@ -202,7 +202,7 @@ function StakeSelector({ stake, onChange }) {
 function StrategyContext({ strategies }) {
   // Leggi signals dal bundle strategies
   const signals = strategies?.signals || [];
-  const readyStrategy = signals.find(s => s.status === 'READY');
+  const readyStrategy = signals.find((s) => s.status === 'READY');
 
   if (!readyStrategy) {
     return (
@@ -245,13 +245,19 @@ export function OddsTab({ data, header, strategies }) {
   // data = tabs.odds = { matchWinner, history, spreads, totals }
   // matchWinner può essere { home: { value, trend }, away: { value, trend } } o direttamente valore
   const rawMatchWinner = data?.matchWinner;
-  
+
   // Normalizza struttura odds per compatibilità
   const odds = {
     matchWinner: {
-      home: typeof rawMatchWinner?.home === 'object' ? rawMatchWinner.home : { value: rawMatchWinner?.home || null, trend: 0 },
-      away: typeof rawMatchWinner?.away === 'object' ? rawMatchWinner.away : { value: rawMatchWinner?.away || null, trend: 0 }
-    }
+      home:
+        typeof rawMatchWinner?.home === 'object'
+          ? rawMatchWinner.home
+          : { value: rawMatchWinner?.home || null, trend: 0 },
+      away:
+        typeof rawMatchWinner?.away === 'object'
+          ? rawMatchWinner.away
+          : { value: rawMatchWinner?.away || null, trend: 0 },
+    },
   };
 
   const handleBack = (player, oddValue) => {
@@ -263,12 +269,7 @@ export function OddsTab({ data, header, strategies }) {
   };
 
   return (
-    <motion.div
-      className="odds-tab"
-      variants={fadeUp}
-      initial="initial"
-      animate="animate"
-    >
+    <motion.div className="odds-tab" variants={fadeUp} initial="initial" animate="animate">
       {/* Header */}
       <div className="odds-tab__header">
         <h2 className="tab-title">

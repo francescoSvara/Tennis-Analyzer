@@ -1,6 +1,6 @@
 /**
  * HomePage.jsx - Lobby / Home refactored
- * 
+ *
  * Ref: FILOSOFIA_FRONTEND.md - HOME (Lobby)
  * - Watchlist
  * - Live Matches → sorted by Edge (strategy priority)
@@ -28,7 +28,8 @@ import {
   XCircle,
   Warning,
   User,
-  ChartLineUp
+  ChartLineUp,
+  Plus,
 } from '@phosphor-icons/react';
 import { MotionCard, MotionButton, MotionRow } from '../../motion';
 import { apiUrl } from '../../config';
@@ -42,10 +43,10 @@ function StatusBadge({ status }) {
   const config = {
     live: { color: '#ef4444', label: 'LIVE', icon: <Broadcast size={12} weight="fill" /> },
     upcoming: { color: '#f59e0b', label: 'Upcoming', icon: <Clock size={12} /> },
-    finished: { color: '#6b7280', label: 'Finished', icon: <CheckCircle size={12} /> }
+    finished: { color: '#6b7280', label: 'Finished', icon: <CheckCircle size={12} /> },
   };
   const c = config[status] || config.upcoming;
-  
+
   return (
     <span className="status-badge" style={{ '--status-color': c.color }}>
       {c.icon}
@@ -59,10 +60,11 @@ function EdgeBadge({ edge }) {
   if (!edge || edge === 0) return null;
   const isPositive = edge > 0;
   const color = isPositive ? '#10b981' : '#ef4444';
-  
+
   return (
     <span className="edge-badge" style={{ color, background: `${color}20` }}>
-      {isPositive ? '+' : ''}{edge.toFixed(1)}%
+      {isPositive ? '+' : ''}
+      {edge.toFixed(1)}%
     </span>
   );
 }
@@ -72,9 +74,9 @@ function StrategyPill({ status, name }) {
   const colors = {
     READY: '#10b981',
     WATCH: '#f59e0b',
-    OFF: '#6b7280'
+    OFF: '#6b7280',
   };
-  
+
   return (
     <span className="strategy-pill" style={{ borderColor: colors[status] }}>
       <span className={`status-dot ${status.toLowerCase()}`}></span>
@@ -85,28 +87,29 @@ function StrategyPill({ status, name }) {
 
 // Single Match Row (for live matches list)
 function MatchRow({ match, onSelect, onToggleWatchlist, isWatched }) {
-  const mainStrategy = match.strategies?.find(s => s.status === 'READY') 
-    || match.strategies?.find(s => s.status === 'WATCH');
-  
+  const mainStrategy =
+    match.strategies?.find((s) => s.status === 'READY') ||
+    match.strategies?.find((s) => s.status === 'WATCH');
+
   // Format player name with rank
   const formatPlayer = (name, rank) => {
     if (rank) return `${name} (${rank})`;
     return name;
   };
-  
+
   return (
-    <MotionRow 
-      className="match-row"
-      onClick={() => onSelect(match)}
-    >
-      <button 
+    <MotionRow className="match-row" onClick={() => onSelect(match)}>
+      <button
         className={`watchlist-star ${isWatched ? 'active' : ''}`}
-        onClick={(e) => { e.stopPropagation(); onToggleWatchlist(match.id); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleWatchlist(match.id);
+        }}
         title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
       >
         {isWatched ? <Star size={16} weight="fill" /> : <Star size={16} />}
       </button>
-      
+
       <div className="match-info">
         <div className="match-players">
           <span className="player home">{formatPlayer(match.homePlayer, match.homeRank)}</span>
@@ -114,25 +117,24 @@ function MatchRow({ match, onSelect, onToggleWatchlist, isWatched }) {
           <span className="player away">{formatPlayer(match.awayPlayer, match.awayRank)}</span>
         </div>
         <div className="match-meta">
-          <span className="tournament">{match.tournament}{match.surface ? ` · ${match.surface}` : ''}</span>
+          <span className="tournament">
+            {match.tournament}
+            {match.surface ? ` · ${match.surface}` : ''}
+          </span>
           <StatusBadge status={match.status} />
         </div>
       </div>
-      
-      <div className="match-score">
-        {match.score || '—'}
-      </div>
-      
+
+      <div className="match-score">{match.score || '—'}</div>
+
       <div className="match-edge">
         <EdgeBadge edge={match.edge} />
       </div>
-      
+
       <div className="match-strategy">
-        {mainStrategy && (
-          <StrategyPill status={mainStrategy.status} name={mainStrategy.name} />
-        )}
+        {mainStrategy && <StrategyPill status={mainStrategy.status} name={mainStrategy.name} />}
       </div>
-      
+
       <CaretRight size={16} className="row-arrow" />
     </MotionRow>
   );
@@ -143,12 +145,12 @@ function AlertItem({ alert, onDismiss }) {
   const typeConfig = {
     READY: { color: '#10b981', icon: <Lightning size={16} weight="fill" /> },
     momentum: { color: '#3b82f6', icon: <TrendUp size={16} weight="fill" /> },
-    warning: { color: '#f59e0b', icon: <Warning size={16} weight="fill" /> }
+    warning: { color: '#f59e0b', icon: <Warning size={16} weight="fill" /> },
   };
   const config = typeConfig[alert.type] || typeConfig.momentum;
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="alert-item"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -171,7 +173,15 @@ function AlertItem({ alert, onDismiss }) {
 }
 
 // Search & Filter bar
-function SearchFilterBar({ searchTerm, onSearchChange, sortBy, onSortChange, filterStatus, onFilterChange, isSearching }) {
+function SearchFilterBar({
+  searchTerm,
+  onSearchChange,
+  sortBy,
+  onSortChange,
+  filterStatus,
+  onFilterChange,
+  isSearching,
+}) {
   return (
     <div className="search-filter-bar">
       <div className="search-input-wrapper">
@@ -188,18 +198,14 @@ function SearchFilterBar({ searchTerm, onSearchChange, sortBy, onSortChange, fil
           onChange={(e) => onSearchChange(e.target.value)}
         />
         {searchTerm && (
-          <button 
-            className="search-clear" 
-            onClick={() => onSearchChange('')}
-            title="Clear search"
-          >
+          <button className="search-clear" onClick={() => onSearchChange('')} title="Clear search">
             <XCircle size={16} />
           </button>
         )}
       </div>
-      
+
       <div className="filter-group">
-        <select 
+        <select
           className="filter-select"
           value={filterStatus}
           onChange={(e) => onFilterChange(e.target.value)}
@@ -209,8 +215,8 @@ function SearchFilterBar({ searchTerm, onSearchChange, sortBy, onSortChange, fil
           <option value="upcoming">Upcoming</option>
           <option value="finished">Finished</option>
         </select>
-        
-        <select 
+
+        <select
           className="filter-select sort"
           value={sortBy}
           onChange={(e) => onSortChange(e.target.value)}
@@ -243,7 +249,7 @@ function AddMatchModal({ onClose, onSuccess }) {
       const response = await fetch(apiUrl('/api/scrape'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() })
+        body: JSON.stringify({ url: url.trim() }),
       });
 
       const data = await response.json();
@@ -262,7 +268,6 @@ function AddMatchModal({ onClose, onSuccess }) {
       setTimeout(() => {
         onSuccess && onSuccess(data);
       }, 1000);
-
     } catch (err) {
       setError(err.message);
       setStatus(null);
@@ -273,7 +278,7 @@ function AddMatchModal({ onClose, onSuccess }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <motion.div 
+      <motion.div
         className="modal-content"
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -284,7 +289,9 @@ function AddMatchModal({ onClose, onSuccess }) {
           <h3 className="modal-title">
             <Plus size={20} /> Add Match
           </h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button className="modal-close" onClick={onClose}>
+            &times;
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -299,9 +306,7 @@ function AddMatchModal({ onClose, onSuccess }) {
               disabled={loading}
               autoFocus
             />
-            <p className="modal-hint">
-              Paste a match link from SofaScore to fetch its data
-            </p>
+            <p className="modal-hint">Paste a match link from SofaScore to fetch its data</p>
 
             {status === 'scraping' && (
               <div className="modal-status scraping">
@@ -330,11 +335,7 @@ function AddMatchModal({ onClose, onSuccess }) {
             <MotionButton variant="ghost" type="button" onClick={onClose}>
               Cancel
             </MotionButton>
-            <MotionButton 
-              variant="primary"
-              type="submit" 
-              disabled={loading || !url.trim()}
-            >
+            <MotionButton variant="primary" type="submit" disabled={loading || !url.trim()}>
               {loading ? 'Fetching...' : 'Add Match'}
             </MotionButton>
           </div>
@@ -345,12 +346,12 @@ function AddMatchModal({ onClose, onSuccess }) {
 }
 
 // Main HomePage Component
-export default function HomePage({ 
-  onMatchSelect, 
-  onNavigateToPlayer, 
-  summaryCache, 
-  summaryLoading, 
-  onRefreshSummary 
+export default function HomePage({
+  onMatchSelect,
+  onNavigateToPlayer,
+  summaryCache,
+  summaryLoading,
+  onRefreshSummary,
 }) {
   const [selectedSport, setSelectedSport] = useState('tennis');
   const [searchTerm, setSearchTerm] = useState('');
@@ -362,13 +363,13 @@ export default function HomePage({
     return saved ? JSON.parse(saved) : [];
   });
   const [showMonitoring, setShowMonitoring] = useState(false);
-  
+
   // Real matches from database
   const [matches, setMatches] = useState([]);
   const [matchesLoading, setMatchesLoading] = useState(true);
   const [matchesError, setMatchesError] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // Debounce search term (wait 300ms after user stops typing)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -376,7 +377,7 @@ export default function HomePage({
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
-  
+
   // Fetch matches from backend - with search parameter
   const fetchMatches = useCallback(async (search = '') => {
     if (search) {
@@ -385,7 +386,7 @@ export default function HomePage({
       setMatchesLoading(true);
     }
     setMatchesError(null);
-    
+
     try {
       // Build URL with search parameter if provided
       const params = new URLSearchParams();
@@ -393,19 +394,19 @@ export default function HomePage({
       if (search.trim()) {
         params.append('search', search.trim());
       }
-      
+
       const response = await fetch(apiUrl(`/api/matches/db?${params.toString()}`));
       if (!response.ok) throw new Error('Failed to fetch matches');
       const data = await response.json();
-      
+
       // Data is already in the right format from backend
-      const transformed = (data.matches || []).map(m => ({
+      const transformed = (data.matches || []).map((m) => ({
         ...m,
         // Ensure all expected fields exist
         edge: m.edge || 0,
-        strategies: m.strategies || []
+        strategies: m.strategies || [],
       }));
-      
+
       setMatches(transformed);
     } catch (err) {
       console.error('Error fetching matches:', err);
@@ -415,17 +416,17 @@ export default function HomePage({
       setIsSearching(false);
     }
   }, []);
-  
+
   // Initial load - fetch recent matches
   useEffect(() => {
     fetchMatches('');
   }, [fetchMatches]);
-  
+
   // Fetch matches when debounced search changes
   useEffect(() => {
     fetchMatches(debouncedSearch);
   }, [debouncedSearch, fetchMatches]);
-  
+
   // Demo alerts (in production, would come from WebSocket/backend)
   const [alerts, setAlerts] = useState([
     {
@@ -434,7 +435,7 @@ export default function HomePage({
       title: 'Double Break Strategy READY',
       description: 'Sinner vs Alcaraz - High confidence setup detected',
       time: '2 min ago',
-      matchId: 123
+      matchId: 123,
     },
     {
       id: 2,
@@ -442,67 +443,64 @@ export default function HomePage({
       title: 'Momentum Shift Detected',
       description: 'Djokovic gaining momentum after break',
       time: '5 min ago',
-      matchId: 124
-    }
+      matchId: 124,
+    },
   ]);
-  
+
   const summary = summaryCache || { total: 0, byYearMonth: [], matches: [] };
   const loading = summaryLoading;
-  
+
   // Save watchlist to localStorage
   useEffect(() => {
     localStorage.setItem('matchWatchlist', JSON.stringify(watchlist));
   }, [watchlist]);
-  
+
   // Toggle watchlist
   const toggleWatchlist = useCallback((matchId) => {
-    setWatchlist(prev => 
-      prev.includes(matchId) 
-        ? prev.filter(id => id !== matchId)
-        : [...prev, matchId]
+    setWatchlist((prev) =>
+      prev.includes(matchId) ? prev.filter((id) => id !== matchId) : [...prev, matchId]
     );
   }, []);
-  
+
   // Dismiss alert
   const dismissAlert = useCallback((alertId) => {
-    setAlerts(prev => prev.filter(a => a.id !== alertId));
+    setAlerts((prev) => prev.filter((a) => a.id !== alertId));
   }, []);
-  
+
   // Filter and sort matches (search is done by backend, only do local status filtering and sorting)
   const filteredMatches = useMemo(() => {
     let result = [...matches];
-    
+
     // Note: Search filtering is now done by the backend API
     // We only do local filtering for status here
-    
+
     // Filter by status (local filter since backend doesn't support status filter yet)
     if (filterStatus !== 'all') {
-      result = result.filter(m => m.status === filterStatus);
+      result = result.filter((m) => m.status === filterStatus);
     }
-    
+
     // Sort
     switch (sortBy) {
       case 'edge':
         result.sort((a, b) => (b.edge || 0) - (a.edge || 0));
         break;
-      case 'time':
+      case 'time': {
         const statusOrder = { live: 0, upcoming: 1, finished: 2 };
         result.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
         break;
+      }
       case 'tournament':
         result.sort((a, b) => (a.tournament || '').localeCompare(b.tournament || ''));
         break;
     }
-    
+
     return result;
   }, [matches, searchTerm, filterStatus, sortBy]);
-  
+
   // Watchlist matches
   const watchlistMatches = useMemo(() => {
-    return matches.filter(m => watchlist.includes(m.id));
+    return matches.filter((m) => watchlist.includes(m.id));
   }, [matches, watchlist]);
-  
-
 
   return (
     <div className="home-page-new">
@@ -514,30 +512,21 @@ export default function HomePage({
             Trading Lobby
           </h1>
         </div>
-        
+
         <div className="home-header-right">
-          <MotionButton 
-            variant="ghost" 
-            onClick={onNavigateToPlayer}
-          >
+          <MotionButton variant="ghost" onClick={onNavigateToPlayer}>
             <User size={18} /> Players
           </MotionButton>
-          <MotionButton 
-            variant="ghost" 
-            onClick={() => setShowMonitoring(true)}
-          >
+          <MotionButton variant="ghost" onClick={() => setShowMonitoring(true)}>
             <ChartLineUp size={18} /> Monitor
           </MotionButton>
         </div>
       </header>
-      
+
       {/* Main Content */}
       <div className="home-content">
-        <SportSidebar 
-          selectedSport={selectedSport}
-          onSelectSport={setSelectedSport}
-        />
-        
+        <SportSidebar selectedSport={selectedSport} onSelectSport={setSelectedSport} />
+
         <main className="home-main">
           {/* Search & Filter */}
           <SearchFilterBar
@@ -549,7 +538,7 @@ export default function HomePage({
             onFilterChange={setFilterStatus}
             isSearching={isSearching}
           />
-          
+
           {/* Watchlist Section */}
           {watchlistMatches.length > 0 && (
             <section className="home-section watchlist-section">
@@ -559,7 +548,7 @@ export default function HomePage({
                 <span className="section-count">{watchlistMatches.length}</span>
               </h2>
               <div className="matches-list">
-                {watchlistMatches.map(match => (
+                {watchlistMatches.map((match) => (
                   <MatchRow
                     key={match.id}
                     match={match}
@@ -571,20 +560,24 @@ export default function HomePage({
               </div>
             </section>
           )}
-          
+
           {/* Live Matches Section */}
           <section className="home-section live-section">
             <h2 className="section-title">
               <TennisBall size={20} weight="duotone" />
-              {filterStatus === 'all' ? 'All Matches' : `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Matches`}
-              <span className="section-count">{matchesLoading ? '...' : filteredMatches.length}</span>
+              {filterStatus === 'all'
+                ? 'All Matches'
+                : `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Matches`}
+              <span className="section-count">
+                {matchesLoading ? '...' : filteredMatches.length}
+              </span>
               {sortBy === 'edge' && (
                 <span className="sort-indicator">
                   <TrendUp size={14} /> Sorted by Edge
                 </span>
               )}
             </h2>
-            
+
             {matchesLoading ? (
               <div className="empty-state">
                 <ArrowClockwise size={48} weight="duotone" className="spinning" />
@@ -610,7 +603,7 @@ export default function HomePage({
               </div>
             ) : (
               <div className="matches-list">
-                {filteredMatches.map(match => (
+                {filteredMatches.map((match) => (
                   <MatchRow
                     key={match.id}
                     match={match}
@@ -623,7 +616,7 @@ export default function HomePage({
             )}
           </section>
         </main>
-        
+
         {/* Right Rail - Alerts Panel */}
         <aside className="home-alerts">
           <div className="alerts-header">
@@ -631,11 +624,9 @@ export default function HomePage({
               <Bell size={18} weight="duotone" />
               Alerts & Signals
             </h3>
-            {alerts.length > 0 && (
-              <span className="alerts-badge">{alerts.length}</span>
-            )}
+            {alerts.length > 0 && <span className="alerts-badge">{alerts.length}</span>}
           </div>
-          
+
           <div className="alerts-list">
             <AnimatePresence>
               {alerts.length === 0 ? (
@@ -644,17 +635,13 @@ export default function HomePage({
                   <p>No active alerts</p>
                 </div>
               ) : (
-                alerts.map(alert => (
-                  <AlertItem
-                    key={alert.id}
-                    alert={alert}
-                    onDismiss={dismissAlert}
-                  />
+                alerts.map((alert) => (
+                  <AlertItem key={alert.id} alert={alert} onDismiss={dismissAlert} />
                 ))
               )}
             </AnimatePresence>
           </div>
-          
+
           <div className="alerts-footer">
             <MotionButton variant="ghost" className="full-width">
               View Alert History
@@ -662,8 +649,8 @@ export default function HomePage({
           </div>
         </aside>
       </div>
-      
-      <MonitoringDashboard 
+
+      <MonitoringDashboard
         isOpen={showMonitoring}
         onClose={() => setShowMonitoring(false)}
         onMatchesUpdated={onRefreshSummary}

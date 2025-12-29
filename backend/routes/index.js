@@ -1,9 +1,9 @@
 /**
  * Routes Index - Central router mount point
- * 
+ *
  * FILOSOFIA: server.js deve contenere SOLO bootstrap + mount routes
  * Questo file centralizza l'import di tutte le route.
- * 
+ *
  * @see docs/filosofie/guida refactor server.js
  */
 
@@ -26,15 +26,15 @@ const scrapesController = require('../controllers/scrapes.controller');
 router.use('/', healthRoutes);
 router.use('/db', dbRoutes);
 router.use('/match', matchRoutes);
-router.use('/matches', matchRoutes);  // Alias per retrocompatibilità
+router.use('/matches', matchRoutes); // Alias per retrocompatibilità
 router.use('/track', trackingRoutes);
 router.use('/tracked', trackingRoutes);
 router.use('/tracking', trackingRoutes);
 router.use('/player', playerRoutes);
 router.use('/event', eventRoutes);
-router.use('/', valueRoutes);  // /interpret-value, /analyze-power-rankings, etc.
+router.use('/', valueRoutes); // /interpret-value, /analyze-power-rankings, etc.
 router.use('/scrapes', scrapesRoutes);
-router.use('/stats', statsRoutes);  // /stats/db, /stats/health
+router.use('/stats', statsRoutes); // /stats/db, /stats/health
 
 // Root-level scraper endpoints (not under /scrapes)
 router.post('/scrape', scrapesController.scrape);

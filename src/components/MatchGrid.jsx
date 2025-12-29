@@ -1,12 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { 
-  CalendarBlank, 
-  CaretDown, 
-  FolderOpen,
-  Calendar,
-  Spinner
-} from '@phosphor-icons/react';
+import { CalendarBlank, CaretDown, FolderOpen, Calendar, Spinner } from '@phosphor-icons/react';
 import MatchCard from './MatchCard';
 import { MatchGridSkeleton } from './motion/Skeleton';
 import EmptyState from './motion/EmptyState';
@@ -16,29 +10,29 @@ import { apiUrl } from '../config';
 // Funzione per ottenere la label della data (per sotto-raggruppamento)
 function getDateLabel(timestamp) {
   if (!timestamp) return 'Data sconosciuta';
-  
+
   const date = new Date(timestamp * 1000);
   const now = new Date();
-  
+
   // Normalizza le date a mezzanotte per confronto
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
+
   const diffDays = Math.round((dateDay - today) / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays === 0) return 'Oggi';
   if (diffDays === 1) return 'Domani';
   if (diffDays === -1) return 'Ieri';
   if (diffDays === 2) return 'Dopodomani';
   if (diffDays > 2 && diffDays <= 7) return `Tra ${diffDays} giorni`;
   if (diffDays < -1 && diffDays >= -7) return `${Math.abs(diffDays)} giorni fa`;
-  
+
   // Per date più lontane, mostra la data completa
-  return date.toLocaleDateString('it-IT', { 
+  return date.toLocaleDateString('it-IT', {
     weekday: 'long',
-    day: 'numeric', 
+    day: 'numeric',
     month: 'long',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
   });
 }
 
@@ -46,39 +40,41 @@ function getDateLabel(timestamp) {
 function getDateKey(timestamp) {
   if (!timestamp) return '9999-99-99'; // Date sconosciute alla fine
   const date = new Date(timestamp * 1000);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate()
+  ).padStart(2, '0')}`;
 }
 
 // 🚀 OTTIMIZZATO: YearGroup - inizia CHIUSO, non carica dati finché non espanso
 function YearGroup({ year, months, onMatchClick }) {
   const [isExpanded, setIsExpanded] = useState(false); // SEMPRE chiuso di default
   const prefersReducedMotion = useReducedMotion();
-  
+
   // Conta totale partite nell'anno (dai conteggi, non dai match)
   const totalCount = months.reduce((sum, m) => sum + m.count, 0);
-  
+
   // Label anno user-friendly
   const now = new Date();
   const yearNum = parseInt(year);
   let yearLabel = year;
   if (yearNum === now.getFullYear()) yearLabel = "Quest'anno";
   else if (yearNum === now.getFullYear() - 1) yearLabel = 'Anno scorso';
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="year-group"
       initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: durations.normal, ease: easings.premium }}
     >
-      <motion.button 
+      <motion.button
         className={`year-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
         onClick={() => setIsExpanded(!isExpanded)}
         whileHover={!prefersReducedMotion ? { backgroundColor: 'rgba(255, 255, 255, 0.06)' } : {}}
         whileTap={{ scale: 0.99 }}
       >
         <div className="year-group-title">
-          <motion.span 
+          <motion.span
             className="year-group-icon"
             animate={{ rotate: isExpanded ? 0 : -90 }}
             transition={{ duration: durations.fast, ease: easings.premium }}
@@ -92,10 +88,10 @@ function YearGroup({ year, months, onMatchClick }) {
           </span>
         </div>
       </motion.button>
-      
+
       <AnimatePresence>
         {isExpanded && (
-          <motion.div 
+          <motion.div
             className="year-group-content"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -124,12 +120,12 @@ function MonthGroupLazy({ monthKey, count, onMatchClick }) {
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const prefersReducedMotion = useReducedMotion();
-  
+
   // Label mese user-friendly
   const [year, month] = monthKey.split('-').map(Number);
   const monthDate = new Date(year, month - 1, 1);
   const now = new Date();
-  
+
   let monthLabel;
   if (year === now.getFullYear() && month === now.getMonth() + 1) {
     monthLabel = 'Questo mese';
@@ -138,12 +134,12 @@ function MonthGroupLazy({ monthKey, count, onMatchClick }) {
   } else {
     monthLabel = monthDate.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
   }
-  
+
   // 🚀 LAZY LOAD: Carica i match solo quando l'utente espande il mese
   const handleExpand = async () => {
     const newExpanded = !isExpanded;
     setIsExpanded(newExpanded);
-    
+
     // Carica i match solo alla prima espansione
     if (newExpanded && !loaded && !loading) {
       setLoading(true);
@@ -161,12 +157,12 @@ function MonthGroupLazy({ monthKey, count, onMatchClick }) {
       }
     }
   };
-  
+
   // Raggruppa i match per giorno (solo se caricati)
   const dayGroups = useMemo(() => {
     if (!matches.length) return [];
     const groups = {};
-    matches.forEach(match => {
+    matches.forEach((match) => {
       const dateKey = getDateKey(match.startTimestamp);
       const dateLabel = getDateLabel(match.startTimestamp);
       if (!groups[dateKey]) {
@@ -176,27 +172,31 @@ function MonthGroupLazy({ monthKey, count, onMatchClick }) {
     });
     return Object.values(groups).sort((a, b) => b.dateKey.localeCompare(a.dateKey));
   }, [matches]);
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="month-group"
       initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -8 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: durations.normal, ease: easings.premium }}
     >
-      <motion.button 
+      <motion.button
         className={`month-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
         onClick={handleExpand}
         whileHover={!prefersReducedMotion ? { backgroundColor: 'rgba(255, 255, 255, 0.04)' } : {}}
         whileTap={{ scale: 0.99 }}
       >
         <div className="month-group-title">
-          <motion.span 
+          <motion.span
             className="month-group-icon"
             animate={{ rotate: isExpanded ? 0 : -90 }}
             transition={{ duration: durations.fast, ease: easings.premium }}
           >
-            {loading ? <Spinner size={12} className="spin" /> : <CaretDown size={12} weight="bold" />}
+            {loading ? (
+              <Spinner size={12} className="spin" />
+            ) : (
+              <CaretDown size={12} weight="bold" />
+            )}
           </motion.span>
           <FolderOpen size={14} weight="duotone" style={{ marginRight: 6, opacity: 0.7 }} />
           <span className="month-group-label">{monthLabel}</span>
@@ -205,10 +205,10 @@ function MonthGroupLazy({ monthKey, count, onMatchClick }) {
           </span>
         </div>
       </motion.button>
-      
+
       <AnimatePresence>
         {isExpanded && (
-          <motion.div 
+          <motion.div
             className="month-group-content"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -241,16 +241,16 @@ function MonthGroupLazy({ monthKey, count, onMatchClick }) {
 function DayGroup({ dateLabel, matches, onMatchClick }) {
   const [isExpanded, setIsExpanded] = useState(false); // SEMPRE chiuso
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div className="day-group">
-      <motion.button 
+      <motion.button
         className={`day-group-header ${isExpanded ? 'expanded' : 'collapsed'}`}
         onClick={() => setIsExpanded(!isExpanded)}
         whileHover={!prefersReducedMotion ? { backgroundColor: 'rgba(255, 255, 255, 0.03)' } : {}}
         whileTap={{ scale: 0.99 }}
       >
-        <motion.span 
+        <motion.span
           className="day-group-icon"
           animate={{ rotate: isExpanded ? 0 : -90 }}
           transition={{ duration: durations.fast, ease: easings.premium }}
@@ -261,10 +261,10 @@ function DayGroup({ dateLabel, matches, onMatchClick }) {
         <span className="day-group-label">{dateLabel}</span>
         <span className="day-group-count">{matches.length}</span>
       </motion.button>
-      
+
       <AnimatePresence>
         {isExpanded && (
-          <motion.div 
+          <motion.div
             className="day-group-matches"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -279,17 +279,13 @@ function DayGroup({ dateLabel, matches, onMatchClick }) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ 
-                  duration: durations.normal, 
+                transition={{
+                  duration: durations.normal,
                   ease: easings.premium,
-                  delay: index * 0.04
+                  delay: index * 0.04,
                 }}
               >
-                <MatchCard 
-                  match={match} 
-                  onClick={onMatchClick}
-                  dataSources={match.dataSources}
-                />
+                <MatchCard match={match} onClick={onMatchClick} dataSources={match.dataSources} />
               </motion.div>
             ))}
           </motion.div>
@@ -320,7 +316,7 @@ function MatchGrid({ summary, loading, onMatchClick }) {
   // Match grid con gruppi per ANNO > MESE > GIORNO
   // TUTTI I GRUPPI INIZIANO CHIUSI - lazy load quando espansi
   return (
-    <motion.div 
+    <motion.div
       className="match-grid-grouped"
       variants={staggerContainer}
       initial="initial"

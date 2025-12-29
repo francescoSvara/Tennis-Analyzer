@@ -25,7 +25,7 @@ async function runMigration() {
     // 1. Crea tabella live_tracking
     console.log('1️⃣ Creating live_tracking table...');
     const { error: e1 } = await supabase.from('live_tracking').select('id').limit(1);
-    
+
     if (e1 && e1.code === '42P01') {
       // Tabella non esiste, la creiamo via REST API non è possibile
       // L'utente deve eseguire manualmente l'SQL dalla dashboard Supabase
@@ -41,10 +41,7 @@ async function runMigration() {
 
     // 2. Verifica struttura
     console.log('\n2️⃣ Verifying table structure...');
-    const { data, error: e2 } = await supabase
-      .from('live_tracking')
-      .select('*')
-      .limit(0);
+    const { data, error: e2 } = await supabase.from('live_tracking').select('*').limit(0);
 
     if (e2) {
       console.error('❌ Error:', e2.message);
@@ -60,7 +57,7 @@ async function runMigration() {
       status: 'WATCHING',
       priority: 'LOW',
       player1_name: 'Test Player 1',
-      player2_name: 'Test Player 2'
+      player2_name: 'Test Player 2',
     };
 
     const { data: inserted, error: e3 } = await supabase
@@ -75,14 +72,13 @@ async function runMigration() {
       console.log('   Esegui lo script SQL dalla dashboard Supabase.');
     } else {
       console.log('✅ Insert OK, id:', inserted.id);
-      
+
       // Cleanup test record
       await supabase.from('live_tracking').delete().eq('id', inserted.id);
       console.log('✅ Test record cleaned up');
     }
 
     console.log('\n✅ Migration verification complete!');
-
   } catch (err) {
     console.error('❌ Migration error:', err.message);
   }

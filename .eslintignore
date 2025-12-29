@@ -6,3 +6,5 @@ build
 /data/**
 backend/node_modules
 .DS_Store
+
+Tennis-Scraper-Local

@@ -1,6 +1,6 @@
 /**
  * Motion Components - Index
- * 
+ *
  * Re-export di tutti i componenti motion per import semplificato
  * Ref: docs/filosofie/FILOSOFIA_FRONTEND.md
  */

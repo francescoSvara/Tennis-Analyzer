@@ -1,6 +1,6 @@
 /**
  * 🔬 DEEP PHILOSOPHY CHECK
- * 
+ *
  * Verifica che le FILOSOFIE siano implementate nel codice.
  * Non verifica solo l'esistenza dei file (come checkConceptualMap.js),
  * ma anche:
@@ -8,7 +8,7 @@
  * - Pattern/strutture richieste
  * - Schema database
  * - Costanti/versioni
- * 
+ *
  * Uso: node scripts/deepPhilosophyCheck.js
  * Output: docs/checks/DEEP_PHILOSOPHY_CHECK.md
  *         Aggiorna docs/TODO_LIST.md
@@ -33,50 +33,50 @@ const PHILOSOPHY_REQUIREMENTS = {
   BANKROLL: {
     name: 'FILOSOFIA_RISK_BANKROLL',
     file: 'docs/filosofie/50_strategy_risk_execution/bankroll_risk/FILOSOFIA_RISK_BANKROLL.md',
-    
+
     // File che DEVONO esistere
     requiredFiles: [
       {
         path: 'backend/services/riskEngine.js',
         description: 'Risk layer: edge → stake suggestion',
-        status: 'TODO' // marcare se dichiarato come TODO nella filosofia
+        status: 'TODO', // marcare se dichiarato come TODO nella filosofia
       },
       {
         path: 'backend/strategies/strategyEngine.js',
-        description: 'Strategy signals: produce edge + confidence'
-      }
+        description: 'Strategy signals: produce edge + confidence',
+      },
     ],
-    
+
     // Funzioni che DEVONO essere esportate
     requiredExports: [
       {
         file: 'backend/services/riskEngine.js',
         exports: ['calculateStake', 'calculateEdge', 'controlExposure', 'kellyFractional'],
-        status: 'TODO'
+        status: 'TODO',
       },
       {
         file: 'backend/strategies/strategyEngine.js',
-        exports: ['evaluateStrategies', 'STRATEGY_ENGINE_VERSION']
-      }
+        exports: ['evaluateStrategies', 'STRATEGY_ENGINE_VERSION'],
+      },
     ],
-    
+
     // Tabelle DB richieste
     requiredTables: [
       {
         name: 'bet_decisions',
         description: 'Log delle decisioni di betting',
-        status: 'TODO'
-      }
+        status: 'TODO',
+      },
     ],
-    
+
     // Pattern/strutture che DEVONO esistere nel codice
     requiredPatterns: [
       {
         file: 'backend/services/matchCardService.js',
         pattern: /risk|stake|edge/i,
-        description: 'matchCardService deve integrare risk output nel bundle'
-      }
-    ]
+        description: 'matchCardService deve integrare risk output nel bundle',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -85,46 +85,46 @@ const PHILOSOPHY_REQUIREMENTS = {
   TEMPORAL: {
     name: 'FILOSOFIA_TEMPORAL',
     file: 'docs/filosofie/10_data_platform/temporal/FILOSOFIA_TEMPORAL.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/liveManager.js',
-        description: 'Live tracking con ingestion_time, event_time'
+        description: 'Live tracking con ingestion_time, event_time',
       },
       {
         path: 'backend/services/matchCardService.js',
-        description: 'MatchBundle builder con as_of_time'
+        description: 'MatchBundle builder con as_of_time',
       },
       {
         path: 'backend/utils/featureEngine.js',
-        description: 'Feature computation con as_of_time'
-      }
+        description: 'Feature computation con as_of_time',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'backend/utils/featureEngine.js',
-        exports: ['computeFeatures', 'FEATURE_ENGINE_VERSION']
-      }
+        exports: ['computeFeatures', 'FEATURE_ENGINE_VERSION'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/liveManager.js',
         pattern: /ingestion_time|event_time|source_time/i,
-        description: 'liveManager deve usare timestamp semantici (ingestion_time, event_time)'
+        description: 'liveManager deve usare timestamp semantici (ingestion_time, event_time)',
       },
       {
         file: 'backend/utils/featureEngine.js',
         pattern: /as_of_time|asOfTime/i,
-        description: 'featureEngine deve supportare as_of_time per anti-leakage'
+        description: 'featureEngine deve supportare as_of_time per anti-leakage',
       },
       {
         file: 'backend/services/matchCardService.js',
         pattern: /as_of_time|asOfTime|generated_at/i,
-        description: 'matchCardService deve includere meta.as_of_time nel bundle'
-      }
-    ]
+        description: 'matchCardService deve includere meta.as_of_time nel bundle',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -133,45 +133,45 @@ const PHILOSOPHY_REQUIREMENTS = {
   REGISTRY: {
     name: 'FILOSOFIA_REGISTRY_CANON',
     file: 'docs/filosofie/10_data_platform/registry_canon/FILOSOFIA_REGISTRY_CANON.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/services/dataNormalizer.js',
-        description: 'Normalizzazione e mapping nomi → canonical IDs'
+        description: 'Normalizzazione e mapping nomi → canonical IDs',
       },
       {
         path: 'data/mappings/players.json',
         description: 'Registry alias mapping per player names',
-        status: 'TODO'
-      }
+        status: 'TODO',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'backend/services/dataNormalizer.js',
-        exports: ['normalizeName', 'resolvePlayerId']
-      }
+        exports: ['normalizeName', 'resolvePlayerId'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/services/dataNormalizer.js',
         pattern: /canonical|normalize|alias/i,
-        description: 'dataNormalizer deve avere logica canonical ID'
+        description: 'dataNormalizer deve avere logica canonical ID',
       },
       {
         file: 'backend/db/matchRepository.js',
         pattern: /player_id|home_player_id|away_player_id/i,
-        description: 'matchRepository deve usare canonical player IDs'
-      }
+        description: 'matchRepository deve usare canonical player IDs',
+      },
     ],
 
     requiredTables: [
       {
         name: 'players',
-        description: 'Tabella players con canonical IDs e name_variants'
-      }
-    ]
+        description: 'Tabella players con canonical IDs e name_variants',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -180,45 +180,45 @@ const PHILOSOPHY_REQUIREMENTS = {
   LINEAGE: {
     name: 'FILOSOFIA_LINEAGE_VERSIONING',
     file: 'docs/filosofie/10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/services/matchCardService.js',
-        description: 'MatchBundle builder: aggiungere meta.versions'
+        description: 'MatchBundle builder: aggiungere meta.versions',
       },
       {
         path: 'backend/utils/featureEngine.js',
-        description: 'Export FEATURE_ENGINE_VERSION'
+        description: 'Export FEATURE_ENGINE_VERSION',
       },
       {
         path: 'backend/strategies/strategyEngine.js',
-        description: 'Export STRATEGY_ENGINE_VERSION'
-      }
+        description: 'Export STRATEGY_ENGINE_VERSION',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'backend/utils/featureEngine.js',
-        exports: ['FEATURE_ENGINE_VERSION']
+        exports: ['FEATURE_ENGINE_VERSION'],
       },
       {
         file: 'backend/strategies/strategyEngine.js',
-        exports: ['STRATEGY_ENGINE_VERSION']
-      }
+        exports: ['STRATEGY_ENGINE_VERSION'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/services/matchCardService.js',
         pattern: /meta\.versions|versions\s*:|bundle_schema|feature_version|strategy_version/i,
-        description: 'matchCardService deve includere meta.versions nel bundle'
+        description: 'matchCardService deve includere meta.versions nel bundle',
       },
       {
         file: 'src/hooks/useMatchBundle.jsx',
         pattern: /meta\.versions|\.meta\b/i,
-        description: 'useMatchBundle deve esporre meta dal bundle'
-      }
-    ]
+        description: 'useMatchBundle deve esporre meta dal bundle',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -227,38 +227,43 @@ const PHILOSOPHY_REQUIREMENTS = {
   OBSERVABILITY: {
     name: 'FILOSOFIA_OBSERVABILITY_DATAQUALITY',
     file: 'docs/filosofie/10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/services/dataQualityChecker.js',
         description: 'Data quality validation: missingness, outliers, staleness',
-        status: 'TODO'
+        status: 'TODO',
       },
       {
         path: 'backend/utils/logger.js',
-        description: 'Structured logging'
-      }
+        description: 'Structured logging',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'backend/services/dataQualityChecker.js',
-        exports: ['calculateCompleteness', 'calculateStaleness', 'detectOutliers', 'checkConsistency'],
-        status: 'TODO'
+        exports: [
+          'calculateCompleteness',
+          'calculateStaleness',
+          'detectOutliers',
+          'checkConsistency',
+        ],
+        status: 'TODO',
       },
       {
         file: 'backend/utils/logger.js',
-        exports: ['logger', 'createLogger']
-      }
+        exports: ['logger', 'createLogger'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/services/matchCardService.js',
         pattern: /dataQuality|data_quality|quality_score/i,
-        description: 'matchCardService deve includere dataQuality nel bundle'
-      }
-    ]
+        description: 'matchCardService deve includere dataQuality nel bundle',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -267,33 +272,33 @@ const PHILOSOPHY_REQUIREMENTS = {
   ODDS: {
     name: 'FILOSOFIA_ODDS',
     file: 'docs/filosofie/30_domain_odds_markets/odds_ticks_snapshots/FILOSOFIA_ODDS.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/services/matchCardService.js',
-        description: 'Include odds nel bundle'
-      }
+        description: 'Include odds nel bundle',
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/services/matchCardService.js',
         pattern: /odds|implied_prob|closing_line/i,
-        description: 'matchCardService deve gestire odds nel bundle'
+        description: 'matchCardService deve gestire odds nel bundle',
       },
       {
         file: 'backend/server.js',
         pattern: /event_time.*odds|odds.*timestamp|ingestion_time/i,
-        description: 'Odds devono avere timestamp per tracciare movimento'
-      }
+        description: 'Odds devono avere timestamp per tracciare movimento',
+      },
     ],
-    
+
     requiredTables: [
       {
         name: 'match_odds_new',
-        description: 'Tabella odds con event_time per ogni tick'
-      }
-    ]
+        description: 'Tabella odds con event_time per ogni tick',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -302,43 +307,43 @@ const PHILOSOPHY_REQUIREMENTS = {
   LIVE: {
     name: 'FILOSOFIA_LIVE_TRACKING',
     file: 'docs/filosofie/20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/liveManager.js',
-        description: 'Gestione tracking live matches'
+        description: 'Gestione tracking live matches',
       },
       {
         path: 'backend/db/liveTrackingRepository.js',
-        description: 'Repository per live snapshots'
-      }
+        description: 'Repository per live snapshots',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'backend/db/liveTrackingRepository.js',
-        exports: ['saveSnapshot', 'getSnapshots', 'getLatestSnapshot']
+        exports: ['saveSnapshot', 'getSnapshots', 'getLatestSnapshot'],
       },
       {
         file: 'backend/liveManager.js',
-        exports: ['startTracking', 'stopTracking', 'getTrackedMatches']
-      }
+        exports: ['startTracking', 'stopTracking', 'getTrackedMatches'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/db/liveTrackingRepository.js',
         pattern: /snapshot_time|snapshotTime|event_time/i,
-        description: 'liveTrackingRepository deve usare snapshotTime per i dati live'
-      }
+        description: 'liveTrackingRepository deve usare snapshotTime per i dati live',
+      },
     ],
-    
+
     requiredTables: [
       {
         name: 'live_tracking_snapshots',
-        description: 'Tabella per live snapshots con timestamp'
-      }
-    ]
+        description: 'Tabella per live snapshots con timestamp',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -347,36 +352,41 @@ const PHILOSOPHY_REQUIREMENTS = {
   STATS: {
     name: 'FILOSOFIA_STATS',
     file: 'docs/filosofie/40_analytics_features_models/stats/FILOSOFIA_STATS.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/utils/featureEngine.js',
-        description: 'Calcolo features: volatility, pressure, dominance'
+        description: 'Calcolo features: volatility, pressure, dominance',
       },
       {
         path: 'backend/services/playerStatsService.js',
-        description: 'Stats aggregate per player'
-      }
+        description: 'Stats aggregate per player',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'backend/utils/featureEngine.js',
-        exports: ['computeFeatures', 'calculateVolatility', 'calculatePressure', 'calculateDominance']
+        exports: [
+          'computeFeatures',
+          'calculateVolatility',
+          'calculatePressure',
+          'calculateDominance',
+        ],
       },
       {
         file: 'backend/services/playerStatsService.js',
-        exports: ['getPlayerStats', 'calculateH2H']
-      }
+        exports: ['getPlayerStats', 'calculateH2H'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/utils/featureEngine.js',
         pattern: /volatility|pressure|dominance/i,
-        description: 'featureEngine deve calcolare volatility, pressure, dominance'
-      }
-    ]
+        description: 'featureEngine deve calcolare volatility, pressure, dominance',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -385,15 +395,15 @@ const PHILOSOPHY_REQUIREMENTS = {
   CALCOLI: {
     name: 'FILOSOFIA_CALCOLI',
     file: 'docs/filosofie/40_analytics_features_models/calcoli/FILOSOFIA_CALCOLI.md',
-    
+
     requiredPatterns: [
       {
         file: 'backend/utils/featureEngine.js',
         pattern: /null.*return|return.*null|!=\s*null|\?\?/i,
         description: 'featureEngine: MAI restituire null, sempre fallback calcolato',
-        antiPattern: true // questo è un anti-pattern da evitare
-      }
-    ]
+        antiPattern: true, // questo è un anti-pattern da evitare
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -402,56 +412,56 @@ const PHILOSOPHY_REQUIREMENTS = {
   DB: {
     name: 'FILOSOFIA_DB',
     file: 'docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md',
-    
+
     requiredFiles: [
       {
         path: 'backend/db/matchRepository.js',
-        description: 'CRUD matches_new'
+        description: 'CRUD matches_new',
       },
       {
         path: 'backend/db/supabase.js',
-        description: 'Client Supabase'
+        description: 'Client Supabase',
       },
       {
         path: 'backend/server.js',
-        description: 'Bundle endpoint /api/match/:id/bundle'
-      }
+        description: 'Bundle endpoint /api/match/:id/bundle',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'backend/db/matchRepository.js',
-        exports: ['getMatches', 'getMatchById', 'saveMatch', 'getMatchBundle']
-      }
+        exports: ['getMatches', 'getMatchById', 'saveMatch', 'getMatchBundle'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'backend/server.js',
         pattern: /\/api\/match\/:.*\/bundle|getMatchBundle/i,
-        description: 'server.js deve avere endpoint /api/match/:id/bundle'
+        description: 'server.js deve avere endpoint /api/match/:id/bundle',
       },
       {
         file: 'backend/server.js',
         pattern: /transformLegacyMatchToBundle|legacy.*fallback/i,
-        description: 'server.js deve avere fallback legacy per match XLSX'
-      }
+        description: 'server.js deve avere fallback legacy per match XLSX',
+      },
     ],
-    
+
     requiredTables: [
       {
         name: 'matches',
-        description: 'Tabella legacy con winner_name, loser_name'
+        description: 'Tabella legacy con winner_name, loser_name',
       },
       {
         name: 'matches_new',
-        description: 'Tabella nuova con home_player_id, away_player_id'
+        description: 'Tabella nuova con home_player_id, away_player_id',
       },
       {
         name: 'match_card_snapshot',
-        description: 'Cache per MatchBundle'
-      }
-    ]
+        description: 'Cache per MatchBundle',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -460,32 +470,32 @@ const PHILOSOPHY_REQUIREMENTS = {
   FRONTEND: {
     name: 'FILOSOFIA_FRONTEND',
     file: 'docs/filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md',
-    
+
     requiredFiles: [
       {
         path: 'src/hooks/useMatchBundle.jsx',
-        description: 'Hook consumo bundle'
+        description: 'Hook consumo bundle',
       },
       {
         path: 'src/components/match/MatchPage.jsx',
-        description: 'Container tabs'
-      }
+        description: 'Container tabs',
+      },
     ],
-    
+
     requiredExports: [
       {
         file: 'src/hooks/useMatchBundle.jsx',
-        exports: ['useMatchBundle']
-      }
+        exports: ['useMatchBundle'],
+      },
     ],
-    
+
     requiredPatterns: [
       {
         file: 'src/hooks/useMatchBundle.jsx',
         pattern: /\/api\/match\/.*\/bundle|getMatchBundle/i,
-        description: 'useMatchBundle deve chiamare endpoint bundle'
-      }
-    ]
+        description: 'useMatchBundle deve chiamare endpoint bundle',
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -494,20 +504,20 @@ const PHILOSOPHY_REQUIREMENTS = {
   FRONTEND_DATA: {
     name: 'FILOSOFIA_FRONTEND_DATA_CONSUMPTION',
     file: 'docs/filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md',
-    
+
     requiredPatterns: [
       {
         file: 'src/components/match/MatchPage.jsx',
         pattern: /useMatchBundle/i,
-        description: 'MatchPage deve usare useMatchBundle'
+        description: 'MatchPage deve usare useMatchBundle',
       },
       {
         file: 'src/App.jsx',
         pattern: /useMatchBundle|MatchPage/i,
-        description: 'App.jsx deve importare useMatchBundle o MatchPage'
-      }
-    ]
-  }
+        description: 'App.jsx deve importare useMatchBundle o MatchPage',
+      },
+    ],
+  },
 };
 
 // ============================================================================
@@ -528,10 +538,10 @@ function readFileContent(filePath) {
 function checkExports(filePath, exports) {
   const content = readFileContent(filePath);
   if (!content) return { exists: false, found: [], missing: exports };
-  
+
   const found = [];
   const missing = [];
-  
+
   for (const exp of exports) {
     // Check various export patterns
     const patterns = [
@@ -541,28 +551,28 @@ function checkExports(filePath, exports) {
       new RegExp(`export\\s+(const|function|class|let|var)\\s+${exp}`, 'i'),
       new RegExp(`export\\s*{[^}]*${exp}`, 'i'),
       new RegExp(`const\\s+${exp}\\s*=`, 'i'), // anche se non esportato
-      new RegExp(`function\\s+${exp}\\s*\\(`, 'i')
+      new RegExp(`function\\s+${exp}\\s*\\(`, 'i'),
     ];
-    
-    const isFound = patterns.some(p => p.test(content));
+
+    const isFound = patterns.some((p) => p.test(content));
     if (isFound) {
       found.push(exp);
     } else {
       missing.push(exp);
     }
   }
-  
+
   return { exists: true, found, missing };
 }
 
 function checkPattern(filePath, pattern, antiPattern = false) {
   const content = readFileContent(filePath);
   if (!content) return { exists: false, matches: false };
-  
+
   const matches = pattern.test(content);
-  return { 
-    exists: true, 
-    matches: antiPattern ? !matches : matches 
+  return {
+    exists: true,
+    matches: antiPattern ? !matches : matches,
   };
 }
 
@@ -570,7 +580,7 @@ function checkDatabaseTable(tableName) {
   // Check migration files for table creation
   const migrationsDir = path.join(ROOT_DIR, 'backend', 'migrations');
   if (!fs.existsSync(migrationsDir)) return { definedInMigration: false };
-  
+
   const migrations = fs.readdirSync(migrationsDir);
   for (const migration of migrations) {
     const content = readFileContent(`backend/migrations/${migration}`);
@@ -578,7 +588,7 @@ function checkDatabaseTable(tableName) {
       return { definedInMigration: true, migrationFile: migration };
     }
   }
-  
+
   return { definedInMigration: false };
 }
 
@@ -593,11 +603,11 @@ function runDeepChecks() {
       totalChecks: 0,
       passed: 0,
       failed: 0,
-      todoItems: 0 // items dichiarati come TODO nelle filosofie
+      todoItems: 0, // items dichiarati come TODO nelle filosofie
     },
-    philosophies: {}
+    philosophies: {},
   };
-  
+
   for (const [key, philosophy] of Object.entries(PHILOSOPHY_REQUIREMENTS)) {
     const philResult = {
       name: philosophy.name,
@@ -605,25 +615,25 @@ function runDeepChecks() {
       checks: [],
       errors: [],
       warnings: [],
-      todos: []
+      todos: [],
     };
-    
+
     // Check required files
     if (philosophy.requiredFiles) {
       for (const fileReq of philosophy.requiredFiles) {
         results.summary.totalChecks++;
         const exists = checkFileExists(fileReq.path);
-        
+
         const check = {
           type: 'FILE',
           path: fileReq.path,
           description: fileReq.description,
           passed: exists,
-          isTodo: fileReq.status === 'TODO'
+          isTodo: fileReq.status === 'TODO',
         };
-        
+
         philResult.checks.push(check);
-        
+
         if (!exists) {
           if (fileReq.status === 'TODO') {
             results.summary.todoItems++;
@@ -631,7 +641,7 @@ function runDeepChecks() {
               type: 'FILE_MISSING_TODO',
               path: fileReq.path,
               description: fileReq.description,
-              message: `File dichiarato come TODO: ${fileReq.path}`
+              message: `File dichiarato come TODO: ${fileReq.path}`,
             });
           } else {
             results.summary.failed++;
@@ -639,7 +649,7 @@ function runDeepChecks() {
               type: 'FILE_MISSING',
               path: fileReq.path,
               description: fileReq.description,
-              message: `File richiesto NON ESISTE: ${fileReq.path}`
+              message: `File richiesto NON ESISTE: ${fileReq.path}`,
             });
           }
         } else {
@@ -647,33 +657,33 @@ function runDeepChecks() {
         }
       }
     }
-    
+
     // Check required exports
     if (philosophy.requiredExports) {
       for (const expReq of philosophy.requiredExports) {
         const fileExists = checkFileExists(expReq.file);
-        
+
         if (!fileExists) {
           // File doesn't exist - already reported above
           continue;
         }
-        
+
         const expResult = checkExports(expReq.file, expReq.exports);
-        
+
         for (const exp of expReq.exports) {
           results.summary.totalChecks++;
           const found = expResult.found.includes(exp);
-          
+
           const check = {
             type: 'EXPORT',
             file: expReq.file,
             export: exp,
             passed: found,
-            isTodo: expReq.status === 'TODO'
+            isTodo: expReq.status === 'TODO',
           };
-          
+
           philResult.checks.push(check);
-          
+
           if (!found) {
             if (expReq.status === 'TODO') {
               results.summary.todoItems++;
@@ -681,7 +691,7 @@ function runDeepChecks() {
                 type: 'EXPORT_MISSING_TODO',
                 file: expReq.file,
                 export: exp,
-                message: `Export dichiarato come TODO: ${expReq.file} → ${exp}`
+                message: `Export dichiarato come TODO: ${expReq.file} → ${exp}`,
               });
             } else {
               results.summary.failed++;
@@ -689,7 +699,7 @@ function runDeepChecks() {
                 type: 'EXPORT_MISSING',
                 file: expReq.file,
                 export: exp,
-                message: `Export richiesto NON TROVATO: ${expReq.file} → ${exp}()`
+                message: `Export richiesto NON TROVATO: ${expReq.file} → ${exp}()`,
               });
             }
           } else {
@@ -698,36 +708,36 @@ function runDeepChecks() {
         }
       }
     }
-    
+
     // Check required patterns
     if (philosophy.requiredPatterns) {
       for (const patReq of philosophy.requiredPatterns) {
         results.summary.totalChecks++;
         const fileExists = checkFileExists(patReq.file);
-        
+
         if (!fileExists) {
           philResult.warnings.push({
             type: 'PATTERN_FILE_MISSING',
             file: patReq.file,
             description: patReq.description,
-            message: `File per pattern check non esiste: ${patReq.file}`
+            message: `File per pattern check non esiste: ${patReq.file}`,
           });
           continue;
         }
-        
+
         const patResult = checkPattern(patReq.file, patReq.pattern, patReq.antiPattern);
-        
+
         const check = {
           type: 'PATTERN',
           file: patReq.file,
           pattern: patReq.pattern.toString(),
           description: patReq.description,
           passed: patResult.matches,
-          antiPattern: patReq.antiPattern || false
+          antiPattern: patReq.antiPattern || false,
         };
-        
+
         philResult.checks.push(check);
-        
+
         if (!patResult.matches) {
           results.summary.failed++;
           philResult.errors.push({
@@ -735,33 +745,33 @@ function runDeepChecks() {
             file: patReq.file,
             pattern: patReq.pattern.toString(),
             description: patReq.description,
-            message: patReq.antiPattern 
+            message: patReq.antiPattern
               ? `Anti-pattern trovato in ${patReq.file}: ${patReq.description}`
-              : `Pattern richiesto NON TROVATO in ${patReq.file}: ${patReq.description}`
+              : `Pattern richiesto NON TROVATO in ${patReq.file}: ${patReq.description}`,
           });
         } else {
           results.summary.passed++;
         }
       }
     }
-    
+
     // Check required tables
     if (philosophy.requiredTables) {
       for (const tableReq of philosophy.requiredTables) {
         results.summary.totalChecks++;
         const tableResult = checkDatabaseTable(tableReq.name);
-        
+
         const check = {
           type: 'TABLE',
           name: tableReq.name,
           description: tableReq.description,
           passed: tableResult.definedInMigration,
           migrationFile: tableResult.migrationFile,
-          isTodo: tableReq.status === 'TODO'
+          isTodo: tableReq.status === 'TODO',
         };
-        
+
         philResult.checks.push(check);
-        
+
         if (!tableResult.definedInMigration) {
           if (tableReq.status === 'TODO') {
             results.summary.todoItems++;
@@ -769,14 +779,14 @@ function runDeepChecks() {
               type: 'TABLE_MISSING_TODO',
               name: tableReq.name,
               description: tableReq.description,
-              message: `Tabella dichiarata come TODO: ${tableReq.name}`
+              message: `Tabella dichiarata come TODO: ${tableReq.name}`,
             });
           } else {
             philResult.warnings.push({
               type: 'TABLE_NOT_IN_MIGRATION',
               name: tableReq.name,
               description: tableReq.description,
-              message: `Tabella non trovata in migrations: ${tableReq.name} (potrebbe esistere in Supabase)`
+              message: `Tabella non trovata in migrations: ${tableReq.name} (potrebbe esistere in Supabase)`,
             });
           }
         } else {
@@ -784,10 +794,10 @@ function runDeepChecks() {
         }
       }
     }
-    
+
     results.philosophies[key] = philResult;
   }
-  
+
   return results;
 }
 
@@ -818,7 +828,7 @@ function generateMarkdownReport(results) {
   const allErrors = [];
   const allWarnings = [];
   const allTodos = [];
-  
+
   for (const [key, phil] of Object.entries(results.philosophies)) {
     for (const err of phil.errors) {
       allErrors.push({ philosophy: key, ...err });
@@ -830,7 +840,7 @@ function generateMarkdownReport(results) {
       allTodos.push({ philosophy: key, ...todo });
     }
   }
-  
+
   if (allErrors.length > 0) {
     md += `---
 
@@ -844,10 +854,12 @@ Questi sono file/funzioni dichiarate nelle filosofie che **DOVREBBERO ESISTERE**
     allErrors.forEach((err, i) => {
       const detail = err.path || err.file || err.name || '';
       const extra = err.export ? `→ ${err.export}()` : '';
-      md += `| ${i+1} | ${err.philosophy} | ${err.type} | \`${detail}\` ${extra} | ${err.description || err.message} |\n`;
+      md += `| ${i + 1} | ${err.philosophy} | ${err.type} | \`${detail}\` ${extra} | ${
+        err.description || err.message
+      } |\n`;
     });
   }
-  
+
   if (allWarnings.length > 0) {
     md += `
 ---
@@ -859,10 +871,10 @@ Questi sono file/funzioni dichiarate nelle filosofie che **DOVREBBERO ESISTERE**
 `;
     allWarnings.forEach((warn, i) => {
       const detail = warn.path || warn.file || warn.name || '';
-      md += `| ${i+1} | ${warn.philosophy} | ${warn.type} | \`${detail}\` | ${warn.message} |\n`;
+      md += `| ${i + 1} | ${warn.philosophy} | ${warn.type} | \`${detail}\` | ${warn.message} |\n`;
     });
   }
-  
+
   if (allTodos.length > 0) {
     md += `
 ---
@@ -876,10 +888,12 @@ Questi elementi sono dichiarati come "TODO" nelle filosofie stesse (non ancora i
 `;
     allTodos.forEach((todo, i) => {
       const detail = todo.path || todo.file || todo.name || '';
-      md += `| ${i+1} | ${todo.philosophy} | ${todo.type} | \`${detail}\` | ${todo.description || todo.message} |\n`;
+      md += `| ${i + 1} | ${todo.philosophy} | ${todo.type} | \`${detail}\` | ${
+        todo.description || todo.message
+      } |\n`;
     });
   }
-  
+
   // Dettaglio per filosofia
   md += `
 ---
@@ -887,19 +901,19 @@ Questi elementi sono dichiarati come "TODO" nelle filosofie stesse (non ancora i
 ## 📖 DETTAGLIO PER FILOSOFIA
 
 `;
-  
+
   for (const [key, phil] of Object.entries(results.philosophies)) {
     const errCount = phil.errors.length;
     const warnCount = phil.warnings.length;
     const todoCount = phil.todos.length;
-    const passCount = phil.checks.filter(c => c.passed).length;
+    const passCount = phil.checks.filter((c) => c.passed).length;
     const totalCount = phil.checks.length;
-    
+
     let status = '✅';
     if (errCount > 0) status = '🔴';
     else if (warnCount > 0) status = '🟡';
     else if (todoCount > 0) status = '📋';
-    
+
     md += `### ${status} ${phil.name}
 
 - **File**: \`${phil.file}\`
@@ -907,32 +921,32 @@ Questi elementi sono dichiarati come "TODO" nelle filosofie stesse (non ancora i
 - **Errori**: ${errCount} | **Warning**: ${warnCount} | **TODO**: ${todoCount}
 
 `;
-    
+
     if (phil.errors.length > 0) {
       md += `**Errori:**\n`;
-      phil.errors.forEach(e => {
+      phil.errors.forEach((e) => {
         md += `- ❌ ${e.message}\n`;
       });
       md += '\n';
     }
-    
+
     if (phil.warnings.length > 0) {
       md += `**Warning:**\n`;
-      phil.warnings.forEach(w => {
+      phil.warnings.forEach((w) => {
         md += `- ⚠️ ${w.message}\n`;
       });
       md += '\n';
     }
-    
+
     if (phil.todos.length > 0) {
       md += `**TODO:**\n`;
-      phil.todos.forEach(t => {
+      phil.todos.forEach((t) => {
         md += `- 📋 ${t.message}\n`;
       });
       md += '\n';
     }
   }
-  
+
   md += `
 ---
 
@@ -959,24 +973,24 @@ Questi sono elementi dichiarati "in roadmap" nelle filosofie. Non sono errori im
 
 **Fine report**
 `;
-  
+
   return md;
 }
 
 function generateTodoListUpdate(results) {
   // Genera sezione per TODO_LIST.md
   const allErrors = [];
-  
+
   for (const [key, phil] of Object.entries(results.philosophies)) {
     for (const err of phil.errors) {
       allErrors.push({ philosophy: key, philosophyName: phil.name, ...err });
     }
   }
-  
+
   if (allErrors.length === 0) {
     return null;
   }
-  
+
   let section = `
 ## 🔬 Problemi Deep Philosophy Check (Auto-generato)
 
@@ -986,13 +1000,15 @@ function generateTodoListUpdate(results) {
 ### 🔴 File/Funzioni Mancanti (${allErrors.length})
 
 `;
-  
+
   allErrors.forEach((err, i) => {
-    const id = `DEEP-${String(i+1).padStart(3, '0')}`;
+    const id = `DEEP-${String(i + 1).padStart(3, '0')}`;
     const detail = err.path || `${err.file}:${err.export}` || err.name;
-    section += `- [ ] **${id}** - \`${detail}\` - ${err.description || err.message} (${err.philosophyName})\n`;
+    section += `- [ ] **${id}** - \`${detail}\` - ${err.description || err.message} (${
+      err.philosophyName
+    })\n`;
   });
-  
+
   return section;
 }
 
@@ -1002,9 +1018,9 @@ function generateTodoListUpdate(results) {
 
 function main() {
   console.log('🔬 Running Deep Philosophy Checks...\n');
-  
+
   const results = runDeepChecks();
-  
+
   // Console output
   console.log(`📊 Risultati:`);
   console.log(`   Check totali: ${results.summary.totalChecks}`);
@@ -1012,17 +1028,17 @@ function main() {
   console.log(`   ❌ Falliti: ${results.summary.failed}`);
   console.log(`   📋 TODO dichiarati: ${results.summary.todoItems}`);
   console.log('');
-  
+
   // List errors
   for (const [key, phil] of Object.entries(results.philosophies)) {
     if (phil.errors.length > 0) {
       console.log(`\n🔴 ${phil.name}:`);
-      phil.errors.forEach(e => {
+      phil.errors.forEach((e) => {
         console.log(`   ❌ ${e.message}`);
       });
     }
   }
-  
+
   // Write report
   const report = generateMarkdownReport(results);
   const checksDir = path.dirname(CHECK_OUTPUT_FILE);
@@ -1031,16 +1047,16 @@ function main() {
   }
   fs.writeFileSync(CHECK_OUTPUT_FILE, report);
   console.log(`\n📄 Report salvato: ${CHECK_OUTPUT_FILE}`);
-  
+
   // Update TODO_LIST.md
   const todoUpdate = generateTodoListUpdate(results);
   if (todoUpdate && fs.existsSync(TODO_LIST_FILE)) {
     let todoContent = fs.readFileSync(TODO_LIST_FILE, 'utf-8');
-    
+
     // Remove old section if exists
     const sectionRegex = /\n## 🔬 Problemi Deep Philosophy Check[\s\S]*?(?=\n## |$)/;
     todoContent = todoContent.replace(sectionRegex, '');
-    
+
     // Add new section before first ## if there's content
     const insertPoint = todoContent.indexOf('\n## ');
     if (insertPoint > -1) {
@@ -1048,16 +1064,16 @@ function main() {
     } else {
       todoContent += todoUpdate;
     }
-    
+
     fs.writeFileSync(TODO_LIST_FILE, todoContent);
     console.log(`📝 TODO_LIST.md aggiornato con ${results.summary.failed} errori`);
   }
-  
+
   // Write JSON for programmatic use
   const jsonPath = path.join(checksDir, 'deep_philosophy_check.json');
   fs.writeFileSync(jsonPath, JSON.stringify(results, null, 2));
   console.log(`📦 JSON salvato: ${jsonPath}`);
-  
+
   // Exit code
   if (results.summary.failed > 0) {
     console.log(`\n⚠️ Ci sono ${results.summary.failed} errori da risolvere!`);

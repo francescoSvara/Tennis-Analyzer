@@ -1,9 +1,9 @@
 /**
  * Stats Tab Builder - Build statistics tab for MatchBundle
- * 
+ *
  * Extracted from server.js as part of the refactor.
  * Contains complex statistics normalization and calculation logic.
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_STATS.md
  */
 
@@ -22,13 +22,13 @@ const VERSION = '1.0.0';
  */
 function convertSofaScoreArrayFormat(statsArray) {
   if (!Array.isArray(statsArray)) return null;
-  
+
   const result = {};
-  
+
   for (const periodData of statsArray) {
     const period = periodData.period;
     if (!period || !periodData.groups) continue;
-    
+
     // Convert period names
     let periodKey = period;
     if (period === '1ST') periodKey = 'SET1';
@@ -36,15 +36,15 @@ function convertSofaScoreArrayFormat(statsArray) {
     else if (period === '3RD') periodKey = 'SET3';
     else if (period === '4TH') periodKey = 'SET4';
     else if (period === '5TH') periodKey = 'SET5';
-    
+
     const stats = { home: {}, away: {} };
-    
+
     for (const group of periodData.groups) {
       if (!group.statisticsItems) continue;
-      
+
       for (const item of group.statisticsItems) {
         const key = item.key;
-        
+
         switch (key) {
           case 'aces':
             stats.home.aces = item.homeValue || 0;
@@ -55,8 +55,12 @@ function convertSofaScoreArrayFormat(statsArray) {
             stats.away.doubleFaults = item.awayValue || 0;
             break;
           case 'firstServeAccuracy':
-            stats.home.firstServePct = item.homeTotal ? Math.round((item.homeValue / item.homeTotal) * 100) : 0;
-            stats.away.firstServePct = item.awayTotal ? Math.round((item.awayValue / item.awayTotal) * 100) : 0;
+            stats.home.firstServePct = item.homeTotal
+              ? Math.round((item.homeValue / item.homeTotal) * 100)
+              : 0;
+            stats.away.firstServePct = item.awayTotal
+              ? Math.round((item.awayValue / item.awayTotal) * 100)
+              : 0;
             stats.home.firstServeIn = item.homeValue || 0;
             stats.home.firstServeTotal = item.homeTotal || 0;
             stats.away.firstServeIn = item.awayValue || 0;
@@ -69,16 +73,24 @@ function convertSofaScoreArrayFormat(statsArray) {
             stats.away.secondServeTotal = item.awayTotal || 0;
             break;
           case 'firstServePointsAccuracy':
-            stats.home.firstServePointsWonPct = item.homeTotal ? Math.round((item.homeValue / item.homeTotal) * 100) : 0;
-            stats.away.firstServePointsWonPct = item.awayTotal ? Math.round((item.awayValue / item.awayTotal) * 100) : 0;
+            stats.home.firstServePointsWonPct = item.homeTotal
+              ? Math.round((item.homeValue / item.homeTotal) * 100)
+              : 0;
+            stats.away.firstServePointsWonPct = item.awayTotal
+              ? Math.round((item.awayValue / item.awayTotal) * 100)
+              : 0;
             stats.home.firstServePointsWon = item.homeValue || 0;
             stats.home.firstServePointsIn = item.homeTotal || 0;
             stats.away.firstServePointsWon = item.awayValue || 0;
             stats.away.firstServePointsIn = item.awayTotal || 0;
             break;
           case 'secondServePointsAccuracy':
-            stats.home.secondServePointsWonPct = item.homeTotal ? Math.round((item.homeValue / item.homeTotal) * 100) : 0;
-            stats.away.secondServePointsWonPct = item.awayTotal ? Math.round((item.awayValue / item.awayTotal) * 100) : 0;
+            stats.home.secondServePointsWonPct = item.homeTotal
+              ? Math.round((item.homeValue / item.homeTotal) * 100)
+              : 0;
+            stats.away.secondServePointsWonPct = item.awayTotal
+              ? Math.round((item.awayValue / item.awayTotal) * 100)
+              : 0;
             stats.home.secondServePointsWon = item.homeValue || 0;
             stats.away.secondServePointsWon = item.awayValue || 0;
             break;
@@ -140,15 +152,25 @@ function convertSofaScoreArrayFormat(statsArray) {
         }
       }
     }
-    
+
     // Calculate derived fields
-    if (!stats.home.totalPointsWon && stats.home.servicePointsWon !== undefined && stats.home.receiverPointsWon !== undefined) {
-      stats.home.totalPointsWon = (stats.home.servicePointsWon || 0) + (stats.home.receiverPointsWon || 0);
+    if (
+      !stats.home.totalPointsWon &&
+      stats.home.servicePointsWon !== undefined &&
+      stats.home.receiverPointsWon !== undefined
+    ) {
+      stats.home.totalPointsWon =
+        (stats.home.servicePointsWon || 0) + (stats.home.receiverPointsWon || 0);
     }
-    if (!stats.away.totalPointsWon && stats.away.servicePointsWon !== undefined && stats.away.receiverPointsWon !== undefined) {
-      stats.away.totalPointsWon = (stats.away.servicePointsWon || 0) + (stats.away.receiverPointsWon || 0);
+    if (
+      !stats.away.totalPointsWon &&
+      stats.away.servicePointsWon !== undefined &&
+      stats.away.receiverPointsWon !== undefined
+    ) {
+      stats.away.totalPointsWon =
+        (stats.away.servicePointsWon || 0) + (stats.away.receiverPointsWon || 0);
     }
-    
+
     // breakPointsTotal = breakPointsFaced of opponent
     if (!stats.home.breakPointsTotal && stats.away.breakPointsFaced) {
       stats.home.breakPointsTotal = stats.away.breakPointsFaced;
@@ -156,7 +178,7 @@ function convertSofaScoreArrayFormat(statsArray) {
     if (!stats.away.breakPointsTotal && stats.home.breakPointsFaced) {
       stats.away.breakPointsTotal = stats.home.breakPointsFaced;
     }
-    
+
     // returnGamesPlayed = serviceGamesPlayed of opponent
     if (!stats.home.returnGamesPlayed && stats.away.serviceGamesPlayed) {
       stats.home.returnGamesPlayed = stats.away.serviceGamesPlayed;
@@ -164,10 +186,10 @@ function convertSofaScoreArrayFormat(statsArray) {
     if (!stats.away.returnGamesPlayed && stats.home.serviceGamesPlayed) {
       stats.away.returnGamesPlayed = stats.home.serviceGamesPlayed;
     }
-    
+
     result[periodKey] = stats;
   }
-  
+
   return Object.keys(result).length > 0 ? result : null;
 }
 
@@ -180,49 +202,53 @@ function convertSofaScoreArrayFormat(statsArray) {
  */
 function extractStatsFromRecord(record) {
   if (!record) return { home: {}, away: {} };
-  
+
   // If record already has home/away structure
   if (record.home !== undefined || record.away !== undefined) {
     return {
       home: { ...record.home },
-      away: { ...record.away }
+      away: { ...record.away },
     };
   }
-  
+
   // DB format with p1_, p2_ prefixes
   return {
     home: {
       aces: record.p1_aces || 0,
       doubleFaults: record.p1_double_faults || 0,
       firstServePct: record.p1_first_serve_pct || 0,
-      firstServePointsWonPct: record.p1_first_serve_won && record.p1_first_serve_total 
-        ? Math.round((record.p1_first_serve_won / record.p1_first_serve_total) * 100) 
-        : 0,
-      secondServePointsWonPct: record.p1_second_serve_won && record.p1_second_serve_total
-        ? Math.round((record.p1_second_serve_won / record.p1_second_serve_total) * 100)
-        : 0,
+      firstServePointsWonPct:
+        record.p1_first_serve_won && record.p1_first_serve_total
+          ? Math.round((record.p1_first_serve_won / record.p1_first_serve_total) * 100)
+          : 0,
+      secondServePointsWonPct:
+        record.p1_second_serve_won && record.p1_second_serve_total
+          ? Math.round((record.p1_second_serve_won / record.p1_second_serve_total) * 100)
+          : 0,
       breakPointsWon: record.p1_break_points_won || 0,
       breakPointsTotal: record.p1_break_points_total || 0,
       totalPointsWon: record.p1_total_points_won || 0,
       winners: record.p1_winners || 0,
-      unforcedErrors: record.p1_unforced_errors || 0
+      unforcedErrors: record.p1_unforced_errors || 0,
     },
     away: {
       aces: record.p2_aces || 0,
       doubleFaults: record.p2_double_faults || 0,
       firstServePct: record.p2_first_serve_pct || 0,
-      firstServePointsWonPct: record.p2_first_serve_won && record.p2_first_serve_total
-        ? Math.round((record.p2_first_serve_won / record.p2_first_serve_total) * 100)
-        : 0,
-      secondServePointsWonPct: record.p2_second_serve_won && record.p2_second_serve_total
-        ? Math.round((record.p2_second_serve_won / record.p2_second_serve_total) * 100)
-        : 0,
+      firstServePointsWonPct:
+        record.p2_first_serve_won && record.p2_first_serve_total
+          ? Math.round((record.p2_first_serve_won / record.p2_first_serve_total) * 100)
+          : 0,
+      secondServePointsWonPct:
+        record.p2_second_serve_won && record.p2_second_serve_total
+          ? Math.round((record.p2_second_serve_won / record.p2_second_serve_total) * 100)
+          : 0,
       breakPointsWon: record.p2_break_points_won || 0,
       breakPointsTotal: record.p2_break_points_total || 0,
       totalPointsWon: record.p2_total_points_won || 0,
       winners: record.p2_winners || 0,
-      unforcedErrors: record.p2_unforced_errors || 0
-    }
+      unforcedErrors: record.p2_unforced_errors || 0,
+    },
   };
 }
 
@@ -240,50 +266,54 @@ function buildTabFromStats(stats, pbpStats = null) {
     if (pbpStats && pbpVal !== undefined && pbpVal !== null) return pbpVal;
     return 0;
   };
-  
+
   const homeTotalWon = mergeValue(stats.home.totalPointsWon, pbpStats?.home?.totalPointsWon);
   const awayTotalWon = mergeValue(stats.away.totalPointsWon, pbpStats?.away?.totalPointsWon);
-  
+
   // Calculate winners if missing
   let homeWinners = stats.home.winners;
   let awayWinners = stats.away.winners;
-  
+
   if ((!homeWinners || homeWinners === 0) && homeTotalWon > 0) {
     const homeAces = mergeValue(stats.home.aces, pbpStats?.home?.aces);
     const homeFirstServePct = stats.home.firstServePct || 60;
     const homeFirstServeWonPct = stats.home.firstServePointsWonPct || 70;
-    const homeFirstServePointsWon = Math.round(homeTotalWon * (homeFirstServePct / 100) * (homeFirstServeWonPct / 100));
+    const homeFirstServePointsWon = Math.round(
+      homeTotalWon * (homeFirstServePct / 100) * (homeFirstServeWonPct / 100)
+    );
     homeWinners = homeAces + Math.round(homeFirstServePointsWon * 0.15);
   }
-  
+
   if ((!awayWinners || awayWinners === 0) && awayTotalWon > 0) {
     const awayAces = stats.away.aces || 0;
     const awayFirstServePct = stats.away.firstServePct || 60;
     const awayFirstServeWonPct = stats.away.firstServePointsWonPct || 70;
-    const awayFirstServePointsWon = Math.round(awayTotalWon * (awayFirstServePct / 100) * (awayFirstServeWonPct / 100));
+    const awayFirstServePointsWon = Math.round(
+      awayTotalWon * (awayFirstServePct / 100) * (awayFirstServeWonPct / 100)
+    );
     awayWinners = awayAces + Math.round(awayFirstServePointsWon * 0.15);
   }
-  
+
   // Calculate unforced errors if missing
   let homeUE = stats.home.unforcedErrors;
   let awayUE = stats.away.unforcedErrors;
   const homePointsLost = awayTotalWon;
   const awayPointsLost = homeTotalWon;
-  
+
   if ((!homeUE || homeUE === 0) && homePointsLost > 0) {
     const homeDF = stats.home.doubleFaults || 0;
     homeUE = homeDF + Math.round(homePointsLost * 0.12);
   }
-  
+
   if ((!awayUE || awayUE === 0) && awayPointsLost > 0) {
     const awayDF = stats.away.doubleFaults || 0;
     awayUE = awayDF + Math.round(awayPointsLost * 0.12);
   }
-  
+
   // Calculate return percentages
   let homeReturnPct = stats.home.returnPointsWonPct;
   let awayReturnPct = stats.away.returnPointsWonPct;
-  
+
   if ((!homeReturnPct || homeReturnPct === 0) && awayTotalWon > 0) {
     const away1stPct = stats.away.firstServePct || 60;
     const away1stWonPct = stats.away.firstServePointsWonPct || 70;
@@ -291,7 +321,7 @@ function buildTabFromStats(stats, pbpStats = null) {
     const awayServeWonPct = (away1stPct * away1stWonPct + (100 - away1stPct) * away2ndWonPct) / 100;
     homeReturnPct = Math.round(100 - awayServeWonPct);
   }
-  
+
   if ((!awayReturnPct || awayReturnPct === 0) && homeTotalWon > 0) {
     const home1stPct = stats.home.firstServePct || 60;
     const home1stWonPct = stats.home.firstServePointsWonPct || 70;
@@ -299,13 +329,13 @@ function buildTabFromStats(stats, pbpStats = null) {
     const homeServeWonPct = (home1stPct * home1stWonPct + (100 - home1stPct) * home2ndWonPct) / 100;
     awayReturnPct = Math.round(100 - homeServeWonPct);
   }
-  
+
   // First serve % fallback
   let homeFirstServePct = stats.home.firstServePct;
   let awayFirstServePct = stats.away.firstServePct;
   if (!homeFirstServePct || homeFirstServePct === 0) homeFirstServePct = 60;
   if (!awayFirstServePct || awayFirstServePct === 0) awayFirstServePct = 60;
-  
+
   // First serve won % fallback
   let homeFirstServeWonPct = stats.home.firstServePointsWonPct;
   let awayFirstServeWonPct = stats.away.firstServePointsWonPct;
@@ -317,7 +347,7 @@ function buildTabFromStats(stats, pbpStats = null) {
     const ratio = awayTotalWon / (homeTotalWon + awayTotalWon || 1);
     awayFirstServeWonPct = Math.round(60 + ratio * 25);
   }
-  
+
   // Second serve won % fallback
   let homeSecondServeWonPct = stats.home.secondServePointsWonPct;
   let awaySecondServeWonPct = stats.away.secondServePointsWonPct;
@@ -329,43 +359,61 @@ function buildTabFromStats(stats, pbpStats = null) {
     const ratio = awayTotalWon / (homeTotalWon + awayTotalWon || 1);
     awaySecondServeWonPct = Math.round(40 + ratio * 20);
   }
-  
+
   // Break points
   let homeBreakPointsWon = mergeValue(stats.home.breakPointsWon, pbpStats?.home?.breakPointsWon);
   let awayBreakPointsWon = mergeValue(stats.away.breakPointsWon, pbpStats?.away?.breakPointsWon);
-  let homeBreakPointsTotal = mergeValue(stats.home.breakPointsTotal, pbpStats?.home?.breakPointsTotal);
-  let awayBreakPointsTotal = mergeValue(stats.away.breakPointsTotal, pbpStats?.away?.breakPointsTotal);
-  let homeBreakPointsFaced = mergeValue(stats.home.breakPointsFaced, pbpStats?.home?.breakPointsFaced);
-  let awayBreakPointsFaced = mergeValue(stats.away.breakPointsFaced, pbpStats?.away?.breakPointsFaced);
-  let homeBreakPointsSaved = mergeValue(stats.home.breakPointsSaved, pbpStats?.home?.breakPointsSaved);
-  let awayBreakPointsSaved = mergeValue(stats.away.breakPointsSaved, pbpStats?.away?.breakPointsSaved);
-  
+  let homeBreakPointsTotal = mergeValue(
+    stats.home.breakPointsTotal,
+    pbpStats?.home?.breakPointsTotal
+  );
+  let awayBreakPointsTotal = mergeValue(
+    stats.away.breakPointsTotal,
+    pbpStats?.away?.breakPointsTotal
+  );
+  let homeBreakPointsFaced = mergeValue(
+    stats.home.breakPointsFaced,
+    pbpStats?.home?.breakPointsFaced
+  );
+  let awayBreakPointsFaced = mergeValue(
+    stats.away.breakPointsFaced,
+    pbpStats?.away?.breakPointsFaced
+  );
+  let homeBreakPointsSaved = mergeValue(
+    stats.home.breakPointsSaved,
+    pbpStats?.home?.breakPointsSaved
+  );
+  let awayBreakPointsSaved = mergeValue(
+    stats.away.breakPointsSaved,
+    pbpStats?.away?.breakPointsSaved
+  );
+
   if (homeBreakPointsTotal === 0 && homeBreakPointsWon > 0) {
     homeBreakPointsTotal = homeBreakPointsWon;
   }
   if (awayBreakPointsTotal === 0 && awayBreakPointsWon > 0) {
     awayBreakPointsTotal = awayBreakPointsWon;
   }
-  
+
   // Service games
   let homeServiceGames = stats.home.serviceGamesPlayed || 0;
   let awayServiceGames = stats.away.serviceGamesPlayed || 0;
-  
+
   // Raw values calculation
   let homeFirstServeIn = stats.home.firstServeIn || 0;
   let homeFirstServeTotal = stats.home.firstServeTotal || 0;
   let awayFirstServeIn = stats.away.firstServeIn || 0;
   let awayFirstServeTotal = stats.away.firstServeTotal || 0;
-  
+
   if (homeFirstServeTotal === 0 && homeFirstServePct > 0 && homeTotalWon > 0) {
     homeFirstServeTotal = Math.round(homeTotalWon * 1.2);
-    homeFirstServeIn = Math.round(homeFirstServeTotal * homeFirstServePct / 100);
+    homeFirstServeIn = Math.round((homeFirstServeTotal * homeFirstServePct) / 100);
   }
   if (awayFirstServeTotal === 0 && awayFirstServePct > 0 && awayTotalWon > 0) {
     awayFirstServeTotal = Math.round(awayTotalWon * 1.2);
-    awayFirstServeIn = Math.round(awayFirstServeTotal * awayFirstServePct / 100);
+    awayFirstServeIn = Math.round((awayFirstServeTotal * awayFirstServePct) / 100);
   }
-  
+
   let homeSecondServeTotal = stats.home.secondServeTotal || 0;
   let awaySecondServeTotal = stats.away.secondServeTotal || 0;
   if (homeSecondServeTotal === 0 && homeFirstServeTotal > 0) {
@@ -374,22 +422,102 @@ function buildTabFromStats(stats, pbpStats = null) {
   if (awaySecondServeTotal === 0 && awayFirstServeTotal > 0) {
     awaySecondServeTotal = awayFirstServeTotal - awayFirstServeIn;
   }
-  
+
   // Service points won
-  let homeServicePointsWon = mergeValue(stats.home.servicePointsWon, pbpStats?.home?.servicePointsWon);
-  let awayServicePointsWon = mergeValue(stats.away.servicePointsWon, pbpStats?.away?.servicePointsWon);
-  
+  let homeServicePointsWon = mergeValue(
+    stats.home.servicePointsWon,
+    pbpStats?.home?.servicePointsWon
+  );
+  let awayServicePointsWon = mergeValue(
+    stats.away.servicePointsWon,
+    pbpStats?.away?.servicePointsWon
+  );
+
   // Return points won
-  let homeReturnPointsWon = stats.home.receiverPointsWon || 0;
-  let awayReturnPointsWon = stats.away.receiverPointsWon || 0;
-  
+  let homeReturnPointsWon = stats.home.receiverPointsWon || stats.home.returnPointsWon || 0;
+  let awayReturnPointsWon = stats.away.receiverPointsWon || stats.away.returnPointsWon || 0;
+
   if (homeReturnPointsWon === 0 && homeTotalWon > 0 && homeServicePointsWon > 0) {
     homeReturnPointsWon = Math.max(0, homeTotalWon - homeServicePointsWon);
   }
   if (awayReturnPointsWon === 0 && awayTotalWon > 0 && awayServicePointsWon > 0) {
     awayReturnPointsWon = Math.max(0, awayTotalWon - awayServicePointsWon);
   }
-  
+
+  // ===== FIRST/SECOND RETURN POINTS (calcolati dai dati serve avversario) =====
+  // homeFirstReturnPointsWon = punti vinti quando AWAY serve prima
+  // = awayFirstServeIn - awayFirstServePointsWon (punti persi da away al primo servizio)
+  let homeFirstServePointsWon = stats.home.firstServePointsWon || 0;
+  let awayFirstServePointsWon = stats.away.firstServePointsWon || 0;
+
+  // Calcola se non disponibili
+  if (homeFirstServePointsWon === 0 && homeFirstServeIn > 0 && homeFirstServeWonPct > 0) {
+    homeFirstServePointsWon = Math.round((homeFirstServeIn * homeFirstServeWonPct) / 100);
+  }
+  if (awayFirstServePointsWon === 0 && awayFirstServeIn > 0 && awayFirstServeWonPct > 0) {
+    awayFirstServePointsWon = Math.round((awayFirstServeIn * awayFirstServeWonPct) / 100);
+  }
+
+  let homeSecondServePointsWon = stats.home.secondServePointsWon || 0;
+  let awaySecondServePointsWon = stats.away.secondServePointsWon || 0;
+
+  if (homeSecondServePointsWon === 0 && homeSecondServeTotal > 0 && homeSecondServeWonPct > 0) {
+    homeSecondServePointsWon = Math.round((homeSecondServeTotal * homeSecondServeWonPct) / 100);
+  }
+  if (awaySecondServePointsWon === 0 && awaySecondServeTotal > 0 && awaySecondServeWonPct > 0) {
+    awaySecondServePointsWon = Math.round((awaySecondServeTotal * awaySecondServeWonPct) / 100);
+  }
+
+  // Calculate servicePointsWon from first + second if not available
+  if (homeServicePointsWon === 0 && (homeFirstServePointsWon > 0 || homeSecondServePointsWon > 0)) {
+    homeServicePointsWon = homeFirstServePointsWon + homeSecondServePointsWon;
+  }
+  if (awayServicePointsWon === 0 && (awayFirstServePointsWon > 0 || awaySecondServePointsWon > 0)) {
+    awayServicePointsWon = awayFirstServePointsWon + awaySecondServePointsWon;
+  }
+
+  // Calculate returnPointsWon if still 0: totalWon - servicePointsWon
+  if (homeReturnPointsWon === 0 && homeTotalWon > 0 && homeServicePointsWon > 0) {
+    homeReturnPointsWon = Math.max(0, homeTotalWon - homeServicePointsWon);
+  }
+  if (awayReturnPointsWon === 0 && awayTotalWon > 0 && awayServicePointsWon > 0) {
+    awayReturnPointsWon = Math.max(0, awayTotalWon - awayServicePointsWon);
+  }
+
+  // FIRST RETURN: HOME vince quando AWAY serve prima
+  let homeFirstReturnPointsWon = stats.home.firstReturnPointsWon || 0;
+  let homeFirstReturnPointsTotal = stats.home.firstReturnPointsTotal || awayFirstServeIn;
+  let awayFirstReturnPointsWon = stats.away.firstReturnPointsWon || 0;
+  let awayFirstReturnPointsTotal = stats.away.firstReturnPointsTotal || homeFirstServeIn;
+
+  if (homeFirstReturnPointsWon === 0 && awayFirstServeIn > 0 && awayFirstServePointsWon > 0) {
+    homeFirstReturnPointsWon = Math.max(0, awayFirstServeIn - awayFirstServePointsWon);
+    homeFirstReturnPointsTotal = awayFirstServeIn;
+  }
+  if (awayFirstReturnPointsWon === 0 && homeFirstServeIn > 0 && homeFirstServePointsWon > 0) {
+    awayFirstReturnPointsWon = Math.max(0, homeFirstServeIn - homeFirstServePointsWon);
+    awayFirstReturnPointsTotal = homeFirstServeIn;
+  }
+
+  // SECOND RETURN: HOME vince quando AWAY serve seconda
+  let homeSecondReturnPointsWon = stats.home.secondReturnPointsWon || 0;
+  let homeSecondReturnPointsTotal = stats.home.secondReturnPointsTotal || awaySecondServeTotal;
+  let awaySecondReturnPointsWon = stats.away.secondReturnPointsWon || 0;
+  let awaySecondReturnPointsTotal = stats.away.secondReturnPointsTotal || homeSecondServeTotal;
+
+  if (homeSecondReturnPointsWon === 0 && awaySecondServeTotal > 0 && awaySecondServePointsWon > 0) {
+    homeSecondReturnPointsWon = Math.max(0, awaySecondServeTotal - awaySecondServePointsWon);
+    homeSecondReturnPointsTotal = awaySecondServeTotal;
+  }
+  if (awaySecondReturnPointsWon === 0 && homeSecondServeTotal > 0 && homeSecondServePointsWon > 0) {
+    awaySecondReturnPointsWon = Math.max(0, homeSecondServeTotal - homeSecondServePointsWon);
+    awaySecondReturnPointsTotal = homeSecondServeTotal;
+  }
+
+  // RETURN GAMES PLAYED = service games dell'avversario
+  let homeReturnGamesPlayed = stats.home.returnGamesPlayed || awayServiceGames || 0;
+  let awayReturnGamesPlayed = stats.away.returnGamesPlayed || homeServiceGames || 0;
+
   // Max consecutive points
   let homeMaxConsecutivePoints = stats.home.maxConsecutivePointsWon || 0;
   let awayMaxConsecutivePoints = stats.away.maxConsecutivePointsWon || 0;
@@ -399,7 +527,7 @@ function buildTabFromStats(stats, pbpStats = null) {
   if (awayMaxConsecutivePoints === 0 && awayTotalWon > 0) {
     awayMaxConsecutivePoints = Math.max(3, Math.round(awayTotalWon * 0.09));
   }
-  
+
   return {
     serve: {
       home: {
@@ -414,7 +542,7 @@ function buildTabFromStats(stats, pbpStats = null) {
         serviceGamesPlayed: homeServiceGames,
         servicePointsWon: homeServicePointsWon,
         breakPointsSaved: homeBreakPointsSaved,
-        breakPointsFaced: homeBreakPointsFaced
+        breakPointsFaced: homeBreakPointsFaced,
       },
       away: {
         aces: stats.away.aces || 0,
@@ -428,22 +556,32 @@ function buildTabFromStats(stats, pbpStats = null) {
         serviceGamesPlayed: awayServiceGames,
         servicePointsWon: awayServicePointsWon,
         breakPointsSaved: awayBreakPointsSaved,
-        breakPointsFaced: awayBreakPointsFaced
-      }
+        breakPointsFaced: awayBreakPointsFaced,
+      },
     },
     return: {
       home: {
         returnPointsWonPct: homeReturnPct,
         returnPointsWon: homeReturnPointsWon,
+        firstReturnPointsWon: homeFirstReturnPointsWon,
+        firstReturnPointsTotal: homeFirstReturnPointsTotal,
+        secondReturnPointsWon: homeSecondReturnPointsWon,
+        secondReturnPointsTotal: homeSecondReturnPointsTotal,
+        returnGamesPlayed: homeReturnGamesPlayed,
         breakPointsWon: homeBreakPointsWon,
-        breakPointsTotal: homeBreakPointsTotal
+        breakPointsTotal: homeBreakPointsTotal,
       },
       away: {
         returnPointsWonPct: awayReturnPct,
         returnPointsWon: awayReturnPointsWon,
+        firstReturnPointsWon: awayFirstReturnPointsWon,
+        firstReturnPointsTotal: awayFirstReturnPointsTotal,
+        secondReturnPointsWon: awaySecondReturnPointsWon,
+        secondReturnPointsTotal: awaySecondReturnPointsTotal,
+        returnGamesPlayed: awayReturnGamesPlayed,
         breakPointsWon: awayBreakPointsWon,
-        breakPointsTotal: awayBreakPointsTotal
-      }
+        breakPointsTotal: awayBreakPointsTotal,
+      },
     },
     points: {
       home: {
@@ -452,7 +590,7 @@ function buildTabFromStats(stats, pbpStats = null) {
         returnPointsWon: homeReturnPointsWon,
         maxConsecutivePointsWon: homeMaxConsecutivePoints,
         winners: homeWinners,
-        unforcedErrors: homeUE
+        unforcedErrors: homeUE,
       },
       away: {
         totalWon: awayTotalWon,
@@ -460,10 +598,126 @@ function buildTabFromStats(stats, pbpStats = null) {
         returnPointsWon: awayReturnPointsWon,
         maxConsecutivePointsWon: awayMaxConsecutivePoints,
         winners: awayWinners,
-        unforcedErrors: awayUE
+        unforcedErrors: awayUE,
+      },
+    },
+  };
+}
+
+// ============================================================================
+// CALCULATE STATS FROM POINT-BY-POINT (PER SET)
+// ============================================================================
+
+/**
+ * Calculate statistics per set from point-by-point data
+ * @param {Array} points - Array of point objects with set, pointWinner, isAce, etc.
+ * @param {Array} games - Array of game objects with set, gameServer, gameWinner, gameIsBreak
+ * @returns {Object} { SET1: {serve, return, points, games}, SET2: {...}, ... }
+ */
+function calculateStatsFromPointByPoint(points, games) {
+  if (!Array.isArray(points) || points.length === 0) return null;
+  
+  // Group points and games by set
+  const setNumbers = [...new Set(points.map(p => p.set))].sort((a, b) => a - b);
+  const result = {};
+  
+  for (const setNum of setNumbers) {
+    const setKey = `SET${setNum}`;
+    const setPoints = points.filter(p => p.set === setNum);
+    const setGames = games?.filter(g => g.set === setNum) || [];
+    
+    // Initialize counters
+    const stats = {
+      home: { aces: 0, doubleFaults: 0, pointsWon: 0, gamesWon: 0, breakPointsWon: 0, serviceGames: 0, returnGames: 0 },
+      away: { aces: 0, doubleFaults: 0, pointsWon: 0, gamesWon: 0, breakPointsWon: 0, serviceGames: 0, returnGames: 0 }
+    };
+    
+    // Count from points
+    for (const point of setPoints) {
+      const winner = point.pointWinner;
+      if (winner === 'home') stats.home.pointsWon++;
+      if (winner === 'away') stats.away.pointsWon++;
+      
+      // Aces and double faults depend on server
+      const server = point.server || point.gameServer;
+      if (point.isAce) {
+        if (server === 'home') stats.home.aces++;
+        if (server === 'away') stats.away.aces++;
+      }
+      if (point.isDoubleFault) {
+        if (server === 'home') stats.home.doubleFaults++;
+        if (server === 'away') stats.away.doubleFaults++;
       }
     }
-  };
+    
+    // Count from games
+    for (const game of setGames) {
+      const winner = game.gameWinner;
+      const server = game.gameServer;
+      
+      if (winner === 'home') stats.home.gamesWon++;
+      if (winner === 'away') stats.away.gamesWon++;
+      
+      if (server === 'home') stats.home.serviceGames++;
+      if (server === 'away') stats.away.serviceGames++;
+      
+      // Break points won (when returner wins against server)
+      if (game.gameIsBreak) {
+        if (server === 'home' && winner === 'away') stats.away.breakPointsWon++;
+        if (server === 'away' && winner === 'home') stats.home.breakPointsWon++;
+      }
+    }
+    
+    // Calculate return games (opponent's service games)
+    stats.home.returnGames = stats.away.serviceGames;
+    stats.away.returnGames = stats.home.serviceGames;
+    
+    // Build standard structure
+    result[setKey] = {
+      serve: {
+        home: {
+          aces: stats.home.aces,
+          doubleFaults: stats.home.doubleFaults,
+          serviceGamesPlayed: stats.home.serviceGames,
+          servicePointsWon: 0, // Would need more detailed tracking
+          firstServePct: 0,
+          firstServeWonPct: 0,
+          secondServeWonPct: 0,
+        },
+        away: {
+          aces: stats.away.aces,
+          doubleFaults: stats.away.doubleFaults,
+          serviceGamesPlayed: stats.away.serviceGames,
+          servicePointsWon: 0,
+          firstServePct: 0,
+          firstServeWonPct: 0,
+          secondServeWonPct: 0,
+        }
+      },
+      return: {
+        home: {
+          returnGamesPlayed: stats.home.returnGames,
+          breakPointsWon: stats.home.breakPointsWon,
+          returnPointsWonPct: 0,
+        },
+        away: {
+          returnGamesPlayed: stats.away.returnGames,
+          breakPointsWon: stats.away.breakPointsWon,
+          returnPointsWonPct: 0,
+        }
+      },
+      points: {
+        home: { totalWon: stats.home.pointsWon, winners: 0, unforcedErrors: 0 },
+        away: { totalWon: stats.away.pointsWon, winners: 0, unforcedErrors: 0 }
+      },
+      games: {
+        home: { gamesWon: stats.home.gamesWon, tiebreaksWon: 0, serviceGamesWon: stats.home.gamesWon - stats.away.breakPointsWon },
+        away: { gamesWon: stats.away.gamesWon, tiebreaksWon: 0, serviceGamesWon: stats.away.gamesWon - stats.home.breakPointsWon }
+      }
+    };
+  }
+  
+  return result;
 }
 
 // ============================================================================
@@ -483,48 +737,145 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
   if (Array.isArray(statisticsData)) {
     statisticsData = convertSofaScoreArrayFormat(statisticsData);
   }
+
+  // Check for snapshot format: {serve: {home, away}, return: {home, away}, points: {home, away}}
+  const isSnapshotFormat = statisticsData && statisticsData.serve && statisticsData.return && statisticsData.points;
   
+  if (isSnapshotFormat) {
+    // Calculate game stats from score first
+    const gameStatsFromScore = calculateGameStatsFromScore(score);
+    const totalGames = gameStatsFromScore.home.gamesWon + gameStatsFromScore.away.gamesWon;
+    
+    // Estimate service games: roughly half of games played each (alternating serve)
+    const homeServiceGames = Math.ceil(totalGames / 2);
+    const awayServiceGames = Math.floor(totalGames / 2);
+    
+    // Convert snapshot format to standard home/away format with enriched data
+    const homeStats = {
+      aces: statisticsData.serve?.home?.aces || 0,
+      doubleFaults: statisticsData.serve?.home?.doubleFaults || 0,
+      firstServePct: statisticsData.serve?.home?.firstServePct || 0,
+      firstServePointsWonPct: statisticsData.serve?.home?.firstServeWonPct || 0,
+      secondServePointsWonPct: statisticsData.serve?.home?.secondServeWonPct || 0,
+      totalPointsWon: statisticsData.points?.home?.totalWon || 0,
+      winners: statisticsData.points?.home?.winners || 0,
+      unforcedErrors: statisticsData.points?.home?.unforcedErrors || 0,
+      returnPointsWonPct: statisticsData.return?.home?.returnPointsWonPct || 0,
+      breakPointsWon: statisticsData.return?.home?.breakPointsWon || 0,
+      breakPointsTotal: statisticsData.return?.home?.breakPointsTotal || 0,
+      // Add calculated service/return games
+      serviceGamesPlayed: homeServiceGames,
+      returnGamesPlayed: awayServiceGames,
+    };
+    const awayStats = {
+      aces: statisticsData.serve?.away?.aces || 0,
+      doubleFaults: statisticsData.serve?.away?.doubleFaults || 0,
+      firstServePct: statisticsData.serve?.away?.firstServePct || 0,
+      firstServePointsWonPct: statisticsData.serve?.away?.firstServeWonPct || 0,
+      secondServePointsWonPct: statisticsData.serve?.away?.secondServeWonPct || 0,
+      totalPointsWon: statisticsData.points?.away?.totalWon || 0,
+      winners: statisticsData.points?.away?.winners || 0,
+      unforcedErrors: statisticsData.points?.away?.unforcedErrors || 0,
+      returnPointsWonPct: statisticsData.return?.away?.returnPointsWonPct || 0,
+      breakPointsWon: statisticsData.return?.away?.breakPointsWon || 0,
+      breakPointsTotal: statisticsData.return?.away?.breakPointsTotal || 0,
+      // Add calculated service/return games
+      serviceGamesPlayed: awayServiceGames,
+      returnGamesPlayed: homeServiceGames,
+    };
+    
+    const result = buildTabFromStats({ home: homeStats, away: awayStats }, null);
+    const gameStats = {
+      home: {
+        gamesWon: gameStatsFromScore.home.gamesWon,
+        tiebreaksWon: gameStatsFromScore.home.tiebreaksWon,
+        consecutiveGamesWon: gameStatsFromScore.home.consecutiveGamesWon,
+        serviceGamesWon: gameStatsFromScore.home.gamesWon - (statisticsData.return?.away?.breakPointsWon || 0),
+      },
+      away: {
+        gamesWon: gameStatsFromScore.away.gamesWon,
+        tiebreaksWon: gameStatsFromScore.away.tiebreaksWon,
+        consecutiveGamesWon: gameStatsFromScore.away.consecutiveGamesWon,
+        serviceGamesWon: gameStatsFromScore.away.gamesWon - (statisticsData.return?.home?.breakPointsWon || 0),
+      },
+    };
+    
+    // For snapshot format, calculate per-set stats from point-by-point data
+    const snapshotResult = { ...result, games: gameStats };
+    
+    // Try to get per-set stats from point-by-point
+    const pbpPoints = Array.isArray(pointByPoint) ? pointByPoint : pointByPoint?.points || [];
+    const pbpGames = pointByPoint?.games || [];
+    const perSetStats = calculateStatsFromPointByPoint(pbpPoints, pbpGames);
+    
+    // Build periods array and byPeriod object
+    const periods = ['ALL'];
+    const byPeriod = { ALL: snapshotResult };
+    
+    if (perSetStats && Object.keys(perSetStats).length > 0) {
+      // Add SET1, SET2, etc. from point-by-point calculation
+      const setKeys = Object.keys(perSetStats).sort();
+      for (const setKey of setKeys) {
+        periods.push(setKey);
+        byPeriod[setKey] = perSetStats[setKey];
+      }
+    }
+    
+    return {
+      periods,
+      byPeriod,
+      ...snapshotResult,
+      dataSource: 'snapshot',
+    };
+  }
+
   const isNewFormat = statisticsData && (statisticsData.ALL || statisticsData.SET1);
-  
+
   // Extract PBP stats if available
-  const pbpPoints = Array.isArray(pointByPoint) 
-    ? pointByPoint 
-    : (pointByPoint?.points || []);
+  const pbpPoints = Array.isArray(pointByPoint) ? pointByPoint : pointByPoint?.points || [];
   const pbpStats = null; // TODO: extractAllStatsFromPBP if needed
-  
+
   if (isNewFormat) {
-    const periods = Object.keys(statisticsData).filter(k => statisticsData[k]);
+    const periods = Object.keys(statisticsData).filter((k) => statisticsData[k]);
     const byPeriod = {};
     const gameStatsFromScore = calculateGameStatsFromScore(score);
     const allStats = statisticsData.ALL ? extractStatsFromRecord(statisticsData.ALL) : {};
-    
+
     const gameStats = {
       home: {
         gamesWon: allStats.home?.gamesWon || gameStatsFromScore.home.gamesWon,
-        tiebreaksWon: allStats.home?.tiebreaksWon !== undefined ? allStats.home.tiebreaksWon : gameStatsFromScore.home.tiebreaksWon,
-        consecutiveGamesWon: allStats.home?.maxConsecutiveGamesWon || gameStatsFromScore.home.consecutiveGamesWon,
-        serviceGamesWon: allStats.home?.serviceGamesWon || 0
+        tiebreaksWon:
+          allStats.home?.tiebreaksWon !== undefined
+            ? allStats.home.tiebreaksWon
+            : gameStatsFromScore.home.tiebreaksWon,
+        consecutiveGamesWon:
+          allStats.home?.maxConsecutiveGamesWon || gameStatsFromScore.home.consecutiveGamesWon,
+        serviceGamesWon: allStats.home?.serviceGamesWon || 0,
       },
       away: {
         gamesWon: allStats.away?.gamesWon || gameStatsFromScore.away.gamesWon,
-        tiebreaksWon: allStats.away?.tiebreaksWon !== undefined ? allStats.away.tiebreaksWon : gameStatsFromScore.away.tiebreaksWon,
-        consecutiveGamesWon: allStats.away?.maxConsecutiveGamesWon || gameStatsFromScore.away.consecutiveGamesWon,
-        serviceGamesWon: allStats.away?.serviceGamesWon || 0
-      }
+        tiebreaksWon:
+          allStats.away?.tiebreaksWon !== undefined
+            ? allStats.away.tiebreaksWon
+            : gameStatsFromScore.away.tiebreaksWon,
+        consecutiveGamesWon:
+          allStats.away?.maxConsecutiveGamesWon || gameStatsFromScore.away.consecutiveGamesWon,
+        serviceGamesWon: allStats.away?.serviceGamesWon || 0,
+      },
     };
-    
+
     for (const period of periods) {
       const stats = extractStatsFromRecord(statisticsData[period]);
       const periodTab = buildTabFromStats(stats, pbpStats);
       byPeriod[period] = { ...periodTab, games: gameStats };
     }
-    
-    const defaultStats = statisticsData.ALL 
+
+    const defaultStats = statisticsData.ALL
       ? extractStatsFromRecord(statisticsData.ALL)
       : extractStatsFromRecord(statisticsData[periods[0]]);
-    
+
     const defaultTab = buildTabFromStats(defaultStats, pbpStats);
-    
+
     return {
       ...defaultTab,
       games: gameStats,
@@ -534,75 +885,82 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
         return a.localeCompare(b);
       }),
       byPeriod,
-      dataSource: 'statistics'
+      dataSource: 'statistics',
     };
   }
-  
+
   // Old format or missing data - estimate from score
   const statistics = statisticsData || {};
-  const hasRealStats = statistics.home && (
-    statistics.home.aces !== undefined ||
-    statistics.home.firstServePct !== undefined ||
-    statistics.home.firstServePointsWonPct !== undefined
-  );
-  
+  const hasRealStats =
+    statistics.home &&
+    (statistics.home.aces !== undefined ||
+      statistics.home.firstServePct !== undefined ||
+      statistics.home.firstServePointsWonPct !== undefined);
+
   if (hasRealStats) {
-    const result = buildTabFromStats({
-      home: statistics.home || {},
-      away: statistics.away || {}
-    }, pbpStats);
+    const result = buildTabFromStats(
+      {
+        home: statistics.home || {},
+        away: statistics.away || {},
+      },
+      pbpStats
+    );
     const gameStatsFromScore = calculateGameStatsFromScore(score);
     const gameStats = {
       home: {
         gamesWon: gameStatsFromScore.home.gamesWon,
         tiebreaksWon: gameStatsFromScore.home.tiebreaksWon,
-        consecutiveGamesWon: statistics.home?.maxConsecutiveGamesWon || gameStatsFromScore.home.consecutiveGamesWon
+        consecutiveGamesWon:
+          statistics.home?.maxConsecutiveGamesWon || gameStatsFromScore.home.consecutiveGamesWon,
       },
       away: {
         gamesWon: gameStatsFromScore.away.gamesWon,
         tiebreaksWon: gameStatsFromScore.away.tiebreaksWon,
-        consecutiveGamesWon: statistics.away?.maxConsecutiveGamesWon || gameStatsFromScore.away.consecutiveGamesWon
-      }
+        consecutiveGamesWon:
+          statistics.away?.maxConsecutiveGamesWon || gameStatsFromScore.away.consecutiveGamesWon,
+      },
     };
     return { ...result, games: gameStats, dataSource: 'statistics' };
   }
-  
+
   // Estimate stats from score
   const sets = score?.sets || [];
-  let homeGames = 0, awayGames = 0;
-  let homeSetsWon = 0, awaySetsWon = 0;
-  
-  sets.forEach(set => {
+  let homeGames = 0,
+    awayGames = 0;
+  let homeSetsWon = 0,
+    awaySetsWon = 0;
+
+  sets.forEach((set) => {
     homeGames += set.home || 0;
     awayGames += set.away || 0;
     if ((set.home || 0) > (set.away || 0)) homeSetsWon++;
     else if ((set.away || 0) > (set.home || 0)) awaySetsWon++;
   });
-  
+
   const totalGames = homeGames + awayGames || 1;
   const avgPointsPerGame = 6.5;
   const homePoints = Math.round(homeGames * avgPointsPerGame);
   const awayPoints = Math.round(awayGames * avgPointsPerGame);
   const gameRatio = homeGames / totalGames;
   const isHomeWinner = homeSetsWon > awaySetsWon;
-  
-  const homeFirstServe = Math.round(55 + (gameRatio * 20));
-  const awayFirstServe = Math.round(55 + ((1 - gameRatio) * 20));
-  const homeFirstServeWon = Math.round(60 + (gameRatio * 25));
-  const awayFirstServeWon = Math.round(60 + ((1 - gameRatio) * 25));
-  const homeSecondServeWon = Math.round(45 + (gameRatio * 15));
-  const awaySecondServeWon = Math.round(45 + ((1 - gameRatio) * 15));
-  
+
+  const homeFirstServe = Math.round(55 + gameRatio * 20);
+  const awayFirstServe = Math.round(55 + (1 - gameRatio) * 20);
+  const homeFirstServeWon = Math.round(60 + gameRatio * 25);
+  const awayFirstServeWon = Math.round(60 + (1 - gameRatio) * 25);
+  const homeSecondServeWon = Math.round(45 + gameRatio * 15);
+  const awaySecondServeWon = Math.round(45 + (1 - gameRatio) * 15);
+
   const homeServiceGames = Math.ceil(homeGames / 2);
   const awayServiceGames = Math.ceil(awayGames / 2);
   const homeAces = Math.round(homeServiceGames * (isHomeWinner ? 0.6 : 0.4));
   const awayAces = Math.round(awayServiceGames * (!isHomeWinner ? 0.6 : 0.4));
   const homeDF = Math.round(homeServiceGames * (isHomeWinner ? 0.25 : 0.35));
   const awayDF = Math.round(awayServiceGames * (!isHomeWinner ? 0.25 : 0.35));
-  
+
   const homeBreaksConverted = Math.max(0, awayGames - awaySetsWon * 3);
   const awayBreaksConverted = Math.max(0, homeGames - homeSetsWon * 3);
-  
+
   return {
     serve: {
       home: {
@@ -610,44 +968,44 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
         doubleFaults: homeDF,
         firstServePct: homeFirstServe,
         firstServeWonPct: homeFirstServeWon,
-        secondServeWonPct: homeSecondServeWon
+        secondServeWonPct: homeSecondServeWon,
       },
       away: {
         aces: awayAces,
         doubleFaults: awayDF,
         firstServePct: awayFirstServe,
         firstServeWonPct: awayFirstServeWon,
-        secondServeWonPct: awaySecondServeWon
-      }
+        secondServeWonPct: awaySecondServeWon,
+      },
     },
     return: {
       home: {
-        returnPointsWonPct: Math.round(35 + (gameRatio * 20)),
+        returnPointsWonPct: Math.round(35 + gameRatio * 20),
         breakPointsWon: homeBreaksConverted,
         // FILOSOFIA_CALCOLI: deterministic calculation, estimate attempts as won + 1
-        breakPointsTotal: homeBreaksConverted + 1
+        breakPointsTotal: homeBreaksConverted + 1,
       },
       away: {
-        returnPointsWonPct: Math.round(35 + ((1 - gameRatio) * 20)),
+        returnPointsWonPct: Math.round(35 + (1 - gameRatio) * 20),
         breakPointsWon: awayBreaksConverted,
         // FILOSOFIA_CALCOLI: deterministic calculation, estimate attempts as won + 1
-        breakPointsTotal: awayBreaksConverted + 1
-      }
+        breakPointsTotal: awayBreaksConverted + 1,
+      },
     },
     points: {
       home: {
         totalWon: homePoints,
         winners: Math.round(homePoints * 0.25),
-        unforcedErrors: Math.round(homePoints * (isHomeWinner ? 0.15 : 0.2))
+        unforcedErrors: Math.round(homePoints * (isHomeWinner ? 0.15 : 0.2)),
       },
       away: {
         totalWon: awayPoints,
         winners: Math.round(awayPoints * 0.25),
-        unforcedErrors: Math.round(awayPoints * (!isHomeWinner ? 0.15 : 0.2))
-      }
+        unforcedErrors: Math.round(awayPoints * (!isHomeWinner ? 0.15 : 0.2)),
+      },
     },
     games: calculateGameStatsFromScore(score),
-    dataSource: 'estimated'
+    dataSource: 'estimated',
   };
 }
 
@@ -656,5 +1014,5 @@ module.exports = {
   convertSofaScoreArrayFormat,
   extractStatsFromRecord,
   buildTabFromStats,
-  buildStatsTab
+  buildStatsTab,
 };

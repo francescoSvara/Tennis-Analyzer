@@ -32,21 +32,25 @@ Se il livello 1 non è disponibile, si usa il 2, poi il 3, ecc.
 ## 3️⃣ Domini dei Calcoli
 
 ### Match State / Context
+
 - `currentSet`, `currentGame`, `currentPoint`
 - `serverState`, `matchPhase`
 - `isClutchPoint`, `isTiebreak`
 
 ### Pressure & Clutch
+
 - `pressure` (0-100): indice pressione globale
 - `hpi` (0-100): Hold Pressure Index
 - `clutchPressure`: pressione nei punti chiave
 
 ### Break & Serve Dynamics
+
 - `breakProbability`: probabilità break game corrente
 - `breakPointConversion`: % conversione storica
 - `serveDominance`, `returnDominance`
 
 ### Volatility & Momentum
+
 - `volatility`: oscillazione match
 - `momentum`: chi ha inerzia positiva
 - `elasticity`: capacità di rimonta
@@ -74,13 +78,13 @@ dataSource: live | statistics | estimated
 
 ## 5️⃣ Convenzione Naming "Break"
 
-| Nome | Significato |
-|------|-------------|
-| `breakProbability` | Probabilità break nel game CORRENTE (0-100) |
-| `breakPoints` | Conteggio raw break point (int) |
-| `breakPointConversion` | % conversione storica (0-100) |
-| `breakPointsSaved` | Conteggio BP salvati (int) |
-| `breakPointsSavedPct` | % BP salvati (0-100) |
+| Nome                   | Significato                                 |
+| ---------------------- | ------------------------------------------- |
+| `breakProbability`     | Probabilità break nel game CORRENTE (0-100) |
+| `breakPoints`          | Conteggio raw break point (int)             |
+| `breakPointConversion` | % conversione storica (0-100)               |
+| `breakPointsSaved`     | Conteggio BP salvati (int)                  |
+| `breakPointsSavedPct`  | % BP salvati (0-100)                        |
 
 ---
 
@@ -101,14 +105,21 @@ Nessun random, nessun side effect.
 ---
 
 **Documenti Correlati**:
+
 - [FILOSOFIA_STATS](../stats/FILOSOFIA_STATS.md) – consuma features per segnali
 - [FILOSOFIA_TEMPORAL](../../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) – `as_of_time` per calcoli
 - [HPI_RESILIENCE](../../../specs/HPI_RESILIENCE.md) – specifiche pressure/resilience
 
-### 📁 File Codice Principali
+### � Pseudocode
 
-| File | Descrizione |
-|------|-------------|
+| Documento                                                            | Descrizione               |
+| -------------------------------------------------------------------- | ------------------------- |
+| [FILOSOFIA_CALCOLI_PSEUDOCODE](./FILOSOFIA_CALCOLI_PSEUDOCODE.md)    | Regole formali calcoli    |
+
+### �📁 File Codice Principali
+
+| File                                                                                     | Descrizione                       |
+| ---------------------------------------------------------------------------------------- | --------------------------------- |
 | [`backend/utils/pressureCalculator.js`](../../../../backend/utils/pressureCalculator.js) | Calcolo pressure, HPI, resilience |
-| [`backend/utils/featureEngine.js`](../../../../backend/utils/featureEngine.js) | Feature Engine wrapper |
-| [`backend/utils/dataQualityChecker.js`](../../../../backend/utils/dataQualityChecker.js) | Quality score calculations |
+| [`backend/utils/featureEngine.js`](../../../../backend/utils/featureEngine.js)           | Feature Engine wrapper            |
+| [`backend/utils/dataQualityChecker.js`](../../../../backend/utils/dataQualityChecker.js) | Quality score calculations        |

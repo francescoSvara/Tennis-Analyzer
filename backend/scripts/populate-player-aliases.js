@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Script per popolare la tabella player_aliases
  * Uso: node scripts/populate-player-aliases.js [--dry-run]
- * 
+ *
  * Questo script:
  * 1. Legge i mappings esistenti da dataNormalizer.js
  * 2. Per ogni giocatore in players_new, crea alias dalle varianti conosciute
@@ -11,10 +11,7 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 const dryRun = process.argv.includes('--dry-run');
 
@@ -108,7 +105,7 @@ const PLAYER_NAME_MAPPINGS = {
   'g monfils': 'Gael Monfils',
   'rune h': 'Holger Rune',
   'h rune': 'Holger Rune',
-  
+
   // Altri formati
   'sonego l': 'Lorenzo Sonego',
   'l sonego': 'Lorenzo Sonego',
@@ -140,7 +137,7 @@ const PLAYER_NAME_MAPPINGS = {
   'h gaston': 'Hugo Gaston',
   'mannarino a': 'Adrian Mannarino',
   'a mannarino': 'Adrian Mannarino',
-  
+
   // Nomi speciali
   'van de zandschulp b': 'Botic Van De Zandschulp',
   'b van de zandschulp': 'Botic Van De Zandschulp',
@@ -152,7 +149,7 @@ const PLAYER_NAME_MAPPINGS = {
   'a davidovich fokina': 'Alejandro Davidovich Fokina',
   'mpetshi perricard g': 'Giovanni Mpetshi Perricard',
   'g mpetshi perricard': 'Giovanni Mpetshi Perricard',
-  
+
   // Formati con iniziali multiple
   'struff jl': 'Jan-Lennard Struff',
   'jl struff': 'Jan-Lennard Struff',
@@ -161,7 +158,7 @@ const PLAYER_NAME_MAPPINGS = {
   'zhang zh': 'Zhizhen Zhang',
   'zh zhang': 'Zhizhen Zhang',
   'tseng ch': 'Chun-Hsin Tseng',
-  'ch tseng': 'Chun-Hsin Tseng'
+  'ch tseng': 'Chun-Hsin Tseng',
 };
 
 /**
@@ -169,47 +166,50 @@ const PLAYER_NAME_MAPPINGS = {
  */
 function generateCommonAliases(fullName) {
   const aliases = new Set();
-  
+
   if (!fullName) return aliases;
-  
+
   const normalized = fullName.toLowerCase().trim();
   const parts = normalized.split(' ');
-  
+
   if (parts.length >= 2) {
     const firstName = parts[0];
     const lastName = parts[parts.length - 1];
     const initial = firstName[0];
-    
+
     // Formato: Cognome I.
     aliases.add(`${lastName} ${initial}`);
-    
+
     // Formato: I. Cognome
     aliases.add(`${initial} ${lastName}`);
-    
+
     // Solo cognome
     aliases.add(lastName);
-    
+
     // Nome completo lowercase
     aliases.add(normalized);
-    
+
     // Nome completo con maiuscole
     aliases.add(fullName.toLowerCase());
-    
+
     // Se ha trattini (es. Felix Auger-Aliassime)
     if (lastName.includes('-')) {
       const lastPart = lastName.split('-').pop();
       aliases.add(`${lastPart} ${initial}`);
       aliases.add(`${initial} ${lastPart}`);
     }
-    
+
     // Se nome composto (es. Juan Manuel Cerundolo)
     if (parts.length > 2) {
-      const initials = parts.slice(0, -1).map(p => p[0]).join('');
+      const initials = parts
+        .slice(0, -1)
+        .map((p) => p[0])
+        .join('');
       aliases.add(`${lastName} ${initials}`);
       aliases.add(`${initials} ${lastName}`);
     }
   }
-  
+
   return aliases;
 }
 
@@ -227,20 +227,18 @@ function normalizeForMatch(str) {
 }
 
 async function main() {
-  console.log('🔄 Popolamento tabella player_aliases...');
+  console.log('ðŸ”„ Popolamento tabella player_aliases...');
   console.log(`   Mode: ${dryRun ? 'DRY RUN' : 'LIVE'}\n`);
 
   // 1. Carica tutti i giocatori
-  const { data: players, error } = await supabase
-    .from('players_new')
-    .select('id, name, country');
+  const { data: players, error } = await supabase.from('players').select('id, name, country');
 
   if (error) {
-    console.error('❌ Errore caricamento giocatori:', error.message);
+    console.error('âŒ Errore caricamento giocatori:', error.message);
     process.exit(1);
   }
 
-  console.log(`📦 Trovati ${players.length} giocatori\n`);
+  console.log(`ðŸ“¦ Trovati ${players.length} giocatori\n`);
 
   // 2. Carica alias esistenti
   const { data: existingAliases } = await supabase
@@ -248,17 +246,17 @@ async function main() {
     .select('player_id, alias_name');
 
   const existingSet = new Set(
-    (existingAliases || []).map(a => `${a.player_id}:${a.alias_name.toLowerCase()}`)
+    (existingAliases || []).map((a) => `${a.player_id}:${a.alias_name.toLowerCase()}`)
   );
 
-  console.log(`📋 Alias esistenti: ${existingSet.size}\n`);
+  console.log(`ðŸ“‹ Alias esistenti: ${existingSet.size}\n`);
 
   // 3. Prepara nuovi alias
   const newAliases = [];
   const stats = {
     fromMappings: 0,
     generated: 0,
-    skippedExisting: 0
+    skippedExisting: 0,
   };
 
   for (const player of players) {
@@ -268,9 +266,11 @@ async function main() {
     // 3a. Cerca nei mappings esistenti
     for (const [alias, canonicalName] of Object.entries(PLAYER_NAME_MAPPINGS)) {
       const normalizedCanonical = normalizeForMatch(canonicalName);
-      
-      if (normalizedCanonical === normalizedName || 
-          canonicalName.toLowerCase() === player.name.toLowerCase()) {
+
+      if (
+        normalizedCanonical === normalizedName ||
+        canonicalName.toLowerCase() === player.name.toLowerCase()
+      ) {
         playerAliases.add(alias);
         stats.fromMappings++;
       }
@@ -288,7 +288,7 @@ async function main() {
     // 3c. Aggiungi solo alias non esistenti
     for (const alias of playerAliases) {
       const key = `${player.id}:${alias.toLowerCase()}`;
-      
+
       if (existingSet.has(key)) {
         stats.skippedExisting++;
         continue;
@@ -297,56 +297,57 @@ async function main() {
       newAliases.push({
         player_id: player.id,
         alias_name: alias,
-        source: 'auto_generated'
+        source: 'auto_generated',
       });
     }
   }
 
-  console.log(`📊 Statistiche:`);
+  console.log(`ðŸ“Š Statistiche:`);
   console.log(`   Da mappings: ${stats.fromMappings}`);
   console.log(`   Generati: ${stats.generated}`);
-  console.log(`   Già esistenti: ${stats.skippedExisting}`);
+  console.log(`   GiÃ  esistenti: ${stats.skippedExisting}`);
   console.log(`   Nuovi da inserire: ${newAliases.length}\n`);
 
   if (dryRun) {
-    console.log('🔍 [DRY RUN] Primi 20 alias:');
-    newAliases.slice(0, 20).forEach(a => {
-      const player = players.find(p => p.id === a.player_id);
-      console.log(`   ${player?.name} → "${a.alias_name}"`);
+    console.log('ðŸ” [DRY RUN] Primi 20 alias:');
+    newAliases.slice(0, 20).forEach((a) => {
+      const player = players.find((p) => p.id === a.player_id);
+      console.log(`   ${player?.name} â†’ "${a.alias_name}"`);
     });
     return;
   }
 
   // 4. Inserisci in batch
   if (newAliases.length === 0) {
-    console.log('✅ Nessun nuovo alias da inserire');
+    console.log('âœ… Nessun nuovo alias da inserire');
     return;
   }
 
-  console.log('💾 Inserimento alias...');
-  
+  console.log('ðŸ’¾ Inserimento alias...');
+
   const batchSize = 500;
   let inserted = 0;
   let errors = 0;
 
   for (let i = 0; i < newAliases.length; i += batchSize) {
     const batch = newAliases.slice(i, i + batchSize);
-    
-    const { error: insertError } = await supabase
-      .from('player_aliases')
-      .insert(batch)
-      .select();
+
+    const { error: insertError } = await supabase.from('player_aliases').insert(batch).select();
 
     if (insertError) {
-      console.error(`   ❌ Errore batch ${i}-${i + batch.length}: ${insertError.message}`);
+      console.error(`   âŒ Errore batch ${i}-${i + batch.length}: ${insertError.message}`);
       errors += batch.length;
     } else {
       inserted += batch.length;
-      console.log(`   ✅ Inseriti ${inserted}/${newAliases.length}`);
+      console.log(`   âœ… Inseriti ${inserted}/${newAliases.length}`);
     }
   }
 
-  console.log(`\n✅ Completato: ${inserted} alias inseriti, ${errors} errori`);
+  console.log(`\nâœ… Completato: ${inserted} alias inseriti, ${errors} errori`);
 }
 
 main().catch(console.error);
+
+
+
+

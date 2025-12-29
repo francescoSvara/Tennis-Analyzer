@@ -1,12 +1,12 @@
-/**
+﻿/**
  * DATA NORMALIZER SERVICE
- * 
+ *
  * Centralizza la normalizzazione di tutti i dati in ingresso:
  * - Nomi giocatori (Sinner J. -> Jannik Sinner)
  * - Superfici (Hardcourt indoor -> Hard)
  * - Tornei (Turin -> ATP Finals Turin)
  * - Date
- * 
+ *
  * Genera fingerprint univoci per deduplicazione match
  */
 
@@ -65,7 +65,7 @@ const PLAYER_NAME_MAPPINGS = {
   'Federer R.': 'Roger Federer',
   'Wawrinka S.': 'Stan Wawrinka',
   'Monfils G.': 'Gael Monfils',
-  
+
   // === TUTTI GLI ALTRI GIOCATORI ATP ===
   'Albot R.': 'Radu Albot',
   'Altmaier D.': 'Daniel Altmaier',
@@ -223,7 +223,7 @@ const PLAYER_NAME_MAPPINGS = {
   'Wong C.': 'Coleman Wong',
   'Wu Y.': 'Yibing Wu',
   'Zeppieri G.': 'Giulio Zeppieri',
-  
+
   // === AGGIUNTI DOPO PRIMA NORMALIZZAZIONE ===
   'Borg L.': 'Leo Borg',
   'Jacquet K.': 'Kyrian Jacquet',
@@ -231,7 +231,7 @@ const PLAYER_NAME_MAPPINGS = {
   'Prizmic D.': 'Dino Prizmic',
   'Ruusuvuori E.': 'Emil Ruusuvuori',
   'Tabur C.': 'Clement Tabur',
-  
+
   // === NOMI CON FORMATO SPECIALE (iniziali multiple) ===
   'Cerundolo J.m.': 'Juan Manuel Cerundolo',
   'Ficovich J.p.': 'Juan Pablo Ficovich',
@@ -259,15 +259,15 @@ const SURFACE_MAPPINGS = {
   'hardcourt outdoor': 'Hard',
   'hard indoor': 'Hard',
   'hard outdoor': 'Hard',
-  'hard': 'Hard',
+  hard: 'Hard',
   'indoor hard': 'Hard',
   'outdoor hard': 'Hard',
-  'clay': 'Clay',
+  clay: 'Clay',
   'red clay': 'Clay',
   'clay outdoor': 'Clay',
-  'grass': 'Grass',
-  'carpet': 'Carpet',
-  'indoor': 'Hard', // Default indoor = hard
+  grass: 'Grass',
+  carpet: 'Carpet',
+  indoor: 'Hard', // Default indoor = hard
 };
 
 // ============================================
@@ -275,39 +275,39 @@ const SURFACE_MAPPINGS = {
 // ============================================
 
 const TOURNAMENT_MAPPINGS = {
-  // Città/Nome breve -> Nome completo
-  'turin': 'ATP Finals',
-  'torino': 'ATP Finals',
+  // CittÃ /Nome breve -> Nome completo
+  turin: 'ATP Finals',
+  torino: 'ATP Finals',
   'atp finals': 'ATP Finals',
-  'london': 'ATP Finals', // Pre-2021
-  'melbourne': 'Australian Open',
+  london: 'ATP Finals', // Pre-2021
+  melbourne: 'Australian Open',
   'australian open': 'Australian Open',
-  'paris': 'Roland Garros',
+  paris: 'Roland Garros',
   'roland garros': 'Roland Garros',
   'french open': 'Roland Garros',
-  'wimbledon': 'Wimbledon',
+  wimbledon: 'Wimbledon',
   'new york': 'US Open',
   'us open': 'US Open',
   'flushing meadows': 'US Open',
   'indian wells': 'Indian Wells',
   'bnp paribas open': 'Indian Wells',
-  'miami': 'Miami Open',
+  miami: 'Miami Open',
   'miami open': 'Miami Open',
   'monte carlo': 'Monte Carlo',
   'monte-carlo': 'Monte Carlo',
-  'madrid': 'Madrid Open',
+  madrid: 'Madrid Open',
   'mutua madrid open': 'Madrid Open',
-  'rome': 'Italian Open',
-  'roma': 'Italian Open',
+  rome: 'Italian Open',
+  roma: 'Italian Open',
   'internazionali bnl': 'Italian Open',
   'italian open': 'Italian Open',
-  'canada': 'Canadian Open',
-  'toronto': 'Canadian Open',
-  'montreal': 'Canadian Open',
+  canada: 'Canadian Open',
+  toronto: 'Canadian Open',
+  montreal: 'Canadian Open',
   'rogers cup': 'Canadian Open',
-  'cincinnati': 'Cincinnati',
+  cincinnati: 'Cincinnati',
   'western & southern': 'Cincinnati',
-  'shanghai': 'Shanghai Masters',
+  shanghai: 'Shanghai Masters',
   'shanghai masters': 'Shanghai Masters',
 };
 
@@ -322,15 +322,15 @@ const TOURNAMENT_MAPPINGS = {
  */
 function normalizePlayerName(name) {
   if (!name) return '';
-  
+
   // Trim e normalizza spazi
   let normalized = name.trim().replace(/\s+/g, ' ');
-  
+
   // Check mapping diretto (xlsx format)
   if (PLAYER_NAME_MAPPINGS[normalized]) {
     return PLAYER_NAME_MAPPINGS[normalized];
   }
-  
+
   // Check case-insensitive
   const lowerName = normalized.toLowerCase();
   for (const [short, full] of Object.entries(PLAYER_NAME_MAPPINGS)) {
@@ -338,10 +338,10 @@ function normalizePlayerName(name) {
       return full;
     }
     if (full.toLowerCase() === lowerName) {
-      return full; // Già nel formato corretto
+      return full; // GiÃ  nel formato corretto
     }
   }
-  
+
   // Prova a riconoscere pattern "Cognome X." -> cerca nel mapping
   const initialsMatch = normalized.match(/^([A-Za-z\-']+)\s+([A-Z])\.?$/);
   if (initialsMatch) {
@@ -350,12 +350,15 @@ function normalizePlayerName(name) {
     for (const [short, full] of Object.entries(PLAYER_NAME_MAPPINGS)) {
       const fullLower = full.toLowerCase();
       const lastNameLower = lastName.toLowerCase();
-      if (fullLower.includes(lastNameLower) && full.charAt(0).toUpperCase() === firstInitial.toUpperCase()) {
+      if (
+        fullLower.includes(lastNameLower) &&
+        full.charAt(0).toUpperCase() === firstInitial.toUpperCase()
+      ) {
         return full;
       }
     }
   }
-  
+
   // Prova pattern "X. Cognome"
   const reverseMatch = normalized.match(/^([A-Z])\.?\s+([A-Za-z\-']+)$/);
   if (reverseMatch) {
@@ -363,12 +366,15 @@ function normalizePlayerName(name) {
     for (const [short, full] of Object.entries(PLAYER_NAME_MAPPINGS)) {
       const fullLower = full.toLowerCase();
       const lastNameLower = lastName.toLowerCase();
-      if (fullLower.includes(lastNameLower) && full.charAt(0).toUpperCase() === firstInitial.toUpperCase()) {
+      if (
+        fullLower.includes(lastNameLower) &&
+        full.charAt(0).toUpperCase() === firstInitial.toUpperCase()
+      ) {
         return full;
       }
     }
   }
-  
+
   // Se non trovato nel mapping, restituisci con Title Case
   return toTitleCase(normalized);
 }
@@ -379,10 +385,10 @@ function normalizePlayerName(name) {
 function extractLastName(fullName) {
   if (!fullName) return '';
   const parts = fullName.trim().split(/\s+/);
-  // Il cognome è solitamente l'ultimo, ma per nomi con "De", "Van", etc.
+  // Il cognome Ã¨ solitamente l'ultimo, ma per nomi con "De", "Van", etc.
   if (parts.length >= 2) {
     const last = parts[parts.length - 1];
-    // Se è un'iniziale, prendi il precedente
+    // Se Ã¨ un'iniziale, prendi il precedente
     if (last.length <= 2 && last.endsWith('.')) {
       return parts[parts.length - 2] || last;
     }
@@ -396,20 +402,20 @@ function extractLastName(fullName) {
  */
 function normalizeSurface(surface) {
   if (!surface) return 'Unknown';
-  
+
   const lower = surface.toLowerCase().trim();
-  
+
   // Check mapping
   if (SURFACE_MAPPINGS[lower]) {
     return SURFACE_MAPPINGS[lower];
   }
-  
+
   // Partial match
   if (lower.includes('hard')) return 'Hard';
   if (lower.includes('clay')) return 'Clay';
   if (lower.includes('grass')) return 'Grass';
   if (lower.includes('carpet')) return 'Carpet';
-  
+
   return toTitleCase(surface);
 }
 
@@ -418,21 +424,21 @@ function normalizeSurface(surface) {
  */
 function normalizeTournament(tournament) {
   if (!tournament) return '';
-  
+
   const lower = tournament.toLowerCase().trim();
-  
+
   // Check mapping
   if (TOURNAMENT_MAPPINGS[lower]) {
     return TOURNAMENT_MAPPINGS[lower];
   }
-  
+
   // Partial match per tornei comuni
   for (const [key, value] of Object.entries(TOURNAMENT_MAPPINGS)) {
     if (lower.includes(key) || key.includes(lower)) {
       return value;
     }
   }
-  
+
   return toTitleCase(tournament);
 }
 
@@ -441,10 +447,10 @@ function normalizeTournament(tournament) {
  */
 function normalizeDate(date) {
   if (!date) return null;
-  
+
   try {
     let d;
-    
+
     if (date instanceof Date) {
       d = date;
     } else if (typeof date === 'string') {
@@ -454,9 +460,9 @@ function normalizeDate(date) {
       // Excel serial date
       d = excelDateToJS(date);
     }
-    
+
     if (isNaN(d.getTime())) return null;
-    
+
     // Ritorna solo la data (ignora l'ora)
     return d.toISOString().split('T')[0];
   } catch (e) {
@@ -487,21 +493,21 @@ function generateMatchFingerprint(match) {
   const player1 = normalizePlayerName(match.winner_name || match.player1 || match.home);
   const player2 = normalizePlayerName(match.loser_name || match.player2 || match.away);
   const tournament = normalizeTournament(match.tournament || match.tournament_name || '');
-  
+
   // Ordina i giocatori alfabeticamente per consistenza
   const players = [player1, player2].sort();
-  
+
   // Crea fingerprint
   const fingerprint = `${date}|${players[0]}|${players[1]}|${tournament}`.toLowerCase();
-  
+
   return {
     fingerprint,
     normalized: {
       date,
       player1: players[0],
       player2: players[1],
-      tournament
-    }
+      tournament,
+    },
   };
 }
 
@@ -511,21 +517,21 @@ function generateMatchFingerprint(match) {
 function areMatchesSame(match1, match2) {
   const fp1 = generateMatchFingerprint(match1);
   const fp2 = generateMatchFingerprint(match2);
-  
+
   return fp1.fingerprint === fp2.fingerprint;
 }
 
 /**
- * Calcola similarità tra due stringhe (per fuzzy matching)
+ * Calcola similaritÃ  tra due stringhe (per fuzzy matching)
  */
 function similarity(s1, s2) {
   if (!s1 || !s2) return 0;
-  
+
   const longer = s1.length > s2.length ? s1 : s2;
   const shorter = s1.length > s2.length ? s2 : s1;
-  
+
   if (longer.length === 0) return 1.0;
-  
+
   const editDistance = levenshteinDistance(longer.toLowerCase(), shorter.toLowerCase());
   return (longer.length - editDistance) / longer.length;
 }
@@ -558,20 +564,20 @@ function levenshteinDistance(s1, s2) {
 function isSamePlayer(name1, name2, threshold = 0.8) {
   const n1 = normalizePlayerName(name1);
   const n2 = normalizePlayerName(name2);
-  
+
   // Match esatto dopo normalizzazione
   if (n1.toLowerCase() === n2.toLowerCase()) return true;
-  
+
   // Confronta cognomi
   const last1 = extractLastName(n1);
   const last2 = extractLastName(n2);
-  
+
   if (last1.toLowerCase() === last2.toLowerCase()) {
     // Stesso cognome, probabilmente stesso giocatore
     return true;
   }
-  
-  // Similarità generale
+
+  // SimilaritÃ  generale
   return similarity(n1, n2) >= threshold;
 }
 
@@ -588,80 +594,82 @@ function normalizeMatch(match, source = 'unknown') {
     // Identificazione
     source: source,
     original_id: match.id || match.event_id || match.sofascore_id || null,
-    
+
     // Data
     match_date: normalizeDate(match.date || match.match_date || match.startTimestamp),
-    
+
     // Giocatori (normalizzati)
     winner_name: normalizePlayerName(match.winner_name || match.winner || ''),
     loser_name: normalizePlayerName(match.loser_name || match.loser || ''),
-    
+
     // Nomi originali (per debug)
     winner_name_original: match.winner_name || match.winner || '',
     loser_name_original: match.loser_name || match.loser || '',
-    
+
     // Torneo
     tournament: normalizeTournament(match.tournament || match.tournament_name || ''),
     tournament_original: match.tournament || match.tournament_name || '',
-    
+
     // Superficie
     surface: normalizeSurface(match.surface || match.ground_type || ''),
     surface_original: match.surface || match.ground_type || '',
-    
+
     // Risultato
     score: match.score || match.result || '',
     winner_sets: match.winner_sets || match.sets_won || null,
     loser_sets: match.loser_sets || match.sets_lost || null,
-    
+
     // Ranking
     winner_rank: match.winner_rank || match.WRank || null,
     loser_rank: match.loser_rank || match.LRank || null,
-    
+
     // Quote
     odds_b365_winner: match.odds_b365_winner || match.B365W || null,
     odds_b365_loser: match.odds_b365_loser || match.B365L || null,
-    
+
     // Serie/Livello
     series: match.series || match.tournament_level || '',
     best_of: match.best_of || (match.series === 'Grand Slam' ? 5 : 3),
-    
+
     // Metadata
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
-  
+
   // Genera fingerprint
   const { fingerprint } = generateMatchFingerprint(normalized);
   normalized.fingerprint = fingerprint;
-  
+
   return normalized;
 }
 
 /**
- * Merge due match (stesso fingerprint) prendendo i dati più completi
+ * Merge due match (stesso fingerprint) prendendo i dati piÃ¹ completi
  */
 function mergeMatches(existing, incoming) {
   const merged = { ...existing };
-  
-  // Per ogni campo, prendi il valore non-null più recente
+
+  // Per ogni campo, prendi il valore non-null piÃ¹ recente
   for (const [key, value] of Object.entries(incoming)) {
     if (key === 'id' || key === 'created_at') continue;
-    
-    // Se il campo esistente è null/empty e incoming ha un valore, usa incoming
+
+    // Se il campo esistente Ã¨ null/empty e incoming ha un valore, usa incoming
     if ((merged[key] === null || merged[key] === '' || merged[key] === undefined) && value) {
       merged[key] = value;
     }
-    
+
     // Per campi specifici, preferisci certi valori
     if (key === 'source') {
       // Combina le sorgenti
-      const sources = new Set([...(existing.source || '').split(','), incoming.source].filter(Boolean));
+      const sources = new Set(
+        [...(existing.source || '').split(','), incoming.source].filter(Boolean)
+      );
       merged.source = Array.from(sources).join(',');
     }
   }
-  
+
   merged.updated_at = new Date().toISOString();
-  
+
   return merged;
 }
 
@@ -671,7 +679,7 @@ function mergeMatches(existing, incoming) {
 
 function toTitleCase(str) {
   if (!str) return '';
-  return str.toLowerCase().replace(/(?:^|\s)\S/g, a => a.toUpperCase());
+  return str.toLowerCase().replace(/(?:^|\s)\S/g, (a) => a.toUpperCase());
 }
 
 // ============================================
@@ -684,21 +692,15 @@ function toTitleCase(str) {
  */
 async function learnMappingsFromDB(supabase) {
   if (!supabase) return { players: {}, tournaments: {} };
-  
+
   const newMappings = { players: {}, tournaments: {} };
-  
+
   try {
     // Prendi tutti i nomi unici
-    const { data: winners } = await supabase
-      .from('matches')
-      .select('winner_name')
-      .limit(5000);
-    
-    const { data: losers } = await supabase
-      .from('matches')
-      .select('loser_name')
-      .limit(5000);
-    
+    const { data: winners } = await supabase.from('matches').select('winner_name').limit(5000);
+
+    const { data: losers } = await supabase.from('matches').select('loser_name').limit(5000);
+
     const allNames = new Set();
     for (const w of winners || []) {
       if (w.winner_name) allNames.add(w.winner_name);
@@ -706,18 +708,18 @@ async function learnMappingsFromDB(supabase) {
     for (const l of losers || []) {
       if (l.loser_name) allNames.add(l.loser_name);
     }
-    
+
     // Raggruppa nomi simili
     const names = Array.from(allNames);
     const groups = [];
     const used = new Set();
-    
+
     for (const name of names) {
       if (used.has(name)) continue;
-      
+
       const group = [name];
       used.add(name);
-      
+
       for (const other of names) {
         if (used.has(other)) continue;
         if (isSamePlayer(name, other, 0.85)) {
@@ -725,28 +727,27 @@ async function learnMappingsFromDB(supabase) {
           used.add(other);
         }
       }
-      
+
       if (group.length > 1) {
         groups.push(group);
       }
     }
-    
-    // Per ogni gruppo, scegli il nome più lungo come canonico
+
+    // Per ogni gruppo, scegli il nome piÃ¹ lungo come canonico
     for (const group of groups) {
-      const canonical = group.reduce((a, b) => a.length > b.length ? a : b);
+      const canonical = group.reduce((a, b) => (a.length > b.length ? a : b));
       for (const name of group) {
         if (name !== canonical) {
           newMappings.players[name] = canonical;
         }
       }
     }
-    
-    console.log(`📚 Learned ${Object.keys(newMappings.players).length} new player mappings`);
-    
+
+    console.log(`ðŸ“š Learned ${Object.keys(newMappings.players).length} new player mappings`);
   } catch (err) {
     console.error('Error learning mappings:', err.message);
   }
-  
+
   return newMappings;
 }
 
@@ -775,25 +776,27 @@ module.exports = {
   normalizeTournament,
   normalizeDate,
   normalizeMatch,
-  
+
   // Deduplicazione
   generateMatchFingerprint,
   areMatchesSame,
   isSamePlayer,
   similarity,
-  
+
   // Merge
   mergeMatches,
-  
+
   // Utility
   extractLastName,
   toTitleCase,
-  
+
   // Learning
   learnMappingsFromDB,
-  
+
   // Mappings (per debug/estensione)
   PLAYER_NAME_MAPPINGS,
   SURFACE_MAPPINGS,
   TOURNAMENT_MAPPINGS,
 };
+
+

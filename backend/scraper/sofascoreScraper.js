@@ -50,22 +50,22 @@ function extractMatchIdFromUrl(url) {
 function extractEventIdFromUrl(url) {
   try {
     const u = new URL(url);
-    
+
     // Check hash for #id:XXXXX format
     if (u.hash) {
       const idMatch = u.hash.match(/id[=:](\d+)/i);
       if (idMatch) return idMatch[1];
     }
-    
+
     // Check for event ID in path like /event/12345
     const pathMatch = u.pathname.match(/\/event\/(\d+)/);
     if (pathMatch) return pathMatch[1];
-    
+
     // Try to find any numeric ID at the end of the path
     const parts = u.pathname.split('/').filter(Boolean);
     const lastPart = parts[parts.length - 1];
     if (/^\d+$/.test(lastPart)) return lastPart;
-    
+
     return null;
   } catch (e) {
     return null;
@@ -78,19 +78,19 @@ function extractEventIdFromUrl(url) {
  */
 async function fetchTournamentMatches(tournamentId, seasonId, currentEventId) {
   if (!tournamentId) return [];
-  
+
   const headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    'Accept': 'application/json',
-    'Referer': 'https://www.sofascore.com/'
+    Accept: 'application/json',
+    Referer: 'https://www.sofascore.com/',
   };
-  
+
   const detectedMatches = [];
   const seenIds = new Set([String(currentEventId)]);
-  
+
   // Try to fetch upcoming and past events
   const endpoints = [];
-  
+
   if (seasonId) {
     endpoints.push(
       `https://www.sofascore.com/api/v1/unique-tournament/${tournamentId}/season/${seasonId}/events/last/0`,
@@ -104,7 +104,7 @@ async function fetchTournamentMatches(tournamentId, seasonId, currentEventId) {
       `https://www.sofascore.com/api/v1/unique-tournament/${tournamentId}/season/${year}/events/next/0`
     );
   }
-  
+
   for (const endpoint of endpoints) {
     try {
       const res = await fetch(endpoint, { headers, timeout: 10000 });
@@ -118,7 +118,8 @@ async function fetchTournamentMatches(tournamentId, seasonId, currentEventId) {
                 eventId: event.id,
                 slug: event.slug,
                 sport: event.tournament?.category?.sport?.slug || 'tennis',
-                tournament: event.tournament?.uniqueTournament?.name || event.tournament?.name || '',
+                tournament:
+                  event.tournament?.uniqueTournament?.name || event.tournament?.name || '',
                 tournamentId: event.tournament?.uniqueTournament?.id || tournamentId,
                 category: event.tournament?.category?.name || '',
                 round: event.roundInfo?.name || event.roundInfo?.round || null,
@@ -127,21 +128,21 @@ async function fetchTournamentMatches(tournamentId, seasonId, currentEventId) {
                   name: event.homeTeam?.name || '',
                   shortName: event.homeTeam?.shortName || '',
                   country: event.homeTeam?.country?.alpha2 || '',
-                  ranking: event.homeTeam?.ranking || null
+                  ranking: event.homeTeam?.ranking || null,
                 },
                 awayTeam: {
                   id: event.awayTeam?.id,
                   name: event.awayTeam?.name || '',
                   shortName: event.awayTeam?.shortName || '',
                   country: event.awayTeam?.country?.alpha2 || '',
-                  ranking: event.awayTeam?.ranking || null
+                  ranking: event.awayTeam?.ranking || null,
                 },
                 homeScore: event.homeScore?.current ?? null,
                 awayScore: event.awayScore?.current ?? null,
                 status: event.status,
                 startTimestamp: event.startTimestamp,
                 winnerCode: event.winnerCode,
-                detectedFrom: 'tournament'
+                detectedFrom: 'tournament',
               });
             }
           }
@@ -151,8 +152,10 @@ async function fetchTournamentMatches(tournamentId, seasonId, currentEventId) {
       console.log(`Failed to fetch tournament matches from ${endpoint}:`, e.message);
     }
   }
-  
-  console.log(`📡 Detected ${detectedMatches.length} other matches from tournament ${tournamentId}`);
+
+  console.log(
+    `📡 Detected ${detectedMatches.length} other matches from tournament ${tournamentId}`
+  );
   return detectedMatches;
 }
 
@@ -161,7 +164,7 @@ async function fetchTournamentMatches(tournamentId, seasonId, currentEventId) {
  */
 async function fetchAdditionalEndpoints(eventId) {
   if (!eventId) return {};
-  
+
   const endpoints = [
     `https://www.sofascore.com/api/v1/event/${eventId}`,
     `https://www.sofascore.com/api/v1/event/${eventId}/statistics`,
@@ -173,20 +176,20 @@ async function fetchAdditionalEndpoints(eventId) {
     `https://www.sofascore.com/api/v1/event/${eventId}/pregame-form`,
     `https://www.sofascore.com/api/v1/event/${eventId}/votes`,
   ];
-  
+
   const results = {};
-  
+
   await Promise.all(
     endpoints.map(async (endpoint) => {
       try {
         const res = await fetch(endpoint, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json',
+            Accept: 'application/json',
           },
           timeout: 10000,
         });
-        
+
         if (res.ok) {
           const json = await res.json();
           if (json && Object.keys(json).length > 0) {
@@ -198,7 +201,7 @@ async function fetchAdditionalEndpoints(eventId) {
       }
     })
   );
-  
+
   return results;
 }
 
@@ -212,18 +215,24 @@ async function runScraper(url) {
     let browser;
     try {
       console.log(`[${id}] Starting scrape for: ${url}`);
-      
+
       // Puppeteer launch options for cloud environments
-      const launchOptions = { 
+      const launchOptions = {
         headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process']
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--single-process',
+        ],
       };
-      
+
       // Use system Chromium if available (Railway/Render)
       if (process.env.PUPPETEER_EXECUTABLE_PATH) {
         launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
       }
-      
+
       browser = await puppeteer.launch(launchOptions);
       console.log(`[${id}] Browser launched successfully`);
       const page = await browser.newPage();
@@ -232,18 +241,21 @@ async function runScraper(url) {
         try {
           const request = response.request();
           const urlResp = response.url();
-          
+
           // Skip binary content (images, flags, logos)
           const contentType = response.headers()['content-type'] || '';
           if (contentType.includes('image/') || contentType.includes('octet-stream')) {
             return; // Skip binary data
           }
-          
+
           // Skip image URLs explicitly
-          if (/\/(image|flag|logo)($|\?|\/)/i.test(urlResp) || /img\.sofascore\.com/i.test(urlResp)) {
+          if (
+            /\/(image|flag|logo)($|\?|\/)/i.test(urlResp) ||
+            /img\.sofascore\.com/i.test(urlResp)
+          ) {
             return; // Skip image endpoints
           }
-          
+
           if (/\/api\/(v1|v2)\//.test(urlResp) || /api\/(v1|v2)\//.test(request.url())) {
             let txt = null;
             try {
@@ -251,19 +263,22 @@ async function runScraper(url) {
             } catch (e) {
               txt = null;
             }
-            
+
             // Skip if response looks like binary data
-            if (txt && (txt.startsWith('\x89PNG') || txt.startsWith('GIF') || txt.includes('\x00'))) {
+            if (
+              txt &&
+              (txt.startsWith('\x89PNG') || txt.startsWith('GIF') || txt.includes('\x00'))
+            ) {
               return; // Skip binary content
             }
-            
+
             let json = null;
             try {
               json = txt ? JSON.parse(txt) : null;
             } catch (e) {
               json = txt;
             }
-            
+
             // Only save non-null JSON data
             if (json !== null) {
               collected.api[urlResp] = json;
@@ -278,40 +293,41 @@ async function runScraper(url) {
 
       // Try to extract event ID from URL first
       let eventId = extractEventIdFromUrl(url);
-      
+
       // If not found in URL, try to extract from page
       if (!eventId) {
         try {
           eventId = await page.evaluate(() => {
             // Try various methods to get event ID
             if (window.__INITIAL_DATA__?.event?.id) return String(window.__INITIAL_DATA__.event.id);
-            if (window.__NEXT_DATA__?.props?.pageProps?.event?.id) return String(window.__NEXT_DATA__.props.pageProps.event.id);
-            
+            if (window.__NEXT_DATA__?.props?.pageProps?.event?.id)
+              return String(window.__NEXT_DATA__.props.pageProps.event.id);
+
             // Try to find in URL
             const urlMatch = window.location.href.match(/id[=:](\d+)/i);
             if (urlMatch) return urlMatch[1];
-            
+
             // Try to find in page content
             const canonical = document.querySelector('link[rel="canonical"]');
             if (canonical) {
               const match = canonical.href.match(/\/event\/(\d+)/);
               if (match) return match[1];
             }
-            
+
             // Look for event ID in any script tags
             const scripts = document.querySelectorAll('script');
             for (const script of scripts) {
               const match = script.textContent?.match(/"eventId"\s*:\s*(\d+)/);
               if (match) return match[1];
             }
-            
+
             return null;
           });
         } catch (e) {
           console.log('Could not extract event ID from page:', e.message);
         }
       }
-      
+
       console.log('Extracted event ID:', eventId);
 
       // try to fetch statistics endpoint directly from page context (if available)
@@ -324,12 +340,12 @@ async function runScraper(url) {
 
       // give some extra time for background requests
       await page.waitForTimeout(1500);
-      
+
       // Fetch additional endpoints directly using the event ID
       if (eventId) {
         console.log('Fetching additional endpoints for event:', eventId);
         const additionalData = await fetchAdditionalEndpoints(eventId);
-        
+
         // Merge additional data into collected.api
         for (const [endpoint, data] of Object.entries(additionalData)) {
           if (data && !collected.api[endpoint]) {
@@ -337,12 +353,12 @@ async function runScraper(url) {
             console.log('Added data from:', endpoint);
           }
         }
-        
+
         // ========== DETECT OTHER TOURNAMENT MATCHES ==========
         // Extract tournament info from event data
         let tournamentId = null;
         let seasonId = null;
-        
+
         for (const [url, data] of Object.entries(collected.api)) {
           if (url.match(/\/event\/\d+$/) && data?.event?.tournament) {
             tournamentId = data.event.tournament.uniqueTournament?.id || data.event.tournament.id;
@@ -350,24 +366,32 @@ async function runScraper(url) {
             break;
           }
         }
-        
+
         if (tournamentId) {
           console.log(`🔍 Detecting other matches from tournament ${tournamentId}...`);
           const detectedMatches = await fetchTournamentMatches(tournamentId, seasonId, eventId);
           if (detectedMatches.length > 0) {
             collected.detectedMatches = detectedMatches;
-            
+
             // Also save detected matches to a separate file for easy access
             try {
               ensureDir(path.join(DATA_DIR, 'detected'));
               const detectedPath = path.join(DATA_DIR, 'detected', `${id}-detected.json`);
-              fs.writeFileSync(detectedPath, JSON.stringify({
-                scrapedEventId: eventId,
-                tournamentId,
-                seasonId,
-                detectedAt: new Date().toISOString(),
-                matches: detectedMatches
-              }, null, 2), 'utf8');
+              fs.writeFileSync(
+                detectedPath,
+                JSON.stringify(
+                  {
+                    scrapedEventId: eventId,
+                    tournamentId,
+                    seasonId,
+                    detectedAt: new Date().toISOString(),
+                    matches: detectedMatches,
+                  },
+                  null,
+                  2
+                ),
+                'utf8'
+              );
               console.log(`📁 Saved ${detectedMatches.length} detected matches to ${detectedPath}`);
             } catch (e) {
               console.error('Failed to save detected matches:', e.message);
@@ -534,46 +558,46 @@ function normalizeForMapping(raw) {
  */
 function extractEventForDB(collected) {
   if (!collected || !collected.api) return null;
-  
+
   // Find the main event object
   let event = null;
   let pointByPoint = null;
   let statistics = null;
   let tennisPowerRankings = null;
-  
+
   for (const [url, data] of Object.entries(collected.api)) {
     if (!data || typeof data !== 'object') continue;
-    
+
     // Event endpoint
     if (data.event && data.event.id) {
       event = data.event;
     }
-    
+
     // Point-by-point
     if (Array.isArray(data.pointByPoint)) {
       pointByPoint = data.pointByPoint;
     }
-    
+
     // Statistics
     if (Array.isArray(data.statistics)) {
       statistics = data.statistics;
     }
-    
+
     // Power rankings
     if (Array.isArray(data.tennisPowerRankings)) {
       tennisPowerRankings = data.tennisPowerRankings;
     }
   }
-  
+
   if (!event) {
     // Try initial data
     if (collected.initial?.event) {
       event = collected.initial.event;
     }
   }
-  
+
   if (!event || !event.id) return null;
-  
+
   // Build combined object for database
   return {
     ...event,
@@ -587,7 +611,7 @@ function extractEventForDB(collected) {
     tournament: event.tournament || event.uniqueTournament,
     pointByPoint,
     statistics,
-    tennisPowerRankings
+    tennisPowerRankings,
   };
 }
 
@@ -598,13 +622,13 @@ async function directFetch(url) {
   // Headers to simulate a mobile app request (bypass 403)
   const headers = {
     'User-Agent': 'SofaScore/6.0.0 (com.sofascore.results; build:1234; Android 14) okhttp/4.12.0',
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'Accept-Language': 'en',
     'Accept-Encoding': 'gzip',
     'X-Requested-With': 'com.sofascore.results',
-    'Connection': 'keep-alive'
+    Connection: 'keep-alive',
   };
-  
+
   const res = await fetch(url, { redirect: 'follow', timeout: 30000, headers });
   const contentType =
     res.headers && (res.headers.get('content-type') || res.headers.get('Content-Type'));

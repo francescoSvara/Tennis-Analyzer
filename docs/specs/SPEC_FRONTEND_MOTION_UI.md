@@ -1,26 +1,27 @@
 # ✨ SPEC FRONTEND – UI / MOTION / ICONS
+
 ## Implementation Spec – Premium UI Design
 
 > **Dominio**: Frontend · UI Design · Animation · Iconography  
 > **Stato**: ATTIVA  
 > **Tipo**: Specifica Operativa  
-> **Ultimo aggiornamento**: 27 Dicembre 2025  
+> **Ultimo aggiornamento**: 27 Dicembre 2025
 
 ---
 
 ## 🧭 NAVIGAZIONE ARCHITETTURA
 
-| ⬆️ Padre | ➡️ Correlato |
-|---------|--------------|
+| ⬆️ Padre                                                                | ➡️ Correlato                                                                                      |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [FRONTEND_DATA](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) |
 
 ### 📁 File Codice Principali
 
-| Tipo | File |
-|------|------|
-| Motion Tokens | [`src/motion/tokens.js`](../../src/motion/tokens.js) |
-| Motion Components | [`src/motion/`](../../src/motion/) |
-| UI Components | [`src/components/`](../../src/components/) |
+| Tipo              | File                                                 |
+| ----------------- | ---------------------------------------------------- |
+| Motion Tokens     | [`src/motion/tokens.js`](../../src/motion/tokens.js) |
+| Motion Components | [`src/motion/`](../../src/motion/)                   |
+| UI Components     | [`src/components/`](../../src/components/)           |
 
 ---
 
@@ -29,6 +30,7 @@
 > ⚠️ Questo NON è un documento "filosofico". È una **spec tecnica** operativa.
 
 Definisce:
+
 - Stack tecnologico UI/Motion
 - Regole di motion design
 - Standard iconografici
@@ -38,14 +40,14 @@ Definisce:
 
 ## 1️⃣ STACK TECNOLOGICO (VINCOLANTE)
 
-| Tecnologia | Ruolo | Note |
-|------------|-------|------|
-| **React + TypeScript** | Base | - |
-| **Tailwind CSS** | Styling | - |
-| **Framer Motion** | Animazioni | Primary |
-| **Lottie** | Empty/Loading states | Opzionale |
-| **Phosphor Icons** | Iconografia | Primary |
-| **Iconoir** | Alternative | Se serve look geometrico |
+| Tecnologia             | Ruolo                | Note                     |
+| ---------------------- | -------------------- | ------------------------ |
+| **React + TypeScript** | Base                 | -                        |
+| **Tailwind CSS**       | Styling              | -                        |
+| **Framer Motion**      | Animazioni           | Primary                  |
+| **Lottie**             | Empty/Loading states | Opzionale                |
+| **Phosphor Icons**     | Iconografia          | Primary                  |
+| **Iconoir**            | Alternative          | Se serve look geometrico |
 
 ### Accessibilità
 
@@ -72,18 +74,18 @@ Trasformare la dashboard in una UI **high-end** senza eccessi:
 
 ### 3.1 Durata e Timing
 
-| Tipo | Durata | Note |
-|------|--------|------|
-| Micro-interactions | 180ms | Hover, focus |
-| Transizioni | 280-320ms | Route change, tab switch |
-| Layout animations | 320-420ms | Reorder, resize |
-| **MAX** | 420ms | Mai superare |
+| Tipo               | Durata    | Note                     |
+| ------------------ | --------- | ------------------------ |
+| Micro-interactions | 180ms     | Hover, focus             |
+| Transizioni        | 280-320ms | Route change, tab switch |
+| Layout animations  | 320-420ms | Reorder, resize          |
+| **MAX**            | 420ms     | Mai superare             |
 
 ### 3.2 Easing
 
 ```javascript
 // Default premium
-const easing = [0.22, 1, 0.36, 1];  // cubic-bezier
+const easing = [0.22, 1, 0.36, 1]; // cubic-bezier
 
 // ❌ EVITARE
 // easeInOut standard
@@ -115,11 +117,11 @@ transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] }
 
 ```javascript
 // staggerContainer
-animate: { 
-  transition: { 
-    staggerChildren: 0.06, 
-    delayChildren: 0.04 
-  } 
+animate: {
+  transition: {
+    staggerChildren: 0.06,
+    delayChildren: 0.04
+  }
 }
 ```
 
@@ -146,19 +148,19 @@ NEVER mix icon sets
 
 ### 4.2 Weight Coerente
 
-| Contesto | Weight |
-|----------|--------|
+| Contesto     | Weight                |
+| ------------ | --------------------- |
 | Sidebar/Menu | `duotone` o `regular` |
-| Card actions | `regular` |
-| KPI header | `bold` o `fill` |
+| Card actions | `regular`             |
+| KPI header   | `bold` o `fill`       |
 
 ### 4.3 Dimensioni Standard
 
-| Contesto | Size |
-|----------|------|
+| Contesto     | Size    |
+| ------------ | ------- |
 | Sidebar/Menu | 20-22px |
 | Card actions | 18-20px |
-| KPI header | 24-28px |
+| KPI header   | 24-28px |
 
 ---
 
@@ -166,12 +168,12 @@ NEVER mix icon sets
 
 ### 5.1 Motion Components
 
-| Componente | Scopo |
-|------------|-------|
-| `<MotionCard>` | Card con hover lift |
-| `<MotionButton>` | Button con feedback |
-| `<MotionTab>` | Tab con underline animata |
-| `<MotionRow>` | Row con hover indicator |
+| Componente       | Scopo                     |
+| ---------------- | ------------------------- |
+| `<MotionCard>`   | Card con hover lift       |
+| `<MotionButton>` | Button con feedback       |
+| `<MotionTab>`    | Tab con underline animata |
+| `<MotionRow>`    | Row con hover indicator   |
 
 ### 5.2 KPI Card Premium
 
@@ -193,12 +195,12 @@ NEVER mix icon sets
 
 ### 5.4 Stati
 
-| Stato | Implementazione |
-|-------|-----------------|
+| Stato       | Implementazione                   |
+| ----------- | --------------------------------- |
 | **Loading** | Skeleton con shimmer leggerissimo |
-| **Empty** | Illustrazione minimale + CTA |
-| **Error** | Messaggio chiaro + retry button |
-| **Success** | Toast/snackbar con motion pulita |
+| **Empty**   | Illustrazione minimale + CTA      |
+| **Error**   | Messaggio chiaro + retry button   |
+| **Success** | Toast/snackbar con motion pulita  |
 
 ---
 
@@ -223,19 +225,19 @@ src/
 export const durations = {
   fast: 0.18,
   normal: 0.32,
-  slow: 0.42
+  slow: 0.42,
 };
 
 export const easings = {
   premium: [0.22, 1, 0.36, 1],
-  bounce: [0.68, -0.6, 0.32, 1.6]
+  bounce: [0.68, -0.6, 0.32, 1.6],
 };
 
 export const variants = {
   fadeUp: {
     initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: 8 }
+    exit: { opacity: 0, y: 8 },
   },
   // ...
 };
@@ -245,19 +247,19 @@ export const variants = {
 
 ## 7️⃣ LOOK & FEEL
 
-| Aspetto | Standard |
-|---------|----------|
-| **Card** | `rounded-2xl`, shadow soft, border subtle |
-| **Tipografia** | Numeri KPI leggibili, gerarchia chiara |
-| **Colore** | 1 primario + 1 accento, stati discreti |
-| **Densità** | Dashboard "aria", non compressa |
+| Aspetto        | Standard                                  |
+| -------------- | ----------------------------------------- |
+| **Card**       | `rounded-2xl`, shadow soft, border subtle |
+| **Tipografia** | Numeri KPI leggibili, gerarchia chiara    |
+| **Colore**     | 1 primario + 1 accento, stati discreti    |
+| **Densità**    | Dashboard "aria", non compressa           |
 
 ---
 
 ## 8️⃣ CHECKLIST IMPLEMENTAZIONE
 
 > ⚠️ **Le checklist sono state consolidate in** [`docs/TODO_LIST.md`](../TODO_LIST.md#32-checklist-motion-ui-spec_frontend_motion_uimd)
-> 
+>
 > Vai al documento TODO_LIST per tracciare lo stato delle implementazioni.
 
 ---
@@ -275,4 +277,3 @@ export const variants = {
 ---
 
 **Fine documento – SPEC_FRONTEND_MOTION_UI**
-

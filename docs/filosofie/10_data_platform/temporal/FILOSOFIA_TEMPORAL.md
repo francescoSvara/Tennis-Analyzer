@@ -9,6 +9,7 @@
 ## 1️⃣ Perché esiste questo documento
 
 Nel betting:
+
 - Odds e live sono **serie temporali**
 - Ogni quota ha un momento di validità
 - Usare dati futuri = **leakage fatale**
@@ -19,12 +20,12 @@ Il tempo non è metadata. È **constraint**.
 
 ## 2️⃣ I Quattro Tempi
 
-| Tempo | Significato |
-|-------|-------------|
-| `event_time` | Quando l'evento è valido nel mondo reale |
-| `source_time` | Timestamp dalla fonte esterna |
-| `ingestion_time` | Quando il nostro sistema riceve il dato |
-| `as_of_time` | Cut temporale per calcoli/snapshot |
+| Tempo            | Significato                              |
+| ---------------- | ---------------------------------------- |
+| `event_time`     | Quando l'evento è valido nel mondo reale |
+| `source_time`    | Timestamp dalla fonte esterna            |
+| `ingestion_time` | Quando il nostro sistema riceve il dato  |
+| `as_of_time`     | Cut temporale per calcoli/snapshot       |
 
 Non confonderli mai.
 
@@ -35,6 +36,7 @@ Non confonderli mai.
 > **Regola d'oro: nessun dato con event_time > as_of_time può essere usato.**
 
 Esempio distruttivo:
+
 - Match inizia alle 14:00
 - Calcolo features alle 13:55 usando quota delle 14:05
 - Risultato: edge finto, modello inutile
@@ -45,12 +47,12 @@ Esempio distruttivo:
 
 I dati invecchiano. Thresholds:
 
-| Tipo | Max Age |
-|------|---------|
-| Live score | 30s |
-| Odds live | 10s |
-| Odds pre-match | 1 min |
-| Player stats | 1 day |
+| Tipo           | Max Age |
+| -------------- | ------- |
+| Live score     | 30s     |
+| Odds live      | 10s     |
+| Odds pre-match | 1 min   |
+| Player stats   | 1 day   |
 
 Oltre = warning o quarantine.
 
@@ -75,18 +77,25 @@ Nessuna eccezione.
 ## 📚 Riferimenti
 
 ### 🧭 Navigazione
-| ⬆️ Padre | ⬅️ Dipende da | ➡️ Usato da |
-|---------|---------------|-------------|
-| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FILOSOFIA_DB](../storage/FILOSOFIA_DB.md) | [FILOSOFIA_LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) |
-| [INDEX_FILOSOFIE](../../INDEX_FILOSOFIE.md) | | [FILOSOFIA_LIVE_TRACKING](../../20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) |
 
-### 📁 File Codice Principali
+| ⬆️ Padre                                                         | ⬅️ Dipende da                              | ➡️ Usato da                                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| [FILOSOFIA_MADRE](../../00_foundation/FILOSOFIA_MADRE_TENNIS.md) | [FILOSOFIA_DB](../storage/FILOSOFIA_DB.md) | [FILOSOFIA_LINEAGE](../lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md)                |
+| [INDEX_FILOSOFIE](../../INDEX_FILOSOFIE.md)                      |                                            | [FILOSOFIA_LIVE_TRACKING](../../20_domain_tennis/live_scoring/FILOSOFIA_LIVE_TRACKING.md) |
 
-| File | Descrizione |
-|------|-------------|
-| [`backend/liveManager.js`](../../../../backend/liveManager.js) | Gestione live polling adattivo |
-| [`backend/services/matchCardService.js`](../../../../backend/services/matchCardService.js) | Meta block temporali |
-| [`backend/utils/dataQualityChecker.js`](../../../../backend/utils/dataQualityChecker.js) | Staleness checks |
+### � Pseudocode
+
+| Documento                                                          | Descrizione               |
+| ------------------------------------------------------------------ | ------------------------- |
+| [FILOSOFIA_TEMPORAL_PSEUDOCODE](./FILOSOFIA_TEMPORAL_PSEUDOCODE.md) | Regole formali temporal   |
+
+### �📁 File Codice Principali
+
+| File                                                                                       | Descrizione                    |
+| ------------------------------------------------------------------------------------------ | ------------------------------ |
+| [`backend/liveManager.js`](../../../../backend/liveManager.js)                             | Gestione live polling adattivo |
+| [`backend/services/matchCardService.js`](../../../../backend/services/matchCardService.js) | Meta block temporali           |
+| [`backend/utils/dataQualityChecker.js`](../../../../backend/utils/dataQualityChecker.js)   | Staleness checks               |
 
 ---
 

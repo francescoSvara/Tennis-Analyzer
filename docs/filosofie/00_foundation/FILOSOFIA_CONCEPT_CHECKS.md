@@ -16,13 +16,13 @@
 
 ## 2️⃣ Invarianti Non Negoziabili
 
-| Invariante | Descrizione |
-|------------|-------------|
-| MATCHBUNDLE_ONLY_FE | Frontend consuma solo MatchBundle |
-| BACKEND_INTERPRETATION | Solo backend interpreta dati |
-| FEATURE_VS_STRATEGY | Feature calcola, Strategy decide, FE visualizza |
-| SIGNAL_NOT_METRIC | Segnali non sono metriche (no persist) |
-| DATAQUALITY_BACKEND | DataQuality calcolata solo backend |
+| Invariante             | Descrizione                                     |
+| ---------------------- | ----------------------------------------------- |
+| MATCHBUNDLE_ONLY_FE    | Frontend consuma solo MatchBundle               |
+| BACKEND_INTERPRETATION | Solo backend interpreta dati                    |
+| FEATURE_VS_STRATEGY    | Feature calcola, Strategy decide, FE visualizza |
+| SIGNAL_NOT_METRIC      | Segnali non sono metriche (no persist)          |
+| DATAQUALITY_BACKEND    | DataQuality calcolata solo backend              |
 
 ---
 
@@ -38,6 +38,7 @@ Violazione = edge finto.
 ## 4️⃣ Regole Identità
 
 Il bundle DEVE avere:
+
 - `header.home_player.player_id` (canonical)
 - `header.away_player.player_id` (canonical)
 - `header.tournament.tournament_id` (canonical)
@@ -47,13 +48,13 @@ Il bundle DEVE avere:
 
 ## 5️⃣ Regole Qualità
 
-| Regola | Soglia | Azione |
-|--------|--------|--------|
-| Data quality score | < 40 | ERROR (blocca) |
-| Data quality score | < 60 | WARNING |
-| Odds staleness (live) | > 30s | WARNING |
-| Odds staleness (pre-match) | > 10min | WARNING |
-| Match quarantined | true | ERROR |
+| Regola                     | Soglia  | Azione         |
+| -------------------------- | ------- | -------------- |
+| Data quality score         | < 40    | ERROR (blocca) |
+| Data quality score         | < 60    | WARNING        |
+| Odds staleness (live)      | > 30s   | WARNING        |
+| Odds staleness (pre-match) | > 10min | WARNING        |
+| Match quarantined          | true    | ERROR          |
 
 ---
 
@@ -85,14 +86,21 @@ Se una regola ha troppi falsi positivi o non è legata a filosofia, va rimossa o
 ---
 
 **Documenti Correlati**:
+
 - [FILOSOFIA_MADRE_TENNIS](./FILOSOFIA_MADRE_TENNIS.md) – principi fondanti
 - [FILOSOFIA_OBSERVABILITY](../10_data_platform/quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) – quality checks
 - [FILOSOFIA_LINEAGE](../10_data_platform/lineage_versioning/FILOSOFIA_LINEAGE_VERSIONING.md) – version checks
 
-### 📁 File Codice Principali
+### � Pseudocode
 
-| File | Descrizione |
-|------|-------------|
+| Documento                                                                    | Descrizione                  |
+| ---------------------------------------------------------------------------- | ---------------------------- |
+| [FILOSOFIA_CONCEPT_CHECKS_PSEUDOCODE](./FILOSOFIA_CONCEPT_CHECKS_PSEUDOCODE.md) | Regole formali dei checks |
+
+### �📁 File Codice Principali
+
+| File                                                                      | Descrizione            |
+| ------------------------------------------------------------------------- | ---------------------- |
 | [`scripts/philosophyEnforcer.js`](../../../scripts/philosophyEnforcer.js) | CI enforcer principale |
-| [`scripts/checkConceptualMap.js`](../../../scripts/checkConceptualMap.js) | Concept map checker |
-| [`scripts/runConceptChecks.js`](../../../scripts/runConceptChecks.js) | Runner concept checks |
+| [`scripts/checkConceptualMap.js`](../../../scripts/checkConceptualMap.js) | Concept map checker    |
+| [`scripts/runConceptChecks.js`](../../../scripts/runConceptChecks.js)     | Runner concept checks  |

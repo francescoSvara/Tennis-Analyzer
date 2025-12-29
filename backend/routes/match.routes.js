@@ -1,6 +1,6 @@
 /**
  * Match Routes
- * 
+ *
  * Endpoints per match singoli e liste:
  * - GET /match/:eventId - Dati match (ibrido: DB → File → SofaScore)
  * - GET /match/:eventId/bundle - UNIFIED MATCH BUNDLE (endpoint principale)
@@ -15,7 +15,7 @@
  * - POST /sync-match/:eventId - Sync completo
  * - GET /check-data/:eventId - Verifica completezza
  * - GET /strategy-context/:home/:away - Contesto strategie per match
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
  * @see docs/filosofie/MATCHBUNDLE_ONLY_FE
  */

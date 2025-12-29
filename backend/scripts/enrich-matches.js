@@ -1,7 +1,7 @@
 /**
  * Script per arricchire in batch i match nel DB con dati da SofaScore
  * Uso: node scripts/enrich-matches.js [--limit N] [--dry-run] [--source sofascore]
- * 
+ *
  * Questo script:
  * 1. Trova match nel DB che potrebbero avere dati mancanti
  * 2. Fetch dati freschi da SofaScore per ciascuno
@@ -12,25 +12,22 @@ require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 const fetch = require('node-fetch');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 // Parse arguments
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
-const limitArg = args.find(a => a.startsWith('--limit'));
+const limitArg = args.find((a) => a.startsWith('--limit'));
 const limit = limitArg ? parseInt(limitArg.split('=')[1] || args[args.indexOf('--limit') + 1]) : 20;
-const sourceArg = args.find(a => a.startsWith('--source'));
+const sourceArg = args.find((a) => a.startsWith('--source'));
 const source = sourceArg ? sourceArg.split('=')[1] || args[args.indexOf('--source') + 1] : null;
 
 const SOFASCORE_API = 'https://api.sofascore.com/api/v1/event';
 const headers = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-  'Accept': 'application/json',
+  Accept: 'application/json',
   'Accept-Language': 'en-US,en;q=0.9',
-  'Referer': 'https://www.sofascore.com/'
+  Referer: 'https://www.sofascore.com/',
 };
 
 /**
@@ -41,7 +38,7 @@ async function fetchSofaScoreData(eventId) {
     powerRankings: [],
     statistics: [],
     pointByPoint: [],
-    errors: []
+    errors: [],
   };
 
   try {
@@ -97,7 +94,7 @@ async function savePowerRankings(matchId, powerRankings) {
     value: pr.value || 0,
     break_occurred: pr.breakOccurred || false,
     zone: pr.zone || null,
-    status: pr.status || null
+    status: pr.status || null,
   }));
 
   const { error } = await supabase.from('power_rankings').insert(records);
@@ -138,16 +135,19 @@ async function main() {
   const { data: existingPR } = await supabase
     .from('power_rankings')
     .select('match_id')
-    .in('match_id', matches.map(m => m.id));
+    .in(
+      'match_id',
+      matches.map((m) => m.id)
+    );
 
-  const existingPRIds = new Set((existingPR || []).map(p => p.match_id));
+  const existingPRIds = new Set((existingPR || []).map((p) => p.match_id));
 
   const results = {
     total: matches.length,
     skippedExisting: 0,
     enriched: 0,
     noData: 0,
-    errors: []
+    errors: [],
   };
 
   for (const match of matches) {
@@ -178,8 +178,7 @@ async function main() {
       }
 
       // Rate limiting
-      await new Promise(r => setTimeout(r, 800));
-
+      await new Promise((r) => setTimeout(r, 800));
     } catch (e) {
       console.error(`   ❌ Errore: ${e.message}`);
       results.errors.push({ matchId: match.id, error: e.message });

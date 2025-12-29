@@ -1,23 +1,12 @@
 /**
  * Live Match Manager
- * Gestisce il polling intelligente per match live e salvataggio automatico su DB
- * 
- * AGGIORNATO: Ora supporta persistenza su Supabase tramite liveTrackingRepository
- * Riferimento: FILOSOFIA_LIVE_TRACKING.md
- * 
- * FILOSOFIA_LIVE_TRACKING: LivePipeline Steps
- * 1. ingest → fetchLiveData
- * 2. normalize → normalizeLiveData
- * 3. validate → validateLiveData
- * 4. enrich → enrichLiveData (features, quality)
- * 5. persist → persistLiveData (DB)
- * 6. broadcast → Socket.IO emit
+ * @see docs/comments/live-manager-explanations.md#header
  */
 
 const fetch = require('node-fetch');
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+
+
 
 // Supabase client for direct snapshot updates
 let supabase = null;
@@ -46,7 +35,10 @@ try {
   USE_DB_TRACKING = true;
   console.log('✅ LiveManager: Live Tracking Repository loaded (DB mode)');
 } catch (e) {
-  console.warn('⚠️ LiveManager: Live Tracking Repository not available, using in-memory mode:', e.message);
+  console.warn(
+    '⚠️ LiveManager: Live Tracking Repository not available, using in-memory mode:',
+    e.message
+  );
 }
 
 // Store per le sottoscrizioni attive (WebSocket)
@@ -55,35 +47,33 @@ const subscriptions = new Map(); // eventId -> { sockets: Set, lastData: object,
 // Store FALLBACK per il tracking delle partite monitorate (se DB non disponibile)
 const trackedMatchesFallback = new Map(); // eventId -> { status, lastUpdate, startTimestamp, autoTrack: boolean }
 
-// Directory per i file
-const DATA_DIR = path.resolve(__dirname, '..', 'data');
-const SCRAPES_DIR = path.join(DATA_DIR, 'scrapes');
+
 
 // Configurazione
 const CONFIG = {
   // Intervalli di polling per priorità (in ms)
   POLL_INTERVALS: {
-    HIGH: 3000,     // 3 secondi per match importanti (finali, live seguito)
-    MEDIUM: 10000,  // 10 secondi default
-    LOW: 30000      // 30 secondi per match meno importanti
+    HIGH: 3000, // 3 secondi per match importanti (finali, live seguito)
+    MEDIUM: 10000, // 10 secondi default
+    LOW: 30000, // 30 secondi per match meno importanti
   },
   DEFAULT_POLL_INTERVAL: 5000, // Fallback per WebSocket subscriptions
   MAX_RETRIES: 3,
   RETRY_DELAY: 2000,
-  MAX_FAIL_COUNT: 5,  // Dopo questo numero di errori → status ERROR
-  SOFASCORE_API: 'https://api.sofascore.com/api/v1/event'
+  MAX_FAIL_COUNT: 5, // Dopo questo numero di errori → status ERROR
+  SOFASCORE_API: 'https://api.sofascore.com/api/v1/event',
 };
 
 const headers = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-  'Accept': 'application/json',
+  Accept: 'application/json',
   'Accept-Language': 'en-US,en;q=0.9',
-  'Referer': 'https://www.sofascore.com/'
+  Referer: 'https://www.sofascore.com/',
 };
 
 /**
  * Fetch dati live per un evento
- * 
+ *
  * TEMPORAL SEMANTICS (FILOSOFIA_TEMPORAL_SEMANTICS compliance):
  * - ingestion_time: quando i dati sono stati ricevuti dal sistema
  * - event_time: timestamp dell'evento originale (se disponibile)
@@ -101,13 +91,13 @@ async function fetchLiveData(eventId) {
     pointByPoint: [],
     statistics: [],
     powerRankings: [],
-    errors: []
+    errors: [],
   };
 
   const fetches = [
     fetch(`${baseUrl}/${eventId}`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.event = data?.event || data;
         // TEMPORAL SEMANTICS: Extract event_time from source
         if (result.event?.startTimestamp) {
@@ -116,22 +106,28 @@ async function fetchLiveData(eventId) {
           result.event_time = new Date(result.event.changes.changeTimestamp * 1000).toISOString();
         }
       })
-      .catch(e => result.errors.push({ endpoint: 'event', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'event', error: e.message })),
 
     fetch(`${baseUrl}/${eventId}/point-by-point`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { result.pointByPoint = data?.pointByPoint || data || []; })
-      .catch(e => result.errors.push({ endpoint: 'point-by-point', error: e.message })),
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        result.pointByPoint = data?.pointByPoint || data || [];
+      })
+      .catch((e) => result.errors.push({ endpoint: 'point-by-point', error: e.message })),
 
     fetch(`${baseUrl}/${eventId}/statistics`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { result.statistics = data?.statistics || []; })
-      .catch(e => result.errors.push({ endpoint: 'statistics', error: e.message })),
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        result.statistics = data?.statistics || [];
+      })
+      .catch((e) => result.errors.push({ endpoint: 'statistics', error: e.message })),
 
     fetch(`${baseUrl}/${eventId}/tennis-power-rankings`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { result.powerRankings = data?.tennisPowerRankings || []; })
-      .catch(e => result.errors.push({ endpoint: 'power-rankings', error: e.message }))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        result.powerRankings = data?.tennisPowerRankings || [];
+      })
+      .catch((e) => result.errors.push({ endpoint: 'power-rankings', error: e.message })),
   ];
 
   await Promise.all(fetches);
@@ -158,89 +154,89 @@ async function fetchCompleteData(eventId) {
     odds: null,
     graph: null,
     errors: [],
-    dataCompleteness: {}
+    dataCompleteness: {},
   };
 
   const fetches = [
     // Dati evento base
     fetch(`${baseUrl}/${eventId}`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.event = data?.event || data;
         result.dataCompleteness.event = !!result.event;
       })
-      .catch(e => result.errors.push({ endpoint: 'event', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'event', error: e.message })),
 
     // Point by point
     fetch(`${baseUrl}/${eventId}/point-by-point`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.pointByPoint = data?.pointByPoint || data || [];
         result.dataCompleteness.pointByPoint = result.pointByPoint.length > 0;
       })
-      .catch(e => result.errors.push({ endpoint: 'point-by-point', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'point-by-point', error: e.message })),
 
     // Statistiche
     fetch(`${baseUrl}/${eventId}/statistics`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.statistics = data?.statistics || [];
         result.dataCompleteness.statistics = result.statistics.length > 0;
       })
-      .catch(e => result.errors.push({ endpoint: 'statistics', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'statistics', error: e.message })),
 
     // Power rankings
     fetch(`${baseUrl}/${eventId}/tennis-power-rankings`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.powerRankings = data?.tennisPowerRankings || [];
         result.dataCompleteness.powerRankings = result.powerRankings.length > 0;
       })
-      .catch(e => result.errors.push({ endpoint: 'power-rankings', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'power-rankings', error: e.message })),
 
     // Incidents (eventi nel match)
     fetch(`${baseUrl}/${eventId}/incidents`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.incidents = data?.incidents || [];
         result.dataCompleteness.incidents = result.incidents.length > 0;
       })
-      .catch(e => result.errors.push({ endpoint: 'incidents', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'incidents', error: e.message })),
 
     // Lineups
     fetch(`${baseUrl}/${eventId}/lineups`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.lineups = data;
         result.dataCompleteness.lineups = !!data;
       })
-      .catch(e => result.errors.push({ endpoint: 'lineups', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'lineups', error: e.message })),
 
     // Head to head
     fetch(`${baseUrl}/${eventId}/h2h`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.h2h = data;
         result.dataCompleteness.h2h = !!data;
       })
-      .catch(e => result.errors.push({ endpoint: 'h2h', error: e.message })),
+      .catch((e) => result.errors.push({ endpoint: 'h2h', error: e.message })),
 
     // Graph (momentum)
     fetch(`${baseUrl}/${eventId}/graph`, { headers })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { 
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         result.graph = data;
         result.dataCompleteness.graph = !!data;
       })
-      .catch(e => result.errors.push({ endpoint: 'graph', error: e.message }))
+      .catch((e) => result.errors.push({ endpoint: 'graph', error: e.message })),
   ];
 
   await Promise.all(fetches);
-  
+
   // Calcola completezza totale
   const fields = Object.values(result.dataCompleteness);
   result.dataCompleteness.total = Math.round((fields.filter(Boolean).length / fields.length) * 100);
-  
+
   return result;
 }
 
@@ -250,22 +246,28 @@ async function fetchCompleteData(eventId) {
  */
 function computeDataHash(data) {
   if (!data || !data.event) return null;
-  
+
   // Hash basato su elementi chiave che cambiano durante il match
   const keyData = {
     score: `${data.event?.homeScore?.current || 0}-${data.event?.awayScore?.current || 0}`,
-    sets: data.event?.homeScore?.period1 !== undefined ? [
-      data.event?.homeScore?.period1, data.event?.awayScore?.period1,
-      data.event?.homeScore?.period2, data.event?.awayScore?.period2,
-      data.event?.homeScore?.period3, data.event?.awayScore?.period3
-    ] : [],
+    sets:
+      data.event?.homeScore?.period1 !== undefined
+        ? [
+            data.event?.homeScore?.period1,
+            data.event?.awayScore?.period1,
+            data.event?.homeScore?.period2,
+            data.event?.awayScore?.period2,
+            data.event?.homeScore?.period3,
+            data.event?.awayScore?.period3,
+          ]
+        : [],
     status: data.event?.status?.type,
     server: data.event?.firstToServe,
     pbpLength: data.pointByPoint?.length || 0,
     lastPbp: data.pointByPoint?.slice(-1)[0] || null,
-    prLength: data.powerRankings?.length || 0
+    prLength: data.powerRankings?.length || 0,
   };
-  
+
   const jsonStr = JSON.stringify(keyData);
   return crypto.createHash('sha256').update(jsonStr).digest('hex').substring(0, 16);
 }
@@ -277,17 +279,17 @@ function isMatchFinished(data) {
   if (!data || !data.event) return false;
   const status = data.event.status;
   if (!status) return false;
-  
+
   const type = (status.type || '').toLowerCase();
   const description = (status.description || '').toLowerCase();
-  
+
   // Match terminato
   if (type === 'finished' || type === 'ended' || type === 'completed') return true;
   if (description.includes('finished') || description.includes('ended')) return true;
-  
+
   // Match cancellato o rimandato (non serve più polling)
   if (type === 'canceled' || type === 'postponed' || type === 'abandoned') return true;
-  
+
   return false;
 }
 
@@ -306,25 +308,25 @@ function hasDataChanged(oldData, newData) {
 /**
  * Step 2: Normalize live data to canonical format
  * FILOSOFIA_LIVE_TRACKING: normalizer step
- * 
+ *
  * @param {Object} rawData - Raw data from fetchLiveData
  * @returns {Object} Normalized data with canonical field names
  */
 function normalizeLiveData(rawData) {
   if (!rawData) return null;
-  
+
   const event = rawData.event || {};
-  
+
   return {
     // Canonical identifiers
     matchId: rawData.eventId,
     eventId: rawData.eventId,
-    
+
     // Temporal fields (FILOSOFIA_TEMPORAL)
     ingestion_time: rawData.ingestion_time,
     event_time: rawData.event_time,
     normalized_at: new Date().toISOString(),
-    
+
     // Match header
     header: {
       match: {
@@ -332,38 +334,38 @@ function normalizeLiveData(rawData) {
         status: event.status?.type || 'unknown',
         statusDescription: event.status?.description,
         startTimestamp: event.startTimestamp,
-        slug: event.slug
+        slug: event.slug,
       },
       players: {
         home: {
           id: event.homeTeam?.id,
           name: event.homeTeam?.name || event.homeTeam?.shortName,
-          slug: event.homeTeam?.slug
+          slug: event.homeTeam?.slug,
         },
         away: {
           id: event.awayTeam?.id,
           name: event.awayTeam?.name || event.awayTeam?.shortName,
-          slug: event.awayTeam?.slug
-        }
+          slug: event.awayTeam?.slug,
+        },
       },
       score: {
         home: event.homeScore?.current ?? event.homeScore?.display ?? 0,
         away: event.awayScore?.current ?? event.awayScore?.display ?? 0,
-        sets: extractSets(event)
+        sets: extractSets(event),
       },
-      server: event.firstToServe
+      server: event.firstToServe,
     },
-    
+
     // Data sections
     pointByPoint: rawData.pointByPoint || [],
     statistics: rawData.statistics || [],
     powerRankings: rawData.powerRankings || [],
-    
+
     // Original data reference
     _raw: rawData,
-    
+
     // Errors from fetch
-    errors: rawData.errors || []
+    errors: rawData.errors || [],
   };
 }
 
@@ -379,7 +381,7 @@ function extractSets(event) {
       sets.push({
         setNumber: i,
         home: home ?? 0,
-        away: away ?? 0
+        away: away ?? 0,
       });
     }
   }
@@ -389,33 +391,37 @@ function extractSets(event) {
 /**
  * Step 3: Validate live data
  * FILOSOFIA_LIVE_TRACKING: validator step
- * 
+ *
  * @param {Object} normalizedData - Normalized data from normalizeLiveData
  * @returns {Object} { valid: boolean, issues: Array, data: Object }
  */
 function validateLiveData(normalizedData) {
   const issues = [];
-  
+
   if (!normalizedData) {
     return { valid: false, issues: ['Data is null'], data: null };
   }
-  
+
   // Required fields
   if (!normalizedData.matchId) {
     issues.push({ code: 'MISSING_MATCH_ID', severity: 'ERROR' });
   }
-  
+
   if (!normalizedData.header?.players?.home?.id || !normalizedData.header?.players?.away?.id) {
     issues.push({ code: 'MISSING_PLAYER_IDS', severity: 'WARN' });
   }
-  
+
   // Temporal validation (FILOSOFIA_TEMPORAL: no future data)
   const ingestionTime = new Date(normalizedData.ingestion_time);
   const now = new Date();
   if (ingestionTime > now) {
-    issues.push({ code: 'FUTURE_TIMESTAMP', severity: 'ERROR', detail: 'ingestion_time is in future' });
+    issues.push({
+      code: 'FUTURE_TIMESTAMP',
+      severity: 'ERROR',
+      detail: 'ingestion_time is in future',
+    });
   }
-  
+
   // Score validation
   const score = normalizedData.header?.score;
   if (score?.sets) {
@@ -426,38 +432,42 @@ function validateLiveData(normalizedData) {
       if (set.home > 7 || set.away > 7) {
         // Only valid in tiebreak scenarios
         if (!(set.home === 7 || set.away === 7)) {
-          issues.push({ code: 'UNLIKELY_SCORE', severity: 'WARN', detail: `Set ${set.setNumber}: ${set.home}-${set.away}` });
+          issues.push({
+            code: 'UNLIKELY_SCORE',
+            severity: 'WARN',
+            detail: `Set ${set.setNumber}: ${set.home}-${set.away}`,
+          });
         }
       }
     }
   }
-  
-  const hasErrors = issues.some(i => i.severity === 'ERROR');
-  
+
+  const hasErrors = issues.some((i) => i.severity === 'ERROR');
+
   return {
     valid: !hasErrors,
     issues,
     data: normalizedData,
-    validated_at: new Date().toISOString()
+    validated_at: new Date().toISOString(),
   };
 }
 
 /**
  * Full pipeline: ingest → normalize → validate
- * 
+ *
  * @param {string} eventId - SofaScore event ID
  * @returns {Object} Processed live data
  */
 async function processLivePipeline(eventId) {
   // Step 1: Ingest
   const rawData = await fetchLiveData(eventId);
-  
+
   // Step 2: Normalize
   const normalized = normalizeLiveData(rawData);
-  
+
   // Step 3: Validate
   const validated = validateLiveData(normalized);
-  
+
   // Return processed data with pipeline metadata
   return {
     ...validated.data,
@@ -465,8 +475,8 @@ async function processLivePipeline(eventId) {
       steps: ['ingest', 'normalize', 'validate'],
       valid: validated.valid,
       issues: validated.issues,
-      processed_at: new Date().toISOString()
-    }
+      processed_at: new Date().toISOString(),
+    },
   };
 }
 
@@ -477,85 +487,85 @@ async function processLivePipeline(eventId) {
 /**
  * Generate patch operations from old to new live data
  * FILOSOFIA_LIVE_TRACKING: RULE_LIVE_OUTPUT - produce patches on MatchBundle
- * 
+ *
  * @param {Object} oldData - Previous live data state
  * @param {Object} newData - New live data state
  * @returns {Array} Array of patch operations in JSON Patch format
  */
 function generateLivePatches(oldData, newData) {
   const patches = [];
-  
+
   if (!oldData || !newData) {
     return patches;
   }
-  
+
   // Score changes
   const oldScore = oldData.header?.score;
   const newScore = newData.header?.score;
-  
+
   if (JSON.stringify(oldScore) !== JSON.stringify(newScore)) {
     patches.push({
       op: 'replace',
       path: '/header/score',
       value: newScore,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
-  
+
   // Status changes
   if (oldData.header?.match?.status !== newData.header?.match?.status) {
     patches.push({
       op: 'replace',
       path: '/header/match/status',
       value: newData.header?.match?.status,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
-  
+
   // Server changes
   if (oldData.header?.server !== newData.header?.server) {
     patches.push({
       op: 'replace',
       path: '/header/server',
       value: newData.header?.server,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
-  
+
   // Point by point additions
   const oldPbpLength = oldData.pointByPoint?.length || 0;
   const newPbpLength = newData.pointByPoint?.length || 0;
-  
+
   if (newPbpLength > oldPbpLength) {
     const newPoints = newData.pointByPoint.slice(oldPbpLength);
     patches.push({
       op: 'add',
       path: '/tabs/points/-',
       value: newPoints,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
-  
+
   // Power rankings changes
   const oldPrLength = oldData.powerRankings?.length || 0;
   const newPrLength = newData.powerRankings?.length || 0;
-  
+
   if (newPrLength > oldPrLength) {
     const newRankings = newData.powerRankings.slice(oldPrLength);
     patches.push({
       op: 'add',
       path: '/tabs/momentum/-',
       value: newRankings,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
-  
+
   return patches;
 }
 
 /**
  * Apply patches to existing bundle
- * 
+ *
  * @param {Object} bundle - Existing MatchBundle
  * @param {Array} patches - Array of patch operations
  * @returns {Object} Updated bundle
@@ -564,14 +574,14 @@ function applyLivePatches(bundle, patches) {
   if (!bundle || !patches || patches.length === 0) {
     return bundle;
   }
-  
+
   const updated = JSON.parse(JSON.stringify(bundle)); // Deep clone
-  
+
   for (const patch of patches) {
     try {
-      const pathParts = patch.path.split('/').filter(p => p);
+      const pathParts = patch.path.split('/').filter((p) => p);
       let target = updated;
-      
+
       // Navigate to parent
       for (let i = 0; i < pathParts.length - 1; i++) {
         if (target[pathParts[i]] === undefined) {
@@ -579,9 +589,9 @@ function applyLivePatches(bundle, patches) {
         }
         target = target[pathParts[i]];
       }
-      
+
       const lastKey = pathParts[pathParts.length - 1];
-      
+
       if (patch.op === 'replace') {
         target[lastKey] = patch.value;
       } else if (patch.op === 'add') {
@@ -600,12 +610,12 @@ function applyLivePatches(bundle, patches) {
       console.warn(`Failed to apply patch: ${patch.path}`, e.message);
     }
   }
-  
+
   // Update meta
   updated.meta = updated.meta || {};
   updated.meta.last_patch_at = new Date().toISOString();
   updated.meta.patch_count = (updated.meta.patch_count || 0) + patches.length;
-  
+
   return updated;
 }
 
@@ -633,7 +643,7 @@ function initLiveManager(io) {
         subscriptions.set(eventId, {
           sockets: new Set([socket]),
           lastData: null,
-          interval: null
+          interval: null,
         });
 
         // Avvia polling per questo evento
@@ -651,7 +661,7 @@ function initLiveManager(io) {
       } else {
         // Aggiungi socket alla subscription esistente
         subscriptions.get(eventId).sockets.add(socket);
-        
+
         // Invia ultimi dati conosciuti
         const lastData = subscriptions.get(eventId).lastData;
         if (lastData) {
@@ -709,7 +719,7 @@ function removeSocketFromSubscription(socket, eventId) {
 /**
  * Avvia polling per un evento
  */
-function startPolling(eventId, io) {
+function startPolling(eventId) {
   const sub = subscriptions.get(eventId);
   if (!sub || sub.interval) return;
 
@@ -718,65 +728,69 @@ function startPolling(eventId, io) {
   sub.interval = setInterval(async () => {
     try {
       const newData = await fetchLiveData(eventId);
-      
+
       // Controlla se il match è terminato
       if (isMatchFinished(newData)) {
         console.log(`🏁 Match ${eventId} finished, fetching complete data...`);
-        
+
         // Fetch COMPLETO finale per avere tutti i dati per il DB
         const completeData = await fetchCompleteData(eventId);
-        
-        console.log(`✅ Complete data fetched for ${eventId}, completeness: ${completeData.dataCompleteness.total}%`);
-        
+
+        console.log(
+          `✅ Complete data fetched for ${eventId}, completeness: ${completeData.dataCompleteness.total}%`
+        );
+
         // ========== SALVA SU DATABASE ==========
         await saveMatchToDatabase(eventId, completeData, 'finished');
-        
+
         // Invia dati completi ai client (se ci sono)
         sub.lastData = completeData;
-        sub.sockets.forEach(socket => {
+        sub.sockets.forEach((socket) => {
           socket.emit('data', completeData);
-          socket.emit('matchFinished', { 
-            eventId, 
+          socket.emit('matchFinished', {
+            eventId,
             message: 'Match terminato',
-            dataCompleteness: completeData.dataCompleteness
+            dataCompleteness: completeData.dataCompleteness,
           });
         });
-        
+
         // Rimuovi dal tracking
         trackedMatchesFallback.delete(String(eventId));
-        
+
         // Ferma polling
         clearInterval(sub.interval);
         sub.interval = null;
         return;
       }
-      
+
       // Controlla se i dati sono cambiati
       if (hasDataChanged(sub.lastData, newData)) {
-        console.log(`📊 Data changed for event ${eventId}, broadcasting to ${sub.sockets.size} clients`);
+        console.log(
+          `📊 Data changed for event ${eventId}, broadcasting to ${sub.sockets.size} clients`
+        );
         sub.lastData = newData;
-        
+
         // ========== SALVA AGGIORNAMENTO SU DATABASE ==========
         // Salva periodicamente durante il match (ogni cambio di dati)
         await saveMatchToDatabase(eventId, newData, 'live-update');
-        
+
         // Aggiorna tracking (fallback in-memory)
         trackedMatchesFallback.set(String(eventId), {
           status: newData.event?.status?.type || 'inprogress',
           lastUpdate: new Date().toISOString(),
           startTimestamp: newData.event?.startTimestamp,
-          autoTrack: true
+          autoTrack: true,
         });
-        
+
         // Broadcast a tutti i socket iscritti
-        sub.sockets.forEach(socket => {
+        sub.sockets.forEach((socket) => {
           socket.emit('data', newData);
         });
       }
     } catch (err) {
       console.error(`❌ Polling error for event ${eventId}:`, err.message);
       // Notifica errore ai client
-      sub.sockets.forEach(socket => {
+      sub.sockets.forEach((socket) => {
         socket.emit('error', { message: err.message, eventId });
       });
     }
@@ -790,14 +804,14 @@ function getStats() {
   const stats = {
     activeSubscriptions: subscriptions.size,
     trackedMatches: trackedMatchesFallback.size,
-    events: []
+    events: [],
   };
 
   subscriptions.forEach((sub, eventId) => {
     stats.events.push({
       eventId,
       clients: sub.sockets.size,
-      hasData: !!sub.lastData
+      hasData: !!sub.lastData,
     });
   });
 
@@ -847,13 +861,16 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
       powerRankings: data.powerRankings || [],
       incidents: data.incidents || [],
       h2h: data.h2h,
-      graph: data.graph
+      graph: data.graph,
     };
 
     // 2. Salva su database (se disponibile)
     if (matchRepository) {
       try {
-        const savedMatch = await matchRepository.insertMatch(matchForDB, `https://www.sofascore.com/event/${eventId}`);
+        await matchRepository.insertMatch(
+          matchForDB,
+          `https://www.sofascore.com/event/${eventId}`
+        );
         console.log(`💾 [${saveType}] Match ${eventId} saved to database`);
       } catch (dbError) {
         console.error(`❌ Database save failed for ${eventId}:`, dbError.message);
@@ -865,11 +882,12 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
     if (supabase) {
       try {
         // Calcola superficie da groundType o tournament
-        const surface = eventData.groundType || 
-                       eventData.tournament?.uniqueTournament?.groundType || 
-                       eventData.tournament?.groundType ||
-                       'Unknown';
-        
+        const surface =
+          eventData.groundType ||
+          eventData.tournament?.uniqueTournament?.groundType ||
+          eventData.tournament?.groundType ||
+          'Unknown';
+
         // Costruisci sets dai punteggi
         const sets = [];
         const homeScore = eventData.homeScore || {};
@@ -881,29 +899,40 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
             sets.push({ home: hPeriod, away: aPeriod });
           }
         }
-        
+
         const snapshotData = {
           match_id: parseInt(eventId),
           core_json: {
             id: parseInt(eventId),
-            status: eventData.status?.type || eventData.status?.description?.toLowerCase().replace(/\s/g, '') || 'unknown',
-            date: eventData.startTimestamp ? new Date(eventData.startTimestamp * 1000).toISOString().split('T')[0] : null,
-            time: eventData.startTimestamp ? new Date(eventData.startTimestamp * 1000).toISOString().split('T')[1]?.substring(0, 5) : null,
+            status:
+              eventData.status?.type ||
+              eventData.status?.description?.toLowerCase().replace(/\s/g, '') ||
+              'unknown',
+            date: eventData.startTimestamp
+              ? new Date(eventData.startTimestamp * 1000).toISOString().split('T')[0]
+              : null,
+            time: eventData.startTimestamp
+              ? new Date(eventData.startTimestamp * 1000)
+                  .toISOString()
+                  .split('T')[1]
+                  ?.substring(0, 5)
+              : null,
             surface: surface,
             round: eventData.roundInfo?.name || null,
             bestOf: eventData.tournament?.uniqueTournament?.tennisMatchFormat?.matchBestOf || 3,
             sets: sets,
-            score: homeScore?.current != null && awayScore?.current != null 
-              ? `${homeScore.current}-${awayScore.current}` 
-              : null,
+            score:
+              homeScore?.current != null && awayScore?.current != null
+                ? `${homeScore.current}-${awayScore.current}`
+                : null,
             winner: eventData.winnerCode || null,
             setsPlayer1: homeScore?.current,
             setsPlayer2: awayScore?.current,
             tournament: {
               name: eventData.tournament?.name || eventData.tournament?.uniqueTournament?.name,
               category: eventData.tournament?.category?.name,
-              id: eventData.tournament?.id
-            }
+              id: eventData.tournament?.id,
+            },
           },
           players_json: {
             player1: {
@@ -911,36 +940,40 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
               name: eventData.homeTeam?.name,
               country: eventData.homeTeam?.country?.alpha2,
               currentRanking: eventData.homeTeam?.ranking,
-              seed: eventData.homeTeam?.seed
+              seed: eventData.homeTeam?.seed,
             },
             player2: {
               id: eventData.awayTeam?.id,
               name: eventData.awayTeam?.name,
               country: eventData.awayTeam?.country?.alpha2,
               currentRanking: eventData.awayTeam?.ranking,
-              seed: eventData.awayTeam?.seed
-            }
+              seed: eventData.awayTeam?.seed,
+            },
           },
           stats_json: data.statistics || [],
           momentum_json: data.powerRankings || [],
           odds_json: data.odds || null,
-          h2h_json: data.h2h ? {
-            player1_wins: data.h2h.homeWins || 0,
-            player2_wins: data.h2h.awayWins || 0
-          } : null,
+          h2h_json: data.h2h
+            ? {
+                player1_wins: data.h2h.homeWins || 0,
+                player2_wins: data.h2h.awayWins || 0,
+              }
+            : null,
           data_sources_json: [{ source_type: 'sofascore_sync' }],
           data_quality_int: calculateDataQualityFromCompleteness(data.dataCompleteness),
-          last_updated_at: new Date().toISOString()
+          last_updated_at: new Date().toISOString(),
         };
-        
+
         const { error: snapshotError } = await supabase
           .from('match_card_snapshot')
           .upsert(snapshotData, { onConflict: 'match_id' });
-        
+
         if (snapshotError) {
           console.error(`❌ Snapshot update failed for ${eventId}:`, snapshotError.message);
         } else {
-          console.log(`📸 [${saveType}] Snapshot updated for match ${eventId} (surface=${surface})`);
+          console.log(
+            `📸 [${saveType}] Snapshot updated for match ${eventId} (surface=${surface})`
+          );
         }
       } catch (snapErr) {
         console.error(`❌ Snapshot error for ${eventId}:`, snapErr.message);
@@ -959,7 +992,7 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
  */
 function calculateDataQualityFromCompleteness(completeness) {
   if (!completeness) return 20;
-  
+
   let score = 0;
   if (completeness.event) score += 30;
   if (completeness.statistics) score += 20;
@@ -967,75 +1000,11 @@ function calculateDataQualityFromCompleteness(completeness) {
   if (completeness.powerRankings) score += 15;
   if (completeness.h2h) score += 10;
   if (completeness.graph) score += 5;
-  
+
   return Math.min(100, score);
 }
 
-/**
- * Salva i dati in un file JSON (retrocompatibilità)
- */
-async function saveMatchToFile(eventId, data, saveType) {
-  try {
-    // Cerca file esistente per questo eventId
-    const files = fs.readdirSync(SCRAPES_DIR).filter(f => f.endsWith('.json'));
-    let targetFile = null;
-    let existingContent = null;
 
-    for (const file of files) {
-      try {
-        const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
-        if (content.api) {
-          for (const [url, apiData] of Object.entries(content.api)) {
-            if (url.includes(`/event/${eventId}`) || apiData?.event?.id === parseInt(eventId)) {
-              targetFile = file;
-              existingContent = content;
-              break;
-            }
-          }
-        }
-        if (targetFile) break;
-      } catch (e) { /* skip */ }
-    }
-
-    if (targetFile && existingContent) {
-      // Aggiorna file esistente
-      existingContent.lastSync = new Date().toISOString();
-      existingContent.syncType = saveType;
-      existingContent.liveData = data;
-      
-      // Aggiorna l'API con dati freschi
-      const baseUrl = `https://api.sofascore.com/api/v1/event/${eventId}`;
-      if (data.event) existingContent.api[baseUrl] = { event: data.event };
-      if (data.pointByPoint?.length) existingContent.api[`${baseUrl}/point-by-point`] = { pointByPoint: data.pointByPoint };
-      if (data.statistics?.length) existingContent.api[`${baseUrl}/statistics`] = { statistics: data.statistics };
-      if (data.powerRankings?.length) existingContent.api[`${baseUrl}/tennis-power-rankings`] = { tennisPowerRankings: data.powerRankings };
-      
-      fs.writeFileSync(path.join(SCRAPES_DIR, targetFile), JSON.stringify(existingContent, null, 2));
-      console.log(`📁 [${saveType}] Updated file ${targetFile}`);
-    } else {
-      // Crea nuovo file
-      const newFileName = `live-${eventId}-${Date.now().toString(36)}.json`;
-      const newContent = {
-        api: {},
-        createdAt: new Date().toISOString(),
-        lastSync: new Date().toISOString(),
-        syncType: saveType,
-        eventId: eventId
-      };
-      
-      const baseUrl = `https://api.sofascore.com/api/v1/event/${eventId}`;
-      if (data.event) newContent.api[baseUrl] = { event: data.event };
-      if (data.pointByPoint?.length) newContent.api[`${baseUrl}/point-by-point`] = { pointByPoint: data.pointByPoint };
-      if (data.statistics?.length) newContent.api[`${baseUrl}/statistics`] = { statistics: data.statistics };
-      if (data.powerRankings?.length) newContent.api[`${baseUrl}/tennis-power-rankings`] = { tennisPowerRankings: data.powerRankings };
-      
-      fs.writeFileSync(path.join(SCRAPES_DIR, newFileName), JSON.stringify(newContent, null, 2));
-      console.log(`📁 [${saveType}] Created new file ${newFileName}`);
-    }
-  } catch (error) {
-    console.error(`❌ File save error for ${eventId}:`, error.message);
-  }
-}
 
 // ============================================================================
 // SCHEDULER - Monitoraggio automatico partite
@@ -1056,14 +1025,14 @@ function startScheduler() {
   }
 
   console.log('🕐 Starting match monitoring scheduler...');
-  
+
   schedulerInterval = setInterval(async () => {
     await checkTrackedMatches();
   }, SCHEDULER_INTERVAL);
 
   // Prima esecuzione immediata
   checkTrackedMatches();
-  
+
   // Avvia anche reconciliation job
   startReconciliationJob();
 }
@@ -1095,7 +1064,7 @@ function startReconciliationJob() {
   }
 
   console.log('🔄 Starting reconciliation job (every 5 min)...');
-  
+
   reconciliationInterval = setInterval(async () => {
     await reconcileLiveMatches();
   }, RECONCILIATION_INTERVAL);
@@ -1122,18 +1091,18 @@ function stopReconciliationJob() {
  */
 async function reconcileLiveMatches() {
   console.log('🔄 Running reconciliation job...');
-  
+
   try {
     // 1. Fetch lista match live da SofaScore
     const liveMatches = await fetchLiveMatchesList();
-    
+
     if (!liveMatches || liveMatches.length === 0) {
       console.log('📭 No live matches found on SofaScore');
       return { added: 0, finished: 0 };
     }
-    
+
     console.log(`📡 Found ${liveMatches.length} live matches on SofaScore`);
-    
+
     // 2. Ottieni match attualmente tracciati
     let currentlyTracked = [];
     if (USE_DB_TRACKING && liveTrackingRepo) {
@@ -1141,61 +1110,63 @@ async function reconcileLiveMatches() {
     } else {
       currentlyTracked = Array.from(trackedMatchesFallback.entries()).map(([id, info]) => ({
         source_event_id: id,
-        ...info
+        ...info,
       }));
     }
-    
-    const trackedIds = new Set(currentlyTracked.map(t => String(t.source_event_id)));
-    const liveIds = new Set(liveMatches.map(m => String(m.id)));
-    
+
+    const trackedIds = new Set(currentlyTracked.map((t) => String(t.source_event_id)));
+    const liveIds = new Set(liveMatches.map((m) => String(m.id)));
+
     // 3. Aggiungi nuovi match live (non ancora tracciati)
     let addedCount = 0;
     for (const match of liveMatches) {
       const eventId = String(match.id);
-      
+
       if (!trackedIds.has(eventId)) {
         // Determina priorità in base a torneo/round
         const priority = determinePriority(match);
-        
+
         const added = await trackMatch(eventId, {
           priority,
           status: 'inprogress',
           player1Name: match.homeTeam?.name,
           player2Name: match.awayTeam?.name,
-          tournamentName: match.tournament?.name
+          tournamentName: match.tournament?.name,
         });
-        
+
         if (added) {
           addedCount++;
-          console.log(`➕ Auto-added: ${match.homeTeam?.name} vs ${match.awayTeam?.name} (${priority})`);
+          console.log(
+            `➕ Auto-added: ${match.homeTeam?.name} vs ${match.awayTeam?.name} (${priority})`
+          );
         }
       }
     }
-    
+
     // 4. Marca come FINISHED i match spariti dalla lista live
     let finishedCount = 0;
     for (const tracked of currentlyTracked) {
       const eventId = tracked.source_event_id;
-      
+
       if (!liveIds.has(eventId)) {
         // Match non più nella lista live → probabilmente finito
         console.log(`🏁 Match ${eventId} no longer live, checking status...`);
-        
+
         try {
           // Verifica effettivo stato
           const data = await fetchLiveData(eventId);
-          
+
           if (isMatchFinished(data)) {
             // Fetch dati completi e salva
             const completeData = await fetchCompleteData(eventId);
             await saveMatchToDatabase(eventId, completeData, 'reconciliation-finished');
-            
+
             if (USE_DB_TRACKING && liveTrackingRepo) {
               await liveTrackingRepo.markFinished(eventId);
             } else {
               trackedMatchesFallback.delete(eventId);
             }
-            
+
             finishedCount++;
             console.log(`✅ Match ${eventId} marked as finished`);
           }
@@ -1204,10 +1175,9 @@ async function reconcileLiveMatches() {
         }
       }
     }
-    
+
     console.log(`🔄 Reconciliation complete: +${addedCount} added, ${finishedCount} finished`);
     return { added: addedCount, finished: finishedCount };
-    
   } catch (error) {
     console.error('❌ Reconciliation error:', error.message);
     return { error: error.message };
@@ -1221,32 +1191,34 @@ async function fetchLiveMatchesList() {
   try {
     // Endpoint per match tennis live
     const url = 'https://api.sofascore.com/api/v1/sport/tennis/events/live';
-    
+
     const response = await fetch(url, { headers });
-    
+
     if (!response.ok) {
       console.warn(`⚠️ Live matches fetch failed: ${response.status}`);
       return [];
     }
-    
+
     const data = await response.json();
     const events = data?.events || [];
-    
+
     // Filtra solo match ATP/WTA principali (opzionale)
-    const mainTourEvents = events.filter(e => {
+    const mainTourEvents = events.filter((e) => {
       const category = e.tournament?.category?.name?.toLowerCase() || '';
       const tournamentName = e.tournament?.name?.toLowerCase() || '';
-      
+
       // Include ATP, WTA, Grand Slam
-      return category.includes('atp') || 
-             category.includes('wta') ||
-             tournamentName.includes('grand slam') ||
-             tournamentName.includes('australian open') ||
-             tournamentName.includes('roland garros') ||
-             tournamentName.includes('wimbledon') ||
-             tournamentName.includes('us open');
+      return (
+        category.includes('atp') ||
+        category.includes('wta') ||
+        tournamentName.includes('grand slam') ||
+        tournamentName.includes('australian open') ||
+        tournamentName.includes('roland garros') ||
+        tournamentName.includes('wimbledon') ||
+        tournamentName.includes('us open')
+      );
     });
-    
+
     return mainTourEvents;
   } catch (error) {
     console.error('❌ Error fetching live matches:', error.message);
@@ -1261,37 +1233,39 @@ function determinePriority(match) {
   const tournamentName = (match.tournament?.name || '').toLowerCase();
   const roundName = (match.roundInfo?.name || '').toLowerCase();
   const category = (match.tournament?.category?.name || '').toLowerCase();
-  
+
   // Grand Slam finals/semis = HIGH
-  if (tournamentName.includes('australian open') ||
-      tournamentName.includes('roland garros') ||
-      tournamentName.includes('wimbledon') ||
-      tournamentName.includes('us open')) {
+  if (
+    tournamentName.includes('australian open') ||
+    tournamentName.includes('roland garros') ||
+    tournamentName.includes('wimbledon') ||
+    tournamentName.includes('us open')
+  ) {
     if (roundName.includes('final') || roundName.includes('semifinal')) {
       return 'HIGH';
     }
     return 'MEDIUM';
   }
-  
+
   // ATP Masters 1000 finals = HIGH
   if (category.includes('atp') && tournamentName.includes('1000')) {
     if (roundName.includes('final')) {
       return 'HIGH';
     }
   }
-  
+
   // Qualificazioni = LOW
   if (roundName.includes('qualification') || roundName.includes('qualifying')) {
     return 'LOW';
   }
-  
+
   // Round 1 di tornei minori = LOW
   if (roundName.includes('round 1') || roundName.includes('1st round')) {
     if (!category.includes('grand slam') && !tournamentName.includes('1000')) {
       return 'LOW';
     }
   }
-  
+
   return 'MEDIUM';
 }
 
@@ -1301,7 +1275,7 @@ function determinePriority(match) {
  */
 async function checkTrackedMatches() {
   let trackedList = [];
-  
+
   // Ottieni lista da DB o fallback
   if (USE_DB_TRACKING && liveTrackingRepo) {
     try {
@@ -1311,23 +1285,23 @@ async function checkTrackedMatches() {
       // Fallback to in-memory
       trackedList = Array.from(trackedMatchesFallback.entries()).map(([eventId, info]) => ({
         source_event_id: eventId,
-        ...info
+        ...info,
       }));
     }
   } else {
     trackedList = Array.from(trackedMatchesFallback.entries()).map(([eventId, info]) => ({
       source_event_id: eventId,
-      ...info
+      ...info,
     }));
   }
-  
+
   if (trackedList.length === 0) return;
-  
+
   console.log(`🔍 Checking ${trackedList.length} tracked matches...`);
 
   for (const trackInfo of trackedList) {
     const eventId = trackInfo.source_event_id;
-    
+
     try {
       // Salta se è già in polling attivo tramite WebSocket
       if (subscriptions.has(eventId)) continue;
@@ -1335,13 +1309,13 @@ async function checkTrackedMatches() {
       // Fetch dati aggiornati
       const data = await fetchLiveData(eventId);
       const payloadHash = computeDataHash(data);
-      
+
       if (isMatchFinished(data)) {
         console.log(`🏁 Tracked match ${eventId} finished, fetching complete data...`);
-        
+
         const completeData = await fetchCompleteData(eventId);
         await saveMatchToDatabase(eventId, completeData, 'scheduler-finished');
-        
+
         // Marca come finito
         if (USE_DB_TRACKING && liveTrackingRepo) {
           await liveTrackingRepo.markFinished(eventId);
@@ -1355,11 +1329,11 @@ async function checkTrackedMatches() {
           currentScore: {
             sets: extractSetsFromEvent(data.event),
             game: `${data.event?.homeScore?.point || 0}-${data.event?.awayScore?.point || 0}`,
-            server: data.event?.firstToServe
+            server: data.event?.firstToServe,
           },
-          matchStatus: data.event?.status?.type || 'inprogress'
+          matchStatus: data.event?.status?.type || 'inprogress',
         };
-        
+
         if (USE_DB_TRACKING && liveTrackingRepo) {
           // Hash diverso = cambio nel match
           if (payloadHash !== trackInfo.last_payload_hash) {
@@ -1371,13 +1345,13 @@ async function checkTrackedMatches() {
             ...trackInfo,
             status: data.event?.status?.type || 'inprogress',
             lastUpdate: new Date().toISOString(),
-            last_payload_hash: payloadHash
+            last_payload_hash: payloadHash,
           });
         }
       }
     } catch (error) {
       console.error(`❌ Error checking tracked match ${eventId}:`, error.message);
-      
+
       // Registra errore
       if (USE_DB_TRACKING && liveTrackingRepo) {
         await liveTrackingRepo.recordPollError(eventId, error.message);
@@ -1408,7 +1382,7 @@ function extractSetsFromEvent(event) {
  */
 async function trackMatch(eventId, options = {}) {
   const id = String(eventId);
-  
+
   if (USE_DB_TRACKING && liveTrackingRepo) {
     // Verifica se già tracciato
     const existing = await liveTrackingRepo.getTracking(id);
@@ -1416,29 +1390,31 @@ async function trackMatch(eventId, options = {}) {
       console.log(`⚠️ Match ${eventId} already tracked in DB`);
       return false;
     }
-    
+
     // Fetch dati iniziali per metadati
     let player1Name = options.player1Name;
     let player2Name = options.player2Name;
     let tournamentName = options.tournamentName;
-    
+
     if (!player1Name || !player2Name) {
       try {
         const data = await fetchLiveData(id);
         player1Name = data.event?.homeTeam?.name || player1Name;
         player2Name = data.event?.awayTeam?.name || player2Name;
         tournamentName = data.event?.tournament?.name || tournamentName;
-      } catch (e) { /* ignore */ }
+      } catch (e) {
+        /* ignore */
+      }
     }
-    
+
     const result = await liveTrackingRepo.addTracking(id, {
       priority: options.priority || 'MEDIUM',
       matchStatus: options.status || 'inprogress',
       player1Name,
       player2Name,
-      tournamentName
+      tournamentName,
     });
-    
+
     if (result) {
       console.log(`📌 Match ${eventId} added to DB tracking (${options.priority || 'MEDIUM'})`);
     }
@@ -1455,12 +1431,12 @@ async function trackMatch(eventId, options = {}) {
       lastUpdate: new Date().toISOString(),
       startTimestamp: options.startTimestamp || null,
       priority: options.priority || 'MEDIUM',
-      autoTrack: true
+      autoTrack: true,
     });
 
     console.log(`📌 Match ${eventId} added to tracking (in-memory)`);
   }
-  
+
   // Avvia scheduler se non attivo
   if (!schedulerInterval) {
     startScheduler();
@@ -1474,7 +1450,7 @@ async function trackMatch(eventId, options = {}) {
  */
 async function untrackMatch(eventId) {
   const id = String(eventId);
-  
+
   if (USE_DB_TRACKING && liveTrackingRepo) {
     const removed = await liveTrackingRepo.removeTracking(id);
     return removed;
@@ -1494,7 +1470,7 @@ async function getTrackedMatches() {
   if (USE_DB_TRACKING && liveTrackingRepo) {
     try {
       const tracking = await liveTrackingRepo.getAllTracking({ status: 'WATCHING' });
-      return tracking.map(t => ({
+      return tracking.map((t) => ({
         eventId: t.source_event_id,
         status: t.match_status,
         priority: t.priority,
@@ -1503,17 +1479,17 @@ async function getTrackedMatches() {
         player2: t.player2_name,
         tournament: t.tournament_name,
         currentScore: t.current_score,
-        failCount: t.fail_count
+        failCount: t.fail_count,
       }));
     } catch (e) {
       console.error('❌ Error fetching tracked matches from DB:', e.message);
     }
   }
-  
+
   // Fallback
   return Array.from(trackedMatchesFallback.entries()).map(([eventId, info]) => ({
     eventId,
-    ...info
+    ...info,
   }));
 }
 
@@ -1522,12 +1498,12 @@ async function getTrackedMatches() {
  */
 async function setMatchPriority(eventId, priority) {
   const id = String(eventId);
-  
+
   if (!['HIGH', 'MEDIUM', 'LOW'].includes(priority)) {
     console.error(`❌ Invalid priority: ${priority}`);
     return false;
   }
-  
+
   if (USE_DB_TRACKING && liveTrackingRepo) {
     const result = await liveTrackingRepo.updatePriority(id, priority);
     return !!result;
@@ -1546,7 +1522,7 @@ async function setMatchPriority(eventId, priority) {
  */
 async function resumeMatch(eventId) {
   const id = String(eventId);
-  
+
   if (USE_DB_TRACKING && liveTrackingRepo) {
     const result = await liveTrackingRepo.resumeTracking(id);
     return !!result;
@@ -1561,12 +1537,12 @@ async function getTrackingStats() {
   if (USE_DB_TRACKING && liveTrackingRepo) {
     return await liveTrackingRepo.getTrackingStats();
   }
-  
+
   return {
     total: trackedMatchesFallback.size,
     byStatus: { WATCHING: trackedMatchesFallback.size },
     byPriority: {},
-    mode: 'in-memory'
+    mode: 'in-memory',
   };
 }
 
@@ -1575,23 +1551,23 @@ async function getTrackingStats() {
  */
 async function syncMatch(eventId) {
   console.log(`🔄 Manual sync for event ${eventId}...`);
-  
+
   try {
     const completeData = await fetchCompleteData(eventId);
     await saveMatchToDatabase(eventId, completeData, 'manual-sync');
-    
+
     return {
       success: true,
       eventId,
       dataCompleteness: completeData.dataCompleteness,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     console.error(`❌ Sync error for ${eventId}:`, error.message);
     return {
       success: false,
       eventId,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -1603,7 +1579,7 @@ async function syncMatch(eventId) {
  */
 function getTrackedMatch(matchId) {
   const tracked = getTrackedMatches();
-  return tracked.find(m => m.id === matchId || m.eventId === matchId) || null;
+  return tracked.find((m) => m.id === matchId || m.eventId === matchId) || null;
 }
 
 module.exports = {
@@ -1643,5 +1619,5 @@ module.exports = {
   applyLivePatches,
   // Constants
   CONFIG,
-  USE_DB_TRACKING
+  USE_DB_TRACKING,
 };

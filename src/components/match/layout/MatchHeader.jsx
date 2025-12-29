@@ -1,6 +1,6 @@
 /**
  * MatchHeader - Header sticky della match page
- * 
+ *
  * Mostra: Nome match, score, odds, volatilità, liquidità, alerts
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
@@ -44,7 +44,7 @@ function LiveBadge({ isLive }) {
  */
 function DataQualityBadge({ quality }) {
   // quality può essere un numero o un oggetto con overall
-  const level = typeof quality === 'number' ? quality / 100 : (quality?.overall || 0);
+  const level = typeof quality === 'number' ? quality / 100 : quality?.overall || 0;
   const color = level >= 0.8 ? '#10b981' : level >= 0.5 ? '#f59e0b' : '#ef4444';
   const label = level >= 0.8 ? 'HIGH' : level >= 0.5 ? 'MED' : 'LOW';
 
@@ -61,7 +61,7 @@ function DataQualityBadge({ quality }) {
 function CompactScoreboard({ header }) {
   const score = header?.score;
   const players = header?.players;
-  
+
   if (!score || !score.sets || score.sets.length === 0) return null;
 
   const homeName = players?.home?.name || 'Player 1';
@@ -69,8 +69,8 @@ function CompactScoreboard({ header }) {
   const serving = score?.serving;
 
   // Estrai i punteggi dei set
-  const homeSets = score.sets.map(s => s.home).join(' ');
-  const awaySets = score.sets.map(s => s.away).join(' ');
+  const homeSets = score.sets.map((s) => s.home).join(' ');
+  const awaySets = score.sets.map((s) => s.away).join(' ');
 
   return (
     <div className="compact-scoreboard">
@@ -127,7 +127,7 @@ function QuickIndicators({ header }) {
  */
 function OddsQuickView({ header }) {
   const odds = header?.odds || {};
-  
+
   // Se non ci sono odds, mostra placeholder
   const homeOdds = odds?.home?.value || odds?.homeOdds;
   const awayOdds = odds?.away?.value || odds?.awayOdds;
@@ -145,12 +145,16 @@ function OddsQuickView({ header }) {
     <div className="odds-quick-view">
       <span className="odds-item">
         <span className="odds-value">{homeOdds ? homeOdds.toFixed(2) : '-'}</span>
-        <span className="odds-trend" style={{ color: homeTrend.color }}>{homeTrend.symbol}</span>
+        <span className="odds-trend" style={{ color: homeTrend.color }}>
+          {homeTrend.symbol}
+        </span>
       </span>
       <span className="odds-separator">|</span>
       <span className="odds-item">
         <span className="odds-value">{awayOdds ? awayOdds.toFixed(2) : '-'}</span>
-        <span className="odds-trend" style={{ color: awayTrend.color }}>{awayTrend.symbol}</span>
+        <span className="odds-trend" style={{ color: awayTrend.color }}>
+          {awayTrend.symbol}
+        </span>
       </span>
     </div>
   );
@@ -159,14 +163,7 @@ function OddsQuickView({ header }) {
 /**
  * MatchHeader Component
  */
-export function MatchHeader({
-  header,
-  isLive,
-  isRefreshing,
-  dataQuality,
-  onBack,
-  onRefresh,
-}) {
+export function MatchHeader({ header, isLive, isRefreshing, dataQuality, onBack, onRefresh }) {
   // Estrai dati dal bundle header
   const match = header?.match || {};
   const players = header?.players || {};

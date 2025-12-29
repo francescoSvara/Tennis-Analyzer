@@ -169,11 +169,11 @@
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .pbp-legend-items {
     gap: 12px;
   }
-  
+
   .pbp-legend-item {
     font-size: 11px;
   }
@@ -858,102 +858,102 @@
     padding: 12px;
     border-radius: 12px;
   }
-  
+
   .points-list {
     grid-template-columns: 1fr;
   }
-  
+
   .value-container {
     align-items: flex-end;
   }
-  
+
   .value-interpretation {
     text-align: right;
     max-width: 150px;
     font-size: 10px;
   }
-  
+
   .value-display {
     padding: 6px 10px;
   }
-  
+
   .value-number {
     font-size: 14px;
   }
-  
+
   .value-icon {
     font-size: 14px;
   }
-  
+
   /* Set accordion responsive */
   .set-header {
     padding: 12px 14px;
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .set-header-left {
     gap: 8px;
   }
-  
+
   .set-header h2 {
     font-size: 14px;
   }
-  
+
   .set-header-right {
     gap: 8px;
   }
-  
+
   .set-score-badge {
     padding: 4px 8px;
     font-size: 12px;
   }
-  
+
   .set-games-count {
     font-size: 11px;
     padding: 3px 8px;
   }
-  
+
   .set-chevron {
     font-size: 10px;
     width: 16px;
     height: 16px;
   }
-  
+
   /* Game accordion responsive */
   .game-header {
     padding: 10px 14px;
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .game-header-left {
     gap: 6px;
     flex: 1;
     min-width: 0;
   }
-  
+
   .game-title {
     font-size: 12px;
     padding: 3px 8px;
   }
-  
+
   .game-score-mini {
     font-size: 10px;
     padding: 2px 6px;
   }
-  
+
   .game-points-count {
     font-size: 10px;
     padding: 2px 6px;
   }
-  
+
   .game-chevron {
     font-size: 9px;
     width: 14px;
     height: 14px;
   }
-  
+
   .game-content-visible {
     padding: 8px 14px 12px 14px;
   }
@@ -1097,8 +1097,13 @@
 }
 
 @keyframes pulse-break {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .ace-badge {
@@ -1189,21 +1194,21 @@
     align-items: flex-end;
     gap: 6px;
   }
-  
+
   .pressure-mini {
     width: 40px;
   }
-  
+
   .game-badge {
     font-size: 9px;
     padding: 2px 6px;
   }
-  
+
   .game-stats-mini {
     gap: 6px;
     padding: 8px 10px;
   }
-  
+
   .game-stats-mini .stat-item {
     font-size: 10px;
     padding: 3px 8px;

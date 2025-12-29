@@ -1,535 +1,509 @@
 ﻿{
-    "serve":  {
-                  "home":  {
-                               "aces":  4,
-                               "doubleFaults":  0,
-                               "firstServePct":  79,
-                               "firstServeIn":  66,
-                               "firstServeTotal":  83,
-                               "firstServeWonPct":  82,
-                               "firstServePointsWon":  54,
-                               "firstServePointsIn":  66,
-                               "secondServeWonPct":  75,
-                               "secondServePointsWon":  13,
-                               "secondServeTotal":  17,
-                               "serviceGamesPlayed":  17,
-                               "serviceGamesWon":  16,
-                               "servicePointsWon":  67,
-                               "breakPointsSaved":  0,
-                               "breakPointsFaced":  1
-                           },
-                  "away":  {
-                               "aces":  5,
-                               "doubleFaults":  0,
-                               "firstServePct":  66,
-                               "firstServeIn":  51,
-                               "firstServeTotal":  78,
-                               "firstServeWonPct":  86,
-                               "firstServePointsWon":  44,
-                               "firstServePointsIn":  51,
-                               "secondServeWonPct":  38,
-                               "secondServePointsWon":  10,
-                               "secondServeTotal":  27,
-                               "serviceGamesPlayed":  16,
-                               "serviceGamesWon":  16,
-                               "servicePointsWon":  54,
-                               "breakPointsSaved":  0,
-                               "breakPointsFaced":  0
-                           }
-              },
-    "return":  {
-                   "home":  {
-                                "returnPointsWonPct":  30,
-                                "returnPointsWon":  2,
-                                "firstReturnPointsWon":  7,
-                                "firstReturnPointsTotal":  51,
-                                "secondReturnPointsWon":  17,
-                                "secondReturnPointsTotal":  27,
-                                "returnGamesPlayed":  16,
-                                "breakPointsWon":  0,
-                                "breakPointsTotal":  0
-                            },
-                   "away":  {
-                                "returnPointsWonPct":  19,
-                                "returnPointsWon":  11,
-                                "firstReturnPointsWon":  12,
-                                "firstReturnPointsTotal":  66,
-                                "secondReturnPointsWon":  4,
-                                "secondReturnPointsTotal":  17,
-                                "returnGamesPlayed":  17,
-                                "breakPointsWon":  1,
-                                "breakPointsTotal":  1
-                            }
-               },
-    "points":  {
-                   "home":  {
-                                "totalWon":  69,
-                                "servicePointsWon":  67,
-                                "returnPointsWon":  2,
-                                "maxConsecutivePointsWon":  6,
-                                "winners":  11,
-                                "unforcedErrors":  8
-                            },
-                   "away":  {
-                                "totalWon":  65,
-                                "servicePointsWon":  54,
-                                "returnPointsWon":  11,
-                                "maxConsecutivePointsWon":  6,
-                                "winners":  11,
-                                "unforcedErrors":  8
-                            }
-               },
-    "games":  {
-                  "home":  {
-                               "gamesWon":  10,
-                               "tiebreaksWon":  0,
-                               "consecutiveGamesWon":  2
-                           },
-                  "away":  {
-                               "gamesWon":  13,
-                               "tiebreaksWon":  1,
-                               "consecutiveGamesWon":  3
-                           }
-              },
-    "periods":  [
-                    "ALL",
-                    "SET1",
-                    "SET2"
-                ],
-    "byPeriod":  {
-                     "ALL":  {
-                                 "serve":  {
-                                               "home":  {
-                                                            "aces":  4,
-                                                            "doubleFaults":  0,
-                                                            "firstServePct":  79,
-                                                            "firstServeIn":  66,
-                                                            "firstServeTotal":  83,
-                                                            "firstServeWonPct":  82,
-                                                            "firstServePointsWon":  54,
-                                                            "firstServePointsIn":  66,
-                                                            "secondServeWonPct":  75,
-                                                            "secondServePointsWon":  13,
-                                                            "secondServeTotal":  17,
-                                                            "serviceGamesPlayed":  17,
-                                                            "serviceGamesWon":  16,
-                                                            "servicePointsWon":  67,
-                                                            "breakPointsSaved":  0,
-                                                            "breakPointsFaced":  1
-                                                        },
-                                               "away":  {
-                                                            "aces":  5,
-                                                            "doubleFaults":  0,
-                                                            "firstServePct":  66,
-                                                            "firstServeIn":  51,
-                                                            "firstServeTotal":  78,
-                                                            "firstServeWonPct":  86,
-                                                            "firstServePointsWon":  44,
-                                                            "firstServePointsIn":  51,
-                                                            "secondServeWonPct":  38,
-                                                            "secondServePointsWon":  10,
-                                                            "secondServeTotal":  27,
-                                                            "serviceGamesPlayed":  16,
-                                                            "serviceGamesWon":  16,
-                                                            "servicePointsWon":  54,
-                                                            "breakPointsSaved":  0,
-                                                            "breakPointsFaced":  0
-                                                        }
-                                           },
-                                 "return":  {
-                                                "home":  {
-                                                             "returnPointsWonPct":  30,
-                                                             "returnPointsWon":  2,
-                                                             "firstReturnPointsWon":  7,
-                                                             "firstReturnPointsTotal":  51,
-                                                             "secondReturnPointsWon":  17,
-                                                             "secondReturnPointsTotal":  27,
-                                                             "returnGamesPlayed":  16,
-                                                             "breakPointsWon":  0,
-                                                             "breakPointsTotal":  0
-                                                         },
-                                                "away":  {
-                                                             "returnPointsWonPct":  19,
-                                                             "returnPointsWon":  11,
-                                                             "firstReturnPointsWon":  12,
-                                                             "firstReturnPointsTotal":  66,
-                                                             "secondReturnPointsWon":  4,
-                                                             "secondReturnPointsTotal":  17,
-                                                             "returnGamesPlayed":  17,
-                                                             "breakPointsWon":  1,
-                                                             "breakPointsTotal":  1
-                                                         }
-                                            },
-                                 "points":  {
-                                                "home":  {
-                                                             "totalWon":  69,
-                                                             "servicePointsWon":  67,
-                                                             "returnPointsWon":  2,
-                                                             "maxConsecutivePointsWon":  6,
-                                                             "winners":  11,
-                                                             "unforcedErrors":  8
-                                                         },
-                                                "away":  {
-                                                             "totalWon":  65,
-                                                             "servicePointsWon":  54,
-                                                             "returnPointsWon":  11,
-                                                             "maxConsecutivePointsWon":  6,
-                                                             "winners":  11,
-                                                             "unforcedErrors":  8
-                                                         }
-                                            },
-                                 "games":  {
-                                               "home":  {
-                                                            "gamesWon":  10,
-                                                            "tiebreaksWon":  0,
-                                                            "consecutiveGamesWon":  2
-                                                        },
-                                               "away":  {
-                                                            "gamesWon":  13,
-                                                            "tiebreaksWon":  1,
-                                                            "consecutiveGamesWon":  3
-                                                        }
-                                           }
-                             },
-                     "SET1":  {
-                                  "serve":  {
-                                                "home":  {
-                                                             "aces":  2,
-                                                             "doubleFaults":  0,
-                                                             "firstServePct":  81,
-                                                             "firstServeIn":  36,
-                                                             "firstServeTotal":  44,
-                                                             "firstServeWonPct":  85,
-                                                             "firstServePointsWon":  31,
-                                                             "firstServePointsIn":  36,
-                                                             "secondServeWonPct":  83,
-                                                             "secondServePointsWon":  7,
-                                                             "secondServeTotal":  8,
-                                                             "serviceGamesPlayed":  9,
-                                                             "serviceGamesWon":  9,
-                                                             "servicePointsWon":  38,
-                                                             "breakPointsSaved":  0,
-                                                             "breakPointsFaced":  0
-                                                         },
-                                                "away":  {
-                                                             "aces":  4,
-                                                             "doubleFaults":  0,
-                                                             "firstServePct":  79,
-                                                             "firstServeIn":  32,
-                                                             "firstServeTotal":  41,
-                                                             "firstServeWonPct":  81,
-                                                             "firstServePointsWon":  26,
-                                                             "firstServePointsIn":  32,
-                                                             "secondServeWonPct":  50,
-                                                             "secondServePointsWon":  5,
-                                                             "secondServeTotal":  9,
-                                                             "serviceGamesPlayed":  8,
-                                                             "serviceGamesWon":  8,
-                                                             "servicePointsWon":  31,
-                                                             "breakPointsSaved":  0,
-                                                             "breakPointsFaced":  0
-                                                         }
-                                            },
-                                  "return":  {
-                                                 "home":  {
-                                                              "returnPointsWonPct":  26,
-                                                              "returnPointsWon":  -1,
-                                                              "firstReturnPointsWon":  6,
-                                                              "firstReturnPointsTotal":  32,
-                                                              "secondReturnPointsWon":  4,
-                                                              "secondReturnPointsTotal":  9,
-                                                              "returnGamesPlayed":  8,
-                                                              "breakPointsWon":  0,
-                                                              "breakPointsTotal":  0
-                                                          },
-                                                 "away":  {
-                                                              "returnPointsWonPct":  15,
-                                                              "returnPointsWon":  3,
-                                                              "firstReturnPointsWon":  5,
-                                                              "firstReturnPointsTotal":  36,
-                                                              "secondReturnPointsWon":  1,
-                                                              "secondReturnPointsTotal":  8,
-                                                              "returnGamesPlayed":  9,
-                                                              "breakPointsWon":  0,
-                                                              "breakPointsTotal":  0
-                                                          }
-                                             },
-                                  "points":  {
-                                                 "home":  {
-                                                              "totalWon":  37,
-                                                              "servicePointsWon":  38,
-                                                              "returnPointsWon":  -1,
-                                                              "maxConsecutivePointsWon":  3,
-                                                              "winners":  6,
-                                                              "unforcedErrors":  4
-                                                          },
-                                                 "away":  {
-                                                              "totalWon":  34,
-                                                              "servicePointsWon":  31,
-                                                              "returnPointsWon":  3,
-                                                              "maxConsecutivePointsWon":  3,
-                                                              "winners":  7,
-                                                              "unforcedErrors":  4
-                                                          }
-                                             },
-                                  "games":  {
-                                                "home":  {
-                                                             "gamesWon":  10,
-                                                             "tiebreaksWon":  0,
-                                                             "consecutiveGamesWon":  2
-                                                         },
-                                                "away":  {
-                                                             "gamesWon":  13,
-                                                             "tiebreaksWon":  1,
-                                                             "consecutiveGamesWon":  3
-                                                         }
-                                            }
-                              },
-                     "SET2":  {
-                                  "serve":  {
-                                                "home":  {
-                                                             "aces":  2,
-                                                             "doubleFaults":  0,
-                                                             "firstServePct":  76,
-                                                             "firstServeIn":  29,
-                                                             "firstServeTotal":  38,
-                                                             "firstServeWonPct":  79,
-                                                             "firstServePointsWon":  23,
-                                                             "firstServePointsIn":  29,
-                                                             "secondServeWonPct":  67,
-                                                             "secondServePointsWon":  6,
-                                                             "secondServeTotal":  9,
-                                                             "serviceGamesPlayed":  8,
-                                                             "serviceGamesWon":  7,
-                                                             "servicePointsWon":  29,
-                                                             "breakPointsSaved":  0,
-                                                             "breakPointsFaced":  1
-                                                         },
-                                                "away":  {
-                                                             "aces":  1,
-                                                             "doubleFaults":  0,
-                                                             "firstServePct":  53,
-                                                             "firstServeIn":  20,
-                                                             "firstServeTotal":  37,
-                                                             "firstServeWonPct":  95,
-                                                             "firstServePointsWon":  19,
-                                                             "firstServePointsIn":  20,
-                                                             "secondServeWonPct":  33,
-                                                             "secondServePointsWon":  6,
-                                                             "secondServeTotal":  17,
-                                                             "serviceGamesPlayed":  7,
-                                                             "serviceGamesWon":  7,
-                                                             "servicePointsWon":  25,
-                                                             "breakPointsSaved":  0,
-                                                             "breakPointsFaced":  0
-                                                         }
-                                            },
-                                  "return":  {
-                                                 "home":  {
-                                                              "returnPointsWonPct":  34,
-                                                              "returnPointsWon":  3,
-                                                              "firstReturnPointsWon":  1,
-                                                              "firstReturnPointsTotal":  20,
-                                                              "secondReturnPointsWon":  11,
-                                                              "secondReturnPointsTotal":  17,
-                                                              "returnGamesPlayed":  7,
-                                                              "breakPointsWon":  0,
-                                                              "breakPointsTotal":  0
-                                                          },
-                                                 "away":  {
-                                                              "returnPointsWonPct":  24,
-                                                              "returnPointsWon":  6,
-                                                              "firstReturnPointsWon":  6,
-                                                              "firstReturnPointsTotal":  29,
-                                                              "secondReturnPointsWon":  3,
-                                                              "secondReturnPointsTotal":  9,
-                                                              "returnGamesPlayed":  8,
-                                                              "breakPointsWon":  1,
-                                                              "breakPointsTotal":  1
-                                                          }
-                                             },
-                                  "points":  {
-                                                 "home":  {
-                                                              "totalWon":  32,
-                                                              "servicePointsWon":  29,
-                                                              "returnPointsWon":  3,
-                                                              "maxConsecutivePointsWon":  3,
-                                                              "winners":  5,
-                                                              "unforcedErrors":  4
-                                                          },
-                                                 "away":  {
-                                                              "totalWon":  31,
-                                                              "servicePointsWon":  25,
-                                                              "returnPointsWon":  6,
-                                                              "maxConsecutivePointsWon":  3,
-                                                              "winners":  3,
-                                                              "unforcedErrors":  4
-                                                          }
-                                             },
-                                  "games":  {
-                                                "home":  {
-                                                             "gamesWon":  10,
-                                                             "tiebreaksWon":  0,
-                                                             "consecutiveGamesWon":  2
-                                                         },
-                                                "away":  {
-                                                             "gamesWon":  13,
-                                                             "tiebreaksWon":  1,
-                                                             "consecutiveGamesWon":  3
-                                                         }
-                                            }
-                              }
-                 },
-    "dataSource":  "statistics",
-    "surfaceSplits":  {
-                          "playerA":  {
-                                          "window":  "career",
-                                          "totalMatches":  3,
-                                          "hard":  {
-                                                       "matches":  1,
-                                                       "wins":  0,
-                                                       "losses":  1,
-                                                       "winRate":  0,
-                                                       "winRatePercent":  0,
-                                                       "holdRate":  null,
-                                                       "breakRate":  null,
-                                                       "sampleFlag":  "LOW_SAMPLE",
-                                                       "recentForm":  [
-                                                                          "L"
-                                                                      ]
-                                                   },
-                                          "clay":  {
-                                                       "matches":  0,
-                                                       "wins":  0,
-                                                       "losses":  0,
-                                                       "winRate":  0,
-                                                       "winRatePercent":  0,
-                                                       "holdRate":  null,
-                                                       "breakRate":  null,
-                                                       "sampleFlag":  "NO_DATA",
-                                                       "recentForm":  [
-
-                                                                      ]
-                                                   },
-                                          "grass":  {
-                                                        "matches":  0,
-                                                        "wins":  0,
-                                                        "losses":  0,
-                                                        "winRate":  0,
-                                                        "winRatePercent":  0,
-                                                        "holdRate":  null,
-                                                        "breakRate":  null,
-                                                        "sampleFlag":  "NO_DATA",
-                                                        "recentForm":  [
-
-                                                                       ]
-                                                    },
-                                          "unknown":  {
-                                                          "matches":  2,
-                                                          "wins":  2,
-                                                          "losses":  0,
-                                                          "winRate":  1,
-                                                          "winRatePercent":  100,
-                                                          "holdRate":  null,
-                                                          "breakRate":  null,
-                                                          "sampleFlag":  "LOW_SAMPLE",
-                                                          "recentForm":  [
-                                                                             "W",
-                                                                             "W"
-                                                                         ]
-                                                      }
-                                      },
-                          "playerB":  {
-                                          "window":  "career",
-                                          "totalMatches":  3,
-                                          "hard":  {
-                                                       "matches":  1,
-                                                       "wins":  1,
-                                                       "losses":  0,
-                                                       "winRate":  1,
-                                                       "winRatePercent":  100,
-                                                       "holdRate":  null,
-                                                       "breakRate":  null,
-                                                       "sampleFlag":  "LOW_SAMPLE",
-                                                       "recentForm":  [
-                                                                          "W"
-                                                                      ]
-                                                   },
-                                          "clay":  {
-                                                       "matches":  0,
-                                                       "wins":  0,
-                                                       "losses":  0,
-                                                       "winRate":  0,
-                                                       "winRatePercent":  0,
-                                                       "holdRate":  null,
-                                                       "breakRate":  null,
-                                                       "sampleFlag":  "NO_DATA",
-                                                       "recentForm":  [
-
-                                                                      ]
-                                                   },
-                                          "grass":  {
-                                                        "matches":  0,
-                                                        "wins":  0,
-                                                        "losses":  0,
-                                                        "winRate":  0,
-                                                        "winRatePercent":  0,
-                                                        "holdRate":  null,
-                                                        "breakRate":  null,
-                                                        "sampleFlag":  "NO_DATA",
-                                                        "recentForm":  [
-
-                                                                       ]
-                                                    },
-                                          "unknown":  {
-                                                          "matches":  2,
-                                                          "wins":  0,
-                                                          "losses":  2,
-                                                          "winRate":  0,
-                                                          "winRatePercent":  0,
-                                                          "holdRate":  null,
-                                                          "breakRate":  null,
-                                                          "sampleFlag":  "LOW_SAMPLE",
-                                                          "recentForm":  [
-                                                                             "L",
-                                                                             "L"
-                                                                         ]
-                                                      }
-                                      },
-                          "matchSurface":  "hard",
-                          "comparison":  {
-                                             "surface":  "hard",
-                                             "playerA":  {
-                                                             "matches":  1,
-                                                             "wins":  0,
-                                                             "losses":  1,
-                                                             "winRate":  0,
-                                                             "winRatePercent":  0,
-                                                             "holdRate":  null,
-                                                             "breakRate":  null,
-                                                             "sampleFlag":  "LOW_SAMPLE",
-                                                             "recentForm":  [
-                                                                                "L"
-                                                                            ]
-                                                         },
-                                             "playerB":  {
-                                                             "matches":  1,
-                                                             "wins":  1,
-                                                             "losses":  0,
-                                                             "winRate":  1,
-                                                             "winRatePercent":  100,
-                                                             "holdRate":  null,
-                                                             "breakRate":  null,
-                                                             "sampleFlag":  "LOW_SAMPLE",
-                                                             "recentForm":  [
-                                                                                "W"
-                                                                            ]
-                                                         },
-                                             "advantage":  {
-                                                               "advantage":  "playerB",
-                                                               "winRateDiff":  -1,
-                                                               "lowSampleWarning":  true
-                                                           }
-                                         }
-                      }
+  "serve": {
+    "home": {
+      "aces": 4,
+      "doubleFaults": 0,
+      "firstServePct": 79,
+      "firstServeIn": 66,
+      "firstServeTotal": 83,
+      "firstServeWonPct": 82,
+      "firstServePointsWon": 54,
+      "firstServePointsIn": 66,
+      "secondServeWonPct": 75,
+      "secondServePointsWon": 13,
+      "secondServeTotal": 17,
+      "serviceGamesPlayed": 17,
+      "serviceGamesWon": 16,
+      "servicePointsWon": 67,
+      "breakPointsSaved": 0,
+      "breakPointsFaced": 1
+    },
+    "away": {
+      "aces": 5,
+      "doubleFaults": 0,
+      "firstServePct": 66,
+      "firstServeIn": 51,
+      "firstServeTotal": 78,
+      "firstServeWonPct": 86,
+      "firstServePointsWon": 44,
+      "firstServePointsIn": 51,
+      "secondServeWonPct": 38,
+      "secondServePointsWon": 10,
+      "secondServeTotal": 27,
+      "serviceGamesPlayed": 16,
+      "serviceGamesWon": 16,
+      "servicePointsWon": 54,
+      "breakPointsSaved": 0,
+      "breakPointsFaced": 0
+    }
+  },
+  "return": {
+    "home": {
+      "returnPointsWonPct": 30,
+      "returnPointsWon": 2,
+      "firstReturnPointsWon": 7,
+      "firstReturnPointsTotal": 51,
+      "secondReturnPointsWon": 17,
+      "secondReturnPointsTotal": 27,
+      "returnGamesPlayed": 16,
+      "breakPointsWon": 0,
+      "breakPointsTotal": 0
+    },
+    "away": {
+      "returnPointsWonPct": 19,
+      "returnPointsWon": 11,
+      "firstReturnPointsWon": 12,
+      "firstReturnPointsTotal": 66,
+      "secondReturnPointsWon": 4,
+      "secondReturnPointsTotal": 17,
+      "returnGamesPlayed": 17,
+      "breakPointsWon": 1,
+      "breakPointsTotal": 1
+    }
+  },
+  "points": {
+    "home": {
+      "totalWon": 69,
+      "servicePointsWon": 67,
+      "returnPointsWon": 2,
+      "maxConsecutivePointsWon": 6,
+      "winners": 11,
+      "unforcedErrors": 8
+    },
+    "away": {
+      "totalWon": 65,
+      "servicePointsWon": 54,
+      "returnPointsWon": 11,
+      "maxConsecutivePointsWon": 6,
+      "winners": 11,
+      "unforcedErrors": 8
+    }
+  },
+  "games": {
+    "home": {
+      "gamesWon": 10,
+      "tiebreaksWon": 0,
+      "consecutiveGamesWon": 2
+    },
+    "away": {
+      "gamesWon": 13,
+      "tiebreaksWon": 1,
+      "consecutiveGamesWon": 3
+    }
+  },
+  "periods": ["ALL", "SET1", "SET2"],
+  "byPeriod": {
+    "ALL": {
+      "serve": {
+        "home": {
+          "aces": 4,
+          "doubleFaults": 0,
+          "firstServePct": 79,
+          "firstServeIn": 66,
+          "firstServeTotal": 83,
+          "firstServeWonPct": 82,
+          "firstServePointsWon": 54,
+          "firstServePointsIn": 66,
+          "secondServeWonPct": 75,
+          "secondServePointsWon": 13,
+          "secondServeTotal": 17,
+          "serviceGamesPlayed": 17,
+          "serviceGamesWon": 16,
+          "servicePointsWon": 67,
+          "breakPointsSaved": 0,
+          "breakPointsFaced": 1
+        },
+        "away": {
+          "aces": 5,
+          "doubleFaults": 0,
+          "firstServePct": 66,
+          "firstServeIn": 51,
+          "firstServeTotal": 78,
+          "firstServeWonPct": 86,
+          "firstServePointsWon": 44,
+          "firstServePointsIn": 51,
+          "secondServeWonPct": 38,
+          "secondServePointsWon": 10,
+          "secondServeTotal": 27,
+          "serviceGamesPlayed": 16,
+          "serviceGamesWon": 16,
+          "servicePointsWon": 54,
+          "breakPointsSaved": 0,
+          "breakPointsFaced": 0
+        }
+      },
+      "return": {
+        "home": {
+          "returnPointsWonPct": 30,
+          "returnPointsWon": 2,
+          "firstReturnPointsWon": 7,
+          "firstReturnPointsTotal": 51,
+          "secondReturnPointsWon": 17,
+          "secondReturnPointsTotal": 27,
+          "returnGamesPlayed": 16,
+          "breakPointsWon": 0,
+          "breakPointsTotal": 0
+        },
+        "away": {
+          "returnPointsWonPct": 19,
+          "returnPointsWon": 11,
+          "firstReturnPointsWon": 12,
+          "firstReturnPointsTotal": 66,
+          "secondReturnPointsWon": 4,
+          "secondReturnPointsTotal": 17,
+          "returnGamesPlayed": 17,
+          "breakPointsWon": 1,
+          "breakPointsTotal": 1
+        }
+      },
+      "points": {
+        "home": {
+          "totalWon": 69,
+          "servicePointsWon": 67,
+          "returnPointsWon": 2,
+          "maxConsecutivePointsWon": 6,
+          "winners": 11,
+          "unforcedErrors": 8
+        },
+        "away": {
+          "totalWon": 65,
+          "servicePointsWon": 54,
+          "returnPointsWon": 11,
+          "maxConsecutivePointsWon": 6,
+          "winners": 11,
+          "unforcedErrors": 8
+        }
+      },
+      "games": {
+        "home": {
+          "gamesWon": 10,
+          "tiebreaksWon": 0,
+          "consecutiveGamesWon": 2
+        },
+        "away": {
+          "gamesWon": 13,
+          "tiebreaksWon": 1,
+          "consecutiveGamesWon": 3
+        }
+      }
+    },
+    "SET1": {
+      "serve": {
+        "home": {
+          "aces": 2,
+          "doubleFaults": 0,
+          "firstServePct": 81,
+          "firstServeIn": 36,
+          "firstServeTotal": 44,
+          "firstServeWonPct": 85,
+          "firstServePointsWon": 31,
+          "firstServePointsIn": 36,
+          "secondServeWonPct": 83,
+          "secondServePointsWon": 7,
+          "secondServeTotal": 8,
+          "serviceGamesPlayed": 9,
+          "serviceGamesWon": 9,
+          "servicePointsWon": 38,
+          "breakPointsSaved": 0,
+          "breakPointsFaced": 0
+        },
+        "away": {
+          "aces": 4,
+          "doubleFaults": 0,
+          "firstServePct": 79,
+          "firstServeIn": 32,
+          "firstServeTotal": 41,
+          "firstServeWonPct": 81,
+          "firstServePointsWon": 26,
+          "firstServePointsIn": 32,
+          "secondServeWonPct": 50,
+          "secondServePointsWon": 5,
+          "secondServeTotal": 9,
+          "serviceGamesPlayed": 8,
+          "serviceGamesWon": 8,
+          "servicePointsWon": 31,
+          "breakPointsSaved": 0,
+          "breakPointsFaced": 0
+        }
+      },
+      "return": {
+        "home": {
+          "returnPointsWonPct": 26,
+          "returnPointsWon": -1,
+          "firstReturnPointsWon": 6,
+          "firstReturnPointsTotal": 32,
+          "secondReturnPointsWon": 4,
+          "secondReturnPointsTotal": 9,
+          "returnGamesPlayed": 8,
+          "breakPointsWon": 0,
+          "breakPointsTotal": 0
+        },
+        "away": {
+          "returnPointsWonPct": 15,
+          "returnPointsWon": 3,
+          "firstReturnPointsWon": 5,
+          "firstReturnPointsTotal": 36,
+          "secondReturnPointsWon": 1,
+          "secondReturnPointsTotal": 8,
+          "returnGamesPlayed": 9,
+          "breakPointsWon": 0,
+          "breakPointsTotal": 0
+        }
+      },
+      "points": {
+        "home": {
+          "totalWon": 37,
+          "servicePointsWon": 38,
+          "returnPointsWon": -1,
+          "maxConsecutivePointsWon": 3,
+          "winners": 6,
+          "unforcedErrors": 4
+        },
+        "away": {
+          "totalWon": 34,
+          "servicePointsWon": 31,
+          "returnPointsWon": 3,
+          "maxConsecutivePointsWon": 3,
+          "winners": 7,
+          "unforcedErrors": 4
+        }
+      },
+      "games": {
+        "home": {
+          "gamesWon": 10,
+          "tiebreaksWon": 0,
+          "consecutiveGamesWon": 2
+        },
+        "away": {
+          "gamesWon": 13,
+          "tiebreaksWon": 1,
+          "consecutiveGamesWon": 3
+        }
+      }
+    },
+    "SET2": {
+      "serve": {
+        "home": {
+          "aces": 2,
+          "doubleFaults": 0,
+          "firstServePct": 76,
+          "firstServeIn": 29,
+          "firstServeTotal": 38,
+          "firstServeWonPct": 79,
+          "firstServePointsWon": 23,
+          "firstServePointsIn": 29,
+          "secondServeWonPct": 67,
+          "secondServePointsWon": 6,
+          "secondServeTotal": 9,
+          "serviceGamesPlayed": 8,
+          "serviceGamesWon": 7,
+          "servicePointsWon": 29,
+          "breakPointsSaved": 0,
+          "breakPointsFaced": 1
+        },
+        "away": {
+          "aces": 1,
+          "doubleFaults": 0,
+          "firstServePct": 53,
+          "firstServeIn": 20,
+          "firstServeTotal": 37,
+          "firstServeWonPct": 95,
+          "firstServePointsWon": 19,
+          "firstServePointsIn": 20,
+          "secondServeWonPct": 33,
+          "secondServePointsWon": 6,
+          "secondServeTotal": 17,
+          "serviceGamesPlayed": 7,
+          "serviceGamesWon": 7,
+          "servicePointsWon": 25,
+          "breakPointsSaved": 0,
+          "breakPointsFaced": 0
+        }
+      },
+      "return": {
+        "home": {
+          "returnPointsWonPct": 34,
+          "returnPointsWon": 3,
+          "firstReturnPointsWon": 1,
+          "firstReturnPointsTotal": 20,
+          "secondReturnPointsWon": 11,
+          "secondReturnPointsTotal": 17,
+          "returnGamesPlayed": 7,
+          "breakPointsWon": 0,
+          "breakPointsTotal": 0
+        },
+        "away": {
+          "returnPointsWonPct": 24,
+          "returnPointsWon": 6,
+          "firstReturnPointsWon": 6,
+          "firstReturnPointsTotal": 29,
+          "secondReturnPointsWon": 3,
+          "secondReturnPointsTotal": 9,
+          "returnGamesPlayed": 8,
+          "breakPointsWon": 1,
+          "breakPointsTotal": 1
+        }
+      },
+      "points": {
+        "home": {
+          "totalWon": 32,
+          "servicePointsWon": 29,
+          "returnPointsWon": 3,
+          "maxConsecutivePointsWon": 3,
+          "winners": 5,
+          "unforcedErrors": 4
+        },
+        "away": {
+          "totalWon": 31,
+          "servicePointsWon": 25,
+          "returnPointsWon": 6,
+          "maxConsecutivePointsWon": 3,
+          "winners": 3,
+          "unforcedErrors": 4
+        }
+      },
+      "games": {
+        "home": {
+          "gamesWon": 10,
+          "tiebreaksWon": 0,
+          "consecutiveGamesWon": 2
+        },
+        "away": {
+          "gamesWon": 13,
+          "tiebreaksWon": 1,
+          "consecutiveGamesWon": 3
+        }
+      }
+    }
+  },
+  "dataSource": "statistics",
+  "surfaceSplits": {
+    "playerA": {
+      "window": "career",
+      "totalMatches": 3,
+      "hard": {
+        "matches": 1,
+        "wins": 0,
+        "losses": 1,
+        "winRate": 0,
+        "winRatePercent": 0,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "LOW_SAMPLE",
+        "recentForm": ["L"]
+      },
+      "clay": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "winRate": 0,
+        "winRatePercent": 0,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "NO_DATA",
+        "recentForm": []
+      },
+      "grass": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "winRate": 0,
+        "winRatePercent": 0,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "NO_DATA",
+        "recentForm": []
+      },
+      "unknown": {
+        "matches": 2,
+        "wins": 2,
+        "losses": 0,
+        "winRate": 1,
+        "winRatePercent": 100,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "LOW_SAMPLE",
+        "recentForm": ["W", "W"]
+      }
+    },
+    "playerB": {
+      "window": "career",
+      "totalMatches": 3,
+      "hard": {
+        "matches": 1,
+        "wins": 1,
+        "losses": 0,
+        "winRate": 1,
+        "winRatePercent": 100,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "LOW_SAMPLE",
+        "recentForm": ["W"]
+      },
+      "clay": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "winRate": 0,
+        "winRatePercent": 0,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "NO_DATA",
+        "recentForm": []
+      },
+      "grass": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "winRate": 0,
+        "winRatePercent": 0,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "NO_DATA",
+        "recentForm": []
+      },
+      "unknown": {
+        "matches": 2,
+        "wins": 0,
+        "losses": 2,
+        "winRate": 0,
+        "winRatePercent": 0,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "LOW_SAMPLE",
+        "recentForm": ["L", "L"]
+      }
+    },
+    "matchSurface": "hard",
+    "comparison": {
+      "surface": "hard",
+      "playerA": {
+        "matches": 1,
+        "wins": 0,
+        "losses": 1,
+        "winRate": 0,
+        "winRatePercent": 0,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "LOW_SAMPLE",
+        "recentForm": ["L"]
+      },
+      "playerB": {
+        "matches": 1,
+        "wins": 1,
+        "losses": 0,
+        "winRate": 1,
+        "winRatePercent": 100,
+        "holdRate": null,
+        "breakRate": null,
+        "sampleFlag": "LOW_SAMPLE",
+        "recentForm": ["W"]
+      },
+      "advantage": {
+        "advantage": "playerB",
+        "winRateDiff": -1,
+        "lowSampleWarning": true
+      }
+    }
+  }
 }

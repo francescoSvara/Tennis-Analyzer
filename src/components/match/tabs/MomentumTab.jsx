@@ -1,12 +1,20 @@
 /**
  * MomentumTab - Trend e Run analysis
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendUp, TrendDown, ArrowRight, Lightning, Target, Pulse, Fire } from '@phosphor-icons/react';
+import {
+  TrendUp,
+  TrendDown,
+  ArrowRight,
+  Lightning,
+  Target,
+  Pulse,
+  Fire,
+} from '@phosphor-icons/react';
 import { MotionCard } from '../../../motion/MotionCard';
 import { fadeUp } from '../../../motion/tokens';
 import './MomentumTab.css';
@@ -20,10 +28,7 @@ function PointsViz({ points, label, winner }) {
       <span className="points-label">{label}:</span>
       <div className="points-dots">
         {points.map((point, idx) => (
-          <span
-            key={idx}
-            className={`point-dot ${point === winner ? 'won' : 'lost'}`}
-          >
+          <span key={idx} className={`point-dot ${point === winner ? 'won' : 'lost'}`}>
             {point === winner ? '●' : '○'}
           </span>
         ))}
@@ -127,11 +132,14 @@ export function MomentumTab({ data, header }) {
   // Bundle: tabs.momentum.qualityStats = { home: { winners, ue }, away: { winners, ue } }
   const features = data?.features || {};
   const powerRankings = data?.powerRankings || [];
-  const qualityStats = data?.qualityStats || { home: { winners: 0, ue: 0 }, away: { winners: 0, ue: 0 } };
-  
+  const qualityStats = data?.qualityStats || {
+    home: { winners: 0, ue: 0 },
+    away: { winners: 0, ue: 0 },
+  };
+
   // header.features ha volatility, pressure, dominance, serveDominance, returnDominance
   const headerFeatures = header?.features || {};
-  
+
   const homeLabel = players.home?.name?.split(' ').pop() || 'H';
   const awayLabel = players.away?.name?.split(' ').pop() || 'A';
 
@@ -140,19 +148,14 @@ export function MomentumTab({ data, header }) {
     trend: features.trend || 'stable',
     recentSwing: features.recentSwing || 0,
     breakCount: features.breakCount || 0,
-    last5avg: features.last5avg || null
+    last5avg: features.last5avg || null,
   };
-  
+
   const serveDom = headerFeatures.serveDominance || 50;
   const returnDom = headerFeatures.returnDominance || 50;
 
   return (
-    <motion.div
-      className="momentum-tab"
-      variants={fadeUp}
-      initial="initial"
-      animate="animate"
-    >
+    <motion.div className="momentum-tab" variants={fadeUp} initial="initial" animate="animate">
       {/* Header */}
       <div className="momentum-tab__header">
         <h2 className="tab-title">
@@ -172,10 +175,22 @@ export function MomentumTab({ data, header }) {
             <div className="trend-item">
               <span className="trend-label">Trend</span>
               <span className={`trend-value trend-${momentum.trend || 'stable'}`}>
-                {momentum.trend === 'rising' && <TrendUp size={16} weight="fill" className="trend-icon" />}
-                {momentum.trend === 'falling' && <TrendDown size={16} weight="fill" className="trend-icon" />}
-                {(!momentum.trend || momentum.trend === 'stable') && <ArrowRight size={16} weight="bold" className="trend-icon" />}
-                <span>{momentum.trend === 'rising' ? 'Rising' : momentum.trend === 'falling' ? 'Falling' : 'Stable'}</span>
+                {momentum.trend === 'rising' && (
+                  <TrendUp size={16} weight="fill" className="trend-icon" />
+                )}
+                {momentum.trend === 'falling' && (
+                  <TrendDown size={16} weight="fill" className="trend-icon" />
+                )}
+                {(!momentum.trend || momentum.trend === 'stable') && (
+                  <ArrowRight size={16} weight="bold" className="trend-icon" />
+                )}
+                <span>
+                  {momentum.trend === 'rising'
+                    ? 'Rising'
+                    : momentum.trend === 'falling'
+                    ? 'Falling'
+                    : 'Stable'}
+                </span>
               </span>
             </div>
             <div className="trend-item">
@@ -188,7 +203,9 @@ export function MomentumTab({ data, header }) {
             </div>
             <div className="trend-item">
               <span className="trend-label">Last 5 Avg</span>
-              <span className="trend-value mono">{typeof momentum.last5avg === 'number' ? momentum.last5avg.toFixed(1) : '—'}</span>
+              <span className="trend-value mono">
+                {typeof momentum.last5avg === 'number' ? momentum.last5avg.toFixed(1) : '—'}
+              </span>
             </div>
           </div>
         </MotionCard>
@@ -223,8 +240,12 @@ export function MomentumTab({ data, header }) {
             {powerRankings.length > 0 ? (
               powerRankings.slice(0, 5).map((rank, idx) => (
                 <div key={idx} className="ranking-item">
-                  <span className="rank-position">S{rank.set_number || rank.set || 1} G{rank.game_number || rank.game || idx + 1}</span>
-                  <span className={`rank-score ${(rank.value || 0) >= 0 ? 'positive' : 'negative'}`}>
+                  <span className="rank-position">
+                    S{rank.set_number || rank.set || 1} G{rank.game_number || rank.game || idx + 1}
+                  </span>
+                  <span
+                    className={`rank-score ${(rank.value || 0) >= 0 ? 'positive' : 'negative'}`}
+                  >
                     {rank.value ?? rank.value_svg ?? 0}
                   </span>
                   {rank.break_occurred && <span className="break-badge">BREAK</span>}

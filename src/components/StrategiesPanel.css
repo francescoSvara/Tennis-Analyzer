@@ -180,9 +180,15 @@
   font-weight: 600;
 }
 
-.confidence-value.high { color: #10b981; }
-.confidence-value.medium { color: #f59e0b; }
-.confidence-value.low { color: #8b95a5; }
+.confidence-value.high {
+  color: #10b981;
+}
+.confidence-value.medium {
+  color: #f59e0b;
+}
+.confidence-value.low {
+  color: #8b95a5;
+}
 
 .confidence-bar {
   background: rgba(0, 0, 0, 0.3);
@@ -323,9 +329,15 @@
   justify-content: center;
 }
 
-.arrow-home { color: #10b981; }
-.arrow-away { color: #ef4444; }
-.arrow-even { color: #6b7280; }
+.arrow-home {
+  color: #10b981;
+}
+.arrow-away {
+  color: #ef4444;
+}
+.arrow-even {
+  color: #6b7280;
+}
 
 .surface-section {
   background: rgba(59, 130, 246, 0.1);
@@ -360,7 +372,12 @@
 
 .skeleton-line {
   height: 14px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
   background-size: 200% 100%;
   border-radius: 4px;
   animation: shimmer 1.5s infinite;
@@ -371,6 +388,10 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

@@ -41,6 +41,7 @@ MATCH (layout con sidebar)
 **Obiettivo**: in 20 secondi l'utente sceglie quale match è "tradabile".
 
 Ogni match row mostra:
+
 - Stato match (set/game/serve)
 - Odds principali
 - Semaforo strategie: quante 🟢/🟡
@@ -75,44 +76,52 @@ Ogni match row mostra:
 ## 5️⃣ Tab Principali
 
 ### Overview
+
 - Scoreboard completo
 - Quick signals (strategie 🟢)
 - Features chiave (volatility, pressure)
 - Status match (serving, clutch point)
 
 ### Strategie Live
+
 - Cards per ogni strategia
 - Semaforo + action suggerita
 - Confidence + reason
 - One-click execution (futuro)
 
 ### Odds
+
 - Mercato principale + ladder
 - Trend (frecce movimento)
 - Implied probability
 - Staleness indicator
 
 ### Point-by-Point
+
 - Log eventi cronologico
 - Momenti chiave evidenziati
 - Break points, set points
 
 ### Stats
+
 - Statistiche aggregate
 - Confronto giocatori
 - Grafici radar
 
 ### Momentum
+
 - Grafico momentum temporale
 - Run di punti
 - Trend
 
 ### Predictor
+
 - Model probability vs Market
 - Edge visualization
 - Confidence interval
 
 ### Journal
+
 - Bet decisions logged
 - P&L tracking
 - Decision audit
@@ -121,13 +130,13 @@ Ogni match row mostra:
 
 ## 6️⃣ Regole UI
 
-| Regola | Descrizione |
-|--------|-------------|
-| Skeleton loading | Mai spinner globali |
-| Semafori ovunque | READY=🟢, WATCH=🟡, OFF=⚫ |
-| Una azione | Max 1 CTA prominente per card |
-| Staleness visible | Mostra età dati se > soglia |
-| Mobile-first | Layout responsive |
+| Regola            | Descrizione                   |
+| ----------------- | ----------------------------- |
+| Skeleton loading  | Mai spinner globali           |
+| Semafori ovunque  | READY=🟢, WATCH=🟡, OFF=⚫    |
+| Una azione        | Max 1 CTA prominente per card |
+| Staleness visible | Mostra età dati se > soglia   |
+| Mobile-first      | Layout responsive             |
 
 ---
 
@@ -140,16 +149,23 @@ Ogni match row mostra:
 ---
 
 **Documenti Correlati**:
+
 - [FILOSOFIA_FRONTEND_DATA](../data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) – data architecture
 - [SPEC_MOTION_UI](../../../specs/SPEC_FRONTEND_MOTION_UI.md) – animazioni
 - [FILOSOFIA_STATS](../../40_analytics_features_models/stats/FILOSOFIA_STATS.md) – strategy signals
 - [SCHEDE_UI_TAB](../../../specs/SCHEDE_UI_TAB.md) – specifiche visual design pagine e tab
 
-### 📁 File Codice Principali
+### � Pseudocode
 
-| File | Descrizione |
-|------|-------------|
-| [`src/components/`](../../../../src/components/) | React UI components |
-| [`src/styles/`](../../../../src/styles/) | CSS / styled components |
-| [`src/motion/`](../../../../src/motion/) | Animation utilities |
-| [`src/App.jsx`](../../../../src/App.jsx) | App entry point |
+| Documento                                                              | Descrizione                 |
+| ---------------------------------------------------------------------- | --------------------------- |
+| [FILOSOFIA_FRONTEND_PSEUDOCODE](./FILOSOFIA_FRONTEND_PSEUDOCODE.md)    | Regole formali frontend UI  |
+
+### �📁 File Codice Principali
+
+| File                                             | Descrizione             |
+| ------------------------------------------------ | ----------------------- |
+| [`src/components/`](../../../../src/components/) | React UI components     |
+| [`src/styles/`](../../../../src/styles/)         | CSS / styled components |
+| [`src/motion/`](../../../../src/motion/)         | Animation utilities     |
+| [`src/App.jsx`](../../../../src/App.jsx)         | App entry point         |

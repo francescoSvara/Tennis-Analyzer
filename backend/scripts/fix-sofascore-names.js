@@ -6,10 +6,7 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 const DRY_RUN = process.argv.includes('--dry-run');
 
@@ -37,18 +34,18 @@ async function fixSofascoreNames() {
   for (const match of matches) {
     try {
       const raw = match.raw_json;
-      
+
       // Estrai nomi da mapping nel raw_json
       let homeName = '';
       let awayName = '';
-      
+
       if (raw?.mapping?.home?.name) {
         homeName = raw.mapping.home.name;
       }
       if (raw?.mapping?.away?.name) {
         awayName = raw.mapping.away.name;
       }
-      
+
       // Se non trovati nel mapping, cerca in event
       if (!homeName && raw?.event?.homeTeam?.name) {
         homeName = raw.event.homeTeam.name;
@@ -56,7 +53,7 @@ async function fixSofascoreNames() {
       if (!awayName && raw?.event?.awayTeam?.name) {
         awayName = raw.event.awayTeam.name;
       }
-      
+
       if (!homeName || !awayName) {
         console.log(`   ⚠️  ID ${match.id}: nomi non trovati nel raw_json`);
         continue;
@@ -84,7 +81,7 @@ async function fixSofascoreNames() {
           .update({
             winner_name: winnerName,
             loser_name: loserName,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
           .eq('id', match.id);
 

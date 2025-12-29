@@ -1,14 +1,14 @@
-/**
+﻿/**
  * Script per inserire i dati PBP estratti con il nuovo estrattore corretto
  * Match: Norrie vs Vacherot (ID: 14968724)
- * 
+ *
  * USA IL NUOVO ESTRATTORE CHE RISPETTA LE INVARIANTI TENNIS:
  * - Il servizio NON dipende mai dal vincitore
  * - Il servizio ALTERNA ogni game
  * - Il break NON cambia l'alternanza
- * - Il primo punto del tie-break è servito da chi avrebbe servito il game successivo
+ * - Il primo punto del tie-break Ã¨ servito da chi avrebbe servito il game successivo
  * - Chi serve primo nel tie-break NON serve il primo game del set successivo
- * 
+ *
  * INSERISCE IN point_by_point (tabella legacy con serving/scoring)
  */
 
@@ -53,19 +53,21 @@ async function main() {
     console.error('Errore estrazione:', extracted.error);
     process.exit(1);
   }
-  
+
   console.log('');
   console.log('=== VERIFICA ESTRAZIONE ===');
   console.log(`First Server: ${extracted.firstServer}`);
   console.log(`Sets: ${extracted.sets.length}`);
-  
+
   for (const set of extracted.sets) {
-    console.log(`\nSet ${set.setNumber}: ${set.finalScore.home}-${set.finalScore.away} (${set.games.length} games)`);
-    const breaks = set.games.filter(g => g.isBreak);
+    console.log(
+      `\nSet ${set.setNumber}: ${set.finalScore.home}-${set.finalScore.away} (${set.games.length} games)`
+    );
+    const breaks = set.games.filter((g) => g.isBreak);
     if (breaks.length > 0) {
-      console.log(`  Breaks: ${breaks.map(b => `G${b.game}`).join(', ')}`);
+      console.log(`  Breaks: ${breaks.map((b) => `G${b.game}`).join(', ')}`);
     }
-    const tb = set.games.find(g => g.isTiebreak);
+    const tb = set.games.find((g) => g.isTiebreak);
     if (tb) {
       console.log(`  Tiebreak: G${tb.game}, winner: ${tb.gameWinner}`);
     }
@@ -74,7 +76,7 @@ async function main() {
   // 3. Formatta per database (tabella point_by_point con serving/scoring)
   const dbPoints = [];
   let pointIndex = 0;
-  
+
   for (const set of extracted.sets) {
     for (const game of set.games) {
       for (const point of game.points) {
@@ -86,53 +88,49 @@ async function main() {
           home_point: point.homeScore,
           away_point: point.awayScore,
           // serving = chi serve questo game (1=home, 2=away)
-          serving: game.server === 'home' ? 1 : (game.server === 'away' ? 2 : null),
+          serving: game.server === 'home' ? 1 : game.server === 'away' ? 2 : null,
           // scoring = chi VINCE il game (1=home, 2=away) - per break detection
-          scoring: game.gameWinner === 'home' ? 1 : (game.gameWinner === 'away' ? 2 : null),
+          scoring: game.gameWinner === 'home' ? 1 : game.gameWinner === 'away' ? 2 : null,
           point_winner: point.pointWinner,
           score_before: point.pointNumber === 1 ? '0-0' : null,
           is_break_point: false,
           is_ace: false,
-          is_double_fault: false
+          is_double_fault: false,
         });
         pointIndex++;
       }
     }
   }
-  
+
   console.log('');
   console.log(`Punti formattati per DB: ${dbPoints.length}`);
 
   // 4. Verifica ed elimina dati esistenti da ENTRAMBE le tabelle
   console.log('');
   console.log('Elimino dati esistenti...');
-  
+
   // Elimina da point_by_point
   await supabase.from('point_by_point').delete().eq('match_id', MATCH_ID);
   // Elimina anche da match_point_by_point_new per evitare conflitti
-  await supabase.from('match_point_by_point_new').delete().eq('match_id', MATCH_ID);
+  await supabase.from('match_point_by_point').delete().eq('match_id', MATCH_ID);
   console.log('Dati esistenti eliminati da entrambe le tabelle');
 
   // 5. Inserisci nuovi dati in point_by_point
   console.log('');
   console.log('Inserisco nuovi dati in point_by_point...');
-  
+
   const BATCH_SIZE = 50;
   let inserted = 0;
-  
+
   for (let i = 0; i < dbPoints.length; i += BATCH_SIZE) {
     const batch = dbPoints.slice(i, i + BATCH_SIZE);
-    const { error: insertError } = await supabase
-      .from('point_by_point')
-      .insert(batch);
+    const { error: insertError } = await supabase.from('point_by_point').insert(batch);
 
     if (insertError) {
       console.error(`Errore inserimento batch ${i}:`, insertError.message);
       // Prova uno per uno
       for (const point of batch) {
-        const { error: singleError } = await supabase
-          .from('point_by_point')
-          .insert([point]);
+        const { error: singleError } = await supabase.from('point_by_point').insert([point]);
         if (!singleError) inserted++;
         else console.error('  Errore singolo:', singleError.message);
       }
@@ -141,7 +139,7 @@ async function main() {
       console.log(`  Inseriti ${inserted}/${dbPoints.length} punti`);
     }
   }
-  
+
   // 6. Verifica inserimento
   console.log('');
   console.log('Verifica inserimento...');
@@ -149,9 +147,9 @@ async function main() {
     .from('point_by_point')
     .select('id', { count: 'exact', head: true })
     .eq('match_id', MATCH_ID);
-    
+
   console.log(`Punti nel DB (point_by_point): ${finalCount}`);
-  
+
   // Verifica serving/scoring
   const { data: sample } = await supabase
     .from('point_by_point')
@@ -161,15 +159,17 @@ async function main() {
     .order('game_number')
     .order('point_index')
     .limit(20);
-    
+
   console.log('');
   console.log('Sample primi 20 punti:');
   if (sample) {
-    sample.forEach(p => {
-      console.log(`  S${p.set_number} G${p.game_number} P${p.point_index}: serving=${p.serving}, scoring=${p.scoring}, winner=${p.point_winner}`);
+    sample.forEach((p) => {
+      console.log(
+        `  S${p.set_number} G${p.game_number} P${p.point_index}: serving=${p.serving}, scoring=${p.scoring}, winner=${p.point_winner}`
+      );
     });
   }
-  
+
   // Verifica break detection
   console.log('');
   console.log('Verifica break detection (Set 2):');
@@ -180,22 +180,29 @@ async function main() {
     .eq('set_number', 2)
     .order('game_number')
     .order('point_index');
-    
+
   if (set2) {
     const games = {};
-    set2.forEach(p => {
+    set2.forEach((p) => {
       if (!games[p.game_number]) {
         games[p.game_number] = { serving: p.serving, scoring: p.scoring };
       }
     });
-    Object.keys(games).forEach(g => {
+    Object.keys(games).forEach((g) => {
       const isBreak = games[g].serving !== games[g].scoring;
-      console.log(`  G${g}: serving=${games[g].serving}, scoring=${games[g].scoring}, break=${isBreak ? 'YES' : 'no'}`);
+      console.log(
+        `  G${g}: serving=${games[g].serving}, scoring=${games[g].scoring}, break=${
+          isBreak ? 'YES' : 'no'
+        }`
+      );
     });
   }
-  
+
   console.log('');
   console.log('=== COMPLETATO ===');
 }
 
 main().catch(console.error);
+
+
+

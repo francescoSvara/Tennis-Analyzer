@@ -1,19 +1,19 @@
-/**
+﻿/**
  * Match Enrichment Service
- * 
+ *
  * FILOSOFIA: Servizio unificato per completare partite passate che non hanno tutti i dati.
  * Combina pbpExtractor + svgMomentumExtractor per ottenere dati completi.
- * 
+ *
  * QUANDO USARE:
- * - Partite già finite senza PBP nel DB
+ * - Partite giÃ  finite senza PBP nel DB
  * - Partite senza power rankings/momentum
  * - Arricchimento batch di partite storiche
- * 
+ *
  * INVARIANTI:
  * - row1 = HOME, row2 = AWAY (SEMPRE, vedi FILOSOFIA_PBP_EXTRACTION.md)
  * - I 6 invarianti tennis devono essere rispettati
  * - Il DB va popolato SOLO con dati SofaScore API o tramite questo servizio
- * 
+ *
  * @see docs/filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md
  * @see docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md
  */
@@ -32,13 +32,13 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN ENRICHMENT FUNCTION
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 /**
  * Arricchisce un match con PBP e SVG momentum da HTML copiato da SofaScore
- * 
+ *
  * @param {number} matchId - ID match nel DB
  * @param {Object} options - Opzioni di arricchimento
  * @param {string} options.pbpHtml - HTML del tab Point-by-Point di SofaScore
@@ -53,7 +53,7 @@ async function enrichMatchFromHtml(matchId, options = {}) {
 
   // 1. Verifica che il match esista nel DB
   const { data: match, error: matchError } = await supabase
-    .from('matches_new')
+    .from('matches')
     .select('id, home_player_id, away_player_id, sofascore_id')
     .eq('sofascore_id', matchId)
     .single();
@@ -100,9 +100,9 @@ async function enrichMatchFromHtml(matchId, options = {}) {
   return result;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PBP EXTRACTION
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 /**
  * Estrae PBP da HTML e inserisce nel DB
@@ -112,7 +112,7 @@ async function extractAndInsertPbp(matchId, html, dryRun = false) {
 
   // Estrai usando pbpExtractor (versione corretta con row1=HOME, row2=AWAY)
   const extracted = extractPbp(html);
-  
+
   if (!extracted || !extracted.points || extracted.points.length === 0) {
     result.errors.push('Nessun punto estratto dal HTML');
     return result;
@@ -129,7 +129,9 @@ async function extractAndInsertPbp(matchId, html, dryRun = false) {
   result.pointsCount = extracted.points.length;
 
   if (dryRun) {
-    logger.info(`[EnrichService] DRY RUN: ${result.pointsCount} punti estratti per match ${matchId}`);
+    logger.info(
+      `[EnrichService] DRY RUN: ${result.pointsCount} punti estratti per match ${matchId}`
+    );
     result.success = true;
     result.dryRun = true;
     return result;
@@ -143,11 +145,11 @@ async function extractAndInsertPbp(matchId, html, dryRun = false) {
     point_number: idx + 1,
     home_score: p.homeScore,
     away_score: p.awayScore,
-    serving: p.server === 'home' ? 1 : 2,  // 1=HOME, 2=AWAY
+    serving: p.server === 'home' ? 1 : 2, // 1=HOME, 2=AWAY
     scoring: p.pointWinner === 'home' ? 1 : 2,
     is_break_point: p.isBreakPoint || false,
     is_set_point: p.isSetPoint || false,
-    is_match_point: p.isMatchPoint || false
+    is_match_point: p.isMatchPoint || false,
   }));
 
   // Elimina PBP esistente per questo match
@@ -162,9 +164,7 @@ async function extractAndInsertPbp(matchId, html, dryRun = false) {
   }
 
   // Inserisci nuovi punti
-  const { error: insertError } = await supabase
-    .from('point_by_point')
-    .insert(dbPoints);
+  const { error: insertError } = await supabase.from('point_by_point').insert(dbPoints);
 
   if (insertError) {
     result.errors.push(`Errore inserimento PBP: ${insertError.message}`);
@@ -176,9 +176,9 @@ async function extractAndInsertPbp(matchId, html, dryRun = false) {
   return result;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SVG MOMENTUM EXTRACTION
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 /**
  * Estrae momentum da SVG HTML e inserisce nel DB
@@ -188,7 +188,7 @@ async function extractAndInsertMomentum(matchId, html, dryRun = false) {
 
   // Estrai usando svgMomentumExtractor
   const extracted = processSvgMomentum(html);
-  
+
   if (!extracted || !extracted.ok) {
     result.errors.push(extracted?.error || 'Errore estrazione SVG momentum');
     return result;
@@ -204,7 +204,9 @@ async function extractAndInsertMomentum(matchId, html, dryRun = false) {
   }
 
   if (dryRun) {
-    logger.info(`[EnrichService] DRY RUN: ${totalGames} game momentum estratti per match ${matchId}`);
+    logger.info(
+      `[EnrichService] DRY RUN: ${totalGames} game momentum estratti per match ${matchId}`
+    );
     result.success = true;
     result.dryRun = true;
     return result;
@@ -213,24 +215,24 @@ async function extractAndInsertMomentum(matchId, html, dryRun = false) {
   // Prepara power rankings per il DB
   const powerRankings = [];
   for (const set of extracted.sets) {
-    for (const game of (set.games || [])) {
+    for (const game of set.games || []) {
       powerRankings.push({
         set: game.set,
         game: game.game,
         value: game.value,
         side: game.side,
         homeValue: game.side === 'home' ? Math.abs(game.value) : 0,
-        awayValue: game.side === 'away' ? Math.abs(game.value) : 0
+        awayValue: game.side === 'away' ? Math.abs(game.value) : 0,
       });
     }
   }
 
   // Aggiorna il campo svg_momentum_json nel match
   const { error: updateError } = await supabase
-    .from('matches_new')
-    .update({ 
+    .from('matches')
+    .update({
       svg_momentum_json: powerRankings,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('sofascore_id', matchId);
 
@@ -244,9 +246,9 @@ async function extractAndInsertMomentum(matchId, html, dryRun = false) {
   return result;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // VALIDATION
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 /**
  * Valida i dati PBP rispettando i 6 invarianti tennis
@@ -254,7 +256,7 @@ async function extractAndInsertMomentum(matchId, html, dryRun = false) {
  */
 function validatePbpData(points) {
   const errors = [];
-  
+
   if (!points || points.length === 0) {
     return { valid: false, errors: ['Nessun punto da validare'] };
   }
@@ -263,7 +265,7 @@ function validatePbpData(points) {
   let prevScore = { home: '0', away: '0' };
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
-    
+
     // Score deve essere valido
     if (!isValidTennisScore(p.homeScore) || !isValidTennisScore(p.awayScore)) {
       errors.push(`Punto ${i}: Score non valido (${p.homeScore}-${p.awayScore})`);
@@ -274,14 +276,14 @@ function validatePbpData(points) {
   const games = groupPointsByGame(points);
   for (const game of games) {
     if (game.points.length === 0) continue;
-    
+
     const lastPoint = game.points[game.points.length - 1];
     const gameWinner = lastPoint.pointWinner;
     const server = game.server;
-    
-    // Se game finito e winner != server, è un break
+
+    // Se game finito e winner != server, Ã¨ un break
     if (gameWinner && server && gameWinner !== server) {
-      // Questo è un break - logga per verifica
+      // Questo Ã¨ un break - logga per verifica
       logger.debug(`Break at S${game.set}G${game.game}: ${gameWinner} broke ${server}`);
     }
   }
@@ -305,12 +307,12 @@ function groupPointsByGame(points) {
         set: p.set,
         game: p.game,
         server: p.server,
-        points: []
+        points: [],
       };
     }
     currentGame.points.push(p);
   }
-  
+
   if (currentGame) games.push(currentGame);
   return games;
 }
@@ -319,16 +321,16 @@ function groupPointsByGame(points) {
  * Valida score tennis
  */
 function isValidTennisScore(score) {
-  if (!score) return true; // 0 è valido
+  if (!score) return true; // 0 Ã¨ valido
   const s = String(score).trim().toUpperCase();
   if (['0', '15', '30', '40', 'A', 'AD'].includes(s)) return true;
   const num = parseInt(s);
   return !isNaN(num) && num >= 0 && num < 100; // Tiebreak
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DATA QUALITY UPDATE
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 /**
  * Ricalcola data_quality dopo arricchimento
@@ -337,7 +339,7 @@ async function updateMatchDataQuality(matchId) {
   try {
     // Controlla cosa ha il match ora
     const { data: match } = await supabase
-      .from('matches_new')
+      .from('matches')
       .select('*')
       .eq('sofascore_id', matchId)
       .single();
@@ -346,17 +348,21 @@ async function updateMatchDataQuality(matchId) {
 
     // Calcola quality score (0-100)
     let quality = 0;
-    
+
     // Base data
     if (match.home_player_id && match.away_player_id) quality += 20;
     if (match.winner_code) quality += 10;
     if (match.tournament_id) quality += 10;
-    
+
     // Score
     if (match.home_score !== null && match.away_score !== null) quality += 15;
-    
+
     // SVG Momentum
-    if (match.svg_momentum_json && Array.isArray(match.svg_momentum_json) && match.svg_momentum_json.length > 0) {
+    if (
+      match.svg_momentum_json &&
+      Array.isArray(match.svg_momentum_json) &&
+      match.svg_momentum_json.length > 0
+    ) {
       quality += 15;
     }
 
@@ -365,7 +371,7 @@ async function updateMatchDataQuality(matchId) {
       .from('point_by_point')
       .select('id', { count: 'exact', head: true })
       .eq('match_id', matchId);
-    
+
     if (pbpCount && pbpCount > 0) quality += 20;
 
     // Statistics
@@ -373,10 +379,10 @@ async function updateMatchDataQuality(matchId) {
 
     // Aggiorna
     await supabase
-      .from('matches_new')
-      .update({ 
+      .from('matches')
+      .update({
         data_quality: quality,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('sofascore_id', matchId);
 
@@ -386,14 +392,17 @@ async function updateMatchDataQuality(matchId) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // EXPORTS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 module.exports = {
   enrichMatchFromHtml,
   extractAndInsertPbp,
   extractAndInsertMomentum,
   validatePbpData,
-  updateMatchDataQuality
+  updateMatchDataQuality,
 };
+
+
+

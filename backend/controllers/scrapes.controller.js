@@ -1,9 +1,9 @@
 /**
  * Scrapes Controller
- * 
+ *
  * Controller per gestione scrapes salvati.
  * Zero logica di dominio - solo lettura file.
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_DB.md
  */
 
@@ -28,13 +28,14 @@ exports.list = (req, res) => {
     if (!fs.existsSync(SCRAPES_DIR)) {
       return res.json({ scrapes: [] });
     }
-    const files = fs.readdirSync(SCRAPES_DIR)
-      .filter(f => f.endsWith('.json'))
-      .map(f => {
+    const files = fs
+      .readdirSync(SCRAPES_DIR)
+      .filter((f) => f.endsWith('.json'))
+      .map((f) => {
         const filePath = path.join(SCRAPES_DIR, f);
         const stat = fs.statSync(filePath);
         const id = f.replace('.json', '');
-        
+
         let info = { id, filename: f, createdAt: stat.mtime.toISOString(), size: stat.size };
         try {
           const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
@@ -53,11 +54,13 @@ exports.list = (req, res) => {
               }
             }
           }
-        } catch (e) { /* ignore parse errors */ }
+        } catch (e) {
+          /* ignore parse errors */
+        }
         return info;
       })
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
+
     res.json({ scrapes: files });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -95,10 +98,10 @@ exports.getStatus = (req, res) => {
  */
 exports.getData = (req, res) => {
   const id = req.params.id;
-  
+
   // Prima controlla in memoria
   let data = scraperModule ? scraperModule.getData(id) : null;
-  
+
   // Se non trovato, prova file
   if (!data) {
     const filePath = path.join(SCRAPES_DIR, `${id}.json`);
@@ -110,11 +113,11 @@ exports.getData = (req, res) => {
       }
     }
   }
-  
+
   if (!data) {
     return res.status(404).json({ status: 'not_found', error: `Match ${id} non trovato` });
   }
-  
+
   res.json(data);
 };
 
@@ -131,8 +134,8 @@ exports.scrape = (req, res) => {
       '2. Esegui: npm install',
       '3. Esegui: npm run dev',
       '4. Apri http://localhost:5174',
-      '5. Inserisci il link SofaScore per acquisire il match'
-    ]
+      '5. Inserisci il link SofaScore per acquisire il match',
+    ],
   });
 };
 
@@ -143,10 +146,10 @@ exports.lookupName = async (req, res) => {
   if (!scraperModule) {
     return res.status(503).json({ error: 'Scraper not available' });
   }
-  
+
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'Missing url' });
-  
+
   try {
     const fetched = await scraperModule.directFetch(url);
     const body = fetched && fetched.body ? fetched.body : null;

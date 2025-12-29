@@ -1,15 +1,15 @@
 /**
  * Event Routes
- * 
+ *
  * Endpoints per fetch diretto eventi SofaScore:
  * - GET /event/:eventId/point-by-point
- * - GET /event/:eventId/statistics  
+ * - GET /event/:eventId/statistics
  * - GET /event/:eventId/power-rankings
  * - GET /event/:eventId/live - Tutti i dati live
- * 
+ *
  * NOTE: Questi endpoint fanno fetch DIRETTO a SofaScore.
  * Per dati da DB usare /api/match/:eventId/bundle (FILOSOFIA MATCHBUNDLE_ONLY_FE)
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_LIVE_TRACKING.md
  */
 

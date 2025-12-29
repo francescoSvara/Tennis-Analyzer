@@ -12,6 +12,19 @@
     }
   },
   "extends": ["eslint:recommended", "plugin:react/recommended", "prettier"],
+  "overrides": [
+    {
+      "files": ["test/**/*.js", "test/**/*.cjs"],
+      "env": { "jest": true, "node": true }
+    },
+    {
+      "files": ["backend/**", "backend/**/*.*", "scripts/**", "scripts/**/*.*"],
+      "env": { "node": true },
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
   "plugins": ["react", "react-hooks"],
   "rules": {
     "no-console": ["warn", { "allow": ["warn", "error", "info"] }],

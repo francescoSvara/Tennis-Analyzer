@@ -16,22 +16,28 @@ Questo documento è **COSTITUZIONALE**: ogni riga di codice PBP deve rispettare 
 ## 2️⃣ Invarianti Tennis (Non Negoziabili)
 
 ### Server Score Progression
+
 Chi serve vede il suo score aumentare quando vince punti.
 
 ### Alternanza Servizio
+
 Il servizio alterna ogni game (eccetto tiebreak).  
 Nuovo set: chi NON ha servito l'ultimo game del set precedente.
 
 ### Break Definition
+
 BREAK = vincere un game sul servizio avversario.
 
 ### Tiebreak Rotation
+
 Nel tiebreak il servizio ruota ogni 2 punti (dopo il primo).
 
 ### Score Display Convention
+
 Score mostrato sempre dal punto di vista del server.
 
 ### Point Winner = Score Change
+
 Chi vince il punto è chi vede aumentare il proprio score.
 
 ---
@@ -56,6 +62,7 @@ Questo NON CAMBIA MAI.
 ## 4️⃣ Point Winner Detection
 
 Il `pointWinner` si determina dal **colore CSS** della cella:
+
 - `row1Won` (verde su row1) → HOME ha vinto
 - `row2Won` (verde su row2) → AWAY ha vinto
 
@@ -66,6 +73,7 @@ Il `pointWinner` si determina dal **colore CSS** della cella:
 ## 5️⃣ Server Detection
 
 Il server si determina:
+
 1. Dall'icona palla nel game header
 2. Dall'alternanza logica se icona mancante
 3. Dal `homeServed` boolean nella row
@@ -81,14 +89,21 @@ Il server si determina:
 ---
 
 **Documenti Correlati**:
+
 - [FILOSOFIA_DB](../10_data_platform/storage/FILOSOFIA_DB.md) – schema point_by_point
 - [FILOSOFIA_LIVE_TRACKING](./live_scoring/FILOSOFIA_LIVE_TRACKING.md) – PBP real-time
 - [FILOSOFIA_TEMPORAL](../10_data_platform/temporal/FILOSOFIA_TEMPORAL.md) – timestamps eventi
 
-### 📁 File Codice Principali
+### � Pseudocode
 
-| File | Descrizione |
-|------|-------------|
-| [`backend/scraper/pbpExtractor.cjs`](../../../backend/scraper/pbpExtractor.cjs) | PBP HTML parser |
-| [`backend/routes/event.routes.js`](../../../backend/routes/event.routes.js) | Route `/api/event/:id/point-by-point` |
-| [`backend/controllers/event.controller.js`](../../../backend/controllers/event.controller.js) | Controller PBP endpoint |
+| Documento                                                                          | Descrizione                |
+| ---------------------------------------------------------------------------------- | -------------------------- |
+| [FILOSOFIA_PBP_EXTRACTION_PSEUDOCODE](./FILOSOFIA_PBP_EXTRACTION_PSEUDOCODE.md)    | Regole formali PBP         |
+
+### �📁 File Codice Principali
+
+| File                                                                                          | Descrizione                           |
+| --------------------------------------------------------------------------------------------- | ------------------------------------- |
+| [`backend/scraper/pbpExtractor.cjs`](../../../backend/scraper/pbpExtractor.cjs)               | PBP HTML parser                       |
+| [`backend/routes/event.routes.js`](../../../backend/routes/event.routes.js)                   | Route `/api/event/:id/point-by-point` |
+| [`backend/controllers/event.controller.js`](../../../backend/controllers/event.controller.js) | Controller PBP endpoint               |

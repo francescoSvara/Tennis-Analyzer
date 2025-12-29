@@ -1,6 +1,6 @@
 /**
  * LoadingSkeleton - Stato di caricamento
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md (UI States)
  */
 

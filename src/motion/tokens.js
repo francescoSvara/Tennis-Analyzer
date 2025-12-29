@@ -8,10 +8,10 @@
 // DURATIONS (in secondi)
 // ============================================
 export const durations = {
-  fast: 0.18,      // hover, micro-interazioni
-  normal: 0.32,    // transizioni standard
-  slow: 0.42,      // entrate elaborate
-  stagger: 0.06,   // delay tra elementi in lista
+  fast: 0.18, // hover, micro-interazioni
+  normal: 0.32, // transizioni standard
+  slow: 0.42, // entrate elaborate
+  stagger: 0.06, // delay tra elementi in lista
 };
 
 // ============================================
@@ -78,17 +78,17 @@ export const staggerItem = {
 
 // Hover per card - effetto lift
 export const cardHover = {
-  rest: { 
-    y: 0, 
+  rest: {
+    y: 0,
     scale: 1,
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
   },
-  hover: { 
-    y: -3, 
+  hover: {
+    y: -3,
     scale: 1.01,
     boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
   },
-  tap: { 
+  tap: {
     scale: 0.99,
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
   },

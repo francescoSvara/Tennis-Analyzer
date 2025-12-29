@@ -248,9 +248,15 @@
   font-variant-numeric: tabular-nums;
 }
 
-.risk-value--low { color: var(--color-success); }
-.risk-value--medium { color: var(--color-warning); }
-.risk-value--high { color: var(--color-danger); }
+.risk-value--low {
+  color: var(--color-success);
+}
+.risk-value--medium {
+  color: var(--color-warning);
+}
+.risk-value--high {
+  color: var(--color-danger);
+}
 
 .risk-progress {
   height: 4px;
@@ -265,9 +271,15 @@
   transition: width var(--motion-normal) var(--motion-ease-out);
 }
 
-.risk-progress__fill--low { background: var(--color-success); }
-.risk-progress__fill--medium { background: var(--color-warning); }
-.risk-progress__fill--high { background: var(--color-danger); }
+.risk-progress__fill--low {
+  background: var(--color-success);
+}
+.risk-progress__fill--medium {
+  background: var(--color-warning);
+}
+.risk-progress__fill--high {
+  background: var(--color-danger);
+}
 
 /* ===========================================
    RISK TOGGLES
@@ -295,7 +307,7 @@
   color: var(--text-primary);
 }
 
-.toggle-item input[type="checkbox"] {
+.toggle-item input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: var(--color-primary);

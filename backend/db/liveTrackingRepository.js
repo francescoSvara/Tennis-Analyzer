@@ -8,22 +8,22 @@ const { supabase, handleSupabaseError } = require('./supabase');
 
 // Costanti per priorità e intervalli
 const PRIORITY_INTERVALS = {
-  HIGH: 3,      // 3 secondi per match importanti
-  MEDIUM: 10,   // 10 secondi default
-  LOW: 30       // 30 secondi per match meno importanti
+  HIGH: 3, // 3 secondi per match importanti
+  MEDIUM: 10, // 10 secondi default
+  LOW: 30, // 30 secondi per match meno importanti
 };
 
 const STATUS = {
   WATCHING: 'WATCHING',
   PAUSED: 'PAUSED',
   FINISHED: 'FINISHED',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
 };
 
 const PRIORITY = {
   HIGH: 'HIGH',
   MEDIUM: 'MEDIUM',
-  LOW: 'LOW'
+  LOW: 'LOW',
 };
 
 // Helper per verificare disponibilità Supabase
@@ -47,7 +47,7 @@ function checkSupabase() {
  */
 async function addTracking(sourceEventId, options = {}) {
   if (!checkSupabase()) return null;
-  
+
   const trackingData = {
     source_event_id: String(sourceEventId),
     source_type: options.sourceType || 'sofascore',
@@ -61,14 +61,14 @@ async function addTracking(sourceEventId, options = {}) {
     current_score: options.currentScore || null,
     next_poll_at: new Date().toISOString(),
     // FILOSOFIA_TEMPORAL: ingestion_time = when our system received the data
-    ingestion_time: new Date().toISOString()
+    ingestion_time: new Date().toISOString(),
   };
 
   const { data, error } = await supabase
     .from('live_tracking')
-    .upsert(trackingData, { 
+    .upsert(trackingData, {
       onConflict: 'source_event_id',
-      ignoreDuplicates: false 
+      ignoreDuplicates: false,
     })
     .select()
     .single();
@@ -150,7 +150,8 @@ async function getTracking(sourceEventId) {
     .eq('source_event_id', String(sourceEventId))
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 = not found
     console.error('❌ Error fetching tracking:', error.message);
   }
 
@@ -194,7 +195,7 @@ async function getTrackingDue(limit = 10) {
  */
 async function updateStatus(sourceEventId, status) {
   if (!checkSupabase()) return null;
-  
+
   if (!Object.values(STATUS).includes(status)) {
     console.error(`❌ Invalid status: ${status}`);
     return null;
@@ -224,7 +225,7 @@ async function updateStatus(sourceEventId, status) {
  */
 async function updatePriority(sourceEventId, priority) {
   if (!checkSupabase()) return null;
-  
+
   if (!Object.values(PRIORITY).includes(priority)) {
     console.error(`❌ Invalid priority: ${priority}`);
     return null;
@@ -234,9 +235,9 @@ async function updatePriority(sourceEventId, priority) {
 
   const { data, error } = await supabase
     .from('live_tracking')
-    .update({ 
+    .update({
       priority,
-      poll_interval_sec: pollInterval
+      poll_interval_sec: pollInterval,
     })
     .eq('source_event_id', String(sourceEventId))
     .select()
@@ -253,11 +254,11 @@ async function updatePriority(sourceEventId, priority) {
 
 /**
  * Registra un poll completato con successo
- * 
+ *
  * TEMPORAL SEMANTICS (FILOSOFIA_TEMPORAL_SEMANTICS compliance):
  * - snapshotTime: momento esatto in cui lo snapshot è stato catturato
  * - last_polled_at: quando il poll è stato completato
- * 
+ *
  * @param {string} sourceEventId - ID evento
  * @param {string} payloadHash - Hash del payload
  * @param {Object} scoreData - Dati punteggio aggiornati
@@ -271,8 +272,8 @@ async function recordPollSuccess(sourceEventId, payloadHash, scoreData = {}, tem
   const tracking = await getTracking(sourceEventId);
   if (!tracking) return null;
 
-  const nextPollAt = new Date(now.getTime() + (tracking.poll_interval_sec * 1000));
-  
+  const nextPollAt = new Date(now.getTime() + tracking.poll_interval_sec * 1000);
+
   // TEMPORAL SEMANTICS: snapshotTime indica quando i dati sono stati catturati
   const snapshotTime = temporalMeta.snapshotTime || now.toISOString();
 
@@ -282,7 +283,7 @@ async function recordPollSuccess(sourceEventId, payloadHash, scoreData = {}, tem
     next_poll_at: nextPollAt.toISOString(),
     fail_count: 0, // Reset fail count on success
     last_error: null,
-    last_error_at: null
+    last_error_at: null,
   };
 
   // Aggiorna hash solo se cambiato
@@ -328,10 +329,10 @@ async function recordPollError(sourceEventId, errorMessage) {
 
   const newFailCount = (tracking.fail_count || 0) + 1;
   const now = new Date();
-  
+
   // Dopo 5 errori consecutivi → PAUSED
   const newStatus = newFailCount >= 5 ? STATUS.ERROR : tracking.status;
-  
+
   // Backoff esponenziale per errori (max 5 minuti)
   const backoffMs = Math.min(
     tracking.poll_interval_sec * 1000 * Math.pow(2, newFailCount),
@@ -346,7 +347,7 @@ async function recordPollError(sourceEventId, errorMessage) {
       last_error: errorMessage,
       last_error_at: now.toISOString(),
       status: newStatus,
-      next_poll_at: nextPollAt.toISOString()
+      next_poll_at: nextPollAt.toISOString(),
     })
     .eq('source_event_id', String(sourceEventId))
     .select()
@@ -375,7 +376,7 @@ async function markFinished(sourceEventId, matchId = null) {
 
   const updateData = {
     status: STATUS.FINISHED,
-    match_status: 'finished'
+    match_status: 'finished',
   };
 
   if (matchId) {
@@ -412,7 +413,7 @@ async function resumeTracking(sourceEventId) {
       status: STATUS.WATCHING,
       fail_count: 0,
       last_error: null,
-      next_poll_at: new Date().toISOString()
+      next_poll_at: new Date().toISOString(),
     })
     .eq('source_event_id', String(sourceEventId))
     .select()
@@ -443,14 +444,14 @@ async function saveSnapshot(sourceEventId, payload, payloadHash) {
 
   // Prima trova il tracking_id
   const tracking = await getTracking(sourceEventId);
-  
+
   const { data, error } = await supabase
     .from('live_snapshots')
     .insert({
       live_tracking_id: tracking?.id || null,
       source_event_id: String(sourceEventId),
       payload,
-      payload_hash: payloadHash
+      payload_hash: payloadHash,
     })
     .select()
     .single();
@@ -525,9 +526,7 @@ async function cleanOldSnapshots() {
 async function getTrackingStats() {
   if (!checkSupabase()) return null;
 
-  const { data, error } = await supabase
-    .from('live_tracking')
-    .select('status, priority');
+  const { data, error } = await supabase.from('live_tracking').select('status, priority');
 
   if (error) {
     console.error('❌ Error fetching stats:', error.message);
@@ -537,10 +536,10 @@ async function getTrackingStats() {
   const stats = {
     total: data.length,
     byStatus: {},
-    byPriority: {}
+    byPriority: {},
   };
 
-  data.forEach(row => {
+  data.forEach((row) => {
     stats.byStatus[row.status] = (stats.byStatus[row.status] || 0) + 1;
     stats.byPriority[row.priority] = (stats.byPriority[row.priority] || 0) + 1;
   });
@@ -567,14 +566,14 @@ module.exports = {
   STATUS,
   PRIORITY,
   PRIORITY_INTERVALS,
-  
+
   // CRUD
   addTracking,
   removeTracking,
   getAllTracking,
   getTracking,
   getTrackingDue,
-  
+
   // Updates
   updateStatus,
   updatePriority,
@@ -582,13 +581,13 @@ module.exports = {
   recordPollError,
   markFinished,
   resumeTracking,
-  
+
   // Snapshots
   saveSnapshot,
   getSnapshots,
   getLatestSnapshot, // FILOSOFIA_LIVE_TRACKING
   cleanOldSnapshots,
-  
+
   // Stats
-  getTrackingStats
+  getTrackingStats,
 };

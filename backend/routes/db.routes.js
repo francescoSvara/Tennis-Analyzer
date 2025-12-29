@@ -1,6 +1,6 @@
 /**
  * Database Routes
- * 
+ *
  * Endpoints per accesso al database:
  * - GET /db-stats - Statistiche complete del database
  * - GET /db/test - Test connessione
@@ -13,7 +13,7 @@
  * - GET /db/tournaments - Lista tornei
  * - GET /db/players/search - Ricerca giocatori
  * - GET /db/logs - Extraction logs
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_DB.md
  */
 

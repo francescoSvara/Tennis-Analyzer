@@ -1,6 +1,6 @@
 /**
  * ErrorState - Stato di errore
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md (UI States)
  */
 
@@ -34,7 +34,7 @@ export function ErrorState({ error, onRetry, onBack }) {
         </motion.div>
 
         <h2 className="error-title">Oops! Qualcosa è andato storto</h2>
-        
+
         <p className="error-message">
           {error || 'Si è verificato un errore durante il caricamento dei dati.'}
         </p>

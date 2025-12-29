@@ -25,10 +25,10 @@ export function apiUrl(path) {
   if (path.startsWith('http')) {
     return path;
   }
-  
+
   // Assicurati che path inizi con /
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  
+
   // In dev (API_BASE_URL vuoto) usa percorso relativo per il proxy Vite
   // In prod usa API_BASE_URL (Railway URL)
   return `${API_BASE_URL}${normalizedPath}`;
@@ -45,7 +45,7 @@ export const WS_URL = import.meta.env.VITE_WS_URL || API_BASE_URL || 'http://loc
 export const PRODUCTION_URLS = {
   backend: 'https://tennis-analyzer-production.up.railway.app',
   frontend: 'https://tennis-analyzer.vercel.app',
-  supabase: 'https://lhffxdsnpgteoeudeiwd.supabase.co'
+  supabase: 'https://lhffxdsnpgteoeudeiwd.supabase.co',
 };
 
 export default {
@@ -55,5 +55,5 @@ export default {
   IS_DEVELOPMENT,
   WS_URL,
   SUPABASE_URL,
-  PRODUCTION_URLS
+  PRODUCTION_URLS,
 };

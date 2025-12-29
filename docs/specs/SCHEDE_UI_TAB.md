@@ -238,23 +238,23 @@
 ## 📚 Riferimenti
 
 ### 🧭 Navigazione
-| ⬆️ Padre | ⬅️ Correlati | ➡️ Implementato in |
-|---------|-------------|-------------------|
-| [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [SPEC_FRONTEND_MOTION_UI](./SPEC_FRONTEND_MOTION_UI.md) | React Components |
-| [INDEX_FILOSOFIE](../filosofie/INDEX_FILOSOFIE.md) | [FILOSOFIA_FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) | |
+
+| ⬆️ Padre                                                                | ⬅️ Correlati                                                                                                            | ➡️ Implementato in |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| [FILOSOFIA_FRONTEND](../filosofie/70_frontend/ui/FILOSOFIA_FRONTEND.md) | [SPEC_FRONTEND_MOTION_UI](./SPEC_FRONTEND_MOTION_UI.md)                                                                 | React Components   |
+| [INDEX_FILOSOFIE](../filosofie/INDEX_FILOSOFIE.md)                      | [FILOSOFIA_FRONTEND_DATA_CONSUMPTION](../filosofie/70_frontend/data_consumption/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md) |                    |
 
 ### 📁 File Codice Principali
 
-| File | Descrizione |
-|------|-------------|
-| [`src/components/home/HomePage.jsx`](../../src/components/home/HomePage.jsx) | Home / Lobby |
-| [`src/components/match/MatchPage.jsx`](../../src/components/match/MatchPage.jsx) | Match Page container |
-| [`src/components/match/tabs/OverviewTab.jsx`](../../src/components/match/tabs/OverviewTab.jsx) | Tab Overview |
-| [`src/components/match/tabs/StrategiesTab.jsx`](../../src/components/match/tabs/StrategiesTab.jsx) | Tab Strategie Live |
-| [`src/components/match/tabs/OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx) | Tab Odds |
-| [`src/components/match/tabs/PointByPointTab.jsx`](../../src/components/match/tabs/PointByPointTab.jsx) | Tab Point-by-Point |
-| [`src/components/match/tabs/StatsTab.jsx`](../../src/components/match/tabs/StatsTab.jsx) | Tab Stats |
-| [`src/components/match/tabs/MomentumTab.jsx`](../../src/components/match/tabs/MomentumTab.jsx) | Tab Momentum |
-| [`src/components/match/tabs/PredictorTab.jsx`](../../src/components/match/tabs/PredictorTab.jsx) | Tab Predictor |
-| [`src/components/match/tabs/JournalTab.jsx`](../../src/components/match/tabs/JournalTab.jsx) | Tab Journal |
-
+| File                                                                                                   | Descrizione          |
+| ------------------------------------------------------------------------------------------------------ | -------------------- |
+| [`src/components/home/HomePage.jsx`](../../src/components/home/HomePage.jsx)                           | Home / Lobby         |
+| [`src/components/match/MatchPage.jsx`](../../src/components/match/MatchPage.jsx)                       | Match Page container |
+| [`src/components/match/tabs/OverviewTab.jsx`](../../src/components/match/tabs/OverviewTab.jsx)         | Tab Overview         |
+| [`src/components/match/tabs/StrategiesTab.jsx`](../../src/components/match/tabs/StrategiesTab.jsx)     | Tab Strategie Live   |
+| [`src/components/match/tabs/OddsTab.jsx`](../../src/components/match/tabs/OddsTab.jsx)                 | Tab Odds             |
+| [`src/components/match/tabs/PointByPointTab.jsx`](../../src/components/match/tabs/PointByPointTab.jsx) | Tab Point-by-Point   |
+| [`src/components/match/tabs/StatsTab.jsx`](../../src/components/match/tabs/StatsTab.jsx)               | Tab Stats            |
+| [`src/components/match/tabs/MomentumTab.jsx`](../../src/components/match/tabs/MomentumTab.jsx)         | Tab Momentum         |
+| [`src/components/match/tabs/PredictorTab.jsx`](../../src/components/match/tabs/PredictorTab.jsx)       | Tab Predictor        |
+| [`src/components/match/tabs/JournalTab.jsx`](../../src/components/match/tabs/JournalTab.jsx)           | Tab Journal          |

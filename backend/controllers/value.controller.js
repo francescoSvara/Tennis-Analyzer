@@ -1,9 +1,9 @@
 /**
  * Value Controller
- * 
+ *
  * Controller per interpretazione valori tennis.
  * Zero logica di dominio - delega a valueInterpreter utils.
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_CALCOLI.md
  */
 
@@ -11,7 +11,7 @@ const {
   interpretGameValue,
   analyzePowerRankings,
   getValueZone,
-  DEFAULT_THRESHOLDS
+  DEFAULT_THRESHOLDS,
 } = require('../utils/valueInterpreter');
 
 /**

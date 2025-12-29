@@ -3,7 +3,7 @@
   "description": "Regole architetturali Tennis Analyzer v5.0 - MatchBundle-Centric",
   "lastUpdated": "2025-12-25",
   "philosophy": "filosofie/00_foundation/FILOSOFIA_MADRE_TENNIS.md",
-  
+
   "domains": {
     "frontend_ui": {
       "description": "Componenti React di presentazione - SOLO rendering da MatchBundle",
@@ -14,104 +14,74 @@
         "liveTrackingRepository",
         "sofascoreScraper"
       ],
-      "forbiddenPatterns": [
-        "createClient",
-        "supabase.from",
-        "fetch.*sofascore"
-      ],
+      "forbiddenPatterns": ["createClient", "supabase.from", "fetch.*sofascore"],
       "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md"
     },
-    
+
     "frontend_hooks": {
       "description": "Custom hooks React - deve esistere useMatchBundle",
       "allowedPaths": ["src/hooks/**/*.jsx", "src/hooks/**/*.js"],
-      "forbiddenImports": [
-        "supabase",
-        "matchRepository"
-      ],
+      "forbiddenImports": ["supabase", "matchRepository"],
       "forbiddenPatterns": [],
       "note": "Ref: FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 3"
     },
-    
+
     "frontend_utils": {
       "description": "Utility frontend - NO logica di dominio",
       "allowedPaths": ["src/utils/**/*.js", "src/utils.js"],
-      "forbiddenImports": [
-        "supabase",
-        "express"
-      ],
+      "forbiddenImports": ["supabase", "express"],
       "forbiddenPatterns": [],
       "note": "Ref: FILOSOFIA_CONCEPT_CHECKS.md invariante 3.2 - Backend Interpretation Invariant"
     },
-    
+
     "backend_api": {
       "description": "Express routes e server - deve esporre /api/match/:id/bundle",
       "allowedPaths": ["backend/server.js"],
-      "forbiddenImports": [
-        "react",
-        "jsx"
-      ],
+      "forbiddenImports": ["react", "jsx"],
       "forbiddenPatterns": [],
       "note": "Ref: FILOSOFIA_DB.md sezione 3"
     },
-    
+
     "backend_services": {
       "description": "Business logic layer",
       "allowedPaths": ["backend/services/**/*.js"],
-      "forbiddenImports": [
-        "react",
-        "express"
-      ],
+      "forbiddenImports": ["react", "express"],
       "forbiddenPatterns": [],
       "note": "I services non devono conoscere Express direttamente"
     },
-    
+
     "backend_strategies": {
       "description": "Strategy Engine - produce SIGNALS (READY/WATCH/OFF)",
       "allowedPaths": ["backend/strategies/**/*.js"],
-      "forbiddenImports": [
-        "react",
-        "express",
-        "supabase"
-      ],
+      "forbiddenImports": ["react", "express", "supabase"],
       "forbiddenPatterns": [],
       "note": "Ref: FILOSOFIA_STATS.md sezione 6 - Strategy Engine"
     },
-    
+
     "backend_db": {
       "description": "Data access layer",
       "allowedPaths": ["backend/db/**/*.js"],
-      "forbiddenImports": [
-        "react",
-        "express",
-        "sofascoreScraper"
-      ],
+      "forbiddenImports": ["react", "express", "sofascoreScraper"],
       "forbiddenPatterns": [],
       "note": "Repository non devono fare scraping"
     },
-    
+
     "backend_utils": {
       "description": "Feature Engine - calcola features per Strategy Engine",
       "allowedPaths": ["backend/utils/**/*.js"],
-      "forbiddenImports": [
-        "react",
-        "express",
-        "supabase"
-      ],
+      "forbiddenImports": ["react", "express", "supabase"],
       "forbiddenPatterns": [],
       "note": "Ref: FILOSOFIA_STATS.md sezione 5 - Feature Engine"
     },
-    
+
     "backend_scraper": {
       "description": "External data fetching",
       "allowedPaths": ["backend/scraper/**/*.js"],
-      "forbiddenImports": [
-        "react"
-      ],
+      "forbiddenImports": ["react"],
       "forbiddenPatterns": []
     }
   },
-  
+
   "invariants": [
     {
       "id": "MATCHBUNDLE_ONLY_FE",
@@ -185,7 +155,7 @@
       "remediation": "Usare API backend invece di accesso diretto DB"
     },
     {
-      "id": "INV-002", 
+      "id": "INV-002",
       "severity": "ERROR",
       "description": "Frontend non deve fare scraping diretto",
       "domains": ["frontend_ui", "frontend_hooks", "frontend_utils"],
@@ -285,7 +255,7 @@
       "reference": "HPI_RESILIENCE.md"
     }
   ],
-  
+
   "architecturalChecks": [
     {
       "id": "BUNDLE_ENDPOINT_EXISTS",
@@ -320,7 +290,7 @@
       "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 1.2"
     },
     {
-      "id": "LIN-002", 
+      "id": "LIN-002",
       "description": "strategyEngine.js deve esportare STRATEGY_ENGINE_VERSION",
       "file": "backend/strategies/strategyEngine.js",
       "pattern": "(STRATEGY_ENGINE_VERSION|VERSION)\\s*[=:]\\s*['\"]v",
@@ -351,7 +321,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_LINEAGE_VERSIONING.md sezione 4"
     },
-    
+
     {
       "id": "TEMP-001",
       "description": "Repository deve avere event_time per ogni entità temporale",
@@ -368,7 +338,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_TEMPORAL.md sezione 3 - Live Snapshot Time"
     },
-    
+
     {
       "id": "REG-001",
       "description": "Registry Canon: mappings/players.json deve esistere per normalizzazione nomi",
@@ -385,7 +355,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_REGISTRY_CANON.md sezione 2 - Name Normalization"
     },
-    
+
     {
       "id": "OBS-001",
       "description": "Bundle deve includere sezione dataQuality",
@@ -402,7 +372,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_OBSERVABILITY_DATAQUALITY.md sezione 2"
     },
-    
+
     {
       "id": "STATS-001",
       "description": "Feature Engine deve esistere in backend/utils",
@@ -435,7 +405,7 @@
       "severity": "ERROR",
       "reference": "FILOSOFIA_STATS.md sezione 5.2 - Pressure Feature"
     },
-    
+
     {
       "id": "CALC-001",
       "description": "featureEngine NON deve MAI ritornare null - regola MAI NULL",
@@ -460,7 +430,7 @@
       "severity": "ERROR",
       "reference": "FILOSOFIA_CALCOLI.md sezione 1 - MAI NULL/UNDEFINED"
     },
-    
+
     {
       "id": "FE-001",
       "description": "App.jsx non deve importare featureEngine direttamente",
@@ -485,7 +455,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md sezione 3"
     },
-    
+
     {
       "id": "DB-001",
       "description": "Supabase client deve essere centralizzato",
@@ -502,7 +472,7 @@
       "severity": "ERROR",
       "reference": "FILOSOFIA_DB.md sezione 2 - Bundle Repository"
     },
-    
+
     {
       "id": "LIVE-001",
       "description": "liveManager deve gestire WebSocket o polling",
@@ -519,7 +489,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 2 - Snapshot Persistence"
     },
-    
+
     {
       "id": "ODDS-001",
       "description": "Odds devono avere timestamp per tracciare movimento",
@@ -536,7 +506,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_ODDS.md sezione 2 - Value Calculation"
     },
-    
+
     {
       "id": "LIVE-003",
       "description": "liveManager deve avere polling adattivo (non fisso)",
@@ -553,7 +523,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_LIVE_TRACKING.md sezione 5 - Data Quality Live"
     },
-    
+
     {
       "id": "RISK-001",
       "description": "riskEngine deve esistere per decisioni betting",
@@ -594,7 +564,7 @@
       "severity": "WARN",
       "reference": "FILOSOFIA_RISK_BANKROLL.md sezione 2.2 - Price Minimum"
     },
-    
+
     {
       "id": "FE-DEEP-001",
       "description": "pressureCalculator deve esportare getHoldDifficulty()",
@@ -636,7 +606,7 @@
       "reference": "FILOSOFIA_FRONTEND.md sezione Backend Functions (Point-by-Point)"
     }
   ],
-  
+
   "allowlist": [
     {
       "file": "src/config.js",

@@ -1,10 +1,10 @@
 /**
  * Stats Routes
- * 
+ *
  * Endpoints per statistiche database e metriche:
  * - GET /stats/db - Statistiche complete del database
  * - GET /stats/health - Health check per il database
- * 
+ *
  * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
  */
 

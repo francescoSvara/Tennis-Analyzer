@@ -3,6 +3,7 @@
 ## Dove scaricare i loghi
 
 ### 1. Siti ufficiali dei tornei
+
 - **Australian Open**: https://ausopen.com/
 - **Roland Garros**: https://www.rolandgarros.com/
 - **Wimbledon**: https://www.wimbledon.com/
@@ -10,14 +11,18 @@
 - **United Cup**: https://www.unitedcup.com/
 
 ### 2. Wikipedia
+
 Cerca il torneo su Wikipedia (es. "United Cup Wikipedia") e scarica il logo dalla pagina
 
 ### 3. Google Images
+
 Cerca: `"[nome torneo] logo png transparent"`
+
 - Preferisci immagini con sfondo trasparente
 - Cerca loghi ufficiali, non fan-made
 
 ### 4. Siti ATP/WTA
+
 - ATP: https://www.atptour.com/
 - WTA: https://www.wtatennis.com/
 
@@ -43,11 +48,13 @@ Cerca: `"[nome torneo] logo png transparent"`
 ## Logo placeholder
 
 Se non trovi il logo, puoi usare un **logo generico**:
+
 - Tornei ATP → usa `atp-default.png`
 - Tornei WTA → usa `wta-default.png`
 
 ## Verifica
 
 Ricarica la pagina e controlla la **Console (F12)**:
+
 - Se vedi `[Logo mancante]` → il logo non è stato trovato
 - Controlla il nome del file suggerito nel messaggio

@@ -8,6 +8,7 @@
 ## 1️⃣ Perché Serve il Versioning
 
 Scenario reale:
+
 - 10 gennaio: strategy suggerisce bet → perdi €500
 - 11 gennaio: correggi bug nel calcolo volatility
 
@@ -23,13 +24,13 @@ Scenario reale:
 
 Ogni layer del sistema ha una versione semantica (`major.minor.patch`):
 
-| Versione | Cosa Rappresenta | Bump Quando |
-|----------|-----------------|-------------|
-| `data_version` | Schema DB + origine dati | Migration, nuova fonte |
-| `feature_version` | featureEngine.js | Cambio formula, fix bug |
-| `odds_schema_version` | Struttura odds ticks | Aggiunta campi temporali |
-| `strategy_version` | strategyEngine.js | Nuova strategia, cambio threshold |
-| `bundle_schema_version` | Contratto MatchBundle | Aggiunta/rimozione tab |
+| Versione                | Cosa Rappresenta         | Bump Quando                       |
+| ----------------------- | ------------------------ | --------------------------------- |
+| `data_version`          | Schema DB + origine dati | Migration, nuova fonte            |
+| `feature_version`       | featureEngine.js         | Cambio formula, fix bug           |
+| `odds_schema_version`   | Struttura odds ticks     | Aggiunta campi temporali          |
+| `strategy_version`      | strategyEngine.js        | Nuova strategia, cambio threshold |
+| `bundle_schema_version` | Contratto MatchBundle    | Aggiunta/rimozione tab            |
 
 ---
 
@@ -86,11 +87,13 @@ Ogni MatchBundle **deve** avere un blocco `meta`:
 > Dato `match_id` + `meta.versions` + `as_of_time`, devo poter rigenerare lo stesso bundle.
 
 **Riproducibile al 100%**:
+
 - Features deterministiche
 - Strategy signals (READY/WATCH/OFF)
 - Odds snapshot
 
 **Non riproducibile** (accettato):
+
 - `generated_at` (ovviamente diverso)
 - Timing di ingestion
 
@@ -100,13 +103,13 @@ Ogni MatchBundle **deve** avere un blocco `meta`:
 
 Prima di committare, verifica:
 
-| Cambio | Azione |
-|--------|--------|
-| Formula feature | Bump `feature_version` |
-| Nuova strategia | Bump `strategy_version` |
-| Fix bug calcolo | Bump `feature_version` (patch) |
-| Struttura bundle | Bump `bundle_schema_version` |
-| Migration DB | Bump `data_version` |
+| Cambio           | Azione                         |
+| ---------------- | ------------------------------ |
+| Formula feature  | Bump `feature_version`         |
+| Nuova strategia  | Bump `strategy_version`        |
+| Fix bug calcolo  | Bump `feature_version` (patch) |
+| Struttura bundle | Bump `bundle_schema_version`   |
+| Migration DB     | Bump `data_version`            |
 
 ---
 
@@ -123,13 +126,20 @@ Versioning = fondamenta della riproducibilità.
 ---
 
 **Documenti Correlati**:
+
 - [FILOSOFIA_TEMPORAL](../temporal/FILOSOFIA_TEMPORAL.md) – gestione `as_of_time`
 - [FILOSOFIA_OBSERVABILITY](../quality_observability/FILOSOFIA_OBSERVABILITY_DATAQUALITY.md) – version drift alerts
 - [FILOSOFIA_DB](../storage/FILOSOFIA_DB.md) – schema versioning
 
-### 📁 File Codice Principali
+### � Pseudocode
 
-| File | Descrizione |
-|------|-------------|
+| Documento                                                                                          | Descrizione             |
+| -------------------------------------------------------------------------------------------------- | ----------------------- |
+| [FILOSOFIA_LINEAGE_VERSIONING_PSEUDOCODE](./FILOSOFIA_LINEAGE_VERSIONING_PSEUDOCODE.md)            | Regole formali lineage  |
+
+### �📁 File Codice Principali
+
+| File                                                                                       | Descrizione                      |
+| ------------------------------------------------------------------------------------------ | -------------------------------- |
 | [`backend/services/matchCardService.js`](../../../../backend/services/matchCardService.js) | Meta block generation (versions) |
-| [`backend/utils/dataQualityChecker.js`](../../../../backend/utils/dataQualityChecker.js) | Version tracking |
+| [`backend/utils/dataQualityChecker.js`](../../../../backend/utils/dataQualityChecker.js)   | Version tracking                 |
