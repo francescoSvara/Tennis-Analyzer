@@ -71,18 +71,20 @@ function CompactScoreboard({ header }) {
   // Estrai i punteggi dei set
   const homeSets = score.sets.map((s) => s.home).join(' ');
   const awaySets = score.sets.map((s) => s.away).join(' ');
+  const setsWon = header?.match?.setsWon;
+  const showFinal = (header?.match?.status === 'finished' || header?.match?.winner) && setsWon;
 
   return (
     <div className="compact-scoreboard">
       <div className={`player-line ${serving === 'home' ? 'serving' : ''}`}>
         {serving === 'home' && <TennisBall size={12} weight="fill" className="serve-icon" />}
         <span className="player-name">{homeName}</span>
-        <span className="score">{homeSets || '-'}</span>
+        <span className="score">{showFinal ? setsWon.home : homeSets || '-'}</span>
       </div>
       <div className={`player-line ${serving === 'away' ? 'serving' : ''}`}>
         {serving === 'away' && <TennisBall size={12} weight="fill" className="serve-icon" />}
         <span className="player-name">{awayName}</span>
-        <span className="score">{awaySets || '-'}</span>
+        <span className="score">{showFinal ? setsWon.away : awaySets || '-'}</span>
       </div>
     </div>
   );

@@ -34,6 +34,8 @@ function Scoreboard({ header }) {
   const odds = header?.odds || {};
   const home = players.home || {};
   const away = players.away || {};
+  const finalSets = header?.match?.setsWon;
+  const showFinalSets = (matchInfo.status === 'finished' || header?.match?.winner) && finalSets;
 
   return (
     <MotionCard className="scoreboard">
@@ -69,7 +71,7 @@ function Scoreboard({ header }) {
             )}
           </div>
           <div className="player-game">
-            <span className="game-score">{score.game?.home ?? '-'}</span>
+            <span className="game-score">{showFinalSets ? finalSets.home : score.game?.home ?? '-'}</span>
           </div>
           {odds.home && (
             <div className="player-odds">
@@ -101,7 +103,7 @@ function Scoreboard({ header }) {
             )}
           </div>
           <div className="player-game">
-            <span className="game-score">{score.game?.away ?? '-'}</span>
+            <span className="game-score">{showFinalSets ? finalSets.away : score.game?.away ?? '-'}</span>
           </div>
           {odds.away && (
             <div className="player-odds">
