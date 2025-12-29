@@ -16,6 +16,7 @@ const {
   calculateDataQuality,
   calculateWinProbability,
   extractKeyFactors,
+  computeSetsWon,
 } = require('../utils/bundleHelpers');
 
 const { buildStatsTab } = require('../utils/statsTabBuilder');
@@ -499,6 +500,15 @@ async function buildBundle(eventId, options = {}) {
       momentum: features.momentum,
     },
   };
+
+  // Calculate sets won from score and expose in header for UI convenience
+  try {
+    const setsResult = computeSetsWon(header.score);
+    header.match.setsWon = { home: setsResult.home, away: setsResult.away };
+    if (setsResult.winner) header.match.winner = setsResult.winner;
+  } catch (e) {
+    // Non-blocking: if compute fails, continue without sets info
+  }
 
   // 10. Risk analysis (optional)
   let riskAnalysis = null;

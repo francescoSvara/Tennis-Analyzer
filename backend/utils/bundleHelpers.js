@@ -697,6 +697,25 @@ function getRealisticStatus(status, startTimestamp, winnerCode) {
   return typeof status === 'string' ? status : status?.type || status?.description || 'unknown';
 }
 
+/**
+ * Compute number of sets won for home/away from score object
+ * @param {Object} score - output from extractScore()
+ * @returns {Object} { home: number, away: number, winner: 'home'|'away'|null }
+ */
+function computeSetsWon(score) {
+  const sets = score?.sets || [];
+  let home = 0;
+  let away = 0;
+  for (const s of sets) {
+    const h = s.home || 0;
+    const a = s.away || 0;
+    if (h > a) home++;
+    else if (a > h) away++;
+  }
+  const winner = home > away ? 'home' : away > home ? 'away' : null;
+  return { home, away, winner };
+}
+
 module.exports = {
   VERSION,
   // Score
@@ -718,6 +737,8 @@ module.exports = {
   // Probability
   calculateWinProbability,
   extractKeyFactors,
+  // Result
+  computeSetsWon,
   // Status
   getRealisticStatus,
 };
