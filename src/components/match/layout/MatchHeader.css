@@ -385,8 +385,9 @@
     gap: var(--space-3);
   }
 
+  /* Allow compact scoreboard to shrink on smaller screens */
   .compact-scoreboard {
-    min-width: 160px;
+    min-width: 0;
   }
 }
 
