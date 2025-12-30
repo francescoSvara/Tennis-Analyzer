@@ -161,7 +161,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 180px;
+  /* Removed fixed min-width to allow flexible layout and prevent truncation */
   background: var(--bg-highlight);
   padding: var(--space-2);
   border-radius: var(--radius-md);
@@ -189,13 +189,13 @@
 }
 
 .player-name {
-  flex: 1;
+  flex: 1 1 auto;
   color: var(--text-primary);
   font-weight: var(--font-weight-medium);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
+  /* Allow full player names to wrap across lines when needed */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .score {
