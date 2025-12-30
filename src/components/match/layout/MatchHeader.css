@@ -192,6 +192,37 @@
   font-weight: var(--font-weight-normal);
 }
 
+/* Set scores shown between home/away odds */
+.set-scores {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.set-scores .set-home,
+.set-scores .set-away {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.set-scores .set-divider {
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+  .set-scores {
+    font-size: 12px;
+    gap: 4px;
+    padding: 0 6px;
+  }
+}
+
 /* ===========================================
    RIGHT SECTION
 =========================================== */
