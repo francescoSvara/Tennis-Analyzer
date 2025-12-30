@@ -1,6 +1,6 @@
 # 📋 TODO LIST – Tennis Analyzer v3.0
 
-> **Ultimo aggiornamento**: 2025-12-28  
+> **Ultimo aggiornamento**: 2025-12-30  
 > **Philosophy Enforcer v2.0**: 10 errori, 28 warnings  
 > **Regole verificate**: 278 su 250 estratte  
 > **Pass rate**: 91%
@@ -46,7 +46,8 @@
 - [ ] **ERR-005** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna away_player_id
 - [ ] **ERR-006** [FILOSOFIA_DB] CANONICAL_SCHEMA: Schema matches_new manca colonna event_time
 - [ ] **ERR-007** [FILOSOFIA_TEMPORAL] INVARIANT_event_time_required: liveTrackingRepository.js insert senza event_time/created_at
-- [ ] **ERR-008** [FILOSOFIA_CALCOLI] NEVER_RETURN_NaN: featureEngine.js non verifica NaN nei calcoli
+- [ ] **ERR-008** [FILOSOFIA_CALCOLI] NEVER_RETURN_NaN: featureEngine.js non verifica NaN nei calcoli (IN PROGRESS: modular refactor reduced null returns; still need explicit NaN guards in computeFeatures + key helpers)
+- [ ] **TASK-NaN** [FILOSOFIA_CALCOLI] Add explicit NaN guards to `computeFeatures` and critical helpers (clamp+fallback are insufficient)
 - [ ] **ERR-009** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVER_SCORE_PROGRESSION: sofascoreScraper.js non traccia chi serve
 - [ ] **ERR-010** [FILOSOFIA_PBP_EXTRACTION] INVARIANT_SERVICE_ALTERNATION: insert-pbp-correct.js non implementa alternanza servizio
 
@@ -97,7 +98,7 @@
 - [ ] **WARN-010** [FILOSOFIA_MADRE_TENNIS] ROLE_REPOSITORY: matchRepository.js ha logica di calcolo (repo deve solo read/write)
 - [ ] **WARN-011** [FILOSOFIA_MADRE_TENNIS] ROLE_FRONTEND: PointByPointTab.jsx ha logica di dominio (frontend deve solo render)
 - [ ] **WARN-012** [FILOSOFIA_LINEAGE_VERSIONING] FUNCTION_testReproducibility: Nessun test di riproducibilità
-- [ ] **WARN-013** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION
+- [x] **WARN-013** [FILOSOFIA_LINEAGE_VERSIONING] MODULE_VERSION_EXPORT: strategyEngine.js non esporta VERSION  — **RESOLVED** (`STRATEGY_ENGINE_VERSION` now exported)
 - [ ] **WARN-014** [FILOSOFIA_OBSERVABILITY_DATAQUALITY] STRUCTURED_LOGGING: Troppi log non strutturati: 773 vs 156 strutturati
 - [ ] **WARN-015** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: add-snapshot-queue-tables.sql manca campi: home_player, away_player
 - [ ] **WARN-016** [FILOSOFIA_REGISTRY_CANON] ENTITY_MatchCanonical: create-new-schema.sql manca campi: home_player, away_player
@@ -142,8 +143,8 @@
 
 | #   | File                                          | Linea    | TODO                                   |
 | --- | --------------------------------------------- | -------- | -------------------------------------- |
-| 1   | `src/components/match/tabs/OddsTab.jsx`       | 258, 262 | Implementare logica                    |
-| 2   | `src/components/match/tabs/StrategiesTab.jsx` | 389      | Implementare logica di esecuzione      |
+| 1   | `src/components/match/tabs/OddsTab.jsx`       | 258, 262 | UI implemented; **handleBack/handleLay** logic pending |
+| 2   | `src/components/match/tabs/StrategiesTab.jsx` | 389      | UI enhancements implemented; **strategy execution** logic pending |
 | 3   | `backend/server.js`                           | 4801     | Get full history                       |
 | 4   | `backend/services/dataNormalizer.js`          | 765      | Integrare con database player registry |
 
@@ -153,7 +154,7 @@
 | --- | -------------------------------------- | ------------------------------------------------------- |
 | 1   | FILOSOFIA_RISK_BANKROLL.md             | riskEngine.js (TODO) - Risk layer completo              |
 | 2   | FILOSOFIA_RISK_BANKROLL.md             | integrate predictor nel model_prob                      |
-| 3   | FILOSOFIA_FRONTEND.md                  | oddsService.js - Implied prob, fair odds, edge          |
+| 3   | FILOSOFIA_FRONTEND.md                  | oddsService.js - Implied prob, fair odds, edge — **IMPLEMENTED** (`features/odds.js`)          |
 | 4   | FILOSOFIA_FRONTEND.md                  | predictorService.js - Win prob avanzata, edge vs market |
 | 5   | FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | send to logging service (CloudWatch, Datadog)           |
 | 6   | FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | send to alert service                                   |
@@ -194,3 +195,40 @@ node scripts/checkConceptualMap.js
 ---
 
 _Generato automaticamente da `philosophyEnforcer.js` - 2025-12-28_
+
+---
+
+## 🔍 Report Check Mappa (Auto-generato)
+
+> Ultimo check: 2025-12-29
+> Esegui: `node scripts/checkConceptualMap.js`
+
+| Metrica | Valore |
+|---------|--------|
+| Check totali | 148 |
+| ✅ Passati | 117 |
+| ❌ Falliti | 21 |
+| ⚠️ Warning | 10 |
+| 📄 Non doc | 4 |
+| 🏗️ Arch viol | 1 |
+
+### Violazioni Architetturali
+
+- 🔴 **BUNDLE_ENDPOINT**: Endpoint /api/match/:id/bundle deve esistere
+  - File: `backend/server.js`
+  - Ref: docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md#sezione-3
+
+### File Mancanti (3)
+
+- [ ] `backend/migrations/create-new-schema.sql`
+- [ ] `backend/migrations/add-snapshot-queue-tables.sql`
+- [ ] `backend/migrations/add-live-tracking-table.sql`
+
+### File Non Documentati (4)
+
+- [ ] `backend/services/bundleService.js` → Aggiungere alla mappa
+- [ ] `backend/services/matchEnrichmentService.js` → Aggiungere alla mappa
+- [ ] `backend/utils/bundleHelpers.js` → Aggiungere alla mappa
+- [ ] `backend/utils/statsTabBuilder.js` → Aggiungere alla mappa
+
+
