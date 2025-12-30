@@ -55,40 +55,9 @@ function DataQualityBadge({ quality }) {
   );
 }
 
-/**
- * Scoreboard compatto
- */
-function CompactScoreboard({ header }) {
-  const score = header?.score;
-  const players = header?.players;
+// CompactScoreboard removed (permanent removal) — scoreboard moved to dedicated page components
+// The visual compact scoreboard was removed from the header to simplify the header layout and avoid redundancy.
 
-  if (!score || !score.sets || score.sets.length === 0) return null;
-
-  const homeName = players?.home?.name || 'Player 1';
-  const awayName = players?.away?.name || 'Player 2';
-  const serving = score?.serving;
-
-  // Estrai i punteggi dei set
-  const homeSets = score.sets.map((s) => s.home).join(' ');
-  const awaySets = score.sets.map((s) => s.away).join(' ');
-  const setsWon = header?.match?.setsWon;
-  const showFinal = (header?.match?.status === 'finished' || header?.match?.winner) && setsWon;
-
-  return (
-    <div className="compact-scoreboard">
-      <div className={`player-line ${serving === 'home' ? 'serving' : ''}`}>
-        {serving === 'home' && <TennisBall size={12} weight="fill" className="serve-icon" />}
-        <span className="player-name">{homeName}</span>
-        <span className="score">{showFinal ? setsWon.home : homeSets || '-'}</span>
-      </div>
-      <div className={`player-line ${serving === 'away' ? 'serving' : ''}`}>
-        {serving === 'away' && <TennisBall size={12} weight="fill" className="serve-icon" />}
-        <span className="player-name">{awayName}</span>
-        <span className="score">{showFinal ? setsWon.away : awaySets || '-'}</span>
-      </div>
-    </div>
-  );
-}
 
 /**
  * Quick indicators (volatilità, liquidità)
@@ -205,7 +174,7 @@ export function MatchHeader({ header, isLive, isRefreshing, dataQuality, onBack,
       </div>
 
       <div className="match-header__center">
-        <CompactScoreboard header={header} />
+
         <OddsQuickView header={header} />
       </div>
 

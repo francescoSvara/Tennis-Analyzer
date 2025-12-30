@@ -153,57 +153,7 @@
   justify-content: center;
 }
 
-/* ===========================================
-   COMPACT SCOREBOARD
-=========================================== */
-
-.compact-scoreboard {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  /* Removed fixed min-width to allow flexible layout and prevent truncation */
-  background: var(--bg-highlight);
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color-light);
-}
-
-.player-line {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  transition: background var(--motion-fast) var(--motion-ease-out);
-}
-
-.player-line.serving {
-  background: var(--color-primary-bg);
-  border: 1px solid var(--color-primary-border);
-}
-
-.serve-icon {
-  color: var(--color-warning);
-  flex-shrink: 0;
-}
-
-.player-name {
-  flex: 1 1 auto;
-  color: var(--text-primary);
-  font-weight: var(--font-weight-medium);
-  /* Allow full player names to wrap across lines when needed */
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-}
-
-.score {
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
-}
+/* Compact scoreboard styles removed — scoreboard UI permanently removed from header */
 
 /* ===========================================
    ODDS QUICK VIEW
