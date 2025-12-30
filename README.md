@@ -44,15 +44,38 @@ Data Layer (Supabase)  ?  matchRepository
 
 ## ?? Feature Engine
 
-Calcola features da dati disponibili (score, odds, rankings):
+Calcola features da dati disponibili (score, odds, rankings) con modelli avanzati:
 
-| Feature          | Fonte         | Fallback         |
-| ---------------- | ------------- | ---------------- |
-| volatility       | powerRankings | score variance   |
-| dominance        | game ratio    | odds probability |
-| pressure         | match state   | set score        |
-| serveDominance   | stats         | ranking          |
-| breakProbability | stats         | odds + ranking   |
+| Feature          | Fonte              | Fallback         | Modello              |
+| ---------------- | ------------------ | ---------------- | -------------------- |
+| volatility       | PR + odds + breaks | score pressure   | **Multi-signal**     |
+| dominance        | game ratio         | odds probability | Game analysis        |
+| pressure         | match state        | set score        | Situational          |
+| serveDominance   | stats              | ranking          | **Markov**           |
+| returnDominance  | stats              | ranking          | **Markov**           |
+| breakProbability | stats + state      | odds + ranking   | **Markov**           |
+
+### Volatility Model (v3.2)
+
+La feature `volatility` combina **4 segnali normalizzati** (0-1) con pesi trading-oriented:
+
+| Segnale           | Peso | Descrizione                                      |
+| ----------------- | ---- | ------------------------------------------------ |
+| PR swing          | 30%  | Media swing assoluto negli ultimi 10 PR          |
+| Break rate        | 25%  | Frequenza break recenti (max 3 → 1.0)            |
+| Odds swing        | 30%  | Movimento implied probability (normalizzato)     |
+| Dominance reversal| 15%  | Flip di segno PR (home↔away)                     |
+
++ **Score amplifier** (+0-10): tiebreak/fine set come boost, non driver principale.
+
+### Markov Model (v3.2)
+
+Le feature `breakProbability`, `serveDominance` e `returnDominance` usano un **modello Markov** che:
+
+- Calcola `pServePoint` = P(server vince un punto) da statistiche reali
+- Usa ricorsione memoizzata per `holdProbability(s, r, p)` dove (s,r) = stato del game
+- Gestisce stati speciali: deuce (formula analitica), advantage
+- Aggiustamenti piccoli per momentum e double faults (max ±2-4%)
 
 **Principio**: MAI restituire null o fallback statici.
 
@@ -141,14 +164,15 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ```
 ├── backend/
-│   ├── server.js              # Bootstrap + mount (target ~300 righe)
-│   ├── routes/                # URL definitions (10 files)
+│   ├── server.js              # Bootstrap + mount (~170 righe) ✅
+│   ├── server.old.js          # Backup vecchio server (4600+ righe)
+│   ├── routes/                # URL definitions (11 files)
 │   │   ├── index.js           # Central router
 │   │   ├── match.routes.js    # MatchBundle endpoint
 │   │   ├── player.routes.js   # Player stats/H2H
 │   │   ├── tracking.routes.js # Live tracking
 │   │   └── ...
-│   ├── controllers/           # req → service → res (9 files)
+│   ├── controllers/           # req → service → res (10 files)
 │   │   ├── match.controller.js
 │   │   ├── stats.controller.js
 │   │   └── ...
@@ -157,6 +181,19 @@ Calcola features da dati disponibili (score, odds, rankings):
 │   │   └── ...
 │   ├── strategies/            # 5 strategie trading
 │   ├── utils/                 # Feature calculations
+│   │   ├── featureEngine.js   # Orchestrator (~300 righe) v1.1.0
+│   │   ├── math.js            # clamp01, clampTo0_100
+│   │   ├── pressureCalculator.js
+│   │   └── features/          # ⭐ MODULAR FEATURES (10 files)
+│   │       ├── index.js       # Central re-export
+│   │       ├── volatility.js  # Multi-signal volatility
+│   │       ├── dominance.js   # Match control
+│   │       ├── serveDominance.js # Markov serve model
+│   │       ├── breakProbability.js # Markov break model
+│   │       ├── momentum.js    # EMA-based momentum
+│   │       ├── pressure.js    # Clutch point detection
+│   │       ├── odds.js        # Implied probability
+│   │       └── fallbacks.js   # Score/ranking fallbacks
 │   └── db/                    # Repositories
 ├── src/
 │   ├── components/            # React UI
@@ -248,6 +285,74 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 ## 📝 Changelog
 
+### v3.2.0 (30 Dic 2025) - Markov Feature Engine ✅
+
+**Feature Engine riscrittura con modelli Markov per tennis analytics**
+
+#### Break Probability (Markov Model)
+
+- `calculateBreakProbability()` - Usa modello Markov ricorsivo per P(break) dallo stato del game
+- `holdProbabilityFromState(s, r, p)` - Calcolo memoizzato con gestione deuce/advantage
+- `parseGameScoreToState()` - Parsing punteggio (0-0, 15-40, A-40, ecc.) → stato Markov
+- `adjustByMomentum()` - Piccolo aggiustamento ±2% per momentum recente
+- `adjustByDoubleFaults()` - Bonus max +4% per DF elevati
+
+#### Serve/Return Dominance (Improved)
+
+- `calculateServeDominance()` - Usa `pServePoint` coerente invece di formule arbitrarie
+- `estimateServePointWinProbFromPct()` - Stima p da 1st/2nd serve won %
+- `adjustServeProbByAcesDF()` - Aces +1.5% max, DF -2% max (evita double counting)
+- `estimateReturnPointWinProb()` - Inferenza da receiverPointsWonPct o debolezza avversario
+- `probToDominance()` - Mapping p → 0-100 centrato su baseline tennis
+
+#### Test Suite (Jest)
+
+- `__tests__/breakProbability.test.js` - 5 test per Markov break probability
+- `__tests__/serveDominance.test.js` - 4 test per serve/return dominance
+
+#### Frontend Integration
+
+- `hasRealData` flag aggiunto a `computeFeatures()` per UI data quality indicator
+- OverviewTab.jsx verifica: tutte le feature (volatility, pressure, dominance, serveDominance, returnDominance, breakProbability) correttamente consumate
+
+#### Modular Refactor (30 Dic 2025)
+
+**featureEngine.js: 1736 → 300 righe (-83%) + 10 moduli**
+
+| Modulo | Funzioni | Righe |
+|--------|----------|-------|
+| `math.js` | clamp01, clampTo0_100 | ~30 |
+| `features/volatility.js` | calculateVolatility + 8 helpers | ~230 |
+| `features/dominance.js` | calculateDominance + 5 helpers | ~180 |
+| `features/serveDominance.js` | calculateServeDominance + 4 helpers | ~160 |
+| `features/breakProbability.js` | calculateBreakProbability + Markov + __holdMemo | ~280 |
+| `features/momentum.js` | calculateRecentMomentum + EMA | ~110 |
+| `features/pressure.js` | buildPressureMatchContext + isClutchPoint | ~230 |
+| `features/odds.js` | calculateOddsFeatures | ~70 |
+| `features/fallbacks.js` | 7 fallback functions | ~290 |
+| `features/index.js` | Central re-export | ~70 |
+
+- **FEATURE_ENGINE_VERSION** bumped to v1.1.0
+- **Backward compatible** - Same API exported from featureEngine.js
+- **26 tests passing** - All existing tests work with new structure
+- **No code duplication** - clamp01/clampTo0_100 centralized in math.js
+
+#### Frontend Enhancements (30 Dic 2025)
+
+- **OverviewTab.jsx**:
+  - `dominantPlayer` indicator (⬆/⬇) with home/away colors
+  - `hasRealData` improved: uses momentumSource + threshold detection
+  - Player names in trend labels ("Vacherot Rising" instead of "Away Rising")
+  - Both rising trends show TrendUp icon, distinguished by color (primary/accent)
+
+- **StrategiesTab.jsx**:
+  - `FeaturesSummary` component showing all computed features
+  - Action badges (BACK/LAY) with color coding
+  - Conditions count display per strategy
+  - `getRelevantFeatures()` helper for per-strategy feature display
+
+- **TiebreakSpecialist** strategy refactored to use serveDominance/returnDominance features
+
 ### v3.1.4 (28 Dic 2025) - FILOSOFIA Compliance Batch ✅
 
 **Pass Rate: 83% → 94%** (5 errori + 27 warnings risolti)
@@ -314,32 +419,26 @@ Calcola features da dati disponibili (score, odds, rankings):
 
 - `Home.jsx` wrapper component
 
-### v3.1.3 (28 Dic 2025) - Server.js Refactoring COMPLETATO ✅
+### v3.1.5 (29 Dic 2025) - Server.js Refactoring FINALE ✅
 
-- **Routes Architecture** - 10 route files + 9 controller files COMPLETATI e funzionanti
-  - `health.routes.js` + `health.controller.js` - Root e health check
-  - `db.routes.js` + `db.controller.js` - Database access endpoints
-  - `match.routes.js` + `match.controller.js` - MatchBundle + CRUD match
-  - `tracking.routes.js` + `tracking.controller.js` - Live tracking system
-  - `player.routes.js` + `player.controller.js` - Player stats/H2H
-  - `event.routes.js` + `event.controller.js` - SofaScore direct fetch
-  - `value.routes.js` + `value.controller.js` - Value interpretation
-  - `scrapes.routes.js` + `scrapes.controller.js` - Scrapes management
-  - `stats.routes.js` + `stats.controller.js` - DB stats/health
-  - `index.js` - Central router mount point
+**server.js: 6996 → 170 righe (-97.5%)**
+
+- **server.js** ora contiene SOLO bootstrap + mount routes
+- **server.old.js** - Backup del vecchio file (4600+ righe)
+- **11 route files** + **10 controller files** completamente funzionanti
+- **Nuovi file creati**:
+  - `admin.routes.js` + `admin.controller.js` - Queue management
+  - 12 nuove funzioni in `match.controller.js` (refresh, getCard, getMomentum, saveMomentumSvg, getStatistics, getOdds, getPoints, rebuildSnapshot, getBreaks, getInspector, getCards, getMerged)
+  - `getRankingHistory` in `player.controller.js`
+- **Endpoint testati e funzionanti**: /api/health, /api/stats/db, /api/match/:id/bundle, /api/match/:id/statistics, /api/admin/queue/stats
+
+### v3.1.3 (28 Dic 2025) - Server.js Refactoring Start
+
+- **Routes Architecture** - 10 route files + 9 controller files creati
 - **Services Extracted**
   - `bundleService.js` (~549 righe) - Core MatchBundle builder
   - `bundleHelpers.js` (~600 righe) - Score/odds/PBP normalization, breaks calculation
   - `statsTabBuilder.js` (~450 righe) - Statistics tab builder
-- **server.js** - Target: bootstrap + mount routes only (refactor completato)
-  - `scrapes.routes.js` + `scrapes.controller.js` - Scrapes management
-  - `stats.routes.js` + `stats.controller.js` - DB stats/health
-  - `index.js` - Central router mount point
-- **Services Extracted**
-  - `bundleService.js` (~549 righe) - Core MatchBundle builder
-  - `bundleHelpers.js` - Score/odds/PBP normalization, breaks calculation
-  - `statsTabBuilder.js` - Statistics tab builder
-- **server.js** - Target: bootstrap + mount routes only (refactor in progress)
 - **Documentation** - INDEX_FILOSOFIE.md con API routes table completa
 
 ### v3.1.2 (28 Dic 2025) - Server.js Refactoring Start
@@ -419,7 +518,7 @@ Calcola features da dati disponibili (score, odds, rankings):
   - [INDEX FILOSOFIE](docs/filosofie/INDEX_FILOSOFIE.md) - Mappa navigazione
   - [INDEX PSEUDOCODE](docs/filosofie/INDEX_FILOSOFIE_PSEUDOCODE.md) - API routes reference
 - [Mappa Concettuale](docs/MAPPA_RETE_CONCETTUALE_V2.md)
-- [Guida Refactor server.js](guida%20refactor%20server.js) - Status migrazione routes/controllers
+- [Guida Refactor server.js](docs/filosofie/00_foundation/GUIDA_REFACTOR_SERVER.md) - ✅ COMPLETATO (29 Dic 2025)
 
 ---
 

@@ -160,6 +160,98 @@ END
 
 ---
 
+## 7️⃣.1 Feature Engine Modular Architecture (v1.1.0)
+
+> Refactored 2024-12-30: monolith (1736 lines) → modular structure
+
+STRUCTURE FeatureEngine_Modules
+ROOT backend/utils/
+
+ORCHESTRATOR featureEngine.js (~300 lines)
+IMPORTS from features/*
+RE-EXPORTS same interface
+CONTAINS computeFeatures() # main entry point
+VERSION v1.1.0
+END
+
+MODULE math.js
+FUNCTION clamp01(x) → 0..1
+FUNCTION clampTo0_100(x) → 0..100
+NOTE Deduplicated utility functions
+END
+
+FOLDER features/
+MODULE volatility.js
+FUNCTION calculateVolatility({ powerRankings, score, odds }) → 0..100
+HELPERS hasOddsHistory, computePRSweepIntensity, computeRecentBreakRate
+HELPERS computeReversalIntensity, computeOddsSwingIntensity
+HELPERS extractImpliedHomeProbSeries, impliedProbNormalized
+HELPERS computeScorePressureAmplifier
+END
+
+MODULE dominance.js
+FUNCTION calculateDominance({ powerRankings, statistics }) → { dominance, dominantPlayer }
+HELPERS smoothPR, statsDominanceIfAvailable
+HELPERS estimateServePointWinProbFromPct, estimateReturnPointWinProbPct
+HELPERS finalizeDominance
+END
+
+MODULE serveDominance.js
+FUNCTION calculateServeDominance(statistics, servingPlayer) → { serveDominance, returnDominance }
+HELPERS estimateServePointWinProbFromPct, adjustServeProbByAcesDF
+HELPERS estimateReturnPointWinProb, probToDominance
+END
+
+MODULE breakProbability.js
+FUNCTION calculateBreakProbability({ statistics, server, gameScore, powerRankings })
+MODEL Markov chain for tennis game states
+CACHE __holdMemo (module-level memoization)
+HELPERS estimateServePointWinProb, holdProbabilityFromState
+HELPERS parseGameScoreToState, adjustByMomentum, adjustByDoubleFaults
+END
+
+MODULE momentum.js
+FUNCTION calculateRecentMomentum(powerRankings) → { trend, recentSwing, last5avg, breakCount }
+ALGORITHM EMA-based trend detection
+HELPERS avgAbsDelta, emaSeries
+END
+
+MODULE pressure.js
+FUNCTION buildPressureMatchContext({ score, serving, gameScore, momentum })
+FUNCTION deriveClutchFlagsFromGameScore(gameScore, serving)
+FUNCTION isClutchPoint(matchState) → { isClutchPoint, clutchType, pressure }
+END
+
+MODULE odds.js
+FUNCTION calculateOddsFeatures(odds) → { impliedProbHome, impliedProbAway, overround, fairOdds }
+END
+
+MODULE fallbacks.js
+FUNCTION calculateVolatilityFromScore(score)
+FUNCTION calculateDominanceFromScore(score)
+FUNCTION calculateDominanceFromOdds(odds)
+FUNCTION calculateServeDominanceFromRankings(player1, player2, serving)
+FUNCTION calculateBreakProbabilityFromOddsRankings(odds, player1, player2, serving)
+FUNCTION calculatePressureFromScore(score)
+FUNCTION calculateMomentumFromScore(score)
+NOTE All functions NEVER return null (FILOSOFIA_CALCOLI)
+END
+
+MODULE index.js
+ROLE Central re-export point for all feature modules
+END
+END FOLDER
+END STRUCTURE
+
+RULE Feature_Module_Principles
+EACH module IS self-contained
+EACH module EXPORTS testable functions
+NO circular dependencies
+ALL helpers EXPOSED for testing
+END
+
+---
+
 ## 8️⃣ Invariants Enforcement Engine
 
 INVARIANT MATCHBUNDLE_ONLY_FE

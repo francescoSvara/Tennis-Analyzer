@@ -195,11 +195,16 @@ function QuickSignals({ header }) {
           <span className="signal-label">Dominance</span>
           <span className="signal-value" style={{ color: getSignalColor(features.dominance) }}>
             {formatValue(features.dominance)}
+            {features.dominantPlayer && features.dominantPlayer !== 'none' && (
+              <small className={`dominant-indicator ${features.dominantPlayer}`}>
+                {' '}({features.dominantPlayer === 'home' ? '⬆' : '⬇'})
+              </small>
+            )}
           </span>
         </div>
 
         <div className="signal-item">
-          <span className="signal-label">Break Prob.</span>
+          <span className="signal-label">Break Probability</span>
           <span
             className="signal-value"
             style={{ color: getSignalColor(features.breakProbability) }}
@@ -209,14 +214,14 @@ function QuickSignals({ header }) {
         </div>
 
         <div className="signal-item">
-          <span className="signal-label">Serve Dom.</span>
+          <span className="signal-label">Serve Dominance</span>
           <span className="signal-value" style={{ color: getSignalColor(features.serveDominance) }}>
             {formatValue(features.serveDominance)}
           </span>
         </div>
 
         <div className="signal-item">
-          <span className="signal-label">Return Dom.</span>
+          <span className="signal-label">Return Dominance</span>
           <span
             className="signal-value"
             style={{ color: getSignalColor(features.returnDominance) }}
@@ -274,9 +279,16 @@ function StrategyMiniPanel({ strategies }) {
                   <span className={`status-dot ${(strategy.status || 'off').toLowerCase()}`} />
                   {strategy.name}
                 </span>
-                <span className={`strategy-state ${(strategy.status || 'off').toLowerCase()}`}>
-                  {strategy.status}
-                </span>
+                <div className="strategy-badges">
+                  {strategy.action && (
+                    <span className={`action-badge ${strategy.action.toLowerCase()}`}>
+                      {strategy.action}
+                    </span>
+                  )}
+                  <span className={`strategy-state ${(strategy.status || 'off').toLowerCase()}`}>
+                    {strategy.status}
+                  </span>
+                </div>
               </div>
               {strategy.confidence > 0 && (
                 <div className="strategy-mini-details">
@@ -285,6 +297,15 @@ function StrategyMiniPanel({ strategies }) {
                     <>
                       <span>•</span>
                       <span>Target: {strategy.target}</span>
+                    </>
+                  )}
+                  {strategy.conditions && (
+                    <>
+                      <span>•</span>
+                      <span className="conditions-count">
+                        {Object.values(strategy.conditions).filter(Boolean).length}/
+                        {Object.keys(strategy.conditions).length} ✓
+                      </span>
                     </>
                   )}
                 </div>
@@ -315,20 +336,36 @@ function MiniMomentum({ header, data }) {
   const momentum = features.momentum || {};
   const players = header?.players || {};
 
-  // Verifica se ci sono dati reali di momentum
-  const hasRealData =
-    features.hasRealData !== false &&
-    (momentum.recentSwing !== undefined ||
-      momentum.breakCount !== undefined ||
-      momentum.last5avg !== undefined ||
-      (momentum.trend && momentum.trend !== 'stable' && momentum.trend !== 'unknown'));
+  // Verifica se ci sono dati reali di momentum (IMPROVED):
+  // 1) Usa momentumSource dal backend: 'live' o 'score' = reale, 'estimated' = fallback
+  // 2) Fallback: verifica che almeno un valore sia "significativo" (non default)
+  const momentumSource = features.momentumSource || 'estimated';
+  const hasMomentumData = momentumSource === 'live' || momentumSource === 'score';
+  
+  // Soglie per distinguere valori reali da default (0/stable)
+  const hasSignificantValues = 
+    (typeof momentum.recentSwing === 'number' && momentum.recentSwing > 5) ||
+    (typeof momentum.breakCount === 'number' && momentum.breakCount > 0) ||
+    (typeof momentum.last5avg === 'number' && Math.abs(momentum.last5avg) > 10) ||
+    (momentum.trend && momentum.trend !== 'stable' && momentum.trend !== 'unknown');
 
+  const hasRealData = features.hasRealData !== false && (hasMomentumData || hasSignificantValues);
+
+  // Nomi giocatori per etichette dinamiche
+  const homeName = players.home?.name?.split(' ').pop() || 'Home';
+  const awayName = players.away?.name?.split(' ').pop() || 'Away';
+
+  // Icona trend: entrambi i rising mostrano freccia UP, ma con stile diverso
+  // home_rising = verde (home sta salendo), away_rising = accent (away sta salendo)
   const getTrendIcon = (trend) => {
     if (!hasRealData) return <ArrowRight size={16} weight="bold" className="trend-icon na" />;
     if (trend === 'home_rising' || trend === 'rising') {
-      return <TrendUp size={16} weight="fill" className="trend-icon rising" />;
+      return <TrendUp size={16} weight="fill" className="trend-icon home-rising" />;
     }
-    if (trend === 'away_rising' || trend === 'falling') {
+    if (trend === 'away_rising') {
+      return <TrendUp size={16} weight="fill" className="trend-icon away-rising" />;
+    }
+    if (trend === 'falling') {
       return <TrendDown size={16} weight="fill" className="trend-icon falling" />;
     }
     return <ArrowRight size={16} weight="bold" className="trend-icon stable" />;
@@ -336,8 +373,8 @@ function MiniMomentum({ header, data }) {
 
   const getTrendLabel = (trend) => {
     if (!hasRealData) return 'N/A';
-    if (trend === 'home_rising') return 'Home Rising';
-    if (trend === 'away_rising') return 'Away Rising';
+    if (trend === 'home_rising') return `${homeName} Rising`;
+    if (trend === 'away_rising') return `${awayName} Rising`;
     if (trend === 'rising') return 'Rising';
     if (trend === 'falling') return 'Falling';
     return 'Stable';
@@ -394,12 +431,14 @@ function MiniMomentum({ header, data }) {
       </div>
 
       <div className="momentum-players">
-        <div className="player-momentum home">
+        <div className={`player-momentum home ${features.dominantPlayer === 'home' ? 'dominant' : ''}`}>
           <span className="player-name">{players.home?.name?.split(' ').pop() || 'Home'}</span>
+          {features.dominantPlayer === 'home' && <span className="dominant-badge">⭐</span>}
         </div>
         <span className="vs-divider">vs</span>
-        <div className="player-momentum away">
+        <div className={`player-momentum away ${features.dominantPlayer === 'away' ? 'dominant' : ''}`}>
           <span className="player-name">{players.away?.name?.split(' ').pop() || 'Away'}</span>
+          {features.dominantPlayer === 'away' && <span className="dominant-badge">⭐</span>}
         </div>
       </div>
     </MotionCard>

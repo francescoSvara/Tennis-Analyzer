@@ -356,11 +356,41 @@
   color: white;
 }
 
+.strategy-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.action-badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.action-badge.back {
+  background: var(--color-success);
+  color: white;
+}
+
+.action-badge.lay {
+  background: var(--color-danger);
+  color: white;
+}
+
 .strategy-mini-details {
   display: flex;
   gap: var(--space-2);
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
+}
+
+.conditions-count {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
 }
 
 .strategy-reason {
@@ -423,9 +453,12 @@
   color: var(--color-success);
 }
 
-.momentum-value.trend-falling,
-.momentum-value.trend-away_rising {
+.momentum-value.trend-falling {
   color: var(--color-danger);
+}
+
+.momentum-value.trend-away_rising {
+  color: var(--color-accent);
 }
 
 .momentum-value.trend-stable {
@@ -434,6 +467,14 @@
 
 .trend-icon {
   flex-shrink: 0;
+}
+
+.trend-icon.home-rising {
+  color: var(--color-success);
+}
+
+.trend-icon.away-rising {
+  color: var(--color-accent);
 }
 
 .trend-icon.rising {
@@ -476,6 +517,32 @@
 .player-momentum .player-name {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
+}
+
+.player-momentum.dominant {
+  padding: var(--space-2);
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-primary-border);
+}
+
+.dominant-badge {
+  font-size: var(--font-size-xs);
+  margin-left: var(--space-1);
+}
+
+.dominant-indicator {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  margin-left: var(--space-1);
+}
+
+.dominant-indicator.home {
+  color: var(--color-success);
+}
+
+.dominant-indicator.away {
+  color: var(--color-danger);
 }
 
 .momentum-players .vs-divider {

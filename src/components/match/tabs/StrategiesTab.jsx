@@ -38,6 +38,53 @@ import './StrategiesTab.css';
 // ============================================
 
 /**
+ * FeaturesSummary - Mostra features correnti rilevanti per le strategie
+ */
+function FeaturesSummary({ features }) {
+  if (!features) return null;
+  
+  const items = [
+    { label: 'Volatility', value: features.volatility, suffix: '%', threshold: 60 },
+    { label: 'Pressure', value: features.pressure, suffix: '%', threshold: 60 },
+    { label: 'Dominance', value: features.dominance, suffix: '%', neutral: 50 },
+    { label: 'Break Prob', value: features.breakProbability, suffix: '%', threshold: 40 },
+    { label: 'Momentum', value: features.momentum?.trend, isText: true },
+  ];
+
+  const getColor = (item) => {
+    if (item.isText) {
+      if (item.value === 'home_rising' || item.value === 'away_rising') return 'var(--color-warning)';
+      return 'var(--text-muted)';
+    }
+    if (item.neutral) {
+      const diff = Math.abs(item.value - item.neutral);
+      return diff > 15 ? 'var(--color-warning)' : 'var(--text-secondary)';
+    }
+    if (item.threshold && item.value >= item.threshold) return 'var(--color-warning)';
+    return 'var(--text-secondary)';
+  };
+
+  const formatVal = (item) => {
+    if (item.isText) return item.value?.replace('_', ' ') || 'stable';
+    if (item.value == null) return 'N/A';
+    return `${item.value}${item.suffix || ''}`;
+  };
+
+  return (
+    <div className="features-summary">
+      {items.map((item) => (
+        <div key={item.label} className="feature-chip">
+          <span className="feature-label">{item.label}</span>
+          <span className="feature-value" style={{ color: getColor(item) }}>
+            {formatVal(item)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
  * Format strategy ID to display name
  */
 function formatStrategyName(id) {
@@ -54,6 +101,27 @@ function formatStrategyName(id) {
 /**
  * Format condition key to readable text
  */
+/**
+ * Get relevant features for each strategy type
+ */
+function getRelevantFeatures(strategyId, features) {
+  const featureMap = {
+    'lay-the-winner': ['volatility', 'dominance', 'momentum'],
+    'banca-servizio': ['pressure', 'breakProbability', 'serveDominance'],
+    'super-break': ['dominance', 'breakProbability', 'momentum'],
+    'tiebreak-specialist': ['serveDominance', 'returnDominance'],
+    'momentum-swing': ['volatility', 'momentum', 'breakProbability'],
+  };
+  
+  const keys = featureMap[strategyId] || [];
+  return keys.map(key => {
+    if (key === 'momentum') {
+      return { key, label: 'Momentum', value: features.momentum?.trend?.replace('_', ' ') || 'stable' };
+    }
+    return { key, label: key.charAt(0).toUpperCase() + key.slice(1), value: features[key] };
+  });
+}
+
 function formatConditionText(key) {
   const texts = {
     set1Winner: 'Winner 1° set determinato',
@@ -146,19 +214,42 @@ function StrategyCard({ strategy, onExecute }) {
       {/* Header */}
       <div className="strategy-card__header">
         <div className="strategy-info">
-          <span className="status-badge" style={{ background: config.color }}>
-            <span className={`status-dot ${status.toLowerCase()}`}></span>
-            {config.label}
-          </span>
+          <div className="status-badges">
+            <span className="status-badge" style={{ background: config.color }}>
+              <span className={`status-dot ${status.toLowerCase()}`}></span>
+              {config.label}
+            </span>
+            {strategy.action && (
+              <span className={`action-badge ${strategy.action.toLowerCase()}`}>
+                {strategy.action}
+              </span>
+            )}
+          </div>
           <h3 className="strategy-name">{strategy.name}</h3>
         </div>
         <div className="strategy-meta">
           <span className="confidence">
             Confidence: {strategy.confidence ? (strategy.confidence * 100).toFixed(0) + '%' : '-'}
           </span>
-          <span className="risk">Risk: {strategy.risk?.level || 'MED'}</span>
+          <span className="conditions-badge">
+            {strategy.conditionsMet}/{strategy.conditionsTotal} ✓
+          </span>
+          <span className={`risk risk-${(strategy.risk?.level || 'MED').toLowerCase()}`}>
+            Risk: {strategy.risk?.level || 'MED'}
+          </span>
         </div>
       </div>
+
+      {/* Relevant Features */}
+      {strategy.relevantFeatures?.length > 0 && (
+        <div className="strategy-features">
+          {strategy.relevantFeatures.map(f => (
+            <span key={f.key} className="feature-tag">
+              {f.label}: <strong>{typeof f.value === 'number' ? f.value + '%' : f.value}</strong>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Details */}
       <div className="strategy-card__body">
@@ -230,38 +321,56 @@ export function StrategiesTab({ data, header }) {
   const [activeFilter, setActiveFilter] = useState('all');
   const [favorites, setFavorites] = useState(new Set());
 
+  // Nomi giocatori per le strategie
+  const homeName = header?.players?.home?.name || 'Home';
+  const awayName = header?.players?.away?.name || 'Away';
+  const features = header?.features || {};
+
+  // Helper per tradurre target in nome giocatore
+  const getTargetName = (target) => {
+    if (target === 'home') return homeName;
+    if (target === 'away') return awayName;
+    if (target === 'none' || !target) return null;
+    return target;
+  };
+
   // Transform bundle data into display format
   const strategies = useMemo(() => {
     // Use real data from bundle if available
     const signals = data?.signals || [];
 
     if (signals.length > 0) {
-      return signals.map((signal) => ({
-        id: signal.id,
-        name: signal.name || formatStrategyName(signal.id),
-        status: signal.status || 'OFF',
-        target:
-          signal.target === 'home'
-            ? header?.players?.home?.name
-            : signal.target === 'away'
-            ? header?.players?.away?.name
-            : signal.target || '-',
-        score: header?.score?.game || '-',
-        confidence: signal.confidence || 0,
-        risk: {
-          level: signal.confidence > 0.7 ? 'MED' : signal.confidence > 0.5 ? 'LOW' : 'HIGH',
-          stakeSuggested: 10,
-          liabilityCap: 30,
-        },
-        action: signal.action || null,
-        exitRule: signal.exitRule || '-',
-        waitingFor: signal.status === 'WATCH' ? signal.reasons?.[0] : null,
-        conditions: Object.entries(signal.conditions || {}).map(([key, met]) => ({
-          text: formatConditionText(key),
-          met: !!met,
-        })),
-        why: signal.reasons?.length > 0 ? signal.reasons.join('. ') : null,
-      }));
+      return signals.map((signal) => {
+        const targetName = getTargetName(signal.target);
+        
+        return {
+          id: signal.id,
+          name: signal.name || formatStrategyName(signal.id),
+          status: signal.status || 'OFF',
+          target: targetName,
+          targetRaw: signal.target, // per styling
+          score: header?.score?.game || '-',
+          confidence: signal.confidence || 0,
+          risk: {
+            level: signal.confidence > 0.7 ? 'LOW' : signal.confidence > 0.5 ? 'MED' : 'HIGH',
+            stakeSuggested: signal.confidence > 0.7 ? 15 : 10,
+            liabilityCap: signal.confidence > 0.7 ? 45 : 30,
+          },
+          action: signal.action || null,
+          exitRule: signal.exitRule || '-',
+          entryRule: signal.entryRule || '-',
+          waitingFor: signal.status === 'WATCH' ? signal.reasons?.[0] : null,
+          conditions: Object.entries(signal.conditions || {}).map(([key, met]) => ({
+            text: formatConditionText(key),
+            met: !!met,
+          })),
+          conditionsMet: Object.values(signal.conditions || {}).filter(Boolean).length,
+          conditionsTotal: Object.keys(signal.conditions || {}).length,
+          why: signal.reasons?.length > 0 ? signal.reasons.join('. ') : null,
+          // Features rilevanti per questa strategia
+          relevantFeatures: getRelevantFeatures(signal.id, features),
+        };
+      });
     }
 
     // Fallback mock data for demo
@@ -372,6 +481,9 @@ export function StrategiesTab({ data, header }) {
           <span className="control-label">Cooldown: 30s</span>
         </div>
       </div>
+
+      {/* Features Summary */}
+      <FeaturesSummary features={header?.features} />
 
       {/* Filters */}
       <div className="strategies-tab__filters">

@@ -371,10 +371,11 @@ function evaluateSuperBreak(matchData) {
  *
  * Condizioni READY:
  * - Set in corso a 6-6 o prossimo al tiebreak
- * - Differenza significativa in serve stats
+ * - Differenza significativa in serve/return dominance
  */
 function evaluateTiebreakSpecialist(matchData) {
-  const { features = {}, score = {}, statistics = {} } = matchData;
+  const { features = {}, score = {} } = matchData;
+  const { serveDominance = 50, returnDominance = 50 } = features;
 
   const reasons = [];
   const conditions = {
@@ -394,30 +395,37 @@ function evaluateTiebreakSpecialist(matchData) {
     else if (closeToTB) reasons.push(`Set ${home}-${away}, tiebreak probabile`);
   }
 
-  // Check imbalance servizio
-  const homeFirstServe = parseFloat(statistics.home?.firstServePointsWonPct) || 60;
-  const awayFirstServe = parseFloat(statistics.away?.firstServePointsWonPct) || 60;
-  const serveDiff = Math.abs(homeFirstServe - awayFirstServe);
-  conditions.serveImbalance = serveDiff > 15;
+  // Check imbalance usando serveDominance/returnDominance già calcolati
+  // serveDominance > 50 = server forte, returnDominance > 50 = returner forte
+  // Un grande squilibrio indica che un giocatore domina al servizio
+  const serveReturnDiff = Math.abs(serveDominance - returnDominance);
+  conditions.serveImbalance = serveReturnDiff > 15;
 
   let weakerServer = null;
   if (conditions.serveImbalance) {
-    weakerServer = homeFirstServe < awayFirstServe ? 'home' : 'away';
-    reasons.push(`${weakerServer} ha servizio più debole (${serveDiff.toFixed(0)}% diff)`);
+    // Chi ha serveDominance più basso è il server più debole
+    // Se serveDominance < 50, il server attuale è debole
+    // Se returnDominance > serveDominance, il returner domina (= server debole)
+    weakerServer = serveDominance < 50 ? 'server' : returnDominance > serveDominance ? 'server' : 'returner';
+    reasons.push(`Squilibrio serve/return: ${serveReturnDiff.toFixed(0)}% diff (serveDom: ${serveDominance}%, returnDom: ${returnDominance}%)`);
   }
 
   let status = 'OFF';
   let confidence = 0;
   let action = null;
+  let target = null;
 
   if (conditions.nearTiebreak && conditions.serveImbalance) {
     status = 'READY';
-    confidence = 0.6;
+    // Confidence basata sullo squilibrio
+    confidence = 0.5 + Math.min(0.25, serveReturnDiff / 100);
     action = 'LAY';
+    target = weakerServer;
     reasons.push('Banca il server più debole nel tiebreak');
   } else if (conditions.nearTiebreak) {
     status = 'WATCH';
     confidence = 0.25;
+    reasons.push('Vicino al tiebreak, monitorare squilibrio servizio');
   }
 
   return {
@@ -425,9 +433,9 @@ function evaluateTiebreakSpecialist(matchData) {
     name: 'Tiebreak Specialist',
     status,
     action,
-    target: weakerServer,
+    target,
     confidence,
-    entryRule: 'Set 6-6, giocatore con servizio più debole',
+    entryRule: 'Set 6-6, squilibrio serve/return dominance > 15%',
     exitRule: 'Fine tiebreak',
     reasons,
     conditions,
