@@ -805,3 +805,505 @@ function transformMatch(m) {
     winnerCode: m.winner_code,
   };
 }
+
+// ============================================================================
+// ADDITIONAL MATCH ENDPOINTS
+// ============================================================================
+
+/**
+ * GET /api/match/:eventId/refresh - Force refresh from SofaScore
+ */
+exports.refresh = async (req, res) => {
+  const { eventId } = req.params;
+
+  if (!eventId) {
+    return res.status(400).json({ error: 'Missing eventId' });
+  }
+
+  if (!liveManager) {
+    return res.status(503).json({ error: 'Live manager not available' });
+  }
+
+  try {
+    const result = await liveManager.syncMatch(eventId);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message, success: false });
+  }
+};
+
+/**
+ * GET /api/match/:eventId/card - Card completa del match
+ */
+exports.getCard = async (req, res) => {
+  const { eventId } = req.params;
+  const { useSnapshot = 'true' } = req.query;
+
+  if (!eventId) {
+    return res.status(400).json({ error: 'Missing eventId' });
+  }
+
+  try {
+    // Try snapshot first
+    if (useSnapshot === 'true' && matchRepository) {
+      const snapshot = await matchRepository.getMatchCardSnapshot(parseInt(eventId));
+
+      if (snapshot) {
+        return res.json({
+          match: snapshot.core_json,
+          tournament: snapshot.core_json?.tournament,
+          player1: snapshot.players_json?.player1,
+          player2: snapshot.players_json?.player2,
+          h2h: snapshot.h2h_json,
+          statistics: snapshot.stats_json,
+          momentum: snapshot.momentum_json,
+          odds: snapshot.odds_json,
+          dataSources: snapshot.data_sources_json?.map((s) => s.source_type) || [],
+          dataQuality: snapshot.data_quality_int,
+          fromSnapshot: true,
+          snapshotUpdatedAt: snapshot.last_updated_at,
+        });
+      }
+    }
+
+    // Fallback to traditional service
+    if (!matchCardService) {
+      return res.status(503).json({ error: 'Match Card Service not available' });
+    }
+
+    const card = await matchCardService.getMatchCard(parseInt(eventId));
+
+    if (!card) {
+      return res.status(404).json({ error: 'Match not found' });
+    }
+
+    res.json({ ...card, fromSnapshot: false });
+  } catch (err) {
+    console.error('Error getting match card:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/match/:eventId/momentum - Power rankings
+ */
+exports.getMomentum = async (req, res) => {
+  const { eventId } = req.params;
+
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+
+  try {
+    const momentum = await matchRepository.getMatchMomentum(parseInt(eventId));
+    res.json({ matchId: eventId, momentum, count: momentum.length });
+  } catch (err) {
+    console.error('Error getting momentum:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * POST /api/match/:eventId/momentum-svg - Save momentum from SVG
+ */
+exports.saveMomentumSvg = async (req, res) => {
+  const { eventId } = req.params;
+  const { svgHtml, powerRankings } = req.body;
+
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+
+  if (!svgHtml && !powerRankings) {
+    return res.status(400).json({ error: 'Missing svgHtml or powerRankings in body' });
+  }
+
+  try {
+    let rankings = powerRankings;
+
+    if (svgHtml && !powerRankings) {
+      const { processSvgMomentum } = require('../utils/svgMomentumExtractor');
+      const result = processSvgMomentum(svgHtml);
+
+      if (!result.ok) {
+        return res.status(400).json({ error: result.error || 'Failed to extract SVG data' });
+      }
+      rankings = result.powerRankings;
+    }
+
+    if (!rankings || rankings.length === 0) {
+      return res.status(400).json({ error: 'No power rankings data extracted' });
+    }
+
+    await matchRepository.updateMomentum(parseInt(eventId), rankings);
+    res.json({ success: true, matchId: eventId, count: rankings.length });
+  } catch (err) {
+    console.error('Error saving momentum:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/match/:eventId/statistics - Match statistics
+ */
+exports.getStatistics = async (req, res) => {
+  const { eventId } = req.params;
+
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+
+  try {
+    const statistics = await matchRepository.getMatchStatisticsNew(parseInt(eventId));
+    res.json({ matchId: eventId, statistics });
+  } catch (err) {
+    console.error('Error getting statistics:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/match/:eventId/odds - Match odds
+ */
+exports.getOdds = async (req, res) => {
+  const { eventId } = req.params;
+
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+
+  try {
+    const odds = await matchRepository.getMatchOdds(parseInt(eventId));
+    res.json({ matchId: eventId, odds });
+  } catch (err) {
+    console.error('Error getting odds:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/match/:eventId/points - Point-by-point data
+ */
+exports.getPoints = async (req, res) => {
+  const { eventId } = req.params;
+  const { offset = 0, limit = 500 } = req.query;
+
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+
+  try {
+    const result = await matchRepository.getMatchPointByPoint(parseInt(eventId), {
+      offset: parseInt(offset),
+      limit: parseInt(limit),
+    });
+    res.json({ matchId: eventId, ...result });
+  } catch (err) {
+    console.error('Error getting point-by-point:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * POST /api/match/:eventId/rebuild-snapshot - Rebuild snapshot
+ */
+exports.rebuildSnapshot = async (req, res) => {
+  const { eventId } = req.params;
+
+  if (!eventId || !matchRepository) {
+    return res.status(400).json({ error: 'Missing eventId or repository not available' });
+  }
+
+  try {
+    await matchRepository.buildMatchCardSnapshot(parseInt(eventId));
+    const snapshot = await matchRepository.getMatchCardSnapshot(parseInt(eventId));
+    res.json({ success: true, matchId: eventId, snapshot });
+  } catch (err) {
+    console.error('Error rebuilding snapshot:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/match/:matchId/breaks - Break analysis
+ */
+exports.getBreaks = async (req, res) => {
+  const { matchId, eventId } = req.params;
+  const id = matchId || eventId;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Missing matchId' });
+  }
+
+  let breakDetector = null;
+  try {
+    breakDetector = require('../utils/breakDetector');
+  } catch (e) {
+    return res.status(503).json({ error: 'Break Detector not available' });
+  }
+
+  if (!matchRepository) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+
+  try {
+    const match = await matchRepository.getMatchById(parseInt(id));
+
+    if (!match) {
+      return res.status(404).json({ error: 'Match not found' });
+    }
+
+    const breakAnalysis = {
+      match_id: match.id,
+      players: {
+        home: match.home_name,
+        away: match.away_name,
+      },
+      sets: [],
+    };
+
+    for (let setNum = 1; setNum <= 5; setNum++) {
+      const homeGames = match[`w${setNum}`];
+      const awayGames = match[`l${setNum}`];
+
+      if (homeGames === null || awayGames === null) break;
+
+      const setScore = { w: homeGames, l: awayGames };
+      const setBreaks = breakDetector.analyzeSetBreaks(setScore, setNum);
+
+      breakAnalysis.sets.push({
+        set_number: setNum,
+        score: `${homeGames}-${awayGames}`,
+        ...setBreaks,
+      });
+    }
+
+    if (breakAnalysis.sets.length > 0) {
+      const allBreaks = breakAnalysis.sets.map((s) => s.total_breaks_estimated);
+      breakAnalysis.total_breaks = allBreaks.reduce((a, b) => a + b, 0);
+      breakAnalysis.avg_breaks_per_set = breakAnalysis.total_breaks / breakAnalysis.sets.length;
+    }
+
+    res.json(breakAnalysis);
+  } catch (err) {
+    console.error('Error analyzing breaks:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/match/:matchId/inspector - Data inspector
+ */
+exports.getInspector = async (req, res) => {
+  const { matchId, eventId } = req.params;
+  const id = matchId || eventId;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Missing matchId' });
+  }
+
+  try {
+    let rawData = {};
+    let match = null;
+
+    if (matchRepository) {
+      // Usa getMatchById invece di getAllMatches
+      match = await matchRepository.getMatchById(parseInt(id));
+
+      if (match) {
+        rawData = {
+          homePlayer: match.home_name || match.home_player || 'N/A',
+          awayPlayer: match.away_name || match.away_player || 'N/A',
+          tournament: match.tournament_name || match.tournament || 'N/A',
+          surface: match.surface || 'N/A',
+          status: match.status_type || match.status || 'N/A',
+          score: match.score || 'N/A',
+          winner: match.winner_code || match.winner || 'N/A',
+          set1: match.w1 != null && match.l1 != null ? `${match.w1}-${match.l1}` : 'N/A',
+          set2: match.w2 != null && match.l2 != null ? `${match.w2}-${match.l2}` : 'N/A',
+          set3: match.w3 != null && match.l3 != null ? `${match.w3}-${match.l3}` : 'N/A',
+          statsCount: match.statistics ? Object.keys(match.statistics).length : 0,
+          powerRankingsCount: match.powerRankings?.length || match.power_rankings?.length || 0,
+          pointByPointCount: match.pointByPoint?.length || match.point_by_point?.length || 0,
+        };
+      }
+    }
+
+    res.json({
+      matchId: id,
+      found: !!match,
+      rawData,
+      dataSources: match ? ['database'] : [],
+    });
+  } catch (err) {
+    console.error('Error in match inspector:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/matches/cards - Match cards list
+ */
+exports.getCards = async (req, res) => {
+  const { limit = 20, surface, tournament, playerId } = req.query;
+
+  if (!matchRepository) {
+    return res.status(503).json({ error: 'Match Repository not available' });
+  }
+
+  try {
+    // Usa il repository direttamente per ottenere i match recenti
+    const matches = await matchRepository.getMatches({
+      limit: parseInt(limit),
+      surface,
+      tournament,
+      playerId: playerId ? parseInt(playerId) : undefined,
+    });
+    
+    // Trasforma in formato card minimale
+    const cards = (matches || []).map(m => ({
+      eventId: m.event_id || m.id,
+      homeTeam: m.home_name || m.homeTeam?.name || 'Unknown',
+      awayTeam: m.away_name || m.awayTeam?.name || 'Unknown',
+      tournament: m.tournament_name || m.tournament || '',
+      surface: m.surface || '',
+      status: m.status_type || m.status || 'unknown',
+      startTime: m.start_time || m.startTimestamp,
+      winnerCode: m.winner_code,
+    }));
+    
+    res.json({ cards, count: cards.length });
+  } catch (err) {
+    console.error('Error getting match cards:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * GET /api/matches/merged - Merged matches from files
+ */
+exports.getMerged = async (req, res) => {
+  const { getRealisticStatus } = require('../utils/bundleHelpers');
+  
+  try {
+    const matches = [];
+
+    if (!fs.existsSync(SCRAPES_DIR)) {
+      return res.json({ matches: [], count: 0, source: 'files' });
+    }
+
+    const files = fs.readdirSync(SCRAPES_DIR).filter((f) => f.endsWith('.json'));
+
+    for (const file of files) {
+      try {
+        const content = JSON.parse(fs.readFileSync(path.join(SCRAPES_DIR, file), 'utf8'));
+
+        if (!content.api) continue;
+
+        for (const [url, data] of Object.entries(content.api)) {
+          if (!url.match(/\/event\/\d+$/) || !data?.event) continue;
+
+          const eventData = data.event;
+          const eventId = eventData.id;
+
+          if (matches.some((m) => m.eventId === eventId)) continue;
+
+          matches.push({
+            eventId,
+            tournament: {
+              name: eventData.tournament?.name || '',
+              category: eventData.tournament?.category?.name || '',
+            },
+            homeTeam: {
+              name: eventData.homeTeam?.name || '',
+              shortName: eventData.homeTeam?.shortName || '',
+              country: eventData.homeTeam?.country?.alpha2 || '',
+              ranking: eventData.homeTeam?.ranking || null,
+            },
+            awayTeam: {
+              name: eventData.awayTeam?.name || '',
+              shortName: eventData.awayTeam?.shortName || '',
+              country: eventData.awayTeam?.country?.alpha2 || '',
+              ranking: eventData.awayTeam?.ranking || null,
+            },
+            homeScore: eventData.homeScore || null,
+            awayScore: eventData.awayScore || null,
+            status: getRealisticStatus(
+              eventData.status,
+              eventData.startTimestamp,
+              eventData.winnerCode
+            ) || { type: 'unknown' },
+            startTimestamp: eventData.startTimestamp || null,
+            winnerCode: eventData.winnerCode || null,
+            source: 'files',
+          });
+        }
+      } catch (fileErr) {
+        console.warn(`⚠️ Error reading file ${file}:`, fileErr.message);
+      }
+    }
+
+    res.json({ matches, count: matches.length, source: 'files' });
+  } catch (err) {
+    console.error('Error in /api/matches/merged:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * POST /api/match/pressure - Calcola indice pressione live
+ */
+exports.calculatePressure = (req, res) => {
+  const { stats, context } = req.body;
+
+  if (!stats) {
+    return res.status(400).json({ error: 'Missing stats object' });
+  }
+
+  let pressureCalculator = null;
+  try {
+    pressureCalculator = require('../utils/pressureCalculator');
+  } catch (e) {
+    return res.status(503).json({ error: 'Pressure Calculator not available' });
+  }
+
+  try {
+    const pressure = pressureCalculator.calculatePressureIndex(stats, context || {});
+    res.json(pressure);
+  } catch (err) {
+    console.error('Error calculating pressure:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * POST /api/match/segment - Segmenta un match in fasi
+ */
+exports.segmentMatch = (req, res) => {
+  const { matchStats } = req.body;
+
+  if (!matchStats) {
+    return res.status(400).json({ error: 'Missing matchStats object' });
+  }
+
+  let matchSegmenter = null;
+  try {
+    matchSegmenter = require('../utils/matchSegmenter');
+  } catch (e) {
+    return res.status(503).json({ error: 'Match Segmenter not available' });
+  }
+
+  try {
+    const segments = matchSegmenter.segmentMatch(matchStats);
+    const summary = matchSegmenter.getSegmentSummary(segments);
+
+    res.json({
+      segments,
+      summary,
+      total_segments: segments.length,
+    });
+  } catch (err) {
+    console.error('Error segmenting match:', err);
+    res.status(500).json({ error: err.message });
+  }
+};

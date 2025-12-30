@@ -197,22 +197,24 @@ HELPERS finalizeDominance
 END
 
 MODULE serveDominance.js
-FUNCTION calculateServeDominance(statistics, servingPlayer) → { serveDominance, returnDominance }
+FUNCTION calculateServeDominance(statistics, servingPlayer) → { serveDominance, returnDominance, isEstimated }
 HELPERS estimateServePointWinProbFromPct, adjustServeProbByAcesDF
 HELPERS estimateReturnPointWinProb, probToDominance
 END
 
 MODULE breakProbability.js
-FUNCTION calculateBreakProbability({ statistics, server, gameScore, powerRankings })
+FUNCTION calculateBreakProbability({ statistics, server, gameScore, powerRankings }) → 0..100
 MODEL Markov chain for tennis game states
 CACHE __holdMemo (module-level memoization)
 HELPERS estimateServePointWinProb, holdProbabilityFromState
-HELPERS parseGameScoreToState, adjustByMomentum, adjustByDoubleFaults
+HELPERS parseGameScoreToState, parseGameScore, adjustByMomentum, adjustByDoubleFaults
 END
 
 MODULE momentum.js
 FUNCTION calculateRecentMomentum(powerRankings) → { trend, recentSwing, last5avg, breakCount }
-ALGORITHM EMA-based trend detection
+OUTPUT trend: 'stable' | 'home_rising' | 'away_rising'
+OUTPUT recentSwing: 0..100, last5avg: integer, breakCount: integer
+ALGORITHM EMA-based trend detection (slope threshold: ±6)
 HELPERS avgAbsDelta, emaSeries
 END
 
@@ -223,7 +225,7 @@ FUNCTION isClutchPoint(matchState) → { isClutchPoint, clutchType, pressure }
 END
 
 MODULE odds.js
-FUNCTION calculateOddsFeatures(odds) → { impliedProbHome, impliedProbAway, overround, fairOdds }
+FUNCTION calculateOddsFeatures(odds) → { impliedProbHome, impliedProbAway, overround, fairOddsHome, fairOddsAway, margin }
 END
 
 MODULE fallbacks.js

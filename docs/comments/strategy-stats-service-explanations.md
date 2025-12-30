@@ -16,6 +16,6 @@
  * - Banca Servizio: % break avvenuti (chi serve perde il game)
  * - Super Break: % match dove favorito (ranking) vince
  *
- * Riferimento: docs/filosofie/FILOSOFIA_STATS_V2.md
+ * Riferimento: docs/filosofie/FILOSOFIA_STATS.md
  */
 ```

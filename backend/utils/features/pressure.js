@@ -5,7 +5,7 @@
  * Builds match context for pressure calculation and detects critical moments.
  *
  * @module features/pressure
- * @see docs/filosofie/FILOSOFIA_STATS_V3.md
+ * @see docs/filosofie/FILOSOFIA_STATS.md
  */
 
 // ============================================================================

@@ -91,15 +91,15 @@ Data Layer (Repository)
 | FILOSOFIA_LINEAGE_VERSIONING.md        | Versioning                    | `matchCardService.js`   |
 | FILOSOFIA_OBSERVABILITY_DATAQUALITY.md | Data Quality                  | `dataQualityChecker.js` |
 
-### 🔀 API Layer (Refactored)
+### 🔀 API Layer (Refactored ✅)
 
 | Struttura   | Scopo                  | File Principali                       |
 | ----------- | ---------------------- | ------------------------------------- |
-| Routes      | URL + middleware       | `backend/routes/*.routes.js`          |
-| Controllers | req → service → res    | `backend/controllers/*.controller.js` |
-| server.js   | SOLO bootstrap + mount | `backend/server.js` (target ~300)     |
+| Routes      | URL + middleware       | `backend/routes/*.routes.js` (11 files) |
+| Controllers | req → service → res    | `backend/controllers/*.controller.js` (10 files) |
+| server.js   | SOLO bootstrap + mount | `backend/server.js` (~170 righe ✅)     |
 
-📌 Vedi: `guida refactor server.js`
+📌 Refactoring completato: **29 Dicembre 2025** (6996 → 170 righe, -97.5%)
 
 #### Route Files Complete Reference
 
@@ -107,13 +107,14 @@ Data Layer (Repository)
 | -------------------- | ---------------------------- | --------------------------------------------------------- |
 | `health.routes.js`   | `/api/`                      | `GET /`, `GET /health`                                    |
 | `db.routes.js`       | `/api/db`                    | `GET /test`, `GET /matches`, `GET /matches/summary`, etc. |
-| `match.routes.js`    | `/api/match`, `/api/matches` | `GET /:eventId/bundle` ⭐, `GET /db`, `GET /suggested`    |
+| `match.routes.js`    | `/api/match`, `/api/matches` | `GET /:eventId/bundle` ⭐, `GET /db`, `GET /suggested`, `/statistics`, `/momentum`, `/odds`, `/points` |
 | `tracking.routes.js` | `/api/track`, `/api/tracked` | `POST /:eventId`, `DELETE /:eventId`, `GET /stats`        |
-| `player.routes.js`   | `/api/player`                | `GET /:name/stats`, `GET /search`, `GET /h2h`             |
+| `player.routes.js`   | `/api/player`                | `GET /:name/stats`, `GET /search`, `GET /h2h`, `GET /:playerId/ranking-history` |
 | `event.routes.js`    | `/api/event`                 | `GET /:eventId/point-by-point` (SofaScore direct)         |
 | `value.routes.js`    | `/api/`                      | `POST /interpret-value`, `POST /analyze-power-rankings`   |
 | `scrapes.routes.js`  | `/api/scrapes`               | `GET /`, `GET /:id`, `POST /scrape`                       |
 | `stats.routes.js`    | `/api/stats`                 | `GET /db`, `GET /health`                                  |
+| `admin.routes.js`    | `/api/admin`                 | `GET /queue/stats`, `POST /queue/enqueue`                 |
 
 ⭐ **MatchBundle endpoint principale**: `GET /api/match/:eventId/bundle`
 
@@ -221,6 +222,19 @@ FONTI → RAW EVENTS
 
 ## 9️⃣ Regole per Copilot / AI
 
+### Classificazione Codice (Decisione in 10 secondi)
+
+| Tipo Codice | Esempio | Destinazione |
+| ----------- | ------- | ------------ |
+| **HTTP glue** | `req`, `res`, status code | `routes/*.routes.js` + `controllers/*.controller.js` |
+| **Business logic** | READY/WATCH/OFF, edge, strategia | `services/*` + `strategies/strategyEngine.js` |
+| **Calcolo puro** | pressure, momentum, break detection | `utils/featureEngine.js`, `utils/pressureCalculator.js` |
+| **Accesso dati** | `supabase.from()`, query | `db/*Repository.js` |
+| **Live tracking** | polling, socket, sync | `liveManager.js` + `db/liveTrackingRepository.js` |
+| **Scraping** | SofaScore, fetch esterni | `scraper/sofascoreScraper.js` |
+
+### Regole IF/THEN
+
 ```
 IF devi definire URL → Routes (*.routes.js)
 IF devi gestire req/res → Controllers (*.controller.js)
@@ -230,6 +244,13 @@ IF devi comporre → Service Layer (services/*)
 IF devi mostrare → Frontend (src/components/*)
 IF non sai → STOP + ARCH_DECISION
 ```
+
+### Regole Evolutive
+
+1. **Se aggiungi un concetto**: dichiara filosofie, file owner, se entra in MatchBundle
+2. **Se sposti codice**: aggiorna INDEX_FILOSOFIE.md
+3. **Se endpoint sembra nuovo**: verifica se può stare nel MatchBundle prima
+4. **Se server.js supera ~300 righe**: regola violata, correggi
 
 ---
 

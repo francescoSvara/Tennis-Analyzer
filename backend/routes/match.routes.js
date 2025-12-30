@@ -49,10 +49,32 @@ router.post('/sync-match/:eventId', matchController.syncMatchFull);
 // Check data completeness
 router.get('/check-data/:eventId', matchController.checkData);
 
+// Cards list
+router.get('/cards', matchController.getCards);
+
+// Merged matches from files
+router.get('/merged', matchController.getMerged);
+
+// Calculation endpoints (static paths before :eventId)
+router.post('/pressure', matchController.calculatePressure);
+router.post('/segment', matchController.segmentMatch);
+
 // DYNAMIC ROUTES LAST (after all static routes)
 
 // Bundle endpoint (MAIN - FILOSOFIA MATCHBUNDLE_ONLY_FE)
 router.get('/:eventId/bundle', matchController.getBundle);
+
+// Match sub-endpoints
+router.get('/:eventId/refresh', matchController.refresh);
+router.get('/:eventId/card', matchController.getCard);
+router.get('/:eventId/momentum', matchController.getMomentum);
+router.post('/:eventId/momentum-svg', matchController.saveMomentumSvg);
+router.get('/:eventId/statistics', matchController.getStatistics);
+router.get('/:eventId/odds', matchController.getOdds);
+router.get('/:eventId/points', matchController.getPoints);
+router.post('/:eventId/rebuild-snapshot', matchController.rebuildSnapshot);
+router.get('/:eventId/breaks', matchController.getBreaks);
+router.get('/:eventId/inspector', matchController.getInspector);
 
 // Single match data (hybrid: DB → File → SofaScore)
 router.get('/:eventId', matchController.getMatch);

@@ -4,7 +4,7 @@
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendUp,
@@ -18,6 +18,98 @@ import {
 import { MotionCard } from '../../../motion/MotionCard';
 import { fadeUp } from '../../../motion/tokens';
 import './MomentumTab.css';
+
+/**
+ * Calcola power rankings dai punti point-by-point
+ * Raggruppa per set/game e calcola un valore di "dominanza" per ogni game
+ * Positivo = home domina, Negativo = away domina
+ * 
+ * LOGICA: Il valore rappresenta chi ha avuto il momentum nel game
+ * - Se il server tiene facilmente (pochi punti), momentum neutro/leggero per server
+ * - Se il receiver porta a deuce/break point, momentum per receiver
+ * - Se c'è break, forte momentum per chi ha breakkato
+ */
+function calculatePowerRankingsFromPoints(points) {
+  if (!points || points.length === 0) return [];
+  
+  // Raggruppa per set/game
+  const games = {};
+  points.forEach(p => {
+    const key = `${p.set}-${p.game}`;
+    if (!games[key]) {
+      games[key] = {
+        set_number: p.set,
+        game_number: p.game,
+        points: [],
+        gameServer: p.gameServer,
+        gameWinner: p.gameWinner,
+        gameIsBreak: p.gameIsBreak
+      };
+    }
+    games[key].points.push(p);
+  });
+  
+  // Calcola power ranking per ogni game
+  return Object.values(games).map(game => {
+    const server = game.gameServer; // 'home' o 'away'
+    const winner = game.gameWinner;
+    const isBreak = game.gameIsBreak;
+    const totalPoints = game.points.length;
+    
+    // Calcola punti vinti dal receiver (chi non serve)
+    const receiverPointsWon = game.points.filter(p => p.pointWinner !== server).length;
+    const serverPointsWon = totalPoints - receiverPointsWon;
+    
+    // Il momentum del game dipende da:
+    // 1. Chi ha vinto il game
+    // 2. Quanto è stato combattuto (più punti = più combattuto)
+    // 3. Se c'è stato un break
+    
+    let value = 0;
+    
+    if (isBreak) {
+      // BREAK: forte momentum per chi ha breakkato
+      // winner !== server significa che il receiver ha vinto
+      value = winner === 'home' ? 80 : -80;
+      // Bonus se molti punti (break difficile = più momentum)
+      if (totalPoints >= 8) value = winner === 'home' ? 100 : -100;
+    } else {
+      // HOLD: il server ha tenuto
+      // Il valore dipende da quanto è stato facile/difficile
+      // Game rapido (3-4 punti) = server dominante
+      // Game lungo (7+ punti, deuce) = receiver ha lottato
+      
+      if (totalPoints <= 4) {
+        // Hold facile - momentum per il server
+        value = server === 'home' ? 60 : -60;
+      } else if (totalPoints <= 6) {
+        // Hold normale - momentum leggero per server
+        value = server === 'home' ? 30 : -30;
+      } else {
+        // Hold difficile/deuce - momentum più neutro o per receiver
+        // Se tanti punti, il receiver ha fatto bene anche se ha perso
+        const receiverPressure = receiverPointsWon / totalPoints;
+        if (receiverPressure > 0.45) {
+          // Receiver ha messo pressione, momentum leggero per lui
+          value = server === 'home' ? -20 : 20;
+        } else {
+          value = server === 'home' ? 15 : -15;
+        }
+      }
+    }
+    
+    return {
+      set_number: game.set_number,
+      game_number: game.game_number,
+      value: Math.max(-100, Math.min(100, value)),
+      break_occurred: isBreak,
+      source: 'calculated'
+    };
+  }).sort((a, b) => {
+    if (a.set_number !== b.set_number) return a.set_number - b.set_number;
+    return a.game_number - b.game_number;
+  });
+}
 
 /**
  * Points Visualization - Ultimi punti visivi
@@ -83,7 +175,81 @@ function ServeDominance({ home, away, homeLabel, awayLabel }) {
 }
 
 /**
- * Quality Stats (Winners/UE)
+ * Power Rankings Chart - Visualizzazione grafica del momentum
+ * Barre orizzontali: positive (verde) a destra, negative (rosso) a sinistra
+ */
+function PowerRankingsChart({ rankings, homeLabel, awayLabel }) {
+  if (!rankings || rankings.length === 0) {
+    return <p className="no-data">No power rankings available</p>;
+  }
+
+  // Prendiamo gli ultimi 10 game (o meno se non ci sono)
+  const recentRankings = rankings.slice(-10);
+  
+  // Trova il valore massimo assoluto per scalare le barre
+  const maxAbsValue = Math.max(...recentRankings.map(r => Math.abs(r.value || 0)), 1);
+
+  return (
+    <div className="power-rankings-chart">
+      {/* Legend */}
+      <div className="pr-chart-legend">
+        <span className="legend-home">{homeLabel}</span>
+        <span className="legend-center">0</span>
+        <span className="legend-away">{awayLabel}</span>
+      </div>
+      
+      {/* Chart */}
+      <div className="pr-chart-container">
+        {recentRankings.map((rank, idx) => {
+          const value = rank.value || 0;
+          const barWidth = Math.abs(value) / maxAbsValue * 50; // max 50% each side
+          const isPositive = value >= 0; // positive = home momentum
+          const hasBreak = rank.break_occurred || rank.breakOccurred;
+          
+          return (
+            <div key={idx} className="pr-chart-row">
+              <span className="pr-game-label">
+                S{rank.set_number || rank.set || 1}G{rank.game_number || rank.game || idx + 1}
+              </span>
+              <div className="pr-bar-container">
+                {/* Left side (positive/home) */}
+                <div className="pr-bar-side left">
+                  {isPositive && (
+                    <div 
+                      className={`pr-bar home ${hasBreak ? 'has-break' : ''}`}
+                      style={{ width: `${barWidth}%` }}
+                    >
+                      {hasBreak && <span className="break-marker">B</span>}
+                    </div>
+                  )}
+                </div>
+                {/* Center line */}
+                <div className="pr-center-line" />
+                {/* Right side (negative/away) */}
+                <div className="pr-bar-side right">
+                  {!isPositive && (
+                    <div 
+                      className={`pr-bar away ${hasBreak ? 'has-break' : ''}`}
+                      style={{ width: `${barWidth}%` }}
+                    >
+                      {hasBreak && <span className="break-marker">B</span>}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <span className={`pr-value ${isPositive ? 'home' : 'away'}`}>
+                {value > 0 ? '+' : ''}{value}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Quality Stats (Winners/UE) - DEPRECATED, kept for reference
  */
 function QualityStats({ home, away, homeLabel, awayLabel }) {
   return (
@@ -124,18 +290,33 @@ function QualityStats({ home, away, homeLabel, awayLabel }) {
 
 /**
  * MomentumTab Component - Legge dal bundle
+ * Usa pointByPointData come fallback se powerRankings incompleti
  */
-export function MomentumTab({ data, header }) {
+export function MomentumTab({ data, header, pointByPointData }) {
   const players = header?.players || {};
   // Bundle: tabs.momentum.features = { trend, recentSwing, breakCount }
   // Bundle: tabs.momentum.powerRankings = []
   // Bundle: tabs.momentum.qualityStats = { home: { winners, ue }, away: { winners, ue } }
   const features = data?.features || {};
-  const powerRankings = data?.powerRankings || [];
+  const bundlePowerRankings = data?.powerRankings || [];
   const qualityStats = data?.qualityStats || {
     home: { winners: 0, ue: 0 },
     away: { winners: 0, ue: 0 },
   };
+
+  // Calcola power rankings da point-by-point se bundle incompleto
+  const pbpPoints = pointByPointData?.points || [];
+  const calculatedPowerRankings = useMemo(() => {
+    return calculatePowerRankingsFromPoints(pbpPoints);
+  }, [pbpPoints]);
+  
+  // Usa power rankings calcolati se bundle ha meno game
+  const powerRankings = useMemo(() => {
+    if (calculatedPowerRankings.length > bundlePowerRankings.length) {
+      return calculatedPowerRankings;
+    }
+    return bundlePowerRankings;
+  }, [bundlePowerRankings, calculatedPowerRankings]);
 
   // header.features ha volatility, pressure, dominance, serveDominance, returnDominance
   const headerFeatures = header?.features || {};
@@ -174,21 +355,22 @@ export function MomentumTab({ data, header }) {
           <div className="trend-info">
             <div className="trend-item">
               <span className="trend-label">Trend</span>
-              <span className={`trend-value trend-${momentum.trend || 'stable'}`}>
-                {momentum.trend === 'rising' && (
+              <span className={`trend-value ${momentum.trend === 'home_rising' ? 'trend-rising home' : momentum.trend === 'away_rising' ? 'trend-rising away' : 'trend-stable'}`}>
+                {momentum.trend === 'home_rising' && (
                   <TrendUp size={16} weight="fill" className="trend-icon" />
                 )}
-                {momentum.trend === 'falling' && (
-                  <TrendDown size={16} weight="fill" className="trend-icon" />
+                {momentum.trend === 'away_rising' && (
+                  // Rising arrow should point up even for away (label is 'Rising')
+                  <TrendUp size={16} weight="fill" className="trend-icon" />
                 )}
                 {(!momentum.trend || momentum.trend === 'stable') && (
                   <ArrowRight size={16} weight="bold" className="trend-icon" />
                 )}
                 <span>
-                  {momentum.trend === 'rising'
-                    ? 'Rising'
-                    : momentum.trend === 'falling'
-                    ? 'Falling'
+                  {momentum.trend === 'home_rising'
+                    ? `${homeLabel} Rising`
+                    : momentum.trend === 'away_rising'
+                    ? `${awayLabel} Rising`
                     : 'Stable'}
                 </span>
               </span>
@@ -220,41 +402,17 @@ export function MomentumTab({ data, header }) {
           />
         </MotionCard>
 
-        {/* Quality Stats - Winners/UE */}
-        <MotionCard className="momentum-card quality-card">
-          <QualityStats
-            home={qualityStats.home}
-            away={qualityStats.away}
+        {/* Power Rankings Chart */}
+        <MotionCard className="momentum-card power-chart-card">
+          <h3 className="card-title">
+            <Target size={18} weight="duotone" />
+            Momentum Flow
+          </h3>
+          <PowerRankingsChart 
+            rankings={powerRankings} 
             homeLabel={homeLabel}
             awayLabel={awayLabel}
           />
-        </MotionCard>
-
-        {/* Power Rankings */}
-        <MotionCard className="momentum-card runs-card">
-          <h3 className="card-title">
-            <Target size={18} weight="duotone" />
-            Power Rankings
-          </h3>
-          <div className="rankings-container">
-            {powerRankings.length > 0 ? (
-              powerRankings.slice(0, 5).map((rank, idx) => (
-                <div key={idx} className="ranking-item">
-                  <span className="rank-position">
-                    S{rank.set_number || rank.set || 1} G{rank.game_number || rank.game || idx + 1}
-                  </span>
-                  <span
-                    className={`rank-score ${(rank.value || 0) >= 0 ? 'positive' : 'negative'}`}
-                  >
-                    {rank.value ?? rank.value_svg ?? 0}
-                  </span>
-                  {rank.break_occurred && <span className="break-badge">BREAK</span>}
-                </div>
-              ))
-            ) : (
-              <p className="no-data">No power rankings available</p>
-            )}
-          </div>
         </MotionCard>
 
         {/* Return Analysis */}

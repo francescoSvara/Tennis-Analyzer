@@ -5,7 +5,7 @@
  * Uses EMA for trend detection and stable swing measurement.
  *
  * @module features/momentum
- * @see docs/filosofie/FILOSOFIA_STATS_V3.md
+ * @see docs/filosofie/FILOSOFIA_STATS.md
  */
 
 const { clamp01 } = require('../math');

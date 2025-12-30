@@ -5,7 +5,7 @@
  * Measures match instability: momentum reversals, breaks, market re-pricing.
  *
  * @module features/volatility
- * @see docs/filosofie/FILOSOFIA_STATS_V3.md
+ * @see docs/filosofie/FILOSOFIA_STATS.md
  */
 
 const { clamp01 } = require('../math');

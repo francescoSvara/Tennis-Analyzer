@@ -55,8 +55,8 @@
  * ⚠️ LEGACY: This handler is now replaced by:
  * routes/match.routes.js → controllers/match.controller.js → services/bundleService.js
  *
- * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
- * @see docs/filosofie/FILOSOFIA_STATS_V3.md
+ * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
+ * @see docs/filosofie/FILOSOFIA_STATS.md
  *
  * FILOSOFIA: SofaScore → DB → Frontend (mai fetch diretto nel bundle)
  */

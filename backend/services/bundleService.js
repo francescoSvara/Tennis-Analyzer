@@ -172,10 +172,23 @@ function buildOverviewTab(matchData, features, strategies, statsTab) {
       message: `${s.name}: ${s.reasons?.[0] || s.entryRule}`,
       strategyId: s.id,
     })),
+    // FILOSOFIA_STATS: tutte le features calcolate dal featureEngine (Markov model)
     features: {
       volatility: features.volatility,
       pressure: features.pressure,
-      momentum: features.momentum?.trend || 'stable',
+      dominance: features.dominance,
+      dominantPlayer: features.dominantPlayer,
+      serveDominance: features.serveDominance,
+      returnDominance: features.returnDominance,
+      breakProbability: features.breakProbability,
+      hasRealData: features.hasRealData,
+      momentum: features.momentum,
+      // Data source flags per trasparenza
+      volatilitySource: features.volatilitySource,
+      pressureSource: features.pressureSource,
+      dominanceSource: features.dominanceSource,
+      serveDominanceSource: features.serveDominanceSource,
+      breakProbabilitySource: features.breakProbabilitySource,
     },
   };
 }
@@ -493,6 +506,7 @@ async function buildBundle(eventId, options = {}) {
       volatility: features.volatility,
       pressure: features.pressure,
       dominance: features.dominance,
+      dominantPlayer: features.dominantPlayer,
       serveDominance: features.serveDominance,
       returnDominance: features.returnDominance,
       breakProbability: features.breakProbability,

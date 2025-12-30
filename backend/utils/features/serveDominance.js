@@ -5,7 +5,7 @@
  * Uses coherent tennis probability model.
  *
  * @module features/serveDominance
- * @see docs/filosofie/FILOSOFIA_STATS_V3.md
+ * @see docs/filosofie/FILOSOFIA_STATS.md
  */
 
 const { clamp01, clampTo0_100 } = require('../math');

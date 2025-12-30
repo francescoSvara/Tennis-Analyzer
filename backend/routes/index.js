@@ -20,6 +20,7 @@ const eventRoutes = require('./event.routes');
 const valueRoutes = require('./value.routes');
 const scrapesRoutes = require('./scrapes.routes');
 const statsRoutes = require('./stats.routes');
+const adminRoutes = require('./admin.routes');
 const scrapesController = require('../controllers/scrapes.controller');
 
 // Mount routes
@@ -31,10 +32,16 @@ router.use('/track', trackingRoutes);
 router.use('/tracked', trackingRoutes);
 router.use('/tracking', trackingRoutes);
 router.use('/player', playerRoutes);
+router.use('/players', playerRoutes); // Alias per /players/search, /players/compare
 router.use('/event', eventRoutes);
 router.use('/', valueRoutes); // /interpret-value, /analyze-power-rankings, etc.
 router.use('/scrapes', scrapesRoutes);
 router.use('/stats', statsRoutes); // /stats/db, /stats/health
+router.use('/admin', adminRoutes); // /admin/queue/stats, /admin/queue/enqueue
+
+// Legacy endpoint aliases
+const playerController = require('../controllers/player.controller');
+router.get('/search/players', playerController.searchPlayers); // /api/search/players
 
 // Root-level scraper endpoints (not under /scrapes)
 router.post('/scrape', scrapesController.scrape);

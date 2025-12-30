@@ -4,7 +4,7 @@
  * Motore centrale per la valutazione delle strategie di trading.
  * Consuma solo FEATURES, produce solo SIGNALS.
  *
- * Ref: docs/filosofie/FILOSOFIA_STATS_V3.md
+ * Ref: docs/filosofie/FILOSOFIA_STATS.md
  * Ref: docs/filosofie/FILOSOFIA_FRONTEND.md (sezione Strategie)
  *
  * @module strategyEngine

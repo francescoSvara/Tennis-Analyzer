@@ -168,6 +168,163 @@ describe('Feature Engine - Break Probability', () => {
     expect(features.breakProbability).toBeLessThanOrEqual(50);
     expect(features.breakProbabilitySource).toBe('odds');
   });
+
+  // ===== NEW MARKOV MODEL TESTS =====
+
+  test('Markov: 0-0 with strong server -> low break prob', () => {
+    const input = {
+      statistics: {
+        home: {
+          firstServePointsWonPct: 75,
+          secondServePointsWonPct: 55,
+          firstServeInPct: 65,
+          doubleFaults: 0,
+        },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '0-0',
+    };
+
+    const result = calculateBreakProbability(input);
+
+    // Strong server at 0-0 should have low break probability (~10-20%)
+    expect(result).toBeLessThan(25);
+    expect(result).toBeGreaterThanOrEqual(0);
+  });
+
+  test('Markov: 15-40 (break point) -> high break prob', () => {
+    const input = {
+      statistics: {
+        home: {
+          firstServePointsWonPct: 65,
+          secondServePointsWonPct: 45,
+          firstServeInPct: 62,
+          doubleFaults: 2,
+        },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '15-40',
+    };
+
+    const result = calculateBreakProbability(input);
+
+    // Break point should have high break probability (>50%)
+    expect(result).toBeGreaterThanOrEqual(50);
+  });
+
+  test('Markov: 40-40 (deuce) -> intermediate break prob', () => {
+    const input = {
+      statistics: {
+        home: {
+          firstServePointsWonPct: 65,
+          secondServePointsWonPct: 45,
+          firstServeInPct: 62,
+          doubleFaults: 1,
+        },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '40-40',
+    };
+
+    const result = calculateBreakProbability(input);
+
+    // Deuce should be intermediate (~25-45%)
+    expect(result).toBeGreaterThanOrEqual(20);
+    expect(result).toBeLessThanOrEqual(50);
+  });
+
+  test('Markov: pServe sensitivity - weak vs strong server at 0-0', () => {
+    const strongServer = {
+      statistics: {
+        home: {
+          firstServePointsWonPct: 80,
+          secondServePointsWonPct: 60,
+          firstServeInPct: 70,
+          doubleFaults: 0,
+        },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '0-0',
+    };
+
+    const weakServer = {
+      statistics: {
+        home: {
+          firstServePointsWonPct: 50,
+          secondServePointsWonPct: 30,
+          firstServeInPct: 55,
+          doubleFaults: 4,
+        },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '0-0',
+    };
+
+    const strongResult = calculateBreakProbability(strongServer);
+    const weakResult = calculateBreakProbability(weakServer);
+
+    // Weak server should have significantly higher break probability
+    expect(weakResult).toBeGreaterThan(strongResult);
+    expect(weakResult - strongResult).toBeGreaterThanOrEqual(15);
+  });
+
+  test('Markov: double faults penalty', () => {
+    const baseStats = {
+      firstServePointsWonPct: 65,
+      secondServePointsWonPct: 45,
+      firstServeInPct: 62,
+    };
+
+    const lowDF = {
+      statistics: {
+        home: { ...baseStats, doubleFaults: 1 },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '30-30',
+    };
+
+    const highDF = {
+      statistics: {
+        home: { ...baseStats, doubleFaults: 8 },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '30-30',
+    };
+
+    const lowDFResult = calculateBreakProbability(lowDF);
+    const highDFResult = calculateBreakProbability(highDF);
+
+    // High double faults should increase break probability
+    expect(highDFResult).toBeGreaterThan(lowDFResult);
+  });
+
+  test('Markov: Advantage-40 (advantage returner) -> very high break prob', () => {
+    const input = {
+      statistics: {
+        home: {
+          firstServePointsWonPct: 65,
+          secondServePointsWonPct: 45,
+          firstServeInPct: 62,
+          doubleFaults: 2,
+        },
+        away: {},
+      },
+      server: 'home',
+      gameScore: '40-A', // Advantage returner
+    };
+
+    const result = calculateBreakProbability(input);
+
+    // Advantage returner should have very high break probability (>55%)
+    expect(result).toBeGreaterThanOrEqual(55);
+  });
 });
 
 describe('Feature Engine - Pressure', () => {

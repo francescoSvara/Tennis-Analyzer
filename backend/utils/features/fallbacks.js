@@ -5,7 +5,7 @@
  * All functions guarantee returning values (never null) per FILOSOFIA_CALCOLI.
  *
  * @module features/fallbacks
- * @see docs/filosofie/FILOSOFIA_STATS_V3.md
+ * @see docs/filosofie/FILOSOFIA_STATS.md
  */
 
 // ============================================================================

@@ -103,7 +103,7 @@ export function MatchPage({ matchId, onBack }) {
       case 'stats':
         return <StatsTab data={tabData} header={header} />;
       case 'momentum':
-        return <MomentumTab data={tabData} header={header} />;
+        return <MomentumTab data={tabData} header={header} pointByPointData={tabs.pointByPoint} />;
       case 'predictor':
         return <PredictorTab data={tabData} header={header} />;
       case 'journal':

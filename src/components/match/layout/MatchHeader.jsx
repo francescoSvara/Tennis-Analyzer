@@ -98,8 +98,13 @@ function QuickIndicators({ header }) {
  */
 function OddsQuickView({ header }) {
   const odds = header?.odds || {};
+  const sets = header?.score?.sets || [];
 
-  // Se non ci sono odds, mostra placeholder
+  // count sets won per player
+  const homeSets = sets.reduce((acc, s) => acc + ((Number(s?.home ?? 0) > Number(s?.away ?? 0)) ? 1 : 0), 0);
+  const awaySets = sets.reduce((acc, s) => acc + ((Number(s?.away ?? 0) > Number(s?.home ?? 0)) ? 1 : 0), 0);
+
+  // Se non ci sono odds, mostra il punteggio dei set del match
   const homeOdds = odds?.home?.value || odds?.homeOdds;
   const awayOdds = odds?.away?.value || odds?.awayOdds;
 
@@ -115,14 +120,14 @@ function OddsQuickView({ header }) {
   return (
     <div className="odds-quick-view">
       <span className="odds-item">
-        <span className="odds-value">{homeOdds ? homeOdds.toFixed(2) : '-'}</span>
+        <span className="odds-value">{homeOdds ? homeOdds.toFixed(2) : String(homeSets)}</span>
         <span className="odds-trend" style={{ color: homeTrend.color }}>
           {homeTrend.symbol}
         </span>
       </span>
       <span className="odds-separator">|</span>
       <span className="odds-item">
-        <span className="odds-value">{awayOdds ? awayOdds.toFixed(2) : '-'}</span>
+        <span className="odds-value">{awayOdds ? awayOdds.toFixed(2) : String(awaySets)}</span>
         <span className="odds-trend" style={{ color: awayTrend.color }}>
           {awayTrend.symbol}
         </span>
@@ -142,6 +147,17 @@ export function MatchHeader({ header, isLive, isRefreshing, dataQuality, onBack,
   const awayName = players?.away?.name || 'Player 2';
   const surface = match?.surface || '';
   const tournament = match?.tournament || 'Tournament';
+
+  // compute sets won for compact display on mobile
+  const sets = header?.score?.sets || [];
+  let homeSets = 0;
+  let awaySets = 0;
+  for (const s of sets) {
+    const h = Number(s?.home ?? 0);
+    const a = Number(s?.away ?? 0);
+    if (h > a) homeSets++;
+    else if (a > h) awaySets++;
+  }
 
   return (
     <header className="match-header">
@@ -163,6 +179,7 @@ export function MatchHeader({ header, isLive, isRefreshing, dataQuality, onBack,
             <TennisBall size={28} weight="duotone" className="sport-icon" />
             <span className="players-name">
               {homeName} vs {awayName}
+              <span className="mobile-set-scores" aria-hidden="true">{homeSets}-{awaySets}</span>
             </span>
             <LiveBadge isLive={isLive} />
           </div>

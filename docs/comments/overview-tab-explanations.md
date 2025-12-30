@@ -12,7 +12,7 @@
  * - Strategy Mini Panel (riassunto strategie)
  * - Mini Momentum
  *
- * Data Sources (FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2):
+ * Data Sources (FILOSOFIA_FRONTEND_DATA_CONSUMPTION):
  * - header: players, score, odds, features, match
  * - tabs.overview: features (volatility, pressure, momentum)
  * - tabs.strategies: signals, summary
@@ -20,6 +20,6 @@
  * Il frontend NON ricalcola, visualizza solo dati pre-computati dal backend.
  *
  * @see docs/filosofie/FILOSOFIA_FRONTEND.md
- * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION_V2.md
+ * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
  */
 ```

@@ -159,77 +159,73 @@ Usa sempre questa mappa quando sposti o aggiungi codice:
 
 ---
 
-## 4. Task pratico: come svuotare `server.js`
+## 4. Task pratico: svuotamento `server.js` ✅ COMPLETATO
 
-Checklist che Copilot deve seguire:
+Tutti i task sono stati completati il **29 Dicembre 2025**:
 
 - [x] Creare `backend/routes/` e `backend/controllers/`
 - [x] Spostare ogni `app.get` / `app.post` in un file route coerente
 - [x] Ogni handler diventa un controller
-- [ ] Estrarre query DB in repository (già parzialmente fatto)
-- [ ] Estrarre calcoli in utils / services (già parzialmente fatto)
-- [ ] Lasciare in `server.js` SOLO bootstrap + mount routes
+- [x] Estrarre query DB in repository
+- [x] Estrarre calcoli in utils / services
+- [x] Lasciare in `server.js` SOLO bootstrap + mount routes
 
-### Struttura creata (2024-12-28):
+### Struttura finale:
 
 ```
 backend/
+├── server.js              # ~170 righe (solo bootstrap + mount)
+├── server.old.js          # Backup del vecchio server (4600+ righe)
 ├── routes/
 │   ├── index.js           # Central router mount
 │   ├── health.routes.js   # GET / e GET /health
 │   ├── db.routes.js       # GET /db/* (test, matches, tournaments, players)
 │   ├── match.routes.js    # GET/POST /match/:id/*, /matches/*
 │   ├── tracking.routes.js # /track/*, /tracked, /live/*
-│   ├── player.routes.js   # GET /player/:name/*, /search, /h2h
+│   ├── player.routes.js   # GET /player/:name/*, /search, /h2h, /ranking-history
 │   ├── event.routes.js    # GET /event/:id/* (SofaScore direct fetch)
 │   ├── value.routes.js    # POST /interpret-value, /analyze-power-rankings
 │   ├── scrapes.routes.js  # GET/POST /scrapes/*
-│   └── stats.routes.js    # GET /stats/db, /stats/health
+│   ├── stats.routes.js    # GET /stats/db, /stats/health
+│   └── admin.routes.js    # GET/POST /admin/queue/*
 ├── controllers/
 │   ├── health.controller.js   # Root + health check
 │   ├── db.controller.js       # Database queries
-│   ├── match.controller.js    # MatchBundle, suggested, detected
+│   ├── match.controller.js    # MatchBundle + 12 sub-endpoints
 │   ├── tracking.controller.js # Live tracking operations
-│   ├── player.controller.js   # Player stats, H2H
+│   ├── player.controller.js   # Player stats, H2H, ranking history
 │   ├── event.controller.js    # SofaScore direct fetches
 │   ├── value.controller.js    # Value interpretation
 │   ├── scrapes.controller.js  # Scrape management
-│   └── stats.controller.js    # DB stats with power score
+│   ├── stats.controller.js    # DB stats with power score
+│   └── admin.controller.js    # Queue management
 ```
 
-### PROGRESSO REFACTORING:
+### REFACTORING COMPLETATO:
 
-| Data      | Righe server.js | Note                                  |
-| --------- | --------------- | ------------------------------------- |
-| Inizio    | ~6996           | God file originale                    |
-| 27 Dic    | ~5329           | Prima migrazione routes/controllers   |
-| 28 Dic AM | ~4850           | Migrato suggested, detected, db-stats |
-| Target    | ~300-400        | Solo bootstrap + mount                |
+| Data      | Righe server.js | Note                                    |
+| --------- | --------------- | --------------------------------------- |
+| Inizio    | ~6996           | God file originale                      |
+| 27 Dic    | ~5329           | Prima migrazione routes/controllers     |
+| 28 Dic AM | ~4850           | Migrato suggested, detected, db-stats   |
+| **29 Dic**| **~170**        | **✅ COMPLETATO - Solo bootstrap + mount** |
 
-### Endpoint Migrati (funzionali via routes):
+### Tutti gli Endpoint Migrati:
 
 - ✅ GET /api/health
-- ✅ GET /api/db-stats → /stats/db
+- ✅ GET /api/stats/db, /api/stats/health
 - ✅ GET /api/match/:eventId/bundle
-- ✅ GET /api/matches/db, /suggested, /detected
-- ✅ GET /api/player/:name/stats, /search, /h2h
+- ✅ GET /api/match/:eventId/card, /momentum, /statistics, /odds, /points
+- ✅ POST /api/match/:eventId/momentum-svg, /rebuild-snapshot
+- ✅ GET /api/match/:eventId/breaks, /inspector, /refresh
+- ✅ GET /api/matches/db, /suggested, /detected, /cards, /merged
+- ✅ GET /api/player/:name/stats, /matches
+- ✅ GET /api/player/search, /h2h
+- ✅ GET /api/player/:playerId/ranking-history
 - ✅ POST/DELETE /api/track/:eventId
-- ✅ GET /api/event/:eventId/\* (SofaScore direct)
+- ✅ GET /api/event/:eventId/* (SofaScore direct)
 - ✅ POST /api/interpret-value, /analyze-power-rankings
-
-### PROSSIMI STEP:
-
-1. Migrare /api/match/:eventId sub-routes (card, momentum, statistics, odds, points)
-2. Migrare /api/admin/\* endpoints (queue/stats, queue/enqueue)
-3. Estrarre helper functions a utils (enrichPowerRankingsWithBreaks, calculateDataCompleteness)
-
-Esempio mapping:
-
-`/api/db-stats`
-➡️ `routes/db.routes.js`
-➡️ `controllers/db.controller.js`
-➡️ `services/dbStatsService.js`
-➡️ `db/matchRepository.js`
+- ✅ GET/POST /api/admin/queue/stats, /admin/queue/enqueue
 
 ---
 
@@ -265,11 +261,9 @@ Se la risposta è sì → **non creare endpoint FE dedicati**.
 
 ### Regola 4 — `server.js` non deve mai ricrescere
 
-Se supera:
+Attualmente: **~170 righe** ✅
 
-- ~300–400 righe
-
-Significa che una regola è stata violata.
+Se supera ~300–400 righe, significa che una regola è stata violata.
 
 ---
 

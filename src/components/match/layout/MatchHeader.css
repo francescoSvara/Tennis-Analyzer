@@ -88,6 +88,14 @@
   letter-spacing: -0.02em;
 }
 
+.mobile-set-scores {
+  display: none;
+  margin-left: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+} 
+
 .match-meta {
   display: flex;
   align-items: center;
@@ -190,37 +198,6 @@
 .odds-separator {
   color: var(--border-color-strong);
   font-weight: var(--font-weight-normal);
-}
-
-/* Set scores shown between home/away odds */
-.set-scores {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-  padding: 2px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
-.set-scores .set-home,
-.set-scores .set-away {
-  color: var(--text-primary);
-  font-weight: var(--font-weight-medium);
-}
-
-.set-scores .set-divider {
-  color: var(--text-muted);
-  opacity: 0.9;
-}
-
-@media (max-width: 480px) {
-  .set-scores {
-    font-size: 12px;
-    gap: 4px;
-    padding: 0 6px;
-  }
 }
 
 /* ===========================================
@@ -386,12 +363,23 @@
     display: none;
   }
 
+  .mobile-set-scores {
+    display: inline-block;
+  }
+
   .quick-indicators {
     display: none;
   }
 
   .players-name {
     font-size: var(--font-size-md);
+  }
+
+
+
+  .odds-value { /* ensure set numbers align visually */
+    min-width: 20px;
+    text-align: center;
   }
 }
 

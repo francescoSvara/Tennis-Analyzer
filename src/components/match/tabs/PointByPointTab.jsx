@@ -503,7 +503,6 @@ export function PointByPointTab({ data, header }) {
           <TennisBall size={14} weight="fill" />
           <span>{awayName}</span>
         </div>
-        <span className="legend-source">Source: {source}</span>
       </div>
 
       {/* Filters */}

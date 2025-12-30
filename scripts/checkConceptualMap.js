@@ -196,36 +196,38 @@ const REFERENCES = {
 
 // Funzioni da verificare con linea approssimativa
 const FUNCTIONS_TO_CHECK = [
-  // Backend - featureEngine.js (NUOVO - principale) - AGGIORNATO 27 Dic 2025
+  // Backend - featureEngine.js (NUOVO - principale) - AGGIORNATO 29 Dic 2025 (Markov model)
   { file: 'backend/utils/featureEngine.js', func: 'calculateVolatility', expectedLine: 49 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateDominance', expectedLine: 97 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominance', expectedLine: 137 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbability', expectedLine: 205 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateRecentMomentum', expectedLine: 293 },
-  { file: 'backend/utils/featureEngine.js', func: 'computeFeatures', expectedLine: 353 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominance', expectedLine: 101 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateServeDominance', expectedLine: 141 },
+  { file: 'backend/utils/featureEngine.js', func: 'estimateServePointWinProb', expectedLine: 226 },
+  { file: 'backend/utils/featureEngine.js', func: 'holdProbabilityFromState', expectedLine: 334 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateBreakProbability', expectedLine: 403 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateRecentMomentum', expectedLine: 493 },
+  { file: 'backend/utils/featureEngine.js', func: 'computeFeatures', expectedLine: 698 },
   {
     file: 'backend/utils/featureEngine.js',
     func: 'calculateVolatilityFromScore',
-    expectedLine: 523,
+    expectedLine: 967,
   },
   {
     file: 'backend/utils/featureEngine.js',
     func: 'calculateDominanceFromScore',
-    expectedLine: 554,
+    expectedLine: 998,
   },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromOdds', expectedLine: 589 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateDominanceFromOdds', expectedLine: 1035 },
   {
     file: 'backend/utils/featureEngine.js',
     func: 'calculateServeDominanceFromRankings',
-    expectedLine: 624,
+    expectedLine: 1070,
   },
   {
     file: 'backend/utils/featureEngine.js',
     func: 'calculateBreakProbabilityFromOddsRankings',
-    expectedLine: 649,
+    expectedLine: 1098,
   },
-  { file: 'backend/utils/featureEngine.js', func: 'calculatePressureFromScore', expectedLine: 694 },
-  { file: 'backend/utils/featureEngine.js', func: 'calculateMomentumFromScore', expectedLine: 725 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculatePressureFromScore', expectedLine: 1143 },
+  { file: 'backend/utils/featureEngine.js', func: 'calculateMomentumFromScore', expectedLine: 1174 },
 
   // Backend - strategyEngine.js - AGGIORNATO 27 Dic 2025
   { file: 'backend/strategies/strategyEngine.js', func: 'evaluateAll', expectedLine: 44 },
