@@ -315,6 +315,48 @@ async function buildBundle(eventId, options = {}) {
     return null;
   }
 
+  // 3b. For LIVE matches, fetch fresh data from SofaScore API
+  const isMatchLive = finalMatchData.match?.status === 'live' || finalMatchData.match?.status === 'inprogress';
+  if (isMatchLive && liveManager?.fetchCompleteData) {
+    console.log(`⚡ Match ${eventId} is LIVE, fetching fresh data from SofaScore...`);
+    try {
+      const liveData = await liveManager.fetchCompleteData(parseInt(eventId));
+      if (liveData?.event) {
+        // Update score from live data
+        const event = liveData.event;
+        if (!finalMatchData.match) finalMatchData.match = {};
+        
+        // Update sets from live data
+        const liveSets = [];
+        if (event.homeScore?.period1 != null) liveSets.push({ home: event.homeScore.period1, away: event.awayScore?.period1 || 0 });
+        if (event.homeScore?.period2 != null) liveSets.push({ home: event.homeScore.period2, away: event.awayScore?.period2 || 0 });
+        if (event.homeScore?.period3 != null) liveSets.push({ home: event.homeScore.period3, away: event.awayScore?.period3 || 0 });
+        if (event.homeScore?.period4 != null) liveSets.push({ home: event.homeScore.period4, away: event.awayScore?.period4 || 0 });
+        if (event.homeScore?.period5 != null) liveSets.push({ home: event.homeScore.period5, away: event.awayScore?.period5 || 0 });
+        
+        if (liveSets.length > 0) {
+          finalMatchData.match.sets = liveSets;
+        }
+        
+        // Update current game score
+        finalMatchData.match.currentGame = {
+          home: event.homeScore?.current || 0,
+          away: event.awayScore?.current || 0,
+        };
+        
+        // Update point score
+        finalMatchData.match.point = {
+          home: event.homeScore?.point || null,
+          away: event.awayScore?.point || null,
+        };
+        
+        console.log(`✅ Live score updated for ${eventId}: Sets=${JSON.stringify(liveSets)}, Game=${event.homeScore?.current}-${event.awayScore?.current}`);
+      }
+    } catch (liveErr) {
+      console.warn(`⚠️ Live fetch failed for ${eventId}:`, liveErr.message);
+    }
+  }
+
   // 4. Enrich match with scores from match_scores table if sets are empty
   const setScores = matchScoresData?.data || [];
   if (

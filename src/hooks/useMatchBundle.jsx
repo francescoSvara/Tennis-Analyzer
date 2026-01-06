@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { io } from 'socket.io-client';
 import { apiUrl, WS_URL, IS_DEVELOPMENT } from '../config';
 
 // Stati del fetch
@@ -203,24 +204,23 @@ export function useMatchBundle(matchId, options = {}) {
   }, []);
 
   /**
-   * Disconnetti WebSocket
+   * Disconnetti Socket.io
    */
   const disconnectWebSocket = useCallback(() => {
     if (wsRef.current) {
-      wsRef.current.close();
+      wsRef.current.disconnect();
       wsRef.current = null;
     }
   }, []);
 
   /**
-   * Connessione WebSocket per live updates
+   * Connessione Socket.io per live updates
    * FILOSOFIA: WebSocket SOLO per match live, MAI per match finiti
    */
   const connectWebSocket = useCallback(() => {
     if (!matchIdRef.current) return;
 
-    // FILOSOFIA: NON connettersi a WS per match finiti
-    // Il bundle ha già tutti i dati necessari
+    // FILOSOFIA: NON connettersi per match finiti
     const matchStatus = bundle?.header?.match?.status;
     const isFinished =
       matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
@@ -230,60 +230,56 @@ export function useMatchBundle(matchId, options = {}) {
       return;
     }
 
-    // Costruisci URL WebSocket usando WS_URL da config
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-
-    // Usa WS_URL da config (già include fallback appropriato)
-    let wsHost;
+    // Costruisci URL Socket.io usando WS_URL da config
+    let socketUrl;
     try {
-      // WS_URL da config include già il default corretto per dev/prod
-      const wsBase = WS_URL;
-      if (wsBase && wsBase.startsWith('http')) {
-        wsHost = new URL(wsBase).host;
-      } else {
-        // Fallback: usa window.location.host (funziona in prod)
-        wsHost = window.location.host;
-      }
+      socketUrl = WS_URL || window.location.origin;
     } catch {
-      // Fallback sicuro
-      wsHost = window.location.host;
+      socketUrl = window.location.origin;
     }
 
-    const wsUrl = `${wsProtocol}//${wsHost}/ws/match/${matchIdRef.current}`;
-
     try {
-      wsRef.current = new WebSocket(wsUrl);
+      // Connetti con Socket.io
+      wsRef.current = io(socketUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 3000,
+      });
 
-      wsRef.current.onopen = () => {
-        console.log(`[MatchBundle] WS connected for match ${matchIdRef.current}`);
+      wsRef.current.on('connect', () => {
+        console.log(`[MatchBundle] Socket.io connected for match ${matchIdRef.current}`);
+        // Subscribe al match
+        wsRef.current.emit('subscribe', matchIdRef.current);
         setIsLive(true);
         setState(BundleState.LIVE);
-      };
+      });
 
-      wsRef.current.onmessage = (event) => {
-        try {
-          const patch = JSON.parse(event.data);
-          applyPatch(patch);
-        } catch (err) {
-          console.warn('[MatchBundle] Failed to parse WS message:', err);
+      wsRef.current.on('subscribed', (data) => {
+        console.log('[MatchBundle] Subscribed:', data);
+      });
+
+      wsRef.current.on('data', (data) => {
+        // Riceve dati completi o patch dal server
+        if (data && typeof data === 'object') {
+          applyPatch(data);
         }
-      };
+      });
 
-      wsRef.current.onclose = () => {
-        console.log('[MatchBundle] WS disconnected');
+      wsRef.current.on('disconnect', () => {
+        console.log('[MatchBundle] Socket.io disconnected');
         setIsLive(false);
 
         // Fallback a polling SOLO se match non finito
         if (matchIdRef.current) {
           startPolling();
         }
-      };
+      });
 
-      wsRef.current.onerror = (err) => {
-        console.warn('[MatchBundle] WS error:', err);
-      };
+      wsRef.current.on('error', (err) => {
+        console.warn('[MatchBundle] Socket.io error:', err);
+      });
     } catch (err) {
-      console.warn('[MatchBundle] WS connection failed:', err);
+      console.warn('[MatchBundle] Socket.io connection failed:', err);
       // Fallback a polling SOLO se match non finito
       startPolling();
     }

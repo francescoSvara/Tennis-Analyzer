@@ -61,12 +61,7 @@ async function addTracking(sourceEventId, options = {}) {
     match_status: options.matchStatus || 'inprogress',
     current_score: options.currentScore || null,
     next_poll_at: now,
-    // FILOSOFIA_TEMPORAL: event_time for lineage (INVARIANT_event_time_required)
-    event_time: options.eventTime || now,
-    // FILOSOFIA_TEMPORAL: created_at = when record was created
     created_at: now,
-    // FILOSOFIA_TEMPORAL: ingestion_time = when our system received the data
-    ingestion_time: now,
   };
 
   const { data, error } = await supabase

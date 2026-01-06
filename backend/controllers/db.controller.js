@@ -292,7 +292,11 @@ exports.getMatchById = async (req, res) => {
     return res.status(503).json({ error: 'Database not configured' });
   }
   try {
-    const match = await matchRepository.getMatchById(parseInt(req.params.id));
+    const matchId = parseInt(req.params.id);
+    if (isNaN(matchId)) {
+      return res.status(400).json({ error: 'Invalid match ID' });
+    }
+    const match = await matchRepository.getMatchById(matchId);
     if (!match) {
       return res.status(404).json({ error: 'Match not found' });
     }
@@ -311,7 +315,11 @@ exports.getPointByPoint = async (req, res) => {
     return res.status(503).json({ error: 'Database not configured' });
   }
   try {
-    const pbp = await matchRepository.getPointByPoint(parseInt(req.params.id));
+    const matchId = parseInt(req.params.id);
+    if (isNaN(matchId)) {
+      return res.status(400).json({ error: 'Invalid match ID' });
+    }
+    const pbp = await matchRepository.getPointByPoint(matchId);
     res.json({ pointByPoint: pbp });
   } catch (err) {
     console.error('Error fetching point-by-point:', err.message);
@@ -328,7 +336,11 @@ exports.getStatistics = async (req, res) => {
   }
   try {
     const { period = 'ALL' } = req.query;
-    const stats = await matchRepository.getStatistics(parseInt(req.params.id), period);
+    const matchId = parseInt(req.params.id);
+    if (isNaN(matchId)) {
+      return res.status(400).json({ error: 'Invalid match ID' });
+    }
+    const stats = await matchRepository.getStatistics(matchId, period);
     res.json(stats);
   } catch (err) {
     console.error('Error fetching statistics:', err.message);

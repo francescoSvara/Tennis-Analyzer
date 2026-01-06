@@ -780,9 +780,36 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
     const gameStatsFromScore = calculateGameStatsFromScore(score);
     const totalGames = gameStatsFromScore.home.gamesWon + gameStatsFromScore.away.gamesWon;
     
-    // Estimate service games: roughly half of games played each (alternating serve)
-    const homeServiceGames = Math.ceil(totalGames / 2);
-    const awayServiceGames = Math.floor(totalGames / 2);
+    // Use existing serviceGamesPlayed if available, otherwise estimate from total games
+    let homeServiceGames = statisticsData.serve?.home?.serviceGamesPlayed || 0;
+    let awayServiceGames = statisticsData.serve?.away?.serviceGamesPlayed || 0;
+    
+    // If not available in data, try to estimate from total games (alternating serve)
+    if (homeServiceGames === 0 && awayServiceGames === 0 && totalGames > 0) {
+      homeServiceGames = Math.ceil(totalGames / 2);
+      awayServiceGames = Math.floor(totalGames / 2);
+    }
+    
+    // Final fallback: estimate from first serve totals (avg ~5 points per service game)
+    if (homeServiceGames === 0 && awayServiceGames === 0) {
+      // Try different field names for first serve total
+      const homeFirstServeTotal = statisticsData.serve?.home?.firstServeTotal 
+        || statisticsData.serve?.home?.firstServeIn 
+        || statisticsData.serve?.home?.servicePointsWon 
+        || 0;
+      const awayFirstServeTotal = statisticsData.serve?.away?.firstServeTotal 
+        || statisticsData.serve?.away?.firstServeIn 
+        || statisticsData.serve?.away?.servicePointsWon 
+        || 0;
+      
+      // Avg ~5-6 service points per game
+      if (homeFirstServeTotal > 0) {
+        homeServiceGames = Math.max(1, Math.round(homeFirstServeTotal / 5));
+      }
+      if (awayFirstServeTotal > 0) {
+        awayServiceGames = Math.max(1, Math.round(awayFirstServeTotal / 5));
+      }
+    }
     
     // Convert snapshot format to standard home/away format with enriched data
     const homeStats = {

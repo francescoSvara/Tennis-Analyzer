@@ -22,6 +22,8 @@ import {
   Clock,
   TrendUp,
   CaretRight,
+  CaretLeft,
+  CaretDown,
   ArrowClockwise,
   Broadcast,
   CheckCircle,
@@ -87,18 +89,57 @@ function StrategyPill({ status, name }) {
 
 // Single Match Row (for live matches list)
 function MatchRow({ match, onSelect, onToggleWatchlist, isWatched }) {
-  const mainStrategy =
-    match.strategies?.find((s) => s.status === 'READY') ||
-    match.strategies?.find((s) => s.status === 'WATCH');
+  // Get status label
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'live': return 'LIVE';
+      case 'finished': return 'Finale';
+      case 'upcoming': return 'Programma';
+      default: return status;
+    }
+  };
 
   // Format player name with rank
   const formatPlayer = (name, rank) => {
-    if (rank) return `${name} (${rank})`;
+    if (!name) return '—';
+    // Get surname + initial: "Nakashima B." format
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      const surname = parts[parts.length - 1];
+      const initials = parts.slice(0, -1).map(p => p[0] + '.').join(' ');
+      return `${surname} ${initials}`;
+    }
     return name;
   };
 
+  // Parse sets data from backend or fallback from score string
+  const getSetsData = () => {
+    // For live matches with liveScore, show current set scores
+    if (match.liveScore && match.status === 'live') {
+      // liveScore has { home: X, away: Y } - current sets won
+      // We show this as the overall score for live
+      return [{ home: match.liveScore.home || 0, away: match.liveScore.away || 0 }];
+    }
+    // First try backend setsData
+    if (match.setsData && match.setsData.length > 0) {
+      return match.setsData;
+    }
+    // Fallback: parse from score string like "6-4, 7-5, 6-3"
+    if (match.score) {
+      const sets = match.score.split(',').map(s => s.trim());
+      return sets.map(setStr => {
+        const [home, away] = setStr.split('-').map(n => parseInt(n.trim(), 10));
+        return { home: home || 0, away: away || 0 };
+      }).filter(s => !isNaN(s.home) && !isNaN(s.away));
+    }
+    return [];
+  };
+
+  const setsData = getSetsData();
+
   return (
     <MotionRow className="match-row" onClick={() => onSelect(match)}>
+      {/* Watchlist star */}
       <button
         className={`watchlist-star ${isWatched ? 'active' : ''}`}
         onClick={(e) => {
@@ -110,29 +151,39 @@ function MatchRow({ match, onSelect, onToggleWatchlist, isWatched }) {
         {isWatched ? <Star size={16} weight="fill" /> : <Star size={16} />}
       </button>
 
-      <div className="match-info">
-        <div className="match-players">
-          <span className="player home">{formatPlayer(match.homePlayer, match.homeRank)}</span>
-          <span className="vs">vs</span>
-          <span className="player away">{formatPlayer(match.awayPlayer, match.awayRank)}</span>
-        </div>
-        <div className="match-meta">
-          <span className="tournament">
-            {match.tournament}
-            {match.surface ? ` · ${match.surface}` : ''}
-          </span>
-          <StatusBadge status={match.status} />
-        </div>
+      {/* Match status */}
+      <div className={`match-status-cell ${match.status}`}>
+        {getStatusLabel(match.status)}
       </div>
 
-      <div className="match-score">{match.score || '—'}</div>
-
-      <div className="match-edge">
-        <EdgeBadge edge={match.edge} />
-      </div>
-
-      <div className="match-strategy">
-        {mainStrategy && <StrategyPill status={mainStrategy.status} name={mainStrategy.name} />}
+      {/* Players and scores table */}
+      <div className="match-players-scores">
+        <div className="player-row home">
+          <span className="player-name">{formatPlayer(match.homePlayer, match.homeRank)}</span>
+          <div className="player-sets">
+            {setsData.map((set, idx) => (
+              <span 
+                key={idx} 
+                className={`set-score ${set.home > set.away ? 'winner' : ''}`}
+              >
+                {set.home}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="player-row away">
+          <span className="player-name">{formatPlayer(match.awayPlayer, match.awayRank)}</span>
+          <div className="player-sets">
+            {setsData.map((set, idx) => (
+              <span 
+                key={idx} 
+                className={`set-score ${set.away > set.home ? 'winner' : ''}`}
+              >
+                {set.away}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
       <CaretRight size={16} className="row-arrow" />
@@ -173,15 +224,7 @@ function AlertItem({ alert, onDismiss }) {
 }
 
 // Search & Filter bar
-function SearchFilterBar({
-  searchTerm,
-  onSearchChange,
-  sortBy,
-  onSortChange,
-  filterStatus,
-  onFilterChange,
-  isSearching,
-}) {
+function SearchFilterBar({ searchTerm, onSearchChange, isSearching }) {
   return (
     <div className="search-filter-bar">
       <div className="search-input-wrapper">
@@ -202,29 +245,6 @@ function SearchFilterBar({
             <XCircle size={16} />
           </button>
         )}
-      </div>
-
-      <div className="filter-group">
-        <select
-          className="filter-select"
-          value={filterStatus}
-          onChange={(e) => onFilterChange(e.target.value)}
-        >
-          <option value="all">All Status</option>
-          <option value="live">Live Only</option>
-          <option value="upcoming">Upcoming</option>
-          <option value="finished">Finished</option>
-        </select>
-
-        <select
-          className="filter-select sort"
-          value={sortBy}
-          onChange={(e) => onSortChange(e.target.value)}
-        >
-          <option value="edge">Sort by Edge</option>
-          <option value="time">Sort by Time</option>
-          <option value="tournament">Sort by Tournament</option>
-        </select>
       </div>
     </div>
   );
@@ -356,13 +376,14 @@ export default function HomePage({
   const [selectedSport, setSelectedSport] = useState('tennis');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [sortBy, setSortBy] = useState('edge');
-  const [filterStatus, setFilterStatus] = useState('all');
   const [watchlist, setWatchlist] = useState(() => {
     const saved = localStorage.getItem('matchWatchlist');
     return saved ? JSON.parse(saved) : [];
   });
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showMonitoring, setShowMonitoring] = useState(false);
+  const [expandedTournaments, setExpandedTournaments] = useState(new Set());
 
   // Real matches from database
   const [matches, setMatches] = useState([]);
@@ -378,8 +399,9 @@ export default function HomePage({
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch matches from backend - with search parameter
-  const fetchMatches = useCallback(async (search = '') => {
+  // Fetch matches from backend - SINGLE QUERY (FILOSOFIA)
+  // Backend fa tutto il merge con live data, frontend riceve dati pronti
+  const fetchMatches = useCallback(async (search = '', date = null) => {
     if (search) {
       setIsSearching(true);
     } else {
@@ -388,26 +410,36 @@ export default function HomePage({
     setMatchesError(null);
 
     try {
-      // Build URL with search parameter if provided
+      // Build URL with search and date parameters
       const params = new URLSearchParams();
-      params.append('limit', search ? '50' : '20'); // More results when searching
+      params.append('limit', '100');
       if (search.trim()) {
         params.append('search', search.trim());
       }
+      
+      // Add date filter if provided
+      if (date) {
+        const dateStr = date.toISOString().split('T')[0];
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const nextDayStr = nextDay.toISOString().split('T')[0];
+        params.append('dateFrom', dateStr);
+        params.append('dateTo', nextDayStr);
+      }
 
+      // SINGLE FETCH - Backend does all the work (merge with live, status correction)
       const response = await fetch(apiUrl(`/api/matches/db?${params.toString()}`));
       if (!response.ok) throw new Error('Failed to fetch matches');
       const data = await response.json();
 
-      // Data is already in the right format from backend
-      const transformed = (data.matches || []).map((m) => ({
+      // Data is ready from backend - just add defaults
+      const matches = (data.matches || []).map((m) => ({
         ...m,
-        // Ensure all expected fields exist
         edge: m.edge || 0,
         strategies: m.strategies || [],
       }));
 
-      setMatches(transformed);
+      setMatches(matches);
     } catch (err) {
       console.error('Error fetching matches:', err);
       setMatchesError(err.message);
@@ -417,15 +449,28 @@ export default function HomePage({
     }
   }, []);
 
-  // Initial load - fetch recent matches
+  // Fetch matches when selectedDate changes
   useEffect(() => {
-    fetchMatches('');
-  }, [fetchMatches]);
+    fetchMatches(debouncedSearch, selectedDate);
+  }, [fetchMatches, selectedDate, debouncedSearch]);
 
-  // Fetch matches when debounced search changes
+  // Auto-refresh live matches every 15 seconds
   useEffect(() => {
-    fetchMatches(debouncedSearch);
-  }, [debouncedSearch, fetchMatches]);
+    // Check if there are any live matches
+    const hasLiveMatches = matches.some((m) => m.status === 'live');
+    
+    // Only poll if viewing today (live matches) or if we have live matches
+    const isToday = selectedDate.toDateString() === new Date().toDateString();
+    
+    if (!isToday && !hasLiveMatches) return;
+
+    const pollInterval = setInterval(() => {
+      console.log('[HomePage] Auto-refreshing live matches...');
+      fetchMatches(debouncedSearch, selectedDate);
+    }, 15000); // 15 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [fetchMatches, debouncedSearch, selectedDate, matches]);
 
   // Demo alerts (in production, would come from WebSocket/backend)
   const [alerts, setAlerts] = useState([
@@ -467,35 +512,63 @@ export default function HomePage({
     setAlerts((prev) => prev.filter((a) => a.id !== alertId));
   }, []);
 
-  // Filter and sort matches (search is done by backend, only do local status filtering and sorting)
+  // Filter and sort matches (date filter is done by backend). Default: sort by edge
   const filteredMatches = useMemo(() => {
     let result = [...matches];
-
-    // Note: Search filtering is now done by the backend API
-    // We only do local filtering for status here
-
-    // Filter by status (local filter since backend doesn't support status filter yet)
+    
+    // Filter by status
     if (filterStatus !== 'all') {
       result = result.filter((m) => m.status === filterStatus);
     }
-
-    // Sort
-    switch (sortBy) {
-      case 'edge':
-        result.sort((a, b) => (b.edge || 0) - (a.edge || 0));
-        break;
-      case 'time': {
-        const statusOrder = { live: 0, upcoming: 1, finished: 2 };
-        result.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-        break;
-      }
-      case 'tournament':
-        result.sort((a, b) => (a.tournament || '').localeCompare(b.tournament || ''));
-        break;
-    }
-
+    
+    // Sort by edge
+    result.sort((a, b) => (b.edge || 0) - (a.edge || 0));
     return result;
-  }, [matches, searchTerm, filterStatus, sortBy]);
+  }, [matches, filterStatus]);
+
+  // Group matches by tournament
+  const matchesByTournament = useMemo(() => {
+    const groups = {};
+    filteredMatches.forEach((match) => {
+      // Build tournament key: "CATEGORY: Name, Surface"
+      const category = match.tournamentCategory || 'ATP';
+      const name = match.tournamentName || match.tournament || 'Unknown';
+      const surface = match.surface || 'Unknown';
+      
+      // Build the label
+      const tournamentLabel = `${category}: ${name}, ${surface.toLowerCase()}`;
+      
+      if (!groups[tournamentLabel]) {
+        groups[tournamentLabel] = {
+          label: tournamentLabel,
+          category,
+          name,
+          surface,
+          matches: [],
+        };
+      }
+      groups[tournamentLabel].matches.push(match);
+    });
+    
+    // Convert to array and sort by category then name
+    return Object.values(groups).sort((a, b) => {
+      if (a.category !== b.category) return a.category.localeCompare(b.category);
+      return a.name.localeCompare(b.name);
+    });
+  }, [filteredMatches]);
+
+  // Toggle tournament expansion
+  const toggleTournament = useCallback((tournamentLabel) => {
+    setExpandedTournaments((prev) => {
+      const next = new Set(prev);
+      if (next.has(tournamentLabel)) {
+        next.delete(tournamentLabel);
+      } else {
+        next.add(tournamentLabel);
+      }
+      return next;
+    });
+  }, []);
 
   // Watchlist matches
   const watchlistMatches = useMemo(() => {
@@ -532,10 +605,6 @@ export default function HomePage({
           <SearchFilterBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            filterStatus={filterStatus}
-            onFilterChange={setFilterStatus}
             isSearching={isSearching}
           />
 
@@ -563,20 +632,66 @@ export default function HomePage({
 
           {/* Live Matches Section */}
           <section className="home-section live-section">
-            <h2 className="section-title">
-              <TennisBall size={20} weight="duotone" />
-              {filterStatus === 'all'
-                ? 'All Matches'
-                : `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Matches`}
-              <span className="section-count">
-                {matchesLoading ? '...' : filteredMatches.length}
-              </span>
-              {sortBy === 'edge' && (
-                <span className="sort-indicator">
-                  <TrendUp size={14} /> Sorted by Edge
+            <div className="filter-bar">
+              <div className="filter-tabs">
+                <button
+                  className={`filter-tab ${filterStatus === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('all')}
+                >
+                  Tutte
+                </button>
+                <button
+                  className={`filter-tab ${filterStatus === 'live' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('live')}
+                >
+                  Live
+                </button>
+                <button
+                  className={`filter-tab ${filterStatus === 'finished' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('finished')}
+                >
+                  Conclusi
+                </button>
+                <button
+                  className={`filter-tab ${filterStatus === 'upcoming' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('upcoming')}
+                >
+                  Programma
+                </button>
+              </div>
+              
+              <div className="date-picker">
+                <button
+                  className="date-arrow"
+                  onClick={() => setSelectedDate(d => {
+                    const prev = new Date(d);
+                    prev.setDate(prev.getDate() - 1);
+                    return prev;
+                  })}
+                  title="Giorno precedente"
+                >
+                  <CaretLeft size={18} weight="bold" />
+                </button>
+                <span className="date-display">
+                  {selectedDate.toLocaleDateString('it-IT', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit'
+                  }).replace(/\//g, '/')}
                 </span>
-              )}
-            </h2>
+                <button
+                  className="date-arrow"
+                  onClick={() => setSelectedDate(d => {
+                    const next = new Date(d);
+                    next.setDate(next.getDate() + 1);
+                    return next;
+                  })}
+                  title="Giorno successivo"
+                >
+                  <CaretRight size={18} weight="bold" />
+                </button>
+              </div>
+            </div>
 
             {matchesLoading ? (
               <div className="empty-state">
@@ -591,7 +706,7 @@ export default function HomePage({
                   Retry
                 </MotionButton>
               </div>
-            ) : filteredMatches.length === 0 ? (
+            ) : matchesByTournament.length === 0 ? (
               <div className="empty-state">
                 <TennisBall size={48} weight="duotone" />
                 <p>No matches found</p>
@@ -602,16 +717,47 @@ export default function HomePage({
                 )}
               </div>
             ) : (
-              <div className="matches-list">
-                {filteredMatches.map((match) => (
-                  <MatchRow
-                    key={match.id}
-                    match={match}
-                    onSelect={onMatchSelect}
-                    onToggleWatchlist={toggleWatchlist}
-                    isWatched={watchlist.includes(match.id)}
-                  />
-                ))}
+              <div className="tournaments-list">
+                {matchesByTournament.map((tournament) => {
+                  const isExpanded = expandedTournaments.has(tournament.label);
+                  return (
+                    <div key={tournament.label} className="tournament-group">
+                      <button
+                        className={`tournament-header ${isExpanded ? 'expanded' : ''}`}
+                        onClick={() => toggleTournament(tournament.label)}
+                      >
+                        <CaretDown
+                          size={16}
+                          weight="bold"
+                          className={`tournament-caret ${isExpanded ? 'expanded' : ''}`}
+                        />
+                        <span className="tournament-label">{tournament.label}</span>
+                        <span className="tournament-count">{tournament.matches.length}</span>
+                      </button>
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            className="tournament-matches"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {tournament.matches.map((match) => (
+                              <MatchRow
+                                key={match.id}
+                                match={match}
+                                onSelect={onMatchSelect}
+                                onToggleWatchlist={toggleWatchlist}
+                                isWatched={watchlist.includes(match.id)}
+                              />
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </section>

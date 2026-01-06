@@ -253,6 +253,8 @@ exports.getTournaments = async (req, res) => {
 
 /**
  * GET /api/matches/db - Lista match dal database
+ * 
+ * FILOSOFIA: Single Query - SOLO DB, zero chiamate esterne
  */
 exports.getFromDb = async (req, res) => {
   if (!supabaseClient?.supabase) {
@@ -260,60 +262,82 @@ exports.getFromDb = async (req, res) => {
   }
 
   try {
-    const { limit = 20, search, surface, series, dateFrom, dateTo } = req.query;
+    const { limit = 20, search, surface, dateFrom, dateTo } = req.query;
     const limitNum = parseInt(limit);
 
+    // SOLO DB - nessuna chiamata esterna
     let query = supabaseClient.supabase
-      .from('v_matches_with_players')
+      .from('matches')
       .select(
         `
-        id, player1_name, player2_name, player1_rank, player2_rank,
-        set1_p1, set1_p2, set2_p1, set2_p2, set3_p1, set3_p2,
-        surface, round, tournament_name, tournament_category,
-        start_timestamp, best_of, winner_code, status, data_quality
+        id, status, surface, round, best_of, winner_code, start_timestamp, score,
+        set1_p1, set1_p2, set2_p1, set2_p2, set3_p1, set3_p2, set4_p1, set4_p2, set5_p1, set5_p2,
+        player1:player1_id(id, name, full_name, country_code, current_ranking),
+        player2:player2_id(id, name, full_name, country_code, current_ranking),
+        tournament:tournament_id(id, name, category)
       `
       )
-      .not('player1_name', 'is', null)
-      .not('player2_name', 'is', null);
+      .not('player1_id', 'is', null)
+      .not('player2_id', 'is', null);
 
-    if (search?.trim()) {
-      const term = search.trim().toLowerCase();
-      query = query.or(`player1_name.ilike.%${term}%,player2_name.ilike.%${term}%`);
-    }
     if (surface) query = query.ilike('surface', `%${surface}%`);
-    if (series)
-      query = query.or(`tournament_name.ilike.%${series}%,tournament_category.ilike.%${series}%`);
     if (dateFrom) query = query.gte('start_timestamp', new Date(dateFrom).getTime() / 1000);
     if (dateTo) query = query.lte('start_timestamp', new Date(dateTo).getTime() / 1000);
 
-    query = query.order('start_timestamp', { ascending: false }).limit(limitNum);
+    query = query.order('start_timestamp', { ascending: false }).limit(search?.trim() ? 500 : limitNum);
 
     const { data, error } = await query;
     if (error) throw error;
 
-    const matches = (data || []).map((m) => {
+    // Transform DB data
+    let matches = (data || []).map((m) => {
       const sets = [];
       if (m.set1_p1 != null) sets.push(`${m.set1_p1}-${m.set1_p2}`);
       if (m.set2_p1 != null) sets.push(`${m.set2_p1}-${m.set2_p2}`);
       if (m.set3_p1 != null) sets.push(`${m.set3_p1}-${m.set3_p2}`);
+      if (m.set4_p1 != null) sets.push(`${m.set4_p1}-${m.set4_p2}`);
+      if (m.set5_p1 != null) sets.push(`${m.set5_p1}-${m.set5_p2}`);
+
+      const setsData = [];
+      if (m.set1_p1 != null) setsData.push({ home: m.set1_p1, away: m.set1_p2 });
+      if (m.set2_p1 != null) setsData.push({ home: m.set2_p1, away: m.set2_p2 });
+      if (m.set3_p1 != null) setsData.push({ home: m.set3_p1, away: m.set3_p2 });
+      if (m.set4_p1 != null) setsData.push({ home: m.set4_p1, away: m.set4_p2 });
+      if (m.set5_p1 != null) setsData.push({ home: m.set5_p1, away: m.set5_p2 });
+
+      const player1Name = m.player1?.name || m.player1?.full_name || 'Player 1';
+      const player2Name = m.player2?.name || m.player2?.full_name || 'Player 2';
 
       return {
         id: m.id,
         eventId: m.id,
-        homePlayer: m.player1_name,
-        awayPlayer: m.player2_name,
-        homeRank: m.player1_rank,
-        awayRank: m.player2_rank,
-        tournament: m.tournament_name || m.tournament_category,
+        sofascoreId: m.id,
+        homePlayer: player1Name,
+        awayPlayer: player2Name,
+        homeRank: m.player1?.current_ranking,
+        awayRank: m.player2?.current_ranking,
+        tournament: m.tournament?.name || m.tournament?.category,
+        tournamentName: m.tournament?.name || '',
+        tournamentCategory: m.tournament?.category || '',
         surface: m.surface || 'Unknown',
         status: m.status || 'finished',
         score: sets.join(', ') || null,
+        setsData: setsData,
         date: m.start_timestamp ? new Date(m.start_timestamp * 1000).toISOString() : null,
         winnerCode: m.winner_code,
-        source: 'sofascore',
-        dataQuality: m.data_quality || 50,
+        source: 'database',
+        dataQuality: 50,
       };
     });
+
+    // Apply search filter
+    if (search?.trim()) {
+      const term = search.trim().toLowerCase();
+      matches = matches.filter(m => 
+        m.homePlayer?.toLowerCase().includes(term) || 
+        m.awayPlayer?.toLowerCase().includes(term)
+      ).slice(0, limitNum);
+    }
 
     res.json({ matches, count: matches.length, hasSearch: !!search?.trim() });
   } catch (err) {

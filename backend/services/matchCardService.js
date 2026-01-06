@@ -161,7 +161,10 @@ class MatchCardService {
       momentum_json: card.momentum || [],
       odds_json: card.odds,
       data_sources_json: (card.dataSources || []).map((s) => ({ source_type: s })),
-      data_quality_int: card.dataQuality || 0,
+      // dataQuality può essere un oggetto {score, completeness, freshness} o un numero
+      data_quality_int: typeof card.dataQuality === 'object' 
+        ? (card.dataQuality?.score || 0) 
+        : (card.dataQuality || 0),
       last_updated_at: new Date().toISOString(),
     };
 
