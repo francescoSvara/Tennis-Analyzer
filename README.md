@@ -184,6 +184,11 @@ Le feature `breakProbability`, `serveDominance` e `returnDominance` usano un **m
 │   │   ├── featureEngine.js   # Orchestrator (~300 righe) v1.1.0
 │   │   ├── math.js            # clamp01, clampTo0_100
 │   │   ├── pressureCalculator.js
+│   │   ├── pbp/               # ⭐ PBP CANONICAL ENTRYPOINT (v2.0.0)
+│   │   │   ├── index.cjs      # extractPbpFromSofaScoreHtml()
+│   │   │   ├── validatePbp.cjs # Tennis invariant validation
+│   │   │   ├── qualityFlags.cjs # Quality scoring 0-100
+│   │   │   └── momentumMerger.cjs # API/SVG value merge
 │   │   └── features/          # ⭐ MODULAR FEATURES (10 files)
 │   │       ├── index.js       # Central re-export
 │   │       ├── volatility.js  # Multi-signal volatility
@@ -284,6 +289,120 @@ Le feature `breakProbability`, `serveDominance` e `returnDominance` usano un **m
 ---
 
 ## 📝 Changelog
+
+### v3.2.3 (30 Dic 2025) - Philosophy Compliance Batch ✅
+
+**15 fix da TODO_LIST - Pass Rate: 92% → 93%**
+
+#### Errori Critici Risolti (3)
+
+| ID | Filosofia | Fix |
+|----|-----------|-----|
+| ERR-007 | FILOSOFIA_TEMPORAL | `liveTrackingRepository.js`: aggiunti campi `event_time`, `created_at` in addTracking() |
+| ERR-008 | FILOSOFIA_CALCOLI | `featureEngine.js`: aggiunto `safeRound()` con `Number.isNaN` guards |
+| ERR-010 | FILOSOFIA_PBP_EXTRACTION | `validatePbp.cjs` con `validateServiceAlternation()` |
+
+#### Warning Risolti (8)
+
+| ID | Filosofia | Fix |
+|----|-----------|-----|
+| WARN-004 | FILOSOFIA_PBP_EXTRACTION | `detectServerFromEventData()` in sofascoreScraper.js |
+| WARN-010 | FILOSOFIA_LINEAGE_VERSIONING | `reproducibility.test.js` creato |
+| WARN-012/13 | FILOSOFIA_REGISTRY_CANON | Migration stubs creati con campi canonici |
+| WARN-014 | FILOSOFIA_REGISTRY_CANON | ID generator deterministico (counter-based) |
+| WARN-017 | FILOSOFIA_FRONTEND_UI | `Home.jsx` esportato in `index.js` |
+| WARN-023 | FILOSOFIA_FRONTEND_UI | MatchCard.jsx N/A → "Data mancante" |
+| WARN-027 | FILOSOFIA_FRONTEND_UI | MonitoringDashboard.jsx N/A → fallback significativi |
+
+#### File Creati (4)
+
+- `backend/migrations/create-new-schema.sql` - Schema stub con campi canonici
+- `backend/migrations/add-snapshot-queue-tables.sql` - Snapshot tables stub
+- `backend/migrations/add-live-tracking-table.sql` - Live tracking stub
+- `backend/__tests__/reproducibility.test.js` - Test riproducibilità features
+
+#### File Documentati (4)
+
+- `backend/services/bundleService.js` - @module @memberof JSDoc
+- `backend/services/matchEnrichmentService.js` - @module @memberof JSDoc
+- `backend/utils/bundleHelpers.js` - @module @memberof JSDoc
+- `backend/utils/statsTabBuilder.js` - @module @memberof JSDoc
+
+---
+
+### v3.2.2 (30 Dic 2025) - Point Type Detection ✅
+
+**Break Points, Set Points, Match Points detection from tennis rules + Ace/DF aggregated stats**
+
+#### Backend (`bundleHelpers.js`)
+
+- `isBreakPointScore(score, server)` - Calculates break point from tennis rules (receiver at 40/AD)
+- `getBreakPointHolder(score, server)` - Returns who has the break point opportunity
+- `isSetPointScore(score, gameScore, server)` - Detects set point situations
+- `isMatchPointScore(score, gameScore, setScore, server)` - Detects match point situations
+- `isTiebreakGame(gameScore)` - Tiebreak detection (6-6)
+- `normalizePointsForBundle()` - Now tracks game/set context for accurate SP/MP calculation
+
+#### Frontend (`PointByPointTab.jsx`)
+
+- **Set Point badges** - Shows player name who has set point
+- **Match Point badges** - Shows player name who has match point  
+- **Ace/DF aggregated fallback** - When point-level data unavailable, uses stats from StatsTab
+- **Informative message** - When filtering Ace/DF with only aggregated data, shows total count with explanation
+
+#### Test Results
+
+- 20/20 unit tests passing
+- Integration test: 38 points → 1 BP, 4 SP, 1 MP correctly detected (Norrie vs Vacherot)
+- Aces: 6 total (2+4), Double Faults: 4 total (2+2) from aggregated stats
+
+---
+
+### v3.2.1 (30 Dic 2025) - PBP Pipeline Hardening ✅
+
+**Canonical PBP extraction entrypoint with validation, quality scoring, and anti-regression tests**
+
+#### Canonical Entrypoint (`backend/utils/pbp/index.cjs`)
+
+- `extractPbpFromSofaScoreHtml(html)` → `{ok, data, validation, quality, meta}`
+- `EXTRACTOR_VERSION = '2.0.0'` for lineage tracking
+- Re-exports: `validatePbp`, `computeQualityFlags`, `extractPbp`, `formatPointsForDb`
+
+#### Validation Module (`validatePbp.cjs`)
+
+- `validateGameScoreProgression()` - No NaN, valid tennis scores (0,15,30,40,A)
+- `validateServiceAlternation()` - Server alternates each game (except tiebreaks)
+- `validateBreakConsistency()` - Break detection matches game winners
+- `validatePointWinners()` - Each point has a winner
+
+#### Quality Scoring (`qualityFlags.cjs`)
+
+- `computeQualityFlags(pbpData)` → `{missingServerIconCount, unknownPointWinnerCount, qualityScore0to100, tags[]}`
+- Tags: `missing_server_icons`, `unknown_winners`, `low_quality`, `high_quality`
+- Score 0-100 based on data completeness
+
+#### SVG Momentum Standardization (`momentumMerger.cjs`)
+
+- `mergeMomentum({value_api, value_svg})` → `{value, value_api, value_svg, source}`
+- `mergeMomentumArrays(apiArray, svgArray)` - Batch merge by set/game
+- Follows SPEC_VALUE_SVG: prefer `value_svg` when available
+
+#### Legacy Quarantine
+
+- `Tennis-Scraper-Local/backend/utils/pbpExtractor.js` - Added `DISALLOW_LEGACY_PBP` guard
+- Runtime throws if legacy extractor used without explicit opt-in
+
+#### Consumer Updates
+
+- `matchEnrichmentService.js` - Uses canonical entrypoint with quality logging
+- `insert-pbp-correct.js` - Uses `extractPbpFromSofaScoreHtml()` with validation
+
+#### Anti-Regression Tests
+
+- `pbpExtractorV2.test.cjs` - Added invariant tests: NaN check, service alternation, winner coverage ≥90%
+- `pbpAntiRegression.cjs` - Updated imports to canonical entrypoint
+
+---
 
 ### v3.2.0 (30 Dic 2025) - Markov Feature Engine ✅
 

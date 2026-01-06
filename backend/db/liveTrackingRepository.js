@@ -48,6 +48,7 @@ function checkSupabase() {
 async function addTracking(sourceEventId, options = {}) {
   if (!checkSupabase()) return null;
 
+  const now = new Date().toISOString();
   const trackingData = {
     source_event_id: String(sourceEventId),
     source_type: options.sourceType || 'sofascore',
@@ -59,9 +60,13 @@ async function addTracking(sourceEventId, options = {}) {
     tournament_name: options.tournamentName || null,
     match_status: options.matchStatus || 'inprogress',
     current_score: options.currentScore || null,
-    next_poll_at: new Date().toISOString(),
+    next_poll_at: now,
+    // FILOSOFIA_TEMPORAL: event_time for lineage (INVARIANT_event_time_required)
+    event_time: options.eventTime || now,
+    // FILOSOFIA_TEMPORAL: created_at = when record was created
+    created_at: now,
     // FILOSOFIA_TEMPORAL: ingestion_time = when our system received the data
-    ingestion_time: new Date().toISOString(),
+    ingestion_time: now,
   };
 
   const { data, error } = await supabase

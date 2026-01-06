@@ -475,11 +475,7 @@ export function StrategiesTab({ data, header }) {
           <Target size={24} weight="duotone" />
           Strategie Live
         </h2>
-        <div className="tab-controls">
-          <span className="control-label">Auto-Refresh: ON</span>
-          <span className="control-label">Anti-spam: ON</span>
-          <span className="control-label">Cooldown: 30s</span>
-        </div>
+
       </div>
 
       {/* Features Summary */}

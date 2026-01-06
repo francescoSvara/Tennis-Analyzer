@@ -300,18 +300,26 @@ function computeFeatures(matchData, options = {}) {
   // hasRealData: true se abbiamo dati live/statistics/score, false solo se tutto è stimato
   const hasRealData = hasPowerRankings || hasStatistics || hasScore || hasOdds || hasRankings;
 
+  // =====================================================================
+  // NaN GUARDS (FILOSOFIA_CALCOLI: NEVER_RETURN_NaN)
+  // =====================================================================
+  const safeRound = (val, fallback = 50) => {
+    const rounded = Math.round(val);
+    return Number.isNaN(rounded) ? fallback : rounded;
+  };
+
   return {
-    volatility: Math.round(volatility),
+    volatility: safeRound(volatility, 50),
     volatilitySource,
-    pressure: Math.round(pressure),
+    pressure: safeRound(pressure, 50),
     pressureSource,
-    dominance: Math.round(dominance),
+    dominance: safeRound(dominance, 50),
     dominanceSource,
-    serveDominance: Math.round(serveDominance),
+    serveDominance: safeRound(serveDominance, 50),
     serveDominanceSource,
-    returnDominance: Math.round(returnDominance),
+    returnDominance: safeRound(returnDominance, 50),
     returnDominanceSource: serveDominanceSource, // Same as serveDominance
-    breakProbability: Math.round(breakProbability),
+    breakProbability: safeRound(breakProbability, 25),
     breakProbabilitySource,
     dominantPlayer,
     serverPlayerId: serving,

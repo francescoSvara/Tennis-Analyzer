@@ -14,8 +14,17 @@ try {
 
 const jobs = {}; // in-memory store: { [id]: { status, data } }
 
+// Counter for deterministic ID generation within same millisecond
+let idCounter = 0;
+
+/**
+ * Generate a deterministic ID based on timestamp + counter
+ * FILOSOFIA_REGISTRY_CANON: ASSERT_RESOLUTION_IS_DETERMINISTIC
+ * Note: This is for job IDs only, not for critical decision functions
+ */
 function makeId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  idCounter = (idCounter + 1) % 10000;
+  return Date.now().toString(36) + '_' + idCounter.toString().padStart(4, '0');
 }
 
 function ensureDir(p) {
@@ -205,13 +214,43 @@ async function fetchAdditionalEndpoints(eventId) {
   return results;
 }
 
+/**
+ * Detect server from SofaScore event data
+ * FILOSOFIA_PBP_EXTRACTION: SERVER_DETECTION_PRIORITY
+ * Priority: 1) API data, 2) Power rankings, 3) Score inference
+ * 
+ * @param {Object} eventData - Event data from SofaScore API
+ * @returns {string|null} 'home' | 'away' | null
+ */
+function detectServerFromEventData(eventData) {
+  if (!eventData) return null;
+  
+  // Priority 1: Direct API data (homeTeam.isServing / awayTeam.isServing)
+  const event = eventData.event || eventData;
+  if (event.homeTeam?.isServing) return 'home';
+  if (event.awayTeam?.isServing) return 'away';
+  
+  // Priority 2: Check from incidents (service indicator)
+  if (eventData.incidents) {
+    const lastIncident = eventData.incidents[eventData.incidents.length - 1];
+    if (lastIncident?.isServing === 1) return 'home';
+    if (lastIncident?.isServing === 2) return 'away';
+  }
+  
+  // Priority 3: From power rankings (first serve indicator)
+  // Note: Full implementation requires pointByPoint analysis
+  // This is a stub - full implementation in pbpExtractor.cjs
+  
+  return null; // Unknown - let downstream code handle
+}
+
 async function runScraper(url) {
   const id = makeId();
   jobs[id] = { status: 'pending', data: null };
 
   (async () => {
     jobs[id].status = 'running';
-    const collected = { api: {} };
+    const collected = { api: {}, serverDetection: null };
     let browser;
     try {
       console.log(`[${id}] Starting scrape for: ${url}`);
@@ -705,4 +744,13 @@ async function getPointByPoint(eventId) {
   return result.body;
 }
 
-module.exports = { runScraper, getData, getStatus, runDirectFetch, directFetch, getPointByPoint };
+module.exports = { 
+  runScraper, 
+  getData, 
+  getStatus, 
+  runDirectFetch, 
+  directFetch, 
+  getPointByPoint,
+  // FILOSOFIA_PBP_EXTRACTION: Server detection helper
+  detectServerFromEventData
+};

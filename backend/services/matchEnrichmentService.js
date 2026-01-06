@@ -5,7 +5,7 @@
  * Combina pbpExtractor + svgMomentumExtractor per ottenere dati completi.
  *
  * QUANDO USARE:
- * - Partite giÃ  finite senza PBP nel DB
+ * - Partite già finite senza PBP nel DB
  * - Partite senza power rankings/momentum
  * - Arricchimento batch di partite storiche
  *
@@ -14,14 +14,25 @@
  * - I 6 invarianti tennis devono essere rispettati
  * - Il DB va popolato SOLO con dati SofaScore API o tramite questo servizio
  *
+ * @module matchEnrichmentService
+ * @memberof ConceptualMap#Services
  * @see docs/filosofie/20_domain_tennis/FILOSOFIA_PBP_EXTRACTION.md
  * @see docs/filosofie/10_data_platform/storage/FILOSOFIA_DB.md
  */
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Importa estrattori
-const { extractPbp, formatPointsForDb } = require('../utils/pbpExtractor.cjs');
+// CANONICAL PBP ENTRYPOINT - use extractPbpFromSofaScoreHtml for new code
+const { 
+  extractPbpFromSofaScoreHtml,
+  extractPbp, 
+  formatPointsForDb,
+  validatePbp,
+  computeQualityFlags,
+  EXTRACTOR_VERSION
+} = require('../utils/pbp/index.cjs');
+
+// SVG extractor
 const { processSvgMomentum } = require('../utils/svgMomentumExtractor');
 
 // Logger
@@ -106,39 +117,53 @@ async function enrichMatchFromHtml(matchId, options = {}) {
 
 /**
  * Estrae PBP da HTML e inserisce nel DB
+ * UPDATED: Uses canonical extractPbpFromSofaScoreHtml with validation and quality scoring
  */
 async function extractAndInsertPbp(matchId, html, dryRun = false) {
-  const result = { success: false, pointsCount: 0, errors: [] };
+  const result = { success: false, pointsCount: 0, quality: null, errors: [] };
 
-  // Estrai usando pbpExtractor (versione corretta con row1=HOME, row2=AWAY)
-  const extracted = extractPbp(html);
+  // Use CANONICAL entrypoint with validation and quality
+  const extracted = extractPbpFromSofaScoreHtml(html);
 
-  if (!extracted || !extracted.points || extracted.points.length === 0) {
+  if (!extracted.ok) {
+    result.errors.push(extracted.error || 'Nessun punto estratto dal HTML');
+    return result;
+  }
+
+  const { data: pbpData, validation, quality, meta } = extracted;
+
+  // Log validation issues as warnings
+  if (!validation.ok) {
+    result.errors.push(...validation.errors);
+    logger.warn(`[EnrichService] PBP validation warnings: ${validation.errors.join(', ')}`);
+    // Continue anyway if there are only warnings
+  }
+
+  // Log quality info
+  result.quality = quality;
+  logger.info(`[EnrichService] PBP Quality: ${quality.qualityScore0to100}/100 (v${meta.extractorVersion})`);
+  if (quality.tags.length > 0) {
+    logger.warn(`[EnrichService] Quality tags: ${quality.tags.join(', ')}`);
+  }
+
+  result.pointsCount = pbpData.points?.length || 0;
+
+  if (result.pointsCount === 0) {
     result.errors.push('Nessun punto estratto dal HTML');
     return result;
   }
 
-  // Valida i dati estratti
-  const validation = validatePbpData(extracted.points);
-  if (!validation.valid) {
-    result.errors.push(...validation.errors);
-    logger.warn(`[EnrichService] PBP validation warnings: ${validation.errors.join(', ')}`);
-    // Continua comunque se ci sono solo warning
-  }
-
-  result.pointsCount = extracted.points.length;
-
   if (dryRun) {
     logger.info(
-      `[EnrichService] DRY RUN: ${result.pointsCount} punti estratti per match ${matchId}`
+      `[EnrichService] DRY RUN: ${result.pointsCount} punti estratti per match ${matchId} (quality: ${quality.qualityScore0to100}/100)`
     );
     result.success = true;
     result.dryRun = true;
     return result;
   }
 
-  // Prepara i punti per il DB
-  const dbPoints = extracted.points.map((p, idx) => ({
+  // Prepara i punti per il DB (use formatPointsForDb if available, else manual)
+  const dbPoints = pbpData.points.map((p, idx) => ({
     match_id: matchId,
     set_number: p.set,
     game_number: p.game,
@@ -251,6 +276,10 @@ async function extractAndInsertMomentum(matchId, html, dryRun = false) {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 /**
+ * @deprecated Use validatePbp from backend/utils/pbp/index.cjs instead
+ * This local function is kept for backwards compatibility but the canonical
+ * validation is now integrated into extractPbpFromSofaScoreHtml()
+ * 
  * Valida i dati PBP rispettando i 6 invarianti tennis
  * @see FILOSOFIA_PBP_EXTRACTION.md
  */
@@ -400,8 +429,11 @@ module.exports = {
   enrichMatchFromHtml,
   extractAndInsertPbp,
   extractAndInsertMomentum,
-  validatePbpData,
+  validatePbpData, // @deprecated - use validatePbp from backend/utils/pbp/index.cjs
   updateMatchDataQuality,
+  // Re-export canonical entrypoint for convenience
+  extractPbpFromSofaScoreHtml,
+  EXTRACTOR_VERSION,
 };
 
 

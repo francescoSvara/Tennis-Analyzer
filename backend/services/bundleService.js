@@ -5,6 +5,8 @@
  * This service orchestrates data fetching, feature computation, strategy
  * evaluation, and bundle assembly.
  *
+ * @module bundleService
+ * @memberof ConceptualMap#Services
  * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
  * @see docs/filosofie/FILOSOFIA_MATCHBUNDLE_ONLY_FE.md
  */

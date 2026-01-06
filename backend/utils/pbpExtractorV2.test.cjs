@@ -164,7 +164,7 @@ test('Set 2 ha 10 game', set2Result.games?.length === 10);
 console.log(`  → Mode: ${set2Result.mode}, Score: ${set2Result.finalScore.home}-${set2Result.finalScore.away}`);
 
 // ═══════════════════════════════════════════════════════════════
-// TEST ANTI-REGRESSIONE: Game specifici
+// TEST: Anti-regressione game specifici
 // ═══════════════════════════════════════════════════════════════
 console.log('\n─── TEST: Anti-regressione game ───');
 
@@ -182,6 +182,59 @@ test('Set 1 NO impossible 13-0',
   !(set1Result.finalScore.home === 13 && set1Result.finalScore.away === 0));
 test('Set 1 NO impossible 0-13', 
   !(set1Result.finalScore.home === 0 && set1Result.finalScore.away === 13));
+
+// ═══════════════════════════════════════════════════════════════
+// TEST INVARIANTI CANONICI (per FILOSOFIA_PBP_EXTRACTION)
+// ═══════════════════════════════════════════════════════════════
+console.log('\n─── TEST: Invarianti canonici ───');
+
+// Test: No NaN in outputs
+let hasNaN = false;
+for (const game of (set1Result.games || [])) {
+  if (game.points) {
+    for (const p of game.points) {
+      if (typeof p.homeScore === 'number' && isNaN(p.homeScore)) hasNaN = true;
+      if (typeof p.awayScore === 'number' && isNaN(p.awayScore)) hasNaN = true;
+    }
+  }
+}
+test('No NaN in outputs', !hasNaN);
+
+// Test: Service alternation
+let alternationViolations = 0;
+const allGames = [...(set1Result.games || []), ...(set2Result.games || [])];
+let prevServer = null;
+let prevSet = null;
+for (const game of allGames) {
+  const currentSet = game.setNumber || 1;
+  // Reset on new set
+  if (currentSet !== prevSet) {
+    prevServer = null;
+    prevSet = currentSet;
+  }
+  
+  if (prevServer !== null && !game.isTiebreak) {
+    const expected = prevServer === 'home' ? 'away' : 'home';
+    if (game.serverSide !== expected) {
+      alternationViolations++;
+    }
+  }
+  prevServer = game.serverSide;
+}
+test('Service alternation ok (or flagged)', alternationViolations === 0 || set1Result.validation?.errors?.length > 0);
+
+// Test: Point winners count matches total points
+let totalPoints = 0;
+let pointsWithWinner = 0;
+for (const game of allGames) {
+  if (game.points) {
+    totalPoints += game.points.length;
+    pointsWithWinner += game.points.filter(p => p.pointWinner !== null && p.pointWinner !== undefined).length;
+  }
+}
+const winnerCoverage = totalPoints > 0 ? pointsWithWinner / totalPoints : 1;
+test('Point winners coverage >= 90%', winnerCoverage >= 0.9);
+console.log(`  → Points with winner: ${pointsWithWinner}/${totalPoints} (${Math.round(winnerCoverage*100)}%)`);
 
 // ═══════════════════════════════════════════════════════════════
 // RISULTATO FINALE

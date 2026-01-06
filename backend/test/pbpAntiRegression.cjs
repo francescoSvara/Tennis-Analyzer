@@ -4,6 +4,8 @@
  * Questi test verificano gli INVARIANTI COSTITUZIONALI del PBP extractor.
  * Se un test fallisce, significa che c'è una VIOLAZIONE degli invarianti
  * e il codice NON deve essere mergiato.
+ * 
+ * UPDATED: Now uses canonical entrypoint backend/utils/pbp/index.cjs
  */
 
 'use strict';
@@ -12,7 +14,16 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// Import delle funzioni da testare
+// Import delle funzioni da testare - USA CANONICAL ENTRYPOINT
+const {
+  extractPbpFromSofaScoreHtml,
+  validatePbp,
+  computeQualityFlags,
+  extractPbp, // Re-export for backward compat
+  EXTRACTOR_VERSION
+} = require('../utils/pbp/index.cjs');
+
+// Import also low-level functions for detailed tests
 const {
   extractRawPbpData,
   extractPlayersFromHtml,
@@ -20,7 +31,6 @@ const {
   extractServerSlugFromBlock,
   resolveSemantics,
   isTiebreakPoints,
-  extractPbp,
 } = require('../utils/pbpExtractor.cjs');
 
 // Golden data per questo match (basato sul HTML in `pbp code`)

@@ -1,0 +1,142 @@
+This scraping pipeline is an enrichment step that updates the same match row already created via SofaScore API; do not create a second match record
+
+
+
+You are GitHub Copilot. I need a safe refactor & hardening of our SofaScore PBP + SVG momentum extraction pipeline.
+Files involved (already in repo):
+- pbpExtractor.cjs  (canonical v2 candidate)
+- pbpExtractor.js   (legacy/naive candidate)
+- pbpAntiRegression.cjs
+- pbpExtractorV2.test.cjs
+- insert-pbp-correct.js
+- svgMomentumExtractor.js
+- svg.js / svg-html.js
+Docs:
+- FILOSOFIA_PBP_EXTRACTION_PSEUDOCODE.md (invariants: row mapping fixed, winner from CSS not score, server detection priority, service alternation incl tiebreak rotation, validation rules)
+- SPEC_VALUE_SVG.md (momentum: value_api priority, value_svg fallback, store source)
+
+PRIMARY GOALS (NO NEW ANALYTICS, JUST HYGIENE + FUTURE-PROOFING):
+1) Declare ONE canonical extractor for production and prevent accidental use of the legacy one.
+2) Add PBP quality flags + validation results to the extraction output so we can store it and decide later which matches are trustworthy for large-scale % analytics.
+3) Standardize the momentum extraction output to include both `value` (api or computed) + `value_svg` + `source`.
+4) Keep runtime behavior stable: do not change external DB schema unless strictly needed. Do not introduce new dependencies.
+
+------------------------------------------------------------
+STEP 0 — ANSWER THESE 3 QUESTIONS BY INSPECTING THE CODEBASE
+(Do NOT ask the user; infer by searching the repo. If still ambiguous, implement defensive compatibility.)
+Q1) Which extractor is actually used in production today?
+    - pbpExtractor.cjs (correct v2) OR pbpExtractor.js (legacy) or both?
+Q2) Do we store in DB:
+    (A) only normalized PBP (sets/games/points) OR
+    (B) also raw HTML (for audit/reparse)?
+    -> infer from DB insert scripts and models.
+Q3) In v2 extractor, “winner from CSS” is done via classes/colors?
+    -> confirm in pbpExtractor.cjs; if missing, add it per philosophy.
+
+Provide the results of your inspection in comments in the PR changes.
+
+Repo inspection commands (run mentally or propose in comments):
+- ripgrep where extractors are imported:
+  rg -n "require\\(['\"].*pbpExtractor(\\.cjs|\\.js)?['\"]\\)" .
+  rg -n "from ['\"].*pbpExtractor(\\.cjs|\\.js)?['\"]" .
+  rg -n "pbpExtractor\\.cjs|pbpExtractor\\.js" .
+- find DB writes:
+  rg -n "insert.*pbp|save.*pbp|match.*pbp|rawHtml|htmlRaw|sofascore.*html" .
+- find winner detection:
+  rg -n "winner|css|class|highlight|text-green|text-red|point-won|serve-won|lost" pbpExtractor.cjs pbpExtractor.js
+
+------------------------------------------------------------
+STEP 1 — CANONICAL ENTRYPOINT + LEGACY QUARANTINE
+Create a single entrypoint module:
+- backend/utils/pbp/index.cjs (or similar, keep CommonJS)
+Export:
+  - extractPbpFromSofaScoreHtml(html, opts) -> { ok, data, quality, validation, meta }
+Where:
+  data = normalized PBP structure (sets/games/points) compatible with existing DB insert code.
+  meta = { sourceUrl, scrapedAt, extractorVersion, usedExtractor: 'v2'|'legacy' }
+
+Rules:
+- Prefer pbpExtractor.cjs as canonical if used in production; else keep compatibility wrapper:
+  - if some flows import pbpExtractor.js, keep it but mark as LEGACY and re-export the canonical function with a console.warn.
+- Add loud comments at top of pbpExtractor.js:
+  "LEGACY / NOT INVARIANT-COMPLIANT. Do not use for production ingestion."
+- OPTIONAL: add a runtime guard env var:
+  if (process.env.DISALLOW_LEGACY_PBP === '1') throw if legacy is used.
+
+------------------------------------------------------------
+STEP 2 — VALIDATION + QUALITY FLAGS (per FILOSOFIA)
+Create new modules (CommonJS):
+- backend/utils/pbp/validatePbp.cjs
+- backend/utils/pbp/qualityFlags.cjs
+
+validatePbp.cjs should implement philosophy invariants as boolean checks + error list:
+- point score progression not impossible
+- game score progression not impossible
+- service alternation consistency (including tiebreak rotation rules)
+- "winner from CSS" was determinable for each point (or count unknown)
+- break detection consistent with server/returner win
+Return:
+  { ok: boolean, errors: [ {code, message, at?} ], warnings: [...] }
+
+qualityFlags.cjs should compute:
+- missingServerIconCount
+- usedAlternationFallbackCount
+- unknownPointWinnerCount
+- inconsistentScoreCount
+- usedLegacyHeuristics: boolean
+Return:
+  { ...counts, qualityScore0to100, tags: [] }
+
+Hook them into extractPbpFromSofaScoreHtml output:
+{ ok, data, validation, quality, meta }
+
+------------------------------------------------------------
+STEP 3 — MOMENTUM SVG STANDARDIZATION (per SPEC_VALUE_SVG)
+Ensure svgMomentumExtractor.js output includes:
+- value_svg (number)
+- source = 'svg_dom'
+If API value exists elsewhere:
+- create a standard merger function:
+  mergeMomentum({ value_api, value_svg }) -> { value, value_api, value_svg, source }
+Rules:
+- if value_api is not null -> value=value_api, source='api'
+- else value=value_svg, source='svg_dom'
+Store both fields if DB schema allows; otherwise store `value` + `source` and keep `value_svg` for debug.
+
+------------------------------------------------------------
+STEP 4 — ANTI-REGRESSION & TESTS
+Update / extend pbpExtractorV2.test.cjs:
+- Add invariant tests (not just snapshots):
+  - no NaN in outputs
+  - server alternation does not violate rules (or if it does, validation ok=false and quality flags reflect it)
+  - point winners count matches total points
+  - if html includes CSS winner markers, unknownPointWinnerCount==0
+
+Update pbpAntiRegression.cjs to:
+- run canonical entrypoint on a few HTML fixtures
+- compare stable output fields (ignore timestamps)
+- fail loudly on schema breaks
+
+------------------------------------------------------------
+STEP 5 — DB INGEST (insert-pbp-correct.js)
+Inspect insert-pbp-correct.js:
+- If it currently uses pbpExtractor.cjs directly, change it to use backend/utils/pbp/index.cjs entrypoint.
+- If it stores raw HTML, keep it.
+- If it does NOT store raw HTML, add optional storage of raw HTML behind a flag:
+  STORE_RAW_HTML=1
+And add meta fields:
+  extractorVersion, scrapedAt, sourceUrl (if available)
+
+IMPORTANT CONSTRAINTS:
+- DO NOT implement new analytics features now.
+- DO NOT change live featureEngine/strategyEngine logic.
+- Keep CommonJS.
+- Keep existing normalized PBP structure unless absolutely necessary; if you need to add fields, add them under `meta`, `validation`, `quality`.
+
+DELIVERABLES:
+- New pbp index entrypoint + validatePbp + qualityFlags
+- Legacy pbpExtractor.js quarantined with warnings/guards
+- svg momentum standard merger
+- Updated tests (pbpExtractorV2.test.cjs) + anti-regression script
+- Update insert-pbp-correct.js to use the canonical entrypoint
+- In-code comments summarizing answers to Q1-Q3 found via repo inspection

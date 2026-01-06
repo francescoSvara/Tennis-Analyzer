@@ -2,21 +2,32 @@
  * Script per inserire i dati PBP estratti con il nuovo estrattore corretto
  * Match: Norrie vs Vacherot (ID: 14968724)
  *
- * USA IL NUOVO ESTRATTORE CHE RISPETTA LE INVARIANTI TENNIS:
+ * USA IL CANONICAL ENTRYPOINT: backend/utils/pbp/index.cjs
+ * 
+ * Rispetta le INVARIANTI TENNIS:
  * - Il servizio NON dipende mai dal vincitore
  * - Il servizio ALTERNA ogni game
  * - Il break NON cambia l'alternanza
- * - Il primo punto del tie-break Ã¨ servito da chi avrebbe servito il game successivo
+ * - Il primo punto del tie-break è servito da chi avrebbe servito il game successivo
  * - Chi serve primo nel tie-break NON serve il primo game del set successivo
  *
  * INSERISCE IN point_by_point (tabella legacy con serving/scoring)
+ * 
+ * Opzioni ambiente:
+ * - STORE_RAW_HTML=1 : Salva anche HTML raw per audit/reparse
+ * - DRY_RUN=1 : Solo estrazione, no inserimento
  */
 
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@supabase/supabase-js');
-const { extractPbp } = require('../utils/pbpExtractor.cjs');
+
+// USA IL CANONICAL ENTRYPOINT
+const { 
+  extractPbpFromSofaScoreHtml, 
+  getExtractorInfo 
+} = require('../utils/pbp/index.cjs');
 
 // Supabase config
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -37,9 +48,14 @@ const HOME_SLUG = 'norrie-cameron';
 const AWAY_SLUG = 'vacherot-valentin';
 
 async function main() {
-  console.log('=== INSERIMENTO PBP DATA (NUOVO ESTRATTORE) ===');
+  const DRY_RUN = process.env.DRY_RUN === '1';
+  const STORE_RAW_HTML = process.env.STORE_RAW_HTML === '1';
+  
+  console.log('=== INSERIMENTO PBP DATA (CANONICAL ENTRYPOINT) ===');
   console.log(`Match ID: ${MATCH_ID}`);
   console.log(`Home: ${HOME_SLUG}, Away: ${AWAY_SLUG}`);
+  console.log(`Extractor: ${JSON.stringify(getExtractorInfo())}`);
+  console.log(`DRY_RUN: ${DRY_RUN}, STORE_RAW_HTML: ${STORE_RAW_HTML}`);
   console.log('');
 
   // 1. Leggi HTML
@@ -47,13 +63,43 @@ async function main() {
   const html = fs.readFileSync(htmlPath, 'utf8');
   console.log(`HTML caricato: ${html.length} bytes`);
 
-  // 2. Estrai dati con nuovo estrattore
-  const extracted = extractPbp(html, { homeSlug: HOME_SLUG, awaySlug: AWAY_SLUG });
-  if (!extracted.ok) {
-    console.error('Errore estrazione:', extracted.error);
+  // 2. Estrai dati con canonical entrypoint (include validation + quality)
+  const result = extractPbpFromSofaScoreHtml(html, { 
+    homeSlug: HOME_SLUG, 
+    awaySlug: AWAY_SLUG,
+    sourceUrl: `file://${htmlPath}`
+  });
+  
+  // Log extraction metadata
+  console.log('');
+  console.log('=== EXTRACTION RESULT ===');
+  console.log(`OK: ${result.ok}`);
+  console.log(`Meta: ${JSON.stringify(result.meta)}`);
+  console.log(`Quality Score: ${result.quality.qualityScore0to100}/100`);
+  console.log(`Quality Tags: ${result.quality.tags.join(', ')}`);
+  
+  if (!result.validation.ok) {
+    console.log('');
+    console.log('=== VALIDATION ERRORS ===');
+    for (const err of result.validation.errors) {
+      console.log(`  [${err.code}] ${err.message}`);
+    }
+  }
+  if (result.validation.warnings.length > 0) {
+    console.log('');
+    console.log('=== VALIDATION WARNINGS ===');
+    for (const warn of result.validation.warnings) {
+      console.log(`  [${warn.code}] ${warn.message}`);
+    }
+  }
+  
+  if (!result.ok) {
+    console.error('Errore estrazione:', result.validation.errors);
     process.exit(1);
   }
 
+  const extracted = result.data;
+  
   console.log('');
   console.log('=== VERIFICA ESTRAZIONE ===');
   console.log(`First Server: ${extracted.firstServer}`);

@@ -155,7 +155,7 @@ function formatDateRange(earliest, latest) {
 }
 
 // Card per singolo torneo - SOLO DATI DAL DATABASE
-// Lo scraping va fatto dal progetto locale Tennis-Scraper-Local
+// Lo scraping va fatto dal progetto esterno: c:\Users\UTENTE\Desktop\Tennis-Scraper-Local
 function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
   const dateRange = formatDateRange(tournament.earliestDate, tournament.latestDate);
 
@@ -376,7 +376,7 @@ function TournamentCard({ tournament, onExpand, expanded, onMatchSelect }) {
                     </span>
                     <div className="mini-match-meta">
                       <span className={`mini-status ${m.status || 'unknown'}`}>
-                        {m.status || 'N/A'}
+                        {m.status || 'Sconosciuto'}
                       </span>
                       <span className="event-id">#{m.eventId}</span>
                     </div>
@@ -492,12 +492,14 @@ const CALCULATED_DATA_FORMULAS = {
 };
 
 // Helper per renderizzare valori nell'inspector (espande oggetti)
+// FILOSOFIA_FRONTEND_UI: RULE_NO_NULL_DISPLAY - inspector shows N/A for truly missing data
+// This is acceptable because inspector is a debug tool showing raw backend data
 function renderInspectorValue(value, depth = 0) {
   if (value === null || value === undefined || value === '') {
     return (
       <>
         <XCircle size={14} weight="fill" style={{ marginRight: 4, color: '#ef4444' }} />
-        N/A
+        Non disponibile
       </>
     );
   }
@@ -1110,7 +1112,7 @@ function MonitoringDashboard({ isOpen, onClose, onMatchesUpdated, onMatchSelect 
                               {match.home_player} vs {match.away_player}
                             </span>
                             <span className="match-info">
-                              {match.tournament_name || match.tournament} • {match.surface || 'N/A'}
+                              {match.tournament_name || match.tournament} • {match.surface || 'Superficie n.d.'}
                             </span>
                             <span className="match-status">{match.status}</span>
                           </div>

@@ -99,7 +99,7 @@ export function MatchPage({ matchId, onBack }) {
       case 'odds':
         return <OddsTab data={tabData} header={header} strategies={tabs.strategies} />;
       case 'pointByPoint':
-        return <PointByPointTab data={tabData} header={header} />;
+        return <PointByPointTab data={tabData} header={header} stats={tabs.stats} />;
       case 'stats':
         return <StatsTab data={tabData} header={header} />;
       case 'momentum':

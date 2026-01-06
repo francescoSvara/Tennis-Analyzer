@@ -128,9 +128,9 @@ exports.scrape = (req, res) => {
   return res.status(503).json({
     error: 'scraping_disabled',
     message: 'Lo scraping è disabilitato sul server di produzione.',
-    hint: 'SofaScore blocca le richieste dai server cloud. Usa Tennis-Scraper-Local per acquisire match da localhost.',
+    hint: 'SofaScore blocca le richieste dai server cloud. Usa il progetto Tennis-Scraper-Local (Desktop) per acquisire match da localhost.',
     instructions: [
-      '1. Apri la cartella Tennis-Scraper-Local',
+      '1. Apri la cartella c:\\Users\\UTENTE\\Desktop\\Tennis-Scraper-Local',
       '2. Esegui: npm install',
       '3. Esegui: npm run dev',
       '4. Apri http://localhost:5174',

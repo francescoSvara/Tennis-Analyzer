@@ -4,6 +4,8 @@
  * Extracted from server.js as part of the refactor.
  * Contains complex statistics normalization and calculation logic.
  *
+ * @module statsTabBuilder
+ * @memberof ConceptualMap#Utils
  * @see docs/filosofie/FILOSOFIA_STATS.md
  */
 

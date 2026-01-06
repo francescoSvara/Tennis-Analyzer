@@ -14,6 +14,7 @@ import { getTournamentLogo, getSuggestedFileName } from '../utils/tournamentLogo
 import { durations, easings } from '../motion/tokens';
 
 // Formatta la data del match
+// FILOSOFIA_FRONTEND_UI: RULE_NO_NULL_DISPLAY - provide meaningful fallback
 function formatDate(timestamp, fileDate) {
   let date;
   if (timestamp) {
@@ -21,7 +22,7 @@ function formatDate(timestamp, fileDate) {
   } else if (fileDate) {
     date = new Date(fileDate);
   } else {
-    return 'N/A';
+    return 'Data mancante';
   }
 
   const now = new Date();

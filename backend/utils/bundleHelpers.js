@@ -4,6 +4,8 @@
  * Extracted from server.js as part of the refactor.
  * Pure functions, no side effects, no DB access.
  *
+ * @module bundleHelpers
+ * @memberof ConceptualMap#Utils
  * @see docs/filosofie/FILOSOFIA_FRONTEND_DATA_CONSUMPTION.md
  */
 
@@ -175,13 +177,60 @@ function normalizePointsForBundle(pointsData) {
   }
 
   // 2. Analizza ogni game per determinare server, winner e break
-  for (const [key, gameData] of gameMap) {
+  // E costruisci la mappa del game score per ogni set-game
+  const gameScoreMap = new Map(); // key: "set-game" -> { homeGames, awayGames, homeSets, awaySets }
+  let currentSetHomeGames = 0;
+  let currentSetAwayGames = 0;
+  let homeSets = 0;
+  let awaySets = 0;
+  let lastSet = 0;
+
+  // Ordina i games per processarli in ordine
+  const sortedGameKeys = Array.from(gameMap.keys()).sort((a, b) => {
+    const [setA, gameA] = a.split('-').map(Number);
+    const [setB, gameB] = b.split('-').map(Number);
+    if (setA !== setB) return setA - setB;
+    return gameA - gameB;
+  });
+
+  for (const key of sortedGameKeys) {
+    const gameData = gameMap.get(key);
     const points = gameData.points;
     points.sort(
       (a, b) => (a.point_number || a.point_index || 0) - (b.point_number || b.point_index || 0)
     );
 
     const firstPoint = points[0];
+    const setNum = firstPoint.set_number || firstPoint.set || 1;
+    const gameNum = firstPoint.game_number || firstPoint.game || 1;
+
+    // Se siamo in un nuovo set, reset game counts e potenzialmente aggiungi set vinto
+    if (setNum !== lastSet) {
+      if (lastSet > 0) {
+        // Determina chi ha vinto il set precedente
+        // Nel tiebreak (6-6), chi vince il tiebreak vince il set
+        if (currentSetHomeGames === 7 || (currentSetHomeGames === 6 && currentSetAwayGames < 6)) {
+          homeSets++;
+        } else if (currentSetAwayGames === 7 || (currentSetAwayGames === 6 && currentSetHomeGames < 6)) {
+          awaySets++;
+        } else if (currentSetHomeGames > currentSetAwayGames) {
+          homeSets++;
+        } else if (currentSetAwayGames > currentSetHomeGames) {
+          awaySets++;
+        }
+      }
+      currentSetHomeGames = 0;
+      currentSetAwayGames = 0;
+      lastSet = setNum;
+    }
+
+    // Salva lo stato PRIMA di questo game (per calcolare set point)
+    gameScoreMap.set(key, {
+      homeGames: currentSetHomeGames,
+      awayGames: currentSetAwayGames,
+      homeSets: homeSets,
+      awaySets: awaySets
+    });
 
     // Determine Server
     let server = 'unknown';
@@ -201,17 +250,28 @@ function normalizePointsForBundle(pointsData) {
       }
     }
 
+    // Aggiorna il conteggio games dopo aver determinato il winner
+    if (gameWinner === 'home') {
+      currentSetHomeGames++;
+    } else if (gameWinner === 'away') {
+      currentSetAwayGames++;
+    }
+
     // Determine Break
     const calculatedBreak = server !== 'unknown' && gameWinner !== null && server !== gameWinner;
     const breakOccurredFromDb = points.some((p) => p.break_occurred === true);
     const isBreak = breakOccurredFromDb || calculatedBreak;
 
-    gameData.set = points[0].set_number || points[0].set;
-    gameData.game = points[0].game_number || points[0].game;
+    // Check if this is a tiebreak
+    const isTiebreak = isTiebreakGame(gameNum, { home: currentSetHomeGames, away: currentSetAwayGames });
+
+    gameData.set = setNum;
+    gameData.game = gameNum;
     gameData.gameServer = server;
     gameData.gameWinner = gameWinner;
     gameData.gameIsBreak = isBreak;
     gameData.pointsCount = points.length;
+    gameData.isTiebreak = isTiebreak;
   }
 
   const games = Array.from(gameMap.values()).map((g) => ({
@@ -221,6 +281,7 @@ function normalizePointsForBundle(pointsData) {
     gameWinner: g.gameWinner,
     gameIsBreak: g.gameIsBreak,
     pointsCount: g.pointsCount,
+    isTiebreak: g.isTiebreak || false,
   }));
 
   const points = pointsData.data.map((p) => {
@@ -276,6 +337,40 @@ function normalizePointsForBundle(pointsData) {
     else if (p.is_unforced_error) type = 'unforced_error';
     else if (p.point_type) type = p.point_type;
 
+    // Calculate isBreakPoint based on tennis rules
+    // PRIORITY: DB value > calculated from score/server
+    // Use server from game if available, otherwise from point
+    const effectiveServer = gameInfo.gameServer || server;
+    const dbBreakPoint = p.is_break_point || false;
+    const calculatedBreakPoint = isBreakPointScore(score, effectiveServer);
+    const finalIsBreakPoint = dbBreakPoint || calculatedBreakPoint;
+
+    // If it's a break point, update type
+    if (finalIsBreakPoint && type === 'regular') {
+      type = 'break_point';
+    }
+
+    // Determine who has the break point opportunity
+    const breakPointHolder = finalIsBreakPoint ? getBreakPointHolder(score, effectiveServer) : null;
+
+    // Get game score context for set point / match point calculation
+    const scoreContext = gameScoreMap.get(key) || { homeGames: 0, awayGames: 0, homeSets: 0, awaySets: 0 };
+    const gameScore = { home: scoreContext.homeGames, away: scoreContext.awayGames };
+    const setScore = { home: scoreContext.homeSets, away: scoreContext.awaySets };
+    const isTiebreak = gameInfo.isTiebreak || false;
+
+    // Calculate Set Point and Match Point
+    const dbSetPoint = p.is_set_point || false;
+    const dbMatchPoint = p.is_match_point || false;
+    
+    const setPointResult = isSetPointScore(score, effectiveServer, gameScore, isTiebreak);
+    const matchPointResult = isMatchPointScore(score, effectiveServer, gameScore, setScore, isTiebreak, 3); // best of 3
+
+    const finalIsSetPoint = dbSetPoint || setPointResult.isSetPoint;
+    const finalIsMatchPoint = dbMatchPoint || matchPointResult.isMatchPoint;
+    const setPointFor = setPointResult.isSetPoint ? setPointResult.setPointFor : null;
+    const matchPointFor = matchPointResult.isMatchPoint ? matchPointResult.matchPointFor : null;
+
     return {
       time: p.timestamp || p.created_at || null,
       set: setNum,
@@ -285,11 +380,14 @@ function normalizePointsForBundle(pointsData) {
       pointWinner,
       description: p.point_description || p.description || '',
       type,
-      isBreakPoint: p.is_break_point || false,
+      isBreakPoint: finalIsBreakPoint,
+      breakPointFor: breakPointHolder, // NEW: who has the break point opportunity
       isAce,
       isDoubleFault,
-      isSetPoint: p.is_set_point || false,
-      isMatchPoint: p.is_match_point || false,
+      isSetPoint: finalIsSetPoint,
+      setPointFor: setPointFor, // NEW: who has the set point opportunity
+      isMatchPoint: finalIsMatchPoint,
+      matchPointFor: matchPointFor, // NEW: who has the match point opportunity
       rallyLength: p.rally_length || null,
       pointNumber: p.point_number || p.point_index || null,
       gameServer: gameInfo.gameServer || server,
@@ -307,6 +405,206 @@ function normalizePointsForBundle(pointsData) {
     total: pointsData.total || points.length,
     source: pointsData.source || 'database',
   };
+}
+
+// ============================================================================
+// BREAK POINT DETECTION (TENNIS RULES)
+// ============================================================================
+
+/**
+ * Determines if a score represents a break point based on tennis rules.
+ *
+ * REGOLA TENNIS FONDAMENTALE:
+ * Break Point = il RECEIVER (chi riceve) è a UN PUNTO dal vincere il game
+ *
+ * Il punteggio è sempre mostrato come HOME-AWAY.
+ * 
+ * Scenari di break point:
+ * 1. Receiver ha 40 e Server ha 0/15/30 → break point
+ * 2. Receiver ha AD (dopo deuce) → break point
+ * 
+ * NON è break point quando:
+ * - 40-40 (deuce) - nessuno ha vantaggio
+ * - Server ha AD (game point per server)
+ * - Server ha 40 e receiver ha 0/15/30 (game point per server)
+ *
+ * @param {string} score - Score in formato "HOME-AWAY" (es: "30-40", "40-AD")
+ * @param {string} server - Chi serve: 'home' | 'away'
+ * @returns {boolean} true se è un break point
+ */
+function isBreakPointScore(score, server) {
+  if (!score || !server || server === 'unknown') return false;
+
+  // Parse score
+  const parts = score.split('-');
+  if (parts.length !== 2) return false;
+
+  const [homeScore, awayScore] = parts.map((s) => s.trim().toUpperCase());
+
+  // Normalize scores: 'A' and 'AD' are equivalent
+  const normalizeScore = (s) => (s === 'A' ? 'AD' : s);
+  const normHome = normalizeScore(homeScore);
+  const normAway = normalizeScore(awayScore);
+
+  // Il receiver è l'opposto del server
+  const receiver = server === 'home' ? 'away' : 'home';
+  const receiverScore = receiver === 'home' ? normHome : normAway;
+  const serverScore = server === 'home' ? normHome : normAway;
+
+  // Caso 1: Receiver ha AD → sempre break point
+  if (receiverScore === 'AD') {
+    return true;
+  }
+
+  // Caso 2: Receiver ha 40, server NON ha 40 né AD → break point
+  if (receiverScore === '40' && serverScore !== '40' && serverScore !== 'AD') {
+    return true;
+  }
+
+  // Tutti gli altri casi non sono break point
+  return false;
+}
+
+/**
+ * Determines who has the break point opportunity
+ * @param {string} score - Score in formato "HOME-AWAY"
+ * @param {string} server - Chi serve: 'home' | 'away'
+ * @returns {string|null} 'home' | 'away' | null
+ */
+function getBreakPointHolder(score, server) {
+  if (!isBreakPointScore(score, server)) return null;
+  // Il break point è SEMPRE del receiver (chi non serve)
+  return server === 'home' ? 'away' : 'home';
+}
+
+// ============================================================================
+// SET POINT & MATCH POINT DETECTION (TENNIS RULES)
+// ============================================================================
+
+/**
+ * Determines if a point is a Set Point based on tennis rules.
+ * 
+ * SET POINT = un giocatore è a UN PUNTO dal vincere il SET
+ * 
+ * Condizioni per Set Point:
+ * 1. Il giocatore ha game point (40 o AD) nel game corrente
+ * 2. Se vince questo game, vince il set:
+ *    - Ha 5 games e l'avversario ne ha max 4 (5-0, 5-1, 5-2, 5-3, 5-4)
+ *    - Ha 6 games e l'avversario ne ha 5 (6-5)
+ *    - Nel tiebreak: ha 6+ punti con 1+ vantaggio
+ * 
+ * @param {string} pointScore - Score del punto in formato "HOME-AWAY" (es: "40-30")
+ * @param {string} server - Chi serve: 'home' | 'away'
+ * @param {Object} gameScore - Score games nel set: { home: number, away: number }
+ * @param {boolean} isTiebreak - Se è un tiebreak
+ * @returns {Object} { isSetPoint: boolean, setPointFor: 'home'|'away'|null }
+ */
+function isSetPointScore(pointScore, server, gameScore = {}, isTiebreak = false) {
+  if (!pointScore) return { isSetPoint: false, setPointFor: null };
+
+  const parts = pointScore.split('-');
+  if (parts.length !== 2) return { isSetPoint: false, setPointFor: null };
+
+  const [homePointStr, awayPointStr] = parts.map((s) => s.trim().toUpperCase());
+  const normalizeScore = (s) => (s === 'A' ? 'AD' : s);
+  const homePoint = normalizeScore(homePointStr);
+  const awayPoint = normalizeScore(awayPointStr);
+
+  const homeGames = gameScore.home || 0;
+  const awayGames = gameScore.away || 0;
+
+  // Funzione per verificare se un giocatore ha game point
+  const hasGamePoint = (playerPoint, opponentPoint, isServer) => {
+    // Tiebreak: usa punteggio numerico
+    if (isTiebreak) {
+      const pNum = parseInt(playerPoint) || 0;
+      const oNum = parseInt(opponentPoint) || 0;
+      return pNum >= 6 && pNum > oNum;
+    }
+    // Game normale: 40 o AD quando l'altro non ha 40/AD
+    if (playerPoint === 'AD') return true;
+    if (playerPoint === '40' && opponentPoint !== '40' && opponentPoint !== 'AD') return true;
+    return false;
+  };
+
+  // Funzione per verificare se vincere questo game fa vincere il set
+  const winsSetIfWinsGame = (playerGames, opponentGames, isTB) => {
+    if (isTB) return true; // Nel tiebreak, vincere = vincere il set
+    // Serve almeno 6 games e 2 di vantaggio
+    if (playerGames >= 5 && playerGames > opponentGames && opponentGames <= 4) return true; // 5-0, 5-1, 5-2, 5-3, 5-4 → 6-x
+    if (playerGames === 6 && opponentGames === 5) return true; // 6-5 → 7-5
+    return false;
+  };
+
+  // Check per HOME
+  const homeHasGamePoint = hasGamePoint(homePoint, awayPoint, server === 'home');
+  const homeWinsSetIfWins = winsSetIfWinsGame(homeGames, awayGames, isTiebreak);
+  if (homeHasGamePoint && homeWinsSetIfWins) {
+    return { isSetPoint: true, setPointFor: 'home' };
+  }
+
+  // Check per AWAY
+  const awayHasGamePoint = hasGamePoint(awayPoint, homePoint, server === 'away');
+  const awayWinsSetIfWins = winsSetIfWinsGame(awayGames, homeGames, isTiebreak);
+  if (awayHasGamePoint && awayWinsSetIfWins) {
+    return { isSetPoint: true, setPointFor: 'away' };
+  }
+
+  return { isSetPoint: false, setPointFor: null };
+}
+
+/**
+ * Determines if a point is a Match Point based on tennis rules.
+ * 
+ * MATCH POINT = un giocatore è a UN PUNTO dal vincere il MATCH
+ * 
+ * Condizioni per Match Point:
+ * 1. È un Set Point
+ * 2. Se vince questo set, vince il match (ha già 1 set in best-of-3, o 2 in best-of-5)
+ * 
+ * @param {string} pointScore - Score del punto in formato "HOME-AWAY"
+ * @param {string} server - Chi serve: 'home' | 'away'
+ * @param {Object} gameScore - Score games nel set corrente: { home: number, away: number }
+ * @param {Object} setScore - Score sets nel match: { home: number, away: number }
+ * @param {boolean} isTiebreak - Se è un tiebreak
+ * @param {number} bestOf - Formato match: 3 o 5
+ * @returns {Object} { isMatchPoint: boolean, matchPointFor: 'home'|'away'|null }
+ */
+function isMatchPointScore(pointScore, server, gameScore = {}, setScore = {}, isTiebreak = false, bestOf = 3) {
+  // Prima controlla se è un Set Point
+  const setPointResult = isSetPointScore(pointScore, server, gameScore, isTiebreak);
+  
+  if (!setPointResult.isSetPoint) {
+    return { isMatchPoint: false, matchPointFor: null };
+  }
+
+  const setsToWin = Math.ceil(bestOf / 2); // 2 per best-of-3, 3 per best-of-5
+  const homeSets = setScore.home || 0;
+  const awaySets = setScore.away || 0;
+
+  // Se chi ha il set point vince, vince anche il match?
+  if (setPointResult.setPointFor === 'home' && homeSets + 1 >= setsToWin) {
+    return { isMatchPoint: true, matchPointFor: 'home' };
+  }
+  if (setPointResult.setPointFor === 'away' && awaySets + 1 >= setsToWin) {
+    return { isMatchPoint: true, matchPointFor: 'away' };
+  }
+
+  return { isMatchPoint: false, matchPointFor: null };
+}
+
+/**
+ * Determines if a game is a tiebreak based on game number and game scores
+ * @param {number} gameNumber - Numero del game nel set
+ * @param {Object} gameScore - Score games: { home: number, away: number }
+ * @returns {boolean}
+ */
+function isTiebreakGame(gameNumber, gameScore = {}) {
+  // Tiebreak standard: game 13 (dopo 6-6)
+  if (gameNumber === 13) return true;
+  // Oppure quando entrambi hanno 6 games
+  if ((gameScore.home || 0) === 6 && (gameScore.away || 0) === 6) return true;
+  return false;
 }
 
 // ============================================================================
@@ -730,6 +1028,13 @@ module.exports = {
   calculateBreaksFromPbp,
   generatePowerRankingsFromPbp,
   enrichPowerRankingsWithBreaks,
+  // Break Point Detection
+  isBreakPointScore,
+  getBreakPointHolder,
+  // Set Point / Match Point Detection
+  isSetPointScore,
+  isMatchPointScore,
+  isTiebreakGame,
   // Quality
   calculateDataQuality,
   // Game stats
@@ -742,4 +1047,3 @@ module.exports = {
   // Status
   getRealisticStatus,
 };
-
