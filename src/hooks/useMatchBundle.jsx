@@ -21,7 +21,7 @@ export const BundleState = {
 const DEFAULT_CONFIG = {
   pollInterval: 10000, // 10 secondi per polling fallback
   wsReconnectDelay: 3000, // 3 secondi per riconnessione WS
-  cacheEnabled: true,
+  cacheEnabled: false, // DISABLED for debugging
   cacheTtlMs: 30000, // 30 secondi TTL cache
   autoConnect: true,
 };
@@ -98,6 +98,9 @@ export function useMatchBundle(matchId, options = {}) {
         }
 
         const data = await response.json();
+
+        // DEBUG: Log per verificare dati dal server
+        console.log('[useMatchBundle] API response - status:', data?.header?.match?.status, 'winner:', data?.header?.match?.winner);
 
         // Salva in cache
         if (cacheEnabled) {
@@ -307,19 +310,32 @@ export function useMatchBundle(matchId, options = {}) {
       fetchBundle().then((data) => {
         if (!data) return;
 
-        // FILOSOFIA: Controlla se il match è finito
-        const matchStatus = data?.header?.match?.status;
+        // FILOSOFIA: Controlla se il match è finito basandosi su status E winner
+        const matchStatus = data?.header?.match?.status?.toLowerCase?.() || '';
+        const hasWinner = !!data?.header?.match?.winner;
         const isFinished =
-          matchStatus === 'finished' || matchStatus === 'ended' || matchStatus === 'completed';
+          hasWinner ||
+          matchStatus === 'finished' ||
+          matchStatus === 'ended' ||
+          matchStatus === 'completed';
 
+        // Imposta isLive basandosi sullo status effettivo del match
         if (isFinished) {
-          // Match finito: NON serve WS né polling
+          // Match finito: NON serve WS né polling, imposta isLive = false
           console.log('[MatchBundle] Match finished, single fetch completed');
+          setIsLive(false);
           return;
         }
 
-        // Match live: tenta connessione WS se autoConnect
-        if (autoConnect) {
+        // Match live: imposta isLive = true e tenta connessione WS se autoConnect
+        const isMatchLive =
+          matchStatus === 'live' ||
+          matchStatus === 'inprogress' ||
+          matchStatus === 'playing';
+        
+        setIsLive(isMatchLive);
+
+        if (autoConnect && isMatchLive) {
           connectWebSocket();
         }
       });

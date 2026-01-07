@@ -15,6 +15,51 @@ function checkSupabase() {
 }
 
 // ============================================================================
+// ID RESOLUTION: sofascore_id -> internal match_id
+// ============================================================================
+
+// Cache per evitare query ripetute
+const idResolutionCache = new Map();
+
+/**
+ * Converte un sofascore_id nel match_id interno del database
+ * @param {number} sofascoreId - ID SofaScore (es: 15298534)
+ * @returns {Promise<number|null>} - ID interno del match (es: 168) o null
+ */
+async function resolveMatchId(sofascoreId) {
+  if (!checkSupabase()) return null;
+  
+  const cached = idResolutionCache.get(sofascoreId);
+  if (cached !== undefined) return cached;
+  
+  const { data } = await supabase
+    .from('matches')
+    .select('id')
+    .eq('sofascore_id', sofascoreId)
+    .single();
+  
+  if (data?.id) {
+    idResolutionCache.set(sofascoreId, data.id);
+    return data.id;
+  }
+  
+  const { data: direct } = await supabase
+    .from('matches')
+    .select('id')
+    .eq('id', sofascoreId)
+    .single();
+  
+  if (direct?.id) {
+    idResolutionCache.set(sofascoreId, direct.id);
+    return direct.id;
+  }
+  
+  idResolutionCache.set(sofascoreId, null);
+  return null;
+}
+
+
+// ============================================================================
 // BREAK CALCULATION FROM POINT-BY-POINT
 // ============================================================================
 
@@ -126,9 +171,21 @@ async function upsertPlayer(player) {
     .select()
     .single();
 
-  if (error && error.code !== '23505') {
-    // Ignora duplicati
-    console.error('Error upserting player:', error.message);
+  if (error) {
+    if (error.code !== '23505') {
+      // Ignora duplicati, logga altri errori
+      console.error('Error upserting player:', error.message);
+    }
+    // Per duplicati, prova a recuperare il player esistente
+    if (error.code === '23505') {
+      const { data: existing } = await supabase
+        .from('players')
+        .select()
+        .eq('id', player.id)
+        .single();
+      return existing;
+    }
+    return null;
   }
 
   return data;
@@ -195,12 +252,21 @@ async function insertMatch(matchData, sourceUrl = null) {
   };
 
   try {
-    // 1. Estrai e salva giocatori
-    const homePlayer = matchData.home || matchData.homeTeam;
-    const awayPlayer = matchData.away || matchData.awayTeam;
+    // 1. Estrai e salva giocatori - ATTENDERE che vengano salvati prima di creare il match
+    const homePlayerData = matchData.home || matchData.homeTeam;
+    const awayPlayerData = matchData.away || matchData.awayTeam;
 
-    if (homePlayer?.id) await upsertPlayer(homePlayer);
-    if (awayPlayer?.id) await upsertPlayer(awayPlayer);
+    // Salva i player e ottieni i risultati per verificare che esistano
+    const homePlayer = homePlayerData?.id ? await upsertPlayer(homePlayerData) : null;
+    const awayPlayer = awayPlayerData?.id ? await upsertPlayer(awayPlayerData) : null;
+
+    // Se i player non sono stati salvati correttamente, non procedere
+    if (homePlayerData?.id && !homePlayer) {
+      console.warn(`⚠️ Could not upsert home player ${homePlayerData.id}, match will have null player1_id`);
+    }
+    if (awayPlayerData?.id && !awayPlayer) {
+      console.warn(`⚠️ Could not upsert away player ${awayPlayerData.id}, match will have null player2_id`);
+    }
 
     // 2. Estrai e salva torneo
     const tournament = matchData.tournament || matchData.uniqueTournament;
@@ -217,8 +283,9 @@ async function insertMatch(matchData, sourceUrl = null) {
     let winnerName = null;
     let loserName = null;
 
-    const homeName = homePlayer?.name || homePlayer?.fullName || homePlayer?.shortName || null;
-    const awayName = awayPlayer?.name || awayPlayer?.fullName || awayPlayer?.shortName || null;
+    // Usa i dati originali per i nomi, ma i player verificati per gli ID
+    const homeName = homePlayerData?.name || homePlayerData?.fullName || homePlayerData?.shortName || null;
+    const awayName = awayPlayerData?.name || awayPlayerData?.fullName || awayPlayerData?.shortName || null;
 
     if (winnerCode === 1) {
       winnerName = homeName;
@@ -291,11 +358,11 @@ async function insertMatch(matchData, sourceUrl = null) {
       set5_p1: homeScore.period5,
       set5_p2: awayScore.period5,
       set5_tb: null,
-      // Rankings/seed
-      player1_rank: homePlayer?.ranking || null,
-      player2_rank: awayPlayer?.ranking || null,
-      player1_seed: homePlayer?.seed || null,
-      player2_seed: awayPlayer?.seed || null,
+      // Rankings/seed (usa dati originali se player non salvato)
+      player1_rank: homePlayer?.current_ranking || homePlayerData?.ranking || null,
+      player2_rank: awayPlayer?.current_ranking || awayPlayerData?.ranking || null,
+      player1_seed: homePlayerData?.seed || null,
+      player2_seed: awayPlayerData?.seed || null,
       // Quality & timestamps
       data_quality: 50,
       updated_at: new Date().toISOString(),
@@ -1681,6 +1748,19 @@ async function buildMatchCardSnapshotManual(matchId) {
   const matchData = matchResult.data;
   if (!matchData) return null;
 
+  // Applica priorità SVG al momentum
+  const processedMomentum = (momentumResult.data || []).map(row => {
+    if (row.value_svg != null) {
+      return {
+        ...row,
+        value: row.value_svg,
+        source: 'svg_manual',
+        _original_value: row.value,
+      };
+    }
+    return row;
+  });
+
   // Get players
   const [p1Result, p2Result] = await Promise.all([
     supabase.from('players').select('*').eq('id', matchData.player1_id).single(),
@@ -1756,7 +1836,7 @@ async function buildMatchCardSnapshotManual(matchId) {
     stats_json: statsResult.data
       ? statsResult.data.reduce((acc, s) => ({ ...acc, [s.period]: s }), {})
       : null,
-    momentum_json: momentumResult.data || [],
+    momentum_json: processedMomentum,
     odds_json: {
       opening: oddsResult.data?.find((o) => o.is_opening) || oddsResult.data?.[0] || null,
       closing:
@@ -1854,6 +1934,8 @@ async function upsertPlayerRanking(
 
 /**
  * Get match momentum data (power rankings)
+ * PRIORITÀ: Se value_svg è presente, ha la precedenza su value (dati live)
+ * Questo perché value_svg viene inserito manualmente quando i dati live sono incompleti
  */
 async function getMatchMomentum(matchId) {
   if (!checkSupabase()) return [];
@@ -1870,7 +1952,20 @@ async function getMatchMomentum(matchId) {
     return [];
   }
 
-  return data || [];
+  // Se value_svg è presente, sovrascrive value (priorità ai dati manuali)
+  const processed = (data || []).map(row => {
+    if (row.value_svg != null) {
+      return {
+        ...row,
+        value: row.value_svg, // SVG ha priorità
+        source: 'svg_manual', // Indica che stiamo usando dati SVG
+        _original_value: row.value, // Salva il valore originale per debug
+      };
+    }
+    return row;
+  });
+
+  return processed;
 }
 
 /**
@@ -2281,7 +2376,11 @@ module.exports = {
   enqueueCalculation,
   getQueueStats,
 
-  // ðŸš€ OPTIMIZED: Lightweight home page endpoints
+  // ID Resolution (sofascore_id -> internal id)
+  resolveMatchId,
+
+  // 🚀 OPTIMIZED: Lightweight home page endpoints
   getMatchesSummary,
   getMatchesByMonth,
 };
+

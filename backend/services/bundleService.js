@@ -196,6 +196,84 @@ function buildOverviewTab(matchData, features, strategies, statsTab) {
 }
 
 // ============================================================================
+// SOFASCORE DATA CONVERTER
+// ============================================================================
+
+/**
+ * Convert raw SofaScore event data to our internal matchData format
+ * Used when DB save fails but we still have fresh data from API
+ */
+function buildMatchDataFromSofaScore(event, fullData = {}) {
+  if (!event) return null;
+
+  // Extract status properly
+  const status = typeof event.status === 'object' 
+    ? event.status.type || event.status.description 
+    : event.status || 'unknown';
+
+  // Build sets array from period scores
+  const sets = [];
+  const homeScore = event.homeScore || {};
+  const awayScore = event.awayScore || {};
+  for (let i = 1; i <= 5; i++) {
+    if (homeScore[`period${i}`] != null) {
+      sets.push({ 
+        home: homeScore[`period${i}`], 
+        away: awayScore[`period${i}`] || 0 
+      });
+    }
+  }
+
+  return {
+    match: {
+      id: event.id,
+      status: status,
+      startTimestamp: event.startTimestamp,
+      winnerCode: event.winnerCode,
+      winner: event.winnerCode ? (event.winnerCode === 1 ? 'home' : 'away') : null,
+      surface: event.groundType || event.tournament?.uniqueTournament?.groundType || 'Unknown',
+      round: event.roundInfo?.name,
+      sets: sets,
+      currentGame: {
+        home: homeScore.current || 0,
+        away: awayScore.current || 0,
+      },
+      point: {
+        home: homeScore.point,
+        away: awayScore.point,
+      },
+      firstToServe: event.firstToServe,
+      homeTeam: event.homeTeam,
+      awayTeam: event.awayTeam,
+      tournament: event.tournament?.uniqueTournament || event.tournament,
+    },
+    player1: {
+      id: event.homeTeam?.id,
+      name: event.homeTeam?.name || event.homeTeam?.shortName,
+      country: event.homeTeam?.country?.alpha2,
+      currentRanking: event.homeTeam?.ranking,
+    },
+    player2: {
+      id: event.awayTeam?.id,
+      name: event.awayTeam?.name || event.awayTeam?.shortName,
+      country: event.awayTeam?.country?.alpha2,
+      currentRanking: event.awayTeam?.ranking,
+    },
+    tournament: {
+      id: event.tournament?.uniqueTournament?.id || event.tournament?.id,
+      name: event.tournament?.uniqueTournament?.name || event.tournament?.name,
+      surface: event.groundType || event.tournament?.uniqueTournament?.groundType,
+    },
+    statistics: fullData.statistics || [],
+    pointByPoint: fullData.pointByPoint || [],
+    powerRankings: fullData.powerRankings || fullData.tennisPowerRankings || [],
+    h2h: fullData.h2h,
+    dataQuality: 30, // Lower quality since not from DB
+    _source: 'sofascore_direct',
+  };
+}
+
+// ============================================================================
 // BUILD BUNDLE (MAIN FUNCTION)
 // ============================================================================
 
@@ -224,138 +302,48 @@ async function buildBundle(eventId, options = {}) {
 
   console.log(`📦 Building bundle for match ${eventId}...`);
 
+  // STEP 0: Resolve sofascore_id to internal match_id
+  // Il frontend passa sofascore_id, il DB usa id interno
+  let internalMatchId = null;
+  if (matchRepository?.resolveMatchId) {
+    internalMatchId = await matchRepository.resolveMatchId(parseInt(eventId));
+    if (internalMatchId) {
+      console.log(`📦 Resolved sofascore_id ${eventId} -> internal id ${internalMatchId}`);
+    }
+  }
+  
+  // Use internal ID for DB queries, fallback to eventId
+  const dbMatchId = internalMatchId || parseInt(eventId);
+
   // 1. Load all raw data in parallel from DB
   let [matchData, statisticsData, momentumData, oddsData, pointsData, matchScoresData] =
     await Promise.all([
       matchCardService ? matchCardService.getMatchCardFromSnapshot(parseInt(eventId)) : null,
-      matchRepository ? matchRepository.getMatchStatisticsNew(parseInt(eventId)) : [],
-      matchRepository ? matchRepository.getMatchMomentum(parseInt(eventId)) : [],
-      matchRepository ? matchRepository.getMatchOdds(parseInt(eventId)) : null,
+      matchRepository ? matchRepository.getMatchStatisticsNew(dbMatchId) : [],
+      matchRepository ? matchRepository.getMatchMomentum(dbMatchId) : [],
+      matchRepository ? matchRepository.getMatchOdds(dbMatchId) : null,
       matchRepository
-        ? matchRepository.getMatchPointByPoint(parseInt(eventId), { limit: 500 })
+        ? matchRepository.getMatchPointByPoint(dbMatchId, { limit: 500 })
         : { data: [] },
       supabaseClient?.supabase
         ? supabaseClient.supabase
             .from('match_scores')
             .select('*')
-            .eq('match_id', parseInt(eventId))
+            .eq('match_id', dbMatchId)
             .order('set_number')
         : { data: [] },
     ]);
 
   let finalMatchData = matchData;
 
-  // 2. If match not in DB, sync from SofaScore
-  if (!finalMatchData && liveManager) {
-    console.log(`📦 Match ${eventId} not in DB, syncing from SofaScore...`);
-    try {
-      const synced = await liveManager.syncMatch(parseInt(eventId));
-      if (synced?.success) {
-        console.log(`✅ Synced match ${eventId} from SofaScore`);
-        // Reload data after sync
-        [matchData, statisticsData, momentumData, pointsData, matchScoresData] = await Promise.all([
-          matchCardService ? matchCardService.getMatchCardFromSnapshot(parseInt(eventId)) : null,
-          matchRepository ? matchRepository.getMatchStatisticsNew(parseInt(eventId)) : [],
-          matchRepository ? matchRepository.getMatchMomentum(parseInt(eventId)) : [],
-          matchRepository
-            ? matchRepository.getMatchPointByPoint(parseInt(eventId), { limit: 500 })
-            : { data: [] },
-          supabaseClient?.supabase
-            ? supabaseClient.supabase
-                .from('match_scores')
-                .select('*')
-                .eq('match_id', parseInt(eventId))
-                .order('set_number')
-            : { data: [] },
-        ]);
-        finalMatchData = matchData;
-      }
-    } catch (syncErr) {
-      console.warn(`⚠️ Sync failed for ${eventId}:`, syncErr.message);
-    }
-  }
-
-  // 3. Check if data needs refresh (surface=Unknown, quality<50)
-  const needsRefresh =
-    finalMatchData &&
-    liveManager &&
-    (finalMatchData.match?.surface === 'Unknown' || finalMatchData.dataQuality < 50);
-
-  if (needsRefresh) {
-    console.log(`🔄 Match ${eventId} has incomplete data, refreshing from SofaScore...`);
-    try {
-      const synced = await liveManager.syncMatch(parseInt(eventId));
-      if (synced?.success) {
-        console.log(`✅ Refreshed match ${eventId} from SofaScore`);
-        [matchData, statisticsData, momentumData, oddsData, pointsData, matchScoresData] =
-          await Promise.all([
-            matchCardService ? matchCardService.getMatchCardFromSnapshot(parseInt(eventId)) : null,
-            matchRepository ? matchRepository.getMatchStatisticsNew(parseInt(eventId)) : [],
-            matchRepository ? matchRepository.getMatchMomentum(parseInt(eventId)) : [],
-            matchRepository ? matchRepository.getMatchOdds(parseInt(eventId)) : null,
-            matchRepository
-              ? matchRepository.getMatchPointByPoint(parseInt(eventId), { limit: 500 })
-              : { data: [] },
-            supabaseClient?.supabase
-              ? supabaseClient.supabase
-                  .from('match_scores')
-                  .select('*')
-                  .eq('match_id', parseInt(eventId))
-                  .order('set_number')
-              : { data: [] },
-          ]);
-        finalMatchData = matchData || finalMatchData;
-      }
-    } catch (refreshErr) {
-      console.warn(`⚠️ Refresh failed for ${eventId}:`, refreshErr.message);
-    }
-  }
+  // 2. Data must come from DB only - no SofaScore sync
 
   if (!finalMatchData) {
+    console.log(`📦 Match ${eventId} not found in DB`);
     return null;
   }
 
-  // 3b. For LIVE matches, fetch fresh data from SofaScore API
-  const isMatchLive = finalMatchData.match?.status === 'live' || finalMatchData.match?.status === 'inprogress';
-  if (isMatchLive && liveManager?.fetchCompleteData) {
-    console.log(`⚡ Match ${eventId} is LIVE, fetching fresh data from SofaScore...`);
-    try {
-      const liveData = await liveManager.fetchCompleteData(parseInt(eventId));
-      if (liveData?.event) {
-        // Update score from live data
-        const event = liveData.event;
-        if (!finalMatchData.match) finalMatchData.match = {};
-        
-        // Update sets from live data
-        const liveSets = [];
-        if (event.homeScore?.period1 != null) liveSets.push({ home: event.homeScore.period1, away: event.awayScore?.period1 || 0 });
-        if (event.homeScore?.period2 != null) liveSets.push({ home: event.homeScore.period2, away: event.awayScore?.period2 || 0 });
-        if (event.homeScore?.period3 != null) liveSets.push({ home: event.homeScore.period3, away: event.awayScore?.period3 || 0 });
-        if (event.homeScore?.period4 != null) liveSets.push({ home: event.homeScore.period4, away: event.awayScore?.period4 || 0 });
-        if (event.homeScore?.period5 != null) liveSets.push({ home: event.homeScore.period5, away: event.awayScore?.period5 || 0 });
-        
-        if (liveSets.length > 0) {
-          finalMatchData.match.sets = liveSets;
-        }
-        
-        // Update current game score
-        finalMatchData.match.currentGame = {
-          home: event.homeScore?.current || 0,
-          away: event.awayScore?.current || 0,
-        };
-        
-        // Update point score
-        finalMatchData.match.point = {
-          home: event.homeScore?.point || null,
-          away: event.awayScore?.point || null,
-        };
-        
-        console.log(`✅ Live score updated for ${eventId}: Sets=${JSON.stringify(liveSets)}, Game=${event.homeScore?.current}-${event.awayScore?.current}`);
-      }
-    } catch (liveErr) {
-      console.warn(`⚠️ Live fetch failed for ${eventId}:`, liveErr.message);
-    }
-  }
+  // 3. Use only DB data, no SofaScore refresh
 
   // 4. Enrich match with scores from match_scores table if sets are empty
   const setScores = matchScoresData?.data || [];
@@ -516,6 +504,9 @@ async function buildBundle(eventId, options = {}) {
       ? rawStatus
       : rawStatus?.type || rawStatus?.description || 'unknown';
 
+  // Extract sets from match data (DB has authoritative data)
+  const matchSets = finalMatchData.match?.sets || [];
+  
   const header = {
     match: {
       id: finalMatchData.match?.id || parseInt(eventId),
@@ -524,6 +515,9 @@ async function buildBundle(eventId, options = {}) {
       tournament: finalMatchData.tournament?.name || finalMatchData.match?.tournament?.name,
       round: finalMatchData.match?.roundInfo?.name || finalMatchData.match?.round,
       surface: finalMatchData.match?.surface || finalMatchData.tournament?.surface,
+      // Include sets and score from DB
+      sets: matchSets,
+      score: finalMatchData.match?.score,
     },
     players: {
       home: {
@@ -566,6 +560,15 @@ async function buildBundle(eventId, options = {}) {
     if (setsResult.winner) header.match.winner = setsResult.winner;
   } catch (e) {
     // Non-blocking: if compute fails, continue without sets info
+  }
+  
+  // Ensure winner is set from DB data if available (fallback)
+  if (!header.match.winner && finalMatchData.match?.winner) {
+    header.match.winner = finalMatchData.match.winner;
+  }
+  // Also try winnerCode (1=home, 2=away)
+  if (!header.match.winner && finalMatchData.match?.winnerCode) {
+    header.match.winner = finalMatchData.match.winnerCode === 1 ? 'home' : 'away';
   }
 
   // 10. Risk analysis (optional)

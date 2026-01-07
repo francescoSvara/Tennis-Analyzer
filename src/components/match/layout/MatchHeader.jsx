@@ -21,22 +21,45 @@ import { durations, easings } from '../../../motion/tokens';
 import './MatchHeader.css';
 
 /**
- * Badge per indicare stato live
+ * Badge per indicare stato match (live/finished/scheduled)
  */
-function LiveBadge({ isLive }) {
-  if (!isLive) return null;
-
-  return (
-    <motion.span
-      className="live-badge"
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: durations.fast }}
-    >
-      <Broadcast size={14} weight="fill" />
-      LIVE
-    </motion.span>
-  );
+function MatchStatusBadge({ status, isLive }) {
+  const normalizedStatus = (status || '').toLowerCase().replace(/[^a-z]/g, '');
+  
+  // Match finished
+  if (normalizedStatus === 'finished' || normalizedStatus === 'ended' || normalizedStatus === 'completed') {
+    return (
+      <span className="status-badge status-badge--finished">
+        ✓ FINAL
+      </span>
+    );
+  }
+  
+  // Match live
+  if (isLive || normalizedStatus === 'live' || normalizedStatus === 'inprogress' || normalizedStatus === 'playing') {
+    return (
+      <motion.span
+        className="live-badge"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: durations.fast }}
+      >
+        <Broadcast size={14} weight="fill" />
+        LIVE
+      </motion.span>
+    );
+  }
+  
+  // Scheduled
+  if (normalizedStatus === 'notstarted' || normalizedStatus === 'scheduled') {
+    return (
+      <span className="status-badge status-badge--scheduled">
+        🕐 SCHEDULED
+      </span>
+    );
+  }
+  
+  return null;
 }
 
 /**
@@ -181,7 +204,7 @@ export function MatchHeader({ header, isLive, isRefreshing, dataQuality, onBack,
               {homeName} vs {awayName}
               <span className="mobile-set-scores" aria-hidden="true">{homeSets}-{awaySets}</span>
             </span>
-            <LiveBadge isLive={isLive} />
+            <MatchStatusBadge status={match?.status} isLive={isLive} />
           </div>
           <div className="match-meta">
             <span className="tournament">{tournament}</span>

@@ -56,6 +56,16 @@ try {
 }
 
 /**
+ * Helper: Resolve sofascore_id to internal DB match_id
+ * Il frontend passa sempre sofascore_id, ma il DB usa id interno
+ */
+async function resolveToInternalId(eventId) {
+  if (!matchRepository?.resolveMatchId) return parseInt(eventId);
+  const internalId = await matchRepository.resolveMatchId(parseInt(eventId));
+  return internalId || parseInt(eventId);
+}
+
+/**
  * GET /api/match/:eventId/bundle - UNIFIED MATCH BUNDLE
  *
  * Single endpoint that returns ALL data needed for MatchPage.
@@ -868,9 +878,12 @@ exports.getCard = async (req, res) => {
   }
 
   try {
+    // Resolve sofascore_id to internal DB match_id
+    const dbMatchId = await resolveToInternalId(eventId);
+    
     // Try snapshot first
     if (useSnapshot === 'true' && matchRepository) {
-      const snapshot = await matchRepository.getMatchCardSnapshot(parseInt(eventId));
+      const snapshot = await matchRepository.getMatchCardSnapshot(dbMatchId);
 
       if (snapshot) {
         return res.json({
@@ -886,6 +899,7 @@ exports.getCard = async (req, res) => {
           dataQuality: snapshot.data_quality_int,
           fromSnapshot: true,
           snapshotUpdatedAt: snapshot.last_updated_at,
+          internalId: dbMatchId,
         });
       }
     }
@@ -895,7 +909,7 @@ exports.getCard = async (req, res) => {
       return res.status(503).json({ error: 'Match Card Service not available' });
     }
 
-    const card = await matchCardService.getMatchCard(parseInt(eventId));
+    const card = await matchCardService.getMatchCard(dbMatchId);
 
     if (!card) {
       return res.status(404).json({ error: 'Match not found' });
@@ -919,8 +933,12 @@ exports.getMomentum = async (req, res) => {
   }
 
   try {
-    const momentum = await matchRepository.getMatchMomentum(parseInt(eventId));
-    res.json({ matchId: eventId, momentum, count: momentum.length });
+    // Resolve sofascore_id to internal match_id
+    const internalMatchId = await matchRepository.resolveMatchId(parseInt(eventId));
+    const dbMatchId = internalMatchId || parseInt(eventId);
+    
+    const momentum = await matchRepository.getMatchMomentum(dbMatchId);
+    res.json({ matchId: eventId, internalId: dbMatchId, momentum, count: momentum.length });
   } catch (err) {
     console.error('Error getting momentum:', err);
     res.status(500).json({ error: err.message });
@@ -959,8 +977,9 @@ exports.saveMomentumSvg = async (req, res) => {
       return res.status(400).json({ error: 'No power rankings data extracted' });
     }
 
-    await matchRepository.updateMomentum(parseInt(eventId), rankings);
-    res.json({ success: true, matchId: eventId, count: rankings.length });
+    const dbMatchId = await resolveToInternalId(eventId);
+    await matchRepository.updateMomentum(dbMatchId, rankings);
+    res.json({ success: true, matchId: eventId, internalId: dbMatchId, count: rankings.length });
   } catch (err) {
     console.error('Error saving momentum:', err);
     res.status(500).json({ error: err.message });
@@ -978,8 +997,9 @@ exports.getStatistics = async (req, res) => {
   }
 
   try {
-    const statistics = await matchRepository.getMatchStatisticsNew(parseInt(eventId));
-    res.json({ matchId: eventId, statistics });
+    const dbMatchId = await resolveToInternalId(eventId);
+    const statistics = await matchRepository.getMatchStatisticsNew(dbMatchId);
+    res.json({ matchId: eventId, internalId: dbMatchId, statistics });
   } catch (err) {
     console.error('Error getting statistics:', err);
     res.status(500).json({ error: err.message });
@@ -997,8 +1017,9 @@ exports.getOdds = async (req, res) => {
   }
 
   try {
-    const odds = await matchRepository.getMatchOdds(parseInt(eventId));
-    res.json({ matchId: eventId, odds });
+    const dbMatchId = await resolveToInternalId(eventId);
+    const odds = await matchRepository.getMatchOdds(dbMatchId);
+    res.json({ matchId: eventId, internalId: dbMatchId, odds });
   } catch (err) {
     console.error('Error getting odds:', err);
     res.status(500).json({ error: err.message });
@@ -1017,11 +1038,12 @@ exports.getPoints = async (req, res) => {
   }
 
   try {
-    const result = await matchRepository.getMatchPointByPoint(parseInt(eventId), {
+    const dbMatchId = await resolveToInternalId(eventId);
+    const result = await matchRepository.getMatchPointByPoint(dbMatchId, {
       offset: parseInt(offset),
       limit: parseInt(limit),
     });
-    res.json({ matchId: eventId, ...result });
+    res.json({ matchId: eventId, internalId: dbMatchId, ...result });
   } catch (err) {
     console.error('Error getting point-by-point:', err);
     res.status(500).json({ error: err.message });
@@ -1039,9 +1061,10 @@ exports.rebuildSnapshot = async (req, res) => {
   }
 
   try {
-    await matchRepository.buildMatchCardSnapshot(parseInt(eventId));
-    const snapshot = await matchRepository.getMatchCardSnapshot(parseInt(eventId));
-    res.json({ success: true, matchId: eventId, snapshot });
+    const dbMatchId = await resolveToInternalId(eventId);
+    await matchRepository.buildMatchCardSnapshot(dbMatchId);
+    const snapshot = await matchRepository.getMatchCardSnapshot(dbMatchId);
+    res.json({ success: true, matchId: eventId, internalId: dbMatchId, snapshot });
   } catch (err) {
     console.error('Error rebuilding snapshot:', err);
     res.status(500).json({ error: err.message });

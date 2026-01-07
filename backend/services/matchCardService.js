@@ -12,10 +12,51 @@ const logger = createLogger('MatchCardService');
 const MATCH_CARD_SERVICE_VERSION = '1.1.0';
 const DATA_VERSION = 'canonical_v2'; // Schema DB + origine dati
 
+// Cache per mappatura sofascore_id -> internal id
+const sofascoreIdCache = new Map();
+
 class MatchCardService {
+  /**
+   * Converte sofascore_id in match_id interno
+   * Il frontend usa sofascore_id, il DB usa id interno
+   */
+  async resolveMatchId(sofascoreId) {
+    // Check cache first
+    const cached = sofascoreIdCache.get(sofascoreId);
+    if (cached) return cached;
+    
+    // Query DB per trovare match_id interno
+    const { data, error } = await supabase
+      .from('matches')
+      .select('id')
+      .eq('sofascore_id', sofascoreId)
+      .single();
+    
+    if (data?.id) {
+      sofascoreIdCache.set(sofascoreId, data.id);
+      logger.debug(`Resolved sofascore_id ${sofascoreId} -> internal id ${data.id}`);
+      return data.id;
+    }
+    
+    // Se non trovato, potrebbe essere già un ID interno
+    const { data: direct } = await supabase
+      .from('matches')
+      .select('id')
+      .eq('id', sofascoreId)
+      .single();
+    
+    if (direct?.id) {
+      return direct.id;
+    }
+    
+    logger.warn(`Match not found in DB: sofascore_id=${sofascoreId}`);
+    return null;
+  }
+
   /**
    * Ottiene la card da snapshot (FAST - single query)
    * Se lo snapshot non esiste, costruisce e restituisce
+   * IMPORTANTE: Arricchisce sempre i dati dello snapshot con quelli freschi dalla tabella matches
    */
   async getMatchCardFromSnapshot(matchId) {
     if (!supabase) {
@@ -24,26 +65,44 @@ class MatchCardService {
     }
 
     try {
-      // Try to get from snapshot first
-      const { data: snapshot, error } = await supabase
-        .from('match_card_snapshot')
-        .select('*')
-        .eq('match_id', matchId)
-        .single();
+      // Resolve sofascore_id to internal match_id
+      const internalId = await this.resolveMatchId(matchId);
+      if (!internalId) {
+        logger.warn(`Cannot resolve match ID: ${matchId}`);
+        return null;
+      }
+      
+      // Get both snapshot AND fresh match data from matches table
+      const [snapshotResult, matchResult] = await Promise.all([
+        supabase
+          .from('match_card_snapshot')
+          .select('*')
+          .eq('match_id', internalId)
+          .single(),
+        supabase
+          .from('matches')
+          .select('*')
+          .eq('id', internalId)
+          .single()
+      ]);
+      
+      const snapshot = snapshotResult.data;
+      const freshMatch = matchResult.data;
 
       if (snapshot) {
-        logger.debug(`Match ${matchId} card from snapshot (quality=${snapshot.data_quality_int}%)`);
-        return this.formatSnapshotResponse(snapshot);
+        logger.debug(`Match ${matchId} (internal: ${internalId}) card from snapshot (quality=${snapshot.data_quality_int}%)`);
+        // Enrich snapshot with fresh data from matches table
+        return this.formatSnapshotResponse(snapshot, freshMatch);
       }
 
       // Snapshot doesn't exist, build it
-      if (error?.code === 'PGRST116') {
-        logger.info(`Building snapshot for match ${matchId}...`);
-        const card = await this.getMatchCard(matchId);
+      if (snapshotResult.error?.code === 'PGRST116') {
+        logger.info(`Building snapshot for match ${matchId} (internal: ${internalId})...`);
+        const card = await this.getMatchCard(internalId);
 
         if (card) {
           // Save snapshot in background (don't block response)
-          this.saveSnapshot(matchId, card).catch((err) =>
+          this.saveSnapshot(internalId, card).catch((err) =>
             console.error('Error saving snapshot:', err.message)
           );
         }
@@ -51,7 +110,7 @@ class MatchCardService {
         return card;
       }
 
-      logger.error('Error fetching snapshot:', error?.message);
+      logger.error('Error fetching snapshot:', snapshotResult.error?.message);
       return null;
     } catch (error) {
       logger.error('Error in getMatchCardFromSnapshot:', error);
@@ -61,14 +120,56 @@ class MatchCardService {
 
   /**
    * Format snapshot data into API response format
+   * Enriches with fresh data from matches table if available
    *
    * FILOSOFIA_TEMPORAL: generated_at / as_of_time for temporal tracking
    * FILOSOFIA_LINEAGE_VERSIONING: meta.versions for bundle versioning
    * FILOSOFIA_RISK_BANKROLL: risk/edge/stake placeholder for integration
    */
-  formatSnapshotResponse(snapshot) {
+  formatSnapshotResponse(snapshot, freshMatch = null) {
+    // Build sets from fresh match data (matches table has authoritative scores)
+    let sets = snapshot.core_json?.sets || [];
+    let matchData = { ...snapshot.core_json };
+    
+    if (freshMatch) {
+      // Override with fresh data from matches table
+      sets = [];
+      if (freshMatch.set1_p1 != null) {
+        sets.push({ player1: freshMatch.set1_p1, player2: freshMatch.set1_p2, tiebreak: freshMatch.set1_tb, setNumber: 1 });
+      }
+      if (freshMatch.set2_p1 != null) {
+        sets.push({ player1: freshMatch.set2_p1, player2: freshMatch.set2_p2, tiebreak: freshMatch.set2_tb, setNumber: 2 });
+      }
+      if (freshMatch.set3_p1 != null) {
+        sets.push({ player1: freshMatch.set3_p1, player2: freshMatch.set3_p2, tiebreak: freshMatch.set3_tb, setNumber: 3 });
+      }
+      if (freshMatch.set4_p1 != null) {
+        sets.push({ player1: freshMatch.set4_p1, player2: freshMatch.set4_p2, tiebreak: freshMatch.set4_tb, setNumber: 4 });
+      }
+      if (freshMatch.set5_p1 != null) {
+        sets.push({ player1: freshMatch.set5_p1, player2: freshMatch.set5_p2, tiebreak: freshMatch.set5_tb, setNumber: 5 });
+      }
+      
+      // Override match data with authoritative values from matches table
+      matchData = {
+        ...matchData,
+        sets: sets,
+        status: freshMatch.status || matchData.status,
+        winner: freshMatch.winner_code === 1 ? 'home' : freshMatch.winner_code === 2 ? 'away' : matchData.winner,
+        winnerCode: freshMatch.winner_code || matchData.winnerCode,
+        score: freshMatch.score || matchData.score,
+        setsPlayer1: freshMatch.sets_player1 ?? matchData.setsPlayer1,
+        setsPlayer2: freshMatch.sets_player2 ?? matchData.setsPlayer2,
+        surface: freshMatch.surface || matchData.surface,
+        round: freshMatch.round || matchData.round,
+        bestOf: freshMatch.best_of || matchData.bestOf,
+      };
+      
+      logger.debug(`Enriched match data from DB: status=${matchData.status}, score=${matchData.score}, sets=${sets.length}`);
+    }
+    
     return {
-      match: snapshot.core_json,
+      match: matchData,
       tournament: snapshot.core_json?.tournament,
       player1: {
         ...(snapshot.players_json?.player1 || {}),
@@ -506,6 +607,7 @@ class MatchCardService {
 
   /**
    * Ottiene power rankings (momentum)
+   * PRIORITÀ: Se value_svg è presente, ha la precedenza su value (dati live)
    */
   async getPowerRankings(matchId) {
     const { data, error } = await supabase
@@ -516,7 +618,21 @@ class MatchCardService {
       .order('game_number');
 
     if (error) return [];
-    return data || [];
+    
+    // Applica priorità SVG: se value_svg presente, sovrascrive value
+    const processed = (data || []).map(row => {
+      if (row.value_svg != null) {
+        return {
+          ...row,
+          value: row.value_svg,
+          source: 'svg_manual',
+          _original_value: row.value,
+        };
+      }
+      return row;
+    });
+    
+    return processed;
   }
 
   /**

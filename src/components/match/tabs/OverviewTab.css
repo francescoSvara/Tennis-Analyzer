@@ -53,6 +53,9 @@
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
   background: var(--bg-interactive);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .match-status--live {
@@ -64,6 +67,21 @@
 .match-status--finished {
   background: var(--color-success-bg);
   color: var(--color-success);
+}
+
+.match-status--scheduled {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.match-status--suspended {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.match-status--unknown {
+  background: var(--bg-interactive);
+  color: var(--text-muted);
 }
 
 @keyframes pulse-live {

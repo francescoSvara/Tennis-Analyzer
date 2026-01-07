@@ -1548,17 +1548,25 @@ async function getTrackingStats() {
 
 /**
  * Sync manuale di una partita (fetch + save)
+ * Ritorna i dati raw anche se il salvataggio fallisce
  */
 async function syncMatch(eventId) {
   console.log(`🔄 Manual sync for event ${eventId}...`);
 
   try {
     const completeData = await fetchCompleteData(eventId);
-    await saveMatchToDatabase(eventId, completeData, 'manual-sync');
+    
+    // Prova a salvare nel DB ma non fallire se non riesce
+    try {
+      await saveMatchToDatabase(eventId, completeData, 'manual-sync');
+    } catch (saveErr) {
+      console.warn(`⚠️ DB save failed for ${eventId}, returning raw data:`, saveErr.message);
+    }
 
     return {
       success: true,
       eventId,
+      data: completeData, // Always return raw data
       dataCompleteness: completeData.dataCompleteness,
       timestamp: new Date().toISOString(),
     };

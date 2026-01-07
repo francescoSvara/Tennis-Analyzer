@@ -454,6 +454,19 @@ class CalculationQueueWorker {
       throw new Error(`Match ${matchId} not found`);
     }
 
+    // Applica priorità SVG al momentum: se value_svg presente, sovrascrive value
+    const processedMomentum = (momentum || []).map(row => {
+      if (row.value_svg != null) {
+        return {
+          ...row,
+          value: row.value_svg,
+          source: 'svg_manual',
+          _original_value: row.value,
+        };
+      }
+      return row;
+    });
+
     // Get players
     const { data: p1Data } = await supabase
       .from('players')
@@ -535,7 +548,7 @@ class CalculationQueueWorker {
       },
       h2h_json: h2h || null,
       stats_json: stats ? stats.reduce((acc, s) => ({ ...acc, [s.period]: s }), {}) : null,
-      momentum_json: momentum || [],
+      momentum_json: processedMomentum,
       odds_json: {
         opening: odds?.find((o) => o.is_opening) || odds?.[0] || null,
         closing: odds?.find((o) => o.is_closing) || odds?.[odds.length - 1] || null,

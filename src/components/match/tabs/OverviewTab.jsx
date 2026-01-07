@@ -19,6 +19,32 @@ import { staggerContainer, staggerItem } from '../../../motion/tokens';
 import './OverviewTab.css';
 
 /**
+ * Helper per formattare lo status del match
+ */
+function getMatchStatusDisplay(status, winner) {
+  const normalizedStatus = (status || '').toLowerCase().replace(/[^a-z]/g, '');
+  
+  // Match finished
+  if (normalizedStatus === 'finished' || normalizedStatus === 'ended' || winner) {
+    return { label: 'FINAL', className: 'finished', emoji: '✓' };
+  }
+  // Match live/in progress
+  if (normalizedStatus === 'live' || normalizedStatus === 'inprogress' || normalizedStatus === 'playing') {
+    return { label: 'LIVE', className: 'live', emoji: '🔴' };
+  }
+  // Not started
+  if (normalizedStatus === 'notstarted' || normalizedStatus === 'scheduled') {
+    return { label: 'SCHEDULED', className: 'scheduled', emoji: '🕐' };
+  }
+  // Suspended/interrupted
+  if (normalizedStatus === 'suspended' || normalizedStatus === 'interrupted') {
+    return { label: 'SUSPENDED', className: 'suspended', emoji: '⏸' };
+  }
+  // Default/unknown
+  return { label: status?.toUpperCase() || 'N/A', className: 'unknown', emoji: '' };
+}
+
+/**
  * Scoreboard - Mostra stato match dal bundle.header
  *
  * Dati da bundle.header:
@@ -35,18 +61,23 @@ function Scoreboard({ header }) {
   const home = players.home || {};
   const away = players.away || {};
   const finalSets = header?.match?.setsWon;
-  const showFinalSets = (matchInfo.status === 'finished' || header?.match?.winner) && finalSets;
+  const winner = header?.match?.winner;
+  const showFinalSets = (matchInfo.status === 'finished' || winner) && finalSets;
+  
+  // DEBUG: Log per verificare i dati
+  console.log('[Scoreboard] matchInfo.status:', matchInfo.status, 'winner:', winner);
+  
+  // Determina status display corretto
+  const statusDisplay = getMatchStatusDisplay(matchInfo.status, winner);
 
   return (
     <MotionCard className="scoreboard">
       <h3 className="scoreboard__title">
         <TennisBall size={18} weight="duotone" />
         Match Info
-        {matchInfo.status && (
-          <span className={`match-status match-status--${matchInfo.status}`}>
-            {matchInfo.status === 'live' ? '🔴 LIVE' : matchInfo.status}
-          </span>
-        )}
+        <span className={`match-status match-status--${statusDisplay.className}`}>
+          {statusDisplay.emoji} {statusDisplay.label}
+        </span>
       </h3>
 
       <div className="scoreboard__players">
