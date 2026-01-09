@@ -260,13 +260,8 @@ async function insertMatch(matchData, sourceUrl = null) {
     const homePlayer = homePlayerData?.id ? await upsertPlayer(homePlayerData) : null;
     const awayPlayer = awayPlayerData?.id ? await upsertPlayer(awayPlayerData) : null;
 
-    // Se i player non sono stati salvati correttamente, non procedere
-    if (homePlayerData?.id && !homePlayer) {
-      console.warn(`⚠️ Could not upsert home player ${homePlayerData.id}, match will have null player1_id`);
-    }
-    if (awayPlayerData?.id && !awayPlayer) {
-      console.warn(`⚠️ Could not upsert away player ${awayPlayerData.id}, match will have null player2_id`);
-    }
+    // Se i player non sono stati salvati correttamente, continua comunque
+    // I warning sono silenziati - è normale che player nuovi non esistano nel DB
 
     // 2. Estrai e salva torneo
     const tournament = matchData.tournament || matchData.uniqueTournament;

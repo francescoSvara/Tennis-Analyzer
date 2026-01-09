@@ -838,6 +838,8 @@ function calculateGameStatsFromScore(score) {
   let awayTiebreaksWon = 0;
   let homeMaxConsecutive = 0;
   let awayMaxConsecutive = 0;
+  let homeServiceGamesPlayed = 0;
+  let awayServiceGamesPlayed = 0;
 
   for (const set of sets) {
     const homeSetGames = set.home || 0;
@@ -845,6 +847,17 @@ function calculateGameStatsFromScore(score) {
 
     homeGamesWon += homeSetGames;
     awayGamesWon += awaySetGames;
+
+    // Calculate service games from total games in set
+    // Tennis alternates serve: game 1,3,5,7... = player who served first
+    // In each set, total games = homeSetGames + awaySetGames
+    const totalSetGames = homeSetGames + awaySetGames;
+    
+    // Service games: roughly half of total games each (alternating serve)
+    // Player 1 serves games 1, 3, 5, etc. → ceil(totalGames/2)
+    // Player 2 serves games 2, 4, 6, etc. → floor(totalGames/2)
+    homeServiceGamesPlayed += Math.ceil(totalSetGames / 2);
+    awayServiceGamesPlayed += Math.floor(totalSetGames / 2);
 
     // Tiebreak detection
     if ((homeSetGames === 7 && awaySetGames === 6) || (homeSetGames === 6 && awaySetGames === 7)) {
@@ -880,11 +893,13 @@ function calculateGameStatsFromScore(score) {
       gamesWon: homeGamesWon,
       tiebreaksWon: homeTiebreaksWon,
       consecutiveGamesWon: homeMaxConsecutive,
+      serviceGamesPlayed: homeServiceGamesPlayed,
     },
     away: {
       gamesWon: awayGamesWon,
       tiebreaksWon: awayTiebreaksWon,
       consecutiveGamesWon: awayMaxConsecutive,
+      serviceGamesPlayed: awayServiceGamesPlayed,
     },
   };
 }

@@ -362,6 +362,9 @@ async function buildBundle(eventId, options = {}) {
     }));
   }
 
+  // DEBUG: Log per verificare periods e byPeriod
+  console.log(`📊 [bundleService] statisticsData keys:`, statisticsData ? Object.keys(statisticsData) : 'null');
+  
   // 5. Compute Features
   const allPeriodStats = statisticsData?.ALL || {};
   const homeStats = {
@@ -444,12 +447,16 @@ async function buildBundle(eventId, options = {}) {
 
   const hasNewStats = statisticsData && Object.keys(statisticsData).length > 0;
   const statsSource = hasNewStats ? statisticsData : finalMatchData?.statistics;
+  console.log(`📊 [bundleService] statsSource keys:`, statsSource ? Object.keys(statsSource) : 'null');
+  
   const statsTab = buildStatsTab(
     statsSource,
     finalMatchData,
     extractScore(finalMatchData),
     normalizedPoints
   );
+  
+  console.log(`📊 [bundleService] statsTab.periods:`, statsTab?.periods);
 
   const tabs = {
     overview: buildOverviewTab(finalMatchData, features, strategySignals, statsTab),

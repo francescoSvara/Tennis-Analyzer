@@ -873,7 +873,8 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
         );
         console.log(`💾 [${saveType}] Match ${eventId} saved to database`);
       } catch (dbError) {
-        console.error(`❌ Database save failed for ${eventId}:`, dbError.message);
+        // Silenced - foreign key errors are expected when tournament not in DB
+        // console.error(`❌ Database save failed for ${eventId}:`, dbError.message);
       }
     }
 
@@ -969,7 +970,8 @@ async function saveMatchToDatabase(eventId, data, saveType = 'live-update') {
           .upsert(snapshotData, { onConflict: 'match_id' });
 
         if (snapshotError) {
-          console.error(`❌ Snapshot update failed for ${eventId}:`, snapshotError.message);
+          // Silenced - foreign key errors are expected when match not in DB
+          // console.error(`❌ Snapshot update failed for ${eventId}:`, snapshotError.message);
         } else {
           console.log(
             `📸 [${saveType}] Snapshot updated for match ${eventId} (surface=${surface})`

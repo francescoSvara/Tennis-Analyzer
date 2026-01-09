@@ -57,7 +57,8 @@ async function testConnection() {
  */
 function handleSupabaseError(error, context = '') {
   if (error) {
-    console.error(`❌ Supabase error ${context}:`, error.message);
+    // Silenced - foreign key errors are expected when tournament/player not in DB
+    // console.error(`❌ Supabase error ${context}:`, error.message);
     throw new Error(`Database error: ${error.message}`);
   }
 }

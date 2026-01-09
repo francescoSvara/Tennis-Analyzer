@@ -214,44 +214,128 @@ function extractStatsFromRecord(record) {
   }
 
   // DB format with p1_, p2_ prefixes
-  return {
-    home: {
-      aces: record.p1_aces || 0,
-      doubleFaults: record.p1_double_faults || 0,
-      firstServePct: record.p1_first_serve_pct || 0,
-      firstServePointsWonPct:
-        record.p1_first_serve_won && record.p1_first_serve_total
-          ? Math.round((record.p1_first_serve_won / record.p1_first_serve_total) * 100)
-          : 0,
-      secondServePointsWonPct:
-        record.p1_second_serve_won && record.p1_second_serve_total
-          ? Math.round((record.p1_second_serve_won / record.p1_second_serve_total) * 100)
-          : 0,
-      breakPointsWon: record.p1_break_points_won || 0,
-      breakPointsTotal: record.p1_break_points_total || 0,
-      totalPointsWon: record.p1_total_points_won || 0,
-      winners: record.p1_winners || 0,
-      unforcedErrors: record.p1_unforced_errors || 0,
-    },
-    away: {
-      aces: record.p2_aces || 0,
-      doubleFaults: record.p2_double_faults || 0,
-      firstServePct: record.p2_first_serve_pct || 0,
-      firstServePointsWonPct:
-        record.p2_first_serve_won && record.p2_first_serve_total
-          ? Math.round((record.p2_first_serve_won / record.p2_first_serve_total) * 100)
-          : 0,
-      secondServePointsWonPct:
-        record.p2_second_serve_won && record.p2_second_serve_total
-          ? Math.round((record.p2_second_serve_won / record.p2_second_serve_total) * 100)
-          : 0,
-      breakPointsWon: record.p2_break_points_won || 0,
-      breakPointsTotal: record.p2_break_points_total || 0,
-      totalPointsWon: record.p2_total_points_won || 0,
-      winners: record.p2_winners || 0,
-      unforcedErrors: record.p2_unforced_errors || 0,
-    },
+  // Map ALL available columns from match_statistics table
+  // 
+  // SofaScore DB semantics:
+  // - p1_first_serve_total = number of FIRST SERVES IN (prime entrate)
+  // - p1_first_serve_won = number of POINTS WON on first serve
+  // - p1_first_serve_pct = % of first serves in (already calculated)
+  // - p1_second_serve_total = number of SECOND SERVES played
+  // - p1_second_serve_won = number of POINTS WON on second serve
+  //
+  // Total service points = first_serve_total + second_serve_total
+  
+  const homeFirstServeIn = record.p1_first_serve_total || 0;  // Prime entrate
+  const homeSecondServeTotal = record.p1_second_serve_total || 0;
+  const homeTotalServicePoints = homeFirstServeIn + homeSecondServeTotal;
+  
+  const awayFirstServeIn = record.p2_first_serve_total || 0;
+  const awaySecondServeTotal = record.p2_second_serve_total || 0;
+  const awayTotalServicePoints = awayFirstServeIn + awaySecondServeTotal;
+  
+  const home = {
+    // Serve stats
+    aces: record.p1_aces || 0,
+    doubleFaults: record.p1_double_faults || 0,
+    // Primo Servizio %: prime entrate / totale punti serviti
+    firstServePct: record.p1_first_serve_pct || (homeTotalServicePoints > 0 
+      ? Math.round((homeFirstServeIn / homeTotalServicePoints) * 100) 
+      : 0),
+    firstServeIn: homeFirstServeIn,  // Quante prime sono entrate
+    firstServeTotal: homeTotalServicePoints, // Totale punti al servizio
+    firstServePointsWon: record.p1_first_serve_won || 0,  // Punti vinti con la prima
+    firstServePointsIn: homeFirstServeIn,  // = firstServeIn (prime entrate)
+    // Punti Primo Servizio %: punti vinti / prime entrate
+    firstServePointsWonPct:
+      record.p1_first_serve_won && homeFirstServeIn
+        ? Math.round((record.p1_first_serve_won / homeFirstServeIn) * 100)
+        : 0,
+    secondServeTotal: homeSecondServeTotal,
+    secondServePointsWon: record.p1_second_serve_won || 0,
+    secondServePointsWonPct:
+      record.p1_second_serve_won && homeSecondServeTotal
+        ? Math.round((record.p1_second_serve_won / homeSecondServeTotal) * 100)
+        : 0,
+    // Service games: estimate from total service points (avg ~4-5 points per game)
+    servicePointsWon: (record.p1_first_serve_won || 0) + (record.p1_second_serve_won || 0),
+    servicePointsTotal: homeTotalServicePoints,
+    serviceGamesPlayed: homeTotalServicePoints > 0 
+      ? Math.round(homeTotalServicePoints / 4.5) 
+      : 0,
+    // Break points
+    breakPointsWon: record.p1_break_points_won || 0,
+    breakPointsTotal: record.p1_break_points_total || 0,
+    breakPointsSaved: (record.p2_break_points_total || 0) - (record.p2_break_points_won || 0),
+    breakPointsFaced: record.p2_break_points_total || 0,
+    // Points
+    totalPointsWon: record.p1_total_points_won || 0,
+    winners: record.p1_winners || 0,
+    unforcedErrors: record.p1_unforced_errors || 0,
   };
+
+  const away = {
+    // Serve stats
+    aces: record.p2_aces || 0,
+    doubleFaults: record.p2_double_faults || 0,
+    firstServePct: record.p2_first_serve_pct || (awayTotalServicePoints > 0
+      ? Math.round((awayFirstServeIn / awayTotalServicePoints) * 100)
+      : 0),
+    firstServeIn: awayFirstServeIn,
+    firstServeTotal: awayTotalServicePoints,
+    firstServePointsWon: record.p2_first_serve_won || 0,
+    firstServePointsIn: awayFirstServeIn,
+    firstServePointsWonPct:
+      record.p2_first_serve_won && awayFirstServeIn
+        ? Math.round((record.p2_first_serve_won / awayFirstServeIn) * 100)
+        : 0,
+    secondServeTotal: awaySecondServeTotal,
+    secondServePointsWon: record.p2_second_serve_won || 0,
+    secondServePointsWonPct:
+      record.p2_second_serve_won && awaySecondServeTotal
+        ? Math.round((record.p2_second_serve_won / awaySecondServeTotal) * 100)
+        : 0,
+    // Service games
+    servicePointsWon: (record.p2_first_serve_won || 0) + (record.p2_second_serve_won || 0),
+    servicePointsTotal: awayTotalServicePoints,
+    serviceGamesPlayed: awayTotalServicePoints > 0
+      ? Math.round(awayTotalServicePoints / 4.5)
+      : 0,
+    // Break points
+    breakPointsWon: record.p2_break_points_won || 0,
+    breakPointsTotal: record.p2_break_points_total || 0,
+    breakPointsSaved: (record.p1_break_points_total || 0) - (record.p1_break_points_won || 0),
+    breakPointsFaced: record.p1_break_points_total || 0,
+    // Points
+    totalPointsWon: record.p2_total_points_won || 0,
+    winners: record.p2_winners || 0,
+    unforcedErrors: record.p2_unforced_errors || 0,
+  };
+
+  // Calculate return stats (opponent's service stats)
+  // First return = points won when opponent serves FIRST serve (using firstServeIn, not firstServeTotal)
+  // firstServeIn = number of first serves that went IN
+  // firstServeTotal = total service points (first + second)
+  home.returnGamesPlayed = away.serviceGamesPlayed;
+  home.firstReturnPointsWon = away.firstServeIn - away.firstServePointsWon;  // Changed from firstServeTotal
+  home.firstReturnPointsTotal = away.firstServeIn;  // Changed from firstServeTotal
+  home.secondReturnPointsWon = away.secondServeTotal - away.secondServePointsWon;
+  home.secondReturnPointsTotal = away.secondServeTotal;
+  home.returnPointsWon = home.firstReturnPointsWon + home.secondReturnPointsWon;
+  home.returnPointsWonPct = (away.servicePointsTotal > 0) 
+    ? Math.round(((away.servicePointsTotal - away.servicePointsWon) / away.servicePointsTotal) * 100)
+    : 0;
+
+  away.returnGamesPlayed = home.serviceGamesPlayed;
+  away.firstReturnPointsWon = home.firstServeIn - home.firstServePointsWon;  // Changed from firstServeTotal
+  away.firstReturnPointsTotal = home.firstServeIn;  // Changed from firstServeTotal
+  away.secondReturnPointsWon = home.secondServeTotal - home.secondServePointsWon;
+  away.secondReturnPointsTotal = home.secondServeTotal;
+  away.returnPointsWon = away.firstReturnPointsWon + away.secondReturnPointsWon;
+  away.returnPointsWonPct = (home.servicePointsTotal > 0)
+    ? Math.round(((home.servicePointsTotal - home.servicePointsWon) / home.servicePointsTotal) * 100)
+    : 0;
+
+  return { home, away };
 }
 
 // ============================================================================
@@ -262,15 +346,36 @@ function extractStatsFromRecord(record) {
  * Build stats tab structure from raw stats
  * FILOSOFIA_CALCOLI: "MAI NULL" - ogni feature ha SEMPRE un valore calcolato
  */
-function buildTabFromStats(stats, pbpStats = null) {
+function buildTabFromStats(stats, pbpStats = null, score = null) {
   const mergeValue = (dbVal, pbpVal) => {
     if (dbVal !== undefined && dbVal !== null) return dbVal;
     if (pbpStats && pbpVal !== undefined && pbpVal !== null) return pbpVal;
     return 0;
   };
 
-  const homeTotalWon = mergeValue(stats.home.totalPointsWon, pbpStats?.home?.totalPointsWon);
-  const awayTotalWon = mergeValue(stats.away.totalPointsWon, pbpStats?.away?.totalPointsWon);
+  // Calculate service games from score as fallback
+  const gameStatsFromScore = score ? calculateGameStatsFromScore(score) : null;
+
+  // Calculate totalWon - prefer direct value, then sum of service + return
+  let homeTotalWon = mergeValue(stats.home.totalPointsWon, pbpStats?.home?.totalPointsWon);
+  let awayTotalWon = mergeValue(stats.away.totalPointsWon, pbpStats?.away?.totalPointsWon);
+  
+  // Fallback: calculate from servicePointsWon + returnPointsWon
+  const homeServicePts = stats.home.servicePointsWon || 
+    ((stats.home.firstServePointsWon || 0) + (stats.home.secondServePointsWon || 0));
+  const awayServicePts = stats.away.servicePointsWon || 
+    ((stats.away.firstServePointsWon || 0) + (stats.away.secondServePointsWon || 0));
+  const homeReturnPts = stats.home.returnPointsWon || 
+    ((stats.home.firstReturnPointsWon || 0) + (stats.home.secondReturnPointsWon || 0));
+  const awayReturnPts = stats.away.returnPointsWon || 
+    ((stats.away.firstReturnPointsWon || 0) + (stats.away.secondReturnPointsWon || 0));
+  
+  if (homeTotalWon === 0 && (homeServicePts > 0 || homeReturnPts > 0)) {
+    homeTotalWon = homeServicePts + homeReturnPts;
+  }
+  if (awayTotalWon === 0 && (awayServicePts > 0 || awayReturnPts > 0)) {
+    awayTotalWon = awayServicePts + awayReturnPts;
+  }
 
   // Calculate winners if missing
   let homeWinners = stats.home.winners;
@@ -397,9 +502,10 @@ function buildTabFromStats(stats, pbpStats = null) {
     awayBreakPointsTotal = awayBreakPointsWon;
   }
 
-  // Service games
-  let homeServiceGames = stats.home.serviceGamesPlayed || 0;
-  let awayServiceGames = stats.away.serviceGamesPlayed || 0;
+  // Service games - ALWAYS prefer score-based calculation if available
+  // The estimated value from servicePointsTotal/4.5 is inaccurate
+  let homeServiceGames = gameStatsFromScore?.home?.serviceGamesPlayed || stats.home.serviceGamesPlayed || 0;
+  let awayServiceGames = gameStatsFromScore?.away?.serviceGamesPlayed || stats.away.serviceGamesPlayed || 0;
 
   // Raw values calculation
   let homeFirstServeIn = stats.home.firstServeIn || 0;
@@ -517,8 +623,9 @@ function buildTabFromStats(stats, pbpStats = null) {
   }
 
   // RETURN GAMES PLAYED = service games dell'avversario
-  let homeReturnGamesPlayed = stats.home.returnGamesPlayed || awayServiceGames || 0;
-  let awayReturnGamesPlayed = stats.away.returnGamesPlayed || homeServiceGames || 0;
+  // Always prefer score-based values (awayServiceGames/homeServiceGames) over stats-based estimates
+  let homeReturnGamesPlayed = awayServiceGames || stats.home.returnGamesPlayed || 0;
+  let awayReturnGamesPlayed = homeServiceGames || stats.away.returnGamesPlayed || 0;
 
   // Max consecutive points
   let homeMaxConsecutivePoints = stats.home.maxConsecutivePointsWon || 0;
@@ -529,6 +636,11 @@ function buildTabFromStats(stats, pbpStats = null) {
   if (awayMaxConsecutivePoints === 0 && awayTotalWon > 0) {
     awayMaxConsecutivePoints = Math.max(3, Math.round(awayTotalWon * 0.09));
   }
+
+  // Service games won = service games played - break points conceded to opponent
+  // break subiti da home = awayBreakPointsWon (away ha convertito break sul servizio di home)
+  const homeServiceGamesWon = Math.max(0, homeServiceGames - awayBreakPointsWon);
+  const awayServiceGamesWon = Math.max(0, awayServiceGames - homeBreakPointsWon);
 
   return {
     serve: {
@@ -545,6 +657,7 @@ function buildTabFromStats(stats, pbpStats = null) {
         secondServePointsWon: homeSecondServePointsWon,
         secondServeTotal: homeSecondServeTotal,
         serviceGamesPlayed: homeServiceGames,
+        serviceGamesWon: homeServiceGamesWon,
         servicePointsWon: homeServicePointsWon,
         breakPointsSaved: homeBreakPointsSaved,
         breakPointsFaced: homeBreakPointsFaced,
@@ -562,6 +675,7 @@ function buildTabFromStats(stats, pbpStats = null) {
         secondServePointsWon: awaySecondServePointsWon,
         secondServeTotal: awaySecondServeTotal,
         serviceGamesPlayed: awayServiceGames,
+        serviceGamesWon: awayServiceGamesWon,
         servicePointsWon: awayServicePointsWon,
         breakPointsSaved: awayBreakPointsSaved,
         breakPointsFaced: awayBreakPointsFaced,
@@ -687,6 +801,7 @@ function calculateStatsFromPointByPoint(points, games) {
           aces: stats.home.aces,
           doubleFaults: stats.home.doubleFaults,
           serviceGamesPlayed: stats.home.serviceGames,
+          serviceGamesWon: stats.home.gamesWon - stats.away.breakPointsWon,
           servicePointsWon: 0, // Would need more detailed tracking
           firstServePct: 0,
           firstServeWonPct: 0,
@@ -704,6 +819,7 @@ function calculateStatsFromPointByPoint(points, games) {
           aces: stats.away.aces,
           doubleFaults: stats.away.doubleFaults,
           serviceGamesPlayed: stats.away.serviceGames,
+          serviceGamesWon: stats.away.gamesWon - stats.home.breakPointsWon,
           servicePointsWon: 0,
           firstServePct: 0,
           firstServeWonPct: 0,
@@ -812,40 +928,80 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
     }
     
     // Convert snapshot format to standard home/away format with enriched data
+    // Include ALL raw fields that buildTabFromStats needs for accurate calculations
+    const homeServe = statisticsData.serve?.home || {};
+    const awayServe = statisticsData.serve?.away || {};
+    const homeReturn = statisticsData.return?.home || {};
+    const awayReturn = statisticsData.return?.away || {};
+    const homePoints = statisticsData.points?.home || {};
+    const awayPoints = statisticsData.points?.away || {};
+    
     const homeStats = {
-      aces: statisticsData.serve?.home?.aces || 0,
-      doubleFaults: statisticsData.serve?.home?.doubleFaults || 0,
-      firstServePct: statisticsData.serve?.home?.firstServePct || 0,
-      firstServePointsWonPct: statisticsData.serve?.home?.firstServeWonPct || 0,
-      secondServePointsWonPct: statisticsData.serve?.home?.secondServeWonPct || 0,
-      totalPointsWon: statisticsData.points?.home?.totalWon || 0,
-      winners: statisticsData.points?.home?.winners || 0,
-      unforcedErrors: statisticsData.points?.home?.unforcedErrors || 0,
-      returnPointsWonPct: statisticsData.return?.home?.returnPointsWonPct || 0,
-      breakPointsWon: statisticsData.return?.home?.breakPointsWon || 0,
-      breakPointsTotal: statisticsData.return?.home?.breakPointsTotal || 0,
-      // Add calculated service/return games
+      // Serve stats
+      aces: homeServe.aces || 0,
+      doubleFaults: homeServe.doubleFaults || 0,
+      firstServePct: homeServe.firstServePct || 0,
+      firstServeIn: homeServe.firstServeIn || homeServe.firstServePointsIn || 0,
+      firstServeTotal: homeServe.firstServeTotal || 0,
+      firstServePointsWon: homeServe.firstServePointsWon || 0,
+      firstServePointsWonPct: homeServe.firstServeWonPct || homeServe.firstServePointsWonPct || 0,
+      secondServeTotal: homeServe.secondServeTotal || 0,
+      secondServePointsWon: homeServe.secondServePointsWon || 0,
+      secondServePointsWonPct: homeServe.secondServeWonPct || homeServe.secondServePointsWonPct || 0,
+      servicePointsWon: homeServe.servicePointsWon || homePoints.servicePointsWon || 0,
+      breakPointsSaved: homeServe.breakPointsSaved || 0,
+      breakPointsFaced: homeServe.breakPointsFaced || 0,
+      // Points stats
+      totalPointsWon: homePoints.totalWon || 0,
+      winners: homePoints.winners || 0,
+      unforcedErrors: homePoints.unforcedErrors || 0,
+      // Return stats
+      returnPointsWon: homeReturn.returnPointsWon || homePoints.returnPointsWon || 0,
+      returnPointsWonPct: homeReturn.returnPointsWonPct || 0,
+      firstReturnPointsWon: homeReturn.firstReturnPointsWon || 0,
+      firstReturnPointsTotal: homeReturn.firstReturnPointsTotal || 0,
+      secondReturnPointsWon: homeReturn.secondReturnPointsWon || 0,
+      secondReturnPointsTotal: homeReturn.secondReturnPointsTotal || 0,
+      breakPointsWon: homeReturn.breakPointsWon || 0,
+      breakPointsTotal: homeReturn.breakPointsTotal || 0,
+      // Games
       serviceGamesPlayed: homeServiceGames,
       returnGamesPlayed: awayServiceGames,
     };
     const awayStats = {
-      aces: statisticsData.serve?.away?.aces || 0,
-      doubleFaults: statisticsData.serve?.away?.doubleFaults || 0,
-      firstServePct: statisticsData.serve?.away?.firstServePct || 0,
-      firstServePointsWonPct: statisticsData.serve?.away?.firstServeWonPct || 0,
-      secondServePointsWonPct: statisticsData.serve?.away?.secondServeWonPct || 0,
-      totalPointsWon: statisticsData.points?.away?.totalWon || 0,
-      winners: statisticsData.points?.away?.winners || 0,
-      unforcedErrors: statisticsData.points?.away?.unforcedErrors || 0,
-      returnPointsWonPct: statisticsData.return?.away?.returnPointsWonPct || 0,
-      breakPointsWon: statisticsData.return?.away?.breakPointsWon || 0,
-      breakPointsTotal: statisticsData.return?.away?.breakPointsTotal || 0,
-      // Add calculated service/return games
+      // Serve stats
+      aces: awayServe.aces || 0,
+      doubleFaults: awayServe.doubleFaults || 0,
+      firstServePct: awayServe.firstServePct || 0,
+      firstServeIn: awayServe.firstServeIn || awayServe.firstServePointsIn || 0,
+      firstServeTotal: awayServe.firstServeTotal || 0,
+      firstServePointsWon: awayServe.firstServePointsWon || 0,
+      firstServePointsWonPct: awayServe.firstServeWonPct || awayServe.firstServePointsWonPct || 0,
+      secondServeTotal: awayServe.secondServeTotal || 0,
+      secondServePointsWon: awayServe.secondServePointsWon || 0,
+      secondServePointsWonPct: awayServe.secondServeWonPct || awayServe.secondServePointsWonPct || 0,
+      servicePointsWon: awayServe.servicePointsWon || awayPoints.servicePointsWon || 0,
+      breakPointsSaved: awayServe.breakPointsSaved || 0,
+      breakPointsFaced: awayServe.breakPointsFaced || 0,
+      // Points stats
+      totalPointsWon: awayPoints.totalWon || 0,
+      winners: awayPoints.winners || 0,
+      unforcedErrors: awayPoints.unforcedErrors || 0,
+      // Return stats
+      returnPointsWon: awayReturn.returnPointsWon || awayPoints.returnPointsWon || 0,
+      returnPointsWonPct: awayReturn.returnPointsWonPct || 0,
+      firstReturnPointsWon: awayReturn.firstReturnPointsWon || 0,
+      firstReturnPointsTotal: awayReturn.firstReturnPointsTotal || 0,
+      secondReturnPointsWon: awayReturn.secondReturnPointsWon || 0,
+      secondReturnPointsTotal: awayReturn.secondReturnPointsTotal || 0,
+      breakPointsWon: awayReturn.breakPointsWon || 0,
+      breakPointsTotal: awayReturn.breakPointsTotal || 0,
+      // Games
       serviceGamesPlayed: awayServiceGames,
       returnGamesPlayed: homeServiceGames,
     };
     
-    const result = buildTabFromStats({ home: homeStats, away: awayStats }, null);
+    const result = buildTabFromStats({ home: homeStats, away: awayStats }, null, score);
     const gameStats = {
       home: {
         gamesWon: gameStatsFromScore.home.gamesWon,
@@ -905,23 +1061,79 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
           homeConsec = homeGames > 0 ? Math.min(2, homeGames) : 0;
         }
         
+        // Estimate service games per player (alternating serve)
+        const totalGames = homeGames + awayGames;
+        const homeServiceGames = Math.ceil(totalGames / 2);
+        const awayServiceGames = Math.floor(totalGames / 2);
+        
+        // Estimate service games won from games won and breaks
+        // Assuming proportional distribution of breaks across sets
+        const totalHomeServiceGamesWon = snapshotResult.serve?.home?.serviceGamesWon || 0;
+        const totalAwayServiceGamesWon = snapshotResult.serve?.away?.serviceGamesWon || 0;
+        const totalHomeGamesWon = gameStatsFromScore.home.gamesWon || 1;
+        const totalAwayGamesWon = gameStatsFromScore.away.gamesWon || 1;
+        
+        // Proportional estimate
+        const homeServiceGamesWonEst = Math.round(totalHomeServiceGamesWon * (homeGames / totalHomeGamesWon));
+        const awayServiceGamesWonEst = Math.round(totalAwayServiceGamesWon * (awayGames / totalAwayGamesWon));
+        
+        // Estimate points for this set proportionally from ALL
+        const allPoints = snapshotResult.points || { home: {}, away: {} };
+        const allTotalGames = totalHomeGamesWon + totalAwayGamesWon || 1;
+        const setTotalGames = homeGames + awayGames;
+        const setRatio = setTotalGames / allTotalGames;
+        
+        const homePointsEst = Math.round((allPoints.home?.totalWon || 0) * setRatio);
+        const awayPointsEst = Math.round((allPoints.away?.totalWon || 0) * setRatio);
+        const homeServicePointsEst = Math.round((allPoints.home?.servicePointsWon || 0) * setRatio);
+        const awayServicePointsEst = Math.round((allPoints.away?.servicePointsWon || 0) * setRatio);
+        const homeReturnPointsEst = Math.round((allPoints.home?.returnPointsWon || 0) * setRatio);
+        const awayReturnPointsEst = Math.round((allPoints.away?.returnPointsWon || 0) * setRatio);
+        
+        // Max consecutive points - estimate based on set length (shorter sets = fewer consecutive)
+        const homeMaxConsec = Math.max(2, Math.round((allPoints.home?.maxConsecutivePointsWon || 3) * Math.sqrt(setRatio)));
+        const awayMaxConsec = Math.max(2, Math.round((allPoints.away?.maxConsecutivePointsWon || 3) * Math.sqrt(setRatio)));
+        
         periods.push(setKey);
         byPeriod[setKey] = {
-          serve: { home: {}, away: {} },
-          return: { home: {}, away: {} },
-          points: { home: { totalWon: 0 }, away: { totalWon: 0 } },
+          serve: { 
+            home: { serviceGamesPlayed: homeServiceGames, serviceGamesWon: homeServiceGamesWonEst }, 
+            away: { serviceGamesPlayed: awayServiceGames, serviceGamesWon: awayServiceGamesWonEst } 
+          },
+          return: { 
+            home: { returnGamesPlayed: awayServiceGames }, 
+            away: { returnGamesPlayed: homeServiceGames } 
+          },
+          points: { 
+            home: { 
+              totalWon: homePointsEst, 
+              servicePointsWon: homeServicePointsEst, 
+              returnPointsWon: homeReturnPointsEst,
+              maxConsecutivePointsWon: homeMaxConsec,
+              winners: 0,
+              unforcedErrors: 0
+            }, 
+            away: { 
+              totalWon: awayPointsEst, 
+              servicePointsWon: awayServicePointsEst, 
+              returnPointsWon: awayReturnPointsEst,
+              maxConsecutivePointsWon: awayMaxConsec,
+              winners: 0,
+              unforcedErrors: 0
+            } 
+          },
           games: {
             home: {
               gamesWon: homeGames,
               tiebreaksWon: homeTiebreakWon,
               consecutiveGamesWon: homeConsec,
-              serviceGamesWon: 0,
+              serviceGamesWon: homeServiceGamesWonEst,
             },
             away: {
               gamesWon: awayGames,
               tiebreaksWon: awayTiebreakWon,
               consecutiveGamesWon: awayConsec,
-              serviceGamesWon: 0,
+              serviceGamesWon: awayServiceGamesWonEst,
             },
           },
         };
@@ -948,6 +1160,16 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
     const gameStatsFromScore = calculateGameStatsFromScore(score);
     const allStats = statisticsData.ALL ? extractStatsFromRecord(statisticsData.ALL) : {};
 
+    // Calculate serviceGamesWon: serviceGames - breaks conceded
+    // Home's service games won = home service games - away break points won
+    const homeServiceGames = allStats.home?.serviceGamesPlayed || Math.ceil(gameStatsFromScore.home.gamesWon + gameStatsFromScore.away.gamesWon) / 2;
+    const awayServiceGames = allStats.away?.serviceGamesPlayed || Math.floor(gameStatsFromScore.home.gamesWon + gameStatsFromScore.away.gamesWon) / 2;
+    const homeBreakPointsWon = allStats.home?.breakPointsWon || 0;
+    const awayBreakPointsWon = allStats.away?.breakPointsWon || 0;
+    
+    const homeServiceGamesWon = Math.max(0, homeServiceGames - awayBreakPointsWon);
+    const awayServiceGamesWon = Math.max(0, awayServiceGames - homeBreakPointsWon);
+
     const gameStats = {
       home: {
         gamesWon: allStats.home?.gamesWon || gameStatsFromScore.home.gamesWon,
@@ -957,7 +1179,7 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
             : gameStatsFromScore.home.tiebreaksWon,
         consecutiveGamesWon:
           allStats.home?.maxConsecutiveGamesWon || gameStatsFromScore.home.consecutiveGamesWon,
-        serviceGamesWon: allStats.home?.serviceGamesWon || 0,
+        serviceGamesWon: homeServiceGamesWon,
       },
       away: {
         gamesWon: allStats.away?.gamesWon || gameStatsFromScore.away.gamesWon,
@@ -967,13 +1189,26 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
             : gameStatsFromScore.away.tiebreaksWon,
         consecutiveGamesWon:
           allStats.away?.maxConsecutiveGamesWon || gameStatsFromScore.away.consecutiveGamesWon,
-        serviceGamesWon: allStats.away?.serviceGamesWon || 0,
+        serviceGamesWon: awayServiceGamesWon,
       },
     };
 
     for (const period of periods) {
       const stats = extractStatsFromRecord(statisticsData[period]);
-      const periodTab = buildTabFromStats(stats, pbpStats);
+      
+      // Build period-specific score for accurate service games calculation
+      let periodScore = score;
+      if (period !== 'ALL') {
+        const setMatch = period.match(/SET(\d+)/);
+        const setIndex = setMatch ? parseInt(setMatch[1]) - 1 : -1;
+        const sets = score?.sets || [];
+        if (setIndex >= 0 && setIndex < sets.length) {
+          // Create score with only this set for accurate service games
+          periodScore = { sets: [sets[setIndex]] };
+        }
+      }
+      
+      const periodTab = buildTabFromStats(stats, pbpStats, periodScore);
       
       // Calculate period-specific game stats
       let periodGameStats;
@@ -1053,7 +1288,7 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
       ? extractStatsFromRecord(statisticsData.ALL)
       : extractStatsFromRecord(statisticsData[periods[0]]);
 
-    const defaultTab = buildTabFromStats(defaultStats, pbpStats);
+    const defaultTab = buildTabFromStats(defaultStats, pbpStats, score);
 
     return {
       ...defaultTab,
@@ -1082,7 +1317,8 @@ function buildStatsTab(statisticsData, matchData, score, pointByPoint = {}) {
         home: statistics.home || {},
         away: statistics.away || {},
       },
-      pbpStats
+      pbpStats,
+      score
     );
     const gameStatsFromScore = calculateGameStatsFromScore(score);
     const gameStats = {
