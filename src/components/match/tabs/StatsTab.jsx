@@ -102,13 +102,22 @@ function TradingStat({ label, value, status, subtext }) {
  * StatsTab Component
  */
 export function StatsTab({ data, header }) {
+  // DEBUG: Log per verificare periods e byPeriod
+  console.log('[StatsTab] data?.periods:', data?.periods);
+  console.log('[StatsTab] data?.byPeriod keys:', data?.byPeriod ? Object.keys(data.byPeriod) : 'undefined');
+  console.log('[StatsTab] data?.byPeriod.ALL:', JSON.stringify(data?.byPeriod?.ALL, null, 2));
+  console.log('[StatsTab] data.serve:', data?.serve);
+  
   // Periodi disponibili (ALL, SET1, SET2, ecc.)
   const periods = data?.periods || ['ALL'];
   const [activePeriod, setActivePeriod] = useState('ALL');
 
   // Leggi stats dal periodo attivo
   const currentStats = data?.byPeriod?.[activePeriod] || data || {};
+  console.log('[StatsTab] currentStats for', activePeriod, ':', currentStats);
+  
   const serve = currentStats?.serve || { home: {}, away: {} };
+  console.log('[StatsTab] serve:', serve);
   const returnStats = currentStats?.return || { home: {}, away: {} };
   const points = currentStats?.points || { home: {}, away: {} };
   const games = currentStats?.games || { home: {}, away: {} };
